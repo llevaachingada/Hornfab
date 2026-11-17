@@ -1727,12 +1727,12 @@ async function viewCampaignDetail(id) {
                 <button aria-pressed="true" id="btn-bw-h">Horizontal</button>
                 <button aria-pressed="false" id="btn-bw-v">Vertical</button>
               </div></div>
-            <div class="cap">Shaded: target ±10 %. Lighter panel: scored band.</div>
+            <div class="cap" id="camp-bw-cap">Shaded: target ±10 %. Lighter panel: scored band.</div>
             <svg id="bw-chart"></svg>
           </div>
           <div class="fig">
             <h3>Directivity index vs target</h3>
-            <div class="cap">Dashed: DI target from brief coverage angles.</div>
+            <div class="cap" id="camp-di-cap">Dashed: DI target from brief coverage angles.</div>
             <svg id="di-overlay"></svg>
           </div>
         </div>
@@ -1768,6 +1768,14 @@ async function viewCampaignDetail(id) {
 
   // Overlays of each family's best design: beamwidth (H or V) and DI, one colour per family
   const target = camp.target || (entries.find(e => e.best && e.best.target) || {}).target || {};
+  // P0 scoring truth for the campaign brief (additive; absent = the historical full-width target).
+  const campSv = camp.scoring_view || null;
+  const campCov = campSv && campSv.coverage ? campSv.coverage : null;
+  const campDi = campSv && campSv.di ? campSv.di : null;
+  const campFloor = campSv && campSv.bw8k_floor ? campSv.bw8k_floor : null;
+  const campNotes = campSv && campSv.notes ? campSv.notes : null;
+  const campWide = campCov ? campCov.below_mode : null;
+  const campWeights = camp.weights || null;
   let bwPlane = "h";
   function drawBW() {
     const bwSvg = document.getElementById("bw-chart"), diSvg = document.getElementById("di-overlay");
@@ -1785,6 +1793,29 @@ async function viewCampaignDetail(id) {
     const f0c = Number(target.f0_hz);
     const f0Finite = isFinite(f0c) && f0c > 0 ? f0c : null;
     const vlines = f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [];
+    // Scored-range target + floor truth (campaign-level; null keeps the historical full-width target).
+    const scoreLo = campCov ? (bwPlane === "h" ? campCov.h_lo_hz : campCov.v_lo_hz) : null;
+    const floorDeg = campFloor ? (bwPlane === "v" ? campFloor.floor_v_deg : campFloor.floor_h_deg) : null;
+    if (floorDeg != null) allBW.push(floorDeg);
+    const bwRef = [], bwArea = [];
+    let bwFill = [];
+    if (tgt != null) {
+      if (scoreLo != null) {
+        bwRef.push({ pts: [[scoreLo, tgt], [xlim[1], tgt]], label: (bwPlane === "h" ? "H" : "V") + " target " + tgt + "°" });
+        bwArea.push({ top: [[scoreLo, tgt * 1.1], [xlim[1], tgt * 1.1]],
+                      bottom: [[scoreLo, tgt * 0.9], [xlim[1], tgt * 0.9]],
+                      color: css("--best"), opacity: 0.10 });
+        if (campWide === "one_sided") {
+          bwArea.push({ top: [[xlim[0], 180], [scoreLo, 180]],
+                        bottom: [[xlim[0], tgt], [scoreLo, tgt]],
+                        color: css("--best"), opacity: 0.08 });
+        }
+      } else {
+        bwFill = [{ y0: tgt * 0.9, y1: tgt * 1.1, color: css("--best"), opacity: 0.10 }];
+        bwRef.push({ y: tgt, label: (bwPlane === "h" ? "H" : "V") + " target " + tgt + "°" });
+      }
+    }
+    if (floorDeg != null) bwRef.push({ y: floorDeg, label: "8k floor " + floorDeg + "°" });
     // Apply fixed BW range (C4: degree multiples)
     const bwSpec = { ...AXES.beamwidth };
     const bwRange = fixedRange(bwSpec, allBW);
@@ -1792,8 +1823,7 @@ async function viewCampaignDetail(id) {
       H: 260, xlog: true, xlim, ylim: [bwRange.lo, bwRange.hi],
       yticks: (() => { const t = []; for (let v = bwRange.lo; v <= bwRange.hi + 1; v += bwSpec.major) t.push(v); return t; })(),
       xlabel: "Hz", ylabel: "deg", band, vlines,
-      fill: tgt != null ? [{ y0: tgt * 0.9, y1: tgt * 1.1, color: css("--best"), opacity: 0.10 }] : [],
-      refLines: tgt != null ? [{ y: tgt, label: (bwPlane === "h" ? "H" : "V") + " target " + tgt + "°" }] : [],
+      fill: bwFill, area: bwArea, refLines: bwRef,
       series: entries.map((e, idx) => { const b = e.best || {}, F2 = b.freqs || freqsRef;
         const arr = bwPlane === "h" ? (b.bw_h || []) : (b.bw_v || []);
         return { pts: F2.map((f, i) => [f, arr[i] ?? null]), color: familyColor(idx), w: idx === 0 ? 2.4 : 1.6 }; }),
@@ -1802,14 +1832,40 @@ async function viewCampaignDetail(id) {
     if (diSvg) {
       const dit = target.di_target_db ?? (tgtH && tgtV ? diFromCuts(tgtH, tgtV) : null);
       const dall = []; entries.forEach(e => ((e.best || {}).di || []).forEach(v => v != null && dall.push(v)));
-      if (dit != null) dall.push(dit);
+      const diRef = [];
+      if (campDi) {
+        // DI level line only when that term is weighted AND the level is scored.
+        const diWeight = campWeights ? Number(campWeights.di) : 0;
+        if (diWeight !== 0 && campDi.level_scored && campDi.level_db != null) {
+          diRef.push({ y: campDi.level_db, label: "DI level target " + fmt(campDi.level_db, 2) + " dB" });
+        }
+        // Slope guide: slope is scored, intercept is display-only (family mean over the scored band).
+        if (campDi.slope_scored && Number.isFinite(campDi.slope_db_per_dec) && scoreLo != null) {
+          const vals = [];
+          entries.forEach(e => { const b = e.best || {}, F2 = b.freqs || freqsRef;
+            F2.forEach((f, i) => { const v = (b.di || [])[i]; if (v != null && isFinite(v) && f >= scoreLo) vals.push(v); }); });
+          if (vals.length) {
+            const mean = vals.reduce((a, v) => a + v, 0) / vals.length;
+            const slope = campDi.slope_db_per_dec;
+            const endY = mean + slope * (Math.log10(xlim[1]) - Math.log10(scoreLo));
+            if (!(slope === 0 && diRef.length)) {
+              diRef.push({ pts: [[scoreLo, mean], [xlim[1], endY]],
+                           label: "slope-only guide " + fmt(slope, 2) + " dB/dec (display-only intercept)", dash: true });
+              dall.push(endY);
+            }
+          }
+        }
+      } else if (dit != null) {
+        diRef.push({ y: dit, label: "DI target" });
+        dall.push(dit);
+      }
       const diSpec = { ...AXES.di };
       const diRange = fixedRange(diSpec, dall);
       chart(diSvg, {
         H: 260, xlog: true, xlim, ylim: [diRange.lo, diRange.hi],
         yticks: (() => { const t = []; for (let v = diRange.lo; v <= diRange.hi + 1; v += diSpec.major) t.push(v); return t; })(),
         xlabel: "Hz", ylabel: "dB", band, vlines,
-        refLines: dit != null ? [{ y: dit, label: "DI target" }] : [],
+        refLines: diRef,
         series: entries.map((e, idx) => { const b = e.best || {}, F2 = b.freqs || freqsRef;
           return { pts: F2.map((f, i) => [f, (b.di || [])[i] ?? null]), color: familyColor(idx), w: idx === 0 ? 2.4 : 1.6 }; }),
         markers: true,
@@ -1817,6 +1873,34 @@ async function viewCampaignDetail(id) {
     }
     legDiv.innerHTML = entries.map((e, idx) => `<span><i style="color:${familyColor(idx)};border-top-color:${familyColor(idx)}"></i>${esc(e.name)}${idx === 0 ? " (rank 1)" : ""}</span>`).join("")
       + (tgt != null ? `<span class="dash-ref">target</span>` : "");
+    // Captions: truthful wording only when the additive scoring payload exists; old campaigns unchanged.
+    const bwCap = document.getElementById("camp-bw-cap");
+    if (bwCap) {
+      if (!campSv) {
+        bwCap.innerHTML = "Shaded: target ±10 %. Lighter panel: scored band.";
+      } else {
+        const parts = ["Shaded ±10%: visual guide, NOT the scoring tolerance. Dotted line: scored coverage target (constant; drawn only where cov scores). Lighter panel: scored band."];
+        if (scoreLo != null) {
+          if (campWide === "one_sided") parts.push("wide free below f0 (one-sided).");
+          else if (campWide === "mask") parts.push("Below f0: masked (unscored).");
+        }
+        if (campCov && campCov.narrow_ratio != null && campCov.narrow_ratio !== 1) parts.push(`Narrow side ×${campCov.narrow_ratio}.`);
+        if (campNotes && campNotes.illustrative_corridor) parts.push("Hypothetical narrowing corridor (if shown) is display-only and may violate the 8 kHz floor.");
+        if (campFloor) parts.push(`narrow-only 8 kHz floor ${campFloor.floor_h_deg}° × ${campFloor.floor_v_deg}° (pen ${fmt(campFloor.penalty_raw, 2)}).`);
+        bwCap.innerHTML = parts.join(" ");
+      }
+    }
+    const diCap = document.getElementById("camp-di-cap");
+    if (diCap) {
+      if (!campSv) {
+        diCap.innerHTML = "Dashed: DI target from brief coverage angles.";
+      } else {
+        const segs = [];
+        if (campDi && campDi.slope_db_per_dec != null) segs.push("target " + fmt(campDi.slope_db_per_dec, 2) + " dB/dec");
+        diCap.innerHTML = "Fitted DI slope over scored band" + (segs.length ? ": " + segs.join(" · ") : "")
+          + " — slope is scored; when di weight is 0 the intercept is NOT (translation-invariant).";
+      }
+    }
   }
   drawBW();
   document.getElementById("btn-bw-h").onclick = () => {
@@ -6010,7 +6094,7 @@ async function viewRunDetail(id) {
             <button type="button" data-isoview="globe" aria-pressed="false">Globe</button>
             <button type="button" data-isoview="globe360" aria-pressed="false">Full globe</button>
           </div></div>
-        <div class="cap">Level relative to on-axis at 2 m, in 3 dB colour bands (thin lines every 3 dB; the heavier line is the −6 dB beamwidth edge). A good design keeps its −6 dB edge on the coverage-target guides. Hover for values. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies (screen fidelity), ticked below the frequency axis. Globe view: the cut data wrapped into a half-circle (front at the bottom, frequency rising outward from the centre). Full globe: the stored balloon sampled right around the circle (front at the bottom, ±180° at the top) — no extra solves, just a different slice of the same data. Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
+        <div class="cap" id="cap-polar">Level relative to on-axis at 2 m, in 3 dB colour bands (thin lines every 3 dB; the heavier line is the −6 dB beamwidth edge). A good design keeps its −6 dB edge on the coverage-target guides. Hover for values. Interpolated between the ${((d.best || {}).freqs || []).length} solved frequencies (screen fidelity), ticked below the frequency axis. Globe view: the cut data wrapped into a half-circle (front at the bottom, frequency rising outward from the centre). Full globe: the stored balloon sampled right around the circle (front at the bottom, ±180° at the top) — no extra solves, just a different slice of the same data. Axis spans the brief band; the colour map is drawn only across the solved frequencies.</div>
         <div id="polar-legend"></div>
         <div class="maps iso-maps" id="polar-maps"></div>
       </div>
@@ -6019,7 +6103,7 @@ async function viewRunDetail(id) {
       <div class="grid2">
         <div class="fig">
           <h3>${tip("bw", "Beamwidth (−6 dB)")} — horizontal vs target</h3>
-          <div class="cap">Total angle between the −6 dB points. Panel: the brief band. Dashed marker: the scoring floor f0. Shaded band: target ±10 %. Dotted line: target. Markers at solved frequencies.</div>
+          <div class="cap" id="cap-bwh">Total angle between the −6 dB points. Panel: the brief band. Dashed marker: the scoring floor f0. Shaded band: target ±10 %. Dotted line: target. Markers at solved frequencies.</div>
           <div class="legend">
             <span><i style="color:var(--best)"></i>best</span>
             <span><i style="color:var(--seed)"></i>start</span>
@@ -6028,7 +6112,7 @@ async function viewRunDetail(id) {
         </div>
         <div class="fig">
           <h3>${tip("bw", "Beamwidth (−6 dB)")} — vertical vs target</h3>
-          <div class="cap">Total angle between the −6 dB points. Shaded band: target ±10 %. Dotted line: target. Markers at solved frequencies.</div>
+          <div class="cap" id="cap-bwv">Total angle between the −6 dB points. Shaded band: target ±10 %. Dotted line: target. Markers at solved frequencies.</div>
           <div class="legend">
             <span><i style="color:var(--best)"></i>best</span>
             <span><i style="color:var(--seed)"></i>start</span>
@@ -6041,7 +6125,7 @@ async function viewRunDetail(id) {
       <div class="grid2">
         <div class="fig">
           <h3>${tip("di_db", "Directivity index")} vs target</h3>
-          <div class="cap">0–15 dB fixed range. Dotted line: DI target from brief. Markers at solved frequencies.</div>
+          <div class="cap" id="cap-di">0–15 dB fixed range. Dotted line: DI target from brief. Markers at solved frequencies.</div>
           <div class="legend">
             <span><i style="color:var(--seed)"></i>start</span>
             <span><i style="color:var(--best)"></i>best</span>
@@ -6221,6 +6305,37 @@ async function viewRunDetail(id) {
   // C10: unscored hatch region (below f0, the unscored prefix)
   const unscored = f0Finite ? [{ x0: xlim[0], x1: f0Finite, label: "not scored" }] : [];
 
+  // ── P0 scoring truth (2026-11-16) ─────────────────────────────────────────────────────────────
+  // The run's immutable config implies a per-plane scored window, target status, DI level/slope
+  // scoring and the v7 8 kHz floor. Every helper below is OPTIONAL: an older run without the
+  // additive payloads (scoring_view / score_window / di_slope_scored) renders EXACTLY as today.
+  const sv = d.scoring_view || null;
+  const svCov = sv && sv.coverage ? sv.coverage : null;
+  const svDi = sv && sv.di ? sv.di : null;
+  const svFloor = sv && sv.bw8k_floor ? sv.bw8k_floor : null;
+  const svNotes = sv && sv.notes ? sv.notes : null;
+  const wideBelow = svCov ? svCov.below_mode : null;
+  // The scored lower onset per plane: best design's design-specific window wins, then the start's,
+  // then the run-level scoring_view coverage. Null keeps today's full-width behaviour.
+  function scoreLoFor(plane) {
+    const key = plane === "v" ? "v_lo_hz" : "h_lo_hz";
+    const bsw = B.score_window || {}, ssw = S.score_window || {};
+    const v = (bsw[key] != null ? bsw[key] : (ssw[key] != null ? ssw[key] : (svCov ? svCov[key] : null)));
+    return (typeof v === "number" && isFinite(v) && v > 0) ? v : null;
+  }
+  // Scored-range target line (a two-point polyline on log-x is exact); null when the onset is
+  // unknown so the caller keeps the historical horizontal reference line.
+  function scoredTargetRef(scoreLo, tgtDeg, label) {
+    if (scoreLo == null || tgtDeg == null) return null;
+    return { pts: [[scoreLo, tgtDeg], [xlim[1], tgtDeg]], label: label };
+  }
+  // Mean measured DI over the scored band — the declared display-only intercept of the slope guide.
+  function meanDiScored(lo) {
+    const pairs = F.map((f, i) => [f, (B.di || [])[i]]).filter(([f, v]) => v != null && isFinite(v) && (lo == null || f >= lo));
+    if (!pairs.length) return null;
+    return pairs.reduce((a, [, v]) => a + v, 0) / pairs.length;
+  }
+
   // C7 helpers: yticks for fixed axes
   function bwTicks(lo, hi, major) { const t = []; for (let v = lo; v <= hi + 1e-9; v += major) t.push(+v.toFixed(4)); return t; }
 
@@ -6234,7 +6349,13 @@ async function viewRunDetail(id) {
     const legEl = document.getElementById("polar-legend");
     const anyOver = [B.polar_h, B.polar_v, withStart ? S.polar_h : null, withStart ? S.polar_v : null]
       .some(r => Array.isArray(r) && r.some(row => Array.isArray(row) && row.some(v => v != null && v > 1)));
-    if (legEl) legEl.innerHTML = "" && isobarLegendHtml({ target: !!(t.coverage_h_deg || t.coverage_v_deg), f0: !!f0Finite, over: anyOver });
+    if (legEl) legEl.innerHTML = "" && isobarLegendHtml({ target: !!(t.coverage_h_deg || t.coverage_v_deg), f0: !!f0Finite, over: anyOver, below: wideBelow, floor: !!svFloor, illustrative: false });
+    // Truthful isobar caption (additive; absent payload = byte-identical old caption).
+    const capPolar = document.getElementById("cap-polar");
+    if (sv && capPolar && !capPolar.dataset.scoringNote) {
+      capPolar.innerHTML += " White dashes: scored coverage target, drawn from the scoring floor only. Amber f0 line marks the mask boundary.";
+      capPolar.dataset.scoringNote = "1";
+    }
     const plots = [["Best design · horizontal", B.polar_h, B], ["Best design · vertical", B.polar_v, B]];
     if (withStart) plots.push(["Starting design · horizontal", S.polar_h, S], ["Starting design · vertical", S.polar_v, S]);
     // view: rectangular map (frequency x angle), half globe (cut data) or full globe (balloon data)
@@ -6247,26 +6368,29 @@ async function viewRunDetail(id) {
     mapsEl.classList.toggle("iso-globes", view !== "rect");
     for (const [lbl, rows, D2] of plots) {
       const vert = /vertical/.test(lbl);
+      // Scored-coverage onset per plane + the v7 floor rays (both optional, both default-off).
+      const tgtLoHz = scoreLoFor(vert ? "v" : "h");
+      const floorRays = svFloor ? { h_deg: svFloor.floor_h_deg, v_deg: svFloor.floor_v_deg } : null;
       if (view === "globe360") {
         // full circle needs the stored balloon; older runs without one simply skip this view
         const r360 = vert ? D2.polar_v360 : D2.polar_h360;
         if (!r360 || !D2.angles360) continue;
-        const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
-        sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + " full globe plot");
-        mapsEl.appendChild(sv);
+        const svgEl = document.createElementNS(NS, "svg"); svgEl.setAttribute("class", "polar");
+        svgEl.setAttribute("role", "img"); svgEl.setAttribute("aria-label", lbl + " full globe plot");
+        mapsEl.appendChild(svgEl);
         const tgt = vert ? t.coverage_v_deg : t.coverage_h_deg;
-        requestAnimationFrame(() => globePlot(sv, r360, D2.angles360, D2.freqs || F, { title: lbl, H: 360, f0: f0Finite, target: tgt }));
+        requestAnimationFrame(() => globePlot(svgEl, r360, D2.angles360, D2.freqs || F, { title: lbl, H: 360, f0: f0Finite, target: tgt, targetLoHz: tgtLoHz, belowMode: wideBelow, illustrativeCurve: null, floorRays: floorRays }));
         continue;
       }
       if (!rows) continue;
-      const sv = document.createElementNS(NS, "svg"); sv.setAttribute("class", "polar");
-      sv.setAttribute("role", "img"); sv.setAttribute("aria-label", lbl + (view === "globe" ? " globe plot" : " isobar plot"));
-      mapsEl.appendChild(sv);
+      const svgEl = document.createElementNS(NS, "svg"); svgEl.setAttribute("class", "polar");
+      svgEl.setAttribute("role", "img"); svgEl.setAttribute("aria-label", lbl + (view === "globe" ? " globe plot" : " isobar plot"));
+      mapsEl.appendChild(svgEl);
       const tgt = vert ? t.coverage_v_deg : t.coverage_h_deg;
       if (view === "globe") {
-        requestAnimationFrame(() => globePlot(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 320, f0: f0Finite, target: tgt }));
+        requestAnimationFrame(() => globePlot(svgEl, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 320, f0: f0Finite, target: tgt, targetLoHz: tgtLoHz, belowMode: wideBelow, illustrativeCurve: null, floorRays: floorRays }));
       } else {
-        requestAnimationFrame(() => isobarMap(sv, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite, target: tgt }));
+        requestAnimationFrame(() => isobarMap(svgEl, rows, D2.angles || [], D2.freqs || F, { title: lbl, H: 300, xlim, f0: f0Finite, target: tgt, targetLoHz: tgtLoHz, belowMode: wideBelow, illustrativeCurve: null, floorRays: floorRays }));
       }
     }
   }
@@ -6274,12 +6398,60 @@ async function viewRunDetail(id) {
   // ── Beamwidth H/V small multiples (C6) ──────────────────────────────────────────────────────
   function drawBwCharts() {
     const th = t.coverage_h_deg, tv = t.coverage_v_deg;
-    function drawOneBw(svgId, key, tgtDeg, label) {
+    // Caption text: the historical wording for runs without the additive payload; the truthful
+    // scored-target wording (P0) whenever scoring_view is present.  Old runs render unchanged.
+    function bwCaption(plane, tgtDeg, scoreLo) {
+      if (!sv) {
+        return plane === "h"
+          ? "Total angle between the −6 dB points. Panel: the brief band. Dashed marker: the scoring floor f0. Shaded band: target ±10 %. Dotted line: target. Markers at solved frequencies."
+          : "Total angle between the −6 dB points. Shaded band: target ±10 %. Dotted line: target. Markers at solved frequencies.";
+      }
+      const parts = ["Total angle between the −6 dB points."];
+      if (plane === "h") parts.push("Panel: the brief band. Dashed marker: the scoring floor f0.");
+      if (tgtDeg != null) {
+        parts.push("Dotted line: scored coverage target (constant; drawn only where cov scores). Shaded ±10%: visual guide, NOT the scoring tolerance.");
+        if (scoreLo != null) {
+          if (wideBelow === "one_sided") parts.push("wide free below f0 (one-sided).");
+          else if (wideBelow === "mask") parts.push("Below f0: masked (unscored).");
+        }
+      }
+      const ratio = svCov ? svCov.narrow_ratio : null;
+      if (ratio != null && ratio !== 1) parts.push(`Narrow side ×${ratio}.`);
+      if (svNotes && svNotes.illustrative_corridor) parts.push("Hypothetical narrowing corridor (if shown) is display-only and may violate the 8 kHz floor.");
+      parts.push("Markers at solved frequencies.");
+      return parts.join(" ");
+    }
+    function drawOneBw(svgId, key, tgtDeg, label, plane) {
       const svg = document.getElementById(svgId);
       if (!svg) return;
       const dataSets = [...(B[key] || []), ...(S[key] || [])].filter(v => v != null);
       if (!dataSets.length && !tgtDeg) return;
-      const allVals = [...dataSets, tgtDeg].filter(v => v != null);
+      // Scored-range truth: the target + its ±10% guide only where cov actually scores.
+      const scoreLo = scoreLoFor(plane);
+      const floorDeg = svFloor ? (plane === "v" ? svFloor.floor_v_deg : svFloor.floor_h_deg) : null;
+      const refLines = [], area = [];
+      let fill = [];
+      if (tgtDeg != null) {
+        const poly = scoredTargetRef(scoreLo, tgtDeg, label + " " + tgtDeg + "°");
+        if (poly) {
+          refLines.push(poly);
+          area.push({ top: [[scoreLo, tgtDeg * 1.1], [xlim[1], tgtDeg * 1.1]],
+                      bottom: [[scoreLo, tgtDeg * 0.9], [xlim[1], tgtDeg * 0.9]],
+                      color: css("--best"), opacity: 0.10 });
+          if (wideBelow === "one_sided") {
+            // Allowed widening below the onset: everything above the flat target is free.
+            area.push({ top: [[xlim[0], 180], [scoreLo, 180]],
+                        bottom: [[xlim[0], tgtDeg], [scoreLo, tgtDeg]],
+                        color: css("--best"), opacity: 0.08 });
+          }
+          // "mask" draws nothing left of scoreLo — the unscored hatch already covers that span.
+        } else {
+          fill = [{ y0: tgtDeg * 0.9, y1: tgtDeg * 1.1, color: css("--best"), opacity: 0.10 }];
+          refLines.push({ y: tgtDeg, label: label + " " + tgtDeg + "°" });
+        }
+      }
+      if (floorDeg != null) refLines.push({ y: floorDeg, label: "8k floor " + floorDeg + "°" });
+      const allVals = [...dataSets, tgtDeg, floorDeg].filter(v => v != null);
       const spec = { ...AXES.beamwidth };
       const range = fixedRange(spec, allVals);
       const ticks = bwTicks(range.lo, range.hi, spec.major);
@@ -6288,18 +6460,18 @@ async function viewRunDetail(id) {
         ...(showStart() && S[key] ? [{ pts: F.map((f, i) => [f, S[key][i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
         ...(B[key] ? [{ pts: F.map((f, i) => [f, B[key][i] ?? null]), color: css("--best"), w: 2.2 }] : []),
       ];
-      const fill = tgtDeg ? [{ y0: tgtDeg * 0.9, y1: tgtDeg * 1.1, color: css("--best"), opacity: 0.10 }] : [];
-      const refLines = tgtDeg ? [{ y: tgtDeg, label: label + " " + tgtDeg + "°" }] : [];
       chart(svg, {
-        xlog: true, xlim, ylim: [range.lo, range.hi], fill,
+        xlog: true, xlim, ylim: [range.lo, range.hi], fill, area,
         yticks: ticks, yMinor: yMinorBw, xlabel: "Hz", ylabel: "deg", band, refLines,
         vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],
         series: seriesList, markers: true, unscored,
         ariaLabel: "Beamwidth −6 dB " + label,
       });
+      const capEl = document.getElementById(plane === "h" ? "cap-bwh" : "cap-bwv");
+      if (capEl) capEl.innerHTML = bwCaption(plane, tgtDeg, scoreLo) + (svFloor ? ` narrow-only 8 kHz floor ${svFloor.floor_h_deg}° × ${svFloor.floor_v_deg}° (pen ${fmt(svFloor.penalty_raw, 2)}).` : "");
     }
-    drawOneBw("c-bwh", "bw_h", th, "target H");
-    drawOneBw("c-bwv", "bw_v", tv, "target V");
+    drawOneBw("c-bwh", "bw_h", th, "target H", "h");
+    drawOneBw("c-bwv", "bw_v", tv, "target V", "v");
   }
 
   // ── DI vs target (C3: fixed 0..15 dB) ───────────────────────────────────────────────────────
@@ -6307,14 +6479,38 @@ async function viewRunDetail(id) {
     const svg = document.getElementById("c-di");
     if (!svg || !F.length || (!S.di && !B.di)) return;
     const dit = t.di_target_db ?? diFromCuts(t.coverage_h_deg || 90, t.coverage_v_deg || 90);
-    const allDi = [...(S.di || []), ...(B.di || []), dit].filter(v => v != null);
+    const allDi = [...(S.di || []), ...(B.di || []), ...(svDi ? [] : [dit])].filter(v => v != null);
+    // DI level line ONLY when that term is scored; the level is otherwise not a scored anchor.
+    const refLines = [];
+    if (svDi) {
+      if (svDi.level_scored && svDi.level_db != null) {
+        refLines.push({ y: svDi.level_db, label: "DI level target " + fmt(svDi.level_db, 2) + " dB" });
+      }
+    } else if (dit != null) {
+      refLines.push({ y: dit, label: "DI target" });
+    }
+    // Slope guide: the slope IS scored, the intercept is NOT (translation-invariant).  The guide is
+    // anchored at the measured mean DI over the scored band and labelled display-only.
+    if (svDi && svDi.slope_scored && Number.isFinite(svDi.slope_db_per_dec)) {
+      const scoreLo = scoreLoFor("h");
+      const mean = scoreLo != null ? meanDiScored(scoreLo) : null;
+      if (scoreLo != null && mean != null) {
+        const slope = svDi.slope_db_per_dec;
+        const endY = mean + slope * (Math.log10(xlim[1]) - Math.log10(scoreLo));
+        if (!(slope === 0 && svDi.level_scored && svDi.level_db != null)) {
+          refLines.push({ pts: [[scoreLo, mean], [xlim[1], endY]],
+                          label: "slope-only guide " + fmt(slope, 2) + " dB/dec (display-only intercept)", dash: true });
+          allDi.push(endY);
+        }
+      }
+    }
     const spec = { ...AXES.di };
     const range = fixedRange(spec, allDi);
     const ticks = bwTicks(range.lo, range.hi, spec.major);
     chart(svg, {
       xlog: true, xlim, ylim: [range.lo, range.hi],
       yticks: ticks, xlabel: "Hz", ylabel: "dB", band,
-      refLines: dit != null ? [{ y: dit, label: "DI target" }] : [],
+      refLines,
       vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],
       series: [
         ...(showStart() && S.di ? [{ pts: F.map((f, i) => [f, S.di[i] ?? null]), color: css("--seed"), w: 1.7 }] : []),
@@ -6322,6 +6518,19 @@ async function viewRunDetail(id) {
       ],
       markers: true, unscored, ariaLabel: "Directivity index vs target",
     });
+    // DI caption: only rewritten when the additive payload exists; old runs keep the static text.
+    const capEl = document.getElementById("cap-di");
+    if (capEl && sv) {
+      const segs = [];
+      const bs = B.di_slope_scored && B.di_slope_scored.slope;
+      const ss = S.di_slope_scored && S.di_slope_scored.slope;
+      const tgtSlope = svDi ? svDi.slope_db_per_dec : null;
+      if (bs != null) segs.push("best " + fmt(bs, 2));
+      if (ss != null) segs.push("start " + fmt(ss, 2));
+      if (tgtSlope != null) segs.push("target " + fmt(tgtSlope, 2) + " dB/dec");
+      capEl.innerHTML = "Fitted DI slope over scored band" + (segs.length ? ": " + segs.join(" · ") : "")
+        + " — slope is scored; when di weight is 0 the intercept is NOT (translation-invariant).";
+    }
   }
 
   // ── On-axis response (C2: fixed −15..+10 dB) ────────────────────────────────────────────────
@@ -7213,6 +7422,76 @@ async function viewCompare() {
     const f0Compare = isFinite(f0c) && f0c > 0 ? f0c : null;
     const vlines = f0Compare ? [{ x: f0Compare, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Compare) }] : [];
 
+    // P0 scoring truth per side (additive; absent = today's targetless compare charts). Each side
+    // keeps its OWN scored target — never one run's target overlaid as if the other shared it.
+    const svA = cmp.scoring_view_a || null, svB = cmp.scoring_view_b || null;
+    const covA = svA && svA.coverage ? svA.coverage : null;
+    const covB = svB && svB.coverage ? svB.coverage : null;
+    const diA = svA && svA.di ? svA.di : null;
+    const diB = svB && svB.di ? svB.di : null;
+    const briefsDiffer = !!(covA && covB) && (
+      covA.h_deg !== covB.h_deg || covA.v_deg !== covB.v_deg ||
+      covA.below_mode !== covB.below_mode || covA.h_lo_hz !== covB.h_lo_hz ||
+      covA.v_lo_hz !== covB.v_lo_hz);
+    const diffBriefBanner = briefsDiffer
+      ? `<div class="alert warn" role="alert">Different scored briefs — targets shown per side, never as one shared target.</div>` : "";
+    // Scored target reference polylines for one plane: per-side A/B when the briefs differ, else one
+    // shared scored target. Null cov on both sides -> no target lines at all (old runs unchanged).
+    function cmpTargetRefs(plane) {
+      const keyDeg = plane === "v" ? "v_deg" : "h_deg";
+      const keyLo = plane === "v" ? "v_lo_hz" : "h_lo_hz";
+      const refs = [];
+      if (covA && covB && briefsDiffer) {
+        if (covA[keyDeg] != null) refs.push({ pts: [[covA[keyLo] ?? xlim[0], covA[keyDeg]], [xlim[1], covA[keyDeg]]], label: "A " + covA[keyDeg] + "°" });
+        if (covB[keyDeg] != null) refs.push({ pts: [[covB[keyLo] ?? xlim[0], covB[keyDeg]], [xlim[1], covB[keyDeg]]], label: "B " + covB[keyDeg] + "°" });
+      } else {
+        const cov = covA || covB;
+        if (cov && cov[keyDeg] != null) {
+          const lo = cov[keyLo] ?? xlim[0];
+          refs.push({ pts: [[lo, cov[keyDeg]], [xlim[1], cov[keyDeg]]], label: "target " + (plane === "v" ? "V" : "H") + " " + cov[keyDeg] + "°" });
+        }
+      }
+      return refs;
+    }
+    const sideMeanDi = (arr, lo) => {
+      const vals = F.map((f, i) => [f, (arr || [])[i]]).filter(([f, v]) => v != null && isFinite(v) && f >= lo).map(([, v]) => v);
+      return vals.length ? vals.reduce((a, v) => a + v, 0) / vals.length : null;
+    };
+    // DI level only where that side scored it; slope guides are display-only (translation-invariant).
+    function cmpDiRefs() {
+      const refs = [], values = [];
+      const sides = [];
+      if (diA) sides.push({ tag: "A", di: diA, cov: covA, arr: dA.di });
+      if (diB) sides.push({ tag: "B", di: diB, cov: covB, arr: dB.di });
+      // A shared brief draws one scored DI level target; differing briefs label each side's own.
+      const perSideLevel = briefsDiffer;
+      const levelSeen = new Set();
+      for (const s of sides) {
+        if (s.di.level_scored && s.di.level_db != null) {
+          const key = s.di.level_db;
+          if (!perSideLevel && levelSeen.has(key)) { /* shared brief: one line is enough */ }
+          else {
+            refs.push({ y: s.di.level_db, label: (perSideLevel ? s.tag + " " : "") + "DI level target " + fmt(s.di.level_db, 2) + " dB" });
+            levelSeen.add(key);
+          }
+        }
+        if (s.di.slope_scored && Number.isFinite(s.di.slope_db_per_dec) && s.cov && s.cov.h_lo_hz != null) {
+          const lo = s.cov.h_lo_hz;
+          const mean = sideMeanDi(s.arr, lo);
+          if (mean != null) {
+            const slope = s.di.slope_db_per_dec;
+            const endY = mean + slope * (Math.log10(xlim[1]) - Math.log10(lo));
+            if (!(slope === 0 && s.di.level_scored && s.di.level_db != null)) {
+              refs.push({ pts: [[lo, mean], [xlim[1], endY]],
+                          label: (sides.length > 1 ? s.tag + " " : "") + "slope-only guide " + fmt(slope, 2) + " dB/dec (display-only intercept)", dash: true });
+              values.push(endY);
+            }
+          }
+        }
+      }
+      return { refs, values };
+    }
+
     // G3: solve-group distinction (C-2 additive keys). group_a/group_b carry the non-default
     // fingerprint keys (backend always included); mixed_keys lists where the sides differ — when
     // empty, no banner renders (absence = clean). The DI guard twin (plan §3.9; the CLI's own
@@ -7249,7 +7528,7 @@ async function viewCompare() {
     const versionBanner = versionsMixed
       ? `<div class="alert warn" role="alert">${J_VERSION_BANNER}</div>` : "";
     const provBlock = [versionBanner, versionPills].filter(Boolean).join("")
-      + [badgeRows, mixedBanner, mountingRankWarnHtml(mixed), diNote].filter(Boolean).join("");
+      + [badgeRows, mixedBanner, mountingRankWarnHtml(mixed), diNote, diffBriefBanner].filter(Boolean).join("");
 
     res.innerHTML = `
       <div class="stack" style="gap:20px">
@@ -7275,10 +7554,11 @@ async function viewCompare() {
 
     if (!F.length) return;
 
-    function cmpChart(svgId, keyA, keyB, ylabel, axisSpec) {
+    function cmpChart(svgId, keyA, keyB, ylabel, axisSpec, extra) {
       const svg = document.getElementById(svgId);
       if (!svg) return;
-      const allV = [...(dA[keyA] || []), ...(dB[keyB] || [])].filter(v => v != null);
+      const ex = extra || {};
+      const allV = [...(dA[keyA] || []), ...(dB[keyB] || []), ...(ex.values || [])].filter(v => v != null);
       if (!allV.length) return;
       const range = axisSpec ? fixedRange(axisSpec, allV) : { lo: Math.floor(Math.min(...allV) - 1), hi: Math.ceil(Math.max(...allV) + 1) };
       const ticks = axisSpec
@@ -7287,6 +7567,7 @@ async function viewCompare() {
       chart(svg, {
         xlog: true, xlim, ylim: [range.lo, range.hi],
         yticks: ticks, xlabel: "Hz", ylabel, band, vlines,
+        refLines: ex.refLines || [],
         series: [
           { pts: F.map((f, i) => [f, (dA[keyA] || [])[i] ?? null]), color: css("--seed"), w: 1.8 },
           { pts: F.map((f, i) => [f, (dB[keyB] || [])[i] ?? null]), color: css("--best"), w: 1.8 },
@@ -7294,9 +7575,10 @@ async function viewCompare() {
         markers: true,
       });
     }
-    cmpChart("cmp-bwh", "bw_h", "bw_h", "°", AXES.beamwidth);
-    cmpChart("cmp-bwv", "bw_v", "bw_v", "°", AXES.beamwidth);
-    cmpChart("cmp-di", "di", "di", "dB", AXES.di);
+    const diRefs = cmpDiRefs();
+    cmpChart("cmp-bwh", "bw_h", "bw_h", "°", AXES.beamwidth, { refLines: cmpTargetRefs("h") });
+    cmpChart("cmp-bwv", "bw_v", "bw_v", "°", AXES.beamwidth, { refLines: cmpTargetRefs("v") });
+    cmpChart("cmp-di", "di", "di", "dB", AXES.di, diRefs);
     cmpChart("cmp-axis", "on_axis", "on_axis", "dB", AXES.onAxis);
   }
 
@@ -7557,7 +7839,7 @@ async function showBriefDetail(b, allBriefs, opts = {}) {
               <div class="hint">Leave blank to derive from coverage angles</div></div>
             <label for="brf-dislope">${tip("dislope", "DI slope target")}</label>
             <div><input id="brf-dislope" type="number" step="0.01" value="${tgt.di_slope_target ?? 0}">
-              <div class="hint">0 = constant directivity</div></div>
+              <div class="hint">0 = constant DI (dB/decade). This is a DI-shape target ONLY — H/V coverage targets stay constant. The scored low-frequency behaviour comes from cov_below_f0 (mask / one-sided) and v6 cov_pat, not from this slope.</div></div>
             <label for="brf-zmin">${tip("load", "Loading threshold")} z_min</label>
             <div><input id="brf-zmin" type="number" step="0.05" min="0" max="1" value="${tgt.z_min ?? 0}">
               <div class="hint">Lowest scored frequency loading threshold — the throat-impedance floor the load term scores below (classical briefs use 0.7, default 0)</div></div>

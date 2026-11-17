@@ -489,6 +489,125 @@ def _profile_from_mesh_uncached(msh: Path) -> dict:
     return prof
 
 
+# P0 scoring-truth presentation (2026-11-16): the pure read-only helper lives in
+# ``hornlab_search.targets.scoring_view`` (parallel lane). These wrappers keep every GUI reader
+# additive and unable to break a page when the helper is absent or rejects a shape it cannot model.
+def _scoring_module():
+    """The scoring-view helper module, or None when it is not present (readers stay read-only)."""
+    try:
+        from ..targets import scoring_view as mod
+        return mod
+    except ImportError:
+        return None
+
+
+def _scoring_inputs(cfg: dict) -> tuple[Any, Any, Any]:
+    """(raw target, raw objective, raw weights) with the exact sourcing ``run_detail`` uses today."""
+    brief = _as_dict(cfg.get("brief"))
+    return (cfg.get("target") or brief.get("target"),
+            cfg.get("objective") or brief.get("objective"),
+            cfg.get("weights") or brief.get("weights"))
+
+
+def _brief_objective_version(brief_raw: dict) -> int:
+    """The brief's own ``objective.version`` with v1 as the unlabelled default (never a guess)."""
+    version = _as_dict(_as_dict(brief_raw).get("objective")).get("version")
+    if isinstance(version, bool) or version is None:
+        return 1
+    try:
+        return int(version)
+    except (TypeError, ValueError):
+        return 1
+
+
+def _design_json(run_dir: Path, h: str | None) -> tuple[dict | None, Any]:
+    """Raw ``metrics.json`` and ``design.json['params']`` of one solved design."""
+    if not h or not HASH.match(str(h)):
+        return None, None
+    d = run_dir / "designs" / str(h)
+    m = _read_json(d / "metrics.json")
+    if not isinstance(m, dict):
+        return None, None
+    return m, _as_dict(_read_json(d / "design.json")).get("params")
+
+
+def _design_score_window(run_dir: Path, metrics: dict, design_params: Any) -> dict | None:
+    """The scored frequency masks/constants of one design (None when unavailable)."""
+    mod = _scoring_module()
+    if mod is None:
+        return None
+    target, objective, _weights = _scoring_inputs(_config(run_dir))
+    if not target or not objective:
+        return None
+    try:
+        win = mod.score_window(target, objective, run_objective_version(run_dir),
+                              metrics.get("scalars"), design_params)
+    except Exception:  # noqa: BLE001 - a read-only view must never break the design page
+        return None
+    return win if isinstance(win, dict) else None
+
+
+def _measured_di_slope(freqs_hz, di_db, lo_hz) -> float | None:
+    """The fitted DI slope (dB/decade) over the scored band (None when not computable)."""
+    mod = _scoring_module()
+    if mod is None:
+        return None
+    try:
+        return mod.measured_di_slope(freqs_hz, di_db, lo_hz)
+    except Exception:  # noqa: BLE001 - a read-only view must never break the design page
+        return None
+
+
+def _run_scoring_view(run_dir: Path, target: Any, objective: Any, weights: Any,
+                      best_hash: str | None, version: int) -> dict | None:
+    """The full scoring view of one run's BEST design, from its own immutable config."""
+    mod = _scoring_module()
+    if mod is None or not (target and objective and weights):
+        return None
+    metrics, params = _design_json(run_dir, best_hash)
+    if metrics is None:
+        return None
+    try:
+        view = mod.build_scoring_view(
+            target, objective, weights, version,
+            design_scalars=metrics.get("scalars"), design_params=params,
+            freqs_hz=metrics.get("freqs_hz"), bw_h_deg=metrics.get("bw_h_deg"),
+            bw_v_deg=metrics.get("bw_v_deg"), di_db=metrics.get("di_db"),
+        )
+    except Exception:  # noqa: BLE001 - a read-only view must never break the detail page
+        return None
+    return clean(view) if isinstance(view, dict) else None
+
+
+def _cfg_scoring_view(run_dir: Path, cfg: dict | None = None,
+                      best_hash: str | None = None, version: int | None = None) -> dict | None:
+    """Scoring view sourced exactly like ``run_detail`` (cfg target/objective/weights + best design)."""
+    cfg = _as_dict(cfg) if cfg is not None else _config(run_dir)
+    target, objective, weights = _scoring_inputs(cfg)
+    ver = version if version is not None else run_objective_version(run_dir)
+    if best_hash is None:
+        best_hash = run_summary(run_dir).get("best_hash")
+    return _run_scoring_view(run_dir, target, objective, weights, best_hash, ver)
+
+
+def _campaign_scoring_view(runs: Path, brief_raw: Any, entries: list[dict]) -> dict | None:
+    """One campaign's scoring view: the BRIEF's target/objective/weights + its best entry's design."""
+    brief_raw = _as_dict(brief_raw)
+    target, objective, weights = (brief_raw.get("target"), brief_raw.get("objective"),
+                                  brief_raw.get("weights"))
+    if not (target and objective and weights):
+        return None
+    version = _brief_objective_version(brief_raw)
+    for entry in entries or []:
+        rid = entry.get("best_run_id")
+        if not rid or not RUN_ID.match(str(rid)):
+            continue
+        rd = runs / str(rid)
+        return _run_scoring_view(rd, target, objective, weights,
+                                 run_summary(rd).get("best_hash"), version)
+    return None
+
+
 def design_curves(run_dir: Path, h: str, tier: str = "screen") -> dict | None:
     """Per-frequency metrics, normalised polar maps and the wall profile of one solved design.
 
@@ -535,6 +654,17 @@ def design_curves(run_dir: Path, h: str, tier: str = "screen") -> dict | None:
     dj = _read_json(d / "design.json") or {}
     out["params"] = dj.get("params")
     out["generator"] = dj.get("generator")
+    # P0 scoring truth (2026-11-16): the actual scored masks/constants/floors this run's immutable
+    # config implies for THIS design. Purely additive; every existing key and J are unchanged, and
+    # the keys are omitted when the raw target/objective or the scored band is unavailable.
+    score = _design_score_window(run_dir, m, out["params"])
+    if score is not None:
+        out["score_window"] = score
+        lo = score.get("h_lo_hz")
+        if lo is not None and m.get("freqs_hz") is not None and m.get("di_db") is not None:
+            slope = _measured_di_slope(m["freqs_hz"], m["di_db"], lo)
+            if slope is not None:
+                out["di_slope_scored"] = {"band_lo_hz": lo, "slope": slope}
     return clean(out)
 
 
@@ -830,6 +960,7 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
     summ = run_summary(d)
     best_hash, seed_hash = summ["best_hash"], (rows[0]["design_hash"] if rows else None)
     seed_ok = bool(rows and rows[0].get("ok"))
+    version = run_objective_version(d)
     best_row = next((r for r in rows if r.get("design_hash") == best_hash and r.get("ok")), None)
     # C-1/G4: STEP files stay the existing list of names (a frozen consumer contract) and the
     # inventory is exposed additively per file; without a sidecar it falls back to the design's own
@@ -858,7 +989,7 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
         "command": run_json.get("command"),
         "step_files": step_files,
         "step_files_detail": step_files_detail,
-        "objective_version": run_objective_version(d),
+        "objective_version": version,
     })
     # Verify re-solves (2026-11-12): ``verify --run X`` writes ``X/verify/search.ndjson``; rows may
     # pair the same design across backends (the two-lane CPU/GPU cross-checks). Absent dir =
@@ -951,6 +1082,12 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
     objective = cfg.get("objective") or (cfg.get("brief") or {}).get("objective")
     if objective is not None:
         out["objective"] = clean(objective)
+    # P0 scoring truth (2026-11-16): the actual scored masks/constants/floors this run's immutable
+    # config implies for its BEST design. Additive only; omitted (never invented) when the raw
+    # target/objective/weights or the best design's metrics are unavailable. J is untouched.
+    scoring_view = _cfg_scoring_view(d, cfg, best_hash, version)
+    if scoring_view is not None:
+        out["scoring_view"] = scoring_view
     return out
 
 
@@ -1050,6 +1187,26 @@ def solve_group_fingerprints(run_a: Path, run_b: Path) -> tuple[dict, dict, list
     ga, gb = _solve_group_fingerprint(run_a), _solve_group_fingerprint(run_b)
     mixed = sorted(k for k in set(ga) | set(gb) if ga.get(k) != gb.get(k))
     return ga, gb, mixed
+
+
+def compare_scoring_views(runs: Path, run_a: str, run_b: str) -> dict:
+    """Additive ``scoring_view_a``/``scoring_view_b`` for the ``/api/compare`` payload (P0).
+
+    Each side is rebuilt from ITS OWN immutable run config with the same sourcing ``run_detail``
+    uses (cfg target/objective/weights + that run's best design metrics). The two views are never
+    overlaid on each other; the GUI decides how to present them. A side missing an essential input
+    is omitted here (never null-filled), so an existing compare payload's shape is unchanged.
+    """
+    out: dict[str, dict] = {}
+    for key, rid in (("a", run_a), ("b", run_b)):
+        try:
+            d = _resolve_run(runs, rid)
+        except (ValueError, FileNotFoundError):
+            continue
+        view = _cfg_scoring_view(d)
+        if view is not None:
+            out[f"scoring_view_{key}"] = view
+    return out
 
 
 def run_objective_version(run_dir: Path) -> int:
@@ -1545,11 +1702,22 @@ def _auto_campaign_detail(runs: Path, cid: str, snap: _Snapshot | None = None,
         })
     entries.sort(key=lambda e: (e["best_j"] is None, e["median_j"] if e["median_j"] is not None else 0))
     brief = members[0][1].get("brief")
-    brief_raw = snap.brief(brief)
-    return clean({"id": cid, "tier": members[0][1].get("mode") or "screen", "brief": brief,
-                  "seeds": None, "superseded": False, "auto": True,
-                  "target": (brief_raw or {}).get("target"), "entries": entries,
-                  "leaderboard_md": None})
+    brief_raw = _as_dict(snap.brief(brief))
+    out = clean({"id": cid, "tier": members[0][1].get("mode") or "screen", "brief": brief,
+                 "seeds": None, "superseded": False, "auto": True,
+                 "target": brief_raw.get("target"), "entries": entries,
+                 "leaderboard_md": None})
+    # P0 scoring truth (2026-11-16): the brief's actual scored target/objective/weights, with the
+    # best entry's design metrics. Additive; omitted (not null-filled) when the brief has no
+    # objective block, so an existing payload shape is unchanged.
+    scoring_view = _campaign_scoring_view(runs, brief_raw, entries)
+    if scoring_view is not None:
+        out["scoring_view"] = scoring_view
+    if brief_raw.get("weights") is not None:
+        out["weights"] = clean(brief_raw["weights"])
+    if brief_raw.get("objective") is not None:
+        out["objective"] = clean(brief_raw["objective"])
+    return out
 
 
 def campaign_detail(runs: Path, cid: str, snap: _Snapshot | None = None,
@@ -1595,13 +1763,24 @@ def campaign_detail(runs: Path, cid: str, snap: _Snapshot | None = None,
             "best": best, "dims": dims, "best_run_id": best_run,
         })
     entries.sort(key=lambda e: (e["best_j"] is None, e["median_j"] if e["median_j"] is not None else 0))
-    brief_raw = snap.brief(c.get("brief_name"))
+    brief_raw = _as_dict(snap.brief(c.get("brief_name")))
     lb = runs / cid / "leaderboard.md"
-    return clean({"id": cid, "tier": c.get("tier"), "brief": c.get("brief_name"), "seeds": c.get("seeds"),
-                  "superseded": superseded(runs, cid, snap),
-                  "target": (brief_raw or {}).get("target"),       # from the brief file named by the campaign
-                  "entries": entries,
-                  "leaderboard_md": lb.read_text(encoding="utf-8") if lb.exists() else None})
+    out = clean({"id": cid, "tier": c.get("tier"), "brief": c.get("brief_name"), "seeds": c.get("seeds"),
+                 "superseded": superseded(runs, cid, snap),
+                 "target": brief_raw.get("target"),       # from the brief file named by the campaign
+                 "entries": entries,
+                 "leaderboard_md": lb.read_text(encoding="utf-8") if lb.exists() else None})
+    # P0 scoring truth (2026-11-16): the brief's actual scored target/objective/weights, with the
+    # best entry's design metrics. Additive; omitted (not null-filled) when the brief has no
+    # objective block, so an existing payload shape is unchanged.
+    scoring_view = _campaign_scoring_view(runs, brief_raw, entries)
+    if scoring_view is not None:
+        out["scoring_view"] = scoring_view
+    if brief_raw.get("weights") is not None:
+        out["weights"] = clean(brief_raw["weights"])
+    if brief_raw.get("objective") is not None:
+        out["objective"] = clean(brief_raw["objective"])
+    return out
 
 
 # ---------------------------------------------------------------------------- briefs

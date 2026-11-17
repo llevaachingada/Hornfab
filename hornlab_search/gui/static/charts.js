@@ -160,7 +160,8 @@ export function fixedRange(spec, data) {
  * NEW options (all optional; defaults preserve existing behaviour):
  *   yMinor:    array of y values for unlabelled minor gridlines
  *   refLines:  [{y|x, label, dash?}] — C5 neutral reference lines (dotted "1 3", --label,
- *              with right-edge text label); y= horizontal, x= vertical
+ *              with right-edge text label); y= horizontal, x= vertical.  A {pts:[[x,y],...],
+ *              label?, dash?} entry draws a polyline (dotted, or "5 4" when dash) clipped to the plot
  *   markers:   true — draw r=2 circles at every finite data point (C7)
  *   unscored:  [{x0, x1, label}] — grey-hatch regions outside the scored band (C10)
  *   area:      [{top:[[x,y],...], bottom:[[x,y],...], color, opacity}] — filled band between two
@@ -319,6 +320,30 @@ export function chart(svg, opts) {
         const anchor = (lx - m.l) < 0.12 * pw ? "start" : (lx > W - m.r - 0.12 * pw) ? "end" : "middle";
         const dx = anchor === "start" ? 4 : anchor === "end" ? -4 : 0;
         const tt = el("text", { x: lx + dx, y: m.t + 9, "text-anchor": anchor,
+          style: `fill:${css("--label")};font-size:9px` }, svg);
+        tt.textContent = rl.label;
+      }
+    } else if (Array.isArray(rl.pts) && rl.pts.length >= 2) {
+      // A polyline reference path: same neutral dotted style as the y/x lines (or a longer dash),
+      // drawn inside the plot-clip group so it can never bleed into the margins.  The label rides
+      // beside the LAST point and is nudged left when it would clip the right edge.
+      const pts = rl.pts
+        .filter(p => Array.isArray(p) && isFinite(p[0]) && isFinite(p[1]))
+        .map(p => {
+          const py = Y(p[1]);
+          return py == null ? null : [X(p[0]), py];
+        })
+        .filter(Boolean);
+      if (pts.length < 2) continue;
+      const d = pts.map((p, i) => `${i ? "L" : "M"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join("");
+      el("path", { d, class: "ref-pts", fill: "none", stroke: css("--label"), "stroke-width": 1,
+        "stroke-dasharray": rl.dash ? "5 4" : "1 3" }, plot);
+      if (rl.label) {
+        const [lastX, lastY] = pts[pts.length - 1];
+        const estW = String(rl.label).length * 5 + 6;         // rough text width, px
+        const anchor = lastX + estW > W - m.r ? "end" : "start";
+        const dx = anchor === "end" ? -4 : 4;
+        const tt = el("text", { x: lastX + dx, y: lastY - 2, "text-anchor": anchor,
           style: `fill:${css("--label")};font-size:9px` }, svg);
         tt.textContent = rl.label;
       }
@@ -802,7 +827,7 @@ function _isoContours(parent, vals, cw, chh, vmax, ox, oy, sx, sy) {
 
 /** Shared legend for a set of isobar maps (HTML string): the band scale once, plus the line keys.
  *  Use with isobarMap(..., { legend: false }) so small multiples do not each repeat a colour bar. */
-export function isobarLegendHtml({ target = false, f0 = false, over = false } = {}) {
+export function isobarLegendHtml({ target = false, f0 = false, over = false, below = false, floor = false, illustrative = false } = {}) {
   const sw = ISOBAR_COLORS.slice().reverse();          // loud → quiet, left → right
   const ticks = [];
   for (let L = ISOBAR_MAX; L >= ISOBAR_MIN; L -= 6) ticks.push(L);
@@ -812,6 +837,9 @@ export function isobarLegendHtml({ target = false, f0 = false, over = false } = 
     `<span class="iso-key"><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="currentColor" stroke-width="1.1"/></svg>−6 dB beamwidth edge (thin lines: every 3 dB)</span>`,
     target ? `<span class="iso-key"><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="currentColor" stroke-width="0.9" stroke-dasharray="4 3"/></svg>coverage target</span>` : "",
     f0 ? `<span class="iso-key iso-key-f0"><svg width="22" height="8" aria-hidden="true"><line x1="11" x2="11" y1="0" y2="8" stroke="currentColor" stroke-width="1" stroke-dasharray="2 2"/></svg>f0 scoring floor</span>` : "",
+    below === "one_sided" ? `<span class="iso-key"><svg width="22" height="10" aria-hidden="true"><rect x="1" y="1" width="20" height="8" fill="currentColor" fill-opacity="0.10" stroke="none"/></svg>wide free below f0 (one-sided)</span>` : "",
+    floor ? `<span class="iso-key"><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="currentColor" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.6"/></svg>8 kHz floor (narrow-only)</span>` : "",
+    illustrative ? `<span class="iso-key"><svg width="22" height="8" aria-hidden="true"><line x1="0" x2="22" y1="4" y2="4" stroke="currentColor" stroke-width="1" stroke-dasharray="2 3"/></svg>hypothetical corridor — NOT scored</span>` : "",
     over ? `<span class="iso-key"><i class="iso-over" style="background:${OVER_RANGE_COLOR}"></i>off-axis lobe &gt; +1 dB</span>` : "",
   ].filter(Boolean).join("");
   return `<div class="iso-legend"><div class="iso-scale-wrap"><span class="iso-unit">dB re on-axis</span>${bar}${lab}</div><div class="iso-keys">${keys}</div></div>`;
@@ -820,14 +848,21 @@ export function isobarLegendHtml({ target = false, f0 = false, over = false } = 
 /** Directivity isobar map (sonogram): level re on-axis vs log frequency (x) and angle (y).
  *  Options: title; H; angleTicks (default ±90 in 30° steps); xlim (axis domain, colour only over the
  *  solved grid); f0 (scoring floor, Hz); target (full coverage angle, deg → ±target/2 guides);
- *  legend (default true: a slim per-map scale; false when a shared isobarLegendHtml() is shown). */
-export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angleTicks = null, xlim, f0, target, legend = true } = {}) {
+ *  legend (default true: a slim per-map scale; false when a shared isobarLegendHtml() is shown).
+ *  NEW optional truthfulness overlays (all default off, existing calls unchanged):
+ *    targetLoHz        scored-coverage guides start here (Hz); drawn only to the right edge
+ *    belowMode         "mask" (nothing below) | "one_sided" (translucent free-widening region below)
+ *    illustrativeCurve [[f,deg],...] symmetric dashed display-only corridor (±deg/2), never a target
+ *    floorRays         {h_deg,v_deg} — lighter dashed H pair at ±h/2 (angle axis only) + "8k floor" */
+export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angleTicks = null, xlim, f0, target, legend = true,
+    targetLoHz, belowMode, illustrativeCurve, floorRays } = {}) {
   svg.innerHTML = "";
   if (!rows || !rows.length || !angles || !angles.length || !freqs || freqs.length < 2) return;
   const W = measuredWidth(svg, 520);
   const ink = css("--ink") || "#15202a", muted = css("--muted") || "#5a6873", rule = css("--rule") || "#a9b4bb";
   const tg = Number(target), hasTarget = isFinite(tg) && tg > 0;
   const hasF0 = isFinite(Number(f0)) && Number(f0) > 0;
+  const loHz = Number(targetLoHz), hasLo = isFinite(loHz) && loHz > 0;   // scored-coverage onset
   const m = { l: 46, r: legend ? 64 : (hasTarget ? 34 : 12), t: (title ? 22 : 10) + (hasF0 ? 12 : 0), b: 34 };
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("width", W); svg.setAttribute("height", H);
   svg.dataset.chart = "1";
@@ -889,13 +924,66 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
   // contours: hairline between every band, −6 dB heavier, dotted > +1 dB outline
   _isoContours(clipped, vals, cw, chh, vmax, m.l, m.t, pw / cw, ph / chh);
   // coverage target: thin dashed guides the −6 dB edge should follow; labelled in the right margin
+  const xRight = m.l + pw;
+  const xOnset = hasLo ? Math.max(m.l, Math.min(xRight, X(loHz))) : m.l;   // scored guides start here
   if (hasTarget) {
     for (const a of [tg / 2, -tg / 2]) {
       if (a < a0 || a > a1) continue;
-      el("line", { x1: m.l, x2: m.l + pw, y1: Y(a), y2: Y(a), stroke: "#ffffff", "stroke-opacity": 0.95,
+      el("line", { x1: xOnset, x2: xRight, y1: Y(a), y2: Y(a), stroke: "#ffffff", "stroke-opacity": 0.95,
                    "stroke-width": 0.9, "stroke-dasharray": "4 3" }, clipped);
       if (!legend) el("text", { x: m.l + pw + 4, y: Y(a) + 3, style: `fill:${muted};font-size:9px` }, svg).textContent =
         `${a > 0 ? "+" : "−"}${+Math.abs(a).toFixed(1)}°`;
+    }
+  }
+  // below-onset allowed widening: only when one_sided; a "mask" mode draws nothing below the onset
+  if (hasTarget && hasLo && belowMode === "one_sided" && xOnset > m.l + 1) {
+    const yTop = m.t, yBot = m.t + ph;
+    // two translucent wedges: from ±tg/2 outward to the plot angle edge, over the below-onset span
+    const wedge = (aIn, aOut, yOuter) => {
+      if (!(Math.abs(aIn) <= Math.abs(aOut) + 1e-9)) return;
+      const d = `M${m.l.toFixed(1)},${Y(aIn).toFixed(1)}L${xOnset.toFixed(1)},${Y(aIn).toFixed(1)}` +
+                `L${xOnset.toFixed(1)},${yOuter.toFixed(1)}L${m.l.toFixed(1)},${yOuter.toFixed(1)}Z`;
+      el("path", { d, class: "iso-below-free", fill: "#ffffff", opacity: 0.10, stroke: "none" }, clipped);
+    };
+    if (tg / 2 < a1) wedge(tg / 2, a1, yTop);
+    if (-tg / 2 > a0) wedge(-tg / 2, a0, yBot);
+    // thin lower bound at ±tg/2, over the below-onset span only
+    for (const a of [tg / 2, -tg / 2]) {
+      if (a < a0 || a > a1) continue;
+      el("line", { x1: m.l, x2: xOnset, y1: Y(a), y2: Y(a), class: "iso-below-bound", stroke: "#ffffff",
+                   "stroke-opacity": 0.85, "stroke-width": 0.7, "stroke-dasharray": "2 2" }, clipped);
+    }
+    el("text", { x: (m.l + xOnset) / 2, y: m.t + 11, "text-anchor": "middle",
+      style: `fill:${muted};font-size:9px` }, svg).textContent = "wide free below f0";
+  }
+  // display-only hypothetical corridor (±deg/2), present in the legend only — NEVER a scored target
+  if (Array.isArray(illustrativeCurve) && illustrativeCurve.length >= 2) {
+    const ic = illustrativeCurve
+      .filter(p => Array.isArray(p) && isFinite(p[0]) && isFinite(p[1]) && p[0] > 0);
+    if (ic.length >= 2) {
+      const illStroke = css("--muted") || "#8aa";
+      for (const sgn of [1, -1]) {
+        const segs = [];
+        for (const p of ic) {
+          const yy = Y(sgn * p[1] / 2);
+          if (yy == null) continue;
+          segs.push(`${segs.length ? "L" : "M"}${X(p[0]).toFixed(1)},${yy.toFixed(1)}`);
+        }
+        if (segs.length >= 2) el("path", { d: segs.join(""), class: "iso-illustrative", fill: "none",
+          stroke: illStroke, "stroke-width": 1, "stroke-dasharray": "2 3" }, clipped);
+      }
+    }
+  }
+  // 8 kHz floor: lighter dashed H pair at ±h/2 (angle axis only), labelled in the right margin
+  if (floorRays && isFinite(Number(floorRays.h_deg))) {
+    const hh = Number(floorRays.h_deg), fStroke = css("--muted") || "#8aa";
+    for (const a of [hh / 2, -hh / 2]) {
+      if (a < a0 || a > a1) continue;
+      el("line", { x1: m.l, x2: xRight, y1: Y(a), y2: Y(a), class: "iso-floor", stroke: fStroke,
+                   "stroke-opacity": 0.55, "stroke-width": 0.8, "stroke-dasharray": "2 3" }, clipped);
+    }
+    if (hh / 2 >= a0 && hh / 2 <= a1) {
+      el("text", { x: m.l + pw + 4, y: Y(hh / 2) + 3, style: `fill:${muted};font-size:9px` }, svg).textContent = "8k floor";
     }
   }
 
@@ -986,8 +1074,13 @@ export function isobarMap(svg, rows, angles, freqs, { H = 300, title = "", angle
  *  the circle, and a closed ±180° span (the stored balloon re-sliced) draws the full circle. Same
  *  lines as the rectangular map: −6 dB edge, coverage-target rays, f0 ring.
  *  Options: title, H (max height), target (full coverage angle, deg), f0 (Hz), legend (slim scale).
- */
-export function globePlot(svg, rows, angles, freqs, { H = 360, title = "", target, f0, legend = true } = {}) {
+ *  NEW optional truthfulness overlays (defaults off; existing calls unchanged):
+ *    targetLoHz        target rays only for radius rOf(targetLoHz)..R
+ *    belowMode         "mask" | "one_sided" (translucent free-widening annular sector below onset)
+ *    illustrativeCurve [[f,deg],...] display-only dashed spiral (±deg/2), never a scored target
+ *    floorRays         {h_deg,v_deg} — lighter dashed ray pair at ±deg/2 */
+export function globePlot(svg, rows, angles, freqs, { H = 360, title = "", target, f0, legend = true,
+    targetLoHz, belowMode, illustrativeCurve, floorRays } = {}) {
   svg.innerHTML = "";
   if (!rows || !rows.length || !angles || angles.length < 2 || !freqs || freqs.length < 2) return;
   const W = measuredWidth(svg, 420);
@@ -1099,13 +1192,68 @@ export function globePlot(svg, rows, angles, freqs, { H = 360, title = "", targe
         fill: "none", stroke: "#ffffff", "stroke-opacity": 0.8, "stroke-width": 0.8, "stroke-dasharray": "2 2" }, svg);
     }
   }
+  const loHz = Number(targetLoHz), hasLo = isFinite(loHz) && loHz > 0;
+  const rOnset = hasLo ? Math.max(0, Math.min(R, rOf(loHz))) : 0;
   const tg = Number(target);
   if (isFinite(tg) && tg > 0) {
     for (const a of [tg / 2, -tg / 2]) {
       if (a < a0 || a > a1) continue;
       const [sx, sy] = dir(a);
-      el("line", { x1: cx, y1: cy, x2: cx + R * sx, y2: cy + R * sy, stroke: "#ffffff", "stroke-opacity": 0.95,
-                   "stroke-width": 0.9, "stroke-dasharray": "4 3" }, svg);
+      el("line", { x1: cx + rOnset * sx, y1: cy + rOnset * sy, x2: cx + R * sx, y2: cy + R * sy,
+                   stroke: "#ffffff", "stroke-opacity": 0.95, "stroke-width": 0.9, "stroke-dasharray": "4 3" }, svg);
+    }
+  }
+  // free-widening below onset (one_sided): translucent annular sectors between the ±tg/2 rays and ±90°
+  if (isFinite(tg) && tg > 0 && hasLo && belowMode === "one_sided" && rOnset > 1) {
+    const rIn = Math.max(0, Math.min(R, rOf(Math.pow(10, lf0))));
+    const sector = (aS, aE, rI, rO) => {
+      const steps = Math.max(6, Math.ceil(Math.abs(aE - aS) / 4));
+      const pts = [];
+      for (let i = 0; i <= steps; i++) {
+        const a = aS + (aE - aS) * i / steps, [dx, dy] = dir(a);
+        pts.push([cx + rO * dx, cy + rO * dy]);
+      }
+      for (let i = steps; i >= 0; i--) {
+        const a = aS + (aE - aS) * i / steps, [dx, dy] = dir(a);
+        pts.push([cx + rI * dx, cy + rI * dy]);
+      }
+      return "M" + pts.map(p => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join("L") + "Z";
+    };
+    // right: +tg/2 -> +90; left: -90 -> -tg/2 (clamped to the drawn span)
+    const sides = [[tg / 2, Math.min(a1, 90)], [Math.max(a0, -90), -tg / 2]];
+    for (const [aS, aE] of sides) {
+      if (!(aE > aS)) continue;
+      el("path", { d: sector(aS, aE, rIn, rOnset), class: "globe-below-free",
+                   fill: "#ffffff", opacity: 0.10, stroke: "none" }, svg);
+    }
+  }
+  // display-only hypothetical corridor: a spiral polyline of (rOf(f), ±deg/2) — NEVER a target
+  if (Array.isArray(illustrativeCurve) && illustrativeCurve.length >= 2) {
+    const ic = illustrativeCurve.filter(p => Array.isArray(p) && isFinite(p[0]) && isFinite(p[1]) && p[0] > 0);
+    if (ic.length >= 2) {
+      const illStroke = css("--muted") || "#8aa";
+      for (const sgn of [1, -1]) {
+        const segs = [];
+        for (const p of ic) {
+          const r = rOf(p[0]);
+          if (!(r >= -1e-6 && r <= R + 1e-6)) continue;
+          const [dx, dy] = dir(sgn * p[1] / 2);
+          segs.push(`${segs.length ? "L" : "M"}${(cx + r * dx).toFixed(1)},${(cy + r * dy).toFixed(1)}`);
+        }
+        if (segs.length >= 2) el("path", { d: segs.join(""), class: "globe-illustrative", fill: "none",
+          stroke: illStroke, "stroke-width": 1, "stroke-dasharray": "2 3" }, svg);
+      }
+    }
+  }
+  // 8 kHz floor: lighter dashed ray pair (angle axis), keyed in the legend below the colour bar
+  if (floorRays && (isFinite(Number(floorRays.h_deg)) || isFinite(Number(floorRays.v_deg)))) {
+    const fAngles = [Number(floorRays.h_deg), Number(floorRays.v_deg)].filter(v => isFinite(v) && v > 0);
+    const fStroke = css("--muted") || "#8aa";
+    for (const fv of fAngles) for (const a of [fv / 2, -fv / 2]) {
+      if (a < a0 || a > a1) continue;
+      const [sx, sy] = dir(a);
+      el("line", { x1: cx, y1: cy, x2: cx + R * sx, y2: cy + R * sy, class: "globe-floor",
+                   stroke: fStroke, "stroke-opacity": 0.55, "stroke-width": 0.8, "stroke-dasharray": "2 3" }, svg);
     }
   }
   if (title) el("text", { x: 4, y: 13, class: "iso-title" }, svg).textContent = title;
@@ -1117,6 +1265,12 @@ export function globePlot(svg, rows, angles, freqs, { H = 360, title = "", targe
       el("text", { x: lx + bwid + 4, y: y + 3, style: `fill:${muted};font-size:9px` }, svg).textContent = L === 0 ? "0" : "−" + Math.abs(L);
     }
     el("text", { x: lx, y: ly - 5, style: `fill:${muted};font-size:9px` }, svg).textContent = "dB";
+    if (floorRays && (isFinite(Number(floorRays.h_deg)) || isFinite(Number(floorRays.v_deg)))) {
+      el("text", { x: lx, y: ly + lh + 11, style: `fill:${muted};font-size:9px` }, svg).textContent = "8k floor";
+    }
+    if (illustrativeCurve && Array.isArray(illustrativeCurve) && illustrativeCurve.length >= 2) {
+      el("text", { x: lx, y: ly + lh + 22, style: `fill:${muted};font-size:9px` }, svg).textContent = "NOT scored";
+    }
   }
 
   // hover readout
