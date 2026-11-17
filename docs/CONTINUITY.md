@@ -1,5 +1,13 @@
 # CONTINUITY
 
+## 2026-11-17 (senior pass, code) - Stage 1 WP 1.4/1.5: rescore and noise-floor tool
+
+- New `tools/analysis/rescore_identity.py`: `rescore` (history under one brief, per-lane bests,
+  unscorable designs reported) and `floor` (frequency part of the floor from study screen/verify
+  pairs: sd of screen-verify J over all and top-N, Spearman). Uses the parity-exact replay, so v9
+  `score_grid` and `constancy` apply when the brief declares them.
+  `tests/test_tools_analysis_rescore_identity.py` 3 passed. Needs `runs/` (Windows) to produce numbers.
+
 ## 2026-11-17 (senior pass, code) - Stage 3 WP 3.3/3.4: record shadow gate tool
 
 - New `tools/analysis/record_shadow.py`: offline shadow of a record-based envelope gate. For each

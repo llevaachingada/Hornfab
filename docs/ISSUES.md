@@ -1,5 +1,10 @@
 # ISSUES
 
+## 2026-11-17 - Stage 1 WP 1.4/1.5 tool landed
+
+- DONE: rescore + floor tool. OPEN: run on Windows once the owner's C1-C3 brief exists (or on the
+  S1 placeholder brief to reproduce N3: expected sd ~0.11 J top-28 for v9 at 18 vs 29 frequencies).
+
 ## 2026-11-17 - Stage 3 WP 3.3/3.4 tool landed
 
 - DONE: record shadow gate + history-record tool. OPEN: run it over the ~75 home-landscape runs on
