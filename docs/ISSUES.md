@@ -1,5 +1,23 @@
 # ISSUES
 
+## 2026-11-16 - Fable architecture evidence dossier delivered; decision items open
+
+- DONE (read-only): 15-file dossier in git-ignored `scratch/fable_architecture/`; tracked digest
+  `docs/research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md`. Snapshot `601be8c`; citations
+  hold at `0750a30`. No code/solve/queue change.
+- OPEN (cheap, zero-GPU; would change architecture): (a) generic-GRID pre-mesh extent vs actual
+  meshed bbox false-refusal count; (b) screen-vs-verify rank correlation (top quartile); (c)
+  held-out GP ranking at 100-231 rows; (d) refusal-margin classifier (AUC) to decide feasibility
+  model vs envelope filter. Exact procedures and predeclared failure thresholds are in the dossier
+  `OPEN_QUESTIONS.md`.
+- OPEN (owner/Fable): point 80x50 vs region 60-90 H / 40-60 V intent (the in-flight v9 corridor
+  objective currently imports a missing `targets/profile.py`); whether the 600x480x480 mm envelope
+  is product truth or a hypothesis; whether a shared geometry representation is worth its cost;
+  whether an adaptive search supervisor is premature while scoring is contested.
+- NOTE: the refusal taxonomy is unreliable for policy use - post-mesh envelope and prefixed family
+  `invalid_envelope` errors both surface as `invalid_geometry` (`evaluate.py:1546,1580`), and the
+  graded infeasibility penalty is unreachable for native families. No fix was applied.
+
 ## 2026-11-16 - V2A timing endpoint correction landed; external v9 import blocker
 
 - DONE (CPU geometry): warped-quintic timing law, analytic endpoint derivatives, tests at

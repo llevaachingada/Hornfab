@@ -1,5 +1,29 @@
 # CONTINUITY
 
+## 2026-11-16 (21:10 local) - Fable discovery evidence dossier delivered (read-only; scratch-only)
+
+- Delivered the v3 handoff's cheap-agent research pass as a 15-file evidence dossier in the
+  git-ignored `scratch/fable_architecture/` (INDEX, SOURCE_INDEX, EVIDENCE_LEDGER with 59 atomic
+  claims, OPEN_QUESTIONS, plus geometry/failure/size/objective/optimizer/external/watchdog/switch/
+  supervisor/unknowns reports). Tracked digest:
+  `docs/research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md`.
+- Snapshot of record `601be8c`; the tree advanced to `0750a30` during the pass and
+  `git diff --stat 601be8c..0750a30` over every cited path is empty. The checkout is 12 commits
+  ahead of the handoff's `origin/main = 2c0e2928`.
+- Decisive findings: post-mesh envelope refusals are coded `invalid_geometry` and family
+  `GeneratorError: invalid_envelope:` strings are also miscoded (`evaluate.py:1546,1580`), so the
+  graded penalty is unreachable for native families; the 2026-11-16 window is 88.6% complete-BEM
+  with zero resource faults (envelope/geometry is the wall, not GPU); the generic-GRID extent
+  estimate is conservative on both axes but realised false refusals are **unmeasured**; the
+  catalogue is mostly names/carries/briefs over six engines; v7 scores an exact 80x50 point while
+  the brief states 60-90 H / 40-60 V; an untracked v9 corridor objective is in flight but imports a
+  missing `targets/profile.py`; scalar BO is one frozen-task GP that excludes refusals; the watchdog
+  merges five outcome classes, never watches BO studies, and would have killed a QD run that
+  reached best 6.636 and a 5/324 archive.
+- No solve, GPU, mesher, pytest, queue edit, threshold change, process signal or git mutation was
+  performed by the research pass; the concurrent lane's work was observed and preserved. This
+  commit adds only the tracked digest plus index/continuity/issues entries.
+
 ## 2026-11-16 - V2A timing-law endpoint correction (CPU geometry only)
 
 - The V2A timing law `smootherstep(u/a)/smootherstep(1/a)` did not guarantee zero first/second

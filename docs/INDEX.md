@@ -8,6 +8,15 @@ and the preserved [supplied compilation](knowledge/imported/HornFab_Research_Kno
 Existing research remains in place; imported recommendations are not implementation mandates.
 
 
+[Fable discovery architecture evidence handoff (2026-11-16)](research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md):
+read-only dossier prepared for a later discovery/decision pass - refusal-taxonomy miscoding, the
+envelope-vs-GPU boundary, the conservative generic-GRID extent estimate (realised effect
+unmeasured), construction-vs-name diversity, v7's point target inside the owner's 60-90/40-60
+range, the in-flight v9 corridor objective, optimizer/cohort reality, and the watchdog replay.
+The full 15-file evidence dossier stays in the git-ignored `scratch/fable_architecture/`.
+No code, solve or queue change.
+
+
 [Klangfilm-Lame H/V throat audit and Phase A implementation (2026-11-16)](evidence/KLANGFILM_HV_THROAT_AUDIT.md):
 canonical-incumbent evidence, saved-recipe digest drift, the `Q'(0)=0` equal-tangent fault, the intrinsic
 rollback diagnosis, and the implemented CPU-validated `klangfilm_lame_hv_cd` family (Phase B deliberately
