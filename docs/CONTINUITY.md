@@ -1,5 +1,26 @@
 # CONTINUITY
 
+## 2026-11-17 03:4x - X3 remaining parts: wavelength scaling lifts V but not H; prior worth ~8 solves
+
+- Scheme 3 (held-out engine), 1,715 designs / 35 lanes / 3 engines. `WL-1` (all 27 lengths times
+  `2*pi*f/c`, c = 343 m/s, per-frequency rows) gives lane H/V/DI .785/.880/.809 and engine
+  .336/.668/.515; per engine GEN-FF .582/.690/.434, GRID .288/.628/.527, OSSE .425/.770/.499. V is
+  >= .6 in 3/3 engines, H in 0/3, so the both-plane line is not met; the within-lane rank line also
+  fails on scheme 3 (.489/.500). WL-1 beats its row-matched frequency-conditioned control on GEN-FF
+  and GRID (+.09/+.03 H, +.09/+.17 DI) with one OSSE H regression (-.03); without either scaling or a
+  frequency channel the same model collapses (-.38 to -2.51).
+- Whole-surface descriptors (227 features from the contract-v2 records; 60 N1b-passing designs, six
+  lanes) do not beat the matched baseline and cannot be read as a representation verdict: the
+  27-number profile baseline also collapses on the same 60 designs (H -.06 vs .75 on all 1,715), and
+  no lane can supply the 30 held-out designs the rank line needs. Le Cleac'h excluded, not replaced.
+- Learning curve / solve value: sibling-holdout prior alone .621 within-lane rank; local-only reaches
+  .618 at 48 designs (aggregate crossing >48), but per lane the prior is matched by 8 solves in 13 of
+  23 lanes and >=16 in 10 of 23 (7 of the 13 have a negative prior, so that is a ceiling). Marginal
+  value of an extra solve: +.019 rank (8->16), +.006 (16->32), ~0 after 32. Transfer decays with lane
+  position .695 -> .575 across chronological quarters. Two cross-group lineage links sit outside the
+  fixed sibling map (fold_warm<-morph, 3x klangfilm_hv<-klangfilm_lame), reported but not merged.
+  Report `scratch/fable_architecture/X3_REMAINING.md`.
+
 ## 2026-11-17 03:2x - X4 completion: sampler validated on five lanes; ROSSE digest drift is validator-only
 
 - Five `.x4` lanes (11 designs each): 55/55 design hashes reproduced and 55/55 pass contract-v2

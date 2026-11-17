@@ -1,5 +1,20 @@
 # ISSUES
 
+## 2026-11-17 - X3 remaining: wavelength scaling lifts V, H still short; prior worth ~8 solves
+
+- DONE (A7): scheme 3 over 1,715 designs. WL-1 lane H/V/DI .785/.880/.809, engine .336/.668/.515;
+  V >= .6 in 3/3 engines, H in 0/3, so the both-plane line fails, and the within-lane rank line fails
+  on scheme 3 (.489/.500). WL-1 beats its matched frequency-conditioned control on GEN-FF/GRID with
+  one OSSE H regression. Whole-surface descriptors (227 features, 60 designs) are underpowered and
+  non-attributable. `X3_REMAINING.md`.
+- OPEN (owner): H-plane transfer needs a feature carrying section shape/aspect/wall angle; the 27
+  lengths do not. A fair whole-surface trial needs more contract records (>60 designs) or a matched
+  1%-sampled rematerialisation, not another model.
+- OPEN: prior worth is metric-dependent (median lane 8 solves, aggregate crossing >48); the brief's
+  <5-solve failure line is not resolvable with the smallest tested n = 8.
+- OPEN: the fixed sibling map misses two construction links (fold_warm<-morph, 3x
+  klangfilm_hv<-klangfilm_lame), so scheme-2 skill is optimistic for those families.
+
 ## 2026-11-17 - X4 completion: lanes pass; ROSSE digest drift is validator-only; lecleach still open
 
 - DONE (A8): five `.x4` lanes 55/55 hash-reproduced and 55/55 pass v2 rule 2 at 65 × 61 (Crowe worst
