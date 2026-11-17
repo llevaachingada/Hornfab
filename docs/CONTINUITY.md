@@ -1,5 +1,26 @@
 # CONTINUITY
 
+## 2026-11-17 (04:05Z) - BoTorch round-2 READOUT: 3 arms complete (25 measured each); ath14 beat its cohort baseline
+
+- Night `bo_multityp_r2_2026-11-16` finished 2026-11-16T23:03 local (exit 0, 7/7 jobs, ~60 min,
+  GPU lane released; runner pre/post hygiene ran). Per arm, observations API reads (screen tier
+  only by design — comparison-25x0, no verified finalist):
+  - **ath14** (`bo_ath14_s71002`): 25 measured; best screen **J 5.3386** vs cohort baseline
+    **5.3737** → beats its cohort best by 0.035 J (−0.65 %); first reached baseline at **attempt
+    14**. Cohort: ATH-core 14 in, 219 rows, d=14, seed 71002.
+  - **corelaw** (`bo_corelaw_s71003`): 25 measured; best screen **J 3.3308** vs cohort baseline
+    **3.2325** → +0.098, did not beat; never reached the baseline in 25 screens. Cohort: 206 rows,
+    d=9, seed 71003.
+  - **hvlaw** (landscape) (`bo_hvlaw_s71004`): 25 measured; best screen **J 3.3533** vs cohort
+    baseline **3.1028** → +0.25, did not beat; never reached the baseline. Cohort: 136 rows, d=8,
+    seed 71004.
+- Same-basin question and remaining §5 items (normalised distance of each arm best from the
+  cohort best design; `hifi_rescore.py` on winners) stay open. Numbers above via the observations
+  API (`sort=best_j` / `sort=attempt`) + each cohort's `offline_scores.json` minimum, 04:05Z.
+  GUI: each arm browsable under Bayes → Studies (`● 25 measured`).
+- No acoustic-quality claim and no BO-beats-CMA claim (no matched control in this campaign); J is
+  per brief/objective, never ranked across arms.
+
 ## 2026-11-17 - Agent orchestration P0/P1 applied: container bootstrap, read budget, prompt isolation; P2 deferred
 
 - Senior review of `AGENT_ORCHESTRATION_REVIEW_2026-11-16.md` returned "approve P0 with

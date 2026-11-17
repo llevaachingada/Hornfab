@@ -83,6 +83,10 @@
   verified finalist).
 - OPEN (readout, after the night drains): `tools/night_status.py` + plan §5 metrics per arm +
   hifi_rescore on winners; GUI arms populate under Bayes → Studies.
+- DONE (readout 2026-11-17 04:05Z): night drained (7/7 jobs exit 0, 23:03 local). ath14 best
+  5.3386 BEAT its cohort baseline 5.3737 (baseline reached at attempt 14); corelaw 3.3308 vs
+  3.2325 and hvlaw 3.3533 vs 3.1028 did not beat within 25 screens. See CONTINUITY same date.
+  Remaining: hifi_rescore on the ath14 winner + normalised same-basin distance.
 - OPEN (from §7 of the plan, unchanged by this release): Crowe/rolled/rounded-rect typologies need
   cohorts (~25 CMA screens each) to reach the 100-row BoTorch floor; the atlas cohort stays
   ineligible (BEM pin mismatch); Crowe bridge study-worker install is separate work.
