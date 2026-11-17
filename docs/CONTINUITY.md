@@ -1,5 +1,38 @@
 # CONTINUITY
 
+## 2026-11-17 07:4x - Queue addition: ten "best J still falling" continuations (+200 evals each), live-reloaded
+
+- Owner asked for the ten GUI "give this run more evaluations" candidates at **+200 solves each if not
+  already queued**. None were: no queued job resumed any of the ten run dirs (checked both live night
+  files for the dir ids), so all ten were added as `kind: command` resumes.
+- **8 on the GPU night** (`cd_rrect_2026-11-17`), inserted as jobs 15-22 - after the in-flight
+  `c_rrect_100w_rc2` repair, before the TuRBO pairs - so the newest owner instruction leads.
+  Valid rows before the addition / run dir: `p80x60__ath_core_14in_home700_v7` 171
+  (`20261114T015916Z-screen-db8e2f`), `p80x60__ath_core14_corelaw_v7` 89 (`...020650Z-screen-22931c`),
+  `p80x60__ext_throat_hvlaw_cov_v7` 113 (`...060011Z-screen-9e3528`),
+  `hl__lecleach_iwata_ar_landscape_v7` 80 (`...162516Z-screen-e31b23`), `hl__rolled_es_spiral_v7` 30
+  (`...001222Z-screen-b25d61`), `hl__biradial_es_style_v7` 142 (`...090751Z-screen-37b115`),
+  `hl__biradial_es_style_smooth_v7` 107 (`...193501Z-screen-f008ad`), `hl__rosse_rect_cd_v7_r50_refine`
+  51 (`20261117T053153Z-screen-15f0e4`).
+- **2 on the CPU night** (`bo_cpu_2026-11-17`), after atlas: `sab__lecleach_ctrl` 143
+  (`20261114T220720Z-screen-88d19c`) and `sab__lecleach_fc540` 142 (`20261114T223630Z-screen-86e077`),
+  keeping their original `--backend beat_cpu --cache-dir cache_cpu --dataset-dir dataset_cpu`. A search
+  job inside a cpu night inherits `HORNLAB_BEAT_WORKER_DIR=runs/lanes/cpu/workers`, so
+  `cli._solve_lock` returns a null lock and the GPU lock is not touched.
+- **Resume form is `--budget 200` = 200 NEW evals** (`cli.py:761` prints "budget N new evaluations";
+  `refresh_watchdog` converts its own repairs with total-minus-valid, which is the other convention).
+  No `--config` is passed, so each resume loads its run's own `config.yaml`; stored vs current
+  `config_sha` verified equal for all ten, so none will refuse. Bridge kinds use their own CLI -
+  `rolled_rect_cli.py` (spiral, `grid/rolled_rect_pucker`) and `rosse_rect_cli.py` (r50_refine,
+  `grid/rosse_rect`); the other six use the generic `hornlab-search.exe`.
+- Both files pass `--dry-run` with no MISSING paths: 45 GPU jobs / 3 CPU jobs, no duplicate ids. The
+  GPU runner re-reads the file before every job, so the block takes effect when `t_trit80_rc2`
+  (running, 29 observations) ends.
+- Wall clock of the addition: ~17 h GPU (2.8 / 3.6 / 2.8 / 0.4 / 2.1 / 1.2 / 1.0 / 2.3 h at each run's
+  measured s/eval) plus ~1.4 h CPU, on top of the three 300-solve crowns and 13 x 200 walls jobs
+  already pending. `queue.ps1`'s 14:30 cutoff only stops STARTING new nights, so this runner drains
+  into 2026-11-18 unless the owner trims (`STOP`) or re-orders.
+
 ## 2026-11-17 07:1x - Lane review: gate false-PAUSE fixed; klame BO arms are unsupported point-grid designs
 
 - **Both lanes verified on the right queue.** GPU night `cd_rrect_2026-11-17` ran `t_trit80_rc2` under
