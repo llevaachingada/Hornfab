@@ -1,5 +1,45 @@
 # CONTINUITY
 
+## 2026-11-16 (20:10 local) - P0 non-CD scoring truth LANDED (additive, no J change) + P1 RFC + deliverable-1 table
+
+- Spec: owner-supplied source-reviewed handoff moved into the repo as
+  `docs/research/typologies/NON_CD_SCORING_TRUTH_HANDOFF_2026-11-16.md` (P0 truthful GUI / P1 opt-in profile / P2 gates).
+  The P0 rules were implemented literally: no scored-vs-imaginary line confusion, the DI-slope-implied corridor is OFF
+  by default and would be labelled "illustrative — NOT scored" if ever rendered.
+- New pure helper `hornlab_search/targets/scoring_view.py` (45 tests): per-version scored truth — per-plane score
+  windows (v1/v2 full band, v3+ f0/f0_v, v4/v5/v7/v8 `cov_below_f0` mask|one_sided + narrow ratio, v6 `cov_pat`
+  onset with the EXACT `resolve_fc_hz` order), resolved DI level (v1 cuts vs v2+ Gaussian; explicit wins; v6
+  level-less), level/slope scored-ness from weights, `bw8k_floor` facts at the scorer's sample index, diag reference.
+- Live-run truth pinned as a test: v6 designs never store `fc_hz`/`g_fc_hz` in metrics scalars, so the v6 scored onset
+  falls back to `f_pattern = pattern_beta × f0` (1920 Hz for `lecleach_rollback_1in_v6`) even though design.json
+  carries varying `g_fc_hz` (~623); the helper therefore deliberately does NOT read design.json knobs
+  (evidence `runs/20261112T113047Z-screen-24053e`). The first implementation consulted knobs — caught during
+  reconciliation and corrected before any GUI could display a false 996 Hz onset.
+- Additive payloads: `run_detail.scoring_view`, `design_curves.score_window` + `di_slope_scored`, campaign
+  `scoring_view`/`weights`/`objective`, `/api/compare` `scoring_view_a`/`scoring_view_b` (3-line server emit). No
+  existing key renamed; absent keys stay absent; J identity untouched.
+- Web GUI (run detail, campaign best-of-family, compare, brief-editor hint): scored coverage target drawn ONLY across
+  the scored window; no target artefacts in the masked region; one-sided widening region + lower bound below onset;
+  plane-specific 8 kHz floor lines with the raw penalty; ±10% band labelled "visual guide, NOT the scoring tolerance";
+  DI level line only when that term is weighted (v1 cuts / v2+ Gaussian), display-only slope guide anchored at the
+  measured DI with the "translation-invariant in dB" note; fitted-slope caption from the scored band; compare draws
+  per-side targets when the scored briefs differ and never overlays one as shared. charts.js gained polyline
+  `refLines`, isobar/globe `targetLoHz`/`belowMode`/`illustrativeCurve`/`floorRays` + legend keys (old calls render
+  identically; node regression tests). Report got `ref_lines` + the same truth (incl. the v2+ Gaussian DI fix).
+- Docs: P1 RFC `docs/research/typologies/NON_CD_OBJECTIVE_PROFILE_RFC_2026-11-16.md` (recommend objective v9,
+  `target.coverage_profile`, soft corridor, `di_roughness` as a NEW term, envelope-derived 8k floor, 12 owner gates);
+  deliverable-1 table `docs/evidence/NON_CD_SCORE_TRUTH_TABLE_2026-11-16.md` (4 real runs; headline: Crowe ES-600
+  `32f7c4` was scored on the BASE CD brief → J 16.92 with dislope 7.40, not comparable to Klangfilm-on-smooth 8.92);
+  INDEX + CODE_MAP updated in this commit.
+- Verification (all real runs): lane suites 45 / 54+46 / node 3 / 58 / 7 green; truth-invariant `test_obj_replay` +
+  v4/v6/v7 objectives exact (96); scoring-path diff EMPTY; full filtered suite zero new failures (residual:
+  klangfilm-lame tools tests green standalone 24/24 and red only under -n 6 xdist load; b8 study-module static check
+  pre-exists this work — `study_jobs.py:829 subprocess.Popen` is from commit 6791bfa 2026-11-15, another lane's
+  module). Reconcile fixes landed here: `test_gui_brief_authoring` per-side-target assert, `test_targets`
+  `catalog.gui.yaml` index exclusion.
+- NOT done: P1 v9 implementation (owner-gated on RFC §7), no scoring/J mutation anywhere, no new solves, no queue
+  writes; nothing here re-ranks existing stored J.
+
 ## 2026-11-16 - Dual Lamé geometry and HF1440 seed gallery (CPU only)
 
 - Added distinct digest-bound Klangfilm-Lamé and derived Le Cléac'h H/V GRID recipes,

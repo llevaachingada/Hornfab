@@ -1808,8 +1808,24 @@ Local-only, added 2026-10-27 (evening; no GitHub issue state changed): resume ni
 
 Local-only, added 2026-11-02 (no GitHub issue state changed): GUI frequency-axis band + scoring-floor f0 marker landed with offline pins (37 tests pass across the three GUI test files); MEH CPU-vs-CUDA benchmark scripts committed under tools/bench/.
 Local-only, added 2026-11-02 (no GitHub issue state changed): **P11 HF data sync DONE** - public dataset repo <https://huggingface.co/datasets/chingadalleva/hornlab-search-data> (7 tar shards, 10.77 GB packed: text/solve/dataset; meshes not uploaded), `tools/hf_sync.py` corrected to `hf upload`. Owner-machine finding: Xet uploads stall here; upload with `HF_HUB_DISABLE_XET=1`. Still open in P11: merge to `main` (which branches) and the two v4 re-runs.
-
 # ISSUES
+
+## 2026-11-16 (20:10) - P0 non-CD scoring truth LANDED; P1 awaits owner gates
+
+- DONE: `targets/scoring_view.py` + additive run/campaign/compare/report payloads; web GUI scored-range targets,
+  one-sided/mask handling, 8 kHz floor lines, DI level-only-if-scored, display-only slope guide, per-side compare
+  targets; report `ref_lines` truth incl. the v2+ Gaussian DI fix; zero J change (objective replay exact).
+- OPEN (owner): approve/rework the 12 gates in
+  `docs/research/typologies/NON_CD_OBJECTIVE_PROFILE_RFC_2026-11-16.md` §7 (v9 vs opt-in block; corridor strength;
+  HF floor origin; diag fate; brief naming). P1 implementation is gated on this decision.
+- OPEN (owner, from evidence): score-fairness for non-CD typologies — Crowe ES-600 run `20261115T205453Z-screen-32f7c4`
+  was scored on the BASE CD brief (J 16.92, `dislope` 7.40) while the Klangfilm ran on the smooth brief (J 8.92);
+  decide the fair same-brief rescore comparison before ranking (docs/evidence/NON_CD_SCORE_TRUTH_TABLE_2026-11-16.md).
+- OPEN (local, pre-existing, other lane): `tests/test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_
+  or_process_kill_paths` — `study_jobs.py:829` holds `subprocess.Popen` (content from 2026-11-15 commit 6791bfa,
+  before this work; belongs to the BO-GUI lane). `test_tools_klangfilm_lame_hv` passes standalone (24/24) and is red
+  only under -n 6 xdist load.
+
 
 Local-only, 2026-11-14 (**scalar Bayesian integration; no GitHub issue state changed**):
 - Validation follow-up: live 18+6 pilot completed; 116 study tests and 25 final guard tests pass.

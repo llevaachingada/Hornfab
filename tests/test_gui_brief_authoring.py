@@ -884,7 +884,7 @@ def test_s1a_views_are_wired():
     assert "kpis.splice(2, 0, f0KpiHtml(t));" in src
     assert 'kpis.filter(Boolean).join("")' in src
     # task 3: the mounting warn rides with the generic banner (kept) and the DI guard
-    assert "[badgeRows, mixedBanner, mountingRankWarnHtml(mixed), diNote]" in src
+    assert "[badgeRows, mixedBanner, mountingRankWarnHtml(mixed), diNote, diffBriefBanner]" in src
     # task 4: seed card right after the restart schedule, fed d.feasibility; since the 2026-11-14
     # UX pass both sit in the collapsed "Run setup & controls" block below the response charts
     # Fix D (2026-11-16): seed_policy added as third arg so the card hides on explicit seeds
