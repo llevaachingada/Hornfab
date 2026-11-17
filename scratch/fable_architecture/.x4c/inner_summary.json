@@ -1,0 +1,52 @@
+{
+ "hl__osse_rrect_fold_warm_v7": {
+  "n": 11,
+  "native_floor_p99": 0.12988093283002797,
+  "record_p99": 0.17510015012934638,
+  "threshold": 1.0,
+  "median_max": 0.016954949177517293,
+  "pass_lane": true,
+  "pass_per_design": 11,
+  "hand_back": false
+ },
+ "hl__ext_throat_hvlaw_v7": {
+  "n": 11,
+  "native_floor_p99": 0.08393142213839974,
+  "record_p99": 0.1099337166155333,
+  "threshold": 1.0,
+  "median_max": 0.022702412984913944,
+  "pass_lane": true,
+  "pass_per_design": 11,
+  "hand_back": false
+ },
+ "hl__ath_tritonia_landscape_v9": {
+  "n": 11,
+  "native_floor_p99": 0.047692799879709966,
+  "record_p99": 0.2425310110587726,
+  "threshold": 1.0,
+  "median_max": 0.019459398936440477,
+  "pass_lane": true,
+  "pass_per_design": 11,
+  "hand_back": false
+ },
+ "hl__crowe_x_osse_cd_v7": {
+  "n": 11,
+  "native_floor_p99": 1.3698035809404125,
+  "record_p99": 1.6456821691183074,
+  "threshold": 1.7122544761755156,
+  "median_max": 0.051439589109161826,
+  "pass_lane": true,
+  "pass_per_design": 11,
+  "hand_back": false
+ },
+ "hl__biradial_es_style_v7": {
+  "n": 11,
+  "native_floor_p99": 0.03855876197856554,
+  "record_p99": 0.09311843337592064,
+  "threshold": 1.0,
+  "median_max": 0.005628491454821487,
+  "pass_lane": true,
+  "pass_per_design": 11,
+  "hand_back": false
+ }
+}

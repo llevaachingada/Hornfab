@@ -1,0 +1,19 @@
+==============================================================================
+hl__osse_rrect_fold_warm_v7  n=248  top decile J <= 3.8737 (n=25)
+  top-decile min envelope margins: W +13.84  H +67.00  D +119.57 mm
+==============================================================================
+hl__ext_throat_hvlaw_v7  n=137  top decile J <= 3.9866 (n=14)
+  top-decile min envelope margins: W +1.69  H +54.67  D +139.39 mm
+  az_a_cos_pow                 edge mass 0.50 (lo 0.50 hi 0.00)
+==============================================================================
+hl__ath_tritonia_landscape_v9  n=120  top decile J <= 5.4094 (n=12)
+  top-decile min envelope margins: W +8.46  H +13.61  D +155.92 mm
+  morph_width_mm               edge mass 0.75 (lo 0.00 hi 0.75)
+  n                            edge mass 0.58 (lo 0.00 hi 0.58)
+==============================================================================
+hl__crowe_x_osse_cd_v7  n=202  top decile J <= 5.6476 (n=21)
+  top-decile min envelope margins: W +6.10  H +62.70  D +218.30 mm
+  g_L_mm                       edge mass 0.52 (lo 0.00 hi 0.52)
+==============================================================================
+hl__biradial_es_style_v7  n=309  top decile J <= 6.7500 (n=31)
+  top-decile min envelope margins: W +18.35  H +90.28  D +233.13 mm

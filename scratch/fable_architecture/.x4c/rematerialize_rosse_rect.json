@@ -1,0 +1,117 @@
+{
+ "lane": "hl__rosse_rect_cd_v7",
+ "kind": "rosse_rect",
+ "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+ "records": [
+  {
+   "h": "a301d2543a96",
+   "run": "20261116T150941Z-screen-0e777a",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  },
+  {
+   "h": "6fbcb743a1d4",
+   "run": "20261116T145634Z-screen-e4c778",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  },
+  {
+   "h": "9d584d0e99ed",
+   "run": "20261116T145634Z-screen-e4c778",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  },
+  {
+   "h": "3d20c5d60d3d",
+   "run": "20261116T150941Z-screen-0e777a",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  },
+  {
+   "h": "68af1fbb003a",
+   "run": "20261116T064438Z-screen-8defc1",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  },
+  {
+   "h": "b7a6aca1d0a7",
+   "run": "20261116T150941Z-screen-0e777a",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  },
+  {
+   "h": "d5a6821ae0ff",
+   "run": "20261116T150941Z-screen-0e777a",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  },
+  {
+   "h": "f92e6c6eca73",
+   "run": "20261116T145634Z-screen-e4c778",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  },
+  {
+   "h": "5157e69d8aeb",
+   "run": "20261116T150941Z-screen-0e777a",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  },
+  {
+   "h": "54ecae318dd1",
+   "run": "20261116T150941Z-screen-0e777a",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  },
+  {
+   "h": "560560538705",
+   "run": "20261116T145634Z-screen-e4c778",
+   "stored_digest": "9b040e3782ad2dcffeafcde901050f9932c32378e8ec1a5b6fb9992cb807c8c4",
+   "head_digest": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+   "hash_ok": true,
+   "built": false,
+   "error": "GeneratorError: rolled_rect: implementation digest or schema differs from persisted recipe",
+   "digest_match": false
+  }
+ ]
+}

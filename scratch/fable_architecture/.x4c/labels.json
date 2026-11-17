@@ -1,0 +1,1429 @@
+{
+ "hl__osse_rrect_fold_warm_v7": {
+  "design_hashes_with_records": 326,
+  "label_designs": 246,
+  "family": {
+   "agree": 246,
+   "n": 246
+  },
+  "typology": {
+   "agree": 246,
+   "n": 246
+  },
+  "family_instances": {
+   "agree": 251,
+   "n": 251
+  },
+  "typology_instances": {
+   "agree": 251,
+   "n": 251
+  },
+  "sampled": {
+   "n": 11,
+   "family_agree": 11,
+   "typology_agree": 11,
+   "both_agree": 11,
+   "at_least_one_agrees": 11
+  },
+  "mounting": {
+   "agree": 0,
+   "n": 0,
+   "positive_labels": 0,
+   "note": "no mounting block stored; all briefs omit it -> freestanding default"
+  },
+  "termination": {
+   "agree": 0,
+   "n": 0,
+   "tokens": 0,
+   "detail": []
+  },
+  "disagreements": []
+ },
+ "hl__ext_throat_hvlaw_v7": {
+  "design_hashes_with_records": 420,
+  "label_designs": 136,
+  "family": {
+   "agree": 136,
+   "n": 136
+  },
+  "typology": {
+   "agree": 136,
+   "n": 136
+  },
+  "family_instances": {
+   "agree": 136,
+   "n": 136
+  },
+  "typology_instances": {
+   "agree": 136,
+   "n": 136
+  },
+  "sampled": {
+   "n": 11,
+   "family_agree": 11,
+   "typology_agree": 11,
+   "both_agree": 11,
+   "at_least_one_agrees": 11
+  },
+  "mounting": {
+   "agree": 0,
+   "n": 0,
+   "positive_labels": 0,
+   "note": "no mounting block stored; all briefs omit it -> freestanding default"
+  },
+  "termination": {
+   "agree": 0,
+   "n": 0,
+   "tokens": 0,
+   "detail": []
+  },
+  "disagreements": []
+ },
+ "hl__ath_tritonia_landscape_v9": {
+  "design_hashes_with_records": 133,
+  "label_designs": 120,
+  "family": {
+   "agree": 120,
+   "n": 120
+  },
+  "typology": {
+   "agree": 120,
+   "n": 120
+  },
+  "family_instances": {
+   "agree": 120,
+   "n": 120
+  },
+  "typology_instances": {
+   "agree": 120,
+   "n": 120
+  },
+  "sampled": {
+   "n": 11,
+   "family_agree": 11,
+   "typology_agree": 11,
+   "both_agree": 11,
+   "at_least_one_agrees": 11
+  },
+  "mounting": {
+   "agree": 0,
+   "n": 0,
+   "positive_labels": 0,
+   "note": "no mounting block stored; all briefs omit it -> freestanding default"
+  },
+  "termination": {
+   "agree": 0,
+   "n": 0,
+   "tokens": 0,
+   "detail": []
+  },
+  "disagreements": []
+ },
+ "hl__crowe_x_osse_cd_v7": {
+  "design_hashes_with_records": 256,
+  "label_designs": 200,
+  "family": {
+   "agree": 200,
+   "n": 200
+  },
+  "typology": {
+   "agree": 193,
+   "n": 200
+  },
+  "family_instances": {
+   "agree": 208,
+   "n": 208
+  },
+  "typology_instances": {
+   "agree": 201,
+   "n": 208
+  },
+  "sampled": {
+   "n": 11,
+   "family_agree": 11,
+   "typology_agree": 10,
+   "both_agree": 10,
+   "at_least_one_agrees": 11
+  },
+  "mounting": {
+   "agree": 0,
+   "n": 0,
+   "positive_labels": 0,
+   "note": "no mounting block stored; all briefs omit it -> freestanding default"
+  },
+  "termination": {
+   "agree": 11,
+   "n": 11,
+   "tokens": 200,
+   "detail": [
+    {
+     "h": "0070dac9e12b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "01cef49e8c40",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "0569d07b0213",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "07a82a436b04",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "0ad221a67723",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "0b5f5605c547",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "0c2dafb29d87",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "11e30e38f881",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "1266dadad6e5",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "13c1d2d1a2cd",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "165a0cc5b683",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "165d6995619b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "1880f9ed93e8",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "18a89a2c78ad",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "1bc0ab853e35",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "1e8d096ae254",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "21abc0fd1ae9",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "230255ee99e0",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "23202aa767f8",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "242cdfacc5dc",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "2441c82df414",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "246dd935f8f6",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "25cd5271ec89",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "26f65e098636",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "2a70fe33fe63",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "2affce079fbe",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "2c922317f1c7",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "2cfb2b643252",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "2d3b49dabbe8",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "2efd4390c7c1",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "301ec2b07577",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "30dfac8ec047",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "31efcf3537ba",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "32ae99e8398f",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "3303463422d7",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "34447f2997c7",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "350b371ad6d1",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "35b4893904d5",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "366ffa01180b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "3836ccaf362a",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -5.709059814327873,
+     "nonmonotone_fraction": 0.0625
+    },
+    {
+     "h": "3c70ab4ac63f",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "3cc37e942257",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "3d45fe1c657c",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -6.886698172338583,
+     "nonmonotone_fraction": 0.1572745901639344
+    },
+    {
+     "h": "3db238abe138",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "3dcd0f2926bd",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "3de7146cd432",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "3f0a50f811a8",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "4043f5dd7feb",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "407604ad7496",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "41fc051e663c",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "4784a31e69cf",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "495be50a9fb4",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "4abd15d83245",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "4b58ee5f2720",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "4c9c7fc353d6",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "4ed657fbd11c",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "514e4432a6d2",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "524d98826aa7",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "535634732c3c",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "55c44c7dab06",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "5621d88d7703",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "5669e5c0341c",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "56b153633f43",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -5.462558592693227,
+     "nonmonotone_fraction": 0.078125
+    },
+    {
+     "h": "58e0f292d349",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "5bbfbd7413f4",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "5f16faab5f42",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "5f4d66e8689c",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "5f6971eb2b08",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "6003be202ff8",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -6.925380361358862,
+     "nonmonotone_fraction": 0.1170594262295082
+    },
+    {
+     "h": "604e56cf7429",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "61a1dd84b72f",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "62b980eb70d0",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "64a23c6e5479",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "6ca73e01c97b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "6dc9f2d49de1",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "6ddf6cd14d48",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "708259a21ad5",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "70f66f28b9c3",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "712a6d72448a",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "72c50635955e",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "7477ae38c09a",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -6.451194545112713,
+     "nonmonotone_fraction": 0.1170594262295082
+    },
+    {
+     "h": "77308ed8afa3",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -5.673543619583256,
+     "nonmonotone_fraction": 0.06608606557377049
+    },
+    {
+     "h": "7a3f0b6aae51",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "7dc53f890358",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "7e22e804bc3e",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "7e556a0ce641",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "7f4c515cedd0",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "8264cdf4a8b9",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "843b7d372067",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "87158e2bff6b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "890102a04a18",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "89722c2be55b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "8a37c61097e5",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "8af1f874db9b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "8b451c887d08",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "8c8d38d07a65",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "8d2f862d91f3",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "8e1c3d6670a3",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "8e978b83912e",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "901d855c40c9",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "909966278673",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -6.026184859441059,
+     "nonmonotone_fraction": 0.16290983606557377
+    },
+    {
+     "h": "909fb0b856eb",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "90b1c6d23770",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "90da89dd7f3f",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "913df8388ba0",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "923b281ab49e",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "93dc06694613",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "9507339c513c",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "989590bf3a3b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "98a610d17793",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "9a4e0a6b0ea6",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "9ac5c763c254",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "9b5428e6dec8",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "9be229abd115",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "9f7b158c831d",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "a09ae9ba31a8",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "a1babe3fdb6e",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "a79dda1dcdbe",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "a8d5ad7fb365",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ad006884e10c",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ad1e21f8d83e",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ae0b662536f0",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ae5b88f3e598",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ae5c89330918",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ae9ed5acfeab",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "af1b88cadb08",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "b14d8cb61b15",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "b3157b0f7163",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "b4ea3b525a2a",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "b65e1f15b049",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "b6ee0e17f793",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "b7430677529b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "b89362a20fe0",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "b8e7e97d7bf3",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "b95141ab50a1",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "b9f49356e8f9",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "bba5f39b825b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "bbd2503905e6",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "bcaad9c02c3a",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "bdd474fd9eab",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "c02a33eaec30",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "c13b33e3a170",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "c3f2eb80fe0b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "c684470914c6",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "c71d8d1a5d4d",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "c78179ab4328",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "c83f1fec97c3",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -6.27893739356324,
+     "nonmonotone_fraction": 0.048924180327868855
+    },
+    {
+     "h": "c9a2ade5dd7b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ca35dbb02024",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "cc2830e7db83",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "cdca7ad06de9",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ce734f655883",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ced2457f7e22",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -5.82930204033957,
+     "nonmonotone_fraction": 0.0855532786885246
+    },
+    {
+     "h": "d0029170ef19",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d0f1209213f7",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d324aeb24677",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d40396a5f970",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d4e5f4cb6696",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d578f143e5dc",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d5b2eabbb003",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -5.505797666991441,
+     "nonmonotone_fraction": 0.078125
+    },
+    {
+     "h": "d5c994f19ed5",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d698b2613550",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d6c86f488d7c",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d79e4618ee8f",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d7ef762ab76b",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "d9755553606d",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "da36313ccc6f",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "da37d2d8ce11",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "da517f5cedfc",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "dbfeb2a560d9",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "deef951bef7d",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "df1164f70c94",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "df9590d7a70d",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "e043f3f367aa",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "e0e1042a7d57",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "e120d5262089",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "e254c2007258",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "e29bed912449",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "e3b370a1fa1c",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "e4d633726a6a",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "e52435b09614",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "e5caf617c5e0",
+     "token": "osse_rollback",
+     "derived": "rollback",
+     "sampled": true,
+     "agree": true,
+     "z_monotone": false,
+     "min_dz_mm": -5.314452584087775,
+     "nonmonotone_fraction": 0.046875
+    },
+    {
+     "h": "e7bffa9aa9ed",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "e80dc3bc90cd",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "eb1906531118",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ee803514c76d",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "efb85ee2e4a1",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "f08c6d755c13",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "f5a5e1dd5be0",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "f63a9837b430",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "f7f76c0cafc2",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "f813d245116f",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "fafb6c0725f5",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "fbce080530d4",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "fe077ca60eda",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "fe712f29596a",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "feca8ed61b2f",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "fefe5dbc2852",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ff8cc8be2dfe",
+     "token": "osse_rollback",
+     "sampled": false
+    },
+    {
+     "h": "ffdea0c9c84f",
+     "token": "osse_rollback",
+     "sampled": false
+    }
+   ]
+  },
+  "disagreements": [
+   {
+    "h": "0070dac9e12b",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "grid"
+    ],
+    "derived": "grid",
+    "runs": [
+     "20261116T095336Z-screen-7fc9b7",
+     "verify"
+    ]
+   },
+   {
+    "h": "2c922317f1c7",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "grid"
+    ],
+    "derived": "grid",
+    "runs": [
+     "20261116T095336Z-screen-7fc9b7",
+     "verify"
+    ]
+   },
+   {
+    "h": "4784a31e69cf",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "grid"
+    ],
+    "derived": "grid",
+    "runs": [
+     "20261116T152544Z-screen-5f7d93",
+     "verify"
+    ]
+   },
+   {
+    "h": "6ca73e01c97b",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "grid"
+    ],
+    "derived": "grid",
+    "runs": [
+     "20261116T074832Z-screen-620f81",
+     "verify"
+    ]
+   },
+   {
+    "h": "77308ed8afa3",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "grid"
+    ],
+    "derived": "grid",
+    "runs": [
+     "20261116T074832Z-screen-620f81",
+     "verify"
+    ]
+   },
+   {
+    "h": "901d855c40c9",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "grid"
+    ],
+    "derived": "grid",
+    "runs": [
+     "20261116T065413Z-screen-a70423",
+     "verify"
+    ]
+   },
+   {
+    "h": "b4ea3b525a2a",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "grid"
+    ],
+    "derived": "grid",
+    "runs": [
+     "20261116T065413Z-screen-a70423",
+     "verify"
+    ]
+   }
+  ]
+ },
+ "hl__biradial_es_style_v7": {
+  "design_hashes_with_records": 326,
+  "label_designs": 307,
+  "family": {
+   "agree": 307,
+   "n": 307
+  },
+  "typology": {
+   "agree": 301,
+   "n": 307
+  },
+  "family_instances": {
+   "agree": 313,
+   "n": 313
+  },
+  "typology_instances": {
+   "agree": 307,
+   "n": 313
+  },
+  "sampled": {
+   "n": 11,
+   "family_agree": 11,
+   "typology_agree": 11,
+   "both_agree": 11,
+   "at_least_one_agrees": 11
+  },
+  "mounting": {
+   "agree": 0,
+   "n": 0,
+   "positive_labels": 0,
+   "note": "no mounting block stored; all briefs omit it -> freestanding default"
+  },
+  "termination": {
+   "agree": 0,
+   "n": 0,
+   "tokens": 0,
+   "detail": []
+  },
+  "disagreements": [
+   {
+    "h": "0004bf3995ed",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "typology:biradial"
+    ],
+    "derived": "typology:biradial",
+    "runs": [
+     "20261116T090751Z-screen-37b115",
+     "verify"
+    ]
+   },
+   {
+    "h": "0d72914a37cd",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "typology:biradial"
+    ],
+    "derived": "typology:biradial",
+    "runs": [
+     "20261116T090751Z-screen-37b115",
+     "verify"
+    ]
+   },
+   {
+    "h": "27fe89821845",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "typology:biradial"
+    ],
+    "derived": "typology:biradial",
+    "runs": [
+     "20261116T061215Z-screen-058f0d",
+     "verify"
+    ]
+   },
+   {
+    "h": "5215af5401f9",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "typology:biradial"
+    ],
+    "derived": "typology:biradial",
+    "runs": [
+     "20261116T071520Z-screen-1c8608",
+     "verify"
+    ]
+   },
+   {
+    "h": "54137913a603",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "typology:biradial"
+    ],
+    "derived": "typology:biradial",
+    "runs": [
+     "20261116T071520Z-screen-1c8608",
+     "verify"
+    ]
+   },
+   {
+    "h": "be2523d196c8",
+    "kind": "typology",
+    "stored": [
+     "FREEFORM",
+     "typology:biradial"
+    ],
+    "derived": "typology:biradial",
+    "runs": [
+     "20261116T061215Z-screen-058f0d",
+     "verify"
+    ]
+   }
+  ]
+ }
+}

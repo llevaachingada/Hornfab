@@ -1,0 +1,575 @@
+{
+ "hl__osse_rrect_fold_warm_v7": {
+  "top_decile_threshold_J": 3.8736757410286815,
+  "n": 248,
+  "n_top": 25,
+  "knobs": [
+   {
+    "knob": "L_mm",
+    "lo": 228.712,
+    "hi": 271.912,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.2,
+    "top_decile_edge": 0.2
+   },
+   {
+    "knob": "a0_deg",
+    "lo": 2.0066,
+    "hi": 2.4866,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "a_deg",
+    "lo": 36.3038,
+    "hi": 40.0,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "az_a_cos_amp",
+    "lo": 8.13355,
+    "hi": 11.73355,
+    "n": 25,
+    "top_decile_near_lo": 0.04,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.04
+   },
+   {
+    "knob": "az_a_cos_pow",
+    "lo": 1.23779,
+    "hi": 2.43779,
+    "n": 25,
+    "top_decile_near_lo": 0.28,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.28
+   },
+   {
+    "knob": "az_s_cos2_amp",
+    "lo": -0.25,
+    "hi": -0.122676,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.24,
+    "top_decile_edge": 0.24
+   },
+   {
+    "knob": "k",
+    "lo": 2.16454,
+    "hi": 2.81254,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.08,
+    "top_decile_edge": 0.08
+   },
+   {
+    "knob": "morph_corner_mm",
+    "lo": 30.0,
+    "hi": 46.3363,
+    "n": 25,
+    "top_decile_near_lo": 0.16,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.16
+   },
+   {
+    "knob": "morph_height_mm",
+    "lo": 378.827,
+    "hi": 412.427,
+    "n": 25,
+    "top_decile_near_lo": 0.04,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.04
+   },
+   {
+    "knob": "morph_rate",
+    "lo": 3.14408,
+    "hi": 4.34408,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.04,
+    "top_decile_edge": 0.04
+   },
+   {
+    "knob": "morph_width_mm",
+    "lo": 559.529,
+    "hi": 588.329,
+    "n": 25,
+    "top_decile_near_lo": 0.04,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.04
+   },
+   {
+    "knob": "n",
+    "lo": 4.64958,
+    "hi": 6.56958,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.08,
+    "top_decile_edge": 0.08
+   },
+   {
+    "knob": "q",
+    "lo": 0.950949,
+    "hi": 0.974949,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.04,
+    "top_decile_edge": 0.04
+   },
+   {
+    "knob": "s",
+    "lo": 0.769626,
+    "hi": 1.009626,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.04,
+    "top_decile_edge": 0.04
+   },
+   {
+    "knob": "az_fold_v_deg",
+    "lo": -25.0,
+    "hi": 0.0,
+    "n": 25,
+    "top_decile_near_lo": 0.04,
+    "top_decile_near_hi": 0.28,
+    "top_decile_edge": 0.32
+   },
+   {
+    "knob": "az_fold_v_width_deg",
+    "lo": 8.0,
+    "hi": 40.0,
+    "n": 25,
+    "top_decile_near_lo": 0.32,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.32
+   },
+   {
+    "knob": "az_fold_h_deg",
+    "lo": -15.0,
+    "hi": 0.0,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.28,
+    "top_decile_edge": 0.28
+   },
+   {
+    "knob": "az_fold_h_width_deg",
+    "lo": 8.0,
+    "hi": 40.0,
+    "n": 25,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.08,
+    "top_decile_edge": 0.08
+   }
+  ],
+  "constraint_margins": {
+   "W": 13.843209628888758,
+   "H": 66.99748646149101,
+   "D": 119.56693266220759
+  }
+ },
+ "hl__ext_throat_hvlaw_v7": {
+  "top_decile_threshold_J": 3.9866412741615544,
+  "n": 137,
+  "n_top": 14,
+  "knobs": [
+   {
+    "knob": "a_deg",
+    "lo": 15.0,
+    "hi": 40.0,
+    "n": 14,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "L_mm",
+    "lo": 180.0,
+    "hi": 330.0,
+    "n": 14,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "s",
+    "lo": 0.3,
+    "hi": 0.9,
+    "n": 14,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "throat_ext_length_mm",
+    "lo": 60.0,
+    "hi": 220.0,
+    "n": 14,
+    "top_decile_near_lo": 0.21428571428571427,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.21428571428571427
+   },
+   {
+    "knob": "throat_ext_angle_deg",
+    "lo": 1.5,
+    "hi": 6.0,
+    "n": 14,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "az_a_cos_pow",
+    "lo": 1.0,
+    "hi": 6.0,
+    "n": 14,
+    "top_decile_near_lo": 0.5,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.5
+   },
+   {
+    "knob": "az_a_cos_amp",
+    "lo": 0.0,
+    "hi": 25.0,
+    "n": 14,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "az_s_cos2_amp",
+    "lo": -0.25,
+    "hi": 0.5,
+    "n": 14,
+    "top_decile_near_lo": 0.07142857142857142,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.07142857142857142
+   }
+  ],
+  "constraint_margins": {
+   "W": 1.6925063661954027,
+   "H": 54.66748355806379,
+   "D": 139.3884434196999
+  }
+ },
+ "hl__ath_tritonia_landscape_v9": {
+  "top_decile_threshold_J": 5.409426954104907,
+  "n": 120,
+  "n_top": 12,
+  "knobs": [
+   {
+    "knob": "L_mm",
+    "lo": 140.0,
+    "hi": 400.0,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "a0_deg",
+    "lo": 5.0,
+    "hi": 11.0,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "a_deg",
+    "lo": 44.0,
+    "hi": 56.0,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "k",
+    "lo": 0.9,
+    "hi": 1.3,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "az_a_cos_amp",
+    "lo": -18.0,
+    "hi": -13.5,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "az_fold_v_deg",
+    "lo": -31.0,
+    "hi": -27.5,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.3333333333333333,
+    "top_decile_edge": 0.3333333333333333
+   },
+   {
+    "knob": "az_fold_v_width_deg",
+    "lo": 21.5,
+    "hi": 25.5,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "morph_corner_mm",
+    "lo": 10.0,
+    "hi": 30.0,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.25,
+    "top_decile_edge": 0.25
+   },
+   {
+    "knob": "morph_height_mm",
+    "lo": 250.0,
+    "hi": 480.0,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "morph_rate",
+    "lo": 1.0,
+    "hi": 2.1,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "morph_width_mm",
+    "lo": 330.0,
+    "hi": 590.0,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.75,
+    "top_decile_edge": 0.75
+   },
+   {
+    "knob": "n",
+    "lo": 4.0,
+    "hi": 7.5,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.5833333333333334,
+    "top_decile_edge": 0.5833333333333334
+   },
+   {
+    "knob": "q",
+    "lo": 0.97,
+    "hi": 0.995,
+    "n": 12,
+    "top_decile_near_lo": 0.08333333333333333,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.08333333333333333
+   },
+   {
+    "knob": "s",
+    "lo": 0.92,
+    "hi": 1.04,
+    "n": 12,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   }
+  ],
+  "constraint_margins": {
+   "W": 8.463333571568569,
+   "H": 13.60551317495299,
+   "D": 155.92017513192212
+  }
+ },
+ "hl__crowe_x_osse_cd_v7": {
+  "top_decile_threshold_J": 5.647567009741746,
+  "n": 202,
+  "n_top": 21,
+  "knobs": [
+   {
+    "knob": "g_a_h_deg",
+    "lo": 33.0,
+    "hi": 40.0,
+    "n": 21,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "g_a_v_deg",
+    "lo": 20.0,
+    "hi": 28.0,
+    "n": 21,
+    "top_decile_near_lo": 0.09523809523809523,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.09523809523809523
+   },
+   {
+    "knob": "g_L_mm",
+    "lo": 200.0,
+    "hi": 260.0,
+    "n": 21,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.5238095238095238,
+    "top_decile_edge": 0.5238095238095238
+   },
+   {
+    "knob": "g_s",
+    "lo": 0.2,
+    "hi": 0.45,
+    "n": 21,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.19047619047619047,
+    "top_decile_edge": 0.19047619047619047
+   },
+   {
+    "knob": "g_n",
+    "lo": 1.8,
+    "hi": 3.2,
+    "n": 21,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.0
+   },
+   {
+    "knob": "g_r_lip_mm",
+    "lo": 8.0,
+    "hi": 30.0,
+    "n": 21,
+    "top_decile_near_lo": 0.14285714285714285,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.14285714285714285
+   },
+   {
+    "knob": "g_wrap_deg",
+    "lo": 80.0,
+    "hi": 160.0,
+    "n": 21,
+    "top_decile_near_lo": 0.047619047619047616,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.047619047619047616
+   },
+   {
+    "knob": "g_sf_ab",
+    "lo": 0.7,
+    "hi": 0.9,
+    "n": 21,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.19047619047619047,
+    "top_decile_edge": 0.19047619047619047
+   },
+   {
+    "knob": "g_sf_amt",
+    "lo": 0.15,
+    "hi": 0.38,
+    "n": 21,
+    "top_decile_near_lo": 0.047619047619047616,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.047619047619047616
+   }
+  ],
+  "constraint_margins": {
+   "W": 6.100247084268744,
+   "H": 62.704226995758006,
+   "D": 218.29755190213172
+  }
+ },
+ "hl__biradial_es_style_v7": {
+  "top_decile_threshold_J": 6.749955417117709,
+  "n": 309,
+  "n_top": 31,
+  "knobs": [
+   {
+    "knob": "L_mm",
+    "lo": 220.0,
+    "hi": 320.0,
+    "n": 31,
+    "top_decile_near_lo": 0.03225806451612903,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.03225806451612903
+   },
+   {
+    "knob": "h_a_deg",
+    "lo": 32.0,
+    "hi": 37.0,
+    "n": 31,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.3548387096774194,
+    "top_decile_edge": 0.3548387096774194
+   },
+   {
+    "knob": "v_a_deg",
+    "lo": 18.0,
+    "hi": 24.0,
+    "n": 31,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.3225806451612903,
+    "top_decile_edge": 0.3225806451612903
+   },
+   {
+    "knob": "h_rm_mm",
+    "lo": 260.0,
+    "hi": 292.0,
+    "n": 31,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.03225806451612903,
+    "top_decile_edge": 0.03225806451612903
+   },
+   {
+    "knob": "v_rm_mm",
+    "lo": 162.0,
+    "hi": 230.0,
+    "n": 31,
+    "top_decile_near_lo": 0.03225806451612903,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.03225806451612903
+   },
+   {
+    "knob": "h_n",
+    "lo": 3.0,
+    "hi": 7.0,
+    "n": 31,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.22580645161290322,
+    "top_decile_edge": 0.22580645161290322
+   },
+   {
+    "knob": "v_n",
+    "lo": 3.0,
+    "hi": 7.0,
+    "n": 31,
+    "top_decile_near_lo": 0.3870967741935484,
+    "top_decile_near_hi": 0.0,
+    "top_decile_edge": 0.3870967741935484
+   },
+   {
+    "knob": "mouth_exponent",
+    "lo": 2.2,
+    "hi": 5.0,
+    "n": 31,
+    "top_decile_near_lo": 0.0,
+    "top_decile_near_hi": 0.03225806451612903,
+    "top_decile_edge": 0.03225806451612903
+   }
+  ],
+  "constraint_margins": {
+   "W": 18.350906000000236,
+   "H": 90.28406577101998,
+   "D": 233.12601499999988
+  }
+ }
+}

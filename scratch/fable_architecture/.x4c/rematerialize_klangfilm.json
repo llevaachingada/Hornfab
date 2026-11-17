@@ -1,0 +1,370 @@
+{
+ "lane": "hl__klangfilm_lame_curved_v1",
+ "kind": "klangfilm_lame",
+ "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+ "records": [
+  {
+   "h": "786caa6b08d7",
+   "run": "20261116T205942Z-screen-8b22b5",
+   "stored_digest": "e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 541.2721522018749,
+    "H_mm": 260.7347272164977,
+    "D_mm": 233.67867209041165
+   },
+   "digest_match": false
+  },
+  {
+   "h": "fe48be8700d2",
+   "run": "20261116T225543Z-screen-6acf41",
+   "stored_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 443.34008833535745,
+    "H_mm": 268.5510135492443,
+    "D_mm": 147.0291206729286
+   },
+   "digest_match": true
+  },
+  {
+   "h": "dafb693ce0d2",
+   "run": "20261116T213830Z-screen-51fcfe",
+   "stored_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 364.9258896961293,
+    "H_mm": 301.01927262442643,
+    "D_mm": 118.2517831755673
+   },
+   "digest_match": true
+  },
+  {
+   "h": "b6e4a89cd1ef",
+   "run": "20261116T225543Z-screen-6acf41",
+   "stored_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 475.9626192433524,
+    "H_mm": 292.05926034539493,
+    "D_mm": 173.24561214896696
+   },
+   "digest_match": true
+  },
+  {
+   "h": "48847f275bdf",
+   "run": "20261116T205942Z-screen-8b22b5",
+   "stored_digest": "e3a1f4a3182cd5405bc1a1fec469456c513a49da31d804bcae27f3a039909866",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 546.1293366507994,
+    "H_mm": 272.6452077357119,
+    "D_mm": 266.45391993350063
+   },
+   "digest_match": false
+  },
+  {
+   "h": "1629ebbdd7ac",
+   "run": "20261116T213830Z-screen-51fcfe",
+   "stored_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 396.82732011454186,
+    "H_mm": 314.7147265762509,
+    "D_mm": 186.16962168334635
+   },
+   "digest_match": true
+  },
+  {
+   "h": "4633cf766785",
+   "run": "20261116T222251Z-screen-91ddfb",
+   "stored_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 595.6037599513146,
+    "H_mm": 372.25234996957147,
+    "D_mm": 266.10832946167966
+   },
+   "digest_match": true
+  },
+  {
+   "h": "a3ea8b02464a",
+   "run": "20261116T220542Z-screen-cceac4",
+   "stored_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 472.18457209973,
+    "H_mm": 263.6531314450929,
+    "D_mm": 183.4358541913549
+   },
+   "digest_match": true
+  },
+  {
+   "h": "f86cb525e4a9",
+   "run": "20261116T214706Z-screen-c2febb",
+   "stored_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 507.32747146541345,
+    "H_mm": 279.4748144068862,
+    "D_mm": 218.54810951462275
+   },
+   "digest_match": true
+  },
+  {
+   "h": "19f6859c6f6a",
+   "run": "20261116T223230Z-screen-ac9b75",
+   "stored_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 446.64836661467723,
+    "H_mm": 304.3746737542028,
+    "D_mm": 152.82884451660598
+   },
+   "digest_match": true
+  },
+  {
+   "h": "22afb1c1b49c",
+   "run": "20261116T230549Z-screen-e70608",
+   "stored_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "head_digest": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+   "hash_ok": true,
+   "built": true,
+   "mode": "klangfilm",
+   "provenance": "tools.geometry.klangfilm_lame.make_grid",
+   "inner_shape": [
+    19,
+    65,
+    3
+   ],
+   "box": {
+    "W_mm": 506.89200616350087,
+    "H_mm": 248.74233114452824,
+    "D_mm": 153.50316564261507
+   },
+   "digest_match": true
+  }
+ ],
+ "verified_replacements": [
+  {
+   "h": "116116a58089",
+   "run": "20261116T211824Z-screen-45c843",
+   "built": true,
+   "mode": "klangfilm",
+   "hash_ok": true,
+   "digest_match": true,
+   "box": {
+    "W_mm": 411.4153849657842,
+    "H_mm": 357.41193981037145,
+    "D_mm": 180.200448434701
+   }
+  },
+  {
+   "h": "16e943118ef9",
+   "run": "20261116T211824Z-screen-45c843",
+   "built": true,
+   "mode": "klangfilm",
+   "hash_ok": true,
+   "digest_match": true,
+   "box": {
+    "W_mm": 563.3804440673325,
+    "H_mm": 344.8580015523764,
+    "D_mm": 226.76312039069117
+   }
+  },
+  {
+   "h": "2638edee99f8",
+   "run": "20261116T211824Z-screen-45c843",
+   "built": true,
+   "mode": "klangfilm",
+   "hash_ok": true,
+   "digest_match": true,
+   "box": {
+    "W_mm": 455.28164697474375,
+    "H_mm": 395.05446393418816,
+    "D_mm": 203.55811430842553
+   }
+  },
+  {
+   "h": "2b6b465b29c0",
+   "run": "20261116T211824Z-screen-45c843",
+   "built": true,
+   "mode": "klangfilm",
+   "hash_ok": true,
+   "digest_match": true,
+   "box": {
+    "W_mm": 516.4188369354068,
+    "H_mm": 369.72006933598607,
+    "D_mm": 220.9381319551774
+   }
+  },
+  {
+   "h": "2f49c33845fc",
+   "run": "20261116T211824Z-screen-45c843",
+   "built": true,
+   "mode": "klangfilm",
+   "hash_ok": true,
+   "digest_match": true,
+   "box": {
+    "W_mm": 555.13376175286,
+    "H_mm": 427.614013957112,
+    "D_mm": 256.38883293468746
+   }
+  },
+  {
+   "h": "36200b4e7d7a",
+   "run": "20261116T211824Z-screen-45c843",
+   "built": true,
+   "mode": "klangfilm",
+   "hash_ok": true,
+   "digest_match": true,
+   "box": {
+    "W_mm": 450.4627301988933,
+    "H_mm": 391.0373421156495,
+    "D_mm": 198.93811903978786
+   }
+  },
+  {
+   "h": "364afa641ba9",
+   "run": "20261116T211824Z-screen-45c843",
+   "built": true,
+   "mode": "klangfilm",
+   "hash_ok": true,
+   "digest_match": true,
+   "box": {
+    "W_mm": 414.02691525148646,
+    "H_mm": 304.87669373193,
+    "D_mm": 153.17554329352754
+   }
+  },
+  {
+   "h": "5ce0947dbe70",
+   "run": "20261116T211824Z-screen-45c843",
+   "built": true,
+   "mode": "klangfilm",
+   "hash_ok": true,
+   "digest_match": true,
+   "box": {
+    "W_mm": 413.85514660710845,
+    "H_mm": 337.17064665042653,
+    "D_mm": 180.16342206087018
+   }
+  },
+  {
+   "h": "5ed8506efb14",
+   "run": "20261116T211824Z-screen-45c843",
+   "built": true,
+   "mode": "klangfilm",
+   "hash_ok": true,
+   "digest_match": true,
+   "box": {
+    "W_mm": 354.2339741970619,
+    "H_mm": 303.2972605296239,
+    "D_mm": 140.44035564034468
+   }
+  },
+  {
+   "h": "626c66076892",
+   "run": "20261116T211824Z-screen-45c843",
+   "built": true,
+   "mode": "klangfilm",
+   "hash_ok": true,
+   "digest_match": true,
+   "box": {
+    "W_mm": 434.1925059569337,
+    "H_mm": 367.504407431021,
+    "D_mm": 191.92676410080804
+   }
+  }
+ ]
+}

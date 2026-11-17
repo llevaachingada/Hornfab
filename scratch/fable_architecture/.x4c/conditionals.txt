@@ -1,0 +1,56 @@
+==============================================================================
+hl__osse_rrect_fold_warm_v7  best 6d6dd332b282  knobs 35
+  n_at_s0                        0.000 mm  inactive (expect inactive)
+  n_at_s_positive                0.484 mm  active   (expect active)
+  q_at_s0                        0.000 mm  inactive (expect inactive)
+  q_at_s_positive              ERROR not testable at 10/5/2 mm: cannot fit the acoustic geometry to the requested mm resolution (throat 2 mm, mouth
+  s1_when_s2_zero                0.000 mm  inactive (expect inactive) [fixed: s1]
+  s2_when_s1_zero                0.000 mm  inactive (expect inactive) [fixed: s2]
+  s1_when_s2_positive           56.550 mm  active   (expect active) [fixed: s1]
+  s2_when_s1_positive            2.679 mm  active   (expect active) [fixed: s2]
+  morph_width_at_target0         0.000 mm  inactive (expect inactive)
+  morph_rate_at_target0          0.000 mm  inactive (expect inactive)
+  morph_exponent_at_target1      0.000 mm  inactive (expect inactive) [fixed: morph_exponent]
+  morph_exponent_at_target3     18.743 mm  active   (expect active) [fixed: morph_exponent]
+  guiding curve: not present in this lane -> replacement rule not testable
+  rot_deg: not present in this lane -> radius/depth coupling not testable
+==============================================================================
+hl__ext_throat_hvlaw_v7  best 3a1038da45d0  knobs 33
+  n_at_s0                        0.000 mm  inactive (expect inactive) [fixed: n]
+  n_at_s_positive                0.000 mm  inactive (expect active) [fixed: n]
+  q_at_s0                        0.000 mm  inactive (expect inactive) [fixed: q]
+  q_at_s_positive              ERROR not testable at 10/5/2 mm: cannot fit the acoustic geometry to the requested mm resolution (throat 2 mm, mouth [fixed: q]
+  morph_width_at_target0         0.000 mm  inactive (expect inactive) [fixed: morph_width_mm]
+  morph_rate_at_target0          0.000 mm  inactive (expect inactive) [fixed: morph_rate]
+  morph_exponent_at_target1      0.000 mm  inactive (expect inactive) [fixed: morph_exponent]
+  morph_exponent_at_target3     25.880 mm  active   (expect active) [fixed: morph_exponent]
+  guiding curve: not present in this lane -> replacement rule not testable
+  rot_deg: not present in this lane -> radius/depth coupling not testable
+==============================================================================
+hl__ath_tritonia_landscape_v9  best ece7bb6a7dbe  knobs 30
+  n_at_s0                        0.000 mm  inactive (expect inactive)
+  n_at_s_positive                6.175 mm  active   (expect active)
+  q_at_s0                        0.000 mm  inactive (expect inactive)
+  q_at_s_positive              ERROR not testable at 10/5/2 mm: cannot fit the acoustic geometry to the requested mm resolution (throat 2 mm, mouth
+  s1_when_s2_zero                0.000 mm  inactive (expect inactive) [fixed: s1]
+  s2_when_s1_zero                0.000 mm  inactive (expect inactive) [fixed: s2]
+  s1_when_s2_positive           57.966 mm  active   (expect active) [fixed: s1]
+  s2_when_s1_positive            3.616 mm  active   (expect active) [fixed: s2]
+  morph_width_at_target0         0.000 mm  inactive (expect inactive)
+  morph_rate_at_target0          0.000 mm  inactive (expect inactive)
+  morph_exponent_at_target1      0.000 mm  inactive (expect inactive) [fixed: morph_exponent]
+  morph_exponent_at_target3     21.272 mm  active   (expect active) [fixed: morph_exponent]
+  guiding curve: not present in this lane -> replacement rule not testable
+  rot_deg: not present in this lane -> radius/depth coupling not testable
+==============================================================================
+hl__crowe_x_osse_cd_v7  best 77308ed8afa3  knobs 15
+  g_n_at_s0                      0.000 mm  inactive (expect inactive)
+  g_n_at_s_positive             13.928 mm  active   (expect active)
+  g_q_at_s0                      0.000 mm  inactive (expect inactive) [fixed: g_q]
+  g_q_at_s_positive             20.118 mm  active   (expect active) [fixed: g_q]
+  guiding curve: not present in this lane -> replacement rule not testable
+  rot_deg: not present in this lane -> radius/depth coupling not testable
+==============================================================================
+hl__biradial_es_style_v7  best d24016b7ab8a  knobs 10
+  guiding curve: not present in this lane -> replacement rule not testable
+  rot_deg: not present in this lane -> radius/depth coupling not testable

@@ -1,0 +1,30 @@
+==============================================================================
+hl__ext_throat_hvlaw_v7  n=11  route=native
+  min W margin +1.13 mm (ca5eb477b1f1: 599.37 mm)
+  min H margin +77.73 mm (ca5eb477b1f1: 402.77 mm)
+  min D margin +113.77 mm (f798274095fe: 381.23 mm)
+  min gap 18.66 mm (limit 12.00, margin +6.66) at d26ab8299ed7
+==============================================================================
+hl__ath_tritonia_landscape_v9  n=11  route=native
+  min W margin +8.87 mm (4e16c26f0799: 591.63 mm)
+  min H margin +1.35 mm (03b21fe1c33e: 479.15 mm)
+  min D margin +16.29 mm (8805a83f7270: 478.71 mm)
+  min gap 12.56 mm (limit 8.00, margin +4.56) at 079dd33f25ea
+==============================================================================
+hl__osse_rrect_fold_warm_v7  n=11  route=native
+  min W margin +12.33 mm (498d036039bd: 588.17 mm)
+  min H margin +66.66 mm (6d6dd332b282: 413.84 mm)
+  min D margin +126.58 mm (6d6dd332b282: 368.42 mm)
+  min gap 12.56 mm (limit 8.00, margin +4.56) at 22ded9feaed8
+==============================================================================
+hl__biradial_es_style_v7  n=11  route=native
+  min W margin +18.43 mm (997986cf3726: 582.07 mm)
+  min H margin +57.41 mm (39f051ebd603: 423.09 mm)
+  min D margin +222.31 mm (85478e24c1b0: 272.69 mm)
+  min gap 12.38 mm (limit 8.00, margin +4.38) at 39f051ebd603
+==============================================================================
+hl__crowe_x_osse_cd_v7  n=11  route=grid
+  min W margin +7.85 mm (77308ed8afa3: 592.65 mm)
+  min H margin +66.44 mm (3d45fe1c657c: 414.06 mm)
+  min D margin +229.68 mm (c83f1fec97c3: 265.32 mm)
+  min gap 12.10 mm (limit 8.00, margin +4.10) at c83f1fec97c3

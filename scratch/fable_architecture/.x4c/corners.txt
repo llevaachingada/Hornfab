@@ -1,0 +1,36 @@
+==============================================================================
+hl__osse_rrect_fold_warm_v7  best 6d6dd332b282  route freestanding  t=3.0 mm
+base: W 587.22 (marg +13.28)  H 413.84 (+66.66)  D 368.42 (+126.58)  gap 13.18 (limit 8.00, marg +5.18)  throat 18.00-18.00 (marg -0.00)
+  min W margin +7.47 mm at directed_W (rms 2.29)
+  min H margin +61.75 mm at directed_H (rms 7.70)
+  min D margin +125.45 mm at all_hi (rms 16.27)
+  min gap margin +4.57 mm (L_mm=lo, gap 12.57)
+==============================================================================
+hl__ext_throat_hvlaw_v7  best 3a1038da45d0  route freestanding  t=5.0 mm
+base: W 580.96 (marg +19.54)  H 401.45 (+79.05)  D 334.95 (+160.05)  gap 18.82 (limit 12.00, marg +6.82)  throat 18.00-18.00 (marg -0.00)
+  min W margin -996.22 mm at directed_W (rms 218.75)
+  min H margin -406.44 mm at directed_H (rms 178.60)
+  min D margin -55.38 mm at directed_D (rms 139.85)
+  min gap margin +6.39 mm (all_lo, gap 18.39)
+  refusals: all_hi: nonmonotone azimuth; no safe interpolation
+==============================================================================
+hl__ath_tritonia_landscape_v9  best ece7bb6a7dbe  route freestanding  t=3.0 mm
+base: W 587.29 (marg +13.21)  H 410.02 (+70.48)  D 307.82 (+187.18)  gap 12.57 (limit 8.00, marg +4.57)  throat 18.00-18.00 (marg -0.00)
+  min W margin +6.84 mm at directed_W (rms 102.66)
+  min H margin -3.95 mm at directed_H (rms 104.56)
+  min D margin +13.84 mm at all_hi (rms 116.13)
+  min gap margin +4.56 mm (all_lo, gap 12.56)
+==============================================================================
+hl__crowe_x_osse_cd_v7  best 77308ed8afa3  route grid  t=3.0 mm
+base: W 592.65 (marg +7.85)  H 411.33 (+69.17)  D 260.17 (+234.83)  gap 12.26 (limit 8.00, marg +4.26)  throat 17.99-18.00 (marg -0.01)
+  min W margin -119.89 mm at directed_W (rms 24.92)
+  min H margin -26.37 mm at all_hi (rms 44.24)
+  min D margin +232.57 mm at directed_D (rms 15.76)
+  min gap margin +4.11 mm (all_lo, gap 12.11)
+==============================================================================
+hl__biradial_es_style_v7  best d24016b7ab8a  route freestanding  t=3.0 mm
+base: W 576.16 (marg +24.34)  H 387.55 (+92.95)  D 241.72 (+253.28)  gap 13.89 (limit 8.00, marg +5.89)  throat 18.00-18.00 (marg -0.00)
+  min W margin +12.45 mm at directed_W (rms 39.00)
+  min H margin +16.50 mm at directed_H (rms 45.28)
+  min D margin +174.91 mm at all_hi (rms 50.16)
+  min gap margin +4.40 mm (L_mm=hi, gap 12.40)

@@ -1,5 +1,20 @@
 # ISSUES
 
+## 2026-11-17 - X4 completion: lanes pass; ROSSE digest drift is validator-only; lecleach still open
+
+- DONE (A8): five `.x4` lanes 55/55 hash-reproduced and 55/55 pass v2 rule 2 at 65 × 61 (Crowe worst
+  p99 1.646 vs 1.712; medians ≤0.051). Labels family 100 %, typology 96.5–100 % (disagreements are
+  verify-mode provenance omissions). Envelope binds at ext/ATH; wall gap does not (+4.10 mm min).
+  `X4_COMPLETION.md`.
+- DONE: `hl__rosse_rect_cd_v7` resolved. `9b040e37…` vs HEAD `601056d0…` is `a10e784`'s validator-only
+  `b >= -0.10` change; with the persisted-digest equality bypassed in memory the 11 grids rebuild
+  11/11 and match the stored meshes (p99 0.468–0.918 mm; W/H exact; depth = rear closure).
+- OPEN: `hl__lecleach_hv_landscape_smooth_v7` remains unrebuildable at HEAD (no digest; `d6c9abd` H/V
+  realization change) and 2 of 11 old Klangfilm sample designs remain unverified (`e3a1f4a3…`).
+- OPEN: X4 Parts B/D gates are not testable/not run; the full 2^k corner scan is not testable.
+- OPEN (owner): require `implementation_sha256` on every grid-row recipe; ROSSE shows a validator-only
+  code change is enough to lock a whole stored lane out of its own canonical adapter.
+
 ## 2026-11-17 - E1 follow-up: full-J response modelling gives no advantage
 
 - DONE (A3): E1 repeated with parity-exact full J. Median lane reveals - score 18.5, curve head 24.0,

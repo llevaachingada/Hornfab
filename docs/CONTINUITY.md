@@ -1,5 +1,23 @@
 # CONTINUITY
 
+## 2026-11-17 03:2x - X4 completion: sampler validated on five lanes; ROSSE digest drift is validator-only
+
+- Five `.x4` lanes (11 designs each): 55/55 design hashes reproduced and 55/55 pass contract-v2
+  rule 2 at 65 × 61 (Crowe worst p99 1.646 mm vs 1.712 threshold; medians <= 0.051 mm), including the
+  native rounded-rectangle lane N1b never tested. Labels: family 100 % on all five; typology 100 % on
+  three and 96.5-98.0 % on Crowe/biradial, all from verify-mode records that omit the generator block.
+  Envelope margins bind (ext W +1.13 mm, ATH H +1.35 mm inside; one-knob corners cross on
+  ext/ATH/Crowe); the wall gap does not (+4.10 mm minimum).
+- **`hl__rosse_rect_cd_v7` resolved.** The stored `9b040e37...` digest vs HEAD `601056d0...` is a
+  validator-only change in `a10e784` (`rosse_rect.py` `validate_shape` `b` floor 0.0 -> -0.10); the
+  geometry kernel is untouched. With only the persisted-digest equality bypassed in memory, 11/11
+  grids rebuild and match the stored meshes (p99 0.468-0.918 mm, native floor 0.343-0.721, all pass;
+  W/H exact; depth difference is the 3 mm rear closure). The stock bridge still refuses the old
+  digest; the bypass is a read-only diagnostic.
+- Unresolved rematerialisations now: **lecleach only** (no digest, `d6c9abd` H/V change) plus 2 of
+  the 11 old Klangfilm sample designs (`e3a1f4a3...`). Part B/D gates are not testable/not run and
+  the full 2^k corner scan is not testable. Report `scratch/fable_architecture/X4_COMPLETION.md`.
+
 ## 2026-11-17 03:0x - E1 follow-up at full J: response modelling still gives no advantage; the proxy was the illusion
 
 - A3 repeats E1 with parity-exact full J (10 lanes x 10 starts, E1's protocol unchanged; parity gate

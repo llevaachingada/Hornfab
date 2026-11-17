@@ -1,0 +1,901 @@
+{
+ "hl__osse_rrect_fold_warm_v7": {
+  "h": "6d6dd332b282",
+  "knobs": [
+   "L_mm",
+   "a0_deg",
+   "a_deg",
+   "aspect_ratio",
+   "az_a_cos_amp",
+   "az_a_cos_pow",
+   "az_a_sf_amp",
+   "az_fold_h_deg",
+   "az_fold_h_width_deg",
+   "az_fold_v_deg",
+   "az_fold_v_width_deg",
+   "az_n_cos2_amp",
+   "az_s_cos2_amp",
+   "az_sf_a",
+   "az_sf_b",
+   "az_sf_m",
+   "az_sf_n1",
+   "az_sf_n2",
+   "az_sf_n3",
+   "exponent",
+   "k",
+   "morph_allow_shrinkage",
+   "morph_corner_mm",
+   "morph_exponent",
+   "morph_fixed",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_target",
+   "morph_width_mm",
+   "n",
+   "q",
+   "r0_mm",
+   "s",
+   "s1",
+   "s2"
+  ],
+  "base_mm": 0.0,
+  "tests": [
+   {
+    "name": "n_at_s0",
+    "gate": "n active iff s != 0",
+    "expect": "inactive",
+    "shared": {
+     "s": 0.0,
+     "s1": 0.0,
+     "s2": 0.0,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "n": 4.64958
+    },
+    "b": {
+     "n": 6.56958
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "n": true
+    },
+    "inactive": true
+   },
+   {
+    "name": "n_at_s_positive",
+    "gate": "n active iff s != 0",
+    "expect": "active",
+    "shared": {
+     "s": 0.6,
+     "s1": 0.0,
+     "s2": 0.0,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "n": 4.64958
+    },
+    "b": {
+     "n": 6.56958
+    },
+    "rms_mm": 0.48379187269195006,
+    "searched": {
+     "n": true
+    },
+    "inactive": false
+   },
+   {
+    "name": "q_at_s0",
+    "gate": "q active iff s != 0",
+    "expect": "inactive",
+    "shared": {
+     "s": 0.0,
+     "s1": 0.0,
+     "s2": 0.0,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "q": 0.9
+    },
+    "b": {
+     "q": 1.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "q": true
+    },
+    "inactive": true
+   },
+   {
+    "name": "q_at_s_positive",
+    "gate": "q active iff s != 0",
+    "expect": "active",
+    "shared": {
+     "s": 0.6,
+     "s1": 0.0,
+     "s2": 0.0,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "q": 0.9
+    },
+    "b": {
+     "q": 1.0
+    },
+    "searched": {
+     "q": true
+    },
+    "error": "not testable at 10/5/2 mm: cannot fit the acoustic geometry to the requested mm resolution (throat 2 mm, mouth 2 mm): the axial chord is still 32.11x its limit; raise the throat/mouth resolution. Refinement stopped at the 2048-segment axial limit ",
+    "positive_control_not_testable": true
+   },
+   {
+    "name": "s1_when_s2_zero",
+    "gate": "s1 active iff s2 != 0",
+    "expect": "inactive",
+    "shared": {
+     "s2": 0.0
+    },
+    "a": {
+     "s1": 0.0
+    },
+    "b": {
+     "s1": 1.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "s1": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "s2_when_s1_zero",
+    "gate": "s2 active iff s1 != 0",
+    "expect": "inactive",
+    "shared": {
+     "s1": 0.0
+    },
+    "a": {
+     "s2": 0.0
+    },
+    "b": {
+     "s2": 0.5
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "s2": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "s1_when_s2_positive",
+    "gate": "s1 active iff s2 != 0",
+    "expect": "active",
+    "shared": {
+     "s2": 0.5
+    },
+    "a": {
+     "s1": 0.1
+    },
+    "b": {
+     "s1": 1.0
+    },
+    "rms_mm": 56.55038186792243,
+    "searched": {
+     "s1": false
+    },
+    "inactive": false
+   },
+   {
+    "name": "s2_when_s1_positive",
+    "gate": "s2 active iff s1 != 0",
+    "expect": "active",
+    "shared": {
+     "s1": 1.0
+    },
+    "a": {
+     "s2": 0.1
+    },
+    "b": {
+     "s2": 0.5
+    },
+    "rms_mm": 2.6793031634387936,
+    "searched": {
+     "s2": false
+    },
+    "inactive": false
+   },
+   {
+    "name": "morph_width_at_target0",
+    "gate": "morph_* active iff morph_target != 0",
+    "expect": "inactive",
+    "shared": {
+     "morph_target": 0
+    },
+    "a": {
+     "morph_width_mm": 450.0
+    },
+    "b": {
+     "morph_width_mm": 550.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "morph_width_mm": true
+    },
+    "inactive": true
+   },
+   {
+    "name": "morph_rate_at_target0",
+    "gate": "morph_* active iff morph_target != 0",
+    "expect": "inactive",
+    "shared": {
+     "morph_target": 0
+    },
+    "a": {
+     "morph_rate": 1.0
+    },
+    "b": {
+     "morph_rate": 4.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "morph_rate": true
+    },
+    "inactive": true
+   },
+   {
+    "name": "morph_exponent_at_target1",
+    "gate": "morph_exponent active iff target == 3",
+    "expect": "inactive",
+    "shared": {
+     "morph_target": 1
+    },
+    "a": {
+     "morph_exponent": 2.0
+    },
+    "b": {
+     "morph_exponent": 8.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "morph_exponent": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "morph_exponent_at_target3",
+    "gate": "morph_exponent active iff target == 3",
+    "expect": "active",
+    "shared": {
+     "morph_target": 3
+    },
+    "a": {
+     "morph_exponent": 2.0
+    },
+    "b": {
+     "morph_exponent": 8.0
+    },
+    "rms_mm": 18.74252993417251,
+    "searched": {
+     "morph_exponent": false
+    },
+    "inactive": false
+   }
+  ],
+  "slack": {
+   "guiding_curve_present": false,
+   "rot_deg_present": false,
+   "note": "guiding-curve replacement not testable: no guiding-curve control in the searched params"
+  }
+ },
+ "hl__ext_throat_hvlaw_v7": {
+  "h": "3a1038da45d0",
+  "knobs": [
+   "L_mm",
+   "a0_deg",
+   "a_deg",
+   "aspect_ratio",
+   "az_a_cos_amp",
+   "az_a_cos_pow",
+   "az_a_sf_amp",
+   "az_n_cos2_amp",
+   "az_s_cos2_amp",
+   "az_sf_a",
+   "az_sf_b",
+   "az_sf_m",
+   "az_sf_n1",
+   "az_sf_n2",
+   "az_sf_n3",
+   "exponent",
+   "k",
+   "morph_allow_shrinkage",
+   "morph_corner_mm",
+   "morph_exponent",
+   "morph_fixed",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_target",
+   "morph_width_mm",
+   "n",
+   "q",
+   "r0_mm",
+   "s",
+   "slot_length_mm",
+   "throat_ext_angle_deg",
+   "throat_ext_length_mm",
+   "wall_thickness_mm"
+  ],
+  "base_mm": 0.0,
+  "tests": [
+   {
+    "name": "n_at_s0",
+    "gate": "n active iff s != 0",
+    "expect": "inactive",
+    "shared": {
+     "s": 0.0,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "n": 6.0
+    },
+    "b": {
+     "n": 6.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "n": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "n_at_s_positive",
+    "gate": "n active iff s != 0",
+    "expect": "active",
+    "shared": {
+     "s": 0.6,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "n": 6.0
+    },
+    "b": {
+     "n": 6.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "n": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "q_at_s0",
+    "gate": "q active iff s != 0",
+    "expect": "inactive",
+    "shared": {
+     "s": 0.0,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "q": 0.9
+    },
+    "b": {
+     "q": 1.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "q": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "q_at_s_positive",
+    "gate": "q active iff s != 0",
+    "expect": "active",
+    "shared": {
+     "s": 0.6,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "q": 0.9
+    },
+    "b": {
+     "q": 1.0
+    },
+    "searched": {
+     "q": false
+    },
+    "error": "not testable at 10/5/2 mm: cannot fit the acoustic geometry to the requested mm resolution (throat 2 mm, mouth 2 mm): the axial chord is still 41.29x its limit; raise the throat/mouth resolution. Refinement stopped at the 2048-segment axial limit ",
+    "positive_control_not_testable": true
+   },
+   {
+    "name": "morph_width_at_target0",
+    "gate": "morph_* active iff morph_target != 0",
+    "expect": "inactive",
+    "shared": {
+     "morph_target": 0
+    },
+    "a": {
+     "morph_width_mm": 450.0
+    },
+    "b": {
+     "morph_width_mm": 550.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "morph_width_mm": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "morph_rate_at_target0",
+    "gate": "morph_* active iff morph_target != 0",
+    "expect": "inactive",
+    "shared": {
+     "morph_target": 0
+    },
+    "a": {
+     "morph_rate": 1.0
+    },
+    "b": {
+     "morph_rate": 4.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "morph_rate": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "morph_exponent_at_target1",
+    "gate": "morph_exponent active iff target == 3",
+    "expect": "inactive",
+    "shared": {
+     "morph_target": 1
+    },
+    "a": {
+     "morph_exponent": 2.0
+    },
+    "b": {
+     "morph_exponent": 8.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "morph_exponent": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "morph_exponent_at_target3",
+    "gate": "morph_exponent active iff target == 3",
+    "expect": "active",
+    "shared": {
+     "morph_target": 3
+    },
+    "a": {
+     "morph_exponent": 2.0
+    },
+    "b": {
+     "morph_exponent": 8.0
+    },
+    "rms_mm": 25.879948440301483,
+    "searched": {
+     "morph_exponent": false
+    },
+    "inactive": false
+   }
+  ],
+  "slack": {
+   "guiding_curve_present": false,
+   "rot_deg_present": false,
+   "note": "guiding-curve replacement not testable: no guiding-curve control in the searched params"
+  }
+ },
+ "hl__ath_tritonia_landscape_v9": {
+  "h": "ece7bb6a7dbe",
+  "knobs": [
+   "L_mm",
+   "a0_deg",
+   "a_deg",
+   "aspect_ratio",
+   "az_a_cos2p_amp",
+   "az_a_cos2p_pow",
+   "az_a_cos_amp",
+   "az_a_cos_pow",
+   "az_fold_h_deg",
+   "az_fold_h_width_deg",
+   "az_fold_v_deg",
+   "az_fold_v_width_deg",
+   "az_n_cos2_amp",
+   "az_s_cos2_amp",
+   "exponent",
+   "k",
+   "morph_allow_shrinkage",
+   "morph_corner_mm",
+   "morph_exponent",
+   "morph_fixed",
+   "morph_height_mm",
+   "morph_rate",
+   "morph_target",
+   "morph_width_mm",
+   "n",
+   "q",
+   "r0_mm",
+   "s",
+   "s1",
+   "s2"
+  ],
+  "base_mm": 0.0,
+  "tests": [
+   {
+    "name": "n_at_s0",
+    "gate": "n active iff s != 0",
+    "expect": "inactive",
+    "shared": {
+     "s": 0.0,
+     "s1": 0.0,
+     "s2": 0.0,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "n": 4.0
+    },
+    "b": {
+     "n": 7.5
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "n": true
+    },
+    "inactive": true
+   },
+   {
+    "name": "n_at_s_positive",
+    "gate": "n active iff s != 0",
+    "expect": "active",
+    "shared": {
+     "s": 0.6,
+     "s1": 0.0,
+     "s2": 0.0,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "n": 4.0
+    },
+    "b": {
+     "n": 7.5
+    },
+    "rms_mm": 6.175178930039685,
+    "searched": {
+     "n": true
+    },
+    "inactive": false
+   },
+   {
+    "name": "q_at_s0",
+    "gate": "q active iff s != 0",
+    "expect": "inactive",
+    "shared": {
+     "s": 0.0,
+     "s1": 0.0,
+     "s2": 0.0,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "q": 0.9
+    },
+    "b": {
+     "q": 1.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "q": true
+    },
+    "inactive": true
+   },
+   {
+    "name": "q_at_s_positive",
+    "gate": "q active iff s != 0",
+    "expect": "active",
+    "shared": {
+     "s": 0.6,
+     "s1": 0.0,
+     "s2": 0.0,
+     "az_s_cos2_amp": 0.0
+    },
+    "a": {
+     "q": 0.9
+    },
+    "b": {
+     "q": 1.0
+    },
+    "searched": {
+     "q": true
+    },
+    "error": "not testable at 10/5/2 mm: cannot fit the acoustic geometry to the requested mm resolution (throat 2 mm, mouth 2 mm): the axial chord is still 48.63x its limit; raise the throat/mouth resolution. Refinement stopped at the 2048-segment axial limit ",
+    "positive_control_not_testable": true
+   },
+   {
+    "name": "s1_when_s2_zero",
+    "gate": "s1 active iff s2 != 0",
+    "expect": "inactive",
+    "shared": {
+     "s2": 0.0
+    },
+    "a": {
+     "s1": 0.0
+    },
+    "b": {
+     "s1": 1.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "s1": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "s2_when_s1_zero",
+    "gate": "s2 active iff s1 != 0",
+    "expect": "inactive",
+    "shared": {
+     "s1": 0.0
+    },
+    "a": {
+     "s2": 0.0
+    },
+    "b": {
+     "s2": 0.5
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "s2": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "s1_when_s2_positive",
+    "gate": "s1 active iff s2 != 0",
+    "expect": "active",
+    "shared": {
+     "s2": 0.5
+    },
+    "a": {
+     "s1": 0.1
+    },
+    "b": {
+     "s1": 1.0
+    },
+    "rms_mm": 57.965957574276395,
+    "searched": {
+     "s1": false
+    },
+    "inactive": false
+   },
+   {
+    "name": "s2_when_s1_positive",
+    "gate": "s2 active iff s1 != 0",
+    "expect": "active",
+    "shared": {
+     "s1": 1.0
+    },
+    "a": {
+     "s2": 0.1
+    },
+    "b": {
+     "s2": 0.5
+    },
+    "rms_mm": 3.6155208025141152,
+    "searched": {
+     "s2": false
+    },
+    "inactive": false
+   },
+   {
+    "name": "morph_width_at_target0",
+    "gate": "morph_* active iff morph_target != 0",
+    "expect": "inactive",
+    "shared": {
+     "morph_target": 0
+    },
+    "a": {
+     "morph_width_mm": 450.0
+    },
+    "b": {
+     "morph_width_mm": 550.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "morph_width_mm": true
+    },
+    "inactive": true
+   },
+   {
+    "name": "morph_rate_at_target0",
+    "gate": "morph_* active iff morph_target != 0",
+    "expect": "inactive",
+    "shared": {
+     "morph_target": 0
+    },
+    "a": {
+     "morph_rate": 1.0
+    },
+    "b": {
+     "morph_rate": 4.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "morph_rate": true
+    },
+    "inactive": true
+   },
+   {
+    "name": "morph_exponent_at_target1",
+    "gate": "morph_exponent active iff target == 3",
+    "expect": "inactive",
+    "shared": {
+     "morph_target": 1
+    },
+    "a": {
+     "morph_exponent": 2.0
+    },
+    "b": {
+     "morph_exponent": 8.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "morph_exponent": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "morph_exponent_at_target3",
+    "gate": "morph_exponent active iff target == 3",
+    "expect": "active",
+    "shared": {
+     "morph_target": 3
+    },
+    "a": {
+     "morph_exponent": 2.0
+    },
+    "b": {
+     "morph_exponent": 8.0
+    },
+    "rms_mm": 21.27246284542905,
+    "searched": {
+     "morph_exponent": false
+    },
+    "inactive": false
+   }
+  ],
+  "slack": {
+   "guiding_curve_present": false,
+   "rot_deg_present": false,
+   "note": "guiding-curve replacement not testable: no guiding-curve control in the searched params"
+  }
+ },
+ "hl__crowe_x_osse_cd_v7": {
+  "h": "77308ed8afa3",
+  "knobs": [
+   "g_L_mm",
+   "g_a_h_deg",
+   "g_a_v_deg",
+   "g_k",
+   "g_n",
+   "g_q",
+   "g_r_lip_mm",
+   "g_s",
+   "g_sf_ab",
+   "g_sf_amt",
+   "g_sf_m",
+   "g_sf_n1",
+   "g_sf_n2",
+   "g_sf_start",
+   "g_wrap_deg"
+  ],
+  "base_mm": 0.0,
+  "tests": [
+   {
+    "name": "g_n_at_s0",
+    "gate": "g_n active iff g_s != 0",
+    "expect": "inactive",
+    "shared": {
+     "g_s": 0.0
+    },
+    "a": {
+     "g_n": 1.8
+    },
+    "b": {
+     "g_n": 3.2
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "g_n": true
+    },
+    "inactive": true
+   },
+   {
+    "name": "g_n_at_s_positive",
+    "gate": "g_n active iff g_s != 0",
+    "expect": "active",
+    "shared": {
+     "g_s": 0.35
+    },
+    "a": {
+     "g_n": 1.8
+    },
+    "b": {
+     "g_n": 3.2
+    },
+    "rms_mm": 13.928337989403179,
+    "searched": {
+     "g_n": true
+    },
+    "inactive": false
+   },
+   {
+    "name": "g_q_at_s0",
+    "gate": "g_q active iff g_s != 0",
+    "expect": "inactive",
+    "shared": {
+     "g_s": 0.0
+    },
+    "a": {
+     "g_q": 0.9
+    },
+    "b": {
+     "g_q": 1.0
+    },
+    "rms_mm": 0.0,
+    "searched": {
+     "g_q": false
+    },
+    "inactive": true
+   },
+   {
+    "name": "g_q_at_s_positive",
+    "gate": "g_q active iff g_s != 0",
+    "expect": "active",
+    "shared": {
+     "g_s": 0.35
+    },
+    "a": {
+     "g_q": 0.9
+    },
+    "b": {
+     "g_q": 1.0
+    },
+    "rms_mm": 20.118004196846517,
+    "searched": {
+     "g_q": false
+    },
+    "inactive": false
+   }
+  ],
+  "slack": {
+   "guiding_curve_present": false,
+   "rot_deg_present": false,
+   "note": "guiding-curve replacement not testable: no guiding-curve control in the searched params"
+  }
+ },
+ "hl__biradial_es_style_v7": {
+  "h": "d24016b7ab8a",
+  "knobs": [
+   "L_mm",
+   "h_a_deg",
+   "h_n",
+   "h_rm_mm",
+   "h_throat_blend_mm",
+   "mouth_exponent",
+   "v_a_deg",
+   "v_n",
+   "v_rm_mm",
+   "v_throat_blend_mm"
+  ],
+  "base_mm": 0.0,
+  "tests": [],
+  "slack": {
+   "guiding_curve_present": false,
+   "rot_deg_present": false,
+   "note": "guiding-curve replacement not testable: no guiding-curve control in the searched params"
+  }
+ }
+}

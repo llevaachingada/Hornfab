@@ -1,0 +1,67 @@
+==============================================================================
+hl__osse_rrect_fold_warm_v7  full-range RMS(lo, hi) at the best design
+  L_mm                           22.483 mm  active      worst corner margins W +17.0 H +71.1 D +125.5
+  a0_deg                          0.226 mm  borderline  worst corner margins W +17.0 H +71.1 D +126.7
+  a_deg                           6.620 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  az_a_cos_amp                    4.733 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  az_a_cos_pow                    2.398 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  az_s_cos2_amp                   0.472 mm  borderline  worst corner margins W +17.0 H +71.1 D +126.7
+  k                               3.556 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  morph_corner_mm                 0.916 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  morph_height_mm                 8.001 mm  active      worst corner margins W +17.0 H +68.1 D +126.7
+  morph_rate                      2.166 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  morph_width_mm                  5.007 mm  active      worst corner margins W +12.2 H +71.1 D +126.7
+  n                               0.715 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  q                               2.805 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  s                               1.568 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  az_fold_v_deg                  14.517 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  az_fold_v_width_deg             1.959 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  az_fold_h_deg                  10.531 mm  active      worst corner margins W +17.0 H +71.1 D +126.7
+  az_fold_h_width_deg             0.054 mm  inactive    worst corner margins W +17.0 H +71.1 D +126.7
+==============================================================================
+hl__ext_throat_hvlaw_v7  full-range RMS(lo, hi) at the best design
+  a_deg                         109.780 mm  active      worst corner margins W -284.9 H -119.1 D +160.4
+  L_mm                          122.946 mm  active      worst corner margins W -148.1 H -34.7 D +85.3
+  s                              38.357 mm  active      worst corner margins W -72.7 H -7.1 D +160.4
+  throat_ext_length_mm          104.227 mm  active      worst corner margins W +20.3 H +80.0 D +20.1
+  throat_ext_angle_deg            1.660 mm  active      worst corner margins W +20.3 H +80.0 D +160.4
+  az_a_cos_pow                   20.712 mm  active      worst corner margins W +20.3 H +75.9 D +160.4
+  az_a_cos_amp                   70.778 mm  active      worst corner margins W -148.5 H +34.4 D +160.4
+  az_s_cos2_amp                  29.600 mm  active      worst corner margins W -81.5 H +62.5 D +160.4
+==============================================================================
+hl__ath_tritonia_landscape_v9  full-range RMS(lo, hi) at the best design
+  L_mm                          167.494 mm  active      worst corner margins W +16.1 H +74.5 D +14.5
+  a0_deg                          1.350 mm  active      worst corner margins W +16.1 H +74.5 D +187.8
+  a_deg                           2.909 mm  active      worst corner margins W +16.1 H +74.5 D +187.8
+  k                               1.235 mm  active      worst corner margins W +16.1 H +74.5 D +187.8
+  az_a_cos_amp                    0.621 mm  active      worst corner margins W +16.1 H +74.5 D +187.8
+  az_fold_v_deg                   0.215 mm  borderline  worst corner margins W +16.1 H +74.5 D +187.8
+  az_fold_v_width_deg             0.447 mm  borderline  worst corner margins W +16.1 H +74.5 D +187.8
+  morph_corner_mm                 0.829 mm  active      worst corner margins W +16.1 H +74.5 D +187.8
+  morph_height_mm                64.471 mm  active      worst corner margins W +16.1 H +0.5 D +187.8
+  morph_rate                     10.249 mm  active      worst corner margins W +16.1 H +74.5 D +187.8
+  morph_width_mm                 54.761 mm  active      worst corner margins W +10.5 H +74.5 D +187.8
+  n                               9.994 mm  active      worst corner margins W +16.1 H +74.5 D +187.8
+  q                              10.999 mm  active      worst corner margins W +16.1 H +74.5 D +187.8
+  s                               1.617 mm  active      worst corner margins W +16.1 H +74.5 D +187.8
+==============================================================================
+hl__crowe_x_osse_cd_v7  full-range RMS(lo, hi) at the best design
+  g_a_h_deg                      18.596 mm  active      worst corner margins W -43.1 H +51.9 D +235.4
+  g_a_v_deg                      16.628 mm  active      worst corner margins W +7.9 H +34.8 D +235.3
+  g_L_mm                         48.434 mm  active      worst corner margins W +7.0 H +68.6 D +235.0
+  g_s                            31.826 mm  active      worst corner margins W -18.7 H +47.4 D +234.3
+  g_n                            15.421 mm  active      worst corner margins W -2.3 H +61.0 D +235.0
+  g_r_lip_mm                     19.077 mm  active      worst corner margins W -19.4 H +49.7 D +234.9
+  g_wrap_deg                     14.266 mm  active      worst corner margins W +7.2 H +68.8 D +235.0
+  g_sf_ab                        13.613 mm  active      worst corner margins W -37.7 H +59.9 D +235.3
+  g_sf_amt                       11.722 mm  active      worst corner margins W +1.5 H +44.5 D +235.2
+==============================================================================
+hl__biradial_es_style_v7  full-range RMS(lo, hi) at the best design
+  L_mm                           50.561 mm  active      worst corner margins W +26.1 H +96.4 D +175.0
+  h_a_deg                         4.973 mm  active      worst corner margins W +26.1 H +96.4 D +253.4
+  v_a_deg                         5.268 mm  active      worst corner margins W +26.1 H +96.4 D +253.4
+  h_rm_mm                         9.907 mm  active      worst corner margins W +16.5 H +96.4 D +253.4
+  v_rm_mm                        29.470 mm  active      worst corner margins W +26.1 H +20.5 D +253.4
+  h_n                             5.208 mm  active      worst corner margins W +26.1 H +96.4 D +253.4
+  v_n                             6.553 mm  active      worst corner margins W +26.1 H +96.4 D +253.4
+  mouth_exponent                 14.129 mm  active      worst corner margins W +26.1 H +96.4 D +253.4

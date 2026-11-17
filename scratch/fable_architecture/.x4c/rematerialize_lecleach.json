@@ -1,0 +1,317 @@
+{
+ "lane": "hl__lecleach_hv_landscape_smooth_v7",
+ "kind": "lecleach",
+ "head_digest": null,
+ "records": [
+  {
+   "h": "01e11c10387c",
+   "run": "20261116T040157Z-screen-402831",
+   "stored_digest": null,
+   "head_digest": null,
+   "hash_ok": true,
+   "built": true,
+   "mode": "grid",
+   "provenance": "hornlab_search.design.generators.grid.grid_points+grid_outer_points",
+   "inner_shape": [
+    15,
+    33,
+    3
+   ],
+   "box": {
+    "W_mm": 579.2312355193228,
+    "H_mm": 357.30736227107917,
+    "D_mm": 298.01924797951307
+   },
+   "digest_match": null,
+   "stored_mesh_box": {
+    "W_mm": 579.2312355193229,
+    "H_mm": 361.092895351644,
+    "D_mm": 426.7272878012229
+   },
+   "delta_mm": {
+    "W_mm": -1.1368683772161603e-13,
+    "H_mm": -3.7855330805648464,
+    "D_mm": -128.7080398217098
+   }
+  },
+  {
+   "h": "031e9f5464fd",
+   "run": "20261116T040157Z-screen-402831",
+   "stored_digest": null,
+   "head_digest": null,
+   "hash_ok": true,
+   "built": true,
+   "mode": "grid",
+   "provenance": "hornlab_search.design.generators.grid.grid_points+grid_outer_points",
+   "inner_shape": [
+    15,
+    33,
+    3
+   ],
+   "box": {
+    "W_mm": 544.9715556998468,
+    "H_mm": 210.90856732358287,
+    "D_mm": 193.390438079442
+   },
+   "digest_match": null,
+   "stored_mesh_box": {
+    "W_mm": 544.9715556998468,
+    "H_mm": 268.3414313495252,
+    "D_mm": 403.528894580001
+   },
+   "delta_mm": {
+    "W_mm": 0.0,
+    "H_mm": -57.43286402594231,
+    "D_mm": -210.13845650055902
+   }
+  },
+  {
+   "h": "2c3fa011926f",
+   "run": "20261116T040157Z-screen-402831",
+   "stored_digest": null,
+   "head_digest": null,
+   "hash_ok": true,
+   "built": true,
+   "mode": "grid",
+   "provenance": "hornlab_search.design.generators.grid.grid_points+grid_outer_points",
+   "inner_shape": [
+    15,
+    33,
+    3
+   ],
+   "box": {
+    "W_mm": 460.18968217896617,
+    "H_mm": 263.51182769071085,
+    "D_mm": 240.56641540665865
+   },
+   "digest_match": null,
+   "stored_mesh_box": {
+    "W_mm": 460.1896821789662,
+    "H_mm": 271.5204925856572,
+    "D_mm": 371.1293322162343
+   },
+   "delta_mm": {
+    "W_mm": -5.684341886080802e-14,
+    "H_mm": -8.008664894946378,
+    "D_mm": -130.56291680957563
+   }
+  },
+  {
+   "h": "372d25730c4e",
+   "run": "20261116T040157Z-screen-402831",
+   "stored_digest": null,
+   "head_digest": null,
+   "hash_ok": true,
+   "built": true,
+   "mode": "grid",
+   "provenance": "hornlab_search.design.generators.grid.grid_points+grid_outer_points",
+   "inner_shape": [
+    15,
+    33,
+    3
+   ],
+   "box": {
+    "W_mm": 367.88222922267465,
+    "H_mm": 205.16105411001018,
+    "D_mm": 117.61070080587012
+   },
+   "digest_match": null,
+   "stored_mesh_box": {
+    "W_mm": 367.8822292226746,
+    "H_mm": 213.4168171271574,
+    "D_mm": 193.7682464444622
+   },
+   "delta_mm": {
+    "W_mm": 5.684341886080802e-14,
+    "H_mm": -8.255763017147217,
+    "D_mm": -76.15754563859207
+   }
+  },
+  {
+   "h": "3cff832028d7",
+   "run": "20261116T040157Z-screen-402831",
+   "stored_digest": null,
+   "head_digest": null,
+   "hash_ok": true,
+   "built": true,
+   "mode": "grid",
+   "provenance": "hornlab_search.design.generators.grid.grid_points+grid_outer_points",
+   "inner_shape": [
+    15,
+    33,
+    3
+   ],
+   "box": {
+    "W_mm": 293.6509191814067,
+    "H_mm": 280.7710380070671,
+    "D_mm": 157.24297167195212
+   },
+   "digest_match": null,
+   "stored_mesh_box": {
+    "W_mm": 293.9581470727188,
+    "H_mm": 280.771038007067,
+    "D_mm": 166.3334809564674
+   },
+   "delta_mm": {
+    "W_mm": -0.3072278913120954,
+    "H_mm": 1.1368683772161603e-13,
+    "D_mm": -9.090509284515292
+   }
+  },
+  {
+   "h": "3d4731536ab0",
+   "run": "20261116T040157Z-screen-402831",
+   "stored_digest": null,
+   "head_digest": null,
+   "hash_ok": true,
+   "built": true,
+   "mode": "grid",
+   "provenance": "hornlab_search.design.generators.grid.grid_points+grid_outer_points",
+   "inner_shape": [
+    15,
+    33,
+    3
+   ],
+   "box": {
+    "W_mm": 491.8251730863737,
+    "H_mm": 162.2653456961804,
+    "D_mm": 169.29518363342805
+   },
+   "digest_match": null,
+   "stored_mesh_box": {
+    "W_mm": 491.8251730863736,
+    "H_mm": 230.9878107539578,
+    "D_mm": 400.42882645637553
+   },
+   "delta_mm": {
+    "W_mm": 1.1368683772161603e-13,
+    "H_mm": -68.72246505777741,
+    "D_mm": -231.13364282294748
+   }
+  },
+  {
+   "h": "487c98a11b51",
+   "run": "20261116T040157Z-screen-402831",
+   "stored_digest": null,
+   "head_digest": null,
+   "hash_ok": true,
+   "built": true,
+   "mode": "grid",
+   "provenance": "hornlab_search.design.generators.grid.grid_points+grid_outer_points",
+   "inner_shape": [
+    15,
+    33,
+    3
+   ],
+   "box": {
+    "W_mm": 549.5445925374978,
+    "H_mm": 209.00051376298745,
+    "D_mm": 213.23352197692904
+   },
+   "digest_match": null,
+   "stored_mesh_box": {
+    "W_mm": 549.5445925374978,
+    "H_mm": 267.8125465938368,
+    "D_mm": 442.5248038809469
+   },
+   "delta_mm": {
+    "W_mm": 0.0,
+    "H_mm": -58.812032830849375,
+    "D_mm": -229.29128190401784
+   }
+  },
+  {
+   "h": "4de57049aa1c",
+   "run": "20261116T040157Z-screen-402831",
+   "stored_digest": null,
+   "head_digest": null,
+   "hash_ok": true,
+   "built": true,
+   "mode": "grid",
+   "provenance": "hornlab_search.design.generators.grid.grid_points+grid_outer_points",
+   "inner_shape": [
+    15,
+    33,
+    3
+   ],
+   "box": {
+    "W_mm": 393.1205169377172,
+    "H_mm": 199.33608258445622,
+    "D_mm": 133.22840732013287
+   },
+   "digest_match": null,
+   "stored_mesh_box": {
+    "W_mm": 393.1205169377172,
+    "H_mm": 216.2320733580236,
+    "D_mm": 233.8805743260971
+   },
+   "delta_mm": {
+    "W_mm": 0.0,
+    "H_mm": -16.895990773567377,
+    "D_mm": -100.65216700596423
+   }
+  },
+  {
+   "h": "4eebb20d92af",
+   "run": "20261116T040157Z-screen-402831",
+   "stored_digest": null,
+   "head_digest": null,
+   "hash_ok": true,
+   "built": true,
+   "mode": "grid",
+   "provenance": "hornlab_search.design.generators.grid.grid_points+grid_outer_points",
+   "inner_shape": [
+    15,
+    33,
+    3
+   ],
+   "box": {
+    "W_mm": 308.3165248030173,
+    "H_mm": 219.26114894569722,
+    "D_mm": 121.57138817604029
+   },
+   "digest_match": null,
+   "stored_mesh_box": {
+    "W_mm": 308.3165248030172,
+    "H_mm": 219.26114894569722,
+    "D_mm": 164.05727336240182
+   },
+   "delta_mm": {
+    "W_mm": 5.684341886080802e-14,
+    "H_mm": 0.0,
+    "D_mm": -42.48588518636153
+   }
+  },
+  {
+   "h": "657cf8a788c0",
+   "run": "20261116T040157Z-screen-402831",
+   "stored_digest": null,
+   "head_digest": null,
+   "hash_ok": true,
+   "built": true,
+   "mode": "grid",
+   "provenance": "hornlab_search.design.generators.grid.grid_points+grid_outer_points",
+   "inner_shape": [
+    15,
+    33,
+    3
+   ],
+   "box": {
+    "W_mm": 554.999759284012,
+    "H_mm": 348.3066888183283,
+    "D_mm": 296.53169760066635
+   },
+   "digest_match": null,
+   "stored_mesh_box": {
+    "W_mm": 554.999759284012,
+    "H_mm": 350.0723750384324,
+    "D_mm": 423.36911043316724
+   },
+   "delta_mm": {
+    "W_mm": 0.0,
+    "H_mm": -1.7656862201041008,
+    "D_mm": -126.83741283250089
+   }
+  }
+ ]
+}

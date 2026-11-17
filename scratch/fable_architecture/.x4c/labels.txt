@@ -1,0 +1,59 @@
+==============================================================================
+hl__osse_rrect_fold_warm_v7  label designs 246 (of 326 design hashes with records)
+  family      246/246 distinct   (251/251 record instances)
+  typology    246/246 distinct   (251/251 record instances)
+  sampled 11  family 11/11, typology 11/11, both 11/11, any 11/11
+  mounting    0/0 (no positive label stored; no mounting block stored; all briefs omit it -> freestanding default)
+  termination 0/0 sampled designs with a stored token
+==============================================================================
+hl__ext_throat_hvlaw_v7  label designs 136 (of 420 design hashes with records)
+  family      136/136 distinct   (136/136 record instances)
+  typology    136/136 distinct   (136/136 record instances)
+  sampled 11  family 11/11, typology 11/11, both 11/11, any 11/11
+  mounting    0/0 (no positive label stored; no mounting block stored; all briefs omit it -> freestanding default)
+  termination 0/0 sampled designs with a stored token
+==============================================================================
+hl__ath_tritonia_landscape_v9  label designs 120 (of 133 design hashes with records)
+  family      120/120 distinct   (120/120 record instances)
+  typology    120/120 distinct   (120/120 record instances)
+  sampled 11  family 11/11, typology 11/11, both 11/11, any 11/11
+  mounting    0/0 (no positive label stored; no mounting block stored; all briefs omit it -> freestanding default)
+  termination 0/0 sampled designs with a stored token
+==============================================================================
+hl__crowe_x_osse_cd_v7  label designs 200 (of 256 design hashes with records)
+  family      200/200 distinct   (208/208 record instances)
+  typology    193/200 distinct   (201/208 record instances)
+  sampled 11  family 11/11, typology 10/11, both 10/11, any 11/11
+  mounting    0/0 (no positive label stored; no mounting block stored; all briefs omit it -> freestanding default)
+  termination 11/11 sampled designs with a stored token
+    DISAGREE 0070dac9e12b typology stored=['FREEFORM', 'grid'] derived=grid
+    DISAGREE 2c922317f1c7 typology stored=['FREEFORM', 'grid'] derived=grid
+    DISAGREE 4784a31e69cf typology stored=['FREEFORM', 'grid'] derived=grid
+    DISAGREE 6ca73e01c97b typology stored=['FREEFORM', 'grid'] derived=grid
+    DISAGREE 77308ed8afa3 typology stored=['FREEFORM', 'grid'] derived=grid
+    DISAGREE 901d855c40c9 typology stored=['FREEFORM', 'grid'] derived=grid
+    DISAGREE b4ea3b525a2a typology stored=['FREEFORM', 'grid'] derived=grid
+    term 3836ccaf362a token=osse_rollback derived=rollback min_dz=-5.71 agree=True
+    term 3d45fe1c657c token=osse_rollback derived=rollback min_dz=-6.89 agree=True
+    term 56b153633f43 token=osse_rollback derived=rollback min_dz=-5.46 agree=True
+    term 6003be202ff8 token=osse_rollback derived=rollback min_dz=-6.93 agree=True
+    term 7477ae38c09a token=osse_rollback derived=rollback min_dz=-6.45 agree=True
+    term 77308ed8afa3 token=osse_rollback derived=rollback min_dz=-5.67 agree=True
+    term 909966278673 token=osse_rollback derived=rollback min_dz=-6.03 agree=True
+    term c83f1fec97c3 token=osse_rollback derived=rollback min_dz=-6.28 agree=True
+    term ced2457f7e22 token=osse_rollback derived=rollback min_dz=-5.83 agree=True
+    term d5b2eabbb003 token=osse_rollback derived=rollback min_dz=-5.51 agree=True
+    term e5caf617c5e0 token=osse_rollback derived=rollback min_dz=-5.31 agree=True
+==============================================================================
+hl__biradial_es_style_v7  label designs 307 (of 326 design hashes with records)
+  family      307/307 distinct   (313/313 record instances)
+  typology    301/307 distinct   (307/313 record instances)
+  sampled 11  family 11/11, typology 11/11, both 11/11, any 11/11
+  mounting    0/0 (no positive label stored; no mounting block stored; all briefs omit it -> freestanding default)
+  termination 0/0 sampled designs with a stored token
+    DISAGREE 0004bf3995ed typology stored=['FREEFORM', 'typology:biradial'] derived=typology:biradial
+    DISAGREE 0d72914a37cd typology stored=['FREEFORM', 'typology:biradial'] derived=typology:biradial
+    DISAGREE 27fe89821845 typology stored=['FREEFORM', 'typology:biradial'] derived=typology:biradial
+    DISAGREE 5215af5401f9 typology stored=['FREEFORM', 'typology:biradial'] derived=typology:biradial
+    DISAGREE 54137913a603 typology stored=['FREEFORM', 'typology:biradial'] derived=typology:biradial
+    DISAGREE be2523d196c8 typology stored=['FREEFORM', 'typology:biradial'] derived=typology:biradial
