@@ -1,5 +1,27 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - owner-box integration started: cloud branch suite green after digest-pin fix (local orchestrator)
+
+- Suite on `cloud/fable-next-2026-11-18` (offline, thread caps 1, -n 6 --dist loadscope):
+  **4861 passed, 4 failed, 22 skipped, 18:42 min** — failures exactly the known 4
+  (`test_v8_key_set…`, `test_b8_lanes…`, 2 × `test_night_bo_arm_wrapper`).
+- Fixed before merge (R7 / WP 0.9): `tests/test_klangfilm_hv_digest_pin.py` pinned the cloud
+  container's `implementation_digest()` values (`ee160698…`/`c65beb16…`), but
+  `implementation_digest()` folds `numpy=<v>;scipy=<v>` into the hash, so those constants cannot
+  hold on another dependency set. Owner box (numpy 2.5.4 / scipy 1.18.1) computes
+  `1304dea3…`/`a032f660…` — and the stored local recipes carry exactly those digests
+  (runs/20261117T071329Z-screen-e4f90d design.json; docs/evidence/klangfilm_hv_2026-11-16/search_box.json),
+  so nothing is locked out. The test now pins the frozen FILE BYTES (same file list + CRLF
+  normalisation as the digest recipe: adapter, kernel, parent, cap, shell) and independently
+  re-checks the digest recipe + version suffix. Kernel files verified byte-identical to
+  pre-b06a938 (`git diff b06a938^ -- <both kernel files>` empty).
+- R22 on the owner box: the uncommitted `scalar_v9.py` edit (adds `ripple_window`/`oa_excess_tol`
+  v9 math) DISCARDED per R22 (copy saved outside the repo);
+  `tests/test_v9_polar_window.py` deleted (it tested only the discarded API);
+  AGENTS.md/.opencode agent-config sync (opencode-go-max preset text + mirror of the umbrella
+  fallback/backgroundJobs block) kept as doc/config-only;
+  `hl__klangfilm_lame_curved_v1_c200w.yaml` kept pending shape_check.
+
 ## 2026-11-18 - cloud senior: ALL owner questions resolved under owner delegation (R1-R25) + code
 
 - `scratch/fable_architecture/OWNER_DECISIONS_RESOLVED_2026-11-18.md`: research frame (CTA-2034

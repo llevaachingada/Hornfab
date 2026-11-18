@@ -1,5 +1,14 @@
 ﻿# ISSUES
 
+## 2026-11-18 - owner-box integration: digest pin was env-dependent (fixed pre-merge); R22 resolved
+
+- FIXED (R7 / WP 0.9, pre-merge): `tests/test_klangfilm_hv_digest_pin.py` pinned absolute
+  `implementation_digest()` values that fold numpy/scipy versions; rewritten to pin frozen file
+  content + digest recipe. Stored local recipes verified unlocked (`1304dea3…`/`a032f660…`).
+- CLOSED (R22): uncommitted `scalar_v9.py` v9-math edit discarded (patch archived outside repo);
+  `tests/test_v9_polar_window.py` deleted (tested only the discarded API); AGENTS.md/.opencode
+  doc/config-only sync kept; c200w yaml kept pending shape_check.
+
 ## 2026-11-18 - owner questions: all RESOLVED (R1-R25); remaining work is execution
 
 - CLOSED (decided, see OWNER_DECISIONS_RESOLVED_2026-11-18.md): C1-C6, ripple region and rip
