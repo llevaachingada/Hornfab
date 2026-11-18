@@ -1,5 +1,16 @@
 # ISSUES
 
+## 2026-11-18 - Shared throat H/V block: local verification before any GPU
+
+- OPEN (owner, local): confirm the pinned `hornlab_mesher` evaluates a p-expression for `k`
+  (shape_check on config A with rho != 1). Run the osse_rollback geometry tests that are skipped
+  without the mesher. Run shape_check plus search_preflight on both configs.
+- OPEN (owner, GPU budget): onset sweep on the 80x50 brief (onset at 0/0.25/0.5/0.75), then a
+  matched screen of config A vs v8.
+- OPEN (design): a rolled-family per-plane throat growth parameter so rho can map there.
+  `lecleach_iwata_ar` adoption. R-OSSE parent status for per-azimuth k is unknown.
+- NOTE: the rolled-family implementation digest changed (file edited).
+
 ## 2026-11-18 - Near-throat H/V control for asymmetric briefs (proposal)
 
 - OPEN (owner): approve the shared throat H/V block (CPU code patch plus tests), and approve the BEM

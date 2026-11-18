@@ -56,6 +56,7 @@ import numpy as np
 
 from . import profiles as profiles_mod
 from . import registry
+from .. import throat_hv
 
 #: Grid knobs whose defaults are NOT registry.DEFAULT_KNOBS (the GRID-only shape freedoms).
 GRID_DEFAULTS: dict[str, float] = {
@@ -1075,6 +1076,22 @@ def _rows_lip_mm(knobs: dict, prefix: str, name: str = "r_lip_mm") -> float:
     return r
 
 
+_THROAT_HV_KNOB_NAMES = tuple(throat_hv.KEYS)
+
+
+def _rows_throat_hv_block(knobs: dict, prefix: str, route: str) -> dict | None:
+    """Shared near-throat H/V block (``throat_hv``), parsed OUTSIDE every defaults dict.
+
+    Returns ``None`` when no key is present or the block is neutral (rho 1 and no
+    onset/ramp), so an absent block leaves rows, meta and design hashes byte-identical.
+    """
+    try:
+        block = throat_hv.parse(knobs, f"{prefix}_")
+    except throat_hv.ThroatHVError as exc:
+        raise registry.GeneratorError(f"{route} rows: {exc}") from exc
+    return block if throat_hv.is_active(block) else None
+
+
 def _rows_lecleach_knobs(knobs: dict, prefix: str = "g") -> dict:
     """Validated ``rows: {type: lecleach}`` knobs: ``fc_hz``, ``T``, ``stop_deg``, lip.
 
@@ -1086,7 +1103,8 @@ def _rows_lecleach_knobs(knobs: dict, prefix: str = "g") -> dict:
     allowed = {f"{prefix}_fc_hz", f"{prefix}_T", f"{prefix}_stop_deg", f"{prefix}_r_lip_mm",
                f"{prefix}_fc_h_hz", f"{prefix}_fc_v_hz",
                f"{prefix}_stop_cos2k", f"{prefix}_stop_sin2k1",
-               f"{prefix}_bend_sin1_mm"}
+               f"{prefix}_bend_sin1_mm",
+               *(f"{prefix}_{n}" for n in _THROAT_HV_KNOB_NAMES)}
     foreign = sorted(str(k) for k in knobs
                      if str(k).startswith(f"{prefix}_") and k not in allowed)
     if foreign:
@@ -1131,9 +1149,18 @@ def _rows_lecleach_knobs(knobs: dict, prefix: str = "g") -> dict:
                 "ratio of 1.5-3.0 (920x330 datasheet = 567/203 = 2.8; "
                 "JMLC_FAMILY_VARIANTS_2026-10-25.md section 2.1(c)) + a safety margin), "
                 f"got fc_h_hz {fc_h_hz} / fc_v_hz {fc_v_hz}")
-    return {"fc_hz": fc, "T": T, "stop_deg": stop,
-            "fc_h_hz": fc_h_hz, "fc_v_hz": fc_v_hz,
-            "r_lip_mm": _rows_lip_mm(knobs, prefix)}
+    out = {"fc_hz": fc, "T": T, "stop_deg": stop,
+           "fc_h_hz": fc_h_hz, "fc_v_hz": fc_v_hz,
+           "r_lip_mm": _rows_lip_mm(knobs, prefix)}
+    hv_block = _rows_throat_hv_block(knobs, prefix, "lecleach")
+    if hv_block is not None:
+        if fc_h_hz is None:
+            raise registry.GeneratorError(
+                f"lecleach rows: {prefix}_throat_hv_ratio / {prefix}_hv_onset_frac / "
+                f"{prefix}_section_exp_ramp need the fc_h/fc_v pair (an inactive "
+                "conditional knob must not be searched)")
+        out["throat_hv"] = hv_block   # only when active: absent = byte-identical dict
+    return out
 
 
 #: A cos(phi) (odd cosine) term breaks the left-right mirror; the rows model is only
@@ -1364,15 +1391,26 @@ def _rows_lecleach_hv_marches(lk: dict, harm: dict, phis: np.ndarray, r0: float,
     # the lip zone, so the rim ring is the ellipse-tube roll: the lip is continuous all
     # the way round (r_lip = 0 returns the marches untouched, byte-identical default).
     r_lip = float(lk["r_lip_mm"])
+    hv = lk.get("throat_hv")
+    # Shared near-throat block: rho scales the per-plane flare T (larger T = faster
+    # expansion, S(l) = S0 [cosh + T sinh]^2, eq 42).  None -> today's T on both planes.
+    t_h = t_v = float(lk["T"])
+    if hv is not None and hv.get("throat_hv_ratio") is not None:
+        rho = hv["throat_hv_ratio"]
+        t_h = float(lk["T"]) * float(throat_hv.hv_scale(rho, 0.0))
+        t_v = float(lk["T"]) * float(throat_hv.hv_scale(rho, 0.5 * math.pi))
+        if not (math.isfinite(t_h) and math.isfinite(t_v) and t_h >= 0.0 and t_v >= 0.0):
+            raise registry.GeneratorError(
+                f"lecleach hv rows: per-plane T out of range (T_h {t_h}, T_v {t_v}; T >= 0)")
     _xs, _ys, _phi_deg, march_meta = profiles_mod.lecleach_exact(
         r0, fc_core, lk["T"], a0, max(stop_h, stop_v), dl_mm=1.0)
-    core_x, _core_y, _L0 = _resample_arc(*_append_lip_torus(_xs, _ys, r_lip), n_s)
+    core_x, core_r, _L0 = _resample_arc(*_append_lip_torus(_xs, _ys, r_lip), n_s)
     xh, r_h, _L0h = _resample_arc(*_append_lip_torus(
         *profiles_mod.lecleach_exact(
-            r0, fc_h, lk["T"], a0, stop_h, dl_mm=1.0)[:2], r_lip), n_s)
+            r0, fc_h, t_h, a0, stop_h, dl_mm=1.0)[:2], r_lip), n_s)
     xv, r_v, _L0v = _resample_arc(*_append_lip_torus(
         *profiles_mod.lecleach_exact(
-            r0, fc_v, lk["T"], a0, stop_v, dl_mm=1.0)[:2], r_lip), n_s)
+            r0, fc_v, t_v, a0, stop_v, dl_mm=1.0)[:2], r_lip), n_s)
     if np.any(r_h <= 0.0) or np.any(r_v <= 0.0):
         raise registry.GeneratorError(
             "lecleach hv rows: a plane march radius is not strictly positive")
@@ -1380,7 +1418,18 @@ def _rows_lecleach_hv_marches(lk: dict, harm: dict, phis: np.ndarray, r0: float,
         raise registry.GeneratorError(
             "lecleach hv rows: resampled stations lost the n_s + 1 contract")
     a_ax, b_ax = r_h, r_v
-    area_ratio = float(r_h[-1] * r_v[-1])
+    if hv is not None and (hv.get("hv_onset_frac") is not None
+                           or hv.get("section_exp_ramp") is not None):
+        # Ath morph weight on the shared arc-fraction station: round core section
+        # (r_m, the core march radius) until the onset, then blend to the plane axes.
+        w_s = throat_hv.ath_ramp(np.arange(n_s + 1, dtype=float) / n_s,
+                                 hv.get("hv_onset_frac"), hv.get("section_exp_ramp"))
+        a_ax = core_r + w_s * (r_h - core_r)
+        b_ax = core_r + w_s * (r_v - core_r)
+        if np.any(a_ax <= 0.0) or np.any(b_ax <= 0.0):
+            raise registry.GeneratorError(
+                "lecleach hv rows: the onset ramp left a non-positive section axis")
+    area_ratio = float(a_ax[-1] * b_ax[-1])
     core_note = [
         "fc_core_hz", float(fc_core),
         "plane_stop_h_deg", float(stop_h),
@@ -1422,6 +1471,12 @@ def _rows_lecleach_hv_marches(lk: dict, harm: dict, phis: np.ndarray, r0: float,
             "resample": False,
             "march": march_meta,
         })
+    if hv is not None:
+        core_note += [
+            "throat_hv", {k: v for k, v in hv.items() if v is not None},
+            "throat_hv_status", throat_hv.STATUS["lecleach_hv"],
+            "throat_hv_plane_T", {"T_h": t_h, "T_v": t_v},
+        ]
     hv_meta = dict(zip(core_note[0::2], core_note[1::2]))
     for row in rows:
         row["hv_meta"] = hv_meta
@@ -1940,7 +1995,8 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
     """Validated ``rows: {type: osse_rollback}`` knobs (OS wall + flutes + curled lip)."""
     names = tuple(ROWS_OSSE_ROLL_KNOB_DEFAULTS)
     allowed = ({f"{prefix}_{n}" for n in names}
-               | {f"{prefix}_ripple_lobes", f"{prefix}_ripple_amp_mm", f"{prefix}_ripple_start"})
+               | {f"{prefix}_ripple_lobes", f"{prefix}_ripple_amp_mm", f"{prefix}_ripple_start"}
+               | {f"{prefix}_{n}" for n in _THROAT_HV_KNOB_NAMES})
     foreign = sorted(str(k) for k in knobs
                      if str(k).startswith(f"{prefix}_") and k not in allowed)
     if foreign:
@@ -2004,6 +2060,20 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
     if out["wrap_cos_amp"] > 0.0 and not out["ripple_lobes"]:
         raise registry.GeneratorError(
             "osse_rollback rows: wrap_cos_amp follows the flute count; set ripple_lobes")
+    hv_block = _rows_throat_hv_block(knobs, prefix, "osse_rollback")
+    if hv_block is not None:
+        window = hv_block["hv_onset_frac"] is not None or hv_block["section_exp_ramp"] is not None
+        if window:
+            if out["sf_m"] == 0.0 or out["sf_amt"] == 0.0:
+                raise registry.GeneratorError(
+                    "osse_rollback rows: hv_onset_frac / section_exp_ramp drive the "
+                    "superformula window; they need sf_m and sf_amt > 0 (an inactive "
+                    "conditional knob must not be searched)")
+            if hv_block["hv_onset_frac"] is not None and out["sf_start"] != 0.0:
+                raise registry.GeneratorError(
+                    "osse_rollback rows: hv_onset_frac replaces sf_start (one onset knob "
+                    "only); leave sf_start at 0 when hv_onset_frac is set")
+        out["_hv"] = hv_block   # only when active: absent = byte-identical dict
     return out
 
 
@@ -2013,6 +2083,10 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
     out = []
     lobes = int(ok["ripple_lobes"])
     sf_m = int(ok["sf_m"])
+    hv = ok.get("_hv")
+    hv_rho = None if hv is None else hv["throat_hv_ratio"]
+    hv_window = hv is not None and (hv["hv_onset_frac"] is not None
+                                    or hv["section_exp_ramp"] is not None)
 
     def superformula(ph):
         q = np.asarray(ph, dtype=float) * sf_m / 4.0
@@ -2035,7 +2109,9 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
                 ang = 0.25 * math.pi + abs(x)
         c2, s2 = math.cos(ang) ** 2, math.sin(ang) ** 2
         a_phi = ok["a_h_deg"] * c2 + ok["a_v_deg"] * s2
-        prm = {"type": "OSSE", "r0": r0, "a0": a0, "L": ok["L_mm"], "a": a_phi, "k": ok["k"],
+        prm = {"type": "OSSE", "r0": r0, "a0": a0, "L": ok["L_mm"], "a": a_phi,
+               "k": (ok["k"] if hv_rho is None
+                     else ok["k"] * float(throat_hv.hv_scale_inverse(hv_rho, float(phi)))),
                "s": ok["s"], "n": ok["n"], "q": ok["q"]}
         try:
             pts = np.asarray(profile_points(prm, ROWS_OSSE_ROLL_SAMPLES, float(phi)), dtype=float)
@@ -2049,7 +2125,9 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
                 f"{np.degrees(phi):.1f} deg for these knobs")
         if sf_m and ok["sf_amt"] > 0.0:
             l_arc = _arc_length(xs, ys)
-            w_sf = _rows_eps_window(l_arc / float(l_arc[-1]), ok["sf_start"])
+            frac = l_arc / float(l_arc[-1])
+            w_sf = (throat_hv.ath_ramp(frac, hv["hv_onset_frac"], hv["section_exp_ramp"])
+                    if hv_window else _rows_eps_window(frac, ok["sf_start"]))
             ys = ys * (1.0 + ok["sf_amt"] * w_sf * (float(superformula(float(phi))) / sf_mean - 1.0))
             if not np.all(ys > 0.0):
                 raise registry.GeneratorError(
@@ -2668,7 +2746,7 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "construction_label": OSSE_ROLL_LABEL,
             "source_auto_angle_deg": a0,
             "wall_thickness_mm": wt,
-            **{k: float(v) for k, v in ok.items() if k != "ripple_lobes"},
+            **{k: float(v) for k, v in ok.items() if k not in ("ripple_lobes", "_hv")},
             "ripple_lobes": int(ok["ripple_lobes"]),
             "lip_model": ("[inferred] tangent-continuous circular lip arc (C1 at the joint) "
                           "curling back; wrap(phi) = wrap_deg (1 + wrap_cos_amp cos(N phi))"),
@@ -2679,6 +2757,9 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
         }
         if ok["ripple_lobes"]:
             meta["ripple_label"] = ROWS_RIPPLE_LABEL
+        if ok.get("_hv") is not None:
+            meta["throat_hv"] = {k: v for k, v in ok["_hv"].items() if v is not None}
+            meta["throat_hv_status"] = throat_hv.STATUS["osse_rollback"]
     elif kind == "lecleach_asym":
         assert asym is not None
         march0 = marches[0]["march"]

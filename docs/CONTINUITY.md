@@ -1,5 +1,26 @@
 # CONTINUITY
 
+## 2026-11-18 - Shared near-throat H/V block implemented (CPU only; mesher and BEM checks pending)
+
+- New `hornlab_search/design/throat_hv.py`: `throat_hv_ratio` (rho), `hv_onset_frac`,
+  `section_exp_ramp`, with one meaning in every family. Absent keys = byte-identical configs,
+  geometry and hashes; rho = 1 = the parent law.
+- Native OSSE: rho -> per-azimuth `k(p) = k*rho**(-cos2p/2)` mesher expression (inside the OS-SE
+  parent; keeps the driver-exit slope). Onset/ramp alias `morph_fixed`/`morph_rate` (the Ath
+  morph). Refused without `morph_target` or alongside the native key.
+- osse_rollback: per-azimuth k; the superformula window uses the Ath ramp (LABELED HYBRID).
+- Le Cleac'h H/V pair: per-plane march T (larger T = faster near-throat growth, eq. 42 plus a
+  numeric test). The onset ramp blends the round core to the H/V ellipse (LABELED HYBRID).
+  `iwata_ar` is untouched.
+- Rolled family: onset/ramp replace the relief window start (now allowed down to 0) and are
+  searchable. rho != 1 is refused (no per-plane throat growth parameter exists yet). Editing
+  `rolled_family.py` changes its `implementation_sha256`, so saved recipes that require the old
+  digest will be refused.
+- Example configs (NOT RUN): `examples/typologies/throat_hv_2026-11-18/` (A: v8 incumbent + rho; B:
+  no round extension + morph to the mouth extent + all three knobs).
+- Tests: 4 new test files. The full suite shows the same 30 failed / 76 errors on main and on this
+  change (all from absent `cma`/`hornlab_mesher` etc.), so there are 0 new failures.
+
 ## 2026-11-18 - Near-throat H/V control: audit, research (KH-002), option literature (KH-003)
 
 - Docs only; no code. Root cause in OS generators: `a0` (from `driver.exit_angle_deg`) and `k`
