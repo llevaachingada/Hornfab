@@ -1,4 +1,26 @@
-# CONTINUITY
+﻿# CONTINUITY
+
+## 2026-11-18 - throat H/V sweep: Phases 1-3 DONE on this branch (owner-authorized GPU)
+
+- Phase 1 (7 single solves, \hornlab-search run\): all ok, v7 identity = v8 stored
+  (20261116T025728Z-screen-cd60f7). **A_r15 (rho 1.5) 3.08361 beats the v8 incumbent 3.10281
+  by 0.0192**; A_r20 3.12713 worse by 0.0243. B family (no ext throat): best B_o50 5.69735
+  (B_ctl 5.94839; the ~5.7-6.4 level is the v7 load term, load 3.2 vs 0.0 - mechanism study).
+- Job-line correction (IMPORTANT): \kind: search, budget: 1\ + every bound \search: false  crashes pycma (x0=[] / ufunc isinf TypeError) - single-design night jobs must be
+  \kind: command\ -> \hornlab-search run --config <yaml> --mode screen\. Three part2 ids
+  (throat_hv_B_*) burned on this; reinserted as throat_hv_run_*.
+- Phase 2 (2 epw8 solves): |dJ| 0.00857/0.01013 -> gate PASSED (0.0101 << 0.25104).
+- Phase 3 (budget 40 search, seed B_o50): 41/41 ok, best J 5.60780 at rho 1.371 / onset 0.320 /
+  ramp 2.160 (run 20261118T150846Z-screen-9a04c5). Track used 9 single solves + one 40-eval
+  search (cap respected; the +1 v8 identity re-solve was unnecessary, identity byte-verified).
+- Evidence: docs/evidence/throat_hv_2026-11-18/ (part3 + phase1_summary.csv + per-config
+  hv_beamwidth/di CSVs + p2/p3 eval CSVs + overlay PNGs). New configs: 3 files in
+  examples/typologies/throat_hv_2026-11-18/sweep/ (2 epw8 + B_search40, shape_checked).
+- Night cd_rrect_2026-11-17 resumed (stale lock pid 15952 taken over); night file edits: 9
+  throat jobs inserted, backup at runs/nights/cd_rrect_2026-11-17.yaml.bak-20261118. Owner
+  authorized skipping the running BO arm; t_ath14_scalar100 (78 obs) and t_corelaw_turbo100
+  were killed and recorded blocked - resume with a FRESH --root. Watcher task
+  HornLabThroatPhase1Poll deleted (track finished).
 
 ## 2026-11-18 - BO metric policy for objective v10 staged (PR-D, OWNER-GATED with PR-A)
 

@@ -1,4 +1,16 @@
-# ISSUES
+﻿# ISSUES
+
+## 2026-11-18 - throat sweep Phases 1-3 complete; two BO arms skipped, resume needs fresh --root
+
+- DONE: Phases 1-3 on cd_rrect_2026-11-17 (A_r15 beats v8 by 0.0192 on the matched v7 identity;
+  Phase 3 best J 5.60780, rho 1.371 / onset 0.320 / ramp 2.160). Evidence:
+  docs/evidence/throat_hv_2026-11-18/.
+- OPEN (queue owner): resume the two killed BO arms with a FRESH --root
+  (runs/night31_2026-11-17/t_ath14_scalar100 had 78 observations; t_corelaw_turbo100) - their
+  package.json files now exist, so the stock resume refuses.
+- OPEN (integrator): single-design night jobs must be kind: command + \hornlab-search run\;
+  kind: search + fully pinned bounds crashes pycma (three part2 handoff job lines affected).
+- NOTE (owner): decision on uncommitted scalar_v9.py / AGENTS.md / .opencode edits still open.
 
 ## 2026-11-18 - v10 BO metric policy: wiring waits on the owner
 
