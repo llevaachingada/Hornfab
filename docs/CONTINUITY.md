@@ -1,5 +1,54 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - integration STEP 1 closed on hornfab-all; STEP 2 CPU evidence 2b/2d/2e/2f committed (local orchestrator, R21/R22)
+
+- **PRs merged [verified]:** #69 (cloud→hornfab-all, merge `382c682`), #67 (plan→main, merge
+  `63c23a8`), with the owner-box suite result pasted (4861 passed / 4 known failures / 22 skipped;
+  +23 tests confirmed by def-count deltas 8+7+2+3+2+1, no parametrize). `hornfab-all→main` PRs and
+  #68 close-out follow after the STEP 2 commits. Local `hornfab-all` advanced to `382c682`.
+- **CLAUDE.md R21 ownership row added** (STEP 1.5) above "Need a file you do not own?".
+- **R22 resolved:** uncommitted `scalar_v9.py` v9-math edit DISCARDED
+  (patch archived outside the repo); `tests/test_v9_polar_window.py` deleted (tested only the
+  discarded API); AGENTS.md/`.opencode` agent-config sync committed as doc/config-only (matches the
+  umbrella preset text); `hl__klangfilm_lame_curved_v1_c200w.yaml` KEPT after `tools/shape_check.py`
+  PASS (mesh ok, 4853/24000 dofs, mouth 585x255, depth 196, envelope fits, round coupling).
+- **2b throat authority (R9 follow-up):** `u3_authority.py --csv-dir` runs committed
+  (`authority_A_vs_v8.{json,csv/}`, `authority_B_p3_vs_o50.{json,csv/}`). rho15: authority FALSE
+  (max 1.84° H) as expected; **rho20: authority TRUE (3.12° H, 2500-5500, V < half)** — contradicts
+  §10.2's "v8 → A_r20 no [inferred]" at the threshold; §10.2 rows left for the senior pass
+  (NOTES_FOR_SENIOR 2026-11-18 entry). Phase 3 winner vs B_o50: authority FALSE (fills the
+  "not judged" row as a verified no-authority/tie, ΔJ 0.0896 < 0.13).
+- **2d ST260 anchor (R4):** source check done. Config values were the rev7 PAPER example; the real
+  ST260 device (page + STL) differs: refit of `ST260-19.stl` gives a0 9.45° (19° total), k 2.13,
+  m 0.86, q 5.05 at RMS 0.08 mm (old values 1.33 mm RMS) — `anchor__rosse_st260_v1.yaml` CORRECTED
+  before any solve. **No admissible measured build exists** (6 linked builds checked; distance/
+  gating/step never stated together; one is a simulation): R4 fallback (ATH CORE/Tritonia) recorded;
+  ST260 NOT solved; the 2 approved anchor solves unspent. Evidence:
+  `docs/evidence/anchor_st260_2026-11-18/README.md` (+ `measured/ST260-19.stl`). shape_check:
+  corrected config meshes 944/12000 dofs, mouth 260 ✓, depth 88 ✓; the table's ok=NO is the
+  pre-existing brief-less-config throat-"unknown" property (pre-correction file fails identically).
+- **2e B1 doc fix (WP 2.2):** dated correction appended to
+  `scratch/fable_architecture/.b1/b1_mesh_feasibility.md` — only `3a1038da45d0` and `9fcd21fc1904`
+  are infeasible; `766c…`/`508f…`/`b996…` are probe-grade (batch 2, R5).
+- **2f U3 host (R8):** best stored `hl__biradial_es_style_v7` = run
+  `runs/20261116T090751Z-screen-37b115`, design `9b05b8756526`, J 6.336386 (v7 home brief identity,
+  verified against run.json/best.json/status.json). `u3_jobs.py` wrote
+  `examples/studies/u3_biradial_es_style_v7/` (control + 7 variants; vt_480 and term_sides invalid
+  per the tool's reach table). Control shape_check PASS (3270/24000 dofs, fits, round coupling).
+  WP 4.2 verify solves are queue-ready.
+- **STEP 3 B1 batch 1 inserted into the LIVE night (GPU, R5/R6):** 5 fold-warm ×2 probe jobs
+  (`scratch/fable_architecture/.b1/b1_mesh_night_insert.yaml`) appended AFTER existing pending work
+  of `runs/nights/cd_rrect_2026-11-17.yaml` (backup `cd_rrect_2026-11-17.yaml.bak-20261118-b1`);
+  `run_campaign_night.py --dry-run` exit 0. Batch 2 / anchor / 4.2+ wait on the probe-1 spill gate;
+  the anchor batch is CANCELLED (2d outcome). GPU lane was and stayed BUSY (live job
+  `w_crowe_panel_es600_v7_200w1`); zero direct solves by the orchestrator.
+- **Dry-run NOTE recorded:** 4 queued `home_range15_*` jobs reference
+  `briefs/home_range_v9_h12.yaml` with `oa_excess_tol`+`ripple_window` keys — these exist only in
+  the DISCARDED scalar_v9 math; they will refuse at start against the merged tree (owner/range-lane
+  decision pending: re-home on v10 `ripple_region preferred_edge` or re-pin).
+- **STEP 2a running:** the full rescore sequence (v7/v9/v10 offline + shipped/slope5 + floors +
+  compares) is executing in the background; results commit follows with the acceptance checks.
+
 ## 2026-11-18 - owner-box integration started: cloud branch suite green after digest-pin fix (local orchestrator)
 
 - Suite on `cloud/fable-next-2026-11-18` (offline, thread caps 1, -n 6 --dist loadscope):

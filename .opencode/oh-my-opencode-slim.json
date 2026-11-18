@@ -85,5 +85,16 @@
         "hornlab-typology-research"
       ]
     }
+  },
+  "fallback": {
+    "enabled": true,
+    "maxRetries": 10,
+    "initialRetryDelayMs": 1000,
+    "retryDelayMs": 3000
+  },
+  "backgroundJobs": {
+    "concurrency": {
+      "defaultConcurrency": 6
+    }
   }
 }

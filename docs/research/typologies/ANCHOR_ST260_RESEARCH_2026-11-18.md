@@ -77,3 +77,28 @@ the real number. Order: after the owner's B1 decision; it does not depend on B1.
    and the section-3 property checks. If the measured build had a box, add the matching
    `brief.mounting` block first (that is a new config version, `_v2`).
 4. Only then ask the owner for the 1-2 GPU slots.
+
+## 2026-11-18 outcome (local orchestrator, steps 1-3 / R4 source check)
+
+- **Step 1 (config corrected).** rev7's example values were copied faithfully, but they describe the
+  paper's 15-deg example, not the actual ST260 device. The ST260 page (fetched) states 82 mm depth
+  and a 19 deg throat opening; a re-fit of the downloadable STL bore+rim to the same rev7 formulas
+  gives a0 9.45 deg, k 2.13, m 0.86, q 5.05 (RMS 0.08 mm, max 0.17 mm) vs 1.33 mm RMS (max 3.5 mm)
+  for the old values. `anchor__rosse_st260_v1.yaml` updated (r0/R/a/r/b/tmax/wall unchanged) BEFORE
+  any solve, as instructed. Evidence: `docs/evidence/anchor_st260_2026-11-18/`.
+- **Step 2 (no admissible measured build).** Only PNG plot attachments/screenshots exist for the six
+  linked builds; none states distance + gating + polar step together (one is a simulation). The
+  section-4 rule therefore fails: **R4 fallback recorded** (ATH CORE / Tritonia with published
+  config + measured polars); ST260 is NOT solved in this pass. Per-build verdicts in the evidence
+  README.
+- **Step 3 (shape_check).** Corrected config meshes: dofs 944/12000 (quarter, epw 6), mouth
+  260 x 260 mm, depth 88 mm — mouth ±1 ✓, throat r 12.7 ✓, depth ≥ 80 ✓. The table's `ok=NO`
+  comes from throat coupling "unknown" because the config declares no `brief_file`/driver block —
+  the **pre-correction file fails the same way** (checked the git HEAD copy: also `NO`, 941 dofs),
+  so it is a brief-less-config property, not a regression from the correction; envelope fits and
+  the mesh builds. Not fixed by inventing a driver block (no invented keys rule); if ST260 returns
+  to anchor candidacy, add the driver block as the `_v2` rule prescribes. Meridian check vs the
+  STL: refit passes at 0.08 mm RMS (details in the evidence README).
+- **Step 4 (GPU) — not requested this pass** (gated on an admissible measurement, which does not
+  exist). The anchor verdict for STEP 4b is then "fail — not measurable against a published
+  measurement; fallback lane required", and the v7-vs-v10 tracking note waits for the fallback.

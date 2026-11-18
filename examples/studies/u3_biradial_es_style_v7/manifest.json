@@ -1,0 +1,97 @@
+{
+ "source_run": "20261116T090751Z-screen-37b115",
+ "design_hash": "9b05b8756526",
+ "record_digest": "83b1787b821c196f8934b95097bcbf26a500644512d238f3d42f446a31b0983e",
+ "wall_thickness_mm": 3.0,
+ "source_auto_angle_deg": 10.271287338542837,
+ "arms": {
+  "control": {
+   "config": "control.yaml",
+   "valid": true,
+   "digest": "83b1787b821c196f8934b95097bcbf26a500644512d238f3d42f446a31b0983e",
+   "reach_mm": 0.0,
+   "envelope_margins_mm": {
+    "width_mm": 10.003334000000109,
+    "height_mm": 87.2724960000001,
+    "depth_mm": 235.239668
+   }
+  },
+  "vt_460": {
+   "config": "vt_460.yaml",
+   "valid": true,
+   "digest": "fc964748b16502601c3642f8e9386f0b055dffca883e1a31f2ec9d80d2bd12b3",
+   "reach_mm": 31.5457570901306,
+   "envelope_margins_mm": {
+    "width_mm": 9.604243090225054,
+    "height_mm": 14.0,
+    "depth_mm": 235.239668
+   }
+  },
+  "vt_480": {
+   "config": "vt_480.yaml",
+   "valid": false,
+   "digest": "cc20a0f20e5a60d70eea1dfac02ec6db37062f95ad29d98a971418db7940300b",
+   "reach_mm": 31.421104806607627,
+   "envelope_margins_mm": {
+    "width_mm": 9.266416445912455,
+    "height_mm": -6.0,
+    "depth_mm": 235.239668
+   }
+  },
+  "term_sides": {
+   "config": "term_sides.yaml",
+   "valid": false,
+   "digest": "d1dc39bf3cb277faee30cc2d30dd6846fda8a4657a809e1e891ea760125d8ada",
+   "reach_mm": 3.1341793689073576,
+   "envelope_margins_mm": {
+    "width_mm": -19.99666599999989,
+    "height_mm": 84.77814717485671,
+    "depth_mm": 235.239668
+   }
+  },
+  "term_topbottom": {
+   "config": "term_topbottom.yaml",
+   "valid": true,
+   "digest": "1a749f55f47d2fe8495b03cac7de4c88938f3b9b2a36b0da9401d4e7302cdf0a",
+   "reach_mm": 3.134179368907359,
+   "envelope_margins_mm": {
+    "width_mm": 9.974813059703934,
+    "height_mm": 57.2724960000001,
+    "depth_mm": 235.239668
+   }
+  },
+  "steer_early": {
+   "config": "steer_early.yaml",
+   "valid": true,
+   "digest": "3fa0eb1f91b8d9886446c6cf760b61abe8ec3a3d032fa7d481281ca267897597",
+   "reach_mm": 3.101181188549109,
+   "envelope_margins_mm": {
+    "width_mm": 10.003334000000223,
+    "height_mm": 87.27249600000022,
+    "depth_mm": 235.239668
+   }
+  },
+  "steer_late": {
+   "config": "steer_late.yaml",
+   "valid": true,
+   "digest": "0dde513917321c504b7d541d67acfaaaef2a0f69810f514f6e383dbfae73f94d",
+   "reach_mm": 3.101181188549109,
+   "envelope_margins_mm": {
+    "width_mm": 10.003334000000223,
+    "height_mm": 87.27249600000022,
+    "depth_mm": 235.239668
+   }
+  },
+  "diag_pull": {
+   "config": "diag_pull.yaml",
+   "valid": true,
+   "digest": "e1a1afb63ba57f79c02d18027f9563d59e2414b09b008c1cdbbc2c5bd92c6811",
+   "reach_mm": 5.3923582229904605,
+   "envelope_margins_mm": {
+    "width_mm": 10.003334000000109,
+    "height_mm": 87.2724960000001,
+    "depth_mm": 235.239668
+   }
+  }
+ }
+}

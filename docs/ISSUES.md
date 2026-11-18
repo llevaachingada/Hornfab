@@ -1,5 +1,28 @@
 ﻿# ISSUES
 
+## 2026-11-18 - integration closes STEP 1; 2b/2d/2e/2f evidence committed; B1 batch 1 queued
+
+- CLOSED (D10/R21): PR #69 merged (`382c682`), PR #67 merged (`63c23a8`); CLAUDE.md R21 row added;
+  R22 resolved (v9 edit discarded, range test deleted, AGENTS/.opencode doc-sync committed, c200w
+  yaml kept on a PASSing shape_check). hornfab-all→main PR and #68 close-out: next push.
+- CLOSED (R22 consequence, NEW — owner/range lane): 4 queued `home_range15_*` jobs in the live night
+  use `briefs/home_range_v9_h12.yaml` whose objective block carries `oa_excess_tol`/`ripple_window`;
+  those keys existed only in the discarded uncommitted v9 math and are refused by the merged loader
+  — the jobs will exit at start with a ConfigError unless re-homed (v10 `ripple_region:
+  preferred_edge`) or the brief is re-pinned. No row rewritten; decision open.
+- OPEN (senior, 2b finding): rho20 (A_r20 vs v8) per-band authority TRUE (3.12° H, 2500-5500) in
+  `docs/evidence/throat_hv_2026-11-18/authority_A_vs_v8.json` — §10.2's "no [inferred]" row and the
+  "rho inert" park are contradicted at the threshold; see NOTES_FOR_SENIOR. Phase 3 vs B_o50: no
+  authority (verified).
+- CLOSED (R4, D6 anchor): ST260 source check done; config corrected to the device (a0 9.45°, k 2.13,
+  m 0.86, q 5.05; STL refit 0.08 mm RMS); NO admissible measured build → R4 fallback recorded,
+  ST260 unsolved, 2 anchor solves unspent. A fallback (ATH CORE/Tritonia) research dossier is a NEW
+  open item (typology-research protocol) before any fallback GPU.
+- OPEN (STEP 3, gated): B1 batch 2 (ext_throat probes) waits on batch 1 probe 1 Shared Usage;
+  WP 4.2/4.3 + BO `_r2` queue after that per R6; B6 waits on v10 floors (rescore running).
+- OPEN (WP 0.7): night cause lines are queued for the review append (fixer lane running; fix
+  candidates listed in NOTES - no code changed yet).
+
 ## 2026-11-18 - owner-box integration: digest pin was env-dependent (fixed pre-merge); R22 resolved
 
 - FIXED (R7 / WP 0.9, pre-merge): `tests/test_klangfilm_hv_digest_pin.py` pinned absolute

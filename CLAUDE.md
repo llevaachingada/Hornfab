@@ -98,6 +98,12 @@ Current ownership comes from your task/handoff (AGENTS.md). The rule still binds
 **MEH effort (owner, 2026-10-30):** tasks M1-M10 own the paths in `docs/meh/00_MEH_CONTRACTS.md` C13 (additive to the
 table above); `docs/meh/**` is orchestrator-owned and frozen for the effort.
 
+**Fable plan (owner delegation, 2026-11-18, R21):** `hornlab_search/geometry/**`, `tools/analysis/**`,
+`tools/night_queue/fidelity_pairs.py`, `examples/protected_lanes.yaml` and `scratch/fable_architecture/**`
+are owned by the Fable senior lane; the local orchestrator is the single integrator of `hornfab-all-*`
+and `main` (cloud work arrives only as PRs into `hornfab-all-*`). Decisions:
+`scratch/fable_architecture/OWNER_DECISIONS_RESOLVED_2026-11-18.md`.
+
 Need a file you do not own? Do not edit it. Append the exact change to `NOTES_FOR_SENIOR.md`.
 
 ## The three silent killers

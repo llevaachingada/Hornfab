@@ -161,3 +161,16 @@ The full five-job file is `b1_mesh_night_insert.yaml`. Hygiene encoded:
 4. **Single-design J threshold.** Per-design jobs cannot derive the inter-finalist gap from one
    row, so the job passes the ten-design value (`0.0057`). If the owner prefers a stricter rule,
    use the noise floor's dB terms for the metric deltas (0.028 dB) and the same 0.0057 for J.
+
+---
+
+## 2026-11-18 correction (local orchestrator, WP 2.2 / R5; fixes the "Recommendation" paragraph above)
+
+The "Recommendation" paragraph says **"The five ext-throat designs are excluded"** — that count is
+wrong. Only **`3a1038da45d0` (v7 leader) and `9fcd21fc1904` (v8 incumbent)** are infeasible on this
+card; the other three ext-throat designs — `766c…`, `508f…`, `b996…` — are **probe-grade** and are
+the subjects of batch 2 (`docs/evidence/b1_readiness_2026-11-18/b1_mesh_ext_throat_probes.yaml`,
+owner decision R5, conditional on batch 1 probe 1 not spilling Shared Usage). The B1 packet README
+(`docs/evidence/b1_readiness_2026-11-18/README.md`, commit `681e429`) already states this; the
+feasibility doc's five-design wording predates it. Batch 2 does NOT include the two leaders — the
+v7/v8 incumbents remain outside the mesh floor on this card (WP 2.3 will state that).

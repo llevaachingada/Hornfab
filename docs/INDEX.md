@@ -443,4 +443,11 @@ Keep this file current: a new doc gets a line here in the same commit.
 - [Exact domains and coupled constraints](research/typologies/audit_2026-11-15/PARAMETER_DOMAINS.md)
 - [Held queue and 26 prepared horn files](queue/rolled_readiness_2026-11-15/README.md)
 
+## Fable integration evidence (2026-11-18, local orchestrator)
+
+- [ST260 anchor source-check outcome + corrected-config rationale + STL](evidence/anchor_st260_2026-11-18/README.md) (+ `measured/ST260-19.stl`; D6 step 1 / R4)
+- [Throat A-vs-v8 per-band authority](evidence/throat_hv_2026-11-18/authority_A_vs_v8.json) and [Phase 3 vs B_o50](evidence/throat_hv_2026-11-18/authority_B_p3_vs_o50.json) (+ hv_beamwidth CSV sets; R9 follow-up / 2b)
+- [U3 biradial host study configs](../examples/studies/u3_biradial_es_style_v7/control.yaml) (R8 / 2f; control + 7 variants + manifest validity table)
+- [v10 rescore + floors results](evidence/v10_rescore_2026-11-18/results/) (WP 1.4/1.5; committed with the sequence run)
+
 
