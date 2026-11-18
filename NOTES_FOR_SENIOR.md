@@ -1125,3 +1125,32 @@ if so, `space_propose`'s rewrite of `brief_file` to a repo-relative path is what
 neither, the run's `run.json` brief must be compared directly and the tool message corrected.
 No code changed for this; recorded rather than improvised (rule 10).
 
+
+## 2026-11-18 — lane C: BL headless result reader + `import_results` hook (append-only)
+
+Lane C (worktree `hornlab-woofer-system-wt`, branch `feat/woofer-system-v0`) added two NEW owned
+files: `hornlab_search/system/boundarylab/bl_results.py` and `tests/system/test_bl_results.py`
+(+ fixture `tests/system/fixtures/bl_results/reference_run/`). No existing file was edited.
+
+HOOK NEEDED in `hornlab_search/system/boundarylab/import_results.py` (recorded here, not applied —
+that file is outside this lane's ownership). `detect_result_artifact()` (lines 32-53) classifies only
+`.blabsp` ZIPs and `.blab.json` projects. Add a directory branch before the suffix checks:
+
+    if p.is_dir():
+        from hornlab_search.system.boundarylab.bl_results import is_bl_headless_result_dir
+        if is_bl_headless_result_dir(p):
+            return ResultArtifact(kind="bl_headless_result", path=str(p), manifest=None,
+                                  notes=("BL headless result directory; read per-excitation "
+                                         "complex bases with bl_results.read_bl_headless_result",))
+
+and either extend `read_blabsp_manifest()` or add a sibling `read_headless_result()` that delegates
+to `bl_results.read_bl_headless_result(p)`. Do not duplicate payload parsing: `BL_HEADLESS_SCHEMA`,
+`is_bl_headless_result_dir` and the typed reader already live in `bl_results.py`. The `kind` string
+is the only naming decision left.
+
+No BL solve was run. Schema pinned to installed BL 0.5.0 HEAD
+`15f9a89245a9adfec8c2f0006c164953ce381e58` (file SHA-256s in `bl_results.BL_SOURCE_PINS`). The one
+unverifiable-without-a-real-run field is recorded as `BLOCKED_BY_BL_RESULT_FORMAT`: the literal
+`axes` labels BEAT writes for `exterior_pressure` are not defined in BL's Python source (they are
+copied verbatim from the engine result at `src/blab/headless.py:469`); the reader prefers the JSON
+labels and falls back to the documented `(excitation, observation)` shape order.
