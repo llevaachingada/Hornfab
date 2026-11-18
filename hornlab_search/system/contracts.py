@@ -395,7 +395,13 @@ class DspRanges:
 
 @dataclass(frozen=True)
 class DspPoint:
-    """One resolved DSP setting (complex analog prototype + honest delay)."""
+    """One resolved DSP setting (complex analog prototype + honest delay).
+
+    Channel conventions (verified against hornlab_search/system/dsp.py and meh/dsp.py):
+    ``relative_delay_ms`` delays the HORN (positive = horn later), ``polarity_woofer`` and
+    ``peq_bands_woofer`` act on the woofer only, and PEQ band tuples are
+    ``(fc_hz, gain_db, Q)`` — gain before Q, matching ``meh/dsp.peaking(f, fc, gain_db, q)``.
+    """
 
     crossover_type: str
     xo_hz: float
@@ -661,6 +667,8 @@ class SystemResponse:
 def canonical_json(obj: Any) -> str:
     """Stable JSON for hashing (sorted keys; floats rounded to 12 significant round-trips)."""
     def _fix(o: Any) -> Any:
+        if isinstance(o, bool):
+            return o
         if isinstance(o, (int, float)) and not isinstance(o, bool):
             return round(float(o), 12)
         if isinstance(o, Mapping):
