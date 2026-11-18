@@ -113,6 +113,11 @@
   decisions, the throat sweep (v7) and B1/B1f are unaffected. Parallel read-only evidence
   E1-E4 (corridor-mask tests, offline rerank, lobe diagnostics, ablation matrix) assigned to
   the throat agent's isolated clone, delivered to the carrier `evidence_scoring_2026-11-18/`.
+  **ANSWERED 2026-11-18: `preferred_edge`; fix = objective v10, draft PR #68 (`feat/objective-v10`
+  @ `2ecfdd5`, stacked on `ccr-260b4b76-fi6b8j`, retarget to `main` after PR #67; verification
+  4790 passed / 40 skipped / 4 known failures, none new). v9 corridor scores stay PROVISIONAL
+  for decisions until v10 lands canonically. Open gates: `0007` (Klangfilm H/V digests), v10
+  rip tolerance/weight, the throat-block landing target, the GPU onset sweep, and B1 GPU slots.**
 - OPEN (senior/owner): B1 encoding is decided (mesh convergence, not the `verify,finalist`
   frequency pair - that encoding is B1f); CPU dry-run + feasibility table in progress in
   `scratch/fable_architecture/.b1/`; GPU slots queue after the BO arms once the owner approves

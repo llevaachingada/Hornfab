@@ -244,8 +244,12 @@ identity — the meaning of existing v9 J is never changed. Target mode's `2*pre
 probably correct if `preferred` is a half-angle edge, per the docstring — verify before changing.
 
 **Owner question (added 2026-11-18): what is the ripple "inspection region"?**
-Options from the audit §4.1: (a) preferred edge (the mode mask centres on the preferred/target
-beamwidth edge); (b) guaranteed minimum edge (inspect from the guaranteed edge of the
-corridor); (c) a declared seat zone (a brief-declared angular region, family-free per the CD
-intent lock); (d) other/combined. This settles both the corridor-mode mask and whether target
-mode's `2*preferred` is the right total width before any fix is versioned.
+**ANSWERED 2026-11-18: `preferred_edge`.** The fix is implemented as objective **v10**, draft
+**PR #68** (`feat/objective-v10` @ `2ecfdd5`, verified stacked on this branch, base =
+`ccr-260b4b76-fi6b8j`, retarget to `main` after PR #67 merges; final verification 4790 passed /
+40 skipped / 4 known failures, no new failures). Consequences: (1) v9 corridor-mode scores stay
+PROVISIONAL for decisions in this branch until v10 LANDS canonically — the corrected identity
+is v10, not a patch to existing v9 J; (2) still owner-gated: landing `0007` (changes the
+Klangfilm H/V digests), the rip tolerance/weight values for v10, the throat-block landing
+target (`feat/throat-hv-block` draft PR is the standing recommendation), and the GPU onset
+sweep (queued after the BO arms and B1). B1 GPU-slot approval remains open.

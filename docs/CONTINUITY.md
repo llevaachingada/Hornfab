@@ -213,7 +213,13 @@
   B1/B1f are unaffected. The scoring-truth track (PR-A..F proposals, qLogNEI/qLogNEHVI later,
   BO `freeze_metric_policy` accepts v4/v7 only) folds into the plan as one track; the throat
   agent's isolated clone runs the read-only evidence E1-E4 into the carrier
-  `evidence_scoring_2026-11-18/`.
+  `evidence_scoring_2026-11-18/`. **Follow-up (same day): the owner answered the ripple
+  policy — `preferred_edge` — and the fix is objective v10, draft PR #68
+  (`feat/objective-v10` @ `2ecfdd5`, verified stacked on this branch, base `ccr-260b4b76-fi6b8j`,
+  to be retargeted to `main` after PR #67; 4790 passed / 40 skipped / 4 known failures, none
+  new). v9 corridor scores remain PROVISIONAL for decisions in this branch until v10 lands
+  canonically; still gated: `0007` (Klangfilm H/V digests), v10 rip tolerance/weight, the
+  throat-block landing target, and the GPU onset sweep.**
 - Commit/coverage note: this entry's code lands in the same push (C1 in
   `feat(tools): night truth`, C2 in `feat(analysis): data-agreement gate`); the queue file is
   untracked (`runs/`), so the queue edits travel as the held-note above, not as commits.
