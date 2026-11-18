@@ -43,8 +43,11 @@ Scope / honesty
 * The driver source cap is not modelled here. A biaxial source ring or a common-tangent landing is a
   separate control and is not implemented.
 
-Frozen copy: reproduced from ``tools/geometry/klangfilm_lame_hv_core.py`` (SHA256
-1782f009b050d0a41bebcf86eb8898d383044b0c41cdb25db3b5dcb7b57bad54). It must stay in sync with that reviewed source; regenerate rather than hand-edit.
+Frozen copy: reproduced from ``tools/geometry/klangfilm_lame_hv_core.py`` at SHA256
+1782f009b050d0a41bebcf86eb8898d383044b0c41cdb25db3b5dcb7b57bad54. At the 2026-11-18 review the tools
+file hashes to 214d4f153032614b97ada46f3597417337f97279dd295c3c23020a29418d1818 and differs from this
+copy only in docstrings and imports. No frozen-vs-tools parity test exists yet; regenerate rather than
+hand-edit.
 """
 from __future__ import annotations
 
@@ -284,22 +287,22 @@ LEGACY_GENES = dict(fc_hz=494.4393461867, aspect=2.0759495982, lame_p=5.00635495
                     source_blend_ratio=0.0, entry_half_angle_deg=2.0,
                     wall_thickness_mm=3.0, n_phi=19, n_s=64)
 SEEDS = {
-    # b1 balanced: L 380, mouth ~ 521 x 262 mm (A0's mouth is 541 x 261), 48 / 24.5 deg end slopes
+    # b1 balanced: L 380, mouth 479.6 x 239.7 mm (recomputed 2026-11-18; A0's mouth is 541 x 261), 48 / 24.5 deg end slopes
     "b1": dict(cd_core_blend=1.0, theta_h0_deg=8.0, theta_v0_deg=5.0, theta_h1_deg=48.0,
                theta_v1_deg=24.5, core_length_mm=380.0, lame_p_mouth=4.0,
                lame_start_frac=0.25, lame_end_frac=0.90, beak_h_setback_mm=15.0,
                beak_v_projection_mm=0.0, beak_diagonal_mm=0.0, beak_start_frac=0.85),
-    # b2 wide: L 420, mouth ~ 561 x 244 mm, stronger H taper and a wider Lamé mouth
+    # b2 wide: L 420, mouth 595.0 x 232.8 mm (recomputed 2026-11-18), stronger H taper and a wider Lamé mouth
     "b2": dict(cd_core_blend=1.0, theta_h0_deg=12.0, theta_v0_deg=4.0, theta_h1_deg=50.5,
                theta_v1_deg=22.0, core_length_mm=420.0, lame_p_mouth=4.8,
                lame_start_frac=0.30, lame_end_frac=0.92, beak_h_setback_mm=25.0,
                beak_v_projection_mm=0.0, beak_diagonal_mm=0.0, beak_start_frac=0.88),
-    # b3 soft: L 340, mouth ~ 498 x 258 mm, gentler end slopes and a rounder lip
+    # b3 soft: L 340, mouth 472.5 x 266.1 mm (recomputed 2026-11-18), gentler end slopes and a rounder lip
     "b3": dict(cd_core_blend=1.0, theta_h0_deg=7.0, theta_v0_deg=6.0, theta_h1_deg=52.1,
                theta_v1_deg=30.4, core_length_mm=340.0, lame_p_mouth=3.0,
                lame_start_frac=0.20, lame_end_frac=0.95, beak_h_setback_mm=10.0,
                beak_v_projection_mm=5.0, beak_diagonal_mm=0.0, beak_start_frac=0.90),
-    # b4: B3 widened to A0's mouth class (563 x 262 x 405) — the targeted H-widening follow-up
+    # b4: B3 widened to A0's mouth class (562.5 x 261.6 mm, recomputed 2026-11-18) — the targeted H-widening follow-up
     "b4": dict(cd_core_blend=1.0, theta_h0_deg=7.0, theta_v0_deg=6.0, theta_h1_deg=53.0,
                theta_v1_deg=25.0, core_length_mm=400.0, lame_p_mouth=3.0,
                lame_start_frac=0.20, lame_end_frac=0.95, beak_h_setback_mm=10.0,

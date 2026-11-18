@@ -1,5 +1,11 @@
 # ISSUES
 
+## 2026-11-18 - Klangfilm H/V comment patch changes family digests (owner gate)
+
+- OPEN (owner): land the comments-only fix only if no queued job or saved recipe depends on the
+  current klangfilm_lame_hv / hv_core implementation digest. Otherwise defer it.
+- OPEN: add a frozen-vs-tools parity test for both H/V kernels (contract check 5).
+
 ## 2026-11-18 - Throat H/V follow-ons: local checks
 
 - OPEN (local): shape_check of a rolled seed with rho 0.8 and 1.25, and of iwata_ar onset 0.5,

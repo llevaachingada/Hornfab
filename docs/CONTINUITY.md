@@ -1,5 +1,13 @@
 # CONTINUITY
 
+## 2026-11-18 - Klangfilm H/V kernels: stale seed-mouth comments and frozen-copy SHA docstrings corrected (comments only)
+
+- `_klangfilm_lame_hv_core_v1.py` SEEDS comments now give the recomputed mouths (b1 479.6x239.7,
+  b2 595.0x232.8, b3 472.5x266.1, b4 562.5x261.6 mm; these match PHASE_B_GEOMETRY). The frozen-copy
+  docstrings of both H/V kernels now record the original SHA and today's tools-file SHA.
+- No geometry change. The klangfilm_lame_hv and hv_core family `implementation_sha256` DO change
+  (the digests hash these files), so saved recipes that require the old digest will be refused.
+
 ## 2026-11-18 - Construction contracts moved from DRAFT to REVIEWED (senior, docs only)
 
 - All 4 contracts end with a "Senior review" section listing their open items.
