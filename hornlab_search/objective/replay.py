@@ -50,6 +50,7 @@ import numpy as np
 
 from ..metrics.compute import compute_metrics
 from .scalar_v9 import V9Params, objective_v9, resolve_v9_weights
+from .scalar_v10 import V10Params, objective_v10
 from ..targets.spec import Target
 from ..types import MetricSet, Response
 from .scalar import objective as _objective_v1
@@ -202,6 +203,10 @@ def _params_from_block(version: int, block: dict | None):
         if block is None:
             raise ValueError("objective v9 needs its objective block (tolerances)")
         return block if isinstance(block, V9Params) else V9Params.from_block(dict(block))
+    if version == 10:
+        if block is None:
+            raise ValueError("objective v10 needs its objective block (tolerances, ripple_region)")
+        return block if isinstance(block, V10Params) else V10Params.from_block(dict(block))
     return None
 
 
@@ -585,10 +590,15 @@ def _dispatch(version: int, metrics: MetricSet, response: Response | None, targe
         return objective_v7(metrics, response, True, target, weights, params)
     if version == 9:
         return objective_v9(metrics, response, True, target, weights, params)
+    if version == 10:
+        return objective_v10(metrics, response, True, target, weights, params)
     raise ValueError(f"no replay dispatch for objective version {version}")
 
 
 def _weight_for(version: int, weights: dict, key: str, params=None) -> float:
+    if version == 10:
+        p9 = params.v9 if isinstance(params, V10Params) else None
+        return float(resolve_v9_weights(weights, p9).get(key, 0.0))
     if version == 9:
         return float(resolve_v9_weights(weights, params if isinstance(params, V9Params) else None)
                      .get(key, 0.0))

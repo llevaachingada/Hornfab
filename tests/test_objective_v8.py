@@ -79,8 +79,9 @@ def _metrics(freqs, t: Target, *, bw_h=None, bw_v=None, di=None, z=None, on_axis
 
 def test_v8_is_registered_nowhere_and_never_changes_a_default():
     # v9 registered 2026-11-17 (owner-approved, amended non-CD profile RFC); v8 stays a
-    # sign-off-gated importable-only PROPOSAL and no default version changed.
-    assert SUPPORTED_OBJECTIVE_VERSIONS == (1, 2, 3, 4, 5, 6, 7, 9)
+    # sign-off-gated importable-only PROPOSAL and no default version changed. v10 (2026-11-18
+    # PR-A, owner-gated) is registered as an explicit opt-in; no brief or default uses it.
+    assert SUPPORTED_OBJECTIVE_VERSIONS == (1, 2, 3, 4, 5, 6, 7, 9, 10)
     assert 8 not in _OBJECTIVE_SCORERS and 8 not in SUPPORTED_OBJECTIVE_VERSIONS
     assert tuple(sorted(_OBJECTIVE_SCORERS)) == SUPPORTED_OBJECTIVE_VERSIONS
 

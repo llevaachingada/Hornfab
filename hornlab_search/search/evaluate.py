@@ -56,6 +56,7 @@ from ..objective.scalar_v4 import V4Params, objective_v4
 from ..objective.scalar_v6 import V6Params, objective_v6
 from ..objective.scalar_v7 import V7Params, objective_v7
 from ..objective.scalar_v9 import V9Params, objective_v9
+from ..objective.scalar_v10 import V10Params, objective_v10
 from ..objective.versions import SUPPORTED_OBJECTIVE_VERSIONS
 from ..solve import cache as solve_cache
 from ..solve.base import stack_responses, theta_deg_from_dirs
@@ -265,6 +266,8 @@ def make_context(cfg, store=None, *, cache_dir=None, lib_shas=None,
         ctx.objective_params = V7Params.from_block(block)
     elif ctx.objective_version == 9:
         ctx.objective_params = V9Params.from_block(block)
+    elif ctx.objective_version == 10:
+        ctx.objective_params = V10Params.from_block(block)
     else:
         ctx.objective_params = V4Params.from_block(block)
     ctx.provenance = record_provenance(cfg)
@@ -1175,6 +1178,17 @@ def _score_v9(metrics, resp, target, weights, params):
     return objective_v9(metrics, resp, True, target, weights, params)
 
 
+def _score_v10(metrics, resp, target, weights, params):
+    """Objective v10 (2026-11-18 PR-A, owner-gated): v9 with a REQUIRED explicit
+    ``objective.ripple_region``; every other term is v9's."""
+    if params is None:
+        raise ValueError("objective_version 10 needs the brief's objective block (tolerances, "
+                         "ripple_region); the evaluation context carries none")
+    if not isinstance(params, V10Params):
+        params = V10Params.from_block(params)
+    return objective_v10(metrics, resp, True, target, weights, params)
+
+
 _OBJECTIVE_SCORERS = {
     1: lambda metrics, resp, target, weights, params: objective(metrics, True, target, weights),
     2: lambda metrics, resp, target, weights, params: objective_v2(metrics, resp, True, target, weights),
@@ -1184,6 +1198,7 @@ _OBJECTIVE_SCORERS = {
     6: _score_v6,
     7: _score_v7,
     9: _score_v9,
+    10: _score_v10,
 }
 if tuple(sorted(_OBJECTIVE_SCORERS)) != SUPPORTED_OBJECTIVE_VERSIONS:
     raise RuntimeError(

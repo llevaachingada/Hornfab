@@ -1,5 +1,16 @@
 # ISSUES
 
+## 2026-11-18 - v10 ripple region: owner chose preferred_edge
+
+- DONE (owner, 2026-11-18): the first v10 briefs use `ripple_region: preferred_edge`
+  (+/-preferred/2 per plane: the -6 dB edges). `min_edge` and `seat_zone_deg` remain explicit
+  opt-ins; E1-E4 can change the policy for later briefs.
+- DONE: the dataset manifest version census includes 10 (`tests/test_dataset_manifest.py`).
+  Full suite on the v10 lane: 4 known failures, 4724 passed, 40 skipped in 7:08.
+- OPEN: no brief uses v10 yet. The BO metric policy (PR-D) is separate; no study or Pareto run
+  consumes it. `tools/analysis/brief_truth_replay.py` stays v9-only for now.
+- NOTE: v9 target mode inspects +/-preferred (2x the -6 dB edge); v9 numbers stay PROVISIONAL.
+
 ## 2026-11-18 (local orchestrator) - Night truth + data-agreement gate landed; bridge-type _w1 lanes fail the stock analysis path; B1 encoding owner-decided
 
 - DONE (C1, tools): `tools/run_campaign_night.py` + `tools/night_status.py` now record/report per

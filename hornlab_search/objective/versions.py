@@ -20,7 +20,10 @@ from __future__ import annotations
 #: 9 = the non-CD profile objective: frequency-dependent H/V coverage corridors, per-frequency
 #: envelope ripple, detrended DI roughness and an optional explicit HF floor (2026-11-17,
 #: ``objective/scalar_v9.py``; registered only after the amended RFC gates G0-G13 pass).
-SUPPORTED_OBJECTIVE_VERSIONS: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7, 9)
+#: 10 = v9 with an explicit, REQUIRED ``objective.ripple_region`` (preferred_edge / min_edge /
+#: seat_zone_deg); fixes the v9 ripple-window semantics as a NEW identity (2026-11-18 PR-A,
+#: ``objective/scalar_v10.py``; OWNER-GATED: no brief uses it until the owner picks the policy).
+SUPPORTED_OBJECTIVE_VERSIONS: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7, 9, 10)
 
 
 def is_supported_objective_version(value: object) -> bool:

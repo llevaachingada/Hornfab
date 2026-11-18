@@ -1,5 +1,24 @@
 # CONTINUITY
 
+## 2026-11-18 - Objective v10 (PR-A, OWNER-APPROVED: ripple_region = preferred_edge): v9 + explicit required ripple_region
+
+- New `hornlab_search/objective/scalar_v10.py`, registered as version 10 in `versions.py`,
+  `search/evaluate.py`, `objective/replay.py` and `config.py`. `scalar_v9.py` is NOT edited; v9 J
+  and the v9 tests are unchanged.
+- Code-verified semantics: profile `preferred/min/max_deg` are FULL beamwidths (the v9 cov term
+  compares them with `beamwidth_deg`'s total included angle). So v9 corridor mode inspects
+  +/-(max-min)/2 and v9 target mode inspects +/-preferred (twice the -6 dB edge). The v9
+  docstring's "half-angle" reading does not hold.
+- v10 requires `objective.ripple_region` (no default): `preferred_edge` (+/-preferred/2),
+  `min_edge` (+/-min/2, corridor only) or `{mode: seat_zone_deg, h_deg, v_deg}` (declared total
+  angles). Every other term is v9's. New identity: `v10_score_identity` (sha256 of the block).
+- `tests/test_objective_v8.py` registration assertion updated to the new tuple (still exact).
+- **Owner decision 2026-11-18: `ripple_region = preferred_edge`** for the first briefs
+  (+/-preferred/2 per plane, the -6 dB edges). `min_edge` and `seat_zone_deg` remain explicit
+  opt-ins. No brief uses v10 yet; the first one must declare `ripple_region: preferred_edge`.
+- `tests/test_dataset_manifest.py` version-census expectation now includes 10. Full suite (v10
+  lane, after the fix): 4 known failures, 4724 passed, 40 skipped in 7:08.
+
 ## 2026-11-18 (local orchestrator) - Night truth (C1) + data-agreement gate (C2) landed; B1 encoding owner-decided; queue repaired
 
 - **C1 night truth** (`tools/run_campaign_night.py`, `tools/night_status.py`, new
