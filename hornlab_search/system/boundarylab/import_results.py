@@ -18,12 +18,13 @@ from typing import Any, Mapping
 
 from hornlab_search.system import contracts as C
 
-__all__ = ["ResultArtifact", "detect_result_artifact", "read_blabsp_manifest"]
+__all__ = ["ResultArtifact", "detect_result_artifact", "read_blabsp_manifest",
+           "read_headless_result"]
 
 
 @dataclass(frozen=True)
 class ResultArtifact:
-    kind: str                      # "blabsp" | "blab_project" | "unknown"
+    kind: str                      # "blabsp" | "blab_project" | "bl_headless_result" | "unknown"
     path: str
     manifest: Mapping[str, Any] | None
     notes: tuple[str, ...]
@@ -31,7 +32,13 @@ class ResultArtifact:
 
 def detect_result_artifact(path: str | Path) -> ResultArtifact:
     p = Path(path)
-    if not p.is_file():
+    if p.is_dir():
+        from hornlab_search.system.boundarylab.bl_results import is_bl_headless_result_dir
+        if is_bl_headless_result_dir(p):
+            return ResultArtifact(kind="bl_headless_result", path=str(p), manifest=None,
+                                  notes=("BL headless result directory; read per-excitation "
+                                         "complex bases with bl_results.read_bl_headless_result",))
+    if not p.exists():
         raise FileNotFoundError(f"result artifact not found: {p}")
     if p.suffix == ".blabsp" and zipfile.is_zipfile(p):
         manifest = _zip_member_json(p, ["manifest.json", "manifest/metadata.json"])
@@ -49,8 +56,18 @@ def detect_result_artifact(path: str | Path) -> ResultArtifact:
             return ResultArtifact(kind="blab_project", path=str(p), manifest=loaded,
                                   notes=("project file (geometry/config), not solved results",))
     return ResultArtifact(kind="unknown", path=str(p), manifest=None,
-                          notes=("unknown artifact kind; supported: .blabsp package or "
-                                 ".blab.json project",))
+                          notes=("unknown artifact kind; supported: .blabsp package, "
+                                 ".blab.json project, or a BL headless result directory",))
+
+
+def read_headless_result(path: str | Path):
+    """Delegating read of a BL headless result directory (no payload parsing duplicated).
+
+    The typed reader, schema pins and refusal tokens live in
+    :mod:`hornlab_search.system.boundarylab.bl_results`; this is the import-boundary alias.
+    """
+    from hornlab_search.system.boundarylab.bl_results import read_bl_headless_result
+    return read_bl_headless_result(path)
 
 
 def read_blabsp_manifest(path: str | Path) -> dict[str, Any]:

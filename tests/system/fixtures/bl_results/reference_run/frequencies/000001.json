@@ -1,0 +1,74 @@
+{
+  "arrays_file": "000001.npz",
+  "diagnostics": {
+    "engine_provenance": {
+      "backend": "beat_cpu",
+      "precision": "float32"
+    },
+    "phasor_convention": "exp(+i omega t)"
+  },
+  "excitation_port_ids": [
+    "excitation:woofer",
+    "excitation:horn"
+  ],
+  "freq_hz": 200.0,
+  "quantities": [
+    {
+      "axes": [
+        "excitation",
+        "observation"
+      ],
+      "dtype": "complex128",
+      "id": "acoustic:pressure:horizontal-polar",
+      "key": "q0000",
+      "metadata": {
+        "source_output_id": "ui:exterior-pressure"
+      },
+      "quantity": "exterior_pressure",
+      "shape": [
+        2,
+        3
+      ],
+      "target_id": "observation:horizontal-polar",
+      "unit": "Pa"
+    },
+    {
+      "axes": [
+        "excitation",
+        "observation"
+      ],
+      "dtype": "complex128",
+      "id": "acoustic:pressure:vertical-polar",
+      "key": "q0001",
+      "metadata": {
+        "source_output_id": "ui:exterior-pressure"
+      },
+      "quantity": "exterior_pressure",
+      "shape": [
+        2,
+        2
+      ],
+      "target_id": "observation:vertical-polar",
+      "unit": "Pa"
+    },
+    {
+      "axes": [
+        "excitation",
+        "observation"
+      ],
+      "dtype": "complex128",
+      "id": "acoustic:pressure:probe:on_axis",
+      "key": "q0002",
+      "metadata": {
+        "source_output_id": "ui:exterior-pressure"
+      },
+      "quantity": "exterior_pressure",
+      "shape": [
+        2,
+        2
+      ],
+      "target_id": "observation:probe:on_axis",
+      "unit": "Pa"
+    }
+  ]
+}

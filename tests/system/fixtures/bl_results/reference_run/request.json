@@ -1,0 +1,12 @@
+{
+  "excitation_port_ids": [
+    "excitation:woofer",
+    "excitation:horn"
+  ],
+  "frequencies_hz": [
+    100.0,
+    200.0
+  ],
+  "include_project_observations": true,
+  "schema_version": 1
+}

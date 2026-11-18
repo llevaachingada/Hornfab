@@ -116,6 +116,101 @@ def _cmd_list_assets(args: argparse.Namespace) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- reference workflow
+
+def _reference_error(exc: BaseException) -> int:
+    print(json.dumps({
+        "error": str(exc),
+        "token": getattr(exc, "token", None),
+    }, indent=2))
+    return 2
+
+
+def _parse_overrides(text: str | None) -> dict | None:
+    if text is None:
+        return None
+    raw = Path(text[1:]).read_text(encoding="utf-8") if text.startswith("@") else text
+    payload = json.loads(raw)
+    if not isinstance(payload, dict):
+        raise ValueError("--overrides must be a JSON object of vented-source values")
+    return payload
+
+
+def _cmd_reference_prepare(args: argparse.Namespace) -> int:
+    from hornlab_search.system import reference as REF
+
+    try:
+        prepared = REF.prepare(
+            root=args.root,
+            overrides=_parse_overrides(args.overrides),
+            horn_mesh=args.horn_mesh,
+            source_group=args.source_group,
+            store_root=args.out,
+            case_dir=args.case_dir,
+            experiment_id=args.experiment_id,
+            mesh_role=args.mesh_role,
+            scale_factor=args.scale_factor,
+            translation_mm=tuple(args.translation_mm),
+            timeout_s=args.timeout_s,
+            run_now=not args.dry_run,
+        )
+    except (REF.ReferenceError, ValueError, OSError, RuntimeError) as exc:
+        return _reference_error(exc)
+    print(json.dumps(prepared.as_dict(), indent=2))
+    if args.dry_run:
+        return 0
+    return 0 if prepared.valid else 1
+
+
+def _cmd_reference_validate(args: argparse.Namespace) -> int:
+    from hornlab_search.system import reference as REF
+
+    try:
+        validation = REF.validate(args.case_dir, args.request, timeout_s=args.timeout_s)
+    except (REF.ReferenceError, ValueError, OSError, RuntimeError) as exc:
+        return _reference_error(exc)
+    print(json.dumps(validation.as_dict(), indent=2))
+    return 0 if (validation.valid and not validation.blockers) else 1
+
+
+def _cmd_reference_solve(args: argparse.Namespace) -> int:
+    from hornlab_search.system import reference as REF
+
+    try:
+        result = REF.solve(
+            args.case_dir,
+            args.request,
+            backend=args.backend,
+            authorized_by=args.authorized_by,
+            out=args.run_out,
+            timeout_s=args.timeout_s,
+        )
+    except REF.ReferenceError as exc:
+        return _reference_error(exc)
+    except (ValueError, OSError, RuntimeError) as exc:
+        return _reference_error(exc)
+    print(json.dumps(result.as_dict(), indent=2))
+    return 0
+
+
+def _cmd_reference_report(args: argparse.Namespace) -> int:
+    from hornlab_search.system import reference as REF
+
+    try:
+        report = REF.report(args.case_dir, run_dir=args.run_dir)
+    except (REF.ReferenceError, ValueError, OSError, RuntimeError) as exc:
+        return _reference_error(exc)
+    if args.markdown_out:
+        Path(args.markdown_out).write_text(report.markdown, encoding="utf-8")
+    if args.json:
+        payload = dict(report.as_dict())
+        payload.pop("markdown", None)
+        print(json.dumps(payload, indent=2))
+    else:
+        print(report.markdown)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="hornlab_search.system.cli",
@@ -167,6 +262,69 @@ def main(argv: list[str] | None = None) -> int:
     p_assets.add_argument("--runs-root", default=None)
     p_assets.add_argument("--limit", type=int, default=40)
     p_assets.set_defaults(func=_cmd_list_assets)
+
+    # ---- reference: no-GUI Boundary Lab reference case (prepare/validate/solve/report)
+    p_reference = sub.add_parser(
+        "reference",
+        help="no-GUI Boundary Lab reference case: prepare, validate, solve (authorized), report")
+    ref_sub = p_reference.add_subparsers(dest="reference_command", required=True)
+
+    p_ref_prepare = ref_sub.add_parser(
+        "prepare", help="stage the horn+vented project through BL's host path and record it")
+    p_ref_prepare.add_argument("--root", default=None, metavar="DIR",
+                               help="verified Boundary Lab checkout (default: probe)")
+    p_ref_prepare.add_argument("--horn-mesh", default=None, metavar="MSH",
+                               help="closed horn mesh (default: newest full-domain mesh, else "
+                                    "vented-only with BLOCKED_BY_FULL_DOMAIN_HORN_MESH_INPUT)")
+    p_ref_prepare.add_argument("--source-group", default=None,
+                               help="2D physical group of the horn mesh to drive (required with "
+                                    "--horn-mesh)")
+    p_ref_prepare.add_argument("--mesh-role", default="full_domain",
+                               choices=["full_domain", "test_double"])
+    p_ref_prepare.add_argument("--scale-factor", type=float, default=1.0)
+    p_ref_prepare.add_argument("--translation-mm", type=float, nargs=3,
+                               default=(0.0, 0.0, 0.0), metavar=("X", "Y", "Z"))
+    p_ref_prepare.add_argument("--overrides", default=None,
+                               help="JSON object (or @file) of vented-source overrides")
+    p_ref_prepare.add_argument("--experiment-id", default="bl_ref_case")
+    p_ref_prepare.add_argument("--out", default=None, metavar="DIR",
+                               help="isolated store root (default system_runs)")
+    p_ref_prepare.add_argument("--case-dir", default=None, metavar="DIR",
+                               help="explicit fresh case directory (must be empty)")
+    p_ref_prepare.add_argument("--timeout-s", type=float, default=1800.0)
+    p_ref_prepare.add_argument("--dry-run", action="store_true",
+                               help="build the BL-side spec only; create nothing")
+    p_ref_prepare.set_defaults(func=_cmd_reference_prepare)
+
+    p_ref_validate = ref_sub.add_parser(
+        "validate", help="BL's own project validate verdict plus reference graph assertions")
+    p_ref_validate.add_argument("case_dir")
+    p_ref_validate.add_argument("--request", default=None, metavar="JSON",
+                                help="BL headless request overlay (schema_version 1)")
+    p_ref_validate.add_argument("--timeout-s", type=float, default=300.0)
+    p_ref_validate.set_defaults(func=_cmd_reference_validate)
+
+    p_ref_solve = ref_sub.add_parser(
+        "solve", help="invoke BL's own project solve (requires --authorized-by)")
+    p_ref_solve.add_argument("case_dir")
+    p_ref_solve.add_argument("--request", required=True, metavar="JSON")
+    p_ref_solve.add_argument("--backend", default="beat_cpu")
+    p_ref_solve.add_argument("--authorized-by", default=None,
+                             help="senior approval record; without it the solve is refused")
+    p_ref_solve.add_argument("--run-out", default=None, metavar="DIR",
+                             help="BL run output directory (default <case_dir>/run)")
+    p_ref_solve.add_argument("--timeout-s", type=float, default=None)
+    p_ref_solve.set_defaults(func=_cmd_reference_solve)
+
+    p_ref_report = ref_sub.add_parser(
+        "report", help="markdown report: DSP-preset complex sums, vertical lobing, honesty labels")
+    p_ref_report.add_argument("case_dir")
+    p_ref_report.add_argument("--run-dir", default=None, metavar="DIR")
+    p_ref_report.add_argument("--markdown-out", default=None, metavar="MD",
+                              help="also write the markdown report to this file")
+    p_ref_report.add_argument("--json", action="store_true",
+                              help="print the recomposition tables as JSON (no markdown)")
+    p_ref_report.set_defaults(func=_cmd_reference_report)
 
     args = parser.parse_args(argv)
     return int(args.func(args))
