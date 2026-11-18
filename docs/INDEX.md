@@ -12,6 +12,41 @@ Near-throat H/V: [route audit](knowledge/THROAT_HV_CONTROL_AUDIT_2026-11-18.md),
 [KH-003 option literature](knowledge/claims/KH-003_throat_hv_options_literature.md).
 Existing research remains in place; imported recommendations are not implementation mandates.
 
+[Throat H/V sweep evidence (2026-11-18, Phases 1-3)](evidence/throat_hv_2026-11-18/LOCAL_RESULTS_2026-11-18_part3.md):
+single solves, epw8 mesh check, 40-eval B search, per-config H/V beamwidth and DI CSVs.
+Follow-up proposal: [G5 recommendation](evidence/throat_hv_2026-11-18/G5_RECOMMENDATION_2026-11-18.md)
+(park on A as inert; B has H authority but is not competitive under v7).
+
+[Night cd_rrect_2026-11-17 record review (2026-11-18)](evidence/night_cd_rrect_2026-11-17_REVIEW_2026-11-18.md):
+throat rows cross-checked, GPU-hour split, 0 of 9 BO arms finished (two owner skips, three launch
+refusals, two failures), an `ok` row with no result, pending queue vs the zero-dimension guard.
+Raw record: [archive/2026-11-18-unintegrated/](../archive/2026-11-18-unintegrated/INDEX.md) (worktree
+snapshots + the night's file, ledger and poll logs; provenance only).
+
+[Owner decisions RESOLVED (2026-11-18, R1-R25)](../scratch/fable_architecture/OWNER_DECISIONS_RESOLVED_2026-11-18.md):
+every open owner question decided by the senior research pass under owner delegation (scoring frame from
+CTA-2034 / Olive / Geddes / repo evidence, briefs, GPU order, U3 host, provenance, envelope, protected
+lanes, PR plan), each with evidence and a reversal condition. Execution prompt for the local agent:
+[LOCAL_AGENT_PROMPT_2026-11-18.md](../LOCAL_AGENT_PROMPT_2026-11-18.md). v10 home briefs:
+`examples/briefs/home_landscape_2026-11-18_v10/`. Approved GPU job files:
+`evidence/gpu_queue_resolved_2026-11-18/`.
+
+[Cloud senior handback (2026-11-18)](../HANDBACK_CLOUD_2026-11-18.md): G1-G6 summary, per-commit verdicts,
+test sets, numbered owner decisions and the ordered local work list with exact commands.
+
+[v10 rescore, one local command (2026-11-18, WP 1.4/1.5)](evidence/v10_rescore_2026-11-18/README.md):
+the replay gate fix, the two offline v9/v10 rescore briefs, and the exact PowerShell commands for
+per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 frequency floor. Not run.
+
+[B1 readiness + zero-dimension truth fix (2026-11-18, WP 2.2/D7)](evidence/b1_readiness_2026-11-18/README.md):
+B1/B1f lines checked (kind: command, safe), search/CLI/night dry-run now refuse a zero-free-dimension
+search, the feasibility table, the ext-throat exclusion finding and the queue-ready batches for GPU approval.
+
+[Physical anchor pick: R-OSSE ST260 (2026-11-18, D6 step 1)](research/typologies/ANCHOR_ST260_RESEARCH_2026-11-18.md):
+why ST260 (published geometry + linked measured builds) over Geddes OS, the source table, the
+predeclared pass rule (beamwidth ±5°/±3° in 2-5 kHz, DI ±1 dB) and the config
+`examples/typologies/anchor_2026-11-18/anchor__rosse_st260_v1.yaml` (shape_check required, 1-2 owner-gated solves).
+
 
 [Orchestrator handoff for the senior plan (2026-11-17)](../scratch/fable_architecture/ORCHESTRATOR_HANDOFF_2026-11-17.md):
 how a lower-cost local orchestrator continues the plan: rules, what exists, first-session verification,
@@ -25,6 +60,7 @@ backbone, new freedoms tested on the record before any are built, search inside 
 safety net; owner decision cards for C1-C6. The target architecture, stages 0-8 with gates, GPU budget
 (about 34-38 solves before matched reruns) and the task-file conversion guide are in
 [ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md](../scratch/fable_architecture/ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md).
+Its §10.2 (2026-11-18) is the current per-WP status, the throat-block authority table and the critical path.
 Docs only; no code, solve or queue change.
 
 [Owner decisions packet (2026-11-17)](../scratch/fable_architecture/OWNER_DECISIONS_PACKET_2026-11-17.md):

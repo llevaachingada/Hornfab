@@ -1,10 +1,13 @@
 # Protected lanes (senior plan WP 7.1, ADR D10). The night runner marks a job protected when its
 # config file stem is listed here; the watchdog then only ADVISES and never stops it. Queue edits
 # by people are unaffected. Source: scratch/fable_architecture/A11_PROTECTED_AND_LINEAGE.md (17
-# lanes with owner-request evidence). STATUS: proposed, awaiting owner confirmation (decision C5).
-# The 4 lanes with no request evidence (ext_throat_hvlaw v7/v8, osse_rrect_morph v7/v8,
-# sp__* pilot, rf__rect_radial_wide_v7) are deliberately NOT listed; the owner decides them.
-status: proposed
+# lanes with owner-request evidence). STATUS: confirmed (C5 resolved 2026-11-18 under owner
+# delegation, scratch/fable_architecture/OWNER_DECISIONS_RESOLVED_2026-11-18.md R11): the list stands
+# as written; ext_throat_hvlaw v7/v8 and osse_rrect_morph v7/v8 stay UNprotected (owner drop
+# evidence), sp__* and rf__rect_radial_wide_v7 stay unprotected (no request evidence). Unprotected
+# lanes still run; they are only stoppable by the watchdog. A refusal storm stops even a protected
+# lane (tools/run_campaign_night.py PROTECTED_STOP_PREFIXES); J-based stops only advise.
+status: confirmed
 lanes:
   - {lane: hl__ath_core_petal_hvlaw_v7, evidence: "HOME_LANDSCAPE_PLAN_2026-11-15.md:5"}
   - {lane: hl__es_style_rollback_v7, evidence: "home_landscape_c_2026-11-15.yaml:5"}

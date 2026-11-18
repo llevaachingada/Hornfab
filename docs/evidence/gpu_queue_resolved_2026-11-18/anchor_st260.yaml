@@ -1,0 +1,30 @@
+# D6 step 1 physical anchor, 2 solves (R4, 2026-11-18). GATED: insert ONLY after the local source check
+# in docs/research/typologies/ANCHOR_ST260_RESEARCH_2026-11-18.md section 6 passes (rev7 values re-read,
+# measured build chosen and saved, shape_check OK). kind: command + run (never kind: search: zero free dims).
+night: resolved_2026-11-18
+lane: gpu
+jobs:
+- id: anchor_st260_screen_20261118
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/anchor_2026-11-18/anchor__rosse_st260_v1.yaml
+  - --mode
+  - screen
+- id: anchor_st260_verify_20261118
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/anchor_2026-11-18/anchor__rosse_st260_v1.yaml
+  - --mode
+  - verify

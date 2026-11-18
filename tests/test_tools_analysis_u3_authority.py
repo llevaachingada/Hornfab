@@ -37,3 +37,15 @@ def test_authority_needs_three_degrees_in_the_intended_plane_and_a_quiet_other_p
 def test_mismatched_grids_are_compared_on_the_overlap():
     host = (np.geomspace(500, 8000, 18), np.full(18, 80.0), np.full(18, 50.0))
     assert UA.equivalence(host, _arm())["pass"] is True
+
+
+def test_write_arm_csv_round_trips_through_band_means(tmp_path):
+    """R18 (2026-11-18): the CSV export reproduces the arm the authority rule reads."""
+    import csv
+    import numpy as np
+    f = np.array([800.0, 1000.0, 1500.0, 3000.0, 4000.0])
+    arm = (f, np.array([70.0, 72.0, 80.0, 81.0, 79.0]), np.array([60.0, 61.0, 55.0, 54.0, 53.0]))
+    p = UA.write_arm_csv(tmp_path / "x" / "hv_beamwidth_a.csv", arm)
+    rows = list(csv.DictReader(p.open(encoding="utf-8")))
+    back = tuple(np.array([float(r[k]) for r in rows]) for k in ("freq_hz", "bw_h_deg", "bw_v_deg"))
+    assert UA.band_means(*back) == UA.band_means(*arm)

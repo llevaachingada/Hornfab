@@ -94,6 +94,17 @@ def load_arm(design_dir: Path, cfg):
     return np.asarray(m.freqs_hz), np.asarray(m.bw_h_deg), np.asarray(m.bw_v_deg)
 
 
+def write_arm_csv(path: Path, arm) -> Path:
+    """Per-frequency H/V -6 dB beamwidth CSV in the throat-evidence format (R18, 2026-11-18), so
+    an authority table never depends on a hand-made export."""
+    f, h, v = (np.asarray(x, float) for x in arm)
+    lines = ["freq_hz,bw_h_deg,bw_v_deg"] + [f"{float(a)!r},{float(b)!r},{float(c)!r}" for a, b, c in zip(f, h, v)]
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--host", type=Path, required=True)
@@ -102,6 +113,7 @@ def main(argv=None) -> int:
     ap.add_argument("--dj", type=float)
     ap.add_argument("--floor", type=float)
     ap.add_argument("--out", type=Path)
+    ap.add_argument("--csv-dir", type=Path, help="also write hv_beamwidth_<arm>.csv per arm here")
     a = ap.parse_args(argv)
     from hornlab_search.config import load_config
     cfg = load_config(a.config)
@@ -110,6 +122,11 @@ def main(argv=None) -> int:
     if "control" not in arms:
         raise SystemExit("--arm control=<design dir> is required (WP 4.2 comes first)")
     control = load_arm(Path(arms.pop("control")), cfg)
+    if a.csv_dir is not None:
+        write_arm_csv(a.csv_dir / "hv_beamwidth_host.csv", host)
+        write_arm_csv(a.csv_dir / "hv_beamwidth_control.csv", control)
+        for name, d in arms.items():
+            write_arm_csv(a.csv_dir / f"hv_beamwidth_{name}.csv", load_arm(Path(d), cfg))
     report = {"equivalence": equivalence(host, control, dj=a.dj, floor=a.floor), "variants": {}}
     if report["equivalence"]["pass"]:
         for name, d in arms.items():

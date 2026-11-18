@@ -1,0 +1,112 @@
+# HOME LANDSCAPE v10 SECOND-SCORE brief (cloud senior decision 2026-11-18 under owner delegation;
+# scratch/fable_architecture/OWNER_DECISIONS_RESOLVED_2026-11-18.md R1-R3).
+# Source of every value: the owner's 2026-11-17 evening C1/C2 answer (corridor H 60-90 from 700 Hz,
+#   V 40-60 from 1000 Hz, loading on) + the 2026-11-18 ripple answer (ripple_region: preferred_edge)
+#   + v9 tolerances/weights as replayed in S1 (rip tol 1 dB, weight 1: E4 shows rip barely moves ranks).
+# grid: copied from room_landscape_80x50_700_hf1440_v7 (18 screen / 29 verify frequencies: the grid the
+#   N3 frequency floor was measured on).
+# USE: CPU rescoring of stored responses and opt-in searches only. Nights keep the v7 brief until the
+#   physical anchor (D6 stage 2b) says which score predicts a real horn better. NOT a default.
+# CONSTANCY VARIANT (owner C2 2026-11-17: slope-limited): S1's reproduction settings (weight 1,
+#   tolerance 1 = 5 deg RMS per unit, slope clip 5 deg/decade); score_grid dense 116 because N3 shows
+#   constancy needs 116 points. RULE: no ranking may use this identity until its own frequency floor
+#   (rescore_identity.py floor with this brief) is published (R2).
+description: '(objective v10) HOME landscape SECOND SCORE + slope-limited constancy
+  (5 deg/decade), dense 116-point score grid: corridor H 60-90 (pref 80) from 700
+  Hz, V 40-60 (pref 50) from 1000 Hz, ripple_region preferred_edge, loading on; HF1440,
+  600x480x480; band 350-8000 Hz. Not the nights'' default (nights stay v7 until D6
+  stage 2b).'
+driver:
+  exit_angle_deg: 2.0
+  exit_radius_mm: 18.0
+envelope:
+  max_depth_mm: 480.0
+  max_mouth_h_mm: 480.0
+  max_mouth_w_mm: 600.0
+grid:
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+  verify_points_per_octave: 6
+name: room_landscape_80x50_700_hf1440_v10_slope5
+objective:
+  cov_below_f0: one_sided
+  cov_narrow_ratio: 2.0
+  cov_v_weight: 0.5
+  flat_band: scored
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  ripple_region: preferred_edge
+  tolerances:
+    cov_profile: 3.0
+    di_roughness: 1.0
+    dislope: 9.0
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3
+    rip: 1.0
+  version: 10
+  constancy:
+    mode: slope
+    weight: 1.0
+    tolerance: 1.0
+    slope_max_deg_per_decade: 5.0
+  score_grid:
+    kind: dense_log
+    points: 116
+source:
+  cap: auto
+symmetry: hv
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_profile:
+    h:
+    - hz: 700
+      max_deg: 90
+      min_deg: 60
+      preferred_deg: 80
+    - hz: 8000
+      max_deg: 90
+      min_deg: 60
+      preferred_deg: 80
+    interpolation: log_frequency
+    mode: corridor
+    v:
+    - hz: 1000
+      max_deg: 60
+      min_deg: 40
+      preferred_deg: 50
+    - hz: 8000
+      max_deg: 60
+      min_deg: 40
+      preferred_deg: 50
+  coverage_v_deg: 50.0
+  coverage_v_down_deg: null
+  coverage_v_up_deg: null
+  di_slope_target: 0.0
+  di_target_db: null
+  driver_exit_radius_mm: null
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov_profile: 1.0
+  di_roughness: 1.0
+  dislope: 1.0
+  flat: 0.5
+  flat_cv: 1.0
+  load: 1.0
+  rip: 1.0

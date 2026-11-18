@@ -1,0 +1,80 @@
+# B1 mesh convergence - OPTIONAL ext-throat x2 probes (cloud senior 2026-11-18, Fable WP 2.2 / D7).
+# PROPOSED ONLY - owner GPU approval required. Same job shape as
+# scratch/fable_architecture/.b1/b1_mesh_night_insert.yaml (kind: command, fresh process per design,
+# memwatch + --record-vram + --teardown-per-design, gain threshold 0.0057).
+# WHY: b1_mesh_feasibility.md's table shows these three ext_throat_v7 designs DO build at x2
+# (14 270 / 15 388 / 15 342 quarter DOF, same probe grade as fold-warm), but its recommendation
+# text excludes "the five ext-throat designs". Only 3a1038da45d0 and 9fcd21fc1904 refuse at epw 12.
+# Queue these AFTER the five fold-warm probes, and only if the first fold-warm probe did not spill.
+night: b1_mesh_2026-11-18
+lane: gpu
+jobs:
+- argv:
+  - .venv/Scripts/python.exe
+  - tools/bench/run_with_memwatch.py
+  - --out
+  - runs/nights/b1_mesh_2026-11-18/memwatch/b1_mesh_766c9b1ba8a9_20261118.json
+  - --
+  - .venv/Scripts/python.exe
+  - tools/night_queue/fidelity_pairs.py
+  - --design
+  - runs/20261115T143219Z-screen-d3a1bb:766c9b1ba8a9
+  - --refine-epw-factor
+  - '2'
+  - --teardown-per-design
+  - --record-vram
+  - --gain-threshold
+  - '0.0057'
+  - --out
+  - runs/b1_mesh_2026-11-18
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  id: b1_mesh_766c9b1ba8a9_20261118
+  kind: command
+  timeout_s: 10800
+- argv:
+  - .venv/Scripts/python.exe
+  - tools/bench/run_with_memwatch.py
+  - --out
+  - runs/nights/b1_mesh_2026-11-18/memwatch/b1_mesh_508f907726d3_20261118.json
+  - --
+  - .venv/Scripts/python.exe
+  - tools/night_queue/fidelity_pairs.py
+  - --design
+  - runs/20261115T143219Z-screen-d3a1bb:508f907726d3
+  - --refine-epw-factor
+  - '2'
+  - --teardown-per-design
+  - --record-vram
+  - --gain-threshold
+  - '0.0057'
+  - --out
+  - runs/b1_mesh_2026-11-18
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  id: b1_mesh_508f907726d3_20261118
+  kind: command
+  timeout_s: 10800
+- argv:
+  - .venv/Scripts/python.exe
+  - tools/bench/run_with_memwatch.py
+  - --out
+  - runs/nights/b1_mesh_2026-11-18/memwatch/b1_mesh_b996da551021_20261118.json
+  - --
+  - .venv/Scripts/python.exe
+  - tools/night_queue/fidelity_pairs.py
+  - --design
+  - runs/20261115T143219Z-screen-d3a1bb:b996da551021
+  - --refine-epw-factor
+  - '2'
+  - --teardown-per-design
+  - --record-vram
+  - --gain-threshold
+  - '0.0057'
+  - --out
+  - runs/b1_mesh_2026-11-18
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  id: b1_mesh_b996da551021_20261118
+  kind: command
+  timeout_s: 10800

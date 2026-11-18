@@ -1,5 +1,128 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - owner-box integration started: cloud branch suite green after digest-pin fix (local orchestrator)
+
+- Suite on `cloud/fable-next-2026-11-18` (offline, thread caps 1, -n 6 --dist loadscope):
+  **4861 passed, 4 failed, 22 skipped, 18:42 min** — failures exactly the known 4
+  (`test_v8_key_set…`, `test_b8_lanes…`, 2 × `test_night_bo_arm_wrapper`).
+- Fixed before merge (R7 / WP 0.9): `tests/test_klangfilm_hv_digest_pin.py` pinned the cloud
+  container's `implementation_digest()` values (`ee160698…`/`c65beb16…`), but
+  `implementation_digest()` folds `numpy=<v>;scipy=<v>` into the hash, so those constants cannot
+  hold on another dependency set. Owner box (numpy 2.5.4 / scipy 1.18.1) computes
+  `1304dea3…`/`a032f660…` — and the stored local recipes carry exactly those digests
+  (runs/20261117T071329Z-screen-e4f90d design.json; docs/evidence/klangfilm_hv_2026-11-16/search_box.json),
+  so nothing is locked out. The test now pins the frozen FILE BYTES (same file list + CRLF
+  normalisation as the digest recipe: adapter, kernel, parent, cap, shell) and independently
+  re-checks the digest recipe + version suffix. Kernel files verified byte-identical to
+  pre-b06a938 (`git diff b06a938^ -- <both kernel files>` empty).
+- R22 on the owner box: the uncommitted `scalar_v9.py` edit (adds `ripple_window`/`oa_excess_tol`
+  v9 math) DISCARDED per R22 (copy saved outside the repo);
+  `tests/test_v9_polar_window.py` deleted (it tested only the discarded API);
+  AGENTS.md/.opencode agent-config sync (opencode-go-max preset text + mirror of the umbrella
+  fallback/backgroundJobs block) kept as doc/config-only;
+  `hl__klangfilm_lame_curved_v1_c200w.yaml` kept pending shape_check.
+
+## 2026-11-18 - cloud senior: ALL owner questions resolved under owner delegation (R1-R25) + code
+
+- `scratch/fable_architecture/OWNER_DECISIONS_RESOLVED_2026-11-18.md`: research frame (CTA-2034
+  listening window, Olive preference model, Geddes, Sridhar, repo S1/N3/SIM_VS_REAL) and 25 decisions,
+  each with evidence and a reversal condition. Plan §10.3 summarises them.
+- Code/config set here: v10 home briefs `examples/briefs/home_landscape_2026-11-18_v10/` (base +
+  slope5 constancy on 116 points; R1-R3); Klangfilm H/V kernels restored to pre-b06a938 bytes +
+  `tests/test_klangfilm_hv_digest_pin.py` (R7; facts moved to the contract errata); protected list
+  `status: confirmed`, refusal storms stop protected lanes (R11); night status `ok_no_result` (R16);
+  `replay.REPLAY_VERSIONS` single list + test (R17); `u3_authority --csv-dir` (R18); Crowe-X /
+  Le Cleach YAML comments (config_sha unchanged, verified; R13/R14); GPU job files
+  `docs/evidence/gpu_queue_resolved_2026-11-18/` (anchor, BO `_r2`; dry-run clean).
+- Not done from the cloud: CLAUDE.md ownership row (R21) - the session guard refused the edit; the
+  local prompt adds it.
+- Tests (cloud): 4826 collected, failure set identical to the 18ec991 baseline (no new failures).
+- Execution: `LOCAL_AGENT_PROMPT_2026-11-18.md` (STEP 1 integrate, 2 CPU evidence, 3 GPU order,
+  4 evidence + WP 0.9/D9).
+
+## 2026-11-18 - cloud senior: review of the pushed night record (WP 0.7 / 7.2 / D8)
+
+- Merged `2b35194` (archive of worktree drafts + night cd_rrect_2026-11-17 ledger) into
+  `cloud/fable-next-2026-11-18`. That commit had no CONTINUITY/ISSUES/INDEX entries; INDEX line
+  added here.
+- `docs/evidence/night_cd_rrect_2026-11-17_REVIEW_2026-11-18.md`: throat rows match the evidence
+  exactly; 14.7 h ok / 3.5 h failed / 2.1 h blocked; 0 of 9 BO arms finished (2 owner skips,
+  t_hvlaw x2 refused for too few training rows [code-verified], t_ath14_turbo100 refused,
+  t_klame x2 failed); t_trit80_rc2 recorded ok with 0 evals and no J; pending queue clean under
+  the zero-dimension guard. Handback §9 added.
+
+## 2026-11-18 - cloud senior G6 (Fable D10): HANDOFF refreshed, PR plan, HANDBACK_CLOUD_2026-11-18.md
+
+- `HANDOFF_2026-11-18.md`: cloud additions table, corrections (A_r15 vs v8 is a tie; no A-family
+  onset search; #68 code byte-identical to this branch [verified]), PR plan: #67 -> main; cloud
+  draft -> hornfab-all; one PR hornfab-all -> main; close #68; nights to main at a night boundary.
+- `HANDBACK_CLOUD_2026-11-18.md` (repo root): status summary, per-commit verdicts (all approve),
+  test sets (cloud baseline 20 F + 19 E, final identical, +15 new passing tests), 7 numbered
+  owner decisions, ordered local work list A-H with commands, queue lines, off-plan proposals.
+
+## 2026-11-18 - cloud senior G5 (Fable WP 4.4): throat block parked on A (proposal)
+
+- `docs/evidence/throat_hv_2026-11-18/G5_RECOMMENDATION_2026-11-18.md`: park on A as inert in
+  this envelope; no A_r15 + onset/ramp test. Code-verified: A's seed (`morph_target 0`,
+  `morph_fixed`/`morph_rate` present) makes `families.py:647-651` refuse `hv_onset_frac` /
+  `section_exp_ramp`; native morph keys load but are inert with no morph target.
+- B kept as "H authority, not competitive under v7"; free CPU check via the v10 rescore column.
+- No config written, nothing queued.
+
+## 2026-11-18 - cloud senior G1: plan §10.2 "Status 2026-11-18" (Fable plan §4, §8.2, §10.1)
+
+- `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` §10.2: one status row per WP (done /
+  tool-done-not-run / blocked-on-owner / not started), placement of the 11-18 work (throat block =
+  stage-4 freedom built ahead of its gate; v10 = the §10.1 new-identity fix; agent_bench +
+  contracts = off-plan knowledge track), the throat authority table, critical path, next three
+  owner decisions.
+- Throat authority, re-derived from the part3 CSVs with `u3_authority.authority()` [verified]:
+  A (rho on ext-throat) INERT (≤ 1.28° per band; A_r15 vs v8 ΔJ 0.0192 = TIE under the 0.13
+  floor); B onset has H authority (up to ~10°, V < half; best onset beats B_ctl by 0.251 > floor);
+  B not competitive under v7 (load ~3.2 J); Phase 3 gain 0.0896 over its seed = TIE.
+- INDEX: throat evidence folder line added (was missing).
+
+## 2026-11-18 - cloud senior G4 (Fable D6 step 1): physical anchor = R-OSSE ST260 (research only)
+
+- Pick: Batik's R-OSSE rev7 "ST260" example (1-inch, round, 260 mm; full parameter set published,
+  CC BY-NC-SA 4.0; ST260 page links user builds with measurements). Geddes OS rejected (no exact
+  published dimensions). Dossier: `docs/research/typologies/ANCHOR_ST260_RESEARCH_2026-11-18.md`.
+- Config: `examples/typologies/anchor_2026-11-18/anchor__rosse_st260_v1.yaml` (all bounds pinned,
+  loads + validates [verified]; NOT meshed, shape_check required).
+- Predeclared pass rule: -6 dB beamwidth ±5° per 1/3-octave band (±3° in 2-5 kHz), DI ±1 dB,
+  1-8 kHz, same DI method both sides.
+- Limits: at-horns.eu / diyAudio unreachable from the cloud; values come from the repo's 2026-11-16
+  fetch and must be re-read locally; the measurement set is not yet chosen.
+
+## 2026-11-18 - cloud senior G3 (Fable WP 2.2 / D7): zero-dimension searches refused; B1 readiness
+
+- Truth fix: `search/cma.py::require_free_dimensions` (called first in `search()`), the
+  `hornlab-search search` CLI (exit 2, empty run dir removed) and `tools/run_campaign_night.py
+  --dry-run` now refuse a search whose config leaves CMA-ES no free dimension, naming
+  `hornlab-search run --config <yaml> --mode screen|finalist` / `kind: command`. This is the part3
+  pycma `x0=[]` crash. Tests: `tests/test_search_zero_dimensions.py` (7).
+- Checked: the B1 and B1f lines from b6d3ba4 are `kind: command` -> fidelity_pairs.py (calls
+  evaluate directly), so they never hit the crash; all three night files dry-run clean.
+- Finding: b1_mesh_feasibility.md excludes "the five ext-throat designs" but its own table shows
+  766c/508f/b996 build at x2 (probe grade). Optional 3-job batch written:
+  `docs/evidence/b1_readiness_2026-11-18/b1_mesh_ext_throat_probes.yaml`. The v7 leader 3a1038 and
+  v8 incumbent 9fcd21 remain infeasible on the 8 GB card.
+- No GPU, no queue edit, no default changed.
+
+## 2026-11-18 - cloud senior G2 (Fable WP 1.4 / 1.5): v10 rescore is one local command
+
+- Bug fixed: `objective/replay.py` dispatched v10 but its version gate `(1,2,3,4,7,9)` refused it
+  (`objective_version_not_supported_by_replay`), so a v10 rescore scored zero rows. Gate now
+  includes 10. No stored J, row, config_sha or default changed (v10 is opt-in; no brief in
+  `examples/` uses it).
+- `tools/analysis/rescore_identity.py`: `--run-brief <stem>`, `--runs-root <dir>`, rows carry
+  `stored_j` / `parity_delta`, new `compare` subcommand (per-lane bests side by side, one column
+  per identity, ranks within a column only).
+- New: `docs/evidence/v10_rescore_2026-11-18/` (README with exact local commands + two OFFLINE
+  rescore briefs: v9 corridor = owner's 11-17 second score, v10 = same + `preferred_edge`).
+- Tests: new `tests/test_rescore_identity_v10.py` (8); `test_obj_replay_v9_parity.py` gate string.
+- NOT RUN: needs `runs/` (local agent; commands in the README).
+
 ## 2026-11-18 - throat H/V sweep: Phases 1-3 DONE on this branch (owner-authorized GPU)
 
 - Phase 1 (7 single solves, \hornlab-search run\): all ok, v7 identity = v8 stored
@@ -8027,6 +8150,7 @@ PASS  round-trip        reserved for task 04
 
 **Next action:** dispatch the Wave 1 issues in parallel using the prompt template in `docs/plan/00_ORCHESTRATOR.md` â€” **only after** CP-0 is completed on a clean GPU and the repo is pushed.
 ## Status
+- **Current (cloud senior 2026-11-18):** Owner questions RESOLVED (R1-R25, OWNER_DECISIONS_RESOLVED_2026-11-18.md); execution = LOCAL_AGENT_PROMPT_2026-11-18.md.
 - **Phase:** senior-pass implementation (owner directive 2026-10-24; WP1â€“WP17, no Synergy/MEH). **M1 DONE and pushed** (WP1â€“WP4 offline parts + WP15 repo-side plumbing; Oracle GO). **M2 DONE: WP15 fused CUDA validated on the GPU** â€” ladder, fused GPU test, measured ceiling, 12 kHz verify; Oracle GO recorded in the M2 entry. **M3 DONE** (carry-overs + WP5/WP7/WP8 calibration, zero new searches; Oracle GO-with-fixes ALL applied). **M4 DONE (2026-10-25): WP9 generators (splice/throat_blend/spherical_salmon) + WP9b GRID rows (organic/elliptical/X-shape as labeled hypotheses + HALF models) + `lecleach` SHIPPED after R9-J PASSED (owner chat directive, Fourcade verified, 0.00 mm width) + WP10 GRID adapter** â€” 12 typology smokes green on the GPU, full-vs-quarter PASS, suites 1194/0/1/0 (intended tripwire only), Oracle GO-with-fixes (doc-only) applied. **M5 WP11 DONE (2026-10-25): restarts (IPOP/BIPOP mirroring pycma) + CMA-ME QD atlas (ribs 0.12.0 â€” offline-first, +40 tests, 4 GPU screens proving budget exactness incl. a fired 4-ES BIPOP run; Oracle GO-with-fixes applied; evidence `docs/evidence/M5_WP11_2026-10-25.md`, byte-check 30/30). M5B DONE (2026-10-25): WP14 multicell CATEGORY (CADâ†’STEP route: `tools/cad/multicell.py` + `mesh/step_build.py` + the `cad` recipe/echo/example + `solve.near_correction*`/`solve_precision`/`source_profile_alpha` keys) + WP16/17 fork branches LANDED AND GPU-VALIDATED (Julia 46/46 testsets incl. all four CUDA testsets; selftests 0.020/0.0390 dB; 3-arm A/B worst 4.94e-06 dB) + FORK HOSTED (github.com/llevaachingada/hornlab-beat-bem) + PIN MOVED THERE (`760a1ec`) â€” the test_mesh_pin tripwire RESOLVED, suite 1325/0/0/0; M4 debts finished; multicell PHYSICS DEFERRED (owner â€” mouth-topology defect diagnosed, evidence preserved); CLI selftest lock-kill fix; evidence `docs/evidence/M5B_WP14_WP16_WP17_2026-10-25.md`, byte-check 33/33. M6/WP12 DONE (2026-10-25): enclosure mounting plumbed (brief.mounting â†’ the mesher's OWN keys, âˆ’mnt- cache keys, all echoes) AND MEASURED on two finalists â€” dofs +199.4 % / +106.5 %, both under the unchanged caps, enclosure J improves (a different objective landscape â€” never rank across mountings), reference parity 2.91e-06 dB; **WP13 OWNER-DEFERRED** ("don't know how necessary that is"); suite 1372/0/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21.** Waves 0â€“3 + CP-7 complete; CP-8a/b PASS, CP-8c CLOSED, CP-8d still FAILED (surrogate retrain pending more OSSE data â€” unchanged).
 - **Done 2026-10-24:** M1: objective v2 (opt-in, offline re-score over 18,059 records: Spearman Ï(v1,v2) = 0.989, both compare-tier claims SURVIVE, v1 drift 0 â€” `docs/evidence/OBJECTIVE_V2_RESCORE.md`); WP2 driver pins with the embedded-brief grandfather; WP3 shape-only perturb + graded infeasibility; WP4 `freq_weights` + HF verify grid. WP15 repo side: `solve.cuda_fused` flag, env gating, diagnostics proof + refusal (fork branch `hornlab-search/fused-cuda` @ `fa99ee5` in `..\forks\hornlab-beat-bem`; Julia tests green). **M2 (late evening):** fork installed by SHA; ladder analytic **0.020 dB** / crosscheck **0.0390 dB** (both = base references); 3-arm A/B vs stored base-pin runs â‰¤ 2.9e-6 dB / 2.1e-05 deg (bars 0.039 dB / 1Â°); fused GPU test green ([measured] on-axis 0.0000 dB, bw 0.01-deg print precision, z_throat 3.35e-07; stale-host refusal); flag-off bit-determinism finding rebarred to a measured 1e-4 dB floor (base-pin reproduction logged); ceiling measured: fused **fits 15,984 / fails 20,237, SAFE = 12,000** (old path same mesh: 7,389 vs 2,217 MiB, 59.6 vs 9.1 s/freq); four `*_fusedcuda` configs (caps 5000/12000/12000); 12 kHz verify on the flag (4,438 dofs, 2.1 s/freq, 25Ã— fused proven). Evidence `docs/evidence/FUSED_CUDA_2026-10-24.md`; pin on `dev/fused-cuda-pin` ONLY (never main; GitHub hosting = owner action). **M3 (2026-10-25):** carry-overs @ `1dda493` + `solve.source_motion` / `mesh.rear_res_factor` / `mesh.band_split` (+ `stack_responses`, verify-only seam, `mesh_policy: band_split_v1` provenance) + the 17-job measurement pack on the stored WP5 finalists (`tools/m3_measurement_pack.py`); evidence `docs/evidence/MEASUREMENT_PACK_2026-10-24.md`; details in the M3 entry above.
 - **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CADâ†’STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned â€” the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) â€” 2â€“4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.

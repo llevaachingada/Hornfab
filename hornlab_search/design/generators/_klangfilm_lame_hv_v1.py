@@ -39,11 +39,9 @@ Throat provenance: the parent's raw wall half-angle is derived (9.3669 deg at fc
 ``brief.driver.exit_angle_deg`` (2 deg) remains a simulation assumption; nothing here converts it into a
 wall tangent or claims it is an HF1440 datasheet value.
 
-Frozen copy: reproduced from ``tools/geometry/klangfilm_lame_hv.py`` at SHA256
-cbb23cc02d9b5d135e1ec46b4d0f3fdac68f8120c313b1a8ffe8e360672bea02. At the 2026-11-18 review the tools
-file hashes to 7fc93d6303081da30e36b9cd48ae2a962ff166814d87601e45db6324b3ca8f64 and differs from this
-copy only in its BOM, docstrings and imports. No frozen-vs-tools parity test exists yet; regenerate
-rather than hand-edit.
+Frozen copy: reproduced from ``tools/geometry/klangfilm_lame_hv.py`` (SHA256
+cbb23cc02d9b5d135e1ec46b4d0f3fdac68f8120c313b1a8ffe8e360672bea02). It must stay in sync with that
+reviewed source; regenerate rather than hand-edit.
 """
 from __future__ import annotations
 

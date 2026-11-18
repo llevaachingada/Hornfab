@@ -1,5 +1,77 @@
 ﻿# ISSUES
 
+## 2026-11-18 - owner-box integration: digest pin was env-dependent (fixed pre-merge); R22 resolved
+
+- FIXED (R7 / WP 0.9, pre-merge): `tests/test_klangfilm_hv_digest_pin.py` pinned absolute
+  `implementation_digest()` values that fold numpy/scipy versions; rewritten to pin frozen file
+  content + digest recipe. Stored local recipes verified unlocked (`1304dea3…`/`a032f660…`).
+- CLOSED (R22): uncommitted `scalar_v9.py` v9-math edit discarded (patch archived outside repo);
+  `tests/test_v9_polar_window.py` deleted (tested only the discarded API); AGENTS.md/.opencode
+  doc/config-only sync kept; c200w yaml kept pending shape_check.
+
+## 2026-11-18 - owner questions: all RESOLVED (R1-R25); remaining work is execution
+
+- CLOSED (decided, see OWNER_DECISIONS_RESOLVED_2026-11-18.md): C1-C6, ripple region and rip
+  tol/weight, constancy, frequency grid, D6 anchor, B1/B1f, U3 host, throat park, b06a938,
+  protected list + refusal storms, provenance rule, envelope convention, Crowe-X g_L_mm, Le Cleach
+  wording, BO re-queue policy, space proposals, categorical split, record_gate, PR plan / integrator,
+  uncommitted scalar_v9 edits, agent bench, b3_soft trim, throat-block landing.
+- OPEN (local agent, execution only): LOCAL_AGENT_PROMPT_2026-11-18.md STEPS 1-4; the CLAUDE.md
+  ownership row (STEP 1.5); WP 0.9/D9 implementation (STEP 4f).
+- Scheduled measurements (not questions): v10/v10_slope5 floors, B1, ST260 anchor, WP 4.2/4.3.
+
+## 2026-11-18 - night cd_rrect_2026-11-17: failure causes not yet read
+
+- OPEN (local agent): read cause lines for t_klame_turbo100, t_klame_scalar100, t_ath14_turbo100,
+  t_hvlaw_turbo100/_scalar100 (row count N), t_trit80_rc2, cont_p80_athcore_corelaw_200,
+  cont_biradial_smooth_200, c_rrect_100w_rc2 (review §8 command); append to the review.
+- OPEN (WP 0.7 proposal): `ok_no_result` status when a job exits 0 with no rows (t_trit80_rc2).
+- OPEN (owner): BO re-queues after the causes; t_hvlaw needs a CMA cohort first.
+
+## 2026-11-18 - integration plan awaits the owner (D10)
+
+- OPEN (owner): approve the PR plan in `HANDOFF_2026-11-18.md` / `HANDBACK_CLOUD_2026-11-18.md` §5.
+- OPEN (local agent): work list A-H in `HANDBACK_CLOUD_2026-11-18.md` §6, starting with the full
+  local suite on `cloud/fable-next-2026-11-18`.
+
+## 2026-11-18 - throat block on A: park decision (owner)
+
+- OPEN (owner): accept "park on A, inert in this envelope" (G5). An A-family morph-target `_v2`
+  is the only legal way to make onset live there; it is a new construction, not recommended.
+- OPEN (local agent, CPU): read the throat runs' rows in the v10 rescore column when it runs.
+
+## 2026-11-18 - plan status §10.2 published; A-vs-v8 per-band authority unconfirmed
+
+- OPEN (local agent, CPU): run the `u3_authority.py` command in plan §10.2 to confirm the A-vs-v8
+  rows per band (cloud had only whole-band means for v8). Expected: no authority.
+- NOTE: "A_r15 beats v8 by 0.0192" is a TIE under the 0.13 floor; do not cite it as a win.
+
+## 2026-11-18 - D6 step 1 anchor (ST260): local source check before any solve
+
+- OPEN (local agent): re-read R-OSSE rev7 + ST260 page, fix config values if they differ, choose
+  an admissible measured build (mounting modelable, distance/gating stated, polar step <= 10 deg),
+  save it under docs/evidence/anchor_st260_<date>/measured/, run shape_check + the mouth/throat
+  property checks.
+- OPEN (owner): accept ST260 + the predeclared pass rule; approve 1-2 solves afterwards.
+
+## 2026-11-18 - B1 GPU approval packet ready (WP 2.2 / D7)
+
+- OPEN (owner): approve batch 1 (5 fold-warm x2 probes), optional batch 2 (3 ext_throat_v7 x2
+  probes), optional B1f; all after the BO arms. Packet:
+  `docs/evidence/b1_readiness_2026-11-18/README.md`.
+- OPEN (B1 evidence author): say explicitly that the floor does not cover 3a1038 / 9fcd21 (and
+  likely the A_r15 throat design): infeasible at x2 on this card.
+- CLOSED: `kind: search` with every bound pinned now refused at search(), CLI and night dry-run.
+
+## 2026-11-18 - v10 rescore not yet run (WP 1.4 / 1.5)
+
+- OPEN (local agent): run the commands in `docs/evidence/v10_rescore_2026-11-18/README.md`
+  (three rescores, compare, two floors), check v7 parity and `mixed_identity: false`, commit the
+  summaries. CPU only.
+- OPEN (owner): v10 rip tolerance/weight are the v9 values in the offline brief; changing them is
+  a new identity. Constancy stays undeclared until its floor is measured.
+- CLOSED: replay refused v10 (gate fixed, tested).
+
 ## 2026-11-18 - throat sweep Phases 1-3 complete; two BO arms skipped, resume needs fresh --root
 
 - DONE: Phases 1-3 on cd_rrect_2026-11-17 (A_r15 beats v8 by 0.0192 on the matched v7 identity;
