@@ -424,3 +424,32 @@ def test_design_is_deterministic() -> None:
     assert a is not None and b is not None
     assert a.vb_l == b.vb_l
     assert a.peq == b.peq
+
+
+def test_z_in_ohm_is_voltage_invariant_non_unit_drive() -> None:
+    """SYS-01: Ohm's law holds at any drive, not just 1 V.
+
+    The State docstring says every quantity is per volt rms (evaluate's default). When ``volts``
+    differs, current and volume velocities must scale linearly and the input impedance must stay
+    drive-independent: ``z_in = e / i`` (V = Z I), not ``1 / i`` (which is correct only at 1 V and
+    otherwise reports an impedance that changes inversely with the requested drive).
+    """
+    d = _synthetic_driver()
+    box = bb.Box("vented", 60.0, 32.0, 200.0, 250.0)
+    f = np.geomspace(20.0, 200.0, 24)
+    st1 = bb.evaluate(f, d, box, volts=1.0)
+    st2_83 = bb.evaluate(f, d, box, volts=2.83)
+    st_half = bb.evaluate(f, d, box, volts=0.5)
+
+    # voltage-linear quantities scale exactly
+    np.testing.assert_allclose(st2_83.i_a, 2.83 * st1.i_a, rtol=1e-12, atol=0.0)
+    np.testing.assert_allclose(st_half.i_a, 0.5 * st1.i_a, rtol=1e-12, atol=0.0)
+    np.testing.assert_allclose(st2_83.u_d_m3s, 2.83 * st1.u_d_m3s, rtol=1e-12, atol=0.0)
+
+    # the impedance is a property of the box+driver, not of the requested drive
+    np.testing.assert_allclose(st2_83.z_in_ohm, st1.z_in_ohm, rtol=1e-12, atol=0.0)
+    np.testing.assert_allclose(st_half.z_in_ohm, st1.z_in_ohm, rtol=1e-12, atol=0.0)
+
+    # no divide-by-zero is hidden: zero/negative drive is refused, not evaluated
+    with pytest.raises(ValueError):
+        bb.evaluate(f, d, box, volts=0.0)

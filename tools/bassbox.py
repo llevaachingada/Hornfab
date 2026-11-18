@@ -274,6 +274,8 @@ def _freq(f) -> np.ndarray:
 def evaluate(f, cone: ConeDriver, box: Box, volts: float = 1.0) -> State:
     """Full small-signal state of ``cone`` in ``box`` at ``volts`` rms (default: per volt)."""
     f = _freq(f)
+    if not (np.isfinite(volts) and float(volts) > 0.0):
+        raise ValueError(f"volts must be finite and > 0, got {volts!r}")
     w = 2.0 * np.pi * f
     e = float(volts) * np.ones(f.shape, dtype=np.complex128)
 
@@ -310,7 +312,7 @@ def evaluate(f, cone: ConeDriver, box: Box, volts: float = 1.0) -> State:
     }
     return State(
         f=f,
-        z_in_ohm=(1.0 / i).astype(np.complex128),
+        z_in_ohm=(e / i).astype(np.complex128),
         i_a=i,
         v_mps=v,
         u_d_m3s=u_d,
