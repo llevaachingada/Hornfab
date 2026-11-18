@@ -90,6 +90,8 @@ STATUS_BLOCKED = "blocked"
 STATUS_FAILED = "failed"
 STATUS_TIMEOUT = "timeout"
 STATUS_WATCHDOG = "watchdog"
+#: exit 0 with nothing recorded (search/BO jobs only); a problem row, not a success (R16).
+STATUS_OK_NO_RESULT = "ok_no_result"
 
 # ------------------------------------------------------------------ search watchdog (2026-11-16)
 #
@@ -737,6 +739,9 @@ def load_night(path: Path | str, *, repo_root: Path | str | None = None,
 #: Default protected-lanes file (WP 7.1). A night YAML may name another with
 #: ``protected_lanes: <path>`` or turn protection off with ``protected_lanes: false``.
 PROTECTED_LANES_DEFAULT = "examples/protected_lanes.yaml"
+
+#: Watchdog reasons that still stop a protected lane (owner C5, resolved 2026-11-18, R11).
+PROTECTED_STOP_PREFIXES = ("refusal rate",)
 
 
 def _job_lane(job: "Job") -> str | None:
@@ -1485,7 +1490,11 @@ class NightRunner:
                         wd_run = _find_new_run_dir(self.runs_root, wd_start)
                     if wd_run is not None:
                         wd_reason = watchdog_verdict(_read_ndjson(wd_run / "search.ndjson")[wd_base:], wd_cfg, _run_bounds(wd_run))
-                    if wd_reason and getattr(job, "protected", False):
+                    if (wd_reason and getattr(job, "protected", False)
+                            and not wd_reason.startswith(PROTECTED_STOP_PREFIXES)):
+                        # Owner C5 (resolved 2026-11-18, R11): protection blocks J-based stops
+                        # (no gain / bound-pinned / stalled) only; a refusal storm still stops
+                        # a protected lane, because it means the config is broken, not slow.
                         log.write(f"\n=== WATCHDOG ADVISORY (protected lane) {wd_reason}; "
                                   f"NOT stopping job {job.id}; the owner decides\n")
                         log.flush()
@@ -1653,6 +1662,15 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
                 f"BO screen {bo_progress.get('screen_calls')} "
                 f"verify {bo_progress.get('verify_calls')} "
                 f"observations {bo_progress.get('observations')}")
+
+    # WP 0.7 (resolved 2026-11-18, R16): a search or BO job that exits 0 but leaves no rows, no
+    # best J, no run dir and no BO progress produced nothing; it must not read as "ok" (the
+    # 2026-11-17 t_trit80_rc2 row ran 2 h, exit 0, evals 0, best_J null). New rows only.
+    if (status == STATUS_OK and int(evals) == 0 and best_j is None and run_dir is None
+            and bo_progress is None and (job.kind == "search" or _is_search_argv(job.argv)
+                                         or bo_root is not None)):
+        status = STATUS_OK_NO_RESULT
+        note_parts.append("exit 0 but no rows, no best J and no run dir: nothing was recorded")
 
     if peak is not None:
         note_parts.append(f"peak {peak:g} MiB")

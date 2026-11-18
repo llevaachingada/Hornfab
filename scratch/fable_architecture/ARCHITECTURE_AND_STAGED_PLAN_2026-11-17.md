@@ -591,3 +591,16 @@ Geometry path in parallel: WP 4.1 host pick → 4.2 equivalence → 4.3 B2. The 
    solves once the local agent has pinned a measurement set.
 3. **Integration (D10)**: approve the PR plan (#67 → main; then `hornfab-all` → main; close #68)
    so nights run `main`.
+
+### 10.3 Owner questions resolved (2026-11-18, cloud senior under owner delegation)
+
+Every owner question open in §10.1, §10.2 and `OWNER_DECISIONS_PACKET_2026-11-17.md` is decided in
+`OWNER_DECISIONS_RESOLVED_2026-11-18.md` (R1-R25), with evidence and a reversal condition each. In
+short: nights stay v7, v10 is the shipped second score (`examples/briefs/home_landscape_2026-11-18_v10/`),
+constancy = slope 5°/decade as its own identity that ranks nothing until its floor exists; B1 batch 1
+approved, batch 2 conditional, B1f dropped; ST260 anchor approved (2 solves, gated on the local source
+check); U3 host = best `hl__biradial_es_style_v7`; throat block parked on A; b06a938 code reverted and
+digests pinned; protected list confirmed, refusal storms still stop protected lanes; geometry gates
+provenance (`record_digest`), kernel digest informs; acoustic box gates, build box recorded; PR plan
+#69 → #67 → hornfab-all → main, close #68. GPU order: B1 → anchor → B1 batch 2 → 4.2 → 4.3 → BO `_r2`
+→ B6. The remaining work is execution only: `LOCAL_AGENT_PROMPT_2026-11-18.md` (repo root).

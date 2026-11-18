@@ -1,0 +1,54 @@
+# BO arm re-runs with FRESH roots (R15, 2026-11-18). Queue AFTER B1 batch 1 and the ST260 anchor.
+# Same cohort, seed and budget profile as the killed arms; root suffixed _r2 because the old roots hold a
+# package.json and the stock resume refuses. The killed arms' state stays in the old roots (provenance).
+# NOT re-queued: t_hvlaw_* (too few training rows: build a CMA cohort first), t_klame_* (cause unread),
+# t_ath14_turbo100 (cause unread) - see docs/evidence/night_cd_rrect_2026-11-17_REVIEW_2026-11-18.md.
+night: resolved_2026-11-18
+lane: gpu
+jobs:
+- id: t_ath14_scalar100_r2
+  kind: command
+  timeout_s: 25200
+  watchdog: false
+  argv:
+  - C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe
+  - tools/night_queue/run_bo_arm.py
+  - --root
+  - runs/night31_2026-11-17/t_ath14_scalar100_r2
+  - --cohort
+  - runs/bo_multityp_2026-11-16/ath_core_14in/cohort
+  - --scores-sha256
+  - 7408357ccf36f07608afb167e6d99eba892573574077235fd0c00ad90ffef4eb
+  - --catalog-sha256
+  - 61456aec2b81efc4cebb54f5c4d90c71ac11176f536925fcb1dc02c7825a5333
+  - --task
+  - p80x60__ath_core_14in_home700_v7
+  - --policy
+  - scalar
+  - --seed
+  - '71006'
+  - --budget-profile
+  - comparison-100x2
+- id: t_corelaw_turbo100_r2
+  kind: command
+  timeout_s: 25200
+  watchdog: false
+  argv:
+  - C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe
+  - tools/night_queue/run_bo_arm.py
+  - --root
+  - runs/night31_2026-11-17/t_corelaw_turbo100_r2
+  - --cohort
+  - runs/bo_multityp_2026-11-16/ext_throat_corelaw/cohort
+  - --scores-sha256
+  - 2e0a7d2c151bf05eb86b5d187c6c21d1c93ed5897037256058a68e1cd31f42cd
+  - --catalog-sha256
+  - 14a548bd390dfb576f4776a57dda44c769f7c265e2022e82a97415df752eaf88
+  - --task
+  - p80x60__ext_throat_corelaw_v7
+  - --policy
+  - turbo
+  - --seed
+  - '71009'
+  - --budget-profile
+  - comparison-100x2

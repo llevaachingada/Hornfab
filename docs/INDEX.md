@@ -23,6 +23,14 @@ refusals, two failures), an `ok` row with no result, pending queue vs the zero-d
 Raw record: [archive/2026-11-18-unintegrated/](../archive/2026-11-18-unintegrated/INDEX.md) (worktree
 snapshots + the night's file, ledger and poll logs; provenance only).
 
+[Owner decisions RESOLVED (2026-11-18, R1-R25)](../scratch/fable_architecture/OWNER_DECISIONS_RESOLVED_2026-11-18.md):
+every open owner question decided by the senior research pass under owner delegation (scoring frame from
+CTA-2034 / Olive / Geddes / repo evidence, briefs, GPU order, U3 host, provenance, envelope, protected
+lanes, PR plan), each with evidence and a reversal condition. Execution prompt for the local agent:
+[LOCAL_AGENT_PROMPT_2026-11-18.md](../LOCAL_AGENT_PROMPT_2026-11-18.md). v10 home briefs:
+`examples/briefs/home_landscape_2026-11-18_v10/`. Approved GPU job files:
+`evidence/gpu_queue_resolved_2026-11-18/`.
+
 [Cloud senior handback (2026-11-18)](../HANDBACK_CLOUD_2026-11-18.md): G1-G6 summary, per-commit verdicts,
 test sets, numbered owner decisions and the ordered local work list with exact commands.
 

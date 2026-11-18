@@ -1,5 +1,16 @@
 ﻿# ISSUES
 
+## 2026-11-18 - owner questions: all RESOLVED (R1-R25); remaining work is execution
+
+- CLOSED (decided, see OWNER_DECISIONS_RESOLVED_2026-11-18.md): C1-C6, ripple region and rip
+  tol/weight, constancy, frequency grid, D6 anchor, B1/B1f, U3 host, throat park, b06a938,
+  protected list + refusal storms, provenance rule, envelope convention, Crowe-X g_L_mm, Le Cleach
+  wording, BO re-queue policy, space proposals, categorical split, record_gate, PR plan / integrator,
+  uncommitted scalar_v9 edits, agent bench, b3_soft trim, throat-block landing.
+- OPEN (local agent, execution only): LOCAL_AGENT_PROMPT_2026-11-18.md STEPS 1-4; the CLAUDE.md
+  ownership row (STEP 1.5); WP 0.9/D9 implementation (STEP 4f).
+- Scheduled measurements (not questions): v10/v10_slope5 floors, B1, ST260 anchor, WP 4.2/4.3.
+
 ## 2026-11-18 - night cd_rrect_2026-11-17: failure causes not yet read
 
 - OPEN (local agent): read cause lines for t_klame_turbo100, t_klame_scalar100, t_ath14_turbo100,

@@ -247,3 +247,16 @@ the night's ledger and logs, not CSVs. Short version:
 
 Owner decision added: **8. BO arms** — re-queue only after the causes are read; `t_hvlaw` needs a
 CMA cohort before BoTorch (owner rule 2026-11-15).
+
+---
+
+## 10. Addendum 2: all owner questions resolved (owner delegation, 2026-11-18 evening)
+
+The owner asked the cloud senior to research and decide every open owner question. Result:
+`scratch/fable_architecture/OWNER_DECISIONS_RESOLVED_2026-11-18.md` (R1-R25; supersedes §5 above) and
+the execution prompt `LOCAL_AGENT_PROMPT_2026-11-18.md`. Set in code on this branch: v10 home briefs (R1-R3),
+Klangfilm H/V kernels restored + digest pin test (R7), protected list confirmed + refusal storms stop
+protected lanes (R11), `ok_no_result` night status (R16), one replay version list (R17), `u3_authority
+--csv-dir` (R18), Crowe-X / Le Cléac'h YAML comments with config_sha unchanged (R13/R14), approved GPU job
+files (R4/R15). Not set from the cloud: the CLAUDE.md ownership row (R21; the session's permission guard
+refused a CLAUDE.md edit), so the prompt's STEP 1.5 adds it locally.

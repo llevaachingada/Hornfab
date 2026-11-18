@@ -134,3 +134,21 @@ Questions for senior review: Are `_CORE_BOUNDS` (theta1<=60, beak ranges) to be 
 - Open: (1) the `cd_core_blend` switch-vs-blend semantics; (2) the post-deformation curved-cap
   residual of the A seeds; (3) a frozen-vs-tools parity test; (4) the mesh-resolution sweep on the
   beak/lip. These are checks 1, 4, 5 and 7 of section 9, unchanged.
+
+## Errata (2026-11-18, decision R7: code comments frozen, facts recorded here)
+
+Commit `b06a938` corrected these facts inside the kernel files, which moved both family
+`implementation_sha256` digests although no geometry changed. Its code part is reverted (digests
+restored: hv_core `ee160698…a4b6`, hv `c65beb16…cbcb`, pinned by
+`tests/test_klangfilm_hv_digest_pin.py`), and the corrections are kept here instead:
+
+| Item | Stale text in the kernel | Correct value (recomputed by re-running the kernel, 2026-11-18) |
+|---|---|---|
+| seed b1 mouth | ~521 x 262 mm | 479.6 x 239.7 mm |
+| seed b2 mouth | ~561 x 244 mm | 595.0 x 232.8 mm |
+| seed b3 mouth | ~498 x 258 mm | 472.5 x 266.1 mm |
+| seed b4 mouth | 563 x 262 x 405 | 562.5 x 261.6 mm |
+| hv_core frozen-copy source | tools SHA `1782f009…ad54` | today's tools file hashes `214d4f15…1818`; differs only in docstrings and imports |
+| hv frozen-copy source | tools SHA `cbb23cc0…bea02` | today's tools file hashes `7fc93d63…8f64`; differs only in BOM, docstrings, imports |
+
+A frozen-vs-tools parity test is still open (contract check 5).
