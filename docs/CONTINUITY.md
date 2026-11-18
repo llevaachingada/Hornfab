@@ -1,5 +1,23 @@
 # CONTINUITY
 
+## 2026-11-18 - WP-K0/K1 docs-only: four draft construction contracts, CLAUDE.md routing, Keele scope fix
+
+- Docs and skill text only. No code, config, brief, queue, scoring or GPU change. PR #67 not touched.
+- Added `docs/knowledge/contracts/` (DRAFT, senior review pending): Klangfilm–Lamé H/V and core,
+  CROWE V2A and Crowe-X/OS-SE CD, rolled section pucker, and Le Cléac'h/Iwata H/V. The drafting
+  environment lacked scipy/hornlab_mesher, so no tests were run.
+- Findings for review (not fixed): Klangfilm `cd_core_blend` is a switch (no parent reduction), and
+  the Phase A cap-area residual is pre-deformation. Crowe-X `g_L_mm` header says 320, bounds say 285.
+  The Le Cléac'h H/V plane meridians lose their axial coordinate (arc-fraction stations, `πab`
+  report-only). The rolled station definition is ambiguous.
+- `CLAUDE.md`: added a routing section deferring to `AGENTS.md` precedence. The wave plan and the
+  ownership table are marked historical. Start-here now reads `ACTIVE_STATE` plus the newest log
+  entry only.
+- `hornlab-shape-check`: the Keele K-law is now scoped to a Keele/Bi-Radial starting estimate (KH-001),
+  not a mouth target for every family.
+- Added `docs/knowledge/AGENT_BENCHMARK_SPEC_2026-11-18.md` (24 cases plus negative controls;
+  spec only).
+
 ## 2026-11-18 (local orchestrator) - Night truth (C1) + data-agreement gate (C2) landed; B1 encoding owner-decided; queue repaired
 
 - **C1 night truth** (`tools/run_campaign_night.py`, `tools/night_status.py`, new

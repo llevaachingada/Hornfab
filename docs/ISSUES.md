@@ -1,5 +1,17 @@
 # ISSUES
 
+## 2026-11-18 - WP-K0/K1 draft contracts delivered; senior review and owner checks open
+
+- DONE (docs only): four draft construction contracts in `docs/knowledge/contracts/`, CLAUDE.md
+  routing reconciled with AGENTS.md, Keele scope fix in `hornlab-shape-check`, and the agent
+  benchmark spec.
+- OPEN (senior reviewer): review the four contracts. Decide whether the "published ellipsoidal
+  construction" label on Le Cléac'h H/V should become "reconstruction".
+- OPEN (owner/integrator): Crowe-X `g_L_mm` bound (header 320 vs file 285, plus a diverged copy in
+  `docs/queue/rolled_readiness_2026-11-15/configs/`). Klangfilm kernel SHA docstrings are stale and
+  the b1-b3 SEEDS mouth comments are stale. Run the zero-control tests (Klangfilm, Le Cléac'h H=V,
+  rolled zero-amplitude) in the pinned env.
+
 ## 2026-11-18 (local orchestrator) - Night truth + data-agreement gate landed; bridge-type _w1 lanes fail the stock analysis path; B1 encoding owner-decided
 
 - DONE (C1, tools): `tools/run_campaign_night.py` + `tools/night_status.py` now record/report per

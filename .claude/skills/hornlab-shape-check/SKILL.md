@@ -21,8 +21,12 @@ from hornlab_search.design.generators import grid
 pts, meta = grid.rows_grid_points(SPEC, knobs, {"driver": {"exit_radius_mm": 18.0, "exit_angle_deg": 2.0}})
 meta["mouth_w_mm"], meta["mouth_h_mm"], meta["x_span_mm"]
 ```
-Sweep a few knob sets in one script, pick the one that lands on the K-law mouth (`25,400,000 / (f0 * coverage)`
-mm per axis) inside the envelope, then run `shape_check.py` on the written config.
+Sweep a few knob sets in one script, pick one that lands inside the brief envelope with the mouth size the
+**family's own** sizing rule suggests, then run `shape_check.py` on the written config. The Keele K-law
+(`25,400,000 / (f0 * coverage)` mm per axis) is a scoped **Keele/Bi-Radial starting estimate only**
+(`docs/knowledge/claims/KH-001_keele_mouth_heuristic.md`): never a pass/fail gate, and not applicable to
+JMLC/Le Cleac'h, OSSE/R-OSSE, tractrix or MEH. For other families or hybrids, check the family card or
+contract in `docs/knowledge/` and let geometry, product envelope and BEM results decide.
 
 ## Pitfalls that cost iterations (2026-10-28)
 

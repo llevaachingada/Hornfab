@@ -31,6 +31,8 @@ resolved targets; a DI slope target does not itself define sloping beamwidth tar
 | MEH / multiple-entry | [Family card](typologies/meh.md) |
 | Derived morphs / rolled and experimental forms | [Family card](typologies/experimental_morphs.md) |
 
+Hybrid and new-law **construction contracts** (draft, 2026-11-18): [contracts/](contracts/README.md).
+
 ## Authority and history
 
 - [Research basis](../plan/12_RESEARCH_BASIS.md): existing plan basis, preserved in place.

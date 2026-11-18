@@ -5,6 +5,8 @@ applicability rules; compact family cards, [source catalog](knowledge/SOURCES.md
 [seed metadata](knowledge/sources.yaml), [Keele claim](knowledge/claims/KH-001_keele_mouth_heuristic.md),
 [claim](knowledge/templates/claim.md) / [family](knowledge/templates/typology.md) templates,
 and the preserved [supplied compilation](knowledge/imported/HornFab_Research_Knowledge_Base_2026-11-16.md).
+Draft hybrid [construction contracts](knowledge/contracts/README.md) and the
+[agent science benchmark spec](knowledge/AGENT_BENCHMARK_SPEC_2026-11-18.md) (2026-11-18, WP-K0/K1).
 Existing research remains in place; imported recommendations are not implementation mandates.
 
 
