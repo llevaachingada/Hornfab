@@ -87,3 +87,33 @@ External invocation ONLY: the adapter never imports blab in the HornLab venv (th
 standalone file executed by BL's interpreter), nothing is copied out of the BL repository, and each
 case manifest pins BL's root identity + file hashes. Attributed reuse of any BL source would be a
 new, separately reviewed decision (master doc §3.1); none happened.
+
+## 8. Stage 4 CPU pre-work (2026-11-18 late; NO solve, CPU/validation only)
+
+Study manifest: `system_runs/system/bl_assembly_prep/20261118T214800Z-assembly-40088-885fc4ef/`.
+
+- **Horn mesh topology truth (decisive)**: the saved lecleach-brief horn mesh (`mesh.msh`,
+  1,892 triangles / 1,028 points, metres, groups `SD1G0`/`SD1D1001`) is **not closed**: it has
+  exactly 162 free edges, of which **81 lie on the x=0 plane and 81 on the y=0 plane, zero
+  elsewhere** — a HornLab quarter-model fundamental-domain patch, oriented (directed-edge rule),
+  zero duplicate points. Recorded blocker:
+  `BLOCKED_BY_FULL_DOMAIN_HORN_MESH` — a BL separate-mesh assembly under symmetry-off needs a
+  FULL-DOMAIN closed horn surface (HornFab full-model mesh or an explicit mirror-weld step);
+  improvised closure is refused. (A real QA bug was found and fixed on the way: free-edge plane
+  lookup must use the lexicographically-sorted unique-coordinate array, not original indices.)
+- **Documented draft project**: `assembly_draft.blab.json` with ONLY keys from BL's
+  `Inputs and Outputs.md` (schema_version 10, generator_documents row for
+  `blab.vented_enclosure`, imported_meshes row for the horn at `scale_factor 1.0` — the metres
+  guard refuses the example's 0.001 mm factor — `stitch_exterior_meshes: true`,
+  `physical_system: {}`), then BL's own `blab project validate --json` on the real install.
+- **BL's verdict, verbatim**: returncode 1 —
+  `{"event":"error","error_type":"ValueError","message":"Unsupported physical model_version 0."}`
+  Recorded as `BLOCKED_BY_BL_HOST_ASSEMBLY_ASSIGNMENTS`: the remaining host work is to stage the
+  vented generator artifact + a physical-system graph through BL's host APIs
+  (`blab.generators.application.stage_generation` / `generators/configuration` /
+  `Physical System Model.md`), with the horn group→boundary kind assignment as a deliberate
+  modelling decision — exactly the list the solve gate must review with the reference-solve
+  authorization.
+- `import_results` contract added: `.blabsp`/project kind detection + manifest-only reading;
+  payload parsing explicitly waits for a real solved package (never synthesized from docs).
+
