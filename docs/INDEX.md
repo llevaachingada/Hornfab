@@ -20,6 +20,11 @@ per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 freq
 B1/B1f lines checked (kind: command, safe), search/CLI/night dry-run now refuse a zero-free-dimension
 search, the feasibility table, the ext-throat exclusion finding and the queue-ready batches for GPU approval.
 
+[Physical anchor pick: R-OSSE ST260 (2026-11-18, D6 step 1)](research/typologies/ANCHOR_ST260_RESEARCH_2026-11-18.md):
+why ST260 (published geometry + linked measured builds) over Geddes OS, the source table, the
+predeclared pass rule (beamwidth ±5°/±3° in 2-5 kHz, DI ±1 dB) and the config
+`examples/typologies/anchor_2026-11-18/anchor__rosse_st260_v1.yaml` (shape_check required, 1-2 owner-gated solves).
+
 
 [Orchestrator handoff for the senior plan (2026-11-17)](../scratch/fable_architecture/ORCHESTRATOR_HANDOFF_2026-11-17.md):
 how a lower-cost local orchestrator continues the plan: rules, what exists, first-session verification,

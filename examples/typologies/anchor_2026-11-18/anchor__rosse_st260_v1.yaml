@@ -1,0 +1,71 @@
+# ANCHOR (Fable D6 step 1, plan §10.1; cloud senior 2026-11-18). SHAPE_CHECK REQUIRED before any GPU.
+# OWNER-GATED: 1-2 solves (`hornlab-search run --mode screen`, then `--mode verify`). NOT a search config:
+# every bound is pinned, so `hornlab-search search` refuses it by design (zero free dimensions).
+#
+# WHAT: Marcel Batik's R-OSSE "ST260" practical design example (1-inch, axisymmetric, 260 mm mouth),
+#   R-OSSE Acoustic Waveguide rev7 (Dec 2022), https://at-horns.eu/release/R-OSSE%20Waveguide%20rev7.pdf,
+#   licence CC BY-NC-SA 4.0. Parameter values copied from the repo dossier
+#   docs/research/ATH_PUBLISHED_SEEDS_80x60_2026-11-16.md Design G (fetched from the primary 2026-11-16).
+#   [unverified this session]: at-horns.eu is not reachable from the cloud container; the local agent
+#   re-reads the rev7 example and the ST260 page and corrects any value below BEFORE shape_check.
+# WHY THIS HORN: published geometry (full parameter set + STEP/STL on the ST260 page) AND user builds with
+#   acoustic measurements linked from the ST260 page; axisymmetric, so one polar orbit describes the far
+#   field and H = V is a built-in self-check. Its family (R-OSSE) is already a native mesher family.
+# PASS RULE (predeclared; dossier: docs/research/typologies/ANCHOR_ST260_RESEARCH_2026-11-18.md):
+#   -6 dB beamwidth within +/-5 deg per 1/3-octave band, +/-3 deg in 2-5 kHz; DI within +/-1 dB,
+#   same DI method on both sides; band 1-8 kHz (1-inch f11 ~ 7.9 kHz; gating below ~1 kHz).
+# Labels: [published] value from the rev7 example; [assumed] not in the example, our choice.
+name: anchor__rosse_st260_v1
+family: R-OSSE
+seed_params:
+  r0_mm: 12.7          # [published] 1-inch throat, radius
+  a0_deg: 7.5          # [published] throat opening half-angle (total 15 deg)
+  a_deg: 39.0          # [published] nominal coverage half-angle (~78 deg total, round)
+  R_mm: 130.0          # [published] mouth radius (260 mm mouth)
+  k: 1.8               # [published]
+  r: 0.3               # [published]
+  b: 0.3               # [published]
+  m: 0.8               # [published]
+  q: 3.7               # [published] R-OSSE blend exponent (not OSSE q)
+  tmax: 1.0            # [assumed] full profile; check against the rev7 script
+  exponent: 2.0        # [assumed] circle: the example is axisymmetric
+  aspect_ratio: 1.0    # [assumed] axisymmetric
+  morph_target: 0      # [assumed] no morph (axisymmetric)
+  wall_thickness_mm: 5.0   # [assumed] explicit (absent -> mesher 6 mm self-intersected on R-OSSE, b1t note)
+bounds:
+  r0_mm: {lo: 12.7, hi: 12.7, search: false}
+  a0_deg: {lo: 7.5, hi: 7.5, search: false}
+  a_deg: {lo: 39.0, hi: 39.0, search: false}
+  R_mm: {lo: 130.0, hi: 130.0, search: false}
+  k: {lo: 1.8, hi: 1.8, search: false}
+  r: {lo: 0.3, hi: 0.3, search: false}
+  b: {lo: 0.3, hi: 0.3, search: false}
+  m: {lo: 0.8, hi: 0.8, search: false}
+  q: {lo: 3.7, hi: 3.7, search: false}
+  tmax: {lo: 1.0, hi: 1.0, search: false}
+target:
+  coverage_h_deg: 78.0
+  coverage_v_deg: 78.0
+  band_lo_hz: 1000.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.0
+weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 0.0}
+mesh:
+  epw: 6.0
+  quadrants: "1"
+  dof_cap_screen: 12000
+  dof_cap_verify: 12000
+  dof_cap_final: 12000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-5
+  timeout_s: 900
+search: {algorithm: cma, sigma0: 0.1, seed: 1234, budget: 1, popsize: null, tolfun: 1.0e-3}

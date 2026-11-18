@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-18 - D6 step 1 anchor (ST260): local source check before any solve
+
+- OPEN (local agent): re-read R-OSSE rev7 + ST260 page, fix config values if they differ, choose
+  an admissible measured build (mounting modelable, distance/gating stated, polar step <= 10 deg),
+  save it under docs/evidence/anchor_st260_<date>/measured/, run shape_check + the mouth/throat
+  property checks.
+- OPEN (owner): accept ST260 + the predeclared pass rule; approve 1-2 solves afterwards.
+
 ## 2026-11-18 - B1 GPU approval packet ready (WP 2.2 / D7)
 
 - OPEN (owner): approve batch 1 (5 fold-warm x2 probes), optional batch 2 (3 ext_throat_v7 x2
