@@ -1,5 +1,14 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - integration carried to main; cloud-resume pointer set (local orchestrator)
+
+- The `classify_recipes` close-out (`e13a1ad`) landed on `hornfab-all-2026-11-18` AFTER PR #70
+  merged, so a short PR carries it (plus this pointer) to `main`. From here on: `main` and
+  `hornfab-all-*` are current; integration continues per R21 (PRs into `hornfab-all-*`).
+- **Cloud-resume pointer:** `cloud/fable-next-2026-11-18` is PROVENANCE (stale at `1e9f71b`);
+  a resuming Fable senior session branches from `hornfab-all-2026-11-18` (or `main`) and reads
+  `docs/ACTIVE_STATE.md` (updated tonight) + the HANDOFF evening section item 0.
+
 ## 2026-11-18 - legacy-recipe classification executed over runs/ (R12b/D9 close-out; read-only)
 
 - `tools/analysis/classify_recipes.py` run over the real `runs/` tree (48,474 design.json records
