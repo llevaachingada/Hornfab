@@ -1,5 +1,14 @@
 # CONTINUITY
 
+## 2026-11-18 - BO metric policy for objective v10 (PR-D; owner policy chosen: preferred_edge)
+
+- `bo/metrics.py`: new `freeze_metric_policy_v10` / `measure_metrics_v10` (schema
+  `bo-physical-metric-v10/1`). Coverage = the v9 profile cost (raw), ripple = the v10
+  `ripple_region` window. `freeze_metric_policy` is unchanged and still accepts v4/v7 only.
+- `assert_single_objective_cohort`: refuses any cohort mixing v4/v7/v9/v10 labels.
+  `bo.cohort.validate_cohort` already refuses mixed versions; a new test pins v7+v10 and v9+v10.
+- Tests: `tests/test_bo_metrics_v10.py`. No wiring into proposals or studies.
+
 ## 2026-11-18 - Objective v10 (PR-A, OWNER-APPROVED: ripple_region = preferred_edge): v9 + explicit required ripple_region
 
 - New `hornlab_search/objective/scalar_v10.py`, registered as version 10 in `versions.py`,

@@ -1,5 +1,11 @@
 # ISSUES
 
+## 2026-11-18 - v10 BO metric policy: policy chosen, wiring still gated
+
+- DONE (owner): PR-A's ripple region is `preferred_edge`, so `measure_metrics_v10` has a policy.
+- OPEN: no study or Pareto run consumes the v10 policy yet. Keep qLogNEI / qLogNEHVI; no
+  multi-output GP without a held-out ablation.
+
 ## 2026-11-18 - v10 ripple region: owner chose preferred_edge
 
 - DONE (owner, 2026-11-18): the first v10 briefs use `ripple_region: preferred_edge`
