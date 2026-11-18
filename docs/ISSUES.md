@@ -1,5 +1,11 @@
 ﻿# ISSUES
 
+## 2026-11-18 - integration plan awaits the owner (D10)
+
+- OPEN (owner): approve the PR plan in `HANDOFF_2026-11-18.md` / `HANDBACK_CLOUD_2026-11-18.md` §5.
+- OPEN (local agent): work list A-H in `HANDBACK_CLOUD_2026-11-18.md` §6, starting with the full
+  local suite on `cloud/fable-next-2026-11-18`.
+
 ## 2026-11-18 - throat block on A: park decision (owner)
 
 - OPEN (owner): accept "park on A, inert in this envelope" (G5). An A-family morph-target `_v2`

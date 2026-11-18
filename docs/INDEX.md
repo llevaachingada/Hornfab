@@ -17,6 +17,9 @@ single solves, epw8 mesh check, 40-eval B search, per-config H/V beamwidth and D
 Follow-up proposal: [G5 recommendation](evidence/throat_hv_2026-11-18/G5_RECOMMENDATION_2026-11-18.md)
 (park on A as inert; B has H authority but is not competitive under v7).
 
+[Cloud senior handback (2026-11-18)](../HANDBACK_CLOUD_2026-11-18.md): G1-G6 summary, per-commit verdicts,
+test sets, numbered owner decisions and the ordered local work list with exact commands.
+
 [v10 rescore, one local command (2026-11-18, WP 1.4/1.5)](evidence/v10_rescore_2026-11-18/README.md):
 the replay gate fix, the two offline v9/v10 rescore briefs, and the exact PowerShell commands for
 per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 frequency floor. Not run.
