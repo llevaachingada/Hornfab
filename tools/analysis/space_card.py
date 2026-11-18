@@ -35,6 +35,7 @@ for p in (REPO, REPO / "tools" / "analysis"):
         sys.path.insert(0, str(p))
 
 SIGMA_BAD_MAX = 0.15     # a sigma0 is "safe" when its predicted bad rate is at most this
+MIN_LINK_ROWS = 10       # senior F8: never claim data agreement/disagreement for n < 10
 
 
 def _data_evidence(run: Path | None) -> dict:
@@ -67,15 +68,48 @@ def _links_payload(data: dict | None) -> dict | None:
     return payload
 
 
+def _data_n(data: dict | None) -> int | None:
+    """Rows in the empirical top decile, or None when no links payload is available."""
+    payload = _links_payload(data)
+    if payload is None:
+        return None
+    n = payload.get("top_decile_n")
+    if isinstance(n, bool) or not isinstance(n, (int, float)):
+        return None
+    return int(n)
+
+
+def _data_verdict(verdict: bool | str, n: int | None) -> str:
+    """Human wording for a data-agreement verdict, carrying the top-decile row count."""
+    if verdict is True:
+        return f"agrees (n={n})"
+    if verdict is False:
+        return f"disagrees (n={n})"
+    if n == 0:
+        return "unknown (no top-decile rows)"
+    if n is not None and n < MIN_LINK_ROWS:
+        return f"unconfirmed (n={n})"
+    return "unknown"
+
+
 def _data_agreement(link: dict, data: dict | None) -> bool | str:
-    """True/False when ``--run`` links evidence is available, "unknown" otherwise.
+    """True/False when ``--run`` links evidence is available *and powered*, else "unknown".
+
+    ``links.py`` needs at least ``MIN_LINK_ROWS`` top-decile rows before a presence/absence
+    result means anything; with fewer (including a missing top decile) the honest verdict is
+    "unknown", never a disagreement (senior F8, 2026-11-17: three lanes were labelled
+    "data disagrees" on zero rows).
 
     True: ``proposed_links`` has the same unordered pair {from, follower} with the same scale
     sign (a reversed proposal is inverted first: ``sign(1 / proposal_scale)``).
-    False: links evidence is available but the pair is absent or its scale sign is opposite.
+    False: a powered links payload is available but the pair is absent or its scale sign is
+    opposite.
     """
     payload = _links_payload(data)
     if payload is None:
+        return "unknown"
+    n = _data_n(data)
+    if n is None or n < MIN_LINK_ROWS:
         return "unknown"
     a, b = link["from"], link["follower"]
     link_sign = _sign(link["scale"])
@@ -112,13 +146,15 @@ def recommend(geo: dict, box: dict, sigma: dict, margin: dict,
                          "evidence": {"active_frac": v["active_frac"]}})
     for link in geo.get("links") or []:
         agrees = _data_agreement(link, data)
+        n = _data_n(data)
         why = (f"surface direction parallel to {link['from']} "
                f"(|cos| {link['median_abs_cos']:.3f})")
         rec = {"knob": link["follower"],
                "action": "link" if agrees is not False else "link_rejected_by_data",
                "why": why, "proposal": {"from": link["from"], "scale": link["scale"],
                                         "offset": link["offset"]},
-               "data_agrees": agrees}
+               "data_agrees": agrees, "data_n": n,
+               "data_verdict": _data_verdict(agrees, n)}
         if agrees is False:
             rec["why"] += "; rejected: the empirical links payload has no same-sign matching pair"
         recs.append(rec)
@@ -187,6 +223,8 @@ def _md(card: dict) -> str:
     for r in card["recommendations"]:
         agree = (f"; data_agrees={str(r['data_agrees']).lower()}"
                  if "data_agrees" in r else "")
+        if "data_verdict" in r:
+            agree += f"; data_verdict={r['data_verdict']}"
         L.append(f"- **{r['action']}** `{r['knob']}`: {r['why']}" + agree
                  + (f"; proposal `{json.dumps(r['proposal'], default=float)}`" if r.get("proposal") else ""))
     return "\n".join(L) + "\n"
