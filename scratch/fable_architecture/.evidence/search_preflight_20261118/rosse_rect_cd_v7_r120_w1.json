@@ -1,0 +1,67 @@
+{
+  "strict": false,
+  "exit_code": 1,
+  "configs": [
+    {
+      "path": "examples\\typologies\\walls_relieved\\rosse_rect_cd_v7_r120\\rosse_rect_cd_v7_r120_w1.yaml",
+      "name": "hl__rosse_rect_cd_v7_r120_w1",
+      "family": "FREEFORM",
+      "generator": "grid",
+      "searched_keys": [
+        "g_a_h_deg",
+        "g_a_v_deg",
+        "g_b",
+        "g_height_mm",
+        "g_k",
+        "g_r",
+        "g_rect_exponent",
+        "g_tmax",
+        "g_width_mm"
+      ],
+      "seed_outside_box": [],
+      "seed_key_missing": [],
+      "seed_design_hash": null,
+      "prior_bests": [],
+      "history": null,
+      "sigma": {
+        "config_sigma0": 0.12,
+        "recommended_sigma": null,
+        "median_spread": null,
+        "dims": 0,
+        "expected_hits": null,
+        "min_expected_hits": 3.0,
+        "refusal_fraction": null
+      },
+      "sampling": {
+        "samples": 0,
+        "status": "not sampled",
+        "note": "--samples 0 (default): no mesh was built"
+      },
+      "refusals": {},
+      "graded": {
+        "infeasible_penalty": "resample_strict",
+        "sampled_refusals": 0,
+        "invalid_envelope": 0
+      },
+      "ab": null,
+      "findings": [
+        {
+          "severity": "HARD",
+          "code": "space_build_failed",
+          "message": "DesignSpace.from_config failed: GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])",
+          "config": "examples\\typologies\\walls_relieved\\rosse_rect_cd_v7_r120\\rosse_rect_cd_v7_r120_w1.yaml"
+        }
+      ]
+    }
+  ],
+  "hards": [
+    {
+      "severity": "HARD",
+      "code": "space_build_failed",
+      "message": "DesignSpace.from_config failed: GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])",
+      "config": "examples\\typologies\\walls_relieved\\rosse_rect_cd_v7_r120\\rosse_rect_cd_v7_r120_w1.yaml"
+    }
+  ],
+  "warnings": [],
+  "infos": []
+}

@@ -26,3 +26,4 @@ Envelope margin model: R^2 0.98, sign agreement 100%, inside 100%, binding {'hei
 - **rebound** `g_L_mm`: edge slice mostly refused/outside while the middle is not; proposal `{"lower_hi_to_unit": 0.8}`
 - **rebound** `g_s`: edge slice mostly refused/outside while the middle is not; proposal `{"lower_hi_to_unit": 0.8}`
 - **sigma0** `*`: predicted bad-candidate rate <= 15% from the seed; proposal `{"max_safe_sigma0": null}`
+- **queue gate (2026-11-18)**: `no_headroom` — seed hash `9b5428e6dec8` equals the prior best; not queueable without `search.warm_start` + a stated refinement reason (a bound trim alone re-tests the optimum).

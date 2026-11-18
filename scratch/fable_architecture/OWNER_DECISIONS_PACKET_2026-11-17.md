@@ -187,3 +187,45 @@ the two `sab__lecleach_*` 1135/5000, 286x286, 159.
 `name:` string. That file is not always the run under the lane's current brief (see the note in
 `NOTES_FOR_SENIOR.md`); the verdict "data disagrees" is therefore "under the newest same-name run",
 which is still a refusal of the link, not a confirmation of it.
+
+## D4-marking (2026-11-18): Crowe not queueable without warm_start + reason
+
+`hl__crowe_x_osse_cd_v7` is **not queueable** as a fresh/no-warm-start search. Per the 2026-11-17
+pre-approval entry it is `no_headroom`: its seed design hash `9b5428e6dec8` EQUALS the prior best, so
+a bounds trim that leaves the seed in place does not create headroom and the run would re-test the
+converged optimum. Any bound trim on this lane must be declared a refinement with `search.warm_start`
+plus a stated reason; until then it stays out of the queue. This is an append-only evidence marking:
+no config, brief, bound or queue file was changed here.
+
+## C2 explanation (final corrected form, 2026-11-18, per senior section 3)
+
+**Slope mode vs strict.** Slope mode fits a line in log-frequency with its tilt capped at
+± `slope_max_deg_per_decade`, then penalises every deviation from that line
+(`hornlab_search/objective/scalar_v9.py:619-647`): it allows a gentle tilt but still charges
+wiggle. Strict penalises tilt AND wiggle around a flat level. Both use H plus
+`cov_v_weight`×V from each plane's onset; in corridor mode the centre is clamped into the
+corridor.
+
+**What is measured.** The 116-point grid and the 0.205 J noise cost were measured for STRICT
+only (N3 §method); slope is unmeasured. "0.113 vs 0.205" is the top-28 error between 18 and 29
+solved frequencies — i.e. the plan's grids, not production's 12/25.
+
+**Range choices (S1, replaces the withdrawn "CD lanes gain, non-CD lanes lose" phrasing, which
+was unmeasured and classified by family):** strict on top of the v9 corridor keeps 13 of the top
+20; strict and slope share 18 of 20; no first place survives every range choice.
+
+**What J pays for today** [measured, `runs/*/search.ndjson`, sum(w·t)/J = 1.000; plus WP3]:
+
+| Lane (brief) | Biggest terms in the top 20 | Top-20 J spread | Reading |
+|---|---|---|---|
+| `hl__biradial_es_style_v7` (kept v7 brief, `room_landscape_80x50_700_hf1440_v7`) | **`load` 55 % of J, nearly constant (3.47-3.59)**; `cov` only 9 % | **0.10 J** | the whole top 20 sits inside the measured frequency floor (sd ≈ 0.11-0.13 J) — statistical ties |
+| `p80x60__ath_core14_corelaw_v7` (`room_80x60_700_hf1440_v7`) | `diag` 24 %, `flat` 22 %, `cov` 20 % | 1.11 J | differences are real, above the floor |
+
+Under the v9 corridor J is mostly DI slope (77-92 % of J, 0 dB/decade target), and
+`preferred_deg` scores nothing inside `[min, max]`, so only the bounds bite (WP3).
+
+**Owner decision (2026-11-17 evening, supersedes the pending question):** keep v7 for the
+nights' scoring; add v9 as a free second score on CPU — H 60-90° from 700 Hz, V 40-60° from
+1000 Hz, loading on; constancy slope-limited, its noise floor measured on stored data before it
+counts. Designs near the top under both scores are the safe picks; the nights' scoring does not
+switch until a physical measurement (stage 2b) shows which score predicts a real horn better.

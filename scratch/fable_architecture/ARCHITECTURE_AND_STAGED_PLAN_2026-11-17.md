@@ -395,3 +395,74 @@ Environment note: the container lacked `libGLU`, so gmsh could not load; install
 real mesher tests runnable here. Pre-existing failures confirmed at `1d6ebc8`, not caused by this
 work: `test_grid_self_approach_classifies_invalid_geometry_and_is_memoized` and two
 `test_gui_preview_shape` tests.
+
+### 10.1 Plan amendments (2026-11-18, orchestrator per senior direction evening 2026-11-17 — proposals, nothing auto-applies)
+
+Owner context: the §4 owner answers arrived 2026-11-17 evening (see
+`OWNER_DECISIONS_PACKET_2026-11-17.md` §D4-marking and below); the GPU-scheduling answer changed:
+**B1 goes into the live night as a job** (senior D7 supersedes the first review's "wait for drain").
+
+- **D5 — merge the two plans into one table (proposal).** Fable's staged plan vs the owner's
+  acoustic-truth master plan (`docs/research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md`):
+  adopt the master plan as the owner's source document (outranks where they conflict; nothing in
+  it contradicts this plan's stage order). One mapping table so no agent re-does WP3/N3 work:
+  Fable 0.4 parity replay + 1.4 rescore = master-plan WP3 use 1 (one tool, `replay_run_dir`);
+  1.5 frequency floor = WP3 use 3 (measured twice: N3 + WP3 — cite, never re-measure); 1.3 home
+  brief = WP5 menu (the WP3 offline briefing candidates); 0.9 recipe schema/provenance + Q5
+  envelope = WP4 (do once, with D9); 3.1 record / X1 mesh agreement = WP1 template, next on a
+  cornered family (X1/X4 corner mismatch is open: superellipse route clean at p99 0.11-0.13 mm,
+  cornered families 1.1-1.6 mm); 2.2 B1 + 4.2/4.3 = WP6 pilot (owner-gated GPU, B1 first).
+- **D6 — "Stage 2b: physical anchor" (owner-approved 2026-11-17 answer 4; upgrade from
+  proposal to scheduled):** two steps, owner-gated per step. Step 1 (now, no build): one
+  published horn (Geddes OSSE or ATH waveguide with published geometry AND measured polars)
+  through the full pipeline; pass = beamwidth ± 5° (± 3° in the presence band), DI ± 1 dB;
+  cost 1-2 solves + research. Step 2 (after B1): print and measure 1-2 finalists —
+  ext-throat `3a1038da45d0` if B1 confirms its lead, plus the top v9-score design if a different
+  construction, else fold-warm OSSE (v9 3.62); measuring two horns ~0.5 J apart ties J
+  differences to a real horn and settles the scoring question with data. Sits before B6.
+- **D7 — B1 scheduling (as directed, now owner-specified):** B1 is a live-night job AFTER the
+  BO arms. **Owner encoding decision 2026-11-18:** B1 must test MESH convergence — same ten
+  designs, same brief/objective/source/mounting, SAME frequency grid as each design's reference
+  solve; refinement = higher epw and/or tighter throat/mouth/rear resolution; report realized
+  triangle/DOF counts for both meshes; pass/fail per design is |ΔJ| + per-term deltas (H/V
+  beamwidth, DI, ripple) against the numerical floor, designs whose shift exceeds the
+  finalists' claimed gains flagged "mesh-sensitive"; before queuing, estimate refined DOF per
+  design (quarter/half where symmetry is genuine); designs that do not fit 8 GB are marked
+  "mesh check infeasible on this card" with the estimated DOF and left out of the conclusion;
+  memwatch + VRAM baseline/peak + sysmem Shared-Usage check mandatory; a spilled run is invalid,
+  not a result. The frequency-grid pair encoding is renamed **B1f** ("frequency-fidelity check")
+  and never read as mesh convergence. Order: encoder + CPU dry-run (build both meshes, ten
+  designs, no solves) → feasibility table → owner approves GPU slots → queue after the BO arms.
+- **D8 — continuation rule (advisory, for WP 7.2/7.3):** propose a continuation only when the
+  lane's last-100-evaluation improvement exceeds that identity's published frequency floor
+  (≈ 0.13 J for v7 at 12/25 frequencies; restate once B1 lands). Worked example = tonight's
+  numbers [measured 2026-11-17]: three lanes beat the floor (ath_core14 +0.38-0.45, hvlaw_cov,
+  lecleach_ar), biradial +0.16 gained but under floor, corelaw and warm-c221aa found nothing.
+- **D9 — provenance in one package (proposal):** WP 0.9 metadata + the C3 `surfaceFit` echo
+  into `mesh_meta.json` (`hornlab_search/mesh/build.py:440-458` currently echoes only midPorts;
+  the mesher's interpolating→approximating fit fallback at `config_builder.py:2304-2320` is
+  unrecorded — one run can mix two wall surfaces with no row-level flag) + the Q5
+  "record both boxes" rule + master-plan WP4 = ONE work item. `record_digest` only after the
+  owner's provenance decision.
+- **D10 — governance (proposal):** nights should run `main` (owner amendment 2026-11-12). After
+  the drain: full offline suite (thread caps, `-n 6`), then ask the owner to merge PR #67.
+  One integrator per branch: `f5db35e` AND `3682173` were second-writer commits — record in
+  `NOTES_FOR_SENIOR.md` and ask the owner who integrates master-plan work from now on
+  (owner 2026-11-18: an independent throat-H/V patch set, 4 patches rebased onto `3682173`,
+  waits for integration AFTER this branch's commit/push + post-drain suite; the GPU throat
+  steps queue after B1 + the BO arms as a separate budget line; not to be applied by the
+  orchestrator beyond the isolated-clone CPU test run).
+
+Status deltas to the table above (2026-11-18): 2.1 finalist tier — wired in CLI/GUI
+(`--mode finalist`); **B1-encoding finding: `dof_cap_finalist` does not densify the mesh for
+these configs (epw/f_max unchanged, cap not binding) — the tier changes frequency grids only**;
+2.2 B1 — in D7 above; 1.3 — owner answered: keep v7 for nights, add v9 as a free second CPU
+score (H 60-90° from 700 Hz, V 40-60° from 1000 Hz, loading on, slope-limited constancy with
+its noise floor measured on stored data before it counts); 3.3/3.4 — data-agreement gate now
+"unknown"/`unconfirmed (n=…)` for n < 10 (C2, tools/analysis/space_card.py, uncommitted);
+0.6/0.7/3.2 — night-truth fields landed in tools (C1, uncommitted); D4 evidence: shape check
+9/14 (the 5 bridge-type `_w1` lanes fail the STOCK `DesignSpace`/`shape_check` path — the night
+jobs now run their bridge CLIs, see `runs/nights/cd_rrect_2026-11-17/held_and_edited_2026-11-18.md`);
+search_preflight `--from-runs` still refuses history on every loadable lane (raw brief_file
+string identity — C5 remains the owner-gated fix), `hl__klangfilm_lame_curved_v1_c200_w1` adds
+`no_headroom`.

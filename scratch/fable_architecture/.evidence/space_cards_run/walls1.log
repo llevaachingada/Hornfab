@@ -1,0 +1,9 @@
+batch 1: 7 configs
+OK ath_tritonia_landscape_v9_w1 326s
+FAIL crowe_panel_es600_v7_w1 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+FAIL klangfilm_lame_curved_v1_w1 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'klangfilm_lame' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+OK lecleach_ctrl_w1 219s
+OK lecleach_fc540_T_narrow_w1 271s
+OK osse_rrect_fold_warm_v7_w1 432s
+FAIL rosse_rect_cd_v7_r50_refine_w1 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+batch done

@@ -1,0 +1,61 @@
+{
+  "strict": false,
+  "exit_code": 1,
+  "configs": [
+    {
+      "path": "examples\\typologies\\walls_relieved\\crowe_panel_es600_v7\\crowe_panel_es600_v7_w1.yaml",
+      "name": "rr__crowe_panel_es600_v7_w1",
+      "family": "FREEFORM",
+      "generator": "grid",
+      "searched_keys": [
+        "g_crown_mm",
+        "g_depth_mm",
+        "g_h_depth_scale"
+      ],
+      "seed_outside_box": [],
+      "seed_key_missing": [],
+      "seed_design_hash": null,
+      "prior_bests": [],
+      "history": null,
+      "sigma": {
+        "config_sigma0": 0.15,
+        "recommended_sigma": null,
+        "median_spread": null,
+        "dims": 0,
+        "expected_hits": null,
+        "min_expected_hits": 3.0,
+        "refusal_fraction": null
+      },
+      "sampling": {
+        "samples": 0,
+        "status": "not sampled",
+        "note": "--samples 0 (default): no mesh was built"
+      },
+      "refusals": {},
+      "graded": {
+        "infeasible_penalty": "resample_strict",
+        "sampled_refusals": 0,
+        "invalid_envelope": 0
+      },
+      "ab": null,
+      "findings": [
+        {
+          "severity": "HARD",
+          "code": "space_build_failed",
+          "message": "DesignSpace.from_config failed: GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])",
+          "config": "examples\\typologies\\walls_relieved\\crowe_panel_es600_v7\\crowe_panel_es600_v7_w1.yaml"
+        }
+      ]
+    }
+  ],
+  "hards": [
+    {
+      "severity": "HARD",
+      "code": "space_build_failed",
+      "message": "DesignSpace.from_config failed: GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])",
+      "config": "examples\\typologies\\walls_relieved\\crowe_panel_es600_v7\\crowe_panel_es600_v7_w1.yaml"
+    }
+  ],
+  "warnings": [],
+  "infos": []
+}
