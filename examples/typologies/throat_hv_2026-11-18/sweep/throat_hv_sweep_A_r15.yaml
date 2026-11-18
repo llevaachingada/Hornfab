@@ -1,0 +1,230 @@
+name: throat_hv_sweep_A_r15
+family: OSSE
+seed_params:
+  r0_mm: 27.0507
+  a0_deg: 4.5
+  a_deg: 24.9504
+  L_mm: 254.874
+  n: 6.0
+  s: 0.50842
+  q: 0.996
+  k: 1.0
+  exponent: 2.0
+  aspect_ratio: 1.0
+  throat_ext_length_mm: 79.696
+  throat_ext_angle_deg: 4.32035
+  slot_length_mm: 0.0
+  morph_target: 0
+  morph_width_mm: 500.0
+  morph_height_mm: 660.0
+  morph_corner_mm: 35.0
+  morph_exponent: 4.0
+  morph_rate: 4.1236
+  morph_fixed: 0.0
+  morph_allow_shrinkage: 0
+  wall_thickness_mm: 5.0
+  az_sf_m: 4.0
+  az_sf_n1: 7.4958
+  az_sf_n2: 12.4449
+  az_sf_n3: 13.4442
+  az_sf_a: 1.0
+  az_sf_b: 0.8569
+  az_a_cos_pow: 1.06777
+  az_n_cos2_amp: 0.0
+  az_a_sf_amp: 0.0
+  az_a_cos_amp: 15.5759
+  az_s_cos2_amp: 0.071279
+  throat_hv_ratio: 1.5
+bounds:
+  r0_mm:
+    lo: 27.0507
+    hi: 27.0507
+    search: false
+  a0_deg:
+    lo: 4.5
+    hi: 4.5
+    search: false
+  a_deg:
+    lo: 24.9504
+    hi: 24.9504
+    search: false
+  L_mm:
+    lo: 254.874
+    hi: 254.874
+    search: false
+  n:
+    lo: 6.0
+    hi: 6.0
+    search: false
+  s:
+    lo: 0.50842
+    hi: 0.50842
+    search: false
+  q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  k:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  exponent:
+    lo: 2.0
+    hi: 2.0
+    search: false
+  aspect_ratio:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  throat_ext_length_mm:
+    lo: 79.696
+    hi: 79.696
+    search: false
+  throat_ext_angle_deg:
+    lo: 4.32035
+    hi: 4.32035
+    search: false
+  slot_length_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  morph_target:
+    lo: 0
+    hi: 0
+    search: false
+  morph_width_mm:
+    lo: 500.0
+    hi: 500.0
+    search: false
+  morph_height_mm:
+    lo: 660.0
+    hi: 660.0
+    search: false
+  morph_corner_mm:
+    lo: 35.0
+    hi: 35.0
+    search: false
+  morph_exponent:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  morph_rate:
+    lo: 4.1236
+    hi: 4.1236
+    search: false
+  morph_fixed:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  morph_allow_shrinkage:
+    lo: 0
+    hi: 0
+    search: false
+  wall_thickness_mm:
+    lo: 5.0
+    hi: 5.0
+    search: false
+  az_sf_m:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  az_sf_n1:
+    lo: 7.4958
+    hi: 7.4958
+    search: false
+  az_sf_n2:
+    lo: 12.4449
+    hi: 12.4449
+    search: false
+  az_sf_n3:
+    lo: 13.4442
+    hi: 13.4442
+    search: false
+  az_sf_a:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  az_sf_b:
+    lo: 0.8569
+    hi: 0.8569
+    search: false
+  az_a_cos_pow:
+    lo: 1.06777
+    hi: 1.06777
+    search: false
+  az_n_cos2_amp:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  az_a_sf_amp:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  az_a_cos_amp:
+    lo: 15.5759
+    hi: 15.5759
+    search: false
+  az_s_cos2_amp:
+    lo: 0.071279
+    hi: 0.071279
+    search: false
+  throat_hv_ratio:
+    lo: 1.5
+    hi: 1.5
+    search: false
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 0.5
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 0.5
+  flat_cv: 0.5
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.22
+  seed: 1234
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 260
+description: 'HOME LANDSCAPE 80Hx50V: OSSE ext-throat + per-direction wall angle (cosine
+  law, wider H than V), no mouth morph (the mouth follows the walls), no K-law sizing
+  | v8: az cos-pow / throat-ext / s-cos2 re-opened, n unlocked'
+brief_file: ../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
