@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-18 - night cd_rrect_2026-11-17: failure causes not yet read
+
+- OPEN (local agent): read cause lines for t_klame_turbo100, t_klame_scalar100, t_ath14_turbo100,
+  t_hvlaw_turbo100/_scalar100 (row count N), t_trit80_rc2, cont_p80_athcore_corelaw_200,
+  cont_biradial_smooth_200, c_rrect_100w_rc2 (review §8 command); append to the review.
+- OPEN (WP 0.7 proposal): `ok_no_result` status when a job exits 0 with no rows (t_trit80_rc2).
+- OPEN (owner): BO re-queues after the causes; t_hvlaw needs a CMA cohort first.
+
 ## 2026-11-18 - integration plan awaits the owner (D10)
 
 - OPEN (owner): approve the PR plan in `HANDOFF_2026-11-18.md` / `HANDBACK_CLOUD_2026-11-18.md` §5.

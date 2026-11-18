@@ -195,6 +195,8 @@ and `9fcd21fc1904` as infeasible and point to the optional probe file. Append-on
 `t_corelaw_turbo100` with a FRESH `--root` (their `package.json` makes the stock resume refuse).
 Unchanged from `HANDOFF_2026-11-18.md`.
 
+**I. Night record causes (CPU, 15 min).** Review §8 of `docs/evidence/night_cd_rrect_2026-11-17_REVIEW_2026-11-18.md`.
+
 **H. After the owner approves the PR plan.** Mark #68 closed-as-superseded (owner action or with
 explicit approval), retarget nothing else; after #67 merges, open `hornfab-all-2026-11-18` → `main`
 with the full suite pasted.
@@ -223,3 +225,25 @@ Single-design rule, now enforced in code: **never `kind: search` for one design*
    part3 CSVs were hand-made), so authority tables never depend on whoever ran the sweep.
    Extend `u3_authority.py` with `--csv-out` rather than writing a new tool.
 3. The agent benchmark A/B run (`tests/agent_bench/`, ISSUES 11-18) stays off-plan.
+
+---
+
+## 9. Addendum: review of the pushed night record (`2b35194`)
+
+Full review: `docs/evidence/night_cd_rrect_2026-11-17_REVIEW_2026-11-18.md`. The push contained
+the night's ledger and logs, not CSVs. Short version:
+
+- **Throat rows match the evidence exactly** [verified]; the §10.2 authority table stands.
+- **GPU hours:** 14.7 h ok, 3.5 h failed, 2.1 h blocked (≈ 50 min of it a stale-lock episode on 11-17).
+- **BO arms: 0 of 9 finished.** Two were owner skips; `t_hvlaw` ×2 were refused by design (too few
+  training rows: build a CMA cohort first) [code-verified]; `t_ath14_turbo100` refused at launch;
+  `t_klame` ×2 failed. The handoff's "two skipped" undercounts this.
+- **`t_trit80_rc2` is recorded `ok` after 2 h with 0 evals and no J**: a night-truth gap (WP 0.7);
+  proposal: an `ok_no_result` status for new rows.
+- **Pending queue is clean under the new zero-dimension guard**; no live-night edit is needed.
+  Three `w_lecleach_*` jobs run `beat_cpu` inside the GPU lane (legal, slow; maybe meant for the CPU lane).
+- **Local action (new item I in §6):** pull the cause lines from the nine job logs listed in the
+  review §8 (UTF-16; `-Encoding Unicode`), append them to the review, then decide BO re-queues.
+
+Owner decision added: **8. BO arms** — re-queue only after the causes are read; `t_hvlaw` needs a
+CMA cohort before BoTorch (owner rule 2026-11-15).

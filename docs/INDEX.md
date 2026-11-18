@@ -17,6 +17,12 @@ single solves, epw8 mesh check, 40-eval B search, per-config H/V beamwidth and D
 Follow-up proposal: [G5 recommendation](evidence/throat_hv_2026-11-18/G5_RECOMMENDATION_2026-11-18.md)
 (park on A as inert; B has H authority but is not competitive under v7).
 
+[Night cd_rrect_2026-11-17 record review (2026-11-18)](evidence/night_cd_rrect_2026-11-17_REVIEW_2026-11-18.md):
+throat rows cross-checked, GPU-hour split, 0 of 9 BO arms finished (two owner skips, three launch
+refusals, two failures), an `ok` row with no result, pending queue vs the zero-dimension guard.
+Raw record: [archive/2026-11-18-unintegrated/](../archive/2026-11-18-unintegrated/INDEX.md) (worktree
+snapshots + the night's file, ledger and poll logs; provenance only).
+
 [Cloud senior handback (2026-11-18)](../HANDBACK_CLOUD_2026-11-18.md): G1-G6 summary, per-commit verdicts,
 test sets, numbered owner decisions and the ordered local work list with exact commands.
 
