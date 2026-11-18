@@ -190,6 +190,17 @@ def _write_mode_meta(d: Path, cfg, run_dir: Path, mode: str, rundir, extra: dict
 # ------------------------------------------------------------------ B1f pair mode
 
 
+def _backend_obj(cfg):
+    """The backend OBJECT ``worker.warm`` / ``evaluate()`` require — the config's
+    ``solve.backend`` STRING crashes both (``AttributeError: 'str' object has no attribute 'name'``,
+    hit for real by the first B1 fold-warm probes 2026-11-18, owner box: all five probes exited in
+    ~6 s on the first real run of the refine path). Mirrors ``hornlab_search.cli._backend`` exactly
+    (kw recipe: timeout_s, cuda_fused for beat_cuda only, julia_threads). Injected in tests.
+    """
+    from hornlab_search.cli import _backend as backend_from_cfg
+    return backend_from_cfg(cfg)
+
+
 def run_pairs(pairs, out_root, *, config_for_run, evaluate_fn, make_ctx_fn, warm_fn,
               space_for_cfg, store=None, cache_dir=None, modes=DEFAULT_MODES, trace_fraction=0.0,
               dry_run=False, echo=print) -> list[dict]:
@@ -245,9 +256,9 @@ def run_pairs(pairs, out_root, *, config_for_run, evaluate_fn, make_ctx_fn, warm
                     _write_mode_meta(st["dir"], cfg, run_dir, mode, rundir,
                                      {"check": PAIR_CHECK,
                                       "frequency_fidelity_not_mesh": True})
-                    warm_fn(cfg.solve.backend)
+                    warm_fn(_backend_obj(cfg))
                 ev = evaluate_fn(_design_for(row), space, cfg, mode, st["dir"], store,
-                                 cfg.solve.backend, ctx=st["ctx"])
+                                 _backend_obj(cfg), ctx=st["ctx"])
                 evals[mode] = ev
                 if not ev.error:
                     st["done"].add(h)
@@ -463,13 +474,13 @@ def run_refine(pairs, out_root, *, config_for_run, evaluate_fn, make_ctx_fn, war
                                     "reference_solve_hash": grid["solve_hash"]},
                 })
             if teardown_per_design:
-                warm_fn(cfg.solve.backend)
+                warm_fn(_backend_obj(snapshot_cfg))
             mem = vram_factory(period=1.0) if vram_factory else None
             t0 = time.perf_counter()
             try:
                 with (mem if mem is not None else contextlib.nullcontext()):
                     ev = evaluate_fn(_design_for(row), space, snapshot_cfg, REFINE_MODE,
-                                     st["dir"], store, cfg.solve.backend, ctx=st["ctx"])
+                                     st["dir"], store, _backend_obj(snapshot_cfg), ctx=st["ctx"])
             finally:
                 if mem is not None:
                     rec["vram"] = mem.record()
