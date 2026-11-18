@@ -1,0 +1,75 @@
+{
+  "strict": false,
+  "exit_code": 0,
+  "configs": [
+    {
+      "path": "examples\\typologies\\walls_relieved\\lecleach_iwata_ar_landscape_smooth_v7\\lecleach_iwata_ar_landscape_smooth_v7_w1.yaml",
+      "name": "hl__lecleach_iwata_ar_landscape_smooth_v7_w1",
+      "family": "FREEFORM",
+      "generator": "grid",
+      "searched_keys": [
+        "g_T",
+        "g_ar_m",
+        "g_ar_p",
+        "g_fc_hz",
+        "g_stop_deg"
+      ],
+      "seed_outside_box": [],
+      "seed_key_missing": [],
+      "seed_design_hash": "f3cc28aac4e8",
+      "prior_bests": [],
+      "history": null,
+      "sigma": {
+        "config_sigma0": 0.2,
+        "recommended_sigma": null,
+        "median_spread": null,
+        "dims": 5,
+        "expected_hits": null,
+        "min_expected_hits": 3.0,
+        "refusal_fraction": null
+      },
+      "sampling": {
+        "samples": 0,
+        "status": "not sampled",
+        "note": "--samples 0 (default): no mesh was built"
+      },
+      "refusals": {},
+      "graded": {
+        "infeasible_penalty": "resample_strict",
+        "sampled_refusals": 0,
+        "invalid_envelope": 0
+      },
+      "ab": null,
+      "findings": [
+        {
+          "severity": "WARN",
+          "code": "history_unusable",
+          "message": "generator history is unusable: runs\\20261116T035949Z-screen-3e49ce has objective version 7 and brief '../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml', this config has version 7 and brief '../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml'",
+          "config": "examples\\typologies\\walls_relieved\\lecleach_iwata_ar_landscape_smooth_v7\\lecleach_iwata_ar_landscape_smooth_v7_w1.yaml"
+        },
+        {
+          "severity": "WARN",
+          "code": "history_unusable",
+          "message": "warm-start history is unusable: runs\\20261116T035949Z-screen-3e49ce: warm_start refuses objective version/brief mismatch (run v7, this config v7; set search.warm_start.allow_cross_brief: true to override)",
+          "config": "examples\\typologies\\walls_relieved\\lecleach_iwata_ar_landscape_smooth_v7\\lecleach_iwata_ar_landscape_smooth_v7_w1.yaml"
+        }
+      ]
+    }
+  ],
+  "hards": [],
+  "warnings": [
+    {
+      "severity": "WARN",
+      "code": "history_unusable",
+      "message": "generator history is unusable: runs\\20261116T035949Z-screen-3e49ce has objective version 7 and brief '../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml', this config has version 7 and brief '../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml'",
+      "config": "examples\\typologies\\walls_relieved\\lecleach_iwata_ar_landscape_smooth_v7\\lecleach_iwata_ar_landscape_smooth_v7_w1.yaml"
+    },
+    {
+      "severity": "WARN",
+      "code": "history_unusable",
+      "message": "warm-start history is unusable: runs\\20261116T035949Z-screen-3e49ce: warm_start refuses objective version/brief mismatch (run v7, this config v7; set search.warm_start.allow_cross_brief: true to override)",
+      "config": "examples\\typologies\\walls_relieved\\lecleach_iwata_ar_landscape_smooth_v7\\lecleach_iwata_ar_landscape_smooth_v7_w1.yaml"
+    }
+  ],
+  "infos": []
+}

@@ -1,0 +1,322 @@
+{
+ "hl__biradial_es_style_v7": {
+  "run": "20261116T090751Z-screen-37b115",
+  "design_hash": "d24016b7ab8a",
+  "stored_j": 6.446802016621025,
+  "record_digest": "d2f21d5ef15842f7dd3375bbea8d6bac256a2fad039ecb87d431796dc8aa353b",
+  "variants": {
+   "control": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 0.0,
+    "reach_ge_5mm": false,
+    "envelope_margins_mm": {
+     "width_mm": 19.5501959999998,
+     "height_mm": 89.89543799999984,
+     "depth_mm": 238.37251
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 574.4498040000002,
+    "mouth_height_mm": 384.10456200000016,
+    "depth_mm": 241.62749,
+    "ok": true,
+    "mesh": "ok"
+   },
+   "vt_460": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 30.766612088678055,
+    "reach_ge_5mm": true,
+    "envelope_margins_mm": {
+     "width_mm": 19.171922831852044,
+     "height_mm": 14.0,
+     "depth_mm": 238.37251
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 574.828077168148,
+    "mouth_height_mm": 460.0,
+    "depth_mm": 241.62749,
+    "ok": true,
+    "mesh": "ok"
+   },
+   "vt_480": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 30.649290954116097,
+    "reach_ge_5mm": true,
+    "envelope_margins_mm": {
+     "width_mm": 18.860922422213093,
+     "height_mm": -6.0,
+     "depth_mm": 238.37251
+    },
+    "inside_envelope": false,
+    "mouth_width_mm": 575.1390775777869,
+    "mouth_height_mm": 480.0,
+    "depth_mm": 241.62749,
+    "ok": false,
+    "mesh": "ok"
+   },
+   "term_sides": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 3.134179368907358,
+    "reach_ge_5mm": false,
+    "envelope_margins_mm": {
+     "width_mm": -10.4498040000002,
+     "height_mm": 87.66206905822759,
+     "depth_mm": 238.37251
+    },
+    "inside_envelope": false,
+    "mouth_width_mm": 604.4498040000002,
+    "mouth_height_mm": 386.3379309417724,
+    "depth_mm": 241.62749,
+    "ok": false,
+    "mesh": "ok"
+   },
+   "term_topbottom": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 3.134179368907358,
+    "reach_ge_5mm": false,
+    "envelope_margins_mm": {
+     "width_mm": 19.530924768721206,
+     "height_mm": 59.89543799999984,
+     "depth_mm": 238.37251
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 574.4690752312788,
+    "mouth_height_mm": 414.10456200000016,
+    "depth_mm": 241.62749,
+    "ok": true,
+    "mesh": "ok"
+   },
+   "steer_early": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 2.8188689988846907,
+    "reach_ge_5mm": false,
+    "envelope_margins_mm": {
+     "width_mm": 19.550196000000028,
+     "height_mm": 89.89543799999996,
+     "depth_mm": 238.37251
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 574.449804,
+    "mouth_height_mm": 384.10456200000004,
+    "depth_mm": 241.62749,
+    "ok": true,
+    "mesh": "ok"
+   },
+   "steer_late": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 2.7543957598341637,
+    "reach_ge_5mm": false,
+    "envelope_margins_mm": {
+     "width_mm": 19.550196000000028,
+     "height_mm": 89.89543799999996,
+     "depth_mm": 238.37251
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 574.449804,
+    "mouth_height_mm": 384.10456200000004,
+    "depth_mm": 241.62749,
+    "ok": true,
+    "mesh": "ok"
+   },
+   "diag_pull": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 5.3923582229904605,
+    "reach_ge_5mm": true,
+    "envelope_margins_mm": {
+     "width_mm": 19.5501959999998,
+     "height_mm": 89.89543799999984,
+     "depth_mm": 238.37251
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 574.4498040000002,
+    "mouth_height_mm": 384.10456200000016,
+    "depth_mm": 241.62749,
+    "ok": true,
+    "mesh": "ok"
+   }
+  }
+ },
+ "hl__ext_throat_hvlaw_v7": {
+  "run": "20261115T143219Z-screen-d3a1bb",
+  "design_hash": "3a1038da45d0",
+  "stored_j": 3.102805201974035,
+  "record_digest": "b26c5e4cddfa2e8a6b21ecd43da2dd3a1c84b01369a386025200b7e374a2a49c",
+  "variants": {
+   "control": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 0.0,
+    "reach_ge_5mm": false,
+    "envelope_margins_mm": {
+     "width_mm": 9.7792562320476,
+     "height_mm": 69.46028369702333,
+     "depth_mm": 145.42959298469998
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 580.2207437679524,
+    "mouth_height_mm": 400.5397163029767,
+    "depth_mm": 334.5704070153,
+    "ok": true,
+    "mesh": "ok"
+   },
+   "vt_460": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 25.027998629027152,
+    "reach_ge_5mm": true,
+    "envelope_margins_mm": {
+     "width_mm": 9.7792562320476,
+     "height_mm": -7.512572517439821,
+     "depth_mm": 145.42959298469998
+    },
+    "inside_envelope": false,
+    "mouth_width_mm": 580.2207437679524,
+    "mouth_height_mm": 477.5125725174398,
+    "depth_mm": 334.5704070153,
+    "ok": false,
+    "mesh": "ok"
+   },
+   "vt_480": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 28.069867694479598,
+    "reach_ge_5mm": true,
+    "envelope_margins_mm": {
+     "width_mm": 9.7792562320476,
+     "height_mm": -25.89836866051155,
+     "depth_mm": 145.42959298469998
+    },
+    "inside_envelope": false,
+    "mouth_width_mm": 580.2207437679524,
+    "mouth_height_mm": 495.89836866051155,
+    "depth_mm": 334.5704070153,
+    "ok": false,
+    "mesh": "ok"
+   },
+   "term_sides": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 3.1341793689073603,
+    "reach_ge_5mm": false,
+    "envelope_margins_mm": {
+     "width_mm": -20.2207437679524,
+     "height_mm": 65.0133772588942,
+     "depth_mm": 145.42959298469998
+    },
+    "inside_envelope": false,
+    "mouth_width_mm": 610.2207437679524,
+    "mouth_height_mm": 404.9866227411058,
+    "depth_mm": 334.5704070153,
+    "ok": false,
+    "mesh": "ok"
+   },
+   "term_topbottom": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 3.134179368907357,
+    "reach_ge_5mm": false,
+    "envelope_margins_mm": {
+     "width_mm": 9.7792562320476,
+     "height_mm": 44.96626513793433,
+     "depth_mm": 145.42959298469998
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 580.2207437679524,
+    "mouth_height_mm": 425.03373486206567,
+    "depth_mm": 334.5704070153,
+    "ok": true,
+    "mesh": "ok"
+   },
+   "steer_early": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 12.26897432645283,
+    "reach_ge_5mm": true,
+    "envelope_margins_mm": {
+     "width_mm": 9.779256232047715,
+     "height_mm": 99.80215591157884,
+     "depth_mm": 145.42959298469998
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 580.2207437679523,
+    "mouth_height_mm": 370.19784408842116,
+    "depth_mm": 334.5704070153,
+    "ok": true,
+    "mesh": "ok"
+   },
+   "steer_late": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 12.055946277922034,
+    "reach_ge_5mm": true,
+    "envelope_margins_mm": {
+     "width_mm": 9.779256232047715,
+     "height_mm": 99.80215591157884,
+     "depth_mm": 145.42959298469998
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 580.2207437679523,
+    "mouth_height_mm": 370.19784408842116,
+    "depth_mm": 334.5704070153,
+    "ok": true,
+    "mesh": "ok"
+   },
+   "diag_pull": {
+    "no_fold_before_lip": true,
+    "w_h_nondecreasing_before_lip": true,
+    "radius_positive": true,
+    "throat_ring_unchanged": true,
+    "max_rms_change_outside_last5pct_mm": 5.3923582229904605,
+    "reach_ge_5mm": true,
+    "envelope_margins_mm": {
+     "width_mm": 9.7792562320476,
+     "height_mm": 77.43431046821587,
+     "depth_mm": 145.42959298469998
+    },
+    "inside_envelope": true,
+    "mouth_width_mm": 580.2207437679524,
+    "mouth_height_mm": 392.56568953178413,
+    "depth_mm": 334.5704070153,
+    "ok": true,
+    "mesh": "ok"
+   }
+  }
+ }
+}

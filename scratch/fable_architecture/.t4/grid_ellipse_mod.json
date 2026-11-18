@@ -1,0 +1,980 @@
+{
+ "summary": {
+  "config": "examples/typologies/grid_ellipse_mod.yaml",
+  "brief": "axi_90x90_1in",
+  "n": 64,
+  "keys": [
+   "L_mm",
+   "h_rm_mm"
+  ],
+  "materialize_refused": 0,
+  "pre_refused": 1,
+  "pre_refused_meshed": 1,
+  "false_refusals(pre_refused_and_post_ok)": 1,
+  "pre_admitted_meshed": 63,
+  "missed(pre_admitted_but_post_violates)": 0,
+  "mesh_refused": 0
+ },
+ "rows": [
+  {
+   "knobs": {
+    "L_mm": 218.5052087344,
+    "h_rm_mm": 86.1876282981,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 168.3396477997,
+    "h_rm_mm": 154.2535848776,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 140.8465464413,
+    "h_rm_mm": 96.9941850239,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 189.8463358916,
+    "h_rm_mm": 143.4441218292,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 174.8851706088,
+    "h_rm_mm": 116.1341221491,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 124.3244072236,
+    "h_rm_mm": 128.0273483088,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 147.3195871152,
+    "h_rm_mm": 69.3852398312,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 195.933329016,
+    "h_rm_mm": 174.7729952866,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.015346380833276108,
+   "pre_refused": true,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 201.9497507066,
+    "h_rm_mm": 90.0550803822,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 153.7296855636,
+    "h_rm_mm": 136.1380785517,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 129.6606683917,
+    "h_rm_mm": 79.2994117178,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 182.1715050191,
+    "h_rm_mm": 146.8896344956,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 183.048188109,
+    "h_rm_mm": 61.954608541,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 135.2172219008,
+    "h_rm_mm": 167.7057931107,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 160.659923479,
+    "h_rm_mm": 108.6420742329,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 213.5629111715,
+    "h_rm_mm": 121.0145437159,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 209.7139664739,
+    "h_rm_mm": 105.9152399795,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 158.368901331,
+    "h_rm_mm": 123.6430601729,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 137.5221470185,
+    "h_rm_mm": 66.3591759233,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 186.9079836458,
+    "h_rm_mm": 163.2030176045,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 178.2140323706,
+    "h_rm_mm": 74.6141402377,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 127.2580661625,
+    "h_rm_mm": 151.224012305,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 156.1183431,
+    "h_rm_mm": 92.6134072663,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 205.8963307925,
+    "h_rm_mm": 133.2287483243,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 198.2413058914,
+    "h_rm_mm": 73.7475008145,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 151.2007449567,
+    "h_rm_mm": 170.0598402042,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 120.4846177995,
+    "h_rm_mm": 113.2526768092,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 172.6094072498,
+    "h_rm_mm": 130.5577898771,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 192.2197346389,
+    "h_rm_mm": 99.5948178787,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 144.7839712538,
+    "h_rm_mm": 140.7451707497,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 164.3608128466,
+    "h_rm_mm": 81.656967476,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 216.0995547473,
+    "h_rm_mm": 158.6860371474,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 214.7620753199,
+    "h_rm_mm": 97.8731593955,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 165.7104121335,
+    "h_rm_mm": 146.1758896336,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 143.3992074616,
+    "h_rm_mm": 87.1197929978,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 193.6166421324,
+    "h_rm_mm": 156.9262400363,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 170.87062167,
+    "h_rm_mm": 68.5093292221,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 122.2111091763,
+    "h_rm_mm": 172.0442912448,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 149.4116232544,
+    "h_rm_mm": 115.1988795493,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 200.0181572326,
+    "h_rm_mm": 125.3516152501,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 207.282651756,
+    "h_rm_mm": 80.1646763785,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 154.71994102,
+    "h_rm_mm": 149.6081329929,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 128.5940271616,
+    "h_rm_mm": 90.9724403592,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 176.8659664132,
+    "h_rm_mm": 138.7963659642,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 188.6956107616,
+    "h_rm_mm": 107.7807511436,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 135.7468528487,
+    "h_rm_mm": 118.2999867899,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 160.1092202403,
+    "h_rm_mm": 61.033293712,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 207.9859566689,
+    "h_rm_mm": 165.0435508462,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 211.8241993524,
+    "h_rm_mm": 63.6828953587,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 162.3864886165,
+    "h_rm_mm": 162.2676644754,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 133.4281739593,
+    "h_rm_mm": 103.1866447534,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 184.8251132108,
+    "h_rm_mm": 122.7676987834,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 180.8340993524,
+    "h_rm_mm": 95.2857325505,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 131.0103414394,
+    "h_rm_mm": 134.1601461731,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 152.3449955322,
+    "h_rm_mm": 77.3466766067,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 203.3467319608,
+    "h_rm_mm": 152.1033148374,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 197.7208406478,
+    "h_rm_mm": 110.5909820506,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 145.5441774614,
+    "h_rm_mm": 129.6365855774,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 126.0646106489,
+    "h_rm_mm": 71.0328350728,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 173.1570453197,
+    "h_rm_mm": 169.1979678953,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 191.2325413711,
+    "h_rm_mm": 84.315584763,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 139.4480288774,
+    "h_rm_mm": 159.6041639755,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 169.6754933149,
+    "h_rm_mm": 102.3125478113,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  },
+  {
+   "knobs": {
+    "L_mm": 217.157027293,
+    "h_rm_mm": 141.6101072496,
+    "g_pnorm": 2.0,
+    "g_a1_mouth": 0.06,
+    "g_a2_mouth": -0.03,
+    "g_term_side_mm": 2.0
+   },
+   "pre_overshoot": 0.0,
+   "pre_refused": false,
+   "post_ok": true,
+   "post_why": "",
+   "status": "meshed"
+  }
+ ]
+}

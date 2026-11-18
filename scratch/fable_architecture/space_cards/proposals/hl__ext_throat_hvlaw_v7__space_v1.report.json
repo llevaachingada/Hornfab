@@ -1,0 +1,38 @@
+{
+ "proposal": "scratch\\fable_architecture\\space_cards\\proposals\\hl__ext_throat_hvlaw_v7__space_v1.yaml",
+ "notes": [
+  "sigma0 0.2 -> 0.1",
+  "REVIEW joint envelope constraint (not expressible in config): envelope binds jointly; linear margin model R^2 0.91, sign right 91%, only 43% of the box inside"
+ ],
+ "before": {
+  "searched": 8,
+  "box": {
+   "ok": 27,
+   "outside": 37,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0625,
+   "0.15": 0.34375,
+   "0.20": 0.375,
+   "0.25": 0.34375
+  }
+ },
+ "after": {
+  "searched": 8,
+  "box": {
+   "ok": 14,
+   "outside": 18,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.08333333333333333,
+   "0.15": 0.125,
+   "0.20": 0.5416666666666666,
+   "0.25": 0.375
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

@@ -42,6 +42,9 @@ resolved targets; a DI slope target does not itself define sloping beamwidth tar
   supplied synthesis preserved verbatim, including source links and uncertainty labels.
   Its proposed actions, old code references and verification statements are historical
   source material, not new implementation requirements or newly checked findings.
+- [Master plan: acoustic truth, typology and optimization (2026-11-17)](../research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md):
+  prioritized WP0–WP6 implementation handoff (owner-supplied proposal). Distinct from the
+  implemented v9 code and the still-open FABLE scoring menu; WP5/WP6 remain owner-gated.
 - [Claim template](templates/claim.md) and [family template](templates/typology.md):
   optional small notes for genuinely new knowledge; link existing research rather than copy it.
 

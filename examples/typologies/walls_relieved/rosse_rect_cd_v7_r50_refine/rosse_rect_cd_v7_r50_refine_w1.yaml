@@ -1,6 +1,6 @@
 name: hl__rosse_rect_cd_v7_r50_refine_w1
 family: FREEFORM
-brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_rosse_rect_v7.yaml
+brief_file: ../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_rosse_rect_v7.yaml
 generator:
   name: grid
   rows:

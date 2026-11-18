@@ -1,0 +1,35 @@
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__biradial_es_style_smooth_v7\\hl__biradial_es_style_smooth_v7__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 8,
+  "box": {
+   "ok": 96,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  }
+ },
+ "after": {
+  "searched": 8,
+  "box": {
+   "ok": 32,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

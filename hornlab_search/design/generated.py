@@ -193,7 +193,23 @@ class GeneratedSpace:
         knobs = dict(self.seed_knobs)
         for k, xi in zip(keys, x):
             knobs[k] = round(self.bounds[k].from_unit(float(xi)), _ROUND_DECIMALS)
-        return knobs
+        return self.apply_knob_links(knobs)
+
+    #: ``search.links`` resolved for this space (stage 0 WP 0.2, 2026-11-17); None = no links.
+    links: dict | None = None
+
+    def apply_knob_links(self, knobs: dict) -> dict:
+        """Compute linked generator knobs from their parents in KNOB space (before
+        ``materialize``): ``v = scale * parent + offset`` clipped to ``[min, max]``. Without
+        links the same dict is returned (default path byte-identical)."""
+        if not self.links:
+            return knobs
+        out = dict(knobs)
+        for knob in sorted(self.links):
+            spec = self.links[knob]
+            v = float(out[spec["from"]]) * float(spec["scale"]) + float(spec["offset"])
+            out[knob] = round(min(max(v, float(spec["min"])), float(spec["max"])), _ROUND_DECIMALS)
+        return out
 
     def design_from_knobs(self, knobs: dict) -> Design:
         try:
@@ -262,4 +278,26 @@ class GeneratedSpace:
             return None
         return {"name": self.gen.get("name", "typology"), "spec": copy.deepcopy(self.gen),
                 "knobs": knobs, "brief": self.brief.get("name"), "brief_hash": brief_hash(self.brief),
-                "derived": generator_info(self.gen, knobs, self.brief)}
+                "derived": generator_info(self.gen, knobs, self.brief),
+                # WP 0.9 (2026-11-17): additive, NON-identity recipe metadata (never hashed).
+                "recipe_meta": self._recipe_meta(d, knobs)}
+
+    def _recipe_meta(self, d: Design, knobs: dict) -> dict:
+        """Termination kind, mesher wall thickness and resolved source cap; never raises."""
+        from .recipe_meta import recipe_metadata
+        mounting = self.brief.get("mounting")
+        mounting = mounting if isinstance(mounting, dict) and mounting else None
+        inner = meta = None
+        block = d.params.get("grid") if isinstance(d.params, dict) else None
+        if isinstance(block, dict):
+            try:
+                if "rows" in block:
+                    spec = {k: v for k, v in block.items() if k != "knobs"}
+                    inner, meta = grid_gen.rows_grid_points(spec, block.get("knobs") or {}, self.brief)
+                else:
+                    spec = {k: block[k] for k in grid_gen.GRID_SPEC_KEYS if k in block}
+                    inner, meta = grid_gen.grid_points(spec, block.get("knobs") or {}, self.brief)
+            except Exception:  # noqa: BLE001 - metadata only
+                inner = meta = None
+        return recipe_metadata(d, mounting=mounting, gen={"spec": self.gen}, grid_inner=inner,
+                               grid_meta=meta)

@@ -1,0 +1,416 @@
+{
+ "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\home_landscape_2026-11-15\\hl__lecleach_iwata_ar_landscape_v7.yaml",
+ "name": "hl__lecleach_iwata_ar_landscape_v7",
+ "family": "FREEFORM",
+ "generator": true,
+ "keys": [
+  "g_ar_m",
+  "g_ar_p",
+  "g_fc_hz",
+  "g_stop_deg"
+ ],
+ "geometry": {
+  "keys": [
+   "g_ar_m",
+   "g_ar_p",
+   "g_fc_hz",
+   "g_stop_deg"
+  ],
+  "n_points": 9,
+  "legal_points": 9,
+  "refused_points": [],
+  "record_points": 3965,
+  "effective_dimension": {
+   "median": 4.0,
+   "min": 4,
+   "max": 4,
+   "searched": 4
+  },
+  "knobs": {
+   "g_ar_m": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 17.65619883715679,
+    "max_rms_mm_per_range": 33.78090343395532,
+    "median_max_disp_mm_per_range": 62.89954693875896,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 125.037581996339,
+     "mouth_height_mm": -67.4848533548562,
+     "depth_mm": -0.0011089761621008163,
+     "h_wall_angle_mouth_deg": -12.678023500426256,
+     "v_wall_angle_mouth_deg": 12.394937612063462,
+     "diag_wall_angle_mouth_deg": 8.575248890301161,
+     "mouth_aspect": 1.1999999999999944,
+     "mouth_area_mm2": -187.12354257113458,
+     "h_halfwidth_mid_mm": 30.00728576326033,
+     "v_halfwidth_mid_mm": -10.77688670436653
+    },
+    "failed_points": 0
+   },
+   "g_ar_p": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 2.5241187434255017,
+    "max_rms_mm_per_range": 5.802512058830017,
+    "median_max_disp_mm_per_range": 5.481118510968416,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 0.0,
+     "mouth_height_mm": 0.0,
+     "depth_mm": 0.01419779905589279,
+     "h_wall_angle_mouth_deg": -3.819979964259087,
+     "v_wall_angle_mouth_deg": 6.748682809031686,
+     "diag_wall_angle_mouth_deg": 2.5613535180745806,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 0.0,
+     "h_halfwidth_mid_mm": -3.8144225458263588,
+     "v_halfwidth_mid_mm": 4.286098609904882
+    },
+    "failed_points": 0
+   },
+   "g_fc_hz": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 119.91000187485774,
+    "max_rms_mm_per_range": 228.60447840946287,
+    "median_max_disp_mm_per_range": 183.341259097649,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": -232.92302455398593,
+     "mouth_height_mm": -162.65561485160077,
+     "depth_mm": -155.5339741181639,
+     "h_wall_angle_mouth_deg": 10.387865656174702,
+     "v_wall_angle_mouth_deg": 25.223050683310767,
+     "diag_wall_angle_mouth_deg": 23.005902865905604,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": -90638.92885315846,
+     "h_halfwidth_mid_mm": -26.076536218567956,
+     "v_halfwidth_mid_mm": -14.820031578160282
+    },
+    "failed_points": 0
+   },
+   "g_stop_deg": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 25.0959064194895,
+    "max_rms_mm_per_range": 29.566369620446398,
+    "median_max_disp_mm_per_range": 50.01942770846321,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 14.140782029416231,
+     "mouth_height_mm": 13.10860373125634,
+     "depth_mm": 0.2761604283229244,
+     "h_wall_angle_mouth_deg": 64.32426638345173,
+     "v_wall_angle_mouth_deg": 73.04669004470436,
+     "diag_wall_angle_mouth_deg": 95.34289078302116,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 5502.100103241714,
+     "h_halfwidth_mid_mm": 12.484405341003313,
+     "v_halfwidth_mid_mm": 8.873818933175535
+    },
+    "failed_points": 0
+   }
+  },
+  "links": [],
+  "feasible_from_seed": {
+   "g_ar_m": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_ar_p": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_fc_hz": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_stop_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   }
+  }
+ },
+ "box": {
+  "n": 96,
+  "counts": {
+   "ok": 94,
+   "outside": 0,
+   "refused": 2
+  },
+  "ok_frac": 0.9791666666666666,
+  "per_knob": {
+   "g_ar_m": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.0,
+     0.05263157894736842,
+     0.05263157894736842
+    ]
+   },
+   "g_ar_p": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.047619047619047616,
+     0.0,
+     0.0,
+     0.05263157894736842
+    ]
+   },
+   "g_fc_hz": {
+    "bad_rate_by_slice": [
+     0.1,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "g_stop_deg": {
+    "bad_rate_by_slice": [
+     0.0,
+     0.0,
+     0.05555555555555555,
+     0.0,
+     0.05263157894736842
+    ]
+   }
+  }
+ },
+ "sigma": {
+  "0.05": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.10": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.15": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.20": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.25": {
+   "bad_rate": 0.020833333333333332,
+   "refused": 1,
+   "outside": 0,
+   "n": 48
+  }
+ },
+ "margin_model": {
+  "available": true,
+  "n_legal": 95,
+  "intercept_mm": 147.0066560659692,
+  "gradient": {
+   "g_ar_m": {
+    "mm_per_range": -73.80057907770754,
+    "mm_per_knob_unit": -61.50048256475628
+   },
+   "g_ar_p": {
+    "mm_per_range": -0.38133841442833116,
+    "mm_per_knob_unit": -0.25422560961888746
+   },
+   "g_fc_hz": {
+    "mm_per_range": 228.31964903773084,
+    "mm_per_knob_unit": 0.507376997861624
+   },
+   "g_stop_deg": {
+    "mm_per_range": -31.93778273061131,
+    "mm_per_knob_unit": -0.3548642525623479
+   }
+  },
+  "r2": 0.9195020559318255,
+  "sign_agreement": 1.0,
+  "binding_axis_counts": {
+   "width_mm": 67,
+   "height_mm": 28
+  },
+  "inside_frac": 1.0,
+  "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
+ },
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T162516Z-screen-e31b23",
+   "family": "FREEFORM",
+   "top_decile_n": 8,
+   "walls": [
+    {
+     "key": "g_fc_hz",
+     "lo": 450.0,
+     "hi": 900.0,
+     "frac_lo": 0.25,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_ar_m",
+     "lo": 1.2,
+     "hi": 2.4,
+     "frac_lo": 0.125,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_stop_deg",
+     "lo": 110.0,
+     "hi": 200.0,
+     "frac_lo": 0.125,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_ar_p",
+     "lo": 0.5,
+     "hi": 2.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "g_ar_m",
+     "action": "narrow",
+     "new_lo": 1.2,
+     "new_hi": 1.6185394209000001,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_ar_p",
+     "action": "narrow",
+     "new_lo": 0.8406032353999999,
+     "new_hi": 1.4494541224,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_fc_hz",
+     "action": "narrow",
+     "new_lo": 450.0,
+     "new_hi": 531.7315519802,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_stop_deg",
+     "action": "narrow",
+     "new_lo": 110.0,
+     "new_hi": 149.0048075186,
+     "reason": "top-decile span padded 5%"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T162516Z-screen-e31b23",
+   "family": "FREEFORM",
+   "top_decile_n": 8,
+   "pairs": [
+    {
+     "a": "g_fc_hz",
+     "b": "g_stop_deg",
+     "rho": 0.6666666666666669,
+     "fit": {
+      "scale": 0.4675707174915959,
+      "offset": -100.04584566401489,
+      "r2": 0.5272338521617842
+     }
+    }
+   ],
+   "cma_directions": [
+    {
+     "rank": 1,
+     "eigenvalue": 2.5904215839246025,
+     "fraction": 0.635746090751923,
+     "keys": [
+      "g_stop_deg",
+      "g_ar_m"
+     ],
+     "loadings": {
+      "g_stop_deg": -0.8056509737619088,
+      "g_ar_m": -0.5202248472122305
+     }
+    },
+    {
+     "rank": 2,
+     "eigenvalue": 0.7981801578307792,
+     "fraction": 0.19589086124270053,
+     "keys": [
+      "g_ar_m",
+      "g_stop_deg"
+     ],
+     "loadings": {
+      "g_ar_m": 0.8382567194759236,
+      "g_stop_deg": -0.44075335568825935
+     }
+    },
+    {
+     "rank": 3,
+     "eigenvalue": 0.5058686445033148,
+     "fraction": 0.1241512251027929,
+     "keys": [
+      "g_ar_p",
+      "g_stop_deg"
+     ],
+     "loadings": {
+      "g_ar_p": -0.9003997616754067,
+      "g_stop_deg": -0.3593861975880829
+     }
+    }
+   ],
+   "proposed_links": [
+    {
+     "knob_b": "g_stop_deg",
+     "knob_a": "g_fc_hz",
+     "scale": 0.4675707174915959,
+     "offset": -100.04584566401489,
+     "r2": 0.5272338521617842,
+     "source": "rho_top_decile"
+    }
+   ]
+  }
+ },
+ "recommendations": [
+  {
+   "knob": "*",
+   "action": "sigma0",
+   "why": "predicted bad-candidate rate <= 15% from the seed",
+   "proposal": {
+    "max_safe_sigma0": 0.25
+   },
+   "evidence": {
+    "0.05": 0.0,
+    "0.10": 0.0,
+    "0.15": 0.0,
+    "0.20": 0.0,
+    "0.25": 0.020833333333333332
+   }
+  }
+ ]
+}

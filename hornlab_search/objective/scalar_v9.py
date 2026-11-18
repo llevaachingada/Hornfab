@@ -63,7 +63,7 @@ __all__ = ["objective_v9", "V9Params", "V9_WEIGHTED_KEYS", "V9_ALL_KEYS",
 V9_BASE_WEIGHTED_KEYS = ("cov_profile", "rip", "flat", "load", "dislope", "di_roughness")
 V9_WEIGHTED_KEYS = V9_BASE_WEIGHTED_KEYS + ("flat_cv",)
 #: ``hf_floor`` joins the weighted set only when the objective block declares it.
-V9_OPTIONAL_WEIGHTED_KEYS = ("hf_floor",)
+V9_OPTIONAL_WEIGHTED_KEYS = ("hf_floor", "constancy")
 #: Reported RAW and never normalised; owner-locked at weight 0.
 V9_UNWEIGHTED_KEYS = ("diag", "distd")
 V9_BOOKKEEPING_KEYS = ("penalty", "total", "n_nan", "n_in_band", "di_estimated")
@@ -82,7 +82,10 @@ _PROFILE_MODES = ("corridor", "target")
 _FLAT_BANDS = ("band", "scored")
 _HF_FLOOR_KEYS = {"hz", "h_deg", "v_deg", "weight", "tolerance"}
 _BLOCK_KEYS = {"version", "tolerances", "cov_narrow_ratio", "cov_below_f0", "cov_v_weight",
-               "flat_band", "loaded_re_z", "lfp_re_z", "lfp_crossover_ratio", "hf_floor"}
+               "flat_band", "loaded_re_z", "lfp_re_z", "lfp_crossover_ratio", "hf_floor",
+               "constancy", "score_grid"}
+_CONSTANCY_KEYS = {"mode", "weight", "tolerance", "slope_max_deg_per_decade"}
+_CONSTANCY_MODES = ("strict", "slope")
 _BW8K_REFUSAL = ("objective.bw8k_floor is invalid with v9; the coverage profile min_deg is "
                  "the narrow-side HF constraint")
 #: The C2 constant-velocity band's upper edge is v7's (reused through ``_flat_cv_term``).
@@ -102,12 +105,21 @@ class V9Params:
     lfp_re_z: float = 0.20
     lfp_crossover_ratio: float = 1.6
     hf_floor: dict | None = None
+    #: Stage 1 WP 1.1 (senior plan 2026-11-17): opt-in beamwidth-constancy term. ABSENT by
+    #: default (J and score identity unchanged). A brief DECLARES it; it is never selected
+    #: from a family name (owner lock, RFC amendment A).
+    constancy: dict | None = None
+    #: Stage 1 WP 1.2: ``{kind: dense_log, points: 58|116|232}`` scores on a uniform dense log
+    #: grid PCHIP-interpolated from the solved frequencies (A4/N3). Absent = solved grid.
+    score_grid: dict | None = None
 
     def weighted_keys(self) -> tuple[str, ...]:
         """The weighted key set for THIS block (``hf_floor`` only when declared)."""
         keys: list[str] = list(V9_WEIGHTED_KEYS)
         if self.hf_floor is not None:
             keys.append("hf_floor")
+        if self.constancy is not None:
+            keys.append("constancy")
         return tuple(keys)
 
     @classmethod
@@ -164,9 +176,16 @@ class V9Params:
         hf_floor = None
         if block.get("hf_floor") is not None:
             hf_floor = _validate_hf_floor(block["hf_floor"])
+        constancy = None
+        if block.get("constancy") is not None:
+            constancy = _validate_constancy(block["constancy"])
+        score_grid = None
+        if block.get("score_grid") is not None:
+            from ..metrics.dense_grid import validate_score_grid
+            score_grid = validate_score_grid(block["score_grid"])
         return cls(tolerances=clean, cov_narrow_ratio=float(ratio), cov_below_f0=str(below),
                    cov_v_weight=float(cov_v_weight), flat_band=str(flat_band),
-                   hf_floor=hf_floor, **constants)
+                   hf_floor=hf_floor, constancy=constancy, score_grid=score_grid, **constants)
 
     def to_block(self) -> dict:
         """The normalised mapping stored in the config; never emits ``bw8k_floor``."""
@@ -183,7 +202,44 @@ class V9Params:
         }
         if self.hf_floor is not None:
             out["hf_floor"] = dict(self.hf_floor)
+        if self.constancy is not None:
+            out["constancy"] = dict(self.constancy)
+        if self.score_grid is not None:
+            out["score_grid"] = dict(self.score_grid)
         return out
+
+
+def _validate_constancy(raw) -> dict:
+    """``constancy: {mode: strict|slope, weight, tolerance[, slope_max_deg_per_decade]}``."""
+    if not isinstance(raw, dict):
+        raise ValueError("objective.constancy must be a mapping")
+    unknown = set(raw) - _CONSTANCY_KEYS
+    if unknown:
+        raise ValueError(f"objective.constancy: unknown key(s) {sorted(unknown)} "
+                         f"(allowed: {sorted(_CONSTANCY_KEYS)})")
+    mode = raw.get("mode")
+    if mode not in _CONSTANCY_MODES:
+        raise ValueError(f"objective.constancy.mode must be one of {list(_CONSTANCY_MODES)}, got {mode!r}")
+    out: dict = {"mode": mode}
+    for key, lo_ok in (("weight", 0.0), ("tolerance", None)):
+        if key not in raw:
+            raise ValueError(f"objective.constancy.{key} is required")
+        v = raw[key]
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(float(v)) \
+                or (float(v) < 0.0 if lo_ok is not None else not float(v) > 0.0):
+            raise ValueError(f"objective.constancy.{key} must be a finite number "
+                             f"{'>= 0' if lo_ok is not None else '> 0'}, got {v!r}")
+        out[key] = float(v)
+    if mode == "slope":
+        v = raw.get("slope_max_deg_per_decade")
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(float(v)) \
+                or not float(v) > 0.0:
+            raise ValueError("objective.constancy.slope_max_deg_per_decade must be a finite "
+                             f"number > 0 for mode 'slope', got {v!r}")
+        out["slope_max_deg_per_decade"] = float(v)
+    elif "slope_max_deg_per_decade" in raw:
+        raise ValueError("objective.constancy.slope_max_deg_per_decade is only valid with mode 'slope'")
+    return out
 
 
 def _validate_hf_floor(raw) -> dict:
@@ -224,6 +280,9 @@ def resolve_v9_weights(weights: dict | None, params: V9Params | None = None) -> 
     hf = params.hf_floor if params is not None else None
     if hf is not None:
         out["hf_floor"] = float(hf["weight"])
+    cst = params.constancy if params is not None else None
+    if cst is not None:
+        out["constancy"] = float(cst["weight"])
     for k, v in (weights or {}).items():
         if k in ("diag", "distd"):
             try:
@@ -256,6 +315,9 @@ def worst_valid_v9_j(params: V9Params, weights: dict | None) -> float:
     hf = params.hf_floor
     if hf is not None:
         total += w["hf_floor"] * NAN_TERM_FILL / hf["tolerance"]
+    cst = params.constancy
+    if cst is not None:
+        total += w["constancy"] * NAN_TERM_FILL / cst["tolerance"]
     return float(total)
 
 
@@ -274,10 +336,27 @@ def _v9_penalty(value: float = PENALTY_FAILED, *, n_in_band: int = 0) -> tuple[f
 def objective_v9(metrics, resp, ok, target: Target, weights: dict | None, params: V9Params):
     """Score one evaluation under objective v9. ``(J, terms)``; ``terms`` has ``V9_ALL_KEYS``."""
     try:
+        if ok and params is not None and params.score_grid is not None:
+            metrics, resp = _on_score_grid(metrics, resp, target, params)
         return _objective_v9(metrics, resp, ok, target, weights, params)
     except Exception:  # noqa: BLE001 - the contract says never raises
         log.exception("objective_v9() failed; returning the failure penalty")
         return _v9_penalty(PENALTY_FAILED)
+
+
+def _on_score_grid(metrics, resp, target: Target, params: V9Params):
+    """WP 1.2: re-derive metrics on the declared dense grid with the production DI rule.
+    Scalars the dense recompute cannot know (mouth/throat geometry) are carried over."""
+    if resp is None:
+        raise ValueError("objective.score_grid needs the Response (not only metrics)")
+    from ..metrics.dense_grid import dense_response
+    from ..search.evaluate import metrics_from_response   # lazy: evaluate imports objective
+    dense = dense_response(resp, params.score_grid["points"], target.band_lo_hz, target.band_hi_hz)
+    m = metrics_from_response(dense, target)
+    keep = dict(getattr(metrics, "scalars", {}) or {}) if metrics is not None else {}
+    keep.update(m.scalars or {})
+    import dataclasses as _dc
+    return _dc.replace(m, scalars=keep), dense
 
 
 # ------------------------------------------------------------------ profile access
@@ -499,6 +578,48 @@ def _hf_floor_term(metrics, target: Target, f: np.ndarray, params: V9Params) -> 
     return float((dh ** 2 + dv ** 2) / 100.0)
 
 
+# ------------------------------------------------------------------ optional constancy
+
+def _plane_constancy_cost(metrics, target: Target, f: np.ndarray, band: np.ndarray,
+                          params: V9Params, plane: str) -> float:
+    """Mean squared deviation (deg^2 / 100) of the plane's beamwidth from a constant level
+    (``strict``) or a slope-limited line in log10 f (``slope``), over the scored band from the
+    plane's onset. The level (line centre) is clamped into the profile's [min, max] at the
+    band's geometric-centre frequency (target mode: unclamped). S1's strict cost
+    ``mean(d^2)/25`` equals this raw value with ``tolerance: 0.25``."""
+    cst = params.constancy
+    bw = np.asarray(metrics.bw_h_deg if plane == "h" else metrics.bw_v_deg, dtype=float)
+    m = band & (f >= _plane_onset(target, plane)) & np.isfinite(bw)
+    if int(m.sum()) < 2:
+        return NAN_TERM_FILL
+    a, x = bw[m], np.log10(f[m])
+    xc = float(x.mean())
+    lo = hi = None
+    if _profile_mode(target) == "corridor":
+        try:
+            _, lo, hi = _profile_at(_plane_anchors(target, plane), float(10.0 ** xc))
+        except Exception:  # noqa: BLE001
+            lo = hi = None
+    slope = 0.0
+    if cst["mode"] == "slope":
+        smax = float(cst["slope_max_deg_per_decade"])
+        slope = float(np.clip(np.polyfit(x, a, 1)[0], -smax, smax))
+    centre = float(np.mean(a - slope * (x - xc)))
+    if lo is not None and hi is not None:
+        centre = float(np.clip(centre, lo, hi))
+    pred = centre + slope * (x - xc)
+    return float(np.mean((a - pred) ** 2) / 100.0)
+
+
+def _constancy_term(metrics, target: Target, f: np.ndarray, band: np.ndarray,
+                    params: V9Params) -> float:
+    if params.constancy is None:
+        return 0.0
+    h = _plane_constancy_cost(metrics, target, f, band, params, "h")
+    v = _plane_constancy_cost(metrics, target, f, band, params, "v")
+    return float(h + params.cov_v_weight * v)
+
+
 # ------------------------------------------------------------------ the objective
 
 def _objective_v9(metrics, resp, ok, target: Target, weights, params: V9Params):
@@ -530,6 +651,7 @@ def _objective_v9(metrics, resp, ok, target: Target, weights, params: V9Params):
     t_raw["distd"] = float(np.std(good)) if good.size >= 2 else 0.0   # owner-locked raw
     t_raw["di_roughness"] = _di_roughness(metrics, f, score)
     t_raw["hf_floor"] = _hf_floor_term(metrics, target, f, params)
+    t_raw["constancy"] = _constancy_term(metrics, target, f, band, params)
     t_raw["diag"] = _diag_term(metrics, resp, target, f, score, params)  # raw, unweighted
 
     active: list[str] = list(V9_WEIGHTED_KEYS)
@@ -537,9 +659,13 @@ def _objective_v9(metrics, resp, ok, target: Target, weights, params: V9Params):
     hf_tol = float(hf["tolerance"]) if hf is not None else 1.0
     if hf is not None:
         active.append("hf_floor")
+    cst = params.constancy
+    if cst is not None:
+        active.append("constancy")
     t = {}
     for k in active:
-        tol = (hf_tol if k == "hf_floor" else params.tolerances[k])
+        tol = (hf_tol if k == "hf_floor" else float(cst["tolerance"]) if k == "constancy"
+               else params.tolerances[k])
         t[k] = t_raw[k] / tol
     if not all(math.isfinite(v) for v in t.values()):
         return _v9_penalty(PENALTY_FAILED, n_in_band=int(raw["n_in_band"]))
@@ -548,6 +674,8 @@ def _objective_v9(metrics, resp, ok, target: Target, weights, params: V9Params):
         return _v9_penalty(PENALTY_FAILED, n_in_band=int(raw["n_in_band"]))
     if hf is None:
         t["hf_floor"] = 0.0                          # static key, no contribution
+    if cst is None:
+        t["constancy"] = 0.0                         # static key, no contribution
     t["diag"] = float(t_raw["diag"])                 # raw, never normalised
     t["distd"] = float(t_raw["distd"])               # raw, never normalised
     t["penalty"] = 0.0

@@ -22,7 +22,14 @@ Every job runs STRICTLY SEQUENTIALLY within its lane:
 3. post-hygiene: ``gpu-clean`` again, then record peak/after VRAM, the run directory parsed from
    the log, the evaluation count read from that run's ``search.ndjson`` (never from ``--budget``),
    and the best J parsed from the search tool's final summary line (``None`` when absent);
-4. append one JSON line per job to ``runs/nights/<night>/summary.jsonl``;
+4. append one JSON line per job to ``runs/nights/<night>/summary.jsonl``. Besides the historical
+   keys, the row records what the job ITSELF did (C1, 2026-11-17): for a search job whose run dir
+   has a ``search.ndjson`` the row-count delta (``rows_before``/``rows_after``) and the rows,
+   valid rows and best J inside the job's own window; for a BO study arm
+   (``tools/night_queue/run_bo_arm.py``) its package progress (``bo_progress``: screen/verify
+   calls, observations, best J per kind). Every row also carries the child's last
+   ``LOG_TAIL_LINES`` output lines (``log_tail``) and a ``stop_reason`` class, with a one-line
+   stop reason + last output appended to ``note``;
 5. a failed or timed-out job is recorded and the runner moves on. A job whose log contains
    ``GPU busy`` (the GPU-lock holder error) is recorded as ``status: blocked`` — never ``ok`` — and
    retried exactly once after ``GPU_BUSY_RETRY_WAIT_S`` (2026-11-12: the 09:35 GPU-busy cascade
@@ -52,6 +59,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import json
+import math
 import os
 import queue
 import re
@@ -289,6 +297,9 @@ class Job:
     env: dict[str, str] = field(default_factory=dict)
     #: Resolved search watchdog (``None`` = off). See ``watchdog_verdict``.
     watchdog: tuple[tuple[str, float], ...] | None = None
+    #: WP 7.1 (senior plan 2026-11-17): the job's config is on the protected-lanes list, so the
+    #: watchdog may only ADVISE (log) and never stops it (ADR D10, senior review SD-6).
+    protected: bool = False
 
 
 @dataclass(frozen=True)
@@ -323,11 +334,25 @@ class JobResult:
     backend: str | None = None
     status: str = STATUS_FAILED
     attempts: int = 1
+    #: WP 0.7: per-kind row counts of the stopped run's search.ndjson (watchdog stops only).
+    outcome_counts: dict | None = None
+    #: C1 (2026-11-17): what THIS job did, not what the whole run dir holds.
+    #: Search rows in the job's own window (``rows_before`` captured before launch), their valid
+    #: count and best J; a BO arm's package progress; the child's last output lines; and the
+    #: stop-reason class. Only present keys are written, so old consumers see the old schema.
+    rows_before: int | None = None
+    rows_after: int | None = None
+    rows_window: int | None = None
+    valid_rows_window: int | None = None
+    best_J_window: float | None = None
+    log_tail: list[str] | None = None
+    stop_reason: str | None = None
+    bo_progress: dict | None = None
 
     def to_dict(self) -> dict:
         """The exact one-line ``summary.jsonl`` schema (existing key order is intentional; new
         keys are additive and appended)."""
-        return {
+        out = {
             "id": self.id,
             "start": self.start,
             "end": self.end,
@@ -344,6 +369,18 @@ class JobResult:
             "status": self.status,
             "attempts": self.attempts,
         }
+        if self.outcome_counts is not None:
+            out["outcome_counts"] = dict(self.outcome_counts)
+        for key in ("rows_before", "rows_after", "rows_window", "valid_rows_window",
+                    "best_J_window", "stop_reason"):
+            value = getattr(self, key)
+            if value is not None:
+                out[key] = value
+        if self.log_tail is not None:
+            out["log_tail"] = list(self.log_tail)
+        if self.bo_progress is not None:
+            out["bo_progress"] = dict(self.bo_progress)
+        return out
 
 
 # ------------------------------------------------------------------ pure helpers
@@ -642,7 +679,54 @@ def load_night(path: Path | str, *, repo_root: Path | str | None = None,
         else:
             wd = None
         watched.append(dataclasses.replace(job, watchdog=wd))
+    protected = load_protected_lanes(raw.get("protected_lanes"), path=path, repo_root=repo_root)
+    if protected:
+        watched = [dataclasses.replace(j, protected=True) if _job_lane(j) in protected else j
+                   for j in watched]
     return NightPlan(night=night, jobs=tuple(watched), path=path, lane=lane, **flags)
+
+
+#: Default protected-lanes file (WP 7.1). A night YAML may name another with
+#: ``protected_lanes: <path>`` or turn protection off with ``protected_lanes: false``.
+PROTECTED_LANES_DEFAULT = "examples/protected_lanes.yaml"
+
+
+def _job_lane(job: "Job") -> str | None:
+    """The lane name of a job: its config file stem (``hl__biradial_es_style_v7.yaml`` ->
+    ``hl__biradial_es_style_v7``)."""
+    return None if not job.config else Path(str(job.config)).stem
+
+
+def load_protected_lanes(value, *, path=None, repo_root=None) -> frozenset:
+    """The protected lane names. ``value``: None -> the default file if it exists; False ->
+    none; a string -> that file (missing = ValueError, a typo must not silently unprotect)."""
+    if value is False:
+        return frozenset()
+    root = _repo_path(repo_root)
+    if value is None:
+        f = root / PROTECTED_LANES_DEFAULT
+        if not f.is_file():
+            return frozenset()
+    elif isinstance(value, str):
+        f = Path(value)
+        if not f.is_absolute():
+            f = root / f
+        if not f.is_file():
+            raise ValueError(f"{path}: protected_lanes file {value!r} not found")
+    else:
+        raise ValueError(f"{path}: protected_lanes must be a path or false")
+    import yaml
+    data = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+    lanes = data.get("lanes") if isinstance(data, dict) else None
+    if not isinstance(lanes, list):
+        raise ValueError(f"{f}: protected lanes file needs a 'lanes' list")
+    names = []
+    for item in lanes:
+        name = item.get("lane") if isinstance(item, dict) else item
+        if not isinstance(name, str) or not name:
+            raise ValueError(f"{f}: every lanes entry needs a lane name")
+        names.append(name)
+    return frozenset(names)
 
 
 # ------------------------------------------------------------------ admission gate
@@ -776,6 +860,31 @@ def parse_best_j(log_text: str) -> float | None:
         return None
 
 
+#: Row ``kind`` -> reported outcome class (WP 0.7); anything else non-ok is ``other``.
+OUTCOME_KINDS = ("ok", "invalid_geometry", "invalid_envelope", "mesh_too_large", "solve_failed", "other")
+
+
+def summarize_ndjson(rows: list[dict]) -> tuple[float | None, dict]:
+    """``(best_J, outcome_counts)`` from search rows: best_J is the lowest finite objective among
+    ``ok`` rows (``None`` if there is none); counts are reported separately per outcome kind."""
+    import math
+    counts = {k: 0 for k in OUTCOME_KINDS}
+    best: float | None = None
+    for r in rows:
+        if not isinstance(r, dict):
+            continue
+        if r.get("ok"):
+            counts["ok"] += 1
+            obj = r.get("objective")
+            if isinstance(obj, (int, float)) and not isinstance(obj, bool) and math.isfinite(obj):
+                if best is None or obj < best:
+                    best = float(obj)
+            continue
+        kind = str(r.get("kind") or str(r.get("error") or "").split(":", 1)[0]).strip()
+        counts[kind if kind in OUTCOME_KINDS and kind != "ok" else "other"] += 1
+    return best, counts
+
+
 def count_evals(ndjson_path: Path | str) -> int:
     """Count evaluation rows in ``search.ndjson`` (non-empty lines). 0 when absent."""
     try:
@@ -783,6 +892,251 @@ def count_evals(ndjson_path: Path | str) -> int:
     except OSError:
         return 0
     return sum(1 for line in text.splitlines() if line.strip())
+
+
+#: How many of the child's own last output lines are kept in the summary row (C1, 2026-11-17).
+LOG_TAIL_LINES = 15
+#: Longest kept tail line: a BO prep can print a ~140 KB package JSON on one line, and the tail
+#: must stay a short, readable summary row, not a copy of the child's whole stdout.
+TAIL_LINE_MAX_CHARS = 400
+#: Runner/tee lines that are NOT the child's own output: dropped from a derived log tail.
+_RUNNER_LOG_PREFIXES = (
+    "=== ", "gpu-clean", "gpu lock clear", "VRAM ", "cpu lane:", "STALE LOCK TAKEN OVER",
+)
+
+#: Stop-reason classes recorded in the summary row (C1). ``exit_nonzero_no_cause`` is the honest
+#: label for the 2026-11-17 class of exit-1 jobs whose log ends without a traceback or error line.
+STOP_OK = "ok"
+STOP_TIMEOUT = "timeout"
+STOP_WATCHDOG = "watchdog"
+STOP_BLOCKED = "blocked_gpu_busy"
+STOP_LAUNCH_FAILED = "launch_failed"
+STOP_HYGIENE_FAILED = "pre_hygiene_failed"
+STOP_TRACEBACK = "crash_traceback"
+STOP_ERROR_LINE = "error_message"
+STOP_UNEXPLAINED = "exit_nonzero_no_cause"
+
+_ERROR_LINE_MARKERS = ("Error:", "error:", "FAILED", "refused:", "Exception", "RuntimeError")
+
+
+def _tail_line(line: str) -> str:
+    """One tail line, stripped of the newline and capped at ``TAIL_LINE_MAX_CHARS``."""
+    text = line.rstrip("\r\n")
+    return text if len(text) <= TAIL_LINE_MAX_CHARS else text[:TAIL_LINE_MAX_CHARS] + "..."
+
+
+def tail_from_log(text: str, n: int = LOG_TAIL_LINES) -> list[str]:
+    """The child's last ``n`` non-empty output lines, with the runner's own tee lines removed."""
+    lines = [_tail_line(line) for line in (text or "").splitlines() if line.strip()]
+    child = [line for line in lines if not line.startswith(_RUNNER_LOG_PREFIXES)]
+    return child[-int(n):] if n and n > 0 else []
+
+
+def classify_stop_reason(exit_code: int, timed_out: bool, status: str,
+                         tail: list[str] | None = None) -> str:
+    """Why a job stopped (C1): a small, stable class recorded next to the log tail."""
+    text = "\n".join(tail or ())
+    if status == STATUS_WATCHDOG:
+        return STOP_WATCHDOG
+    if timed_out:
+        return STOP_TIMEOUT
+    if status == STATUS_BLOCKED:
+        return STOP_BLOCKED
+    if int(exit_code) == 0:
+        return STOP_OK
+    if "LAUNCH FAILED" in text:
+        return STOP_LAUNCH_FAILED
+    if "Traceback (most recent call last)" in text:
+        return STOP_TRACEBACK
+    if any(marker in text for marker in _ERROR_LINE_MARKERS):
+        return STOP_ERROR_LINE
+    return STOP_UNEXPLAINED
+
+
+def argv_path_value(argv, name: str) -> str | None:
+    """Value of ``--name value`` / ``--name=value`` in an argv, else ``None``."""
+    tokens = [str(token) for token in argv]
+    for index, token in enumerate(tokens):
+        if token == name and index + 1 < len(tokens):
+            return tokens[index + 1]
+        if token.startswith(name + "="):
+            return token.split("=", 1)[1]
+    return None
+
+
+def _repo_join(value, repo_root: Path | str | None = None) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else _repo_path(repo_root) / path
+
+
+def run_dir_from_argv(argv, repo_root: Path | str | None = None) -> Path | None:
+    """The run dir named by ``--resume``/``--run`` in a job's argv (the resumed job's own dir)."""
+    for flag in ("--resume", "--run"):
+        value = argv_path_value(argv, flag)
+        if value:
+            return _repo_join(value, repo_root)
+    return None
+
+
+#: The BO arm wrapper script; a job whose argv runs it reports package progress, not evals.
+BO_ARM_SCRIPT = "run_bo_arm.py"
+
+
+def bo_root_from_argv(argv, repo_root: Path | str | None = None) -> Path | None:
+    """The study root a BO arm (``tools/night_queue/run_bo_arm.py --root <dir>``) writes to."""
+    if not any(Path(str(token)).name == BO_ARM_SCRIPT for token in argv):
+        return None
+    value = argv_path_value(argv, "--root")
+    return None if not value else _repo_join(value, repo_root)
+
+
+def parse_argv_from_log(text: str) -> tuple[str, ...]:
+    """The ``=== argv: ...`` line the runner writes before launching a job (empty if absent)."""
+    marker = "=== argv: "
+    for line in (text or "").splitlines():
+        index = line.find(marker)
+        if index >= 0:
+            return tuple(line[index + len(marker):].split())
+    return ()
+
+
+def parse_created_epoch(value) -> float | None:
+    """Epoch seconds from a row's ``created_utc`` (ISO-8601 ``Z`` form), else ``None``."""
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return None
+
+
+def rows_in_window(rows: list[dict], start, end) -> list[dict]:
+    """Rows whose ``created_utc`` lies inside ``[start, end]`` (both ISO strings)."""
+    start_epoch = parse_created_epoch(start)
+    end_epoch = parse_created_epoch(end)
+    if start_epoch is None or end_epoch is None:
+        return []
+    out: list[dict] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        stamp = parse_created_epoch(row.get("created_utc"))
+        if stamp is not None and start_epoch <= stamp <= end_epoch:
+            out.append(row)
+    return out
+
+
+def window_summary(rows: list[dict]) -> dict:
+    """``{"rows", "valid", "best_J"}`` for one job's own slice of a run's ``search.ndjson``."""
+    valid = [r for r in rows if isinstance(r, dict) and r.get("ok")]
+    best: float | None = None
+    for row in valid:
+        obj = row.get("objective")
+        if isinstance(obj, (int, float)) and not isinstance(obj, bool) and math.isfinite(float(obj)):
+            value = float(obj)
+            if best is None or value < best:
+                best = value
+    return {"rows": len(rows), "valid": len(valid), "best_J": best}
+
+
+def job_window_rows(rows: list[dict], rows_before: int, start: str, end: str) -> list[dict]:
+    """The rows one job wrote: the slice after ``rows_before`` when the run dir grew, else the
+    rows whose ``created_utc`` lies inside the job's recorded ``[start, end]`` window."""
+    before = max(0, int(rows_before or 0))
+    if before and len(rows) >= before:
+        return rows[before:]
+    if not before:
+        return list(rows)
+    return rows_in_window(rows, start, end)
+
+
+def read_bo_progress(root: Path | str) -> dict | None:
+    """A BO study root's package progress, read-only from its journal (C1).
+
+    Counts the calls the journal actually resolved (``call_status == "called"``), the observation
+    rows, and the best observed J per kind. Any problem returns ``None`` so callers can fall back
+    to the study CLI's printed progress JSON; reporting must never fail a night.
+    """
+    root = Path(root)
+    package: dict = {}
+    try:
+        loaded = json.loads((root / "package.json").read_text(encoding="utf-8"))
+        if isinstance(loaded, dict):
+            package = loaded
+    except (OSError, ValueError):
+        pass
+    db = root / "studies.sqlite3"
+    if not db.is_file():
+        return None
+    try:
+        import sqlite3
+        conn = sqlite3.connect(f"file:{db.as_posix()}?mode=ro", uri=True, timeout=5.0)
+        try:
+            attempts = conn.execute("SELECT kind, result_json FROM attempts").fetchall()
+            observations = int(conn.execute("SELECT COUNT(*) FROM observations").fetchone()[0])
+            statuses = [str(row[0]) for row in conn.execute("SELECT status FROM packages").fetchall()]
+        finally:
+            conn.close()
+    except Exception:  # noqa: BLE001 - reporting only; never fail a night over progress
+        return None
+    calls = {"screen_calls": 0, "verify_calls": 0}
+    best: dict[str, float | None] = {"screen": None, "verify": None}
+    for kind, result_json in attempts:
+        if not result_json:
+            continue
+        try:
+            result = json.loads(result_json)
+        except (TypeError, ValueError):
+            continue
+        if not isinstance(result, dict):
+            continue
+        called = result.get("call_status") == "called"
+        if called:
+            calls["screen_calls" if kind == "screen" else "verify_calls"] += 1
+        score = result.get("observed_j")
+        bucket = "screen" if kind == "screen" else "verify"
+        # Only a call the backend actually made may contribute a J (a not-called/refused
+        # attempt can still carry a predicted or cached number; it is not a measurement).
+        if (called and isinstance(score, (int, float)) and not isinstance(score, bool)
+                and math.isfinite(float(score))):
+            value = float(score)
+            current = best[bucket]
+            if current is None or value < current:
+                best[bucket] = value
+    raw_budget = package.get("budget")
+    budget: dict = raw_budget if isinstance(raw_budget, dict) else {}
+    return {
+        "root": str(root),
+        "source": "studies.sqlite3",
+        "screen_calls": calls["screen_calls"],
+        "verify_calls": calls["verify_calls"],
+        "total_calls": calls["screen_calls"] + calls["verify_calls"],
+        "attempts": len(attempts),
+        "observations": observations,
+        "best_screen_J": best["screen"],
+        "best_verify_J": best["verify"],
+        "package_status": statuses[-1] if statuses else None,
+        "budget": {key: budget[key] for key in
+                   ("screen_calls", "verify_calls", "total_calls", "attempts") if key in budget},
+    }
+
+
+def bo_progress_from_log(text: str) -> dict | None:
+    """The study CLI's last printed progress JSON line (fallback when the journal is unreadable)."""
+    for line in reversed((text or "").splitlines()):
+        line = line.strip()
+        if not line.startswith("{") or '"progress"' not in line:
+            continue
+        try:
+            payload = json.loads(line)
+        except ValueError:
+            continue
+        progress = payload.get("progress") if isinstance(payload, dict) else None
+        if isinstance(progress, dict):
+            out: dict = {"root": None, "source": "log", **progress}
+            out["package_status"] = payload.get("status")
+            return out
+    return None
 
 
 def _read_text(path: Path) -> str:
@@ -892,6 +1246,8 @@ class NightRunner:
         self.last_peak_mb: float | None = None
         self._last_baseline_mb: float | None = None
         self.watchdog_poll_s = WATCHDOG_POLL_S
+        #: The last job's own stdout/stderr tail (the child's lines, not the runner's tee lines).
+        self.last_child_tail: list[str] = []
 
     # -- hygiene -------------------------------------------------------
 
@@ -967,6 +1323,7 @@ class NightRunner:
         """Launch one job, tee its output, enforce the timeout. Returns (exit_code, timed_out)."""
         log_path = Path(log_path)
         self.last_peak_mb = self._last_baseline_mb
+        self.last_child_tail = []
         peak = {"value": self._last_baseline_mb}
         stop = threading.Event()
 
@@ -996,6 +1353,7 @@ class NightRunner:
             if poll_thread is not None:
                 poll_thread.join(timeout=5)
             self.last_peak_mb = peak["value"]
+            self.last_child_tail = [f"LAUNCH FAILED: {exc}"]
             _append(log_path, f"LAUNCH FAILED: {exc}\n")
             return 127, False
 
@@ -1035,9 +1393,14 @@ class NightRunner:
                 wd_base = len(_read_ndjson(cand / "search.ndjson"))   # judge only this job's new rows
 
         with open(log_path, "a", encoding="utf-8", errors="replace") as log:
+            child_tail: list[str] = []
+
             def emit(line: str) -> None:
                 log.write(line)
                 log.flush()
+                if line.strip():
+                    child_tail.append(_tail_line(line))
+                    del child_tail[:-LOG_TAIL_LINES]
                 try:
                     sys.stdout.write(line)
                     sys.stdout.flush()
@@ -1074,6 +1437,12 @@ class NightRunner:
                         wd_run = _find_new_run_dir(self.runs_root, wd_start)
                     if wd_run is not None:
                         wd_reason = watchdog_verdict(_read_ndjson(wd_run / "search.ndjson")[wd_base:], wd_cfg, _run_bounds(wd_run))
+                    if wd_reason and getattr(job, "protected", False):
+                        log.write(f"\n=== WATCHDOG ADVISORY (protected lane) {wd_reason}; "
+                                  f"NOT stopping job {job.id}; the owner decides\n")
+                        log.flush()
+                        wd_cfg = None                  # advise once; never kill a protected lane
+                        wd_reason = None
                     if wd_reason:
                         log.write(f"\n=== WATCHDOG {wd_reason}; stopping job {job.id} (pid {proc.pid})\n"
                                   f"search ABORTED: watchdog (partial results in {wd_run})\n")
@@ -1109,6 +1478,7 @@ class NightRunner:
         if poll_thread is not None:
             poll_thread.join(timeout=5)
         self.last_peak_mb = peak["value"]
+        self.last_child_tail = list(child_tail)
         if timed_out:
             _append(log_path, f"=== job {job.id} timed out\n")
             return 124, True
@@ -1137,6 +1507,11 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
     timed_out = False
     note_parts: list[str] = []
     ran = False
+    # C1 (2026-11-17): count the rows a resumed job starts with BEFORE it launches, so the summary
+    # can report the work THIS job did instead of the whole run dir (a --resume job was reported
+    # as "0 evals" on 2026-11-17 while it really added 182 rows).
+    resume_dir = run_dir_from_argv(job.argv, repo_root=repo_root) if job.kind == "search" else None
+    rows_before = count_evals(resume_dir / "search.ndjson") if resume_dir is not None else 0
 
     try:
         pre = runner.pre_hygiene(job, log_path) or {}
@@ -1165,6 +1540,10 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
     run_dir: Path | None = None
     evals = 0
     best_j: float | None = None
+    outcome_counts: dict | None = None
+    rows_after: int | None = None
+    window: dict | None = None
+    bo_progress: dict | None = None
     status = classify_status(exit_code, timed_out, log_text)
 
     if timed_out:
@@ -1180,6 +1559,10 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
     # parsing them prevents the summary from showing evals=0/run_dir=null for command jobs.
     if job.kind in ("search", "command"):
         run_dir = parse_run_dir(log_text, repo_root=repo_root)
+        if run_dir is None and resume_dir is not None:
+            # A resumed job whose log carries no final summary line still names its run dir in
+            # its own argv; without this the row says run_dir=null and evals=0 (2026-11-17).
+            run_dir = resume_dir
         if run_dir is None:
             if job.kind == "search":
                 note_parts.append("run dir not parsed from log")
@@ -1187,13 +1570,57 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
             ndjson = run_dir / "search.ndjson"
             if ndjson.is_file():
                 evals = count_evals(ndjson)
+                rows_after = int(evals)
+                window = window_summary(
+                    job_window_rows(_read_ndjson(ndjson), rows_before, start, end))
             elif job.kind == "search":
                 note_parts.append("search.ndjson missing")
         best_j = parse_best_j(log_text)
+        if status == STATUS_WATCHDOG and run_dir is not None:
+            # WP 0.7: a watchdog stop prints no final summary; recompute from the run's own rows.
+            wd_best, outcome_counts = summarize_ndjson(_read_ndjson(run_dir / "search.ndjson"))
+            if best_j is None:
+                best_j = wd_best
+            note_parts.append("outcomes " + " ".join(f"{k}={v}" for k, v in outcome_counts.items()))
         if best_j is None and job.kind == "search":
             note_parts.append("best J not in log")
+        if best_j is None and window is not None:
+            # No final summary line (crash/exit 1): the run's own rows are the measured answer.
+            best_j = window["best_J"]
+
+    # BO study arm (tools/night_queue/run_bo_arm.py --root <study root>): its work lives in the
+    # study root's package journal, not in a search.ndjson. Record calls, observations and J.
+    bo_root = bo_root_from_argv(job.argv, repo_root=repo_root)
+    if bo_root is not None:
+        bo_progress = read_bo_progress(bo_root) or bo_progress_from_log(log_text)
+        if bo_progress is None:
+            note_parts.append("BO package progress not recorded")
+        else:
+            evals = int(bo_progress.get("total_calls") or 0)
+            best_j = bo_progress.get("best_verify_J")
+            if best_j is None:
+                best_j = bo_progress.get("best_screen_J")
+            run_dir = None                       # the study root is not a search run dir
+            note_parts.append(
+                f"BO screen {bo_progress.get('screen_calls')} "
+                f"verify {bo_progress.get('verify_calls')} "
+                f"observations {bo_progress.get('observations')}")
+
     if peak is not None:
         note_parts.append(f"peak {peak:g} MiB")
+
+    # C1: the child's own last lines and a honest stop-reason class, in the note field (the full
+    # ~15-line tail is kept in the additive ``log_tail`` key so the note stays one line).
+    runner_tail = getattr(runner, "last_child_tail", None)
+    tail = [str(line) for line in (runner_tail or tail_from_log(log_text))]
+    tail = tail[-LOG_TAIL_LINES:]
+    if not ran:
+        stop_reason = STOP_HYGIENE_FAILED
+    else:
+        stop_reason = classify_stop_reason(exit_code, timed_out, status, tail)
+    note_parts.append(f"stop reason: {stop_reason}")
+    if tail:
+        note_parts.append(f"last output: {tail[-1][:180]}")
 
     return JobResult(
         id=job.id,
@@ -1212,6 +1639,15 @@ def _run_one(plan: NightPlan, job: Job, *, night_dir: Path, runner, repo_root: P
         backend=backend_of(job),
         status=status,
         attempts=int(attempts),
+        outcome_counts=outcome_counts,
+        rows_before=int(rows_before) if window is not None else None,
+        rows_after=rows_after,
+        rows_window=None if window is None else int(window["rows"]),
+        valid_rows_window=None if window is None else int(window["valid"]),
+        best_J_window=None if window is None else window["best_J"],
+        log_tail=tail,
+        stop_reason=stop_reason,
+        bo_progress=bo_progress,
     )
 
 
@@ -1286,6 +1722,32 @@ def _write_queue_state(night_dir: Path, plan: NightPlan, done: list[str], runnin
     os.replace(tmp, night_dir / "queue_state.json")
 
 
+def _load_done(night_dir: Path, plan: NightPlan, queue_log: Path | None = None) -> list[str]:
+    """WP 0.6: job ids a previous runner of this night already finished (``queue_state.json``).
+
+    Absent file -> ``[]`` silently. Unreadable/malformed or another night's file -> ``[]`` with a
+    warning, i.e. the historical behaviour.
+    """
+    path = night_dir / "queue_state.json"
+    if not path.is_file():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        ids = data.get("done")
+        if not isinstance(ids, list) or not all(isinstance(i, str) for i in ids):
+            raise ValueError("'done' is not a list of job ids")
+        if data.get("night") not in (None, plan.night):
+            raise ValueError(f"state is for night {data.get('night')!r}, not {plan.night!r}")
+    except Exception as exc:  # noqa: BLE001 - a bad state file must not stop the night
+        msg = f"queue_state.json unreadable ({type(exc).__name__}: {exc}); starting with no jobs done"
+        print(f"WARNING: {msg}", file=sys.stderr)
+        if queue_log is not None:
+            with contextlib.suppress(Exception):
+                write_queue_line(queue_log, f"WARN {msg}")
+        return []
+    return list(dict.fromkeys(ids))
+
+
 def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None,
               repo_root: Path | str | None = None,
               runs_root: Path | str | None = None,
@@ -1349,7 +1811,9 @@ def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None
     poll = float(CONTROL_POLL_S if control_poll_s is None else control_poll_s)
     allowed = set(admission.get("allowed_job_ids") or ()) if admission else None
     current = plan
-    done: list[str] = []
+    done: list[str] = [] if only is not None else _load_done(night_dir, plan, queue_log)
+    if done:
+        write_queue_line(queue_log, f"RESUME: {len(done)} job(s) already done, not re-run: {', '.join(done)}")
     skipped: set[str] = set()
     reload_error: list = []
 

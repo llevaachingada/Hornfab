@@ -1,0 +1,19 @@
+batch 1: 17 configs
+OK hl__es_style_rollback_v7 42s
+OK hl__lecleach_iwata_ar_landscape_v7 39s
+FAIL rr__pucker_hv_moderate_v7 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rolled_rect_pucker' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+FAIL hl__crowe_panel_home_v7 GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_asym', 'osse_rollback'])
+OK rf__section_axial_home_smooth_v8 142s
+OK hl__ath_tritonia_landscape_v7 647s
+OK hl__ath_twinray380_landscape_v8 166s
+OK hl__osse_rrect_fold_warm_v7 341s
+OK a0 265s
+OK b3_soft 30s
+OK atlas__core_law 7166s
+OK 20261114T015916Z-screen-db8e2f 1202s
+FAIL lecleach_ctrl_w1 ConfigError: lecleach_ctrl_w1.yaml: brief_file '../../briefs/lecleach_rollback_1in_v6.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\lecleach_ctrl) and repo root. Use an absolute path or a path relative to the config file.
+FAIL ath_tritonia_landscape_v9_w1 ConfigError: ath_tritonia_landscape_v9_w1.yaml: brief_file '../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\ath_tritonia_landscape_v9) and repo root. Use an absolute path or a path relative to the config file.
+FAIL klangfilm_lame_curved_v1_w1 ConfigError: klangfilm_lame_curved_v1_w1.yaml: brief_file '../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\klangfilm_lame_curved_v1) and repo root. Use an absolute path or a path relative to the config file.
+FAIL rosse_rect_cd_v7_r120_w1 ConfigError: rosse_rect_cd_v7_r120_w1.yaml: brief_file '../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_rosse_rect_v7.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\rosse_rect_cd_v7_r120) and repo root. Use an absolute path or a path relative to the config file.
+FAIL control_v7_w1 ConfigError: control_v7_w1.yaml: brief_file '../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml' could not be found; tried relative to config dir (C:\Users\hunte\Hrns\hornlab-search\examples\typologies\walls_relieved\control_v7) and repo root. Use an absolute path or a path relative to the config file.
+batch done

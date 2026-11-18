@@ -2803,8 +2803,8 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
 def rows_grid_points(spec: dict, knobs: dict, brief: dict,
                      prefix: str = "g") -> tuple[np.ndarray, dict]:
     """Public rows-route entry used by ``mesh/build.py`` and ``design_params``."""
-    from . import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv
-    for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv):
+    from . import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, record_body
+    for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, record_body):
         if family.is_family_spec(spec):
             if prefix != 'g':
                 raise registry.GeneratorError('versioned family knobs require the g prefix')
@@ -2890,8 +2890,8 @@ def design_params(spec: dict, knobs: dict, brief: dict) -> dict:
     The knob prefix is always ``"g"`` (the wire-in contract); knobs equal to the GRID defaults are
     canonicalised away so an explicit zero and an absent zero hash identically.
     """
-    from . import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv
-    for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv):
+    from . import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, record_body
+    for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, record_body):
         if family.is_family_spec(spec):
             return family.design_params(spec, knobs, brief)
     knob_map = _knob_map(knobs)
@@ -2933,8 +2933,8 @@ def validate_grid_params(block: dict) -> None:
     Same structural ranges as :func:`grid_points`; meridian/brief-dependent legality was already
     enforced when the design was materialised. Raises ``registry.GeneratorError``.
     """
-    from . import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv
-    for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv):
+    from . import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, record_body
+    for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, record_body):
         if family.is_family_spec(block):
             family.validate_grid_params(block)
             return
@@ -2994,8 +2994,8 @@ def envelope_extents(spec: dict, knobs: dict, brief: dict) -> tuple[float, float
     radial envelope of the modulated section is taken as ``max_phi r(1, phi)`` for both width and
     height (conservative; mirrors ``registry.envelope_overshoot_estimate``'s max-radius rule).
     """
-    from . import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv
-    for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv):
+    from . import rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, record_body
+    for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, record_body):
         if family.is_family_spec(spec):
             block = family.design_params(spec, knobs, brief)['grid'] if 'implementation_sha256' not in spec['rows'] else {**spec, 'knobs': knobs}
             meta = family.resolve_grid(block, brief)['meta']
@@ -3016,5 +3016,12 @@ def envelope_extents(spec: dict, knobs: dict, brief: dict) -> tuple[float, float
     radius = _radius_field(np.array([r_h]), np.array([r_v]), phi, p, a_throat, a_mouth,
                            np.array([1.0]))
     wt = float(spec.get("wall_thickness_mm", 3.0))
-    outer_radius = float(np.max(radius)) + wt
-    return 2.0 * outer_radius, 2.0 * outer_radius, float(L) + wt
+    # Stage 0 WP 0.5 (2026-11-17): per plane, not max-radius on both axes. The old rule
+    # returned 2(max_phi r + t) for BOTH width and height, so an asymmetric section's smaller
+    # axis was over-reported and refused pre-mesh although the mesh fit (T4: 3/3 pre-mesh
+    # refusals of grid_ellipse_mod were post-mesh admitted). The shell offset adds at most t in
+    # any in-plane direction, so max(r cos phi) + t and max(r sin phi) + t stay conservative.
+    r_phi = np.asarray(radius, dtype=float).reshape(-1)
+    half_w = float(np.max(r_phi * np.cos(phi))) + wt
+    half_h = float(np.max(r_phi * np.sin(phi))) + wt
+    return 2.0 * half_w, 2.0 * half_h, float(L) + wt

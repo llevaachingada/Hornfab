@@ -1,0 +1,349 @@
+batch 2: 9 cards
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\20261114T223630Z-screen-86e077\\config__space_v1.yaml",
+ "notes": [
+  "g_T.lo 0.3 -> 0.44"
+ ],
+ "before": {
+  "searched": 3,
+  "box": {
+   "ok": 77,
+   "outside": 0,
+   "refused": 19
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0625,
+   "0.20": 0.10416666666666667,
+   "0.25": 0.125
+  }
+ },
+ "after": {
+  "searched": 3,
+  "box": {
+   "ok": 29,
+   "outside": 0,
+   "refused": 3
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.08333333333333333,
+   "0.25": 0.125
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK 20261114T223630Z-screen-86e077 92s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\a1_h_only_single_axis\\a1_h_only_single_axis__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 0,
+  "box": {
+   "ok": 0,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  }
+ },
+ "after": {
+  "searched": 0,
+  "box": {
+   "ok": 0,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK a1_h_only_single_axis 138s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\atlas__core_law\\atlas__core_law__space_v1.yaml",
+ "notes": [
+  "sigma0 0.25 -> 0.05",
+  "REVIEW joint envelope constraint (not expressible in config): envelope binds jointly; linear margin model R^2 0.78, sign right 83%, only 44% of the box inside"
+ ],
+ "before": {
+  "searched": 17,
+  "box": {
+   "ok": 32,
+   "outside": 42,
+   "refused": 22
+  },
+  "sigma": {
+   "0.05": 0.08333333333333333,
+   "0.10": 0.2916666666666667,
+   "0.15": 0.25,
+   "0.20": 0.5208333333333334,
+   "0.25": 0.5833333333333334
+  }
+ },
+ "after": {
+  "searched": 17,
+  "box": {
+   "ok": 10,
+   "outside": 15,
+   "refused": 7
+  },
+  "sigma": {
+   "0.05": 0.08333333333333333,
+   "0.10": 0.3333333333333333,
+   "0.15": 0.375,
+   "0.20": 0.4583333333333333,
+   "0.25": 0.5
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK atlas__core_law 497s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__ath_tritonia_landscape_v7\\hl__ath_tritonia_landscape_v7__space_v1.yaml",
+ "notes": [
+  "fixed morph_exponent at its seed (moves no surface point at any sampled point)",
+  "sigma0 0.2 -> 0.05"
+ ],
+ "before": {
+  "searched": 22,
+  "box": {
+   "ok": 78,
+   "outside": 13,
+   "refused": 5
+  },
+  "sigma": {
+   "0.05": 0.14583333333333334,
+   "0.10": 0.3958333333333333,
+   "0.15": 0.6041666666666666,
+   "0.20": 0.5,
+   "0.25": 0.7708333333333334
+  }
+ },
+ "after": {
+  "searched": 21,
+  "box": {
+   "ok": 26,
+   "outside": 4,
+   "refused": 2
+  },
+  "sigma": {
+   "0.05": 0.20833333333333334,
+   "0.10": 0.375,
+   "0.15": 0.5416666666666666,
+   "0.20": 0.5416666666666666,
+   "0.25": 0.875
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK hl__ath_tritonia_landscape_v7 183s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__ath_twinray380_landscape_v8\\hl__ath_twinray380_landscape_v8__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 13,
+  "box": {
+   "ok": 89,
+   "outside": 7,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.08333333333333333,
+   "0.25": 0.020833333333333332
+  }
+ },
+ "after": {
+  "searched": 13,
+  "box": {
+   "ok": 30,
+   "outside": 2,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.041666666666666664,
+   "0.20": 0.0,
+   "0.25": 0.041666666666666664
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK hl__ath_twinray380_landscape_v8 39s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__crowe_x_osse_cd_v7\\hl__crowe_x_osse_cd_v7__space_v1.yaml",
+ "notes": [
+  "g_L_mm.hi 285.0 -> 268.0",
+  "g_s.hi 0.45 -> 0.4",
+  "REVIEW sigma0: no tested value kept the predicted bad rate <= 15 %"
+ ],
+ "before": {
+  "searched": 9,
+  "box": {
+   "ok": 73,
+   "outside": 0,
+   "refused": 23
+  },
+  "sigma": {
+   "0.05": 0.5,
+   "0.10": 0.4791666666666667,
+   "0.15": 0.4375,
+   "0.20": 0.5208333333333334,
+   "0.25": 0.5208333333333334
+  }
+ },
+ "after": {
+  "searched": 9,
+  "box": {
+   "ok": 30,
+   "outside": 0,
+   "refused": 2
+  },
+  "sigma": {
+   "0.05": 0.4583333333333333,
+   "0.10": 0.4166666666666667,
+   "0.15": 0.2916666666666667,
+   "0.20": 0.4583333333333333,
+   "0.25": 0.4166666666666667
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK hl__crowe_x_osse_cd_v7 102s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__ext_throat_hvlaw_v7\\hl__ext_throat_hvlaw_v7__space_v1.yaml",
+ "notes": [
+  "sigma0 0.2 -> 0.1",
+  "REVIEW joint envelope constraint (not expressible in config): envelope binds jointly; linear margin model R^2 0.91, sign right 91%, only 43% of the box inside"
+ ],
+ "before": {
+  "searched": 8,
+  "box": {
+   "ok": 27,
+   "outside": 37,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0625,
+   "0.15": 0.34375,
+   "0.20": 0.375,
+   "0.25": 0.34375
+  }
+ },
+ "after": {
+  "searched": 8,
+  "box": {
+   "ok": 14,
+   "outside": 18,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.08333333333333333,
+   "0.15": 0.125,
+   "0.20": 0.5416666666666666,
+   "0.25": 0.375
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK hl__ext_throat_hvlaw_v7 14s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__lecleach_iwata_ar_landscape_smooth_v7\\hl__lecleach_iwata_ar_landscape_smooth_v7__space_v1.yaml",
+ "notes": [
+  "g_fc_hz.lo 300.0 -> 420.0",
+  "g_stop_deg.lo 60.0 -> 88.0",
+  "sigma0 0.2 -> 0.1"
+ ],
+ "before": {
+  "searched": 5,
+  "box": {
+   "ok": 63,
+   "outside": 0,
+   "refused": 33
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.020833333333333332,
+   "0.15": 0.20833333333333334,
+   "0.20": 0.3125,
+   "0.25": 0.4166666666666667
+  }
+ },
+ "after": {
+  "searched": 5,
+  "box": {
+   "ok": 32,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.08333333333333333,
+   "0.25": 0.375
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK hl__lecleach_iwata_ar_landscape_smooth_v7 12s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\osse_rrect_fold_warm_v7_w1\\osse_rrect_fold_warm_v7_w1__space_v1.yaml",
+ "notes": [
+  "REVIEW a0_deg: whole range moves the surface <= 0.42 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise (not fixed; pass --fix-weak or widen by hand)",
+  "linked n = -3.966338 * s + 9.751498",
+  "linked k = -0.093956 * a_deg + 6.22487"
+ ],
+ "before": {
+  "searched": 18,
+  "box": {
+   "ok": 96,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  }
+ },
+ "after": {
+  "searched": 16,
+  "box": {
+   "ok": 32,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK osse_rrect_fold_warm_v7_w1 46s
+batch done

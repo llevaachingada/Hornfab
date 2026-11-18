@@ -45,6 +45,7 @@ from . import rundir
 from . import links as links_mod
 from . import warmstart
 from . import outcomes
+from . import evaluate as evaluate_mod
 from .pipeline import CandidatePipeline
 from .evaluate import (DETERMINISTIC_KINDS, collect_lib_shas, error_kind, evaluate, make_context,
                        read_ndjson)
@@ -509,6 +510,13 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                                      command, config_path, lib_shas)
     policy = budget_policy(cfg, budget)
     max_new = policy["budget"]
+    gate_mode = str(getattr(cfg.search, "record_gate", "") or "")
+    if gate_mode == "resample" and strict_active(cfg):
+        # WP 3.3: the strict path already replaces deterministic refusals before ``tell``; the
+        # record gate is inert there so a strict run never double-replaces. Today's behaviour.
+        log.warning("search.record_gate: resample is inert with the strict path "
+                    "(infeasible_penalty: resample_strict / error_policy: "
+                    "retry_same_then_stop); keeping the strict behaviour")
     space = DesignSpace.from_config(cfg)
     space, linked = links_mod.reduce_space(space, cfg)   # B.2: absent search.links = same space
     if linked:
@@ -564,7 +572,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     restarts_log: list[dict] = []              # filled only when search.restarts is configured
     state = {"best": None, "best_no": None, "seed_ev": None, "n_new": 0, "stop": "",
              "solve_fail_streak": 0, "attempts": 0, "n_valid": 0, "n_refused_free": 0,
-             "n_resampled": 0}
+             "n_resampled": 0, "n_record_resampled": 0}
     # F0: None on every legacy run, so run.json's schema and behaviour are untouched unless the
     # new opt-in keys are present.
     strict_state = None
@@ -958,6 +966,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
             Returns the stop reason. A generation cut by the budget is NOT ``tell``-ed (a resume
             replays it from the cache and finishes it), exactly as in the single-ES path."""
             resample = str(cfg.search.infeasible_penalty) == "resample"     # B.6 (opt-in)
+            gate_resample = gate_mode == "resample"                         # WP 3.3 (opt-in)
             gen = 0
             while not exhausted():
                 stop = es_instance.stop()
@@ -970,6 +979,25 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                     # WP2 (opt-in): same order, same run_one, same F; only mesh building of the
                     # NEXT candidates moves onto a background worker while this one solves.
                     designs = [space.denormalize(np.asarray(x)) for x in X]
+                    if gate_resample:
+                        # WP 3.3 (opt-in): replace an outside-record candidate BEFORE any mesh
+                        # is prefetched/evaluated (cap RESAMPLE_CAP draws). UNKNOWN margin
+                        # (None) or an exhausted cap admits the last replacement -- the gate
+                        # never deadlocks and never raises. ``designs[i]`` must be the admitted
+                        # design so the pipeline prefetches the candidate that will be run.
+                        for i, d in enumerate(designs):
+                            if exhausted():
+                                break
+                            margin = evaluate_mod.record_gate_margin(d, cfg)
+                            for _ in range(RESAMPLE_CAP):
+                                if margin is None or margin >= 0.0 or exhausted():
+                                    break
+                                x_new = np.asarray(es_instance.ask(1)[0], dtype=float).reshape(-1)
+                                X[i] = x_new
+                                state["n_record_resampled"] += 1
+                                d = space.denormalize(x_new)
+                                margin = evaluate_mod.record_gate_margin(d, cfg)
+                            designs[i] = d
                     pipe.begin_generation(designs)
                     for i, d in enumerate(designs):
                         if exhausted():
@@ -991,7 +1019,21 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                     for i, x in enumerate(X):
                         if exhausted():
                             break
-                        ev = run_one(space.denormalize(np.asarray(x)))
+                        d = space.denormalize(np.asarray(x))
+                        # WP 3.3 (opt-in): same pre-evaluation record replacement as the prefetch
+                        # path above; an outside candidate is never handed to run_one unless the
+                        # RESAMPLE_CAP draws are exhausted (then the last one is admitted).
+                        if gate_resample:
+                            margin = evaluate_mod.record_gate_margin(d, cfg)
+                            for _ in range(RESAMPLE_CAP):
+                                if margin is None or margin >= 0.0 or exhausted():
+                                    break
+                                x_new = np.asarray(es_instance.ask(1)[0], dtype=float).reshape(-1)
+                                X[i] = x_new
+                                state["n_record_resampled"] += 1
+                                d = space.denormalize(x_new)
+                                margin = evaluate_mod.record_gate_margin(d, cfg)
+                        ev = run_one(d)
                         # B.6: same resample-and-replace as the prefetch path above (plain pycma
                         # ask(number=1) resampling, as done by BoundTransform in cma's own
                         # ask_and_eval); a refusal is LOADED into the ndjson but NEVER told.
@@ -1009,6 +1051,9 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                 if resample and state.get("n_resampled"):
                     log.info("B.6 resample: %d refusal(s) replaced by new samples so far",
                              state["n_resampled"])
+                if gate_resample and state.get("n_record_resampled"):
+                    log.info("record gate: %d outside-record candidate(s) replaced before "
+                             "evaluation so far", state["n_record_resampled"])
                 try:
                     es_instance.logger.add()
                 except Exception:  # noqa: BLE001 - cma's own logging is optional

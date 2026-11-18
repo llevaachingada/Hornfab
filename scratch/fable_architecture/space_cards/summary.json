@@ -1,0 +1,167 @@
+{
+ "cards": [
+  "p80x60__ath_core_14in_home700_v7",
+  "sab__lecleach_ctrl",
+  "sab__lecleach_fc540",
+  "p80x60__ath_core14_corelaw_v7",
+  "klangfilm_hv__a0_exact_incumbent_control",
+  "klangfilm_hv__a1_h_only_single_axis",
+  "klangfilm_hv__a2_v_only_single_axis",
+  "atlas__ath_core",
+  "atlas__core_law",
+  "klangfilm_hv_core__b3_soft",
+  "hl__ath_core_petal_hvlaw_v7",
+  "hl__ath_tritonia_landscape_v7",
+  "hl__ath_tritonia_landscape_v8",
+  "hl__ath_tritonia_landscape_v9",
+  "hl__ath_twinray380_landscape_v8",
+  "hl__biradial_es_style_smooth_v7",
+  "hl__biradial_es_style_v7",
+  "hl__crowe_x_osse_cd_v7",
+  "hl__crowe_x_square_v7",
+  "hl__es_style_rollback_v7",
+  "hl__ext_throat_hvlaw_v7",
+  "hl__klangfilm_lame_curved_v1_c200",
+  "hl__lecleach_hv_landscape_smooth_v7",
+  "hl__lecleach_iwata_ar_landscape_smooth_v7",
+  "hl__lecleach_iwata_ar_landscape_v7",
+  "hl__osse_rrect_fold_warm_v7",
+  "hl__osse_rrect_fold_warm_v7_w1",
+  "rf__section_axial_home_smooth_v8",
+  "rf__section_axial_home_v7"
+ ],
+ "recommendations": {
+  "p80x60__ath_core_14in_home700_v7": [
+   "fix_or_widen:a0_deg",
+   "fix:morph_exponent",
+   "check_condition:morph_fixed",
+   "link:a0_deg",
+   "sigma0:*"
+  ],
+  "sab__lecleach_ctrl": [
+   "rebound:g_T",
+   "sigma0:*"
+  ],
+  "sab__lecleach_fc540": [
+   "rebound:g_T",
+   "sigma0:*"
+  ],
+  "p80x60__ath_core14_corelaw_v7": [
+   "fix:morph_exponent",
+   "check_condition:morph_fixed",
+   "link:morph_fixed",
+   "link:az_a_sf_amp",
+   "sigma0:*"
+  ],
+  "klangfilm_hv__a0_exact_incumbent_control": [
+   "sigma0:*"
+  ],
+  "klangfilm_hv__a1_h_only_single_axis": [
+   "sigma0:*"
+  ],
+  "klangfilm_hv__a2_v_only_single_axis": [
+   "sigma0:*"
+  ],
+  "atlas__ath_core": [
+   "fix:morph_exponent",
+   "link:k",
+   "rebound:L_mm",
+   "rebound:a_deg",
+   "sigma0:*"
+  ],
+  "atlas__core_law": [
+   "link:a_deg",
+   "link:morph_fixed",
+   "link:az_n_cos2_amp",
+   "sigma0:*",
+   "constraint:*"
+  ],
+  "klangfilm_hv_core__b3_soft": [
+   "sigma0:*"
+  ],
+  "hl__ath_core_petal_hvlaw_v7": [
+   "link:q",
+   "link:az_a_sf_amp",
+   "rebound:q",
+   "sigma0:*",
+   "constraint:*"
+  ],
+  "hl__ath_tritonia_landscape_v7": [
+   "fix:morph_exponent",
+   "check_condition:morph_fixed",
+   "link:morph_fixed",
+   "link:n",
+   "sigma0:*"
+  ],
+  "hl__ath_tritonia_landscape_v8": [
+   "link:s",
+   "sigma0:*"
+  ],
+  "hl__ath_tritonia_landscape_v9": [
+   "link:s",
+   "link:k",
+   "sigma0:*"
+  ],
+  "hl__ath_twinray380_landscape_v8": [
+   "link:n",
+   "link:q",
+   "link:a0_deg",
+   "sigma0:*"
+  ],
+  "hl__biradial_es_style_smooth_v7": [
+   "sigma0:*"
+  ],
+  "hl__biradial_es_style_v7": [
+   "sigma0:*"
+  ],
+  "hl__crowe_x_osse_cd_v7": [
+   "link:g_wrap_deg",
+   "rebound:g_L_mm",
+   "rebound:g_s",
+   "sigma0:*"
+  ],
+  "hl__crowe_x_square_v7": [
+   "sigma0:*"
+  ],
+  "hl__es_style_rollback_v7": [
+   "check_condition:g_stop_deg",
+   "sigma0:*"
+  ],
+  "hl__ext_throat_hvlaw_v7": [
+   "sigma0:*",
+   "constraint:*"
+  ],
+  "hl__klangfilm_lame_curved_v1_c200": [
+   "sigma0:*"
+  ],
+  "hl__lecleach_hv_landscape_smooth_v7": [
+   "sigma0:*"
+  ],
+  "hl__lecleach_iwata_ar_landscape_smooth_v7": [
+   "rebound:g_fc_hz",
+   "rebound:g_stop_deg",
+   "sigma0:*"
+  ],
+  "hl__lecleach_iwata_ar_landscape_v7": [
+   "sigma0:*"
+  ],
+  "hl__osse_rrect_fold_warm_v7": [
+   "fix_or_widen:a0_deg",
+   "link:n",
+   "link:k",
+   "sigma0:*"
+  ],
+  "hl__osse_rrect_fold_warm_v7_w1": [
+   "fix_or_widen:a0_deg",
+   "link:n",
+   "link:k",
+   "sigma0:*"
+  ],
+  "rf__section_axial_home_smooth_v8": [
+   "sigma0:*"
+  ],
+  "rf__section_axial_home_v7": [
+   "sigma0:*"
+  ]
+ }
+}

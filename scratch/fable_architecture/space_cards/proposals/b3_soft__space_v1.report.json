@@ -1,0 +1,35 @@
+{
+ "proposal": "scratch\\fable_architecture\\space_cards\\proposals\\b3_soft__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 12,
+  "box": {
+   "ok": 81,
+   "outside": 0,
+   "refused": 15
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.10416666666666667,
+   "0.25": 0.1875
+  }
+ },
+ "after": {
+  "searched": 12,
+  "box": {
+   "ok": 27,
+   "outside": 0,
+   "refused": 5
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.125,
+   "0.25": 0.08333333333333333
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

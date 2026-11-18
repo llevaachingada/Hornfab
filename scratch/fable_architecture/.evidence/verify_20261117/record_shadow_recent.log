@@ -1,0 +1,35 @@
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 1780 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 1780 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 87 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 87 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 1466 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 1466 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 483 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 483 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 132 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 132 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 86 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 86 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 262 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 262 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 17, axial interval 234 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 17, axial interval 234 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 191 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 191 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 19, axial interval 58 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 19, axial interval 58 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 244 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 244 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 37 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 37 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 423 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+[hornlab-mesher] outer wall self-intersects: OSSE generated outer offset grid has a normal flip near azimuth row 0, axial interval 423 Reduce the wall thickness or open the local curvature; the acoustic (inner) surface is unaffected.
+{
+ "runs": 22,
+ "counts": {
+  "agree": 1598,
+  "record_failed": 429,
+  "record_outside_but_ok": 28
+ },
+ "failed_runs": []
+}

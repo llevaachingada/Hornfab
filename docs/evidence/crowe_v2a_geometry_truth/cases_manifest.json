@@ -1,0 +1,18 @@
+{
+  "description": "WP1 canonical CROWE V2A sample set (12 geometrically admitted cases) under the c1 four-DOF box. c0 seed W580/H474/L300; two interior heights; single-variable low/high for all four knobs; two coupled feasible corners. No invalid corner is silently dropped: the tool records a typed refusal if admission fails.",
+  "base_config": "examples/typologies/crowe_hv_area_aspect_2026-11-16/configs/c1_four_dof_bounds.yaml",
+  "cases": [
+    {"name": "c0_seed", "role": "seed", "knobs": {"height_v_active_mm": 474.0, "L_forward_mm": 300.0, "area_mid_bias": 0.0, "aspect_timing_u50": 0.5}},
+    {"name": "interior_h400", "role": "interior", "knobs": {"height_v_active_mm": 400.0, "L_forward_mm": 300.0, "area_mid_bias": 0.0, "aspect_timing_u50": 0.5}},
+    {"name": "interior_h430", "role": "interior", "knobs": {"height_v_active_mm": 430.0, "L_forward_mm": 300.0, "area_mid_bias": 0.0, "aspect_timing_u50": 0.5}},
+    {"name": "height_low300", "role": "single_variable_low", "knobs": {"height_v_active_mm": 300.0, "L_forward_mm": 300.0, "area_mid_bias": 0.0, "aspect_timing_u50": 0.5}},
+    {"name": "length_low220", "role": "single_variable_low", "knobs": {"height_v_active_mm": 474.0, "L_forward_mm": 220.0, "area_mid_bias": 0.0, "aspect_timing_u50": 0.5}},
+    {"name": "length_high340", "role": "single_variable_high", "knobs": {"height_v_active_mm": 474.0, "L_forward_mm": 340.0, "area_mid_bias": 0.0, "aspect_timing_u50": 0.5}},
+    {"name": "area_bias_low", "role": "single_variable_low", "knobs": {"height_v_active_mm": 474.0, "L_forward_mm": 300.0, "area_mid_bias": -0.15, "aspect_timing_u50": 0.5}},
+    {"name": "area_bias_high", "role": "single_variable_high", "knobs": {"height_v_active_mm": 474.0, "L_forward_mm": 300.0, "area_mid_bias": 0.15, "aspect_timing_u50": 0.5}},
+    {"name": "u50_low", "role": "single_variable_low", "knobs": {"height_v_active_mm": 474.0, "L_forward_mm": 300.0, "area_mid_bias": 0.0, "aspect_timing_u50": 0.35}},
+    {"name": "u50_high", "role": "single_variable_high", "knobs": {"height_v_active_mm": 474.0, "L_forward_mm": 300.0, "area_mid_bias": 0.0, "aspect_timing_u50": 0.65}},
+    {"name": "corner_small_boxy", "role": "coupled_corner", "knobs": {"height_v_active_mm": 300.0, "L_forward_mm": 220.0, "area_mid_bias": -0.15, "aspect_timing_u50": 0.65}},
+    {"name": "corner_large_round", "role": "coupled_corner", "knobs": {"height_v_active_mm": 474.0, "L_forward_mm": 340.0, "area_mid_bias": 0.15, "aspect_timing_u50": 0.35}}
+  ]
+}

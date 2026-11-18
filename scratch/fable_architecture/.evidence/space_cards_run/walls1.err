@@ -1,0 +1,2 @@
+C:\Users\hunte\Hrns\hornlab-search\hornlab_search\geometry\sensitivity.py:226: UserWarning: The balance properties of Sobol' points require n to be a power of 2.
+  pts += list(qmc.Sobol(k, seed=seed).random(n))

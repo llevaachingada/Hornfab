@@ -1,0 +1,34 @@
+| config | ok | dofs / cap | mouth W x H mm | depth mm | envelope | driver coupling | note |
+|---|---|---|---|---|---|---|---|
+
+
+| ath_core14_corelaw_v7_w1 | yes | 6568 / 24000 | 541 x 628 | 387 | fits | round, matches the exit |  |
+
+
+| ath_tritonia_landscape_v9_w1 | yes | 5408 / 24000 | 586 x 474 | 297 | fits | round, matches the exit |  |
+| control_v7_w1 | NO | - | - x - | - | - | - | CONFIG ERROR: GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'section_pucker' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecle |
+| crowe_panel_es600_v7_w1 | NO | - | - x - | - | - | - | CONFIG ERROR: GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'crowe_panel' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach |
+
+
+| ext_throat_hvlaw_cov_v7_w1 | yes | 6478 / 24000 | 500 x 660 | 473 | fits | round, matches the exit |  |
+| klangfilm_lame_curved_v1_w1 | NO | - | - x - | - | - | - | CONFIG ERROR: GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'klangfilm_lame' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecle |
+
+
+| klangfilm_lame_curved_v1_c200_w1 | yes | 4853 / 24000 | 585 x 255 | 196 | fits | round, matches the exit |  |
+
+
+| lecleach_ctrl_w1 | yes | 982 / 5000 | 262 x 262 | 168 | fits | round, matches the exit |  |
+
+
+| lecleach_fc540_w1 | yes | 988 / 5000 | 263 x 263 | 167 | fits | round, matches the exit |  |
+
+
+| lecleach_fc540_T_narrow_w1 | yes | 988 / 5000 | 264 x 264 | 164 | fits | round, matches the exit |  |
+
+
+| lecleach_iwata_ar_landscape_smooth_v7_w1 | yes | 1736 / 24000 | 388 x 333 | 239 | fits | round, matches the exit |  |
+
+
+| osse_rrect_fold_warm_v7_w1 | yes | 3828 / 24000 | 568 x 399 | 359 | fits | round, matches the exit |  |
+| rosse_rect_cd_v7_r120_w1 | NO | - | - x - | - | - | - | CONFIG ERROR: GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_ |
+| rosse_rect_cd_v7_r50_refine_w1 | NO | - | - x - | - | - | - | CONFIG ERROR: GeometryInvalidError: generator seed is not a legal horn: unknown rows type 'rosse_rect' (known: ['salmon_elliptical', 'salmon_axisym', 'lecleach', 'iwata_ar', 'toroidal_rollback', 'lecleach_mod', 'lecleach_ar', 'lecleach_ |

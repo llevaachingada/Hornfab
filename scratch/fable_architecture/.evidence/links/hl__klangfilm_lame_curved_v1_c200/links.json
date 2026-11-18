@@ -1,0 +1,30 @@
+{
+ "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T091346Z-screen-517217",
+ "family": "FREEFORM",
+ "top_decile_n": 20,
+ "pairs": [
+  {
+   "a": "g_aspect",
+   "b": "g_morph_frac",
+   "rho": -0.6631578947368421,
+   "fit": {
+    "scale": -0.330074421446612,
+    "offset": 1.105200390049982,
+    "r2": 0.1729138595677
+   }
+  }
+ ],
+ "cma_directions": [],
+ "proposed_links": [
+  {
+   "knob_b": "g_morph_frac",
+   "knob_a": "g_aspect",
+   "scale": -0.330074421446612,
+   "offset": 1.105200390049982,
+   "r2": 0.1729138595677,
+   "source": "rho_top_decile"
+  }
+ ],
+ "tool": "links",
+ "generated_utc": "2026-11-17T20:55:45Z"
+}

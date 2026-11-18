@@ -1,5 +1,13 @@
 # Hornfab discovery architecture — evidence dossier (READ THIS FIRST)
 
+> **Senior decisions and plan (2026-11-17), read these first now:**
+> `FABLE_SENIOR_REVIEW_2026-11-17.md` (verdict on the lane review, the reserved generator and
+> search decisions, corrections, owner decision cards) and
+> `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` (target architecture, stages 0-8 with gates, GPU
+> budget, and how each work package becomes an implementation task file). They take precedence
+> over `LOW_COST_AGENT_HANDOFF.md` and every position document below; result files still outrank
+> all position documents on facts.
+
 > **Current navigation and evidence:** start with `LOW_COST_AGENT_HANDOFF.md` and the individual result reports. The dossier below records a historical snapshot, not current repository state. At observed HEAD `01560e5`, v9 and `targets/profile.py` are tracked and version 9 is registered; the snapshot finding that v9 was unimportable is historical. Concurrent report edits may be present. The experimental corpus was committed in `207f97a` and `01560e5`; reproduction scripts may overwrite tracked artifacts.
 
 **Prepared:** 2026-11-16, read-only research pass. **Repo:** `C:\Users\hunte\Hrns\hornlab-search`
@@ -277,6 +285,14 @@ verify rank stability, held-out GP ranking at 100–231 rows, and refusal-margin
 | `X4_PARAMETER_SPACE.md` | X4: five-lane exploratory parameter-space checks; sampler and classification gates remain open |
 | `X5_ALLOCATION.md` | X5: corrected allocation replay — policy comparison degenerate at the stated target |
 | `fable_zero_gpu_checks.py` | the zero-GPU reproduction checks named in the reports |
+| `LANE_REVIEW_FOR_FABLE_2026-11-17.md` | lower-cost lane's corpus review handed to the senior reviewer |
+| `X1_ACCEPTANCE_TABLE.md` | consolidated X1 per-test verdict (ruled by the senior review: accepted for geometry, open for metadata) |
+| `OWNER_DECISIONS_2026-11-17.md` | owner options menu C1-C6 (options only) |
+| `FABLE_SENIOR_REVIEW_2026-11-17.md` | **senior verdict**: confirm/amend/overrule table, corrections C-1..C-5, reserved decisions SD-1..SD-8, owner decision cards, supersession register |
+| `ORCHESTRATOR_HANDOFF_2026-11-17.md` | **handoff for the local orchestrator**: rules, inventory, verification, stage-5 workflow, ordered tasks |
+| `U3_RECORD_EDITS_CPU_2026-11-17.md` | U3 CPU stage on a biradial seed |
+| `space_cards/` | parameter-space cards and `__space_v1` proposals for five lanes |
+| `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` | **target architecture and staged plan**: layers, contracts, stages 0-8 with work packages and exit gates, GPU budget, invariants, task-file template and readiness |
 
 ## Tracked digest
 
@@ -295,3 +311,20 @@ records; only the stored-data replays and the watchdog replay are reproductions.
 lane's work was observed and preserved, never overwritten. **Tracking state changed after the pass
 closed:** `.gitignore:9` (`/scratch/`) still ignores the folder by default, but this subtree was
 force-added on owner instruction, so subsequent edits here now show up in `git status`.
+
+## Local orchestrator pass (2026-11-17)
+
+- `EVIDENCE_VERIFY_2026-11-17.md` - what the Windows checkout actually returned for handoff §2:
+  tests, full-suite triage, U3 CPU tables, record-shadow counts, space-card batch and the 22 configs
+  that could not be carded, with the source log/JSON named under each block.
+- `space_cards/` - 29 lane cards + `shared_map.md` + `summary.json` (`--points 8 --box 96 --sigma-n 48`).
+- `.evidence/verify_20261117/` - raw logs and JSON behind the note (`pytest_targeted.log`,
+  `u3_cpu.json`, `record_shadow_recent/summary.json`, `space_cards_run/batch*.log`).
+- `OWNER_DECISIONS_PACKET_2026-11-17.md` - the decision set (C1-C6, provenance, envelope, U3 host)
+  with the stage-5 proposal table, the categorical split, the cross-family residuals and the
+  frequency counts; evidence only, nothing applied.
+- `space_cards/proposals/` - 29 `__space_v1` proposals (12 changed, 17 no-change). The four reviewed
+  earlier are flat files; the rest sit in one subdirectory per lane. Links survive only where
+  `links.py` does not disagree (`data_agrees` true/unknown) - all run-backed links were withdrawn.
+- `.evidence/links/<lane>/` - the `links.py` report behind each card's `data_agrees`.
+- `.evidence/translate.json` - cross-family seeding residuals (`match_descriptors`).

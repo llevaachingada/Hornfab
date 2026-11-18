@@ -34,7 +34,7 @@ def reduce_space(space, cfg) -> tuple[object, dict | None]:
     if not links:
         return space, None
     if getattr(cfg, "generator", None):
-        raise ValueError("search.links is not supported with a generator block")
+        return _reduce_generated(space, links)
     bounds = dict(space.bounds)
     for knob in sorted(links):
         b = bounds[knob]
@@ -53,6 +53,30 @@ def reduce_space(space, cfg) -> tuple[object, dict | None]:
     reduced = DesignSpace(family=space.family, seed=Design(space.family, params),
                           bounds=bounds)
     return reduced, _resolved(space, links)
+
+
+def _reduce_generated(space, links) -> tuple[object, dict]:
+    """Stage 0 WP 0.2 (2026-11-17): links for generator-block configs. The generator's
+    geometry is a function of its KNOBS, so links are applied in knob space by the space
+    itself (``GeneratedSpace.apply_knob_links``) before ``materialize``; ``apply_links`` on the
+    resulting Design is then a no-op. Linked knobs leave the CMA dimension; the seed's own
+    value for a linked knob is replaced by the computed one (warned)."""
+    from ..design.generated import GeneratedSpace
+    resolved = _resolved(space, links)
+    bounds = dict(space.bounds)
+    for knob in sorted(links):
+        b = bounds[knob]
+        bounds[knob] = Bound(lo=b.lo, hi=b.hi, search=False, log=b.log)
+    stale = sorted(k for k in links if k in space.seed_knobs)
+    if stale:
+        log.warning("search.links: the seed's own value(s) for linked generator knob(s) %s are "
+                    "ignored (computed from the parent)", stale)
+    probe = GeneratedSpace.__new__(GeneratedSpace)
+    probe.links = resolved
+    seed = probe.apply_knob_links(dict(space.seed_knobs))
+    reduced = GeneratedSpace(space.gen, space.brief, seed, bounds)
+    reduced.links = resolved
+    return reduced, resolved
 
 
 def _resolved(space, links) -> dict:
@@ -74,6 +98,8 @@ def apply_links(design: Design, space, cfg) -> Design:
     links = getattr(getattr(cfg, "search", None), "links", None)
     if not links:
         return design
+    if getattr(cfg, "generator", None):
+        return design          # generator links were applied in knob space (WP 0.2)
     params = dict(design.params)            # shallow copy: the candidate object stays untouched
     for knob in sorted(links):
         spec = links[knob]

@@ -1,0 +1,73 @@
+{
+  "strict": false,
+  "exit_code": 0,
+  "configs": [
+    {
+      "path": "examples\\typologies\\walls_relieved\\lecleach_fc540\\lecleach_fc540_w1.yaml",
+      "name": "sab__lecleach_fc540_w1",
+      "family": "FREEFORM",
+      "generator": "grid",
+      "searched_keys": [
+        "g_T",
+        "g_fc_hz",
+        "g_stop_deg"
+      ],
+      "seed_outside_box": [],
+      "seed_key_missing": [],
+      "seed_design_hash": "a6e36f491870",
+      "prior_bests": [],
+      "history": null,
+      "sigma": {
+        "config_sigma0": 0.25,
+        "recommended_sigma": null,
+        "median_spread": null,
+        "dims": 3,
+        "expected_hits": null,
+        "min_expected_hits": 3.0,
+        "refusal_fraction": null
+      },
+      "sampling": {
+        "samples": 0,
+        "status": "not sampled",
+        "note": "--samples 0 (default): no mesh was built"
+      },
+      "refusals": {},
+      "graded": {
+        "infeasible_penalty": "resample_strict",
+        "sampled_refusals": 0,
+        "invalid_envelope": 0
+      },
+      "ab": null,
+      "findings": [
+        {
+          "severity": "WARN",
+          "code": "history_unusable",
+          "message": "generator history is unusable: runs\\20261114T223630Z-screen-86e077 has objective version 6 and brief '../../briefs/lecleach_rollback_1in_v6.yaml', this config has version 6 and brief '../../../briefs/lecleach_rollback_1in_v6.yaml'",
+          "config": "examples\\typologies\\walls_relieved\\lecleach_fc540\\lecleach_fc540_w1.yaml"
+        },
+        {
+          "severity": "WARN",
+          "code": "history_unusable",
+          "message": "warm-start history is unusable: runs\\20261114T223630Z-screen-86e077: warm_start refuses objective version/brief mismatch (run v6, this config v6; set search.warm_start.allow_cross_brief: true to override)",
+          "config": "examples\\typologies\\walls_relieved\\lecleach_fc540\\lecleach_fc540_w1.yaml"
+        }
+      ]
+    }
+  ],
+  "hards": [],
+  "warnings": [
+    {
+      "severity": "WARN",
+      "code": "history_unusable",
+      "message": "generator history is unusable: runs\\20261114T223630Z-screen-86e077 has objective version 6 and brief '../../briefs/lecleach_rollback_1in_v6.yaml', this config has version 6 and brief '../../../briefs/lecleach_rollback_1in_v6.yaml'",
+      "config": "examples\\typologies\\walls_relieved\\lecleach_fc540\\lecleach_fc540_w1.yaml"
+    },
+    {
+      "severity": "WARN",
+      "code": "history_unusable",
+      "message": "warm-start history is unusable: runs\\20261114T223630Z-screen-86e077: warm_start refuses objective version/brief mismatch (run v6, this config v6; set search.warm_start.allow_cross_brief: true to override)",
+      "config": "examples\\typologies\\walls_relieved\\lecleach_fc540\\lecleach_fc540_w1.yaml"
+    }
+  ],
+  "infos": []
+}

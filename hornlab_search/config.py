@@ -28,9 +28,17 @@ FREQ_GRIDS: dict[str, tuple[float, float, int]] = {
     "screen": (500.0, 10_000.0, 12),
     "verify": (300.0, 16_000.0, 25),
     "final": (250.0, 20_000.0, 36),
+    # WP 2.1 (fidelity ladder, 2026-11-17): the FINALIST tier. >= 29 frequencies on the verify band,
+    # solved on a mesh at FINALIST_DOF_FACTOR x the screen DOF cap. It is a separate mode so the
+    # screen/verify/final specs, hashes and config_sha stay byte-identical.
+    "finalist": (300.0, 16_000.0, 36),
 }
 
-MODES = ("screen", "verify", "final")
+MODES = ("screen", "verify", "final", "finalist")
+
+# WP 2.1: default ratio of the finalist DOF cap to the screen DOF cap. A config overrides the whole
+# cap with ``mesh.dof_cap_finalist`` (absent = FINALIST_DOF_FACTOR x ``mesh.dof_cap_screen``).
+FINALIST_DOF_FACTOR = 2
 
 # WP11b: the search algorithms this config knows how to run. The CLI entry (``search.cma.search``)
 # dispatches on this value; anything else is refused at load time with a ``search.algorithm`` prefix.
@@ -65,8 +73,13 @@ class MeshSettings:
     band_split: dict | None = None     # WP8: {"edges_hz": [...]} -> one mesh per band (absent = today)
     curvature_npts: float = 0.0        # WP4 (throughput): Gmsh Mesh.MeshSizeFromCurvature for the CAD
                                        # route; 0 = off = today's meshes and hashes exactly
+    dof_cap_finalist: int = 0          # WP 2.1: 0 (absent) = FINALIST_DOF_FACTOR x dof_cap_screen
 
     def dof_cap(self, mode: str) -> int:
+        if mode == "finalist":
+            if int(self.dof_cap_finalist) > 0:
+                return int(self.dof_cap_finalist)
+            return int(FINALIST_DOF_FACTOR * int(self.dof_cap_screen))
         return int(getattr(self, f"dof_cap_{mode}"))
 
 
@@ -109,6 +122,7 @@ class SolveSettings:
     def balloon_points(self, mode: str) -> int:
         if not self.balloon:
             return 0
+        # WP 2.1: the finalist tier is a verify-class solve (verify balloon density).
         return int(self.balloon_points_screen if mode == "screen" else self.balloon_points_verify)
 
 
@@ -136,6 +150,9 @@ class SearchSettings:
     error_policy: str = "legacy"       # F0: 'legacy' (default) | 'retry_same_then_stop'
                                        # (same-candidate infrastructure retry then resumable stop;
                                        # used by cma and, for infrastructure only, cma_me)
+    record_gate: str = ""              # WP 3.3 (2026-11-17): '' (default, today) | 'shadow'
+                                       # (record margin + agreement row keys) | 'resample'
+                                       # (outside-record candidates replaced before evaluation)
 
 
 @dataclass
@@ -891,7 +908,7 @@ def _validate_budget_counts(value, where: str) -> str:
     """B.4 (day 2026-11-12): ``search.budget_counts`` selects what consumes the budget.
 
     ``new`` (default) is today's semantics: every NON-CACHED evaluation consumes one budget
-    unit, refusals included. ``valid`` makes the budget count only VALID evaluations: the
+    unit, refusals included (cache hits are free in both modes). ``valid`` makes the budget count only VALID evaluations: the
     deterministic refusals (invalid_geometry / invalid_envelope / mesh_too_large) do not
     consume budget, and a hard ceiling ``search.max_attempts`` (default 4 x budget) stops an
     all-refusing box. Exact tokens; anything else is a typo and is refused."""
@@ -1382,7 +1399,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         raw = _brief_preflight_and_derive(raw, brief_d, where)
 
     mesh = _build(MeshSettings, _require(raw, "mesh", where), f"{where}:mesh",
-                  optional=("max_triangle_slack", "rear_res_factor", "band_split", "curvature_npts"))
+                  optional=("max_triangle_slack", "rear_res_factor", "band_split", "curvature_npts", "dof_cap_finalist"))
     solve_section = dict(_require(raw, "solve", where))
     if solve_section.get("freq_grid") is not None:
         _validate_freq_grid(solve_section["freq_grid"], f"{where}:solve")
@@ -1434,7 +1451,7 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     search = _build(SearchSettings, _require(raw, "search", where), f"{where}:search",
                     optional=("popsize", "infeasible_penalty", "restarts", "qd", "pipeline_prefetch",
                               "budget_counts", "max_attempts", "links", "warm_start",
-                              "surrogate", "error_policy"))
+                              "surrogate", "error_policy", "record_gate"))
     if "popsize" not in raw["search"]:
         search.popsize = None
     if "budget_counts" not in raw["search"]:
@@ -1460,14 +1477,25 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         raise ConfigError(f"{where}: search.infeasible_penalty: resample is not supported with "
                           f"search.algorithm: cma_me (ribs scheduler.tell needs one result per "
                           f"asked solution; refusals there keep today's seed-cell fallback)")
+    # WP 3.3 (2026-11-17): opt-in pre-mesh record gate. Absent/empty keeps today's behaviour
+    # byte-identically; 'shadow' only adds two ndjson row keys, 'resample' replaces a candidate
+    # whose surface record lies outside the brief envelope BEFORE ``run_one``.
+    gate = "" if search.record_gate is None else str(search.record_gate).strip()
+    if gate not in ("", "shadow", "resample"):
+        raise ConfigError(f"{where}: search.record_gate must be 'shadow' or 'resample' "
+                          f"(or empty/absent), got {search.record_gate!r}")
+    if gate == "resample" and search.algorithm != "cma":
+        # Mirror of the infeasible_penalty resample/cma_me precedent above: the ribs QD
+        # scheduler needs one result per asked solution, so pre-evaluation replacement is a
+        # plain-CMA behaviour only.
+        raise ConfigError(f"{where}: search.record_gate: resample is only supported with "
+                          f"search.algorithm: cma (got {search.algorithm!r})")
+    search.record_gate = gate
     search.budget_counts = _validate_budget_counts(search.budget_counts, f"{where}:search")
     search.max_attempts = _validate_max_attempts(search.max_attempts, f"{where}:search")
     if "links" not in raw["search"]:
         search.links = None
-    elif raw.get("generator") is not None:
-        raise ConfigError(f"{where}:search.links: linked knobs are not supported with a "
-                          f"generator block")
-    else:
+    else:   # WP 0.2 (2026-11-17): generator blocks link in knob space (GeneratedSpace)
         search.links = _validate_search_links(search.links, f"{where}:search.links",
                                               raw.get("bounds") or {})
     if "warm_start" not in raw["search"]:
@@ -1611,6 +1639,10 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     for k, b in bounds.items():
         if "lo" not in b or "hi" not in b:
             raise ConfigError(f"{where}: bounds.{k} needs lo and hi")
+    for k in categorical_searched_keys(bounds, gen is None):
+        log.warning("%s: bounds.%s is a CATEGORICAL key searched inside a continuous box "
+                    "(values are rounded; the optimizer sees a staircase). Prefer one config "
+                    "per category (senior plan WP 5.2).", where, k)
 
     # 2026-10-29 owner retarget: surface the applied brief's driver exit radius on the TYPED target
     # only (not on ``raw``), so the objective can derive the DRIVER-EXIT f11 when the brief has no
@@ -1643,6 +1675,19 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         mounting=mounting_cfg,
         objective_params=objective_params,
     )
+
+
+#: Native-family integer keys whose values are CATEGORIES, not quantities (WP 5.2, 2026-11-17).
+CATEGORICAL_KEYS = frozenset({"morph_target", "morph_allow_shrinkage", "gcurve_type"})
+
+
+def categorical_searched_keys(bounds: dict, native: bool = True) -> list[str]:
+    """Searched bounds on categorical keys (native families only; generator knobs are floats)."""
+    if not native:
+        return []
+    return sorted(k for k, b in (bounds or {}).items()
+                  if k in CATEGORICAL_KEYS and isinstance(b, dict) and b.get("search", True)
+                  and float(b.get("hi", 0)) > float(b.get("lo", 0)))
 
 
 # ------------------------------------------------------------------ specs

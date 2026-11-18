@@ -8,6 +8,32 @@ and the preserved [supplied compilation](knowledge/imported/HornFab_Research_Kno
 Existing research remains in place; imported recommendations are not implementation mandates.
 
 
+[Orchestrator handoff for the senior plan (2026-11-17)](../scratch/fable_architecture/ORCHESTRATOR_HANDOFF_2026-11-17.md):
+how a lower-cost local orchestrator continues the plan: rules, what exists, first-session verification,
+the stage-5 parameter-space workflow (space cards, proposals, constraint-aware filtering, links agreement,
+categoricals, cross-family seeding), the ordered remaining tasks, owner decisions, and the first proposals.
+
+[Fable senior review and architecture plan (2026-11-17)](../scratch/fable_architecture/FABLE_SENIOR_REVIEW_2026-11-17.md):
+senior verdict on the lane review (confirm/amend/overrule), corrections to the record, and the reserved
+decisions: plural specialist generators with one shared description (canonical record v2), no unified
+backbone, new freedoms tested on the record before any are built, search inside lanes, watchdog as a
+safety net; owner decision cards for C1-C6. The target architecture, stages 0-8 with gates, GPU budget
+(about 34-38 solves before matched reruns) and the task-file conversion guide are in
+[ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md](../scratch/fable_architecture/ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md).
+Docs only; no code, solve or queue change.
+
+[Owner decisions packet (2026-11-17)](../scratch/fable_architecture/OWNER_DECISIONS_PACKET_2026-11-17.md):
+C1-C6 with what each choice changes, the stage-5 proposal table (12 changed, 17 no-change), the
+categorical split, cross-family seeding residuals, the frequency counts actually in use, and the six
+new defects. Evidence only; nothing applied.
+
+[First-session verification evidence (2026-11-17)](../scratch/fable_architecture/EVIDENCE_VERIFY_2026-11-17.md):
+the Windows-checkout run of the handoff §2 tests (187 passed), the full offline suite and its 8-failure
+triage, the U3 CPU validity tables on both candidate hosts, the record-shadow counts over 22 lane runs
+(0 `record_inside_but_refused`), and the stage-5 space-card batch (29 built, 22 blocked by two
+pre-existing config/route defects). Every number is quoted from a log or JSON in the same folder tree.
+
+
 [Fable discovery architecture evidence handoff (2026-11-16)](research/FABLE_DISCOVERY_EVIDENCE_HANDOFF_2026-11-16.md):
 read-only dossier prepared for a later discovery/decision pass - refusal-taxonomy miscoding, the
 envelope-vs-GPU boundary, the conservative generic-GRID extent estimate (realised effect
@@ -43,6 +69,29 @@ quarter mesh, and the deferred Phase 2 items (roll, X crease, rim setback, throa
 objective changes). The earlier V1 evidence note is retained with a supersession header.
 
 [HF1440 12-seed supplied gallery and verification](research/typologies/hf1440_diverse_2026-11-16/RESULTS.md): distinct existing-code J seeds and K preview shapes, compatibility and CPU preflight results.
+
+[Master plan: HornFab acoustic truth, typology and optimization (2026-11-17)](research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md):
+owner-supplied prioritized proposal — WP1 actual-BEM-wall geometry truth, WP2 report-only pattern-quality
+diagnostics, WP3 objective/brief-truth replay and frequency fidelity; WP4 provenance optional; WP5/WP6
+owner-gated. It does not authorize new GPU solves or a production objective change.
+
+[Solver-surface truth, CROWE V2A (2026-11-17)](evidence/CROWE_V2A_SOLVER_SURFACE_TRUTH_2026-11-17.md): WP1 —
+measured analytic-law vs actual-BEM-inner-wall comparison on 12 admitted cases: worst prescribed p99
+0.1286 mm (dense max 0.2195 mm), signed bias −0.019…−0.027 mm, native floor p99 0.0142–0.0243 mm,
+FABLE v2 12/12 pass; epw 6/9/12 resolution study shows the residual is mesh discretisation/fit, not the
+law; mesh-surface rank 4/4, max |cos| 0.19; topology clean. No mesher change needed for V2A.
+
+[Pattern-quality diagnostics, report-only (2026-11-17)](evidence/PATTERN_QUALITY_READONLY_2026-11-17.md): WP2 —
+legacy vs boresight-connected −6 dB width, disconnected islands, off-axis excess (v7 H12 threshold),
+censored statuses and canonical sin(theta) DI over stored responses (Crowe/Klangfilm/OSSE winners);
+18 synthetic fixtures; v1–v9 scoring untouched.
+
+[Home CROWE v9 offline candidates + brief-truth replay (2026-11-17)](evidence/HOME_CROWE_V9_OFFLINE_CANDIDATES_2026-11-17.md): WP3 —
+exact identity replay (Δ=0.0 for Crowe 16.918 base-v7 and Klangfilm 8.924 smooth-v7; the 2×2
+cross-brief matrix 16.918/6.836 and 22.782/8.924 reproduced to 6 dp), five NOT-QUEUED v9
+corridor scenarios (dislope = 77 %/92 % of v9 J; corridor `preferred` unscored in-bounds; slope-0 collapses
+J to 2.17/0.94), and screen/verify grid stability (sd 0.208 → 0.19 interpolated, rank 0.99). Owner decision
+required before any production brief change.
 
 [Dual Lamé geometry integration research and gate](research/typologies/DUAL_LAME_INTEGRATION_2026-11-16.md): distinct parent constructions, source and identity findings, and validation limits.
 
@@ -189,6 +238,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 | `tools/agent/ping_agents.py` | Agent ping harness (2026-11-17): static checks (all 8 HornLab skills discoverable from the repo and the `Hrns` umbrella, config parses, no rbassist skill granted to the HornLab orchestrator) plus `--live` skill-load pings through the real orchestrator→child path. `--live` needs a funded provider and is not a CI gate. |
 | [reference/PARAMETERS.md](reference/PARAMETERS.md) | **GENERATED â€” do not edit by hand.** The parameter reference (P9): every resolved typology's knobs with label, unit, one-line tooltip summary, physics detail, formula, physical effect, default (read from that config's own seed), search bounds + where they live (`bounds_source`), hard schema limits + provenance, code symbol + doc anchors, flags (`overloaded`, `doc_mismatch`, ...). Built by `tools/gen_param_catalog.py` from `hornlab_search/design/params/` (annotate-don't-restate: every number is read from an authority at build time). |
 | [reference/SEARCH_CONFIG_KEYS.md](reference/SEARCH_CONFIG_KEYS.md) | **Hand-maintained â€” deliberately NOT generated.** The search/solve config keys (`search.budget_counts` + `search.max_attempts` semantics, links, warm_start, surrogate, and the rest of the day-2026-11-12 group-B opt-ins). Split out of `PARAMETERS.md` so the generated file is 100 % generated and `gen_param_catalog.py --check` can gate CI; fold this into the generator when it learns to document search/brief keys, then delete the file. |
+| [reference/OBJECTIVE_STD_CONVENTIONS.md](reference/OBJECTIVE_STD_CONVENTIONS.md) | WP 0.8 (2026-11-17): `flat` is ddof=2, `flat_cv` / `di_roughness` / `distd` are ddof=0; documented, not changed (historical J immutable). |
 | [../tools/analysis/schema.md](../tools/analysis/schema.md) | Day Group A analysis-report JSON schemas (2026-11-12): terminology (valid/new eval/top decile), per-tool report shapes (convergence, seed_variance, sensitivity, links, walls, ab_compare, lane_parity, term_balance, fidelity, report_day spec YAML), chart contract; every tool reads run dirs read-only and writes only to `--out`. |
 | `tools/analysis/seed_pack.py` | S5 diverse, feasible seed pack selector (2026-11-13): reads catalog.json/CSV, filters by task/family/fidelity/objective_version, deduplicates by design_hash, applies optional score-percentile floor, selects k diverse exemplars with greedy max-min diversity, keeps full provenance. Hash-identity round-trip (geometric round-trip needs config loading, flagged `needs_config=True`). No fabricated warm starts; tested in `tests/test_tools_analysis_seed_pack.py` (47 fixture tests, no mesh or BEM). |
 | [research/TEST_SUITE_EFFICIENCY_2026-11-12.md](research/TEST_SUITE_EFFICIENCY_2026-11-12.md) | Test-suite efficiency review (2026-11-12, senior pass, proposal): measured local/CI runtimes and churn, cost concentration, and low-risk reductions R1-R8 (single trigger, pip cache, docs fast lane, slow-marking, CI-as-gate, required checks, xdist, GPU ladder) with exact diffs; no coverage removed. |

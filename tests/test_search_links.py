@@ -5,6 +5,7 @@ behaviour byte for byte (same dimensions, no run.json key).
 """
 from __future__ import annotations
 
+from pathlib import Path
 import dataclasses
 import json
 
@@ -67,14 +68,53 @@ def test_links_bad_yaml_is_a_configerror(tmp_path, smoke_cfg_path, links, match)
         _cfg_with_links(tmp_path, smoke_cfg_path, links)
 
 
-def test_links_with_a_generator_block_is_refused(tmp_path, smoke_cfg_path):
-    raw = yaml.safe_load(Path_read(smoke_cfg_path))
-    raw["search"]["links"] = {"exponent": {"from": "s"}}
-    raw["generator"] = {"name": "whatever"}
-    p = tmp_path / "cfg.yaml"
+def _gen_cfg_with_links(tmp_path, links):
+    """WP 0.2 (2026-11-17): a real generator-block config (classical hypex) with links."""
+    src = Path(__file__).resolve().parents[1] / "examples" / "typologies" / "hypex.yaml"
+    raw = yaml.safe_load(src.read_text(encoding="utf-8"))
+    raw["search"]["links"] = links
+    if "brief_file" in raw:
+        raw["brief_file"] = str((src.parent / raw["brief_file"]).resolve())
+    p = tmp_path / "hypex_links.yaml"
     p.write_text(yaml.safe_dump(raw, sort_keys=False), encoding="utf-8")
-    with pytest.raises(ConfigError, match="generator"):
-        load_config(p)
+    return load_config(p)
+
+
+def test_links_with_a_generator_block_load_and_reduce_in_knob_space(tmp_path):
+    from hornlab_search.design.generated import GeneratedSpace
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.search.links import apply_links, reduce_space
+    cfg = _gen_cfg_with_links(tmp_path, {"h_rm_mm": {"from": "L_mm", "scale": 0.6, "offset": 10.0}})
+    space = DesignSpace.from_config(cfg)
+    reduced, resolved = reduce_space(space, cfg)
+    assert isinstance(reduced, GeneratedSpace)
+    assert "h_rm_mm" not in reduced.keys() and "L_mm" in reduced.keys()
+    assert resolved["h_rm_mm"]["min"] == 60.0 and resolved["h_rm_mm"]["max"] == 175.0
+    import numpy as np
+    for x in (np.zeros(len(reduced.keys())), np.ones(len(reduced.keys())),
+              np.full(len(reduced.keys()), 0.5)):
+        knobs = reduced.knobs_from_unit(x)
+        want = min(max(0.6 * knobs["L_mm"] + 10.0, 60.0), 175.0)
+        assert abs(knobs["h_rm_mm"] - want) < 1e-9
+        d = reduced.denormalize(x)
+        assert apply_links(d, reduced, cfg) is d          # no double application
+    seed_knobs = reduced.seed_knobs
+    assert abs(seed_knobs["h_rm_mm"] - min(max(0.6 * seed_knobs["L_mm"] + 10.0, 60.0), 175.0)) < 1e-9
+
+
+def test_generator_links_bad_parent_is_a_configerror(tmp_path):
+    with pytest.raises(ConfigError, match="not a searched bound"):
+        _gen_cfg_with_links(tmp_path, {"h_rm_mm": {"from": "nope"}})
+
+
+def test_generator_without_links_space_is_unchanged(tmp_path):
+    from hornlab_search.design.space import DesignSpace
+    from hornlab_search.search.links import reduce_space
+    src = Path(__file__).resolve().parents[1] / "examples" / "typologies" / "hypex.yaml"
+    cfg = load_config(src)
+    space = DesignSpace.from_config(cfg)
+    assert reduce_space(space, cfg) == (space, None)
+    assert space.links is None and space.apply_knob_links({"a": 1.0}) == {"a": 1.0}
 
 
 def test_absent_links_key_defaults_to_none(tmp_path, smoke_cfg_path):

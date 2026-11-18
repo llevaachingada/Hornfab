@@ -1,6 +1,6 @@
 name: p80x60__ath_core14_corelaw_v7_w1
 family: OSSE
-brief_file: ../../briefs/print_80x60_2026-11-13/room_80x60_700_hf1440_v7.yaml
+brief_file: ../../../briefs/print_80x60_2026-11-13/room_80x60_700_hf1440_v7.yaml
 seed_params:
   r0_mm: 18.0
   a0_deg: 1.9863

@@ -1,0 +1,89 @@
+# PROPOSED by tools/analysis/space_propose.py from C:\Users\hunte\Hrns\hornlab-search\scratch\fable_architecture\space_cards\hl__biradial_es_style_smooth_v7.json
+# Review before use; the original config is unchanged. Changes:
+name: hl__biradial_es_style_smooth_v7__space_v1
+family: FREEFORM
+brief_file: examples\briefs\home_landscape_2026-11-15\room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: typology
+  profile_h:
+    type: biradial
+  profile_v:
+    type: biradial
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: superellipse
+  seed_policy: explicit
+seed_params:
+  L_mm: 255.0
+  h_a_deg: 36.0
+  v_a_deg: 22.5
+  h_rm_mm: 280.0
+  v_rm_mm: 175.0
+  h_n: 5.0
+  v_n: 5.0
+  h_throat_blend_mm: 25.0
+  v_throat_blend_mm: 25.0
+  mouth_exponent: 3.0
+bounds:
+  L_mm:
+    lo: 220.0
+    hi: 320.0
+  h_a_deg:
+    lo: 32.0
+    hi: 37.0
+  v_a_deg:
+    lo: 18.0
+    hi: 24.0
+  h_rm_mm:
+    lo: 260.0
+    hi: 292.0
+  v_rm_mm:
+    lo: 162.0
+    hi: 230.0
+  h_n:
+    lo: 3.0
+    hi: 7.0
+  v_n:
+    lo: 3.0
+    hi: 7.0
+  h_throat_blend_mm:
+    lo: 25.0
+    hi: 25.0
+    search: false
+  v_throat_blend_mm:
+    lo: 25.0
+    hi: 25.0
+    search: false
+  mouth_exponent:
+    lo: 2.2
+    hi: 5.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 96
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+description: 'HOME: Keele Bi-Radial (US4308932A per-plane law), ES-450-style squarish
+  landscape mouth, OS throat blend from the driver exit angle (fixes the throat kink),
+  Keele 0.9 x half-coverage seed angles, closure-coupled bounds | SMOOTH brief (narrowing
+  family)'

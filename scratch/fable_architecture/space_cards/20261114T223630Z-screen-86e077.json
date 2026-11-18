@@ -1,0 +1,400 @@
+{
+ "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261114T223630Z-screen-86e077\\config.yaml",
+ "name": "sab__lecleach_fc540",
+ "family": "FREEFORM",
+ "generator": true,
+ "keys": [
+  "g_T",
+  "g_fc_hz",
+  "g_stop_deg"
+ ],
+ "geometry": {
+  "keys": [
+   "g_T",
+   "g_fc_hz",
+   "g_stop_deg"
+  ],
+  "n_points": 9,
+  "legal_points": 6,
+  "refused_points": [
+   {
+    "x": [
+     0.18284777738153934,
+     0.4156510019674897,
+     0.15155307482928038
+    ],
+    "reason": "base point is not a legal record: generator: GeneratorError: lecleach_exact: S_ii <= 0 (non-positive bracket) at step 1 (l=1.000 mm, S_ii=-3.74828e-07); refuse "
+   },
+   {
+    "x": [
+     0.0715479040518403,
+     0.5000435458496213,
+     0.45763515401631594
+    ],
+    "reason": "base point is not a legal record: generator: GeneratorError: lecleach_exact: S_ii <= 0 (non-positive bracket) at step 1 (l=1.000 mm, S_ii=-1.18109e-06); refuse "
+   },
+   {
+    "x": [
+     0.31086281780153513,
+     0.027658749371767044,
+     0.9485806748270988
+    ],
+    "reason": "base point is not a legal record: generator: GeneratorError: lecleach_exact: S_ii <= 0 (non-positive bracket) at step 1 (l=1.000 mm, S_ii=-1.54979e-06); refuse "
+   }
+  ],
+  "record_points": 3965,
+  "effective_dimension": {
+   "median": 3.0,
+   "min": 2,
+   "max": 3,
+   "searched": 3
+  },
+  "knobs": {
+   "g_T": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 20.240511507758338,
+    "max_rms_mm_per_range": 24.515173199327574,
+    "median_max_disp_mm_per_range": 33.1409672199373,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 1.6475071835044601,
+     "mouth_height_mm": 1.6475071835044601,
+     "depth_mm": -26.747257814650972,
+     "h_wall_angle_mouth_deg": 8.889997344267705,
+     "v_wall_angle_mouth_deg": 8.889997344267705,
+     "diag_wall_angle_mouth_deg": 8.889997344262577,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 1038.3590500064647,
+     "h_halfwidth_mid_mm": 9.071410867206321,
+     "v_halfwidth_mid_mm": 9.071410867206321
+    },
+    "failed_points": 0
+   },
+   "g_fc_hz": {
+    "label": "active",
+    "active_frac": 1.0,
+    "median_rms_mm_per_range": 96.65635215191162,
+    "max_rms_mm_per_range": 179.40598081178615,
+    "median_max_disp_mm_per_range": 145.8324879040664,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": -158.78365735603083,
+     "mouth_height_mm": -158.78365735603083,
+     "depth_mm": -124.89206319792554,
+     "h_wall_angle_mouth_deg": 12.507509348024477,
+     "v_wall_angle_mouth_deg": 12.507509348024477,
+     "diag_wall_angle_mouth_deg": 12.507509348028385,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": -56073.53784588263,
+     "h_halfwidth_mid_mm": -15.671075042379798,
+     "v_halfwidth_mid_mm": -15.671075042379798
+    },
+    "failed_points": 0
+   },
+   "g_stop_deg": {
+    "label": "active",
+    "active_frac": 0.8333333333333334,
+    "median_rms_mm_per_range": 14.328494475073818,
+    "max_rms_mm_per_range": 28.875129809899875,
+    "median_max_disp_mm_per_range": 25.000000000000057,
+    "coupled_with": [],
+    "descriptor_per_range": {
+     "mouth_width_mm": 6.661947073610358,
+     "mouth_height_mm": 6.661947073610358,
+     "depth_mm": 0.45849940118660687,
+     "h_wall_angle_mouth_deg": 76.11366031203019,
+     "v_wall_angle_mouth_deg": 76.11366031203019,
+     "diag_wall_angle_mouth_deg": 76.11366031202735,
+     "mouth_aspect": 0.0,
+     "mouth_area_mm2": 1345.7395239561254,
+     "h_halfwidth_mid_mm": 8.550379630431408,
+     "v_halfwidth_mid_mm": 8.550379630431408
+    },
+    "failed_points": 0
+   }
+  },
+  "links": [],
+  "feasible_from_seed": {
+   "g_T": {
+    "lo_frac": 0.453125,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.390625,
+    "feasible_unit_hi": 1.0
+   },
+   "g_fc_hz": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   },
+   "g_stop_deg": {
+    "lo_frac": 1.0,
+    "hi_frac": 1.0,
+    "feasible_unit_lo": 0.0,
+    "feasible_unit_hi": 1.0
+   }
+  }
+ },
+ "box": {
+  "n": 96,
+  "counts": {
+   "ok": 77,
+   "outside": 0,
+   "refused": 19
+  },
+  "ok_frac": 0.8020833333333334,
+  "per_knob": {
+   "g_T": {
+    "bad_rate_by_slice": [
+     0.631578947368421,
+     0.3,
+     0.05263157894736842,
+     0.0,
+     0.0
+    ],
+    "raise_lo_to_unit": 0.2
+   },
+   "g_fc_hz": {
+    "bad_rate_by_slice": [
+     0.45,
+     0.2222222222222222,
+     0.21052631578947367,
+     0.1,
+     0.0
+    ]
+   },
+   "g_stop_deg": {
+    "bad_rate_by_slice": [
+     0.2,
+     0.1111111111111111,
+     0.25,
+     0.2222222222222222,
+     0.2
+    ]
+   }
+  }
+ },
+ "sigma": {
+  "0.05": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.10": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.15": {
+   "bad_rate": 0.0625,
+   "refused": 3,
+   "outside": 0,
+   "n": 48
+  },
+  "0.20": {
+   "bad_rate": 0.10416666666666667,
+   "refused": 5,
+   "outside": 0,
+   "n": 48
+  },
+  "0.25": {
+   "bad_rate": 0.125,
+   "refused": 6,
+   "outside": 0,
+   "n": 48
+  }
+ },
+ "margin_model": {
+  "available": true,
+  "n_legal": 78,
+  "intercept_mm": 67.54422841036994,
+  "gradient": {
+   "g_T": {
+    "mm_per_range": 25.699290832177525,
+    "mm_per_knob_unit": 36.71327261739646
+   },
+   "g_fc_hz": {
+    "mm_per_range": 132.30621815005554,
+    "mm_per_knob_unit": 0.20046396689402354
+   },
+   "g_stop_deg": {
+    "mm_per_range": -1.475992933009607,
+    "mm_per_knob_unit": -0.012299941108413393
+   }
+  },
+  "r2": 0.9431957159030905,
+  "sign_agreement": 1.0,
+  "binding_axis_counts": {
+   "depth_mm": 78
+  },
+  "inside_frac": 1.0,
+  "constraint": "sum_k g_k * x_k >= -intercept (x in unit coordinates)"
+ },
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261114T223630Z-screen-86e077",
+   "family": "FREEFORM",
+   "top_decile_n": 15,
+   "walls": [
+    {
+     "key": "g_stop_deg",
+     "lo": 120.0,
+     "hi": 240.0,
+     "frac_lo": 1.0,
+     "frac_hi": 0.0,
+     "wall_lo": true,
+     "wall_hi": false
+    },
+    {
+     "key": "g_T",
+     "lo": 0.3,
+     "hi": 1.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    },
+    {
+     "key": "g_fc_hz",
+     "lo": 540.0,
+     "hi": 1200.0,
+     "frac_lo": 0.0,
+     "frac_hi": 0.0,
+     "wall_lo": false,
+     "wall_hi": false
+    }
+   ],
+   "proposal": [
+    {
+     "key": "g_T",
+     "action": "narrow",
+     "new_lo": 0.5513193786,
+     "new_hi": 0.7085242709,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_fc_hz",
+     "action": "narrow",
+     "new_lo": 593.164871963,
+     "new_hi": 696.9810467809,
+     "reason": "top-decile span padded 5%"
+    },
+    {
+     "key": "g_stop_deg",
+     "action": "widen_lo",
+     "new_lo": 108.0,
+     "new_hi": 240.0,
+     "reason": "100% of the top decile within 3% of lo; widen candidate (-10%), gated by physical safety"
+    }
+   ],
+   "wall_rel": 0.03,
+   "wall_frac": 0.5,
+   "note": "proposals are inputs for Group B 'narrow', never automatic config changes"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261114T223630Z-screen-86e077",
+   "family": "FREEFORM",
+   "top_decile_n": 15,
+   "pairs": [
+    {
+     "a": "g_T",
+     "b": "g_fc_hz",
+     "rho": -0.7107142857142856,
+     "fit": {
+      "scale": -244.5354458531114,
+      "offset": 797.3231743162853,
+      "r2": 0.4433369585022179
+     }
+    }
+   ],
+   "cma_directions": [
+    {
+     "rank": 1,
+     "eigenvalue": 1.6311140215905544,
+     "fraction": 0.926123596611684,
+     "keys": [
+      "g_T",
+      "g_fc_hz"
+     ],
+     "loadings": {
+      "g_T": -0.9897464897853603,
+      "g_fc_hz": 0.14256800788853205
+     }
+    },
+    {
+     "rank": 2,
+     "eigenvalue": 0.0950637968530426,
+     "fraction": 0.053975886592680204,
+     "keys": [
+      "g_fc_hz",
+      "g_stop_deg"
+     ],
+     "loadings": {
+      "g_fc_hz": 0.9696403255361145,
+      "g_stop_deg": -0.2019503872784712
+     }
+    },
+    {
+     "rank": 3,
+     "eigenvalue": 0.03504933045763894,
+     "fraction": 0.01990051679563588,
+     "keys": [
+      "g_stop_deg",
+      "g_fc_hz"
+     ],
+     "loadings": {
+      "g_stop_deg": 0.9793568256737799,
+      "g_fc_hz": 0.19867562060030008
+     }
+    }
+   ],
+   "proposed_links": [
+    {
+     "knob_b": "g_fc_hz",
+     "knob_a": "g_T",
+     "scale": -244.5354458531114,
+     "offset": 797.3231743162853,
+     "r2": 0.4433369585022179,
+     "source": "rho_top_decile"
+    }
+   ]
+  }
+ },
+ "recommendations": [
+  {
+   "knob": "g_T",
+   "action": "rebound",
+   "why": "edge slice mostly refused/outside while the middle is not",
+   "proposal": {
+    "raise_lo_to_unit": 0.2
+   },
+   "evidence": {
+    "bad_rate_by_slice": [
+     0.631578947368421,
+     0.3,
+     0.05263157894736842,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  {
+   "knob": "*",
+   "action": "sigma0",
+   "why": "predicted bad-candidate rate <= 15% from the seed",
+   "proposal": {
+    "max_safe_sigma0": 0.25
+   },
+   "evidence": {
+    "0.05": 0.0,
+    "0.10": 0.0,
+    "0.15": 0.0625,
+    "0.20": 0.10416666666666667,
+    "0.25": 0.125
+   }
+  }
+ ]
+}

@@ -1,0 +1,141 @@
+# B1 — MESH CONVERGENCE (owner decision 2026-11-18). PROPOSED ONLY — DO NOT INSERT YET.
+#
+# Queue AFTER the current BO arms, only after owner approval. The orchestrator owns the live night
+# file; this file is a standalone spec (it is also a valid 1-night queue for run_campaign_night.py
+# --dry-run).
+#
+# Scope after the CPU sizing dry run (b1_mesh_feasibility.md):
+#   * fold-warm x2 (epw 6 -> 12): builds at the existing 24 000-DOF screen cap, realized
+#     14 270-15 388 quarter DOF. That is INSIDE the measured 8.9-15.7 k OOM transition, so each
+#     design is a PROBE: the Shared Usage record decides validity (spill -> excluded).
+#   * x3 (epw 18): CAP-BOUND at 24 000 for every design; true size 31.8-49.3 k DOF. NOT QUEUED.
+#   * ext-throat x2/x3: mesher refuses at epw 12/18 (symmetry-plane slivers) and the estimate
+#     (~21.1 k DOF) is over the card ceiling. NOT QUEUED; marked "mesh check infeasible on this
+#     card" in b1_mesh_feasibility.md.
+#
+# One job per design = one fresh process per measurement (AGENTS.md GPU hygiene rule 2), plus:
+#   --teardown-per-design : worker.shutdown(verify=True) after the design; raises if a host lives
+#   --record-vram         : per-design baseline + peak + host dedicated/SHARED usage; spill = fail
+#   run_with_memwatch.py  : independent dedicated/shared record per job
+#   --gain-threshold      : 0.0057 = the smallest non-degenerate finalist J gap in the ten-design
+#                           set (a per-design job cannot derive it from one row)
+# The reference is the stored screen row (no re-solve); the refined solve uses the SAME screen
+# grid. Only cfg.mesh.epw changes.
+night: b1_mesh_2026-11-18
+lane: gpu
+jobs:
+- id: b1_mesh_2f7307c06023_20261118
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/bench/run_with_memwatch.py
+  - --out
+  - runs/nights/b1_mesh_2026-11-18/memwatch/b1_mesh_2f7307c06023_20261118.json
+  - --
+  - .venv/Scripts/python.exe
+  - tools/night_queue/fidelity_pairs.py
+  - --design
+  - runs/20261116T130335Z-screen-ab4fb9:2f7307c06023
+  - --refine-epw-factor
+  - '2'
+  - --teardown-per-design
+  - --record-vram
+  - --gain-threshold
+  - '0.0057'
+  - --out
+  - runs/b1_mesh_2026-11-18
+- id: b1_mesh_507e7257c091_20261118
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/bench/run_with_memwatch.py
+  - --out
+  - runs/nights/b1_mesh_2026-11-18/memwatch/b1_mesh_507e7257c091_20261118.json
+  - --
+  - .venv/Scripts/python.exe
+  - tools/night_queue/fidelity_pairs.py
+  - --design
+  - runs/20261116T130335Z-screen-ab4fb9:507e7257c091
+  - --refine-epw-factor
+  - '2'
+  - --teardown-per-design
+  - --record-vram
+  - --gain-threshold
+  - '0.0057'
+  - --out
+  - runs/b1_mesh_2026-11-18
+- id: b1_mesh_ced63c6a01a1_20261118
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/bench/run_with_memwatch.py
+  - --out
+  - runs/nights/b1_mesh_2026-11-18/memwatch/b1_mesh_ced63c6a01a1_20261118.json
+  - --
+  - .venv/Scripts/python.exe
+  - tools/night_queue/fidelity_pairs.py
+  - --design
+  - runs/20261116T130335Z-screen-ab4fb9:ced63c6a01a1
+  - --refine-epw-factor
+  - '2'
+  - --teardown-per-design
+  - --record-vram
+  - --gain-threshold
+  - '0.0057'
+  - --out
+  - runs/b1_mesh_2026-11-18
+- id: b1_mesh_688ffe811b6a_20261118
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/bench/run_with_memwatch.py
+  - --out
+  - runs/nights/b1_mesh_2026-11-18/memwatch/b1_mesh_688ffe811b6a_20261118.json
+  - --
+  - .venv/Scripts/python.exe
+  - tools/night_queue/fidelity_pairs.py
+  - --design
+  - runs/20261116T130335Z-screen-ab4fb9:688ffe811b6a
+  - --refine-epw-factor
+  - '2'
+  - --teardown-per-design
+  - --record-vram
+  - --gain-threshold
+  - '0.0057'
+  - --out
+  - runs/b1_mesh_2026-11-18
+- id: b1_mesh_78f599e8a1d2_20261118
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/bench/run_with_memwatch.py
+  - --out
+  - runs/nights/b1_mesh_2026-11-18/memwatch/b1_mesh_78f599e8a1d2_20261118.json
+  - --
+  - .venv/Scripts/python.exe
+  - tools/night_queue/fidelity_pairs.py
+  - --design
+  - runs/20261116T130335Z-screen-ab4fb9:78f599e8a1d2
+  - --refine-epw-factor
+  - '2'
+  - --teardown-per-design
+  - --record-vram
+  - --gain-threshold
+  - '0.0057'
+  - --out
+  - runs/b1_mesh_2026-11-18

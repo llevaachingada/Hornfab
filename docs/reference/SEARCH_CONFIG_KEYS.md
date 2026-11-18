@@ -15,6 +15,13 @@ All keys are OPT-IN: absent key = the pre-day-B behaviour byte for byte (pinned 
   semantics: every non-cached evaluation counts, refusals included) or `valid` (only VALID
   evaluations consume budget; the deterministic refusals - invalid_geometry / invalid_envelope /
   mesh_too_large - are free).
+- **Counting rules (verified in `search/cma.py` `budget_count` / `budget_exhausted`, WP 0.8):**
+  a cache hit (`ev.cached`) consumes NO budget and writes no counter in EITHER mode. In `new`,
+  every non-cached evaluation consumes one unit, including deterministic refusals (a refused
+  candidate is a non-cached attempt). In `valid`, only non-error evaluations consume budget and
+  deterministic refusals (`DETERMINISTIC_KINDS`) are free; solve / metrics failures still consume
+  budget (the machine hiccupped, the design was not refused). Do not read "budget including cache
+  outcomes" as cache hits costing budget: they do not.
 - **Detail:** With `budget_counts: valid`, `search.max_attempts` (a positive integer, default
   `4 x budget`) is the hard ceiling on new attempts so a box that refuses everything still stops.
   pycma's fitness-range stops (tolfun / tolfunhist / tolflatfitness) are suppressed in `valid`
@@ -52,7 +59,10 @@ gates:
 - **Detail:** One level only (a parent that is itself linked - chains, and with them cycles - is
   a ConfigError); unknown knobs/parents are a ConfigError; the seed's own value for a linked knob
   is ignored with a warning; `search.ndjson` `params` carry the computed value; `run.json`
-  records the resolved links. Not supported with a `generator:` block.
+  records the resolved links. Since stage-0 WP 0.2 (2026-11-17) a `generator:` block is supported
+  too: the link is applied in the generator's own knob space (`GeneratedSpace.apply_knob_links`),
+  which reduces the searched dimension and reproduces the seed
+  (`tests/test_search_links.py::test_links_with_a_generator_block_load_and_reduce_in_knob_space`).
 - **Example:**
 
 ```yaml
@@ -131,8 +141,30 @@ search:
   surrogate: lq    # default: omitted = plain CMA
 ```
 
-## `search.qd.maes` (B.8)
+## `search.record_gate` (stage-5 WP 3.3, 2026-11-17)
 
+- **Summary:** Opt-in pre-mesh envelope gate driven by the canonical surface record.
+  `shadow` computes the worst signed envelope margin for every evaluated design and adds two
+  ndjson keys (`record_margin_mm`, `record_gate_agrees`) with no other change. `resample` replaces
+  a candidate whose record lies outside the brief envelope BEFORE evaluation (up to 10 fresh
+  samples from the same CMA distribution), so the refusal is never spent; the seed is always
+  evaluated.
+- **Detail:** Absent/empty = today's behaviour byte for byte. Agreement counts only the pre-mesh
+  prediction the gate is meant to make: a design is "refused" for this purpose when its error kind
+  is `invalid_envelope` or `invalid_geometry`; `mesh_too_large`, `solve_failed` and
+  `metrics_failed` are not record disagreements. Any record/geometry failure = unknown = admit.
+  `resample` requires `search.algorithm: cma` and is inert under `infeasible_penalty:
+  resample_strict` (that path already replaces refusals). Switch a lane to `resample` only after
+  its `shadow` report shows zero `record_inside_but_refused` (`tools/analysis/record_shadow.py`).
+- **Validation:** `in ('shadow', 'resample')` or empty; `resample` + `cma_me` = ConfigError.
+- **Example:**
+
+```yaml
+search:
+  record_gate: shadow    # observe only; 'resample' replaces outside candidates before evaluation
+```
+
+## `search.qd.maes` (B.8)
 - **Summary:** Inside an existing `search.qd` block, `maes: {learning_rate, j_threshold}` turns
   the CMA-ME archive into a CMA-MAE soft archive: `GridArchive(learning_rate in [0.01, 0.1],
   threshold_min = -j_threshold)` (the archive maximises -J), emitter ranker `imp` and NO emitter

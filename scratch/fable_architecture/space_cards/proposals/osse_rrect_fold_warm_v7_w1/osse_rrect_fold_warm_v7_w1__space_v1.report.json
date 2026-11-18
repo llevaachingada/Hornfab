@@ -1,0 +1,39 @@
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\osse_rrect_fold_warm_v7_w1\\osse_rrect_fold_warm_v7_w1__space_v1.yaml",
+ "notes": [
+  "REVIEW a0_deg: whole range moves the surface <= 0.42 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise (not fixed; pass --fix-weak or widen by hand)",
+  "linked n = -3.966338 * s + 9.751498",
+  "linked k = -0.093956 * a_deg + 6.22487"
+ ],
+ "before": {
+  "searched": 18,
+  "box": {
+   "ok": 96,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  }
+ },
+ "after": {
+  "searched": 16,
+  "box": {
+   "ok": 32,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

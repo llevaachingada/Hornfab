@@ -1,0 +1,38 @@
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__ath_tritonia_landscape_v7\\hl__ath_tritonia_landscape_v7__space_v1.yaml",
+ "notes": [
+  "fixed morph_exponent at its seed (moves no surface point at any sampled point)",
+  "sigma0 0.2 -> 0.05"
+ ],
+ "before": {
+  "searched": 22,
+  "box": {
+   "ok": 78,
+   "outside": 13,
+   "refused": 5
+  },
+  "sigma": {
+   "0.05": 0.14583333333333334,
+   "0.10": 0.3958333333333333,
+   "0.15": 0.6041666666666666,
+   "0.20": 0.5,
+   "0.25": 0.7708333333333334
+  }
+ },
+ "after": {
+  "searched": 21,
+  "box": {
+   "ok": 26,
+   "outside": 4,
+   "refused": 2
+  },
+  "sigma": {
+   "0.05": 0.20833333333333334,
+   "0.10": 0.375,
+   "0.15": 0.5416666666666666,
+   "0.20": 0.5416666666666666,
+   "0.25": 0.875
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

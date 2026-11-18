@@ -1,0 +1,104 @@
+{
+ "config": "C:\\Users\\hunte\\Hrns\\hornlab-search\\examples\\typologies\\klangfilm_hv_2026-11-16\\configs\\a2_v_only_single_axis.yaml",
+ "name": "klangfilm_hv__a2_v_only_single_axis",
+ "family": "FREEFORM",
+ "generator": true,
+ "keys": [],
+ "geometry": {
+  "keys": [],
+  "n_points": 1,
+  "legal_points": 1,
+  "refused_points": [],
+  "record_points": 3965,
+  "effective_dimension": {
+   "median": 0.0,
+   "min": 0,
+   "max": 0,
+   "searched": 0
+  },
+  "knobs": {},
+  "links": [],
+  "feasible_from_seed": {}
+ },
+ "box": {
+  "n": 0,
+  "counts": {
+   "ok": 0,
+   "outside": 0,
+   "refused": 0
+  },
+  "ok_frac": 0.0,
+  "per_knob": {}
+ },
+ "sigma": {
+  "0.05": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.10": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.15": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.20": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  },
+  "0.25": {
+   "bad_rate": 0.0,
+   "refused": 0,
+   "outside": 0,
+   "n": 48
+  }
+ },
+ "margin_model": {
+  "available": false,
+  "reason": "only 1 legal records"
+ },
+ "data": {
+  "walls": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T015658Z-screen-7ffaad",
+   "family": "FREEFORM",
+   "top_decile_n": 0,
+   "walls": [],
+   "proposal": [],
+   "note": "fewer than 10 valid rows: no top decile (schema.md)"
+  },
+  "links": {
+   "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T015658Z-screen-7ffaad",
+   "family": "FREEFORM",
+   "top_decile_n": 0,
+   "pairs": [],
+   "cma_directions": [],
+   "proposed_links": []
+  }
+ },
+ "recommendations": [
+  {
+   "knob": "*",
+   "action": "sigma0",
+   "why": "predicted bad-candidate rate <= 15% from the seed",
+   "proposal": {
+    "max_safe_sigma0": 0.25
+   },
+   "evidence": {
+    "0.05": 0.0,
+    "0.10": 0.0,
+    "0.15": 0.0,
+    "0.20": 0.0,
+    "0.25": 0.0
+   }
+  }
+ ]
+}

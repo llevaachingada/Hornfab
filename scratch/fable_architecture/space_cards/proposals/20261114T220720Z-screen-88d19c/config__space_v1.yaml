@@ -1,0 +1,151 @@
+# PROPOSED by tools/analysis/space_propose.py from C:\Users\hunte\Hrns\hornlab-search\scratch\fable_architecture\space_cards\20261114T220720Z-screen-88d19c.json
+# Review before use; the original config is unchanged. Changes:
+#   - g_T.lo 0.3 -> 0.44
+name: sab__lecleach_ctrl__space_v1
+family: FREEFORM
+brief_file: briefs\lecleach_rollback_1in_v6.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach
+  n_phi: 15
+  n_s: 32
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 652.6829361872657
+  g_T: 0.8
+  g_stop_deg: 170.0
+bounds:
+  g_fc_hz:
+    lo: 600.0
+    hi: 1200.0
+  g_T:
+    lo: 0.44
+    hi: 1.0
+  g_stop_deg:
+    lo: 120.0
+    hi: 240.0
+target:
+  coverage_h_deg: 90.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 700.0
+  band_hi_hz: 5500.0
+  di_target_db: null
+  di_slope_target: 5.0
+  z_min: 0.7
+  f0_hz: 1200.0
+weights:
+  load_near: 1.0
+  z_smooth: 0.8
+  flat: 0.5
+  rip: 0.8
+  cov_pat: 0.3
+  di_rise: 0.4
+  distd: 0.3
+  diag: 0.0
+mesh:
+  epw: 8.0
+  quadrants: '1'
+  dof_cap_screen: 5000
+  dof_cap_verify: 7000
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cpu
+  distance_m: 2.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+search:
+  algorithm: cma
+  sigma0: 0.25
+  seed: 2302
+  budget: 200
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+brief:
+  name: lecleach_rollback_1in_v6
+  description: Le Cleac'h rollback 90x60, 1-inch, scored with objective v6 loading_smooth
+  driver:
+    exit_radius_mm: 12.7
+    exit_angle_deg: 5.0
+  envelope:
+    max_mouth_w_mm: 520.0
+    max_mouth_h_mm: 420.0
+    max_depth_mm: 260.0
+  symmetry: hv
+  source:
+    cap: auto
+  target:
+    coverage_h_deg: 90.0
+    coverage_v_deg: 60.0
+    band_lo_hz: 700.0
+    band_hi_hz: 5500.0
+    di_target_db: null
+    di_slope_target: 5.0
+    z_min: 0.7
+    f0_hz: 1200.0
+  weights:
+    load_near: 1.0
+    z_smooth: 0.8
+    flat: 0.5
+    rip: 0.8
+    cov_pat: 0.3
+    di_rise: 0.4
+    distd: 0.3
+    diag: 0.0
+  objective:
+    version: 6
+    load_alpha: 1.0
+    pattern_beta: 1.6
+    cov_narrow_ratio: 1.0
+    cov_below_f0: one_sided
+    tolerances:
+      load_near: 0.25
+      z_smooth: 0.15
+      flat: 1.5
+      rip: 2.0
+      cov_pat: 15.0
+      di_rise: 4.0
+      distd: 2.0
+      diag: 4.5
+objective:
+  version: 6
+  load_alpha: 1.0
+  pattern_beta: 1.6
+  cov_narrow_ratio: 1.0
+  cov_below_f0: one_sided
+  tolerances:
+    load_near: 0.25
+    z_smooth: 0.15
+    flat: 1.5
+    rip: 2.0
+    cov_pat: 15.0
+    di_rise: 4.0
+    distd: 2.0
+    diag: 4.5
+feasibility:
+  rule: d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)
+  f0_hz: 1200.0
+  required_mouth_w_mm: 235.1851851851852
+  required_mouth_h_mm: 352.77777777777777
+  envelope_mouth_w_mm: 520.0
+  envelope_mouth_h_mm: 420.0
+  held_coverage_w_deg: 40.705128205128204
+  held_coverage_v_deg: 50.3968253968254
+  feasible_w: true
+  feasible_v: true
+  screen_freqs_below_f0: 5
+  screen_freqs_total: 12
+  verify_freqs_below_f0: 12
+  verify_freqs_total: 25
+  derivation:
+  - knob: g_fc_hz
+    derived_mm: 652.6829361872657
+    applied: 652.6829361872657
+    clamped_to_bound: false
+    note: K-law inverse at the geometric-mean mouth

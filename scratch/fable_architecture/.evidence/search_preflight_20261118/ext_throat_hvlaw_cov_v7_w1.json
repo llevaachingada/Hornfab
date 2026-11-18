@@ -1,0 +1,67 @@
+{
+  "strict": false,
+  "exit_code": 0,
+  "configs": [
+    {
+      "path": "examples\\typologies\\walls_relieved\\ext_throat_hvlaw_cov_v7\\ext_throat_hvlaw_cov_v7_w1.yaml",
+      "name": "p80x60__ext_throat_hvlaw_cov_v7_w1",
+      "family": "OSSE",
+      "generator": null,
+      "searched_keys": [
+        "L_mm",
+        "a_deg",
+        "az_a_cos_amp",
+        "az_a_cos_pow",
+        "az_s_cos2_amp",
+        "morph_rate",
+        "s",
+        "throat_ext_angle_deg",
+        "throat_ext_length_mm"
+      ],
+      "seed_outside_box": [],
+      "seed_key_missing": [],
+      "seed_design_hash": "857a01e265de",
+      "prior_bests": [],
+      "history": null,
+      "sigma": {
+        "config_sigma0": 0.15,
+        "recommended_sigma": null,
+        "median_spread": null,
+        "dims": 9,
+        "expected_hits": null,
+        "min_expected_hits": 3.0,
+        "refusal_fraction": null
+      },
+      "sampling": {
+        "samples": 0,
+        "status": "not sampled",
+        "note": "--samples 0 (default): no mesh was built"
+      },
+      "refusals": {},
+      "graded": {
+        "infeasible_penalty": "resample_strict",
+        "sampled_refusals": 0,
+        "invalid_envelope": 0
+      },
+      "ab": null,
+      "findings": [
+        {
+          "severity": "WARN",
+          "code": "history_unusable",
+          "message": "warm-start history is unusable: runs\\20261115T115015Z-screen-f1258b: warm_start refuses objective version/brief mismatch (run v7, this config v7; set search.warm_start.allow_cross_brief: true to override)",
+          "config": "examples\\typologies\\walls_relieved\\ext_throat_hvlaw_cov_v7\\ext_throat_hvlaw_cov_v7_w1.yaml"
+        }
+      ]
+    }
+  ],
+  "hards": [],
+  "warnings": [
+    {
+      "severity": "WARN",
+      "code": "history_unusable",
+      "message": "warm-start history is unusable: runs\\20261115T115015Z-screen-f1258b: warm_start refuses objective version/brief mismatch (run v7, this config v7; set search.warm_start.allow_cross_brief: true to override)",
+      "config": "examples\\typologies\\walls_relieved\\ext_throat_hvlaw_cov_v7\\ext_throat_hvlaw_cov_v7_w1.yaml"
+    }
+  ],
+  "infos": []
+}

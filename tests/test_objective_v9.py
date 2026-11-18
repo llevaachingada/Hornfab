@@ -112,7 +112,7 @@ def _metrics(freqs, t: Target, *, bw_h=None, bw_v=None, di=None, z=None, on_axis
 def test_v9_key_set_defaults_and_owner_locks():
     assert V9_WEIGHTED_KEYS == ("cov_profile", "rip", "flat", "load", "dislope",
                                 "di_roughness", "flat_cv")
-    assert V9_OPTIONAL_WEIGHTED_KEYS == ("hf_floor",)
+    assert V9_OPTIONAL_WEIGHTED_KEYS == ("hf_floor", "constancy")
     assert V9_UNWEIGHTED_KEYS == ("diag", "distd")
     for k in ("cov_profile", "rip", "flat", "load", "dislope", "di_roughness", "flat_cv",
               "hf_floor", "diag", "distd"):
@@ -496,3 +496,73 @@ def test_k_law_feasibility_uses_the_first_anchor_preferred_deg():
         k / (700.0 * 80.0))
     assert out2["feasibility"]["required_mouth_h_mm"] == pytest.approx(
         k / (700.0 * 50.0))
+
+
+# ------------------------------------------------------------------ stage 1 WP 1.1: constancy
+
+def _const_case():
+    t = _corridor_target(h=[(700.0, 70.0, 60.0, 80.0), (8000.0, 70.0, 60.0, 80.0)],
+                         v=[(700.0, 50.0, 40.0, 60.0), (8000.0, 50.0, 40.0, 60.0)])
+    f = np.geomspace(700.0, 8000.0, 16)
+    x = np.log10(f)
+    bw_h = 75.0 - 8.0 * (x - x.mean()) + 2.0 * np.sin(5 * x)      # narrows, stays in corridor
+    bw_v = 52.0 + 3.0 * np.cos(4 * x)
+    return t, f, x, _metrics(f, t, bw_h=bw_h, bw_v=bw_v), bw_h, bw_v
+
+
+def test_constancy_absent_keeps_j_and_terms_identical():
+    t, f, _, m, _, _ = _const_case()
+    j0, t0 = objective_v9(m, None, True, t, None, _params())
+    j1, t1 = objective_v9(m, None, True, t, None, _params())
+    assert j0 == j1 and t0["constancy"] == 0.0
+    assert "constancy" not in _params().to_block()
+    assert "constancy" not in _params().weighted_keys()
+
+
+def test_constancy_strict_matches_s1_formula():
+    t, f, x, m, bw_h, bw_v = _const_case()
+    p0 = _params(cov_v_weight=0.5)
+    p = _params(cov_v_weight=0.5, constancy={"mode": "strict", "weight": 1.0, "tolerance": 0.25})
+    j0, _ = objective_v9(m, None, True, t, None, p0)
+    j, terms = objective_v9(m, None, True, t, None, p)
+    # S1 (.s1/replay.py): mean((bw - clip(mean, lo, hi))^2) / 25, H + 0.5 V
+    h = np.mean((bw_h - np.clip(bw_h.mean(), 60, 80)) ** 2) / 25.0
+    v = np.mean((bw_v - np.clip(bw_v.mean(), 40, 60)) ** 2) / 25.0
+    assert terms["constancy"] == pytest.approx(h + 0.5 * v, rel=1e-12)
+    assert j - j0 == pytest.approx(h + 0.5 * v, rel=1e-12)
+    assert p.to_block()["constancy"]["mode"] == "strict"
+
+
+def test_constancy_slope_mode_forgives_a_permitted_steady_narrowing():
+    t, f, x, _, _, _ = _const_case()
+    bw_h = 70.0 - 4.0 * (x - x.mean())                    # 4 deg/decade narrowing, no ripple
+    m = _metrics(f, t, bw_h=bw_h, bw_v=np.full(f.size, 50.0))
+    strict = _params(constancy={"mode": "strict", "weight": 1.0, "tolerance": 1.0})
+    slope = _params(constancy={"mode": "slope", "weight": 1.0, "tolerance": 1.0,
+                               "slope_max_deg_per_decade": 5.0})
+    tight = _params(constancy={"mode": "slope", "weight": 1.0, "tolerance": 1.0,
+                               "slope_max_deg_per_decade": 1.0})
+    c_strict = objective_v9(m, None, True, t, None, strict)[1]["constancy"]
+    c_slope = objective_v9(m, None, True, t, None, slope)[1]["constancy"]
+    c_tight = objective_v9(m, None, True, t, None, tight)[1]["constancy"]
+    assert c_slope == pytest.approx(0.0, abs=1e-20)
+    assert 0.0 < c_tight < c_strict
+
+
+@pytest.mark.parametrize("bad,match", [
+    ({"mode": "flat", "weight": 1, "tolerance": 1}, "mode"),
+    ({"mode": "strict", "weight": 1}, "tolerance"),
+    ({"mode": "strict", "weight": -1, "tolerance": 1}, "weight"),
+    ({"mode": "slope", "weight": 1, "tolerance": 1}, "slope_max"),
+    ({"mode": "strict", "weight": 1, "tolerance": 1, "slope_max_deg_per_decade": 3}, "only valid"),
+    ({"mode": "strict", "weight": 1, "tolerance": 1, "extra": 1}, "unknown"),
+])
+def test_constancy_block_is_validated(bad, match):
+    with pytest.raises(ValueError, match=match):
+        _params(constancy=bad)
+
+
+def test_worst_valid_j_includes_constancy_only_when_declared():
+    base = worst_valid_v9_j(_params(), None)
+    p = _params(constancy={"mode": "strict", "weight": 2.0, "tolerance": 4.0})
+    assert worst_valid_v9_j(p, None) == pytest.approx(base + 2.0 * NAN_TERM_FILL / 4.0)

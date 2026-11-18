@@ -1,0 +1,76 @@
+{
+ "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261117T003115Z-screen-4f7cd5",
+ "family": "OSSE",
+ "top_decile_n": 12,
+ "pairs": [
+  {
+   "a": "a0_deg",
+   "b": "az_a_cos_amp",
+   "rho": 0.6993006993006995,
+   "fit": {
+    "scale": 0.6925244567646307,
+    "offset": -21.03510434108054,
+    "r2": 0.4672049981874318
+   }
+  }
+ ],
+ "cma_directions": [
+  {
+   "rank": 1,
+   "eigenvalue": 1.5753318129991114,
+   "fraction": 0.11697380110781386,
+   "keys": [
+    "morph_corner_mm",
+    "az_fold_v_deg",
+    "morph_height_mm"
+   ],
+   "loadings": {
+    "morph_corner_mm": 0.48128559991634007,
+    "az_fold_v_deg": 0.47605793037685507,
+    "morph_height_mm": -0.4079196044206444
+   }
+  },
+  {
+   "rank": 2,
+   "eigenvalue": 1.2440917619432064,
+   "fraction": 0.09237808893376065,
+   "keys": [
+    "az_fold_v_width_deg",
+    "az_a_cos_amp",
+    "a_deg"
+   ],
+   "loadings": {
+    "az_fold_v_width_deg": -0.5122791239394043,
+    "az_a_cos_amp": -0.4953681611723798,
+    "a_deg": -0.4807412670377429
+   }
+  },
+  {
+   "rank": 3,
+   "eigenvalue": 1.1823645253342923,
+   "fraction": 0.08779462947560385,
+   "keys": [
+    "a_deg",
+    "q",
+    "az_a_cos_amp"
+   ],
+   "loadings": {
+    "a_deg": -0.5407213113901466,
+    "q": -0.4772317134957357,
+    "az_a_cos_amp": 0.45564401110492514
+   }
+  }
+ ],
+ "proposed_links": [
+  {
+   "knob_b": "az_a_cos_amp",
+   "knob_a": "a0_deg",
+   "scale": 0.6925244567646307,
+   "offset": -21.03510434108054,
+   "r2": 0.4672049981874318,
+   "source": "rho_top_decile"
+  }
+ ],
+ "tool": "links",
+ "generated_utc": "2026-11-17T20:55:45Z"
+}

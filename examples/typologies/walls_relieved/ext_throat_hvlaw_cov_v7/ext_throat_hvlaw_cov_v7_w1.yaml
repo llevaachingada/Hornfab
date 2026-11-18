@@ -214,4 +214,4 @@ search:
 description: 'HOME 80x60 strict-coverage track: OSSE ext-throat + per-direction wall
   angle a(p) = a_deg + az_a_cos_amp*|cos p|^pow (wider H than V), morph shrinkage
   on'
-brief_file: ../../briefs/print_80x60_2026-11-13/room_80x60_700_hf1440_v7_cov.yaml
+brief_file: ../../../briefs/print_80x60_2026-11-13/room_80x60_700_hf1440_v7_cov.yaml

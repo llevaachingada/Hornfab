@@ -121,7 +121,7 @@ bounds:
   az_fold_h_width_deg:
     lo: 8.0
     hi: 40.0
-brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+brief_file: ../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
 description: 'WARM START: hl__osse_rrect_morph_v7 best (J 3.992, runs/20261115T154322Z-screen-07bea2)
   + meridian fold searched'
 family: OSSE

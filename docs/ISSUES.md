@@ -1,5 +1,286 @@
 # ISSUES
 
+## 2026-11-18 (local orchestrator) - Night truth + data-agreement gate landed; bridge-type _w1 lanes fail the stock analysis path; B1 encoding owner-decided
+
+- DONE (C1, tools): `tools/run_campaign_night.py` + `tools/night_status.py` now record/report per
+  job the rows the job itself created (resume-window counting), BO package progress (read-only
+  sqlite), a log tail and a stop-reason class; "0 evals" is gone for resumed work (verified:
+  `cont_p80_athcore_corelaw_200` 182 rows/159 valid/J 4.8097; `t_trit80_rc2` 80 screen calls).
+  Tests: `tests/test_night_status_truth.py` (13) + 46 regression tests pass.
+- DONE (C2, tools): `space_card._data_agreement` "unknown"/`unconfirmed (n=...)` unless
+  n >= 10; no data-justified link on unknown. Tests: `tests/test_space_card_data_agreement.py`
+  (7). Senior do-not "never claim data disagrees for n < 10" is enforced in the tool now.
+- DONE (queue, live night `cd_rrect_2026-11-17`): owner-approved edits (rrect BO arm ->
+  `c_rrect_100w_rc3` --budget 110; atlas arms to the end; fold-warm held) PLUS a launch-fatal
+  repair: all 12 queued `w_*_200w1` jobs had bare `search` argv[0]; `kind: command` runs argv
+  verbatim, so they would all have died at launch. Fixed (8 stock -> `.venv/Scripts/
+  hornlab-search.exe`, 5 bridge-type -> their `tools/geometry/*_cli.py`). Owner's manual PAUSE
+  removed on the owner's word; night resumed into the BO arms. Queue file is untracked; details
+  in `runs/nights/cd_rrect_2026-11-17/held_and_edited_2026-11-18.md`.
+- DONE (D4 evidence on the fixed state): shape check 9/14; `search_preflight --from-runs`:
+  seed-in-box everywhere, history still refused on every loadable lane (raw brief_file string),
+  so expected hits remain uncomputed; `hl__klangfilm_lame_curved_v1_c200_w1` is `no_headroom`;
+  Crowe marked not-queueable-without-warm_start+reason (append-only) in the decision packet +
+  card.
+- OPEN (owner C5): brief identity by digest instead of the raw `brief_file` string - the 2026-11-17
+  path fix (commits `84339a7`) made the `_w1` configs LOADABLE but cannot restore warm-start/
+  preflight history identity at a different directory depth; only the digest fix can.
+- OPEN (tools, low): the stock analysis path (`space_card`, `shape_check`, `search_preflight`,
+  `DesignSpace.from_config`) refuses the 5 bridge `rows` types (`section_pucker`, `crowe_panel`,
+  `klangfilm_lame`, `rosse_rect`, plus legacy `rolled_*` outside bridges); the night jobs run
+  them via bridge CLIs. Carding those lanes needs either a bridge-install import shim in the
+  analysis path or carding via the bridge CLIs (senior's "5 cardable" ambiguity noted in the
+  handoff).
+- DONE (B1 prep, 2026-11-18): `tools/night_queue/fidelity_pairs.py` now carries three labelled
+  paths — B1f frequency check (renamed; outputs say NOT mesh convergence), B1 mesh-convergence
+  refine mode (same stored screen row as reference, same screen grid, only `cfg.mesh.epw`
+  scaled; refined solve-hash == stored solve-hash verified for all ten), and a CPU mesh-sizing
+  dry run. Realized table in `scratch/fable_architecture/.b1/b1_mesh_feasibility.md`: fold-warm
+  x2 (epw 12) = 14 270-15 388 quarter-DOF, probe-grade (inside the 8.9-15.7 k OOM transition,
+  Shared-Usage spill decides per design); x3 cap-bound/never built for all; ext-throat x2/x3
+  INFEASIBLE on this card (mesher refuses: symmetry-plane slivers; est. ~21.1 k DOF). 24 tests;
+  five per-design job spec `.b1/b1_mesh_night_insert.yaml` PROPOSED, not queued.
+- OPEN (owner, NEW 2026-11-18 senor-directive addendum §5): v9 corridor-mode ripple mask
+  confirmed buggy (`scalar_v9.py:493` passes `hi - lo` as the total inspected angle — a 70-90°
+  corridor is scored over only ±10°). **All v9 corridor-mode second scores are PROVISIONAL**: no
+  ranking, winner-pick or queue decision from v9 corridor numbers until the owner settles the
+  ripple inspection-region policy (preferred edge / guaranteed minimum edge / declared seat
+  zone / other). `scalar_v9.py` untouched while the uncommitted other-author edits exist; any
+  fix is a NEW versioned objective/score identity (existing v9 J meaning never changes). Target
+  mode's `2*preferred` is probably correct per its docstring — verify before changing. v7
+  decisions, the throat sweep (v7) and B1/B1f are unaffected. Parallel read-only evidence
+  E1-E4 (corridor-mask tests, offline rerank, lobe diagnostics, ablation matrix) assigned to
+  the throat agent's isolated clone, delivered to the carrier `evidence_scoring_2026-11-18/`.
+- OPEN (senior/owner): B1 encoding is decided (mesh convergence, not the `verify,finalist`
+  frequency pair - that encoding is B1f); CPU dry-run + feasibility table in progress in
+  `scratch/fable_architecture/.b1/`; GPU slots queue after the BO arms once the owner approves
+  the table. Note: `dof_cap_finalist` does not densify the mesh for these configs (epw/f_max
+  unchanged); a real mesh check needs an epw/f_max refinement path.
+- OPEN (tools, low): `tests/test_night_bo_arm_wrapper.py` (2) monkeypatch `subprocess.call/run`
+  but `tools/night_queue/run_bo_arm.py` has used `Popen` since `1482304` - pre-existing at
+  `1d6ebc8`/`3682173`, untouched.
+- DONE (docs/proposals): plan amendments D5-D10 in `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md`
+  §10.1; corrected C2 explanation + "what J pays for today" table in the decision packet;
+  orchestrator handoff `ORCHESTRATOR_HANDOFF_2026-11-17_LATE.md`. Governance: second-writer
+  commits `f5db35e`/`3682173`; throat-H/V patch set (clone
+  `.claude/worktrees/agent-a527a7d28dc77734a`, tip `5af0048`) integrates after this push +
+  post-drain suite; its GPU steps queue at the end after the BO arms and B1.
+
+## 2026-11-17 (acoustic-truth lane) - WP1-WP3 hardened (independent review + reproduction)
+
+- DONE: static compliance review + fresh-input reproduction of commit f5db35e; all headline claims
+  reproduce on new inputs; 24 repairs (guard order, typed refusals, grid mesh evidence, committed
+  `--parity` mode, mesher-optional existing-mesh, candidate tests on committed YAMLs); tests
+  26+22+20 = 68 passed, 0 failed; published measured values unchanged.
+- OPEN (owner): unchanged from the WP0-WP3 entry below — production home brief (corridor vs point,
+  V onset, DI slope weight, dead band); v9 `preferred`-in-bounds semantics; WP6 pilot scheduling.
+- NOTE: v9 scenario J columns were captured against the uncommitted concurrent
+  `scalar_v9.py`/`evaluate.py`/`config.py` edits; re-run `brief_truth_replay.py scenarios` if that
+  lane commits changed v9 code.
+
+## 2026-11-17 - Pre-approval checks: 14/14 shape-clean, Crowe has no headroom, history unusable
+
+- DONE: shape_check on all 14 changed proposals (14/14 pass: meshes, dof cap, envelope, round
+  coupling). Economics: seed-in-box yes everywhere.
+- OPEN (owner): `hl__crowe_x_osse_cd_v7` proposal is `no_headroom` (seed == prior best) and has no
+  tested sigma0 with bad rate <= 15 %; it needs a declared refinement (warm_start + reason) before a
+  night, or the lane is a re-test.
+- OPEN (senior): `search_preflight --from-runs` returns `history_unusable` ("objective version/brief
+  mismatch (run v7, this config v7)") on every lane with history, so expected in-basin hits cannot be
+  computed. Question in `NOTES_FOR_SENIOR.md` (run selection by name; brief comparison/rewritten
+  brief_file). Tool behaviour unchanged.
+
+## 2026-11-17 - Stage-5 proposals: data rejects every run-backed geometric link
+
+- DONE: `data_agrees` attached to all 29 cards from `links.py` on the latest run; 20/20 run-backed
+  links disagree. The Crowe `g_wrap_deg` and fold-warm `n`/`k` links in the reviewed proposals are
+  WITHDRAWN. OPEN (owner C5/§2): review the remaining proposal changes.
+- OPEN (owner): `b3_soft`'s `g_theta_h1_deg.hi 60 -> 55.3` trim is sampling-sensitive (fires at a
+  64-point box, not at 96: top slice 47 %). Decide on the older evidence or wait.
+- OPEN (owner): the `_w1` fold-warm proposal keeps two links with `data_agrees: unknown` (no run);
+  needs a run or a 2-run A/B before approval.
+- OPEN (owner): `hl__crowe_x_osse_cd_v7` has **no tested sigma0 with predicted bad rate ≤ 15 %**
+  (23/96 box points refused); its bounds trim is a candidate but the lane is refusal-dominated.
+- OPEN (owner): categorical split for `ath_core.yaml` + 4 `rear_density` `ath_like_rear*` (3 configs
+  per source, 15 files) - see `OWNER_DECISIONS_PACKET_2026-11-17.md` §3.
+
+## 2026-11-17 - Verification findings (local orchestrator, Windows checkout)
+
+- OPEN (owner): **12 `examples/typologies/walls_relieved/*/*_w1.yaml` do not load.** `brief_file:
+  '../../briefs/...'` resolves to `examples/typologies/briefs/`; the briefs are at `examples/briefs/`,
+  so the path is one `../` short. These are 12 jobs queued in `cd_rrect_2026-11-17`; they will fail at
+  config load. Pre-existing (`530f4cc`). No config edited - a config change needs owner approval.
+- OPEN (orchestrator/owner): **10 generator-route lanes cannot be space-carded** -
+  `DesignSpace.from_config` refuses `rows` types `rosse_rect`, `rolled_rect`,
+  `rolled_rect_pucker`, `crowe_panel`, `klangfilm_lame` ("unknown rows type") while the mesher
+  registry accepts them; those lanes run only through `tools/geometry/*_cli.py`. Pre-existing
+  (`main:hornlab_search/design/generators/grid.py:914-916`).
+- OPEN: **record shadow could not build a record for 429 / 2055 designs** (`route: null`),
+  concentrated in `rosse_rect` r120/r50 and the two `klangfilm_lame` runs. A `record_gate` switch
+  cannot be proposed for those lanes until `record_for_design` covers their routes.
+- OPEN: **the one-command evidence driver is ~10 h on the full `runs\2026111*` glob** (native route
+  ~3-4 s per design). This pass used a bounded 22-run set (the live lanes) instead.
+- OPEN (owner): the handoff's "three known pre-existing failures" is incomplete - `main` also fails
+  `tests/test_objective_v8.py::test_v8_key_set_is_v4_minus_load_plus_the_extras`,
+  `tests/test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  and the two `tests/test_night_bo_arm_wrapper.py` tests. All four files are unchanged on this branch.
+- DONE: the two branch-caused test failures are repaired (`test_targets` excludes the WP 7.1 data
+  file; `test_search_qd_failure_isolation` asserts the WP 0.2 linked-space reduction).
+- DONE: `search.record_gate`, `space_card` `data_agrees`, `--mode finalist` wiring (all opt-in;
+  `screen`/`verify`/`final` unchanged).
+
+## 2026-11-17 - Acoustic-truth master plan WP0-WP3 landed
+
+- DONE: master plan `docs/research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md` + index links;
+  WP1 mesh truth (12 cases, prescribed p99 ≤ 0.1286 mm vs native floor 0.014–0.024 mm, FABLE v2 12/12,
+  mesh-surface rank 4); WP2 report-only pattern quality (18 fixtures, 3 stored winners, legacy/DI parity
+  0.0/9e-16); WP3 brief-truth replay (identity Δ=0.0, five NOT-QUEUED v9 corridor candidates, grid sd
+  0.208→0.19 interpolated).
+- OPEN (owner): approve a production home brief (v9 corridor vs point, V onset 700/1000/1250, DI slope
+  weight, dead band) per `docs/evidence/HOME_CROWE_V9_OFFLINE_CANDIDATES_2026-11-17.md`; WP6 pilot
+  authorization is separate and requires GPU scheduling approval.
+- OPEN (scoring semantics): v9 corridor `preferred_deg` contributes nothing inside `[min,max]` — decide
+  whether preferred should score in-bounds.
+- OPEN (optional): WP4 provenance/envelope report (master plan §WP4) not done.
+
+## 2026-11-17 - Handoff to the local orchestrator
+
+- OPEN (orchestrator): follow `ORCHESTRATOR_HANDOFF_2026-11-17.md` §2-§4.
+- OPEN (owner): review the four `__space_v1` proposals.
+
+## 2026-11-17 - Stage 5 core landed (parameter spaces)
+
+- DONE: sensitivity module, space cards, proposals. OPEN (orchestrator, local): cards for every
+  active lane; read each proposal's seed shift and before/after; owner approves config edits;
+  `--run` evidence from walls/links on each lane's latest run; constraint-aware CMA repair (the
+  margin model is not yet usable by search).
+- OPEN: WP 2.1 wiring (CLI `--mode finalist`, GUI modes, evaluate/runner dispatch).
+- OPEN: two legacy configs no longer load at HEAD (`hl__klangfilm_lame_curved_v1.yaml`,
+  `hl__rolled_es_spiral_v7.yaml`: unknown rows type) - pre-existing, found while carding.
+
+## 2026-11-17 - Plan status table
+
+- DONE: plan §10 status table. OPEN: WP 6.1 (extend offline_scores beyond ATH/v4).
+
+## 2026-11-17 - WP 4.2/4.3 analysis ready
+
+- DONE: rule implementation. OPEN: needs the solves (owner C6).
+
+## 2026-11-17 - WP 4.2/4.3 runnable (needs GPU + owner approval)
+
+- DONE: record body family + U3 job writer. OPEN (owner C6): approve ~2 + 12-16 solves; pick the host
+  design (best stored biradial or ext-throat) and run `tools/analysis/u3_jobs.py` on it.
+
+## 2026-11-17 - Evidence driver ready for the owner's machine
+
+- OPEN (owner, Windows): `.venv\\Scripts\\python.exe tools\\analysis\\senior_plan_evidence.py --runs-glob "runs\\2026111*" --u3-lane hl__biradial_es_style_v7 --u3-lane hl__ext_throat_hvlaw_v7 [--brief <v9 brief>]`.
+
+## 2026-11-17 - Stage 5 WP 5.2 warning landed
+
+- OPEN (owner): split `ath_core.yaml` and the 4 `ath_like_rear*` study configs per `morph_target`.
+
+## 2026-11-17 - Stage 7 WP 7.1 done (protected lanes)
+
+- DONE: protected-lane file + advisory-only watchdog for listed lanes.
+- OPEN (owner C5): confirm the list (`status: proposed`); decide the 4 no-evidence lanes; decide
+  whether hard refusal storms in protected lanes should still stop (today: advisory only).
+
+## 2026-11-17 - Stage 1 WP 1.4/1.5 tool landed
+
+- DONE: rescore + floor tool. OPEN: run on Windows once the owner's C1-C3 brief exists (or on the
+  S1 placeholder brief to reproduce N3: expected sd ~0.11 J top-28 for v9 at 18 vs 29 frequencies).
+
+## 2026-11-17 - Stage 3 WP 3.3/3.4 tool landed
+
+- DONE: record shadow gate + history-record tool. OPEN: run it over the ~75 home-landscape runs on
+  the Windows checkout and read the disagreement counts before any gate switch.
+
+## 2026-11-17 - Stage 0 WP 0.5 done (GRID extent)
+
+- DONE: per-plane GRID extent estimate; false refusals 3 -> 1 of 64, no admitted design violates.
+- OPEN (pre-existing, not ours): `tests/test_gui_preview_shape.py` plughorn-face and
+  typology-link tests fail at `1d6ebc8`.
+
+## 2026-11-17 - Stage 4 WP 4.1 CPU stage done on a seed host
+
+- DONE: record-edit module + real point-grid meshes for control and 7 variants (biradial seed).
+- OPEN (owner): U3 host pick after the same run on the best stored biradial / ext-throat designs
+  (needs `runs/`); WP 4.2 (2 solves) and B2 (12-16 solves) need C6 approval.
+- OPEN (pre-existing): `tests/test_mesh_build_grid.py::test_grid_self_approach_classifies_invalid_geometry_and_is_memoized`
+  fails at `1d6ebc8` too (EvalContext.solve_cache_root is None).
+
+## 2026-11-17 - Stage 1 WP 1.2 done (dense-grid scoring)
+
+- DONE: opt-in v9 `score_grid`. OPEN: reproduce N3's 58-pair numbers with the packaged path on the
+  Windows machine (needs `runs/study-*`); WP 1.3-1.5 wait on owner C1-C3.
+
+## 2026-11-17 - Stage 1 WP 1.1 done (constancy mechanism)
+
+- DONE: opt-in v9 constancy term (off by default). OPEN (owner C2): strict, slope-limited or none
+  for the home brief; the slope bound if slope-limited.
+
+## 2026-11-17 - Stage 3 WP 3.1/3.2 landed (record module)
+
+- DONE: `hornlab_search/geometry/record.py` + 11 offline tests.
+- OPEN: mesh-agreement test (contract T2) on the six contract lanes needs `runs/` + gmsh (Windows);
+  ownership assignment for `geometry/`; WP 3.3 shadow gate and WP 3.4 history records next.
+
+## 2026-11-17 - Stage 0 WP 0.2 done (generator links)
+
+- DONE: `search.links` for generator-block configs (knob-space links). Unblocks coupling for the
+  grid/rolled/Klangfilm families (stage 5.1).
+
+## 2026-11-17 - Stage 0: WP 0.1 and WP 0.4 done
+
+- DONE: WP 0.1 refusal taxonomy (post-mesh envelope and prefixed generator envelope errors coded
+  `invalid_envelope`); WP 0.4 replay dispatches v9 with production DI. WP 0.3/0.6/0.7 merged.
+- OPEN: real-mesh verification of 0.1 on the Windows machine (gmsh needs libGLU, absent here);
+  parity check of 0.4 against stored v9 rows (needs `runs/`); WP 0.2, 0.5, 0.8, 0.9 and stage 3.1.
+
+## 2026-11-17 - Stage-0 WP 0.3 / 0.6 / 0.7 implemented (offline)
+
+- DONE: night-runner restart idempotency (0.6); watchdog stop `best_J` + per-kind outcome counts (0.7);
+  cohort gate by objective identity instead of hard v4 (0.3). Offline tests added.
+- OPEN: expose/document watchdog `pin_min_valid` / `pin_frac` / `pin_count` (rest of 0.7); replay of
+  the 38 historical stops is not run (historical records are never rewritten).
+## 2026-11-17 - Fable senior review: reserved decisions taken; architecture and staged plan written
+
+- DONE (senior reviewer): lane review confirmed/amended item by item; generator direction decided
+  (plural specialist generators, one shared description; no unified backbone); search design decided
+  (within-lane BoTorch/CMA-ES, no cross-family model); staged plan written with gates.
+  `scratch/fable_architecture/FABLE_SENIOR_REVIEW_2026-11-17.md`,
+  `scratch/fable_architecture/ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md`. Docs only.
+- CLOSED: the 2026-11-17 lane-review OPEN item "senior reviewer: confirm, amend or overrule; write the
+  staged plan; decide the generator direction". U2 closed; B3 and B5 withdrawn.
+- OPEN (owner): C1-C4 scoring values for the home brief; C5 protected-list confirmation (4 lanes with
+  no request evidence); C6 solve budget (B1 20, record-route equivalence 2, B2 12-16, B6 owner's
+  choice); provenance rule; envelope convention; U3 host pick (ext-throat or biradial) after the CPU
+  variant stage.
+- OPEN (owner): commit `A4_GRID_INDEPENDENT_SCORE.md`, `A5_SOLVER_CALL_TIMING.md`,
+  `A9_CORRIDOR_VS_TERM_SET.md`, `X1_ADDENDUM_KLANGFILM_PROVENANCE.md` and their `.a4/`/`.a9/` script
+  folders from the Windows checkout; the handoff cites them but no commit contains them.
+- OPEN (implementation, ready for task files): stage 0 WP 0.1-0.8 (outcome taxonomy and prefix bug at
+  `search/evaluate.py:1562`; generator `search.links`; cohort gate by score identity; parity-exact v9
+  replay; GRID extent false-refusal count; night-runner restart idempotency; watchdog best_J and
+  outcome classes; doc truths), WP 1.2 dense-grid score identity, WP 2.1 fidelity tiers, WP 3.1-3.2
+  record module (needs an owner path assignment for the new module).
+- PARKED with reopen conditions: U1-bis, cross-family predictor, supervisor acting on J, QD-first,
+  oversize exploration, frequency staging, adjoint freeform (plan §9).
+## 2026-11-17 - Stage 0 WP 0.8 / WP 0.9 (metadata) implemented
+
+- DONE: WP 0.8 doc truths (queue.ps1 live-reload comment, `budget_counts` rules, ddof note in
+  `docs/reference/OBJECTIVE_STD_CONVENTIONS.md`) and the E-012 `mode` guard with test.
+- DONE: WP 0.9 additive recipe metadata (`design/recipe_meta.py`, generator provenance block).
+- OPEN: `search/evaluate.py` `_persist` should write `recipe_metadata` for non-generator designs
+  (file owned by another agent; NOTES_FOR_SENIOR). OPEN (owner): the `record_digest` /
+  `kernel_sha256` rule and envelope convention; legacy-bridge classification (rest of WP 0.9).
+## 2026-11-17 - WP 2.1 finalist fidelity tier (config resolution done; CLI/evaluate wiring open)
+
+- DONE: `finalist` mode resolves in config (>= 29 freqs, 2x screen DOF cap, own mesh/solve identity),
+  budget profile `fidelity-ladder-10`, offline tests; screen/verify unchanged.
+- OPEN: expose `finalist` in CLI `--mode` and gui SEARCH_MODES; evaluate/runner dispatch (files owned
+  by other agents); WP 2.2 B1 (20 solves) and WP 2.3 floor not started.
+
 ## 2026-11-17 - Lane review of the Fable corpus delivered; decisions reserved to the senior reviewer and owner
 
 - DONE (lane agent, lower-cost): full-corpus review handed to the senior reviewer

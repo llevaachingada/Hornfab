@@ -1,0 +1,111 @@
+# PROPOSED by tools/analysis/space_propose.py from C:\Users\hunte\Hrns\hornlab-search\scratch\fable_architecture\space_cards\rf__section_axial_home_smooth_v8.json
+# Review before use; the original config is unchanged. Changes:
+#   - REVIEW sigma0: no tested value kept the predicted bad rate <= 15 %
+name: rf__section_axial_home_smooth_v8__space_v1
+family: FREEFORM
+brief_file: examples\briefs\home_landscape_2026-11-15\room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: rolled_family_section_v1
+    mode: axial
+  seed_policy: explicit
+  span: quarter
+  n_phi: 49
+  n_s: 96
+  wall_thickness_mm: 3.0
+seed_params:
+  g_width_mm: 599.2
+  g_height_mm: 278.7
+  g_depth_mm: 270.0
+  g_h_depth_scale: 1.043
+  g_crown_mm: 36.17
+  g_throat_blend_mm: 20.0
+  g_junction_power: 16.01
+  g_inward_h_mm: 0.0
+  g_inward_v_mm: 0.0
+  g_axial_h_mm: 6.78
+  g_axial_v_mm: 0.0
+  g_relief_start_s: 0.3
+  g_relief_peak_s: 0.8
+  g_relief_end_s: 0.96
+bounds:
+  g_width_mm:
+    lo: 480.0
+    hi: 600.0
+  g_height_mm:
+    lo: 220.0
+    hi: 420.0
+  g_depth_mm:
+    lo: 170.0
+    hi: 300.0
+  g_h_depth_scale:
+    lo: 0.9
+    hi: 1.1
+  g_crown_mm:
+    lo: 10.0
+    hi: 43.0
+  g_throat_blend_mm:
+    lo: 20.0
+    hi: 20.0
+    search: false
+  g_junction_power:
+    lo: 16.0
+    hi: 48.0
+  g_inward_h_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_inward_v_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_axial_h_mm:
+    lo: 0.0
+    hi: 12.0
+  g_axial_v_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_relief_start_s:
+    lo: 0.3
+    hi: 0.3
+    search: false
+  g_relief_peak_s:
+    lo: 0.8
+    hi: 0.8
+    search: false
+  g_relief_end_s:
+    lo: 0.96
+    hi: 0.96
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 10000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 80
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: flat
+description: 'HOME section family: size/depth/H-V depth split/crown/junction searched,
+  axial H/V mouth pucker as a secondary rim/diagonal lever; 25-eval pilot is coarse
+  for 7 knobs | v8: vertical pucker off, junction/crown/H-depth re-opened | SMOOTH
+  brief (narrowing family)'

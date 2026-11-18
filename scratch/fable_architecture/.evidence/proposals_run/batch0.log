@@ -1,0 +1,373 @@
+batch 0: 10 cards
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\20261114T015916Z-screen-db8e2f\\config__space_v1.yaml",
+ "notes": [
+  "REVIEW a0_deg: whole range moves the surface <= 0.97 mm (below the ~1 mm mesher fit): CMA spends a dimension on mesh noise (not fixed; pass --fix-weak or widen by hand)",
+  "fixed morph_exponent at its seed (moves no surface point at any sampled point)",
+  "REVIEW sigma0: no tested value kept the predicted bad rate <= 15 %"
+ ],
+ "before": {
+  "searched": 15,
+  "box": {
+   "ok": 33,
+   "outside": 62,
+   "refused": 1
+  },
+  "sigma": {
+   "0.05": 0.375,
+   "0.10": 0.5416666666666666,
+   "0.15": 0.5625,
+   "0.20": 0.625,
+   "0.25": 0.8125
+  }
+ },
+ "after": {
+  "searched": 14,
+  "box": {
+   "ok": 11,
+   "outside": 20,
+   "refused": 1
+  },
+  "sigma": {
+   "0.05": 0.16666666666666666,
+   "0.10": 0.625,
+   "0.15": 0.8333333333333334,
+   "0.20": 0.5,
+   "0.25": 0.75
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK 20261114T015916Z-screen-db8e2f 132s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\20261115T020650Z-screen-22931c\\config__space_v1.yaml",
+ "notes": [
+  "fixed morph_exponent at its seed (moves no surface point at any sampled point)",
+  "sigma0 0.15 -> 0.1"
+ ],
+ "before": {
+  "searched": 18,
+  "box": {
+   "ok": 18,
+   "outside": 50,
+   "refused": 28
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.125,
+   "0.15": 0.3958333333333333,
+   "0.20": 0.5416666666666666,
+   "0.25": 0.5625
+  }
+ },
+ "after": {
+  "searched": 17,
+  "box": {
+   "ok": 11,
+   "outside": 13,
+   "refused": 8
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.041666666666666664,
+   "0.15": 0.4166666666666667,
+   "0.20": 0.375,
+   "0.25": 0.6666666666666666
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK 20261115T020650Z-screen-22931c 1087s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\a2_v_only_single_axis\\a2_v_only_single_axis__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 0,
+  "box": {
+   "ok": 0,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  }
+ },
+ "after": {
+  "searched": 0,
+  "box": {
+   "ok": 0,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK a2_v_only_single_axis 134s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\b3_soft\\b3_soft__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 12,
+  "box": {
+   "ok": 81,
+   "outside": 0,
+   "refused": 15
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.10416666666666667,
+   "0.25": 0.1875
+  }
+ },
+ "after": {
+  "searched": 12,
+  "box": {
+   "ok": 27,
+   "outside": 0,
+   "refused": 5
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.125,
+   "0.25": 0.08333333333333333
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK b3_soft 7s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__ath_tritonia_landscape_v8\\hl__ath_tritonia_landscape_v8__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 14,
+  "box": {
+   "ok": 92,
+   "outside": 0,
+   "refused": 4
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  }
+ },
+ "after": {
+  "searched": 14,
+  "box": {
+   "ok": 30,
+   "outside": 0,
+   "refused": 2
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK hl__ath_tritonia_landscape_v8 56s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__biradial_es_style_smooth_v7\\hl__biradial_es_style_smooth_v7__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 8,
+  "box": {
+   "ok": 96,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  }
+ },
+ "after": {
+  "searched": 8,
+  "box": {
+   "ok": 32,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK hl__biradial_es_style_smooth_v7 117s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__crowe_x_square_v7\\hl__crowe_x_square_v7__space_v1.yaml",
+ "notes": [
+  "REVIEW sigma0: no tested value kept the predicted bad rate <= 15 %"
+ ],
+ "before": {
+  "searched": 8,
+  "box": {
+   "ok": 33,
+   "outside": 0,
+   "refused": 63
+  },
+  "sigma": {
+   "0.05": 0.75,
+   "0.10": 0.6666666666666666,
+   "0.15": 0.5625,
+   "0.20": 0.5208333333333334,
+   "0.25": 0.6666666666666666
+  }
+ },
+ "after": {
+  "searched": 8,
+  "box": {
+   "ok": 10,
+   "outside": 0,
+   "refused": 22
+  },
+  "sigma": {
+   "0.05": 0.7083333333333334,
+   "0.10": 0.5,
+   "0.15": 0.625,
+   "0.20": 0.4583333333333333,
+   "0.25": 0.7083333333333334
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK hl__crowe_x_square_v7 133s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__klangfilm_lame_curved_v1_c200\\hl__klangfilm_lame_curved_v1_c200__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 6,
+  "box": {
+   "ok": 96,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0625
+  }
+ },
+ "after": {
+  "searched": 6,
+  "box": {
+   "ok": 32,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK hl__klangfilm_lame_curved_v1_c200 170s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__lecleach_iwata_ar_landscape_v7\\hl__lecleach_iwata_ar_landscape_v7__space_v1.yaml",
+ "notes": [],
+ "before": {
+  "searched": 4,
+  "box": {
+   "ok": 94,
+   "outside": 0,
+   "refused": 2
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.020833333333333332
+  }
+ },
+ "after": {
+  "searched": 4,
+  "box": {
+   "ok": 32,
+   "outside": 0,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.0,
+   "0.10": 0.0,
+   "0.15": 0.0,
+   "0.20": 0.0,
+   "0.25": 0.0
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK hl__lecleach_iwata_ar_landscape_v7 12s
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\rf__section_axial_home_smooth_v8\\rf__section_axial_home_smooth_v8__space_v1.yaml",
+ "notes": [
+  "REVIEW sigma0: no tested value kept the predicted bad rate <= 15 %"
+ ],
+ "before": {
+  "searched": 7,
+  "box": {
+   "ok": 91,
+   "outside": 4,
+   "refused": 1
+  },
+  "sigma": {
+   "0.05": 0.7916666666666666,
+   "0.10": 0.5833333333333334,
+   "0.15": 0.5833333333333334,
+   "0.20": 0.5416666666666666,
+   "0.25": 0.6875
+  }
+ },
+ "after": {
+  "searched": 7,
+  "box": {
+   "ok": 31,
+   "outside": 1,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.6666666666666666,
+   "0.10": 0.7916666666666666,
+   "0.15": 0.5833333333333334,
+   "0.20": 0.4583333333333333,
+   "0.25": 0.625
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}
+OK rf__section_axial_home_smooth_v8 42s
+batch done

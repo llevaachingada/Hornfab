@@ -1,0 +1,3439 @@
+{
+  "cells": [
+    {
+      "J": 9.96094006749582,
+      "brief_hash": "be0df894601ef065",
+      "brief_name": "home_v9_corridor_h90_70_v700",
+      "brief_path": "scratch\\home_v9_offline_2026-11-17\\home_v9_corridor_h90_70_v700.yaml",
+      "design_hash": "22365b569be9",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 48.09627511190587,
+          "bw_v_deg": 35.17936926711795,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "objective.bw8k_floor refused under v9; the corridor min_deg is the HF narrow-side constraint; no hf_floor declared; measured (unscored) BW @ 8000 Hz = 48.10 H / 35.18 V deg",
+        "bw8k_floor": null,
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": null,
+          "level_scored": false,
+          "level_source": null,
+          "slope_db_per_dec": 0.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": false
+        },
+        "diag_scored": false,
+        "distd_weighted": 0.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 8.163095566628673,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 13,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 700.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 700.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": [
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 400.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 500.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 643.33,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 88.62378632242303,
+            "hz": 827.75,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 86.55445621292866,
+            "hz": 1065.04,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 84.4851477376484,
+            "hz": 1370.35,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 82.41584754840991,
+            "hz": 1763.18,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.34651195088198,
+            "hz": 2268.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 79.31292912368428,
+            "hz": 2573.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 78.27722450200326,
+            "hz": 2918.96,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 77.24260344956966,
+            "hz": 3311.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 76.20792589326003,
+            "hz": 3755.72,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 75.1735816831316,
+            "hz": 4260.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 74.13860817811671,
+            "hz": 4832.36,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 72.06929954265817,
+            "hz": 6217.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 70.0,
+            "hz": 8000.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          }
+        ]
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "crowe_es600",
+      "metrics_recomputed": true,
+      "objective_version": 9,
+      "parity_delta": null,
+      "rank_in_brief": 1,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T205453Z-screen-32f7c4",
+      "score_id": "90c494c44e417e8ae8f82c186d3c38d4e3139d7a53b2159eb831e3eb2c5a1b28",
+      "source": "v9-scenario",
+      "status": "exact_complete",
+      "stored_J": 16.91817613526687,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 1.1303440717864939,
+          "key": "cov_profile",
+          "normalized": 1.1303440717864939,
+          "raw": 3.3910322153594814,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.005528762607446189,
+          "key": "rip",
+          "normalized": 0.005528762607446189,
+          "raw": 0.005528762607446189,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.18686444101512534,
+          "key": "flat",
+          "normalized": 0.3737288820302507,
+          "raw": 0.560593323045376,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 7.404014358879189,
+          "key": "dislope",
+          "normalized": 7.404014358879189,
+          "raw": 66.6361292299127,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.9393230621054578,
+          "key": "di_roughness",
+          "normalized": 0.9393230621054578,
+          "raw": 0.4696615310527289,
+          "tolerance": 0.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.29486537110210703,
+          "key": "flat_cv",
+          "normalized": 0.29486537110210703,
+          "raw": 0.4422980566531606,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "diag",
+          "normalized": null,
+          "raw": 7.421058514202903,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "distd",
+          "normalized": null,
+          "raw": 2.356360678281651,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        }
+      ]
+    },
+    {
+      "J": 9.57672093289535,
+      "brief_hash": "2c96b5ba30bfed37",
+      "brief_name": "home_v9_corridor_h90_70_v1000",
+      "brief_path": "scratch\\home_v9_offline_2026-11-17\\home_v9_corridor_h90_70_v1000.yaml",
+      "design_hash": "22365b569be9",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 48.09627511190587,
+          "bw_v_deg": 35.17936926711795,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "objective.bw8k_floor refused under v9; the corridor min_deg is the HF narrow-side constraint; no hf_floor declared; measured (unscored) BW @ 8000 Hz = 48.10 H / 35.18 V deg",
+        "bw8k_floor": null,
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": null,
+          "level_scored": false,
+          "level_source": null,
+          "slope_db_per_dec": 0.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": false
+        },
+        "diag_scored": false,
+        "distd_weighted": 0.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 8.163095566628673,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 12,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 1000.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 1000.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": [
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 400.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 500.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 643.33,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 88.62378632242303,
+            "hz": 827.75,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 86.55445621292866,
+            "hz": 1065.04,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 84.4851477376484,
+            "hz": 1370.35,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 82.41584754840991,
+            "hz": 1763.18,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.34651195088198,
+            "hz": 2268.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 79.31292912368428,
+            "hz": 2573.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 78.27722450200326,
+            "hz": 2918.96,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 77.24260344956966,
+            "hz": 3311.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 76.20792589326003,
+            "hz": 3755.72,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 75.1735816831316,
+            "hz": 4260.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 74.13860817811671,
+            "hz": 4832.36,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 72.06929954265817,
+            "hz": 6217.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 70.0,
+            "hz": 8000.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          }
+        ]
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "crowe_es600",
+      "metrics_recomputed": true,
+      "objective_version": 9,
+      "parity_delta": null,
+      "rank_in_brief": 1,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T205453Z-screen-32f7c4",
+      "score_id": "53cee862f6cdb970998328043a4638c56dc223fbbdf8ea5f209c7e0260753de0",
+      "source": "v9-scenario",
+      "status": "exact_complete",
+      "stored_J": 16.91817613526687,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 0.7461249371860249,
+          "key": "cov_profile",
+          "normalized": 0.7461249371860249,
+          "raw": 2.238374811558075,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.005528762607446189,
+          "key": "rip",
+          "normalized": 0.005528762607446189,
+          "raw": 0.005528762607446189,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.18686444101512534,
+          "key": "flat",
+          "normalized": 0.3737288820302507,
+          "raw": 0.560593323045376,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 7.404014358879189,
+          "key": "dislope",
+          "normalized": 7.404014358879189,
+          "raw": 66.6361292299127,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.9393230621054578,
+          "key": "di_roughness",
+          "normalized": 0.9393230621054578,
+          "raw": 0.4696615310527289,
+          "tolerance": 0.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.29486537110210703,
+          "key": "flat_cv",
+          "normalized": 0.29486537110210703,
+          "raw": 0.4422980566531606,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "diag",
+          "normalized": null,
+          "raw": 7.421058514202903,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "distd",
+          "normalized": null,
+          "raw": 2.356360678281651,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        }
+      ]
+    },
+    {
+      "J": 9.27381664371564,
+      "brief_hash": "b78524fda8b6ac86",
+      "brief_name": "home_v9_corridor_h90_70_v1250",
+      "brief_path": "scratch\\home_v9_offline_2026-11-17\\home_v9_corridor_h90_70_v1250.yaml",
+      "design_hash": "22365b569be9",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 48.09627511190587,
+          "bw_v_deg": 35.17936926711795,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "objective.bw8k_floor refused under v9; the corridor min_deg is the HF narrow-side constraint; no hf_floor declared; measured (unscored) BW @ 8000 Hz = 48.10 H / 35.18 V deg",
+        "bw8k_floor": null,
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": null,
+          "level_scored": false,
+          "level_source": null,
+          "slope_db_per_dec": 0.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": false
+        },
+        "diag_scored": false,
+        "distd_weighted": 0.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 8.163095566628673,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 11,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 1250.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 1250.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": [
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 400.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 500.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 643.33,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 88.62378632242303,
+            "hz": 827.75,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 86.55445621292866,
+            "hz": 1065.04,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 84.4851477376484,
+            "hz": 1370.35,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 82.41584754840991,
+            "hz": 1763.18,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.34651195088198,
+            "hz": 2268.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 79.31292912368428,
+            "hz": 2573.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 78.27722450200326,
+            "hz": 2918.96,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 77.24260344956966,
+            "hz": 3311.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 76.20792589326003,
+            "hz": 3755.72,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 75.1735816831316,
+            "hz": 4260.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 74.13860817811671,
+            "hz": 4832.36,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 72.06929954265817,
+            "hz": 6217.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 70.0,
+            "hz": 8000.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          }
+        ]
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "crowe_es600",
+      "metrics_recomputed": true,
+      "objective_version": 9,
+      "parity_delta": null,
+      "rank_in_brief": 1,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T205453Z-screen-32f7c4",
+      "score_id": "febf82afe8c66a8f699232c84d276fcaeb3005fe260a52cb2fb4f3225e6b86e1",
+      "source": "v9-scenario",
+      "status": "exact_complete",
+      "stored_J": 16.91817613526687,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 0.4432206480063157,
+          "key": "cov_profile",
+          "normalized": 0.4432206480063157,
+          "raw": 1.3296619440189472,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.005528762607446189,
+          "key": "rip",
+          "normalized": 0.005528762607446189,
+          "raw": 0.005528762607446189,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.18686444101512534,
+          "key": "flat",
+          "normalized": 0.3737288820302507,
+          "raw": 0.560593323045376,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 7.404014358879189,
+          "key": "dislope",
+          "normalized": 7.404014358879189,
+          "raw": 66.6361292299127,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.9393230621054578,
+          "key": "di_roughness",
+          "normalized": 0.9393230621054578,
+          "raw": 0.4696615310527289,
+          "tolerance": 0.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.29486537110210703,
+          "key": "flat_cv",
+          "normalized": 0.29486537110210703,
+          "raw": 0.4422980566531606,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "diag",
+          "normalized": null,
+          "raw": 7.421058514202903,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "distd",
+          "normalized": null,
+          "raw": 2.356360678281651,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        }
+      ]
+    },
+    {
+      "J": 2.172706574016161,
+      "brief_hash": "8d56cf678ce6a53c",
+      "brief_name": "home_v9_corridor_h90_70_v1000_slope0",
+      "brief_path": "scratch\\home_v9_offline_2026-11-17\\home_v9_corridor_h90_70_v1000_slope0.yaml",
+      "design_hash": "22365b569be9",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 48.09627511190587,
+          "bw_v_deg": 35.17936926711795,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "objective.bw8k_floor refused under v9; the corridor min_deg is the HF narrow-side constraint; no hf_floor declared; measured (unscored) BW @ 8000 Hz = 48.10 H / 35.18 V deg",
+        "bw8k_floor": null,
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": null,
+          "level_scored": false,
+          "level_source": null,
+          "slope_db_per_dec": 0.0,
+          "slope_scored": false
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": false
+        },
+        "diag_scored": false,
+        "distd_weighted": 0.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 8.163095566628673,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 12,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 1000.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 1000.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": [
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 400.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 500.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 643.33,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 88.62378632242303,
+            "hz": 827.75,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 86.55445621292866,
+            "hz": 1065.04,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 84.4851477376484,
+            "hz": 1370.35,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 82.41584754840991,
+            "hz": 1763.18,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.34651195088198,
+            "hz": 2268.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 79.31292912368428,
+            "hz": 2573.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 78.27722450200326,
+            "hz": 2918.96,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 77.24260344956966,
+            "hz": 3311.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 76.20792589326003,
+            "hz": 3755.72,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 75.1735816831316,
+            "hz": 4260.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 74.13860817811671,
+            "hz": 4832.36,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 72.06929954265817,
+            "hz": 6217.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 70.0,
+            "hz": 8000.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          }
+        ]
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "crowe_es600",
+      "metrics_recomputed": true,
+      "objective_version": 9,
+      "parity_delta": null,
+      "rank_in_brief": 2,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T205453Z-screen-32f7c4",
+      "score_id": "ff6498189c84c10b91bb2af0a95945c32060cff7cfe5fe4e38c99c402f48cbee",
+      "source": "v9-scenario",
+      "status": "exact_complete",
+      "stored_J": 16.91817613526687,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 0.7461249371860249,
+          "key": "cov_profile",
+          "normalized": 0.7461249371860249,
+          "raw": 2.238374811558075,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.005528762607446189,
+          "key": "rip",
+          "normalized": 0.005528762607446189,
+          "raw": 0.005528762607446189,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.18686444101512534,
+          "key": "flat",
+          "normalized": 0.3737288820302507,
+          "raw": 0.560593323045376,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "dislope",
+          "normalized": 7.404014358879189,
+          "raw": 66.6361292299127,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.9393230621054578,
+          "key": "di_roughness",
+          "normalized": 0.9393230621054578,
+          "raw": 0.4696615310527289,
+          "tolerance": 0.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.29486537110210703,
+          "key": "flat_cv",
+          "normalized": 0.29486537110210703,
+          "raw": 0.4422980566531606,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "diag",
+          "normalized": null,
+          "raw": 7.421058514202903,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "distd",
+          "normalized": null,
+          "raw": 2.356360678281651,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        }
+      ]
+    },
+    {
+      "J": 9.57672093289535,
+      "brief_hash": "728205a3b1d28e5c",
+      "brief_name": "home_v9_corridor_h80flat_v1000",
+      "brief_path": "scratch\\home_v9_offline_2026-11-17\\home_v9_corridor_h80flat_v1000.yaml",
+      "design_hash": "22365b569be9",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 48.09627511190587,
+          "bw_v_deg": 35.17936926711795,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "objective.bw8k_floor refused under v9; the corridor min_deg is the HF narrow-side constraint; no hf_floor declared; measured (unscored) BW @ 8000 Hz = 48.10 H / 35.18 V deg",
+        "bw8k_floor": null,
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": null,
+          "level_scored": false,
+          "level_source": null,
+          "slope_db_per_dec": 0.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": false
+        },
+        "diag_scored": false,
+        "distd_weighted": 0.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 8.163095566628673,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 12,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 1000.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 1000.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": [
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 400.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 500.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 643.33,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 827.75,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 1065.04,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 1370.35,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 1763.18,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 2268.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 2573.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 2918.96,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 3311.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 3755.72,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 4260.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 4832.36,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 6217.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 8000.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          }
+        ]
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "crowe_es600",
+      "metrics_recomputed": true,
+      "objective_version": 9,
+      "parity_delta": null,
+      "rank_in_brief": 1,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261115T205453Z-screen-32f7c4",
+      "score_id": "14596c0fb8272cf5147ffe73ef9e613c7c476cb870aecb9a2c09da67ac60ff3e",
+      "source": "v9-scenario",
+      "status": "exact_complete",
+      "stored_J": 16.91817613526687,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 0.7461249371860249,
+          "key": "cov_profile",
+          "normalized": 0.7461249371860249,
+          "raw": 2.238374811558075,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.005528762607446189,
+          "key": "rip",
+          "normalized": 0.005528762607446189,
+          "raw": 0.005528762607446189,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.18686444101512534,
+          "key": "flat",
+          "normalized": 0.3737288820302507,
+          "raw": 0.560593323045376,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 7.404014358879189,
+          "key": "dislope",
+          "normalized": 7.404014358879189,
+          "raw": 66.6361292299127,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.9393230621054578,
+          "key": "di_roughness",
+          "normalized": 0.9393230621054578,
+          "raw": 0.4696615310527289,
+          "tolerance": 0.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.29486537110210703,
+          "key": "flat_cv",
+          "normalized": 0.29486537110210703,
+          "raw": 0.4422980566531606,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "diag",
+          "normalized": null,
+          "raw": 7.421058514202903,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "distd",
+          "normalized": null,
+          "raw": 2.356360678281651,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        }
+      ]
+    },
+    {
+      "J": 11.398108088494078,
+      "brief_hash": "be0df894601ef065",
+      "brief_name": "home_v9_corridor_h90_70_v700",
+      "brief_path": "scratch\\home_v9_offline_2026-11-17\\home_v9_corridor_h90_70_v700.yaml",
+      "design_hash": "491efb2132b8",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 39.47950689800333,
+          "bw_v_deg": 33.85482929647661,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "objective.bw8k_floor refused under v9; the corridor min_deg is the HF narrow-side constraint; no hf_floor declared; measured (unscored) BW @ 8000 Hz = 39.48 H / 33.85 V deg",
+        "bw8k_floor": null,
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": null,
+          "level_scored": false,
+          "level_source": null,
+          "slope_db_per_dec": 0.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": false
+        },
+        "diag_scored": false,
+        "distd_weighted": 0.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 9.567573280356504,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 13,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 700.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 700.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": [
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 400.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 500.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 643.33,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 88.62378632242303,
+            "hz": 827.75,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 86.55445621292866,
+            "hz": 1065.04,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 84.4851477376484,
+            "hz": 1370.35,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 82.41584754840991,
+            "hz": 1763.18,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.34651195088198,
+            "hz": 2268.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 79.31292912368428,
+            "hz": 2573.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 78.27722450200326,
+            "hz": 2918.96,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 77.24260344956966,
+            "hz": 3311.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 76.20792589326003,
+            "hz": 3755.72,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 75.1735816831316,
+            "hz": 4260.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 74.13860817811671,
+            "hz": 4832.36,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 72.06929954265817,
+            "hz": 6217.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 70.0,
+            "hz": 8000.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          }
+        ]
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "klangfilm_lame",
+      "metrics_recomputed": true,
+      "objective_version": 9,
+      "parity_delta": null,
+      "rank_in_brief": 2,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T225543Z-screen-6acf41",
+      "score_id": "47e64324a6fe572b970356313ffb92db757b4181b8785e5640b0dac361781698",
+      "source": "v9-scenario",
+      "status": "exact_complete",
+      "stored_J": 8.923616737684702,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 0.8248085616409645,
+          "key": "cov_profile",
+          "normalized": 0.8248085616409645,
+          "raw": 2.4744256849228936,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0009393016028572637,
+          "key": "rip",
+          "normalized": 0.0009393016028572637,
+          "raw": 0.0009393016028572637,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0300224046897513,
+          "key": "flat",
+          "normalized": 0.0600448093795026,
+          "raw": 0.0900672140692539,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 10.170939830554635,
+          "key": "dislope",
+          "normalized": 10.170939830554635,
+          "raw": 91.53845847499171,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.35497197688822707,
+          "key": "di_roughness",
+          "normalized": 0.35497197688822707,
+          "raw": 0.17748598844411353,
+          "tolerance": 0.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0164260131176427,
+          "key": "flat_cv",
+          "normalized": 0.0164260131176427,
+          "raw": 0.02463901967646405,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "diag",
+          "normalized": null,
+          "raw": 11.069275066558191,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "distd",
+          "normalized": null,
+          "raw": 2.7121764911946933,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        }
+      ]
+    },
+    {
+      "J": 11.111374394703942,
+      "brief_hash": "2c96b5ba30bfed37",
+      "brief_name": "home_v9_corridor_h90_70_v1000",
+      "brief_path": "scratch\\home_v9_offline_2026-11-17\\home_v9_corridor_h90_70_v1000.yaml",
+      "design_hash": "491efb2132b8",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 39.47950689800333,
+          "bw_v_deg": 33.85482929647661,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "objective.bw8k_floor refused under v9; the corridor min_deg is the HF narrow-side constraint; no hf_floor declared; measured (unscored) BW @ 8000 Hz = 39.48 H / 33.85 V deg",
+        "bw8k_floor": null,
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": null,
+          "level_scored": false,
+          "level_source": null,
+          "slope_db_per_dec": 0.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": false
+        },
+        "diag_scored": false,
+        "distd_weighted": 0.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 9.567573280356504,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 12,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 1000.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 1000.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": [
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 400.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 500.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 643.33,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 88.62378632242303,
+            "hz": 827.75,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 86.55445621292866,
+            "hz": 1065.04,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 84.4851477376484,
+            "hz": 1370.35,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 82.41584754840991,
+            "hz": 1763.18,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.34651195088198,
+            "hz": 2268.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 79.31292912368428,
+            "hz": 2573.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 78.27722450200326,
+            "hz": 2918.96,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 77.24260344956966,
+            "hz": 3311.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 76.20792589326003,
+            "hz": 3755.72,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 75.1735816831316,
+            "hz": 4260.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 74.13860817811671,
+            "hz": 4832.36,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 72.06929954265817,
+            "hz": 6217.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 70.0,
+            "hz": 8000.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          }
+        ]
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "klangfilm_lame",
+      "metrics_recomputed": true,
+      "objective_version": 9,
+      "parity_delta": null,
+      "rank_in_brief": 2,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T225543Z-screen-6acf41",
+      "score_id": "590a6484614c3b58b33e9b58e460b98c25f5465b45a63d892c504957b00f6288",
+      "source": "v9-scenario",
+      "status": "exact_complete",
+      "stored_J": 8.923616737684702,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 0.5380748678508287,
+          "key": "cov_profile",
+          "normalized": 0.5380748678508287,
+          "raw": 1.614224603552486,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0009393016028572637,
+          "key": "rip",
+          "normalized": 0.0009393016028572637,
+          "raw": 0.0009393016028572637,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0300224046897513,
+          "key": "flat",
+          "normalized": 0.0600448093795026,
+          "raw": 0.0900672140692539,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 10.170939830554635,
+          "key": "dislope",
+          "normalized": 10.170939830554635,
+          "raw": 91.53845847499171,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.35497197688822707,
+          "key": "di_roughness",
+          "normalized": 0.35497197688822707,
+          "raw": 0.17748598844411353,
+          "tolerance": 0.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0164260131176427,
+          "key": "flat_cv",
+          "normalized": 0.0164260131176427,
+          "raw": 0.02463901967646405,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "diag",
+          "normalized": null,
+          "raw": 11.069275066558191,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "distd",
+          "normalized": null,
+          "raw": 2.7121764911946933,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        }
+      ]
+    },
+    {
+      "J": 11.000009687264669,
+      "brief_hash": "b78524fda8b6ac86",
+      "brief_name": "home_v9_corridor_h90_70_v1250",
+      "brief_path": "scratch\\home_v9_offline_2026-11-17\\home_v9_corridor_h90_70_v1250.yaml",
+      "design_hash": "491efb2132b8",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 39.47950689800333,
+          "bw_v_deg": 33.85482929647661,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "objective.bw8k_floor refused under v9; the corridor min_deg is the HF narrow-side constraint; no hf_floor declared; measured (unscored) BW @ 8000 Hz = 39.48 H / 33.85 V deg",
+        "bw8k_floor": null,
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": null,
+          "level_scored": false,
+          "level_source": null,
+          "slope_db_per_dec": 0.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": false
+        },
+        "diag_scored": false,
+        "distd_weighted": 0.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 9.567573280356504,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 11,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 1250.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 1250.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": [
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 400.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 500.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 643.33,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 88.62378632242303,
+            "hz": 827.75,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 86.55445621292866,
+            "hz": 1065.04,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 84.4851477376484,
+            "hz": 1370.35,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 82.41584754840991,
+            "hz": 1763.18,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.34651195088198,
+            "hz": 2268.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 79.31292912368428,
+            "hz": 2573.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 78.27722450200326,
+            "hz": 2918.96,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 77.24260344956966,
+            "hz": 3311.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 76.20792589326003,
+            "hz": 3755.72,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 75.1735816831316,
+            "hz": 4260.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 74.13860817811671,
+            "hz": 4832.36,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 72.06929954265817,
+            "hz": 6217.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 70.0,
+            "hz": 8000.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          }
+        ]
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "klangfilm_lame",
+      "metrics_recomputed": true,
+      "objective_version": 9,
+      "parity_delta": null,
+      "rank_in_brief": 2,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T225543Z-screen-6acf41",
+      "score_id": "ead5374c6be17020beb5ace8cb0437b25a0e55cd2e1438c291b15889f87425f7",
+      "source": "v9-scenario",
+      "status": "exact_complete",
+      "stored_J": 8.923616737684702,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 0.4267101604115546,
+          "key": "cov_profile",
+          "normalized": 0.4267101604115546,
+          "raw": 1.2801304812346637,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0009393016028572637,
+          "key": "rip",
+          "normalized": 0.0009393016028572637,
+          "raw": 0.0009393016028572637,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0300224046897513,
+          "key": "flat",
+          "normalized": 0.0600448093795026,
+          "raw": 0.0900672140692539,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 10.170939830554635,
+          "key": "dislope",
+          "normalized": 10.170939830554635,
+          "raw": 91.53845847499171,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.35497197688822707,
+          "key": "di_roughness",
+          "normalized": 0.35497197688822707,
+          "raw": 0.17748598844411353,
+          "tolerance": 0.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0164260131176427,
+          "key": "flat_cv",
+          "normalized": 0.0164260131176427,
+          "raw": 0.02463901967646405,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "diag",
+          "normalized": null,
+          "raw": 11.069275066558191,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "distd",
+          "normalized": null,
+          "raw": 2.7121764911946933,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        }
+      ]
+    },
+    {
+      "J": 0.940434564149307,
+      "brief_hash": "8d56cf678ce6a53c",
+      "brief_name": "home_v9_corridor_h90_70_v1000_slope0",
+      "brief_path": "scratch\\home_v9_offline_2026-11-17\\home_v9_corridor_h90_70_v1000_slope0.yaml",
+      "design_hash": "491efb2132b8",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 39.47950689800333,
+          "bw_v_deg": 33.85482929647661,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "objective.bw8k_floor refused under v9; the corridor min_deg is the HF narrow-side constraint; no hf_floor declared; measured (unscored) BW @ 8000 Hz = 39.48 H / 33.85 V deg",
+        "bw8k_floor": null,
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": null,
+          "level_scored": false,
+          "level_source": null,
+          "slope_db_per_dec": 0.0,
+          "slope_scored": false
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": false
+        },
+        "diag_scored": false,
+        "distd_weighted": 0.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 9.567573280356504,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 12,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 1000.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 1000.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": [
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 400.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 500.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 643.33,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 88.62378632242303,
+            "hz": 827.75,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 86.55445621292866,
+            "hz": 1065.04,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 84.4851477376484,
+            "hz": 1370.35,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 82.41584754840991,
+            "hz": 1763.18,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.34651195088198,
+            "hz": 2268.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 79.31292912368428,
+            "hz": 2573.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 78.27722450200326,
+            "hz": 2918.96,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 77.24260344956966,
+            "hz": 3311.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 76.20792589326003,
+            "hz": 3755.72,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 75.1735816831316,
+            "hz": 4260.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 74.13860817811671,
+            "hz": 4832.36,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 72.06929954265817,
+            "hz": 6217.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 70.0,
+            "hz": 8000.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          }
+        ]
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "klangfilm_lame",
+      "metrics_recomputed": true,
+      "objective_version": 9,
+      "parity_delta": null,
+      "rank_in_brief": 1,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T225543Z-screen-6acf41",
+      "score_id": "55bb604a83f4e0e47ca91f077cb9c54c6e113649fe2e094f1d4ce8a1915572cd",
+      "source": "v9-scenario",
+      "status": "exact_complete",
+      "stored_J": 8.923616737684702,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 0.5380748678508287,
+          "key": "cov_profile",
+          "normalized": 0.5380748678508287,
+          "raw": 1.614224603552486,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0009393016028572637,
+          "key": "rip",
+          "normalized": 0.0009393016028572637,
+          "raw": 0.0009393016028572637,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0300224046897513,
+          "key": "flat",
+          "normalized": 0.0600448093795026,
+          "raw": 0.0900672140692539,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "dislope",
+          "normalized": 10.170939830554635,
+          "raw": 91.53845847499171,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.35497197688822707,
+          "key": "di_roughness",
+          "normalized": 0.35497197688822707,
+          "raw": 0.17748598844411353,
+          "tolerance": 0.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0164260131176427,
+          "key": "flat_cv",
+          "normalized": 0.0164260131176427,
+          "raw": 0.02463901967646405,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "diag",
+          "normalized": null,
+          "raw": 11.069275066558191,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "distd",
+          "normalized": null,
+          "raw": 2.7121764911946933,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        }
+      ]
+    },
+    {
+      "J": 11.111374394703942,
+      "brief_hash": "728205a3b1d28e5c",
+      "brief_name": "home_v9_corridor_h80flat_v1000",
+      "brief_path": "scratch\\home_v9_offline_2026-11-17\\home_v9_corridor_h80flat_v1000.yaml",
+      "design_hash": "491efb2132b8",
+      "facts": {
+        "below_mode": "mask",
+        "bw8k": {
+          "bw_h_deg": 39.47950689800333,
+          "bw_v_deg": 33.85482929647661,
+          "hz": 8000.0
+        },
+        "bw8k_condition": "objective.bw8k_floor refused under v9; the corridor min_deg is the HF narrow-side constraint; no hf_floor declared; measured (unscored) BW @ 8000 Hz = 39.48 H / 33.85 V deg",
+        "bw8k_floor": null,
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "di": {
+          "anchor_hz": 700.0,
+          "level_db": null,
+          "level_scored": false,
+          "level_source": null,
+          "slope_db_per_dec": 0.0,
+          "slope_scored": true
+        },
+        "di_slope_target": 0.0,
+        "diag": {
+          "reference_deg": 65.0,
+          "scored": false
+        },
+        "diag_scored": false,
+        "distd_weighted": 0.0,
+        "flat_band": "scored",
+        "measured_di_slope_db_per_dec": 9.567573280356504,
+        "n_scored_cov_h": 13,
+        "n_scored_cov_v": 12,
+        "n_solved_in_band": 16,
+        "n_solved_total": 18,
+        "onset_h_hz": 700.0,
+        "onset_v_hz": 1000.0,
+        "score_window": {
+          "band_hi_hz": 8000.0,
+          "band_lo_hz": 350.0,
+          "below_mode": "mask",
+          "coverage_v_down_deg": null,
+          "coverage_v_up_deg": null,
+          "f_pattern_hz": null,
+          "fc_hz": null,
+          "h_deg": 80.0,
+          "h_lo_hz": 700.0,
+          "narrow_ratio": 2.0,
+          "pattern_beta": null,
+          "v_deg": 50.0,
+          "v_lo_hz": 1000.0
+        },
+        "solved_freqs_hz": [
+          250.0,
+          315.0,
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "solved_freqs_in_band_hz": [
+          400.0,
+          500.0,
+          643.33,
+          827.75,
+          1065.04,
+          1370.35,
+          1763.18,
+          2268.63,
+          2573.0,
+          2918.96,
+          3311.0,
+          3755.72,
+          4260.0,
+          4832.36,
+          6217.63,
+          8000.0
+        ],
+        "target_profile_at_solved_hz": [
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 400.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 500.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": null,
+            "hz": 643.33,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 827.75,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": null
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 1065.04,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 1370.35,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 1763.18,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 2268.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 2573.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 2918.96,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 3311.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 3755.72,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 4260.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 4832.36,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 6217.63,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          },
+          {
+            "h_max_deg": 90.0,
+            "h_min_deg": 60.0,
+            "h_pref_deg": 80.0,
+            "hz": 8000.0,
+            "v_max_deg": 60.0,
+            "v_min_deg": 40.0,
+            "v_pref_deg": 50.0
+          }
+        ]
+      },
+      "grid": "solved",
+      "grid_points": null,
+      "label": "klangfilm_lame",
+      "metrics_recomputed": true,
+      "objective_version": 9,
+      "parity_delta": null,
+      "rank_in_brief": 2,
+      "reasons": [],
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T225543Z-screen-6acf41",
+      "score_id": "cef91923e24cbd810d0bf77545251fed7c6d82a1d1031b8ce581952299a98030",
+      "source": "v9-scenario",
+      "status": "exact_complete",
+      "stored_J": 8.923616737684702,
+      "target_changed": true,
+      "terms": [
+        {
+          "contribution": 0.5380748678508287,
+          "key": "cov_profile",
+          "normalized": 0.5380748678508287,
+          "raw": 1.614224603552486,
+          "tolerance": 3.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0009393016028572637,
+          "key": "rip",
+          "normalized": 0.0009393016028572637,
+          "raw": 0.0009393016028572637,
+          "tolerance": 1.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0300224046897513,
+          "key": "flat",
+          "normalized": 0.0600448093795026,
+          "raw": 0.0900672140692539,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 0.5
+        },
+        {
+          "contribution": 0.0,
+          "key": "load",
+          "normalized": 0.0,
+          "raw": 0.0,
+          "tolerance": 0.3,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 10.170939830554635,
+          "key": "dislope",
+          "normalized": 10.170939830554635,
+          "raw": 91.53845847499171,
+          "tolerance": 9.0,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.35497197688822707,
+          "key": "di_roughness",
+          "normalized": 0.35497197688822707,
+          "raw": 0.17748598844411353,
+          "tolerance": 0.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0164260131176427,
+          "key": "flat_cv",
+          "normalized": 0.0164260131176427,
+          "raw": 0.02463901967646405,
+          "tolerance": 1.5,
+          "unweighted_raw": false,
+          "weight": 1.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "diag",
+          "normalized": null,
+          "raw": 11.069275066558191,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        },
+        {
+          "contribution": 0.0,
+          "key": "distd",
+          "normalized": null,
+          "raw": 2.7121764911946933,
+          "tolerance": null,
+          "unweighted_raw": true,
+          "weight": 0.0
+        }
+      ]
+    }
+  ],
+  "cross_brief_ranking_refused": "raw J is not a common ranking across objective versions or briefs: versions=[9], 5 distinct brief hash(es), names=['home_v9_corridor_h80flat_v1000', 'home_v9_corridor_h90_70_v1000', 'home_v9_corridor_h90_70_v1000_slope0', 'home_v9_corridor_h90_70_v1250', 'home_v9_corridor_h90_70_v700']. Compare only the same-brief column, or decompose the terms.",
+  "provenance": {
+    "captured_utc": "2026-11-17T19:37:49Z",
+    "dirty_tree": [
+      " M docs/CONTINUITY.md",
+      " M docs/INDEX.md",
+      " M docs/knowledge/README.md",
+      " M hornlab_search/cli.py",
+      " M hornlab_search/config.py",
+      " M hornlab_search/gui/jobs.py",
+      " M hornlab_search/objective/scalar_v9.py",
+      " M hornlab_search/search/cma.py",
+      " M hornlab_search/search/evaluate.py",
+      " M scratch/fable_architecture/space_cards/b3_soft.json",
+      " M scratch/fable_architecture/space_cards/b3_soft.md",
+      " M scratch/fable_architecture/space_cards/hl__biradial_es_style_v7.json",
+      " M scratch/fable_architecture/space_cards/hl__biradial_es_style_v7.md",
+      " M scratch/fable_architecture/space_cards/hl__crowe_x_osse_cd_v7.json",
+      " M scratch/fable_architecture/space_cards/hl__crowe_x_osse_cd_v7.md",
+      " M scratch/fable_architecture/space_cards/hl__osse_rrect_fold_warm_v7.json",
+      " M scratch/fable_architecture/space_cards/hl__osse_rrect_fold_warm_v7.md",
+      " M scratch/fable_architecture/space_cards/summary.json",
+      " M tests/test_search_qd_failure_isolation.py",
+      " M tests/test_targets.py",
+      " M tools/analysis/space_card.py",
+      "?? .claude/worktrees/",
+      "?? docs/evidence/PATTERN_QUALITY_READONLY_2026-11-17.md",
+      "?? docs/evidence/pattern_quality_readonly/",
+      "?? docs/research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md",
+      "?? examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_c200w.yaml",
+      "?? hornlab_search/metrics/pattern_quality.py",
+      "?? tests/test_brief_truth_replay.py",
+      "?? tests/test_cli_finalist_mode.py",
+      "?? tests/test_gui_jobs_finalist_mode.py",
+      "?? tests/test_metrics_pattern_quality.py",
+      "?? tests/test_search_record_gate.py",
+      "?? tests/test_tools_analysis_space_card_data_agrees.py",
+      "?? tests/test_v9_polar_window.py",
+      "?? tools/analysis/brief_truth_replay.py",
+      "?? tools/analysis/crowe_mesh_truth.py",
+      "?? tools/analysis/pattern_quality_report.py"
+    ],
+    "labels": "[measured] stored BEM responses; [derived] recomputed metrics/scores; [proposed] v9 candidate briefs; [unavailable] anything not stored",
+    "repo_head": "8b255f074cb12e80a0a53fa2176dfba1d5802f75",
+    "tool": "brief_truth_replay",
+    "tool_version": "1.0.0"
+  },
+  "source_guard": {
+    "files": 2,
+    "sha256": {
+      "runs\\20261115T205453Z-screen-32f7c4\\designs\\22365b569be9\\response.npz": "8d0bc7f5310717b0db1521844c6c042778592c904724963ce49f8ffd8aa5fe62",
+      "runs\\20261116T225543Z-screen-6acf41\\designs\\491efb2132b8\\response.npz": "0267dbf71bcce1699492a1310dcad1aeb9441464c5d37ff83b6fa8ff06ed7e37"
+    },
+    "unchanged": true
+  }
+}

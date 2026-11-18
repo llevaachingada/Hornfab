@@ -1,0 +1,39 @@
+{
+ "proposal": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\fable_architecture\\space_cards\\proposals\\hl__ath_core_petal_hvlaw_v7\\hl__ath_core_petal_hvlaw_v7__space_v1.yaml",
+ "notes": [
+  "skipped q.hi cut (seed 0.9869 above it)",
+  "sigma0 0.2 -> 0.05",
+  "REVIEW joint envelope constraint (not expressible in config): envelope binds jointly; linear margin model R^2 0.81, sign right 82%, only 63% of the box inside"
+ ],
+ "before": {
+  "searched": 11,
+  "box": {
+   "ok": 60,
+   "outside": 36,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.020833333333333332,
+   "0.10": 0.4375,
+   "0.15": 0.4583333333333333,
+   "0.20": 0.5208333333333334,
+   "0.25": 0.5833333333333334
+  }
+ },
+ "after": {
+  "searched": 11,
+  "box": {
+   "ok": 23,
+   "outside": 9,
+   "refused": 0
+  },
+  "sigma": {
+   "0.05": 0.041666666666666664,
+   "0.10": 0.375,
+   "0.15": 0.5416666666666666,
+   "0.20": 0.4583333333333333,
+   "0.25": 0.625
+  },
+  "seed_shift_max_mm": 0.0
+ }
+}

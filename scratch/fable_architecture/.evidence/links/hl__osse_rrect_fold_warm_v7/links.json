@@ -1,0 +1,241 @@
+{
+ "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261116T153619Z-screen-c221aa",
+ "family": "OSSE",
+ "top_decile_n": 10,
+ "pairs": [
+  {
+   "a": "az_fold_v_deg",
+   "b": "q",
+   "rho": 0.8545454545454544,
+   "fit": {
+    "scale": 0.00040349938026027377,
+    "offset": 0.9659997490000299,
+    "r2": 0.6256882891088706
+   }
+  },
+  {
+   "a": "az_a_cos_amp",
+   "b": "az_s_cos2_amp",
+   "rho": 0.709090909090909,
+   "fit": {
+    "scale": 0.0237012628614445,
+    "offset": -0.3872315845532391,
+    "r2": 0.6686570719226619
+   }
+  },
+  {
+   "a": "az_s_cos2_amp",
+   "b": "q",
+   "rho": -0.6969696969696969,
+   "fit": {
+    "scale": -0.15977330949534863,
+    "offset": 0.9346085825463191,
+    "r2": 0.3256840774808881
+   }
+  },
+  {
+   "a": "az_fold_h_width_deg",
+   "b": "morph_height_mm",
+   "rho": -0.6848484848484848,
+   "fit": {
+    "scale": -0.4847679316664605,
+    "offset": 416.454155123049,
+    "r2": 0.5613202545559997
+   }
+  },
+  {
+   "a": "L_mm",
+   "b": "morph_rate",
+   "rho": -0.6606060606060605,
+   "fit": {
+    "scale": -0.02809084964718759,
+    "offset": 11.378194803378031,
+    "r2": 0.5612507395951394
+   }
+  },
+  {
+   "a": "L_mm",
+   "b": "morph_width_mm",
+   "rho": 0.6606060606060605,
+   "fit": {
+    "scale": 0.6493535724363336,
+    "offset": 404.3167012744486,
+    "r2": 0.2745492308940055
+   }
+  },
+  {
+   "a": "a0_deg",
+   "b": "az_a_cos_amp",
+   "rho": -0.6484848484848483,
+   "fit": {
+    "scale": -5.130477110288636,
+    "offset": 21.149333237710916,
+    "r2": 0.5093457495749038
+   }
+  },
+  {
+   "a": "morph_rate",
+   "b": "n",
+   "rho": 0.6363636363636362,
+   "fit": {
+    "scale": 0.844419693480584,
+    "offset": 2.3944248531787595,
+    "r2": 0.2634783242755727
+   }
+  },
+  {
+   "a": "L_mm",
+   "b": "a0_deg",
+   "rho": 0.6242424242424242,
+   "fit": {
+    "scale": 0.00773830233485262,
+    "offset": 0.320940176409695,
+    "r2": 0.29936170252318983
+   }
+  },
+  {
+   "a": "az_fold_h_width_deg",
+   "b": "az_fold_v_width_deg",
+   "rho": -0.6242424242424242,
+   "fit": {
+    "scale": -0.45203880187565115,
+    "offset": 26.261419750669244,
+    "r2": 0.28326020112357453
+   }
+  },
+  {
+   "a": "a_deg",
+   "b": "morph_height_mm",
+   "rho": 0.6,
+   "fit": {
+    "scale": 5.471693152482369,
+    "offset": 187.8375894815537,
+    "r2": 0.35680231865564505
+   }
+  }
+ ],
+ "cma_directions": [
+  {
+   "rank": 1,
+   "eigenvalue": 1.3023358030065961,
+   "fraction": 0.07380062230672488,
+   "keys": [
+    "morph_width_mm",
+    "s",
+    "L_mm"
+   ],
+   "loadings": {
+    "morph_width_mm": -0.5556059841993809,
+    "s": 0.40598628262134917,
+    "L_mm": -0.36680263427891546
+   }
+  },
+  {
+   "rank": 2,
+   "eigenvalue": 1.225405739698179,
+   "fraction": 0.06944115792499647,
+   "keys": [
+    "az_a_cos_amp",
+    "a0_deg",
+    "az_a_cos_pow"
+   ],
+   "loadings": {
+    "az_a_cos_amp": -0.5308086348653851,
+    "a0_deg": 0.4111756591076647,
+    "az_a_cos_pow": -0.4014306745598687
+   }
+  }
+ ],
+ "proposed_links": [
+  {
+   "knob_b": "az_s_cos2_amp",
+   "knob_a": "az_a_cos_amp",
+   "scale": 0.0237012628614445,
+   "offset": -0.3872315845532391,
+   "r2": 0.6686570719226619,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "q",
+   "knob_a": "az_fold_v_deg",
+   "scale": 0.00040349938026027377,
+   "offset": 0.9659997490000299,
+   "r2": 0.6256882891088706,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "morph_height_mm",
+   "knob_a": "az_fold_h_width_deg",
+   "scale": -0.4847679316664605,
+   "offset": 416.454155123049,
+   "r2": 0.5613202545559997,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "morph_rate",
+   "knob_a": "L_mm",
+   "scale": -0.02809084964718759,
+   "offset": 11.378194803378031,
+   "r2": 0.5612507395951394,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "az_a_cos_amp",
+   "knob_a": "a0_deg",
+   "scale": -5.130477110288636,
+   "offset": 21.149333237710916,
+   "r2": 0.5093457495749038,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "morph_height_mm",
+   "knob_a": "a_deg",
+   "scale": 5.471693152482369,
+   "offset": 187.8375894815537,
+   "r2": 0.35680231865564505,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "q",
+   "knob_a": "az_s_cos2_amp",
+   "scale": -0.15977330949534863,
+   "offset": 0.9346085825463191,
+   "r2": 0.3256840774808881,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "a0_deg",
+   "knob_a": "L_mm",
+   "scale": 0.00773830233485262,
+   "offset": 0.320940176409695,
+   "r2": 0.29936170252318983,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "az_fold_v_width_deg",
+   "knob_a": "az_fold_h_width_deg",
+   "scale": -0.45203880187565115,
+   "offset": 26.261419750669244,
+   "r2": 0.28326020112357453,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "morph_width_mm",
+   "knob_a": "L_mm",
+   "scale": 0.6493535724363336,
+   "offset": 404.3167012744486,
+   "r2": 0.2745492308940055,
+   "source": "rho_top_decile"
+  },
+  {
+   "knob_b": "n",
+   "knob_a": "morph_rate",
+   "scale": 0.844419693480584,
+   "offset": 2.3944248531787595,
+   "r2": 0.2634783242755727,
+   "source": "rho_top_decile"
+  }
+ ],
+ "tool": "links",
+ "generated_utc": "2026-11-17T20:55:45Z"
+}

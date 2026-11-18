@@ -13,6 +13,7 @@ def main():
     parser = argparse.ArgumentParser()
     for name in ("root", "cohort", "policy", "seed"):
         parser.add_argument("--" + name, required=True)
+    parser.add_argument("--lane", default="gpu", choices=("gpu", "cpu"))
     parser.add_argument("--scores-sha256")
     parser.add_argument("--catalog-sha256")
     parser.add_argument("--refresh-cohort", action="store_true")
@@ -43,7 +44,7 @@ def main():
     prep = [sys.executable, "tools/bo_compare/prepare_study.py", "--root", args.root,
             "--cohort", args.cohort, "--policy", args.policy,
             "--seed", args.seed, "--label", Path(args.root).name, "--min-rows", "100",
-            "--budget-profile", args.budget_profile, "--deadline-hours", "6"]
+            "--budget-profile", args.budget_profile, "--deadline-hours", "6", "--lane", args.lane]
     prep.extend(["--task", args.task] if args.task else ["--config", args.config])
     # Stream the child's stdout LINE BY LINE: a captured pipe deadlocks when a successful
     # preparation prints its ~140 KB package JSON (the stdout buffer fills, the child blocks

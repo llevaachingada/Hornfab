@@ -708,6 +708,13 @@ def to_mesher_config(design: Design, mesh: MeshSpec, res_mm: dict, out_path: Pat
             cfg[key] = value
         else:
             sections.setdefault(sec, {})[key] = value
+    if mounting is not None and cfg["mode"] not in ("enclosure", "enclosed"):
+        # E-012 guard: the top-level ``mode`` design key is copied after the enclosure flip and
+        # would silently turn a mounting run into a freestanding one. No shipped config sets it.
+        raise GeometryInvalidError(
+            f"{design.family}: design key mode={cfg['mode']!r} contradicts brief.mounting (which "
+            "forces mode 'enclosure'); remove the 'mode' knob from mounting runs")
+    cfg["mode"] = cfg["mode"] if mounting is None else "enclosure"
     for key, expr in exprs.items():
         if key not in design.params:        # the mesher's own default is then the base value
             sections["profile"][key] = expr

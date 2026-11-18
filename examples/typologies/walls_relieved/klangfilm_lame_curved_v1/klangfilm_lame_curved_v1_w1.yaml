@@ -1,6 +1,6 @@
 name: hl__klangfilm_lame_curved_v1_w1
 family: FREEFORM
-brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+brief_file: ../../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
 generator:
   name: grid
   rows:

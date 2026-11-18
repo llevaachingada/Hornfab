@@ -1,5 +1,600 @@
 # CONTINUITY
 
+## 2026-11-18 (local orchestrator) - Night truth (C1) + data-agreement gate (C2) landed; B1 encoding owner-decided; queue repaired
+
+- **C1 night truth** (`tools/run_campaign_night.py`, `tools/night_status.py`, new
+  `tests/test_night_status_truth.py`, 13 tests): the runner now records, additively, per summary
+  row: `rows_before/rows_after/rows_window/valid_rows_window/best_J_window` (a `--resume` job
+  reports the work IT did), `bo_progress` (BO arms read `studies.sqlite3` read-only), a ~15-line
+  `log_tail`, and a `stop_reason` class (9 values); `night_status` prefers the new fields and
+  re-derives old rows read-only - a resume row with real rows but no attribution reads
+  "unknown", never "0 evals". Verified on real data [measured]:
+  `cont_p80_athcore_corelaw_200: best J 4.8097, 182 evals (window 182/282, valid 159)`;
+  `t_trit80_rc2: best J 5.5235, 82 evals (BO screen 80 verify 2, observations 80)`. The live
+  runner picks the new fields up on its next launch (not mid-night). Known pre-existing failure
+  `tests/test_night_bo_arm_wrapper.py` (2, monkeypatch-Popen mismatch since `1482304`) untouched.
+- **C2 data-agreement gate** (`tools/analysis/space_card.py`, new
+  `tests/test_space_card_data_agreement.py`, 7 tests): `_data_agreement` is "unknown" when the
+  top decile is absent or n < 10 (True/False only at n >= 10, `MIN_LINK_ROWS = 10`); cards render
+  `unconfirmed (n=...)`; unknown never yields a data-justified `action: link`; `data_agrees`
+  values unchanged for backward compatibility. Senior rule enforced: never claim "data
+  disagrees" for n < 10.
+- **B1 (mesh fidelity) - owner encoding decision 2026-11-18**: B1 must test MESH convergence
+  (same ten designs/brief/identity, SAME frequency grid as the reference solve; refinement =
+  higher epw and/or tighter throat/mouth/rear resolution; realized triangle/DOF counts reported
+  for both meshes; per-design |ΔJ| + per-term deltas vs the numerical floor; "mesh-sensitive"
+  flags; 8 GB feasibility per design before queuing with the quarter/half model; non-fitting
+  designs marked "mesh check infeasible on this card" and left out of the conclusion; memwatch +
+  baseline/peak VRAM + sysmem Shared-Usage check mandatory). The frequency-grid pair encoding is
+  renamed **B1f** and never read as mesh convergence. Key coding finding: `dof_cap_finalist`
+  does NOT densify the mesh for these configs (epw/f_max unchanged; the cap is not binding) -
+  the finalist tier changes frequency grids only. B1 CPU dry-run (build both meshes, no solves,
+  epw x2 and x3 candidates) and the feasibility table are in preparation
+  (`scratch/fable_architecture/.b1/`); GPU slots wait for owner approval of the table.
+- **Queue edits on the live night `cd_rrect_2026-11-17`** (owner-approved; documented in
+  `runs/nights/cd_rrect_2026-11-17/held_and_edited_2026-11-18.md`): `t_rrect_turbo300` replaced
+  by `c_rrect_100w_rc3` (`rosse_rect_cli search --resume 20261117T070118Z-screen-8627f8 --budget
+  110`); the two atlas turbo300 arms moved to the end; `w_osse_rrect_fold_warm_v7_200w1` HELD
+  (warm-start identity pending C5; links withdrawn). **argv repair:** all 12 queued
+  `w_*_200w1` jobs had bare `search` argv[0] (kind:command runs argv verbatim, which would have
+  failed at launch with FileNotFoundError); fixed to `.venv/Scripts/hornlab-search.exe` (8
+  stock) and `.venv/Scripts/python.exe tools/geometry/<bridge>_cli.py search` (5 bridge:
+  control->section_pucker_cli, crowe->crowe_panel_cli, klame->klangfilm_lame_cli, rosse
+  r120/r50->rosse_rect_cli). Post-fix: full YAML parse, 54 unique ids, argv audit clean, runner
+  `--dry-run` clean. Owner's manual PAUSE (0-byte, set 2026-11-17 20:12, unrelated to this
+  work) removed with the owner's word; night resumed into the BO arms (`t_ath14_turbo100`
+  running, merged lock fix in effect).
+- **D4 evidence (rerun on the fixed state)** (`scratch/fable_architecture/.evidence/
+  shape_check_proposals_20261118.log`, `search_preflight_20261118/`): shape check **9/14** -
+  the 5 bridge-type `_w1` lanes fail the STOCK `DesignSpace.from_config`/`shape_check` path
+  (`unknown rows type '...'` for section_pucker/crowe_panel/klangfilm_lame/rosse_rect; they are
+  bridge-CLI configs); the 9 loadable lanes pass everything. `search_preflight --from-runs`:
+  seed in own box everywhere (exit 0), but **history refused on every loadable lane** - native
+  lanes via `warm_start`'s brief-identity refusal, generator lanes via the raw-string fallback
+  (`../../briefs/...` vs `../../../briefs/...`) - so **no expected-hits number computed** (C5,
+  digest identity, remains the owner-gated fix; the path fix alone cannot unblock it). New
+  `no_headroom`: `hl__klangfilm_lame_curved_v1_c200_w1` (seed = prior best). Crowe marking
+  "not queueable without warm_start + reason" appended to the decision packet + the lane card.
+- **Plan amendments D5-D10** written into `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` §10.1
+  (proposals, nothing auto-applies); the corrected C2 explanation + the "what J pays for today"
+  table recorded in the owner decision packet. Full handoff:
+  `scratch/fable_architecture/ORCHESTRATOR_HANDOFF_2026-11-17_LATE.md`. Second-writer commits
+  `f5db35e`/`3682173` recorded for the D10 one-integrator question; the throat-H/V patch set
+  (4 patches, clone `.claude/worktrees/agent-a527a7d28dc77734a`, tip `5af0048`) waits for
+  integration after this push + the post-drain suite. Isolated-clone test run re-verified by a
+  second independent agent (`tmp_thv_test`: 0 new failures, mesher accepts k-expression); my
+  duplicated pytest run in the clone was stopped on owner instruction.
+- **B1 CPU dry-run landed (2026-11-18, real mesher, no solves).** Realized sizing
+  (`scratch/fable_architecture/.b1/b1_mesh_feasibility.md`): epw ×2 (12) builds at the existing
+  24 k screen cap for the five fold-warm designs at 14 270-15 388 quarter DOF — INSIDE the
+  measured 8.9-15.7 k OOM transition, i.e. **probe-grade**, each a per-design fresh-process job
+  with Shared-Usage spill adjudication; epw ×3 (18) is cap-bound for every design (true size
+  31.8-49.3 k DOF; build.py refuses at 1.5× cap pre-mesh and deletes above cap post-build, so
+  "cap-bound" = not built, never coarsened); the five ext-throat designs are **excluded**
+  ("mesh check infeasible on this card, est. ~21.1 k DOF" — the mesher also refuses the finer
+  geometry: symmetry-plane slivers at epw 12/18). Same-grid contract verified: refined
+  SolveSpec.hash == stored solve hash for all ten. Per-term deltas read from stored rows
+  (`terms` + `metrics`, di_source balloon) — no reference re-solve needed; mesh-sensitivity
+  gain threshold 0.0057 J (smallest non-degenerate finalist gap in the set). Hygiene hooks in
+  `tools/night_queue/fidelity_pairs.py`: --teardown-per-design (verified worker shutdown),
+  --record-vram (baseline/peak/dedicated/SHARED per design; shared > 512 MiB = spilled = failed),
+  memwatch per job. B1f (frequency-fidelity) renamed and labelled NOT-mesh-convergence in its
+  outputs. Five-job B1 mesh spec proposed in `.b1/b1_mesh_night_insert.yaml`, NOT queued —
+  owner approves GPU slots first. Heavy raw intermediates (replay pools ~40 MB JSON, dry-run
+  meshes ~56 MB .msh) left uncommitted, reproducible from the committed dry-run command.
+- **Scoring-truth addendum applied (2026-11-18, carrier
+  `hornfab_patches/SENIOR_DIRECTIVE_2026-11-18.md` §5).** Confirmed in the cloud against
+  `b6d3ba4`: v9 corridor-mode ripple-mask bug at `hornlab_search/objective/scalar_v9.py:493`
+  (passes `hi - lo` as the inspected angle — a 70-90° corridor scores only ±10°). **All v9
+  corridor-mode second scores are now marked PROVISIONAL** (decision packet, plan §10.1,
+  handoff §9.3/9.11): no ranking, winner-pick or queue decision from them until the owner
+  settles the ripple inspection-region policy (preferred edge / guaranteed minimum edge /
+  declared seat zone / other). `scalar_v9.py` untouched while the uncommitted other-author
+  edits exist; any fix becomes a NEW versioned objective identity. v7, the throat sweep and
+  B1/B1f are unaffected. The scoring-truth track (PR-A..F proposals, qLogNEI/qLogNEHVI later,
+  BO `freeze_metric_policy` accepts v4/v7 only) folds into the plan as one track; the throat
+  agent's isolated clone runs the read-only evidence E1-E4 into the carrier
+  `evidence_scoring_2026-11-18/`.
+- Commit/coverage note: this entry's code lands in the same push (C1 in
+  `feat(tools): night truth`, C2 in `feat(analysis): data-agreement gate`); the queue file is
+  untracked (`runs/`), so the queue edits travel as the held-note above, not as commits.
+
+
+## 2026-11-17 (acoustic-truth lane) — WP1–WP3 hardening pass (independent review + reproduction)
+
+- Two read-only lanes (static compliance review; independent fresh-input reproduction) audited the
+  WP0–WP3 commit `f5db35e`. Every headline claim reproduces on inputs the authors did not use:
+  2 new c1 corners (bias −0.0174/−0.0282 mm, p99 0.133/0.125 mm, rank 4, FABLE pass); parity on 2
+  fresh stored winners 0.000e+00° / 0.0/8.882e-16 dB; identity Δ exactly 0.0; v700 scenario J exact;
+  stored response/best hashes unchanged before/after; determinism diff = `meta.utc` only.
+- 24 repairs applied to the three tools + test files (no measured value changed, re-verified):
+  `brief_truth_replay` hash guard now snapshots **before** any read in all three subcommands (was
+  post-hoc in scenarios/grid → the guard could not fail), grid skips one-sided design dirs as typed
+  skipped pairs (was KeyError abort), identity raises on an empty term set (was vacuous pass), a
+  bad-v9 brief prints one typed `ConfigError` line and exits 2, `grid_stability.json` gains per-side
+  `mesh_hash`/`n_dof`/`mesh_epw` ("same-mesh" now evidenced from stored manifests);
+  `crowe_mesh_truth` stores full 64-hex config digests (+short aliases), exits 1 when any case is
+  refused, narrows the broad except so tool bugs fail loudly, reuses `geometry/record.py::
+  native_points`, divides one-sided Jacobian steps by the achieved step, and is mesher-optional in
+  `--existing-mesh` mode (CI-safe); `pattern_quality` refuses a balloon without `balloon_grid`
+  (`BalloonGridUnavailableError`, no silent equal-area DI) and renames the censored-width key to
+  `censored_legacy_width_deg`; the report CLI requires `--out` and gained a committed `--parity`
+  mode. Candidate-YAML tests now load the committed `docs/evidence/home_crowe_v9_offline_2026-11-17/`
+  copies, so the load proof runs in a clean checkout.
+- Tests **53 → 68** (26 + 22 + 20), 0 failed. Published measured numbers unchanged (identity Δ=0.0,
+  v700 J 9.96094006749582/11.398108088494078, c0 p99 0.12630539225424334 rank 4, parity
+  0.000e+00/8.882e-16).
+- Committed artifacts upgraded: `identity/` and `grid/` JSON/CSV regenerated inside
+  `docs/evidence/home_crowe_v9_offline_2026-11-17/` (previously gitignored-scratch only);
+  `pattern_quality_readonly` JSON/CSV regenerated + `parity_check.json` added; the three evidence
+  docs carry hardening addenda, including the WP3-vs-FABLE reconciliation (60 vs 58 pairs, screen−verify
+  sign convention, v7 vs v9 corridor, all-vs-top-28 rank) and the WP2 provenance/identity block.
+- Provenance caveat (owner-facing): the v9 scenario J numbers were captured while the working tree
+  carried uncommitted concurrent edits to `objective/scalar_v9.py`/`search/evaluate.py`/`config.py`;
+  `f5db35e`+this pass do not include them. If that lane commits changed v9 code, re-run
+  `brief_truth_replay.py scenarios` before relying on the v9 J columns.
+- Owner-gated decisions unchanged: WP5 production-brief choice (corridor vs point, V onset, slope
+  weight, dead band, `preferred`-in-bounds semantics); WP6 pilot scheduling.
+
+## 2026-11-17 (local orchestrator, stage 5) - Pre-approval checks on the 14 changed proposals
+
+- `tools/shape_check.py` on all 14 changed `__space_v1` proposals: **14/14 mesh, under their screen
+  DOF cap, fit their brief envelope, round coupling matches the driver exit** (exit 0; log
+  `scratch/fable_architecture/.evidence/shape_check_proposals.log`).
+- `tools/search_preflight.py --from-runs <newest same-name run>`: exit 0 everywhere, seed in its own
+  box everywhere. **`hl__crowe_x_osse_cd_v7` is `no_headroom`** (seed hash equals the prior best), so
+  its bounds trim must be declared a refinement (warm_start + reason) or it re-tests the optimum.
+  **`history_unusable` on every lane with history** ("objective version/brief mismatch (run v7, this
+  config v7)"), so the expected in-basin hits cannot be computed - question appended to
+  `NOTES_FOR_SENIOR.md`, not improvised.
+- Same-name runs are not always the run under the lane's current brief; §1's link verdicts are
+  scoped to "newest same-name run" in `OWNER_DECISIONS_PACKET_2026-11-17.md` §9.
+
+## 2026-11-17 (local orchestrator, stage 5) - Data agreement rejects every geometric link; 29 proposals
+
+- `space_card.recommend()` now carries `data_agrees` from `links.py` on each lane's latest run. Of 20
+  link proposals with a real run behind them, **all 20 are `false`** (`hl__crowe_x_osse_cd_v7`
+  `g_wrap_deg`, `hl__osse_rrect_fold_warm_v7` `n`/`k`, the tritonia/twinray/ath/atlas pairs, ...).
+  The links in the already-reviewed Crowe and fold-warm proposals are therefore **withdrawn**;
+  the fold-warm `a0_deg` fix (18 -> 17, seed shift 0) remains. Only the `_w1` variant keeps its
+  links, flagged `unknown` (no run) and needing a run or a 2-run A/B.
+- 29 proposals in `scratch/fable_architecture/space_cards/proposals/` (12 apply a change, 17 are
+  "no change justified"); originals untouched, nothing applied. Biggest: `atlas__ath_core`
+  14 -> 13 keys with `L_mm.hi 520 -> 436.8`, `a_deg.hi 80 -> 66` (box outside 37/96 -> 4/32);
+  `atlas__core_law` sigma0 0.25 -> 0.05; `hl__lecleach_iwata_ar_landscape_smooth_v7` two bound
+  raises + sigma0 0.20 -> 0.10. Every proposal keeps the incumbent seed (seed shift 0.0 mm).
+- `b3_soft`: the senior-pass `g_theta_h1_deg.hi 60 -> 55.3` trim does NOT reproduce at the handoff's
+  96-point box (top slice 9/19 = 47 %, under the trigger); it is sampling-sensitive and now needs
+  owner judgement rather than an automatic trim.
+- `OWNER_DECISIONS_PACKET_2026-11-17.md`: C1-C6 with what each changes, the proposal table, the
+  categorical split (ath_core + 4 rear_density -> 3 configs each = 15 files), cross-family residuals
+  (biradial -> fold-warm RMS 31.8, depth 83 mm away; tritonia_v9 -> biradial RMS 4.2), and the
+  frequency counts actually in use (screen 12 / verify 25 / final 36).
+- No config, brief, bound, envelope or queue changed; no GPU job started.
+
+## 2026-11-17 (local orchestrator) - First-session verification on the Windows checkout
+
+- Branch `ccr-260b4b76-fi6b8j` (PR #67). Handoff §2 test list: **187 passed** (log
+  `scratch/fable_architecture/.evidence/verify_20261117/pytest_targeted.log`). Full offline suite:
+  **8 failed / 4557 passed / 22 skipped**. Triage: 2 load flakes (both pass alone), 4 pre-existing on
+  `main` and NOT in the handoff's list of three (`test_objective_v8` `oa_excess_raw` from `4db1453`;
+  `gui/study_jobs.py` Popen; 2 `run_bo_arm` wrapper tests - those files are unchanged on this branch),
+  2 branch-caused and repaired (`protected_lanes.yaml` in the brief glob; the QD generator-links test
+  now asserts the WP 0.2 reduction instead of the removed refusal).
+- Code (opt-in/additive, verified by the orchestrator): `search.record_gate: shadow|resample`
+  (absent = today; shadow adds exactly `record_margin_mm` + `record_gate_agrees`; resample replaces an
+  outside-record candidate before evaluation, seed never replaced, strict path untouched);
+  `space_card.recommend()` `data_agrees` (no `link` action when the data disagrees);
+  `--mode finalist` wired in `cli.py` (run/search/export-step) and GUI `SEARCH_MODES`, with
+  `screen`/`verify`/`final` specs pinned unchanged.
+- Evidence `scratch/fable_architecture/EVIDENCE_VERIFY_2026-11-17.md`: U3 CPU 8/8 variants mesh on both
+  candidate hosts; record shadow over the 22 most recent lane runs (2055 designs) = **0
+  `record_inside_but_refused`**, 28 `record_outside_but_ok`, 429 `record_failed` (all `route: null`,
+  concentrated in rosse_rect r120/r50 and the two klangfilm_lame runs).
+- Stage 5 cards: 29 cards + `shared_map.md` + `summary.json` in
+  `scratch/fable_architecture/space_cards/`. 22 configs could not be built: 12
+  `examples/typologies/walls_relieved/*/*_w1.yaml` have `brief_file: '../../briefs/...'` one `../`
+  short (12 queued live-night jobs - flagged, not edited); 10 generator-route lanes are refused by
+  `DesignSpace.from_config` (`unknown rows type` for rosse_rect/rolled_rect/rolled_rect_pucker/
+  crowe_panel/klangfilm_lame) although the mesher registry accepts them (pre-existing).
+- Committed the four reports that existed only on this machine: `A4_GRID_INDEPENDENT_SCORE.md`,
+  `A5_SOLVER_CALL_TIMING.md`, `A9_CORRIDOR_VS_TERM_SET.md`, `X1_ADDENDUM_KLANGFILM_PROVENANCE.md`
+  and the `.a4/` + `.a9/` script/output folders (force-added past `/scratch/`).
+
+## 2026-11-17 — Acoustic-truth master plan: WP0–WP3 implemented (CPU/read-only, no GPU)
+
+- Owner master plan saved at `docs/research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md` (+ INDEX /
+  knowledge-hub links). WP4 optional (not done); WP5/WP6 owner-gated. No GPU job started, queued or
+  touched; the live GPU search (`runs/20261115T020650Z-screen-22931c` → hifi queue handover) was only
+  observed, never interrupted.
+- **WP1** `tools/analysis/crowe_mesh_truth.py` (no-solve CPU tool): 12-case CROWE V2A law vs actual BEM
+  inner wall. Worst prescribed p99 **0.1286 mm** (`area_bias_low`; dense 97×73 scan max 0.2195 mm,
+  `u50_low`), signed bias −0.019…−0.027 mm (mesh slightly inside law), native floor p99 0.0142–0.0243 mm,
+  FABLE v2 relative rule 12/12 pass — the absolute p99, not the flag, is the result. Resolution study on
+  c0: epw 6/9/12 → p99 0.126/0.080/0.071 mm, so the residual is mesh discretisation/surface fit, not a law
+  defect; no mesher change needed for V2A. Mesh-surface rank 4/4, max pairwise |cos| 0.19 (L > H >
+  area bias ≈ u50), topology clean (0 bad open/nonmanifold edges, source tag `SD1D1001`, 36×36 mm section,
+  shell stand-off median 3.00 mm). 21 offline tests incl. a stored c0 quarter-mesh fixture
+  (`tests/fixtures/crowe_v2a/c0_quarter_screen_8k`, force-added past the `*.msh` ignore like the dual-Lamé
+  meshes). Evidence: `docs/evidence/CROWE_V2A_SOLVER_SURFACE_TRUTH_2026-11-17.md` +
+  `docs/evidence/crowe_v2a_geometry_truth/`.
+- **WP2** `hornlab_search/metrics/pattern_quality.py` + `tools/analysis/pattern_quality_report.py`
+  (report-only; no objective/metric file touched): legacy outermost vs boresight-connected −6 dB width,
+  disconnected islands, off-axis excess at the existing v7 H12 threshold, censored statuses, canonical
+  sin(theta) balloon DI. 18 fixtures (legacy-vs-connected distinction, censored, omni DI=0, weighting
+  difference…). On 3 stored winners legacy/DI parity: 0.000e+00 deg / 8.882e-16 dB. Evidence:
+  `docs/evidence/PATTERN_QUALITY_READONLY_2026-11-17.md` + `docs/evidence/pattern_quality_readonly/`.
+- **WP3** `tools/analysis/brief_truth_replay.py` (read-only): legacy identity replay exact — Crowe
+  ES-600 16.918/6.836 and Klangfilm 22.782/8.924 reproduced to 6 dp, Δ=+0.000e+00; five NOT-QUEUED v9
+  corridor candidates (`scratch/home_v9_offline_2026-11-17/`, committed copies in
+  `docs/evidence/home_crowe_v9_offline_2026-11-17/`): dislope is 77 %/92 % of v9 J at 0 target, slope-0
+  collapses J to 2.1727/0.9404, corridor `preferred` is not scored inside bounds (h80flat ≡ h90_70);
+  grid stability on 60 same-mesh screen/verify pairs: 18-vs-29 sd 0.208 (top-28 0.112), rank
+  0.986/0.893; interpolated 58/116 sd 0.193/0.190, rank 0.991/0.958; interpolation removes grid noise,
+  not acoustic resolution. 14 tests incl. cross-version pooling refusal + v9 `bw8k_floor` refusal.
+  Evidence: `docs/evidence/HOME_CROWE_V9_OFFLINE_CANDIDATES_2026-11-17.md`.
+- OPEN (owner): WP5 production-brief decision (corridor vs point, V onset, DI slope weight, dead band);
+  WP6 pilot scheduling is a separate authorization. OPEN (semantics): v9 corridor `preferred_deg` is
+  unscored inside `[min,max]` — decide whether preferred should contribute in-bounds.
+
+## 2026-11-17 13:58 ET — owner-directed queue priority
+
+- Owner directed stopping the non-improving `cont_p80_athcore_corelaw_200` to advance the home-hi-fi jobs. The exact search process tree was stopped; existing run rows in `runs/20261115T020650Z-screen-22931c` were preserved. Runner recorded exit 1, performed lane cleanup, and live-reloaded the queue.
+- At 13:58 ET `hifi_verify_rosse_r50_20261117` started; six hi-fi verification jobs then four 15-evaluation home-range pilots are first in the live `runs/nights/cd_rrect_2026-11-17.yaml`. The current job and subsequent results must be checked in the live queue log; start is not completion.
+
+
+## 2026-11-17 (senior pass) - Orchestrator handoff + first parameter-space proposals
+
+- `scratch/fable_architecture/ORCHESTRATOR_HANDOFF_2026-11-17.md`: rules, inventory, first-session
+  verification commands, stage-5 workflow, ordered remaining tasks, owner decisions.
+- Proposals (not applied) in `scratch/fable_architecture/space_cards/proposals/`: Crowe 9 -> 8 knobs,
+  bad box share 23 % -> 6 %; ext-throat sigma0 0.20 -> 0.10 (predicted bad 34 % -> 12.5 % at 0.15);
+  fold-warm 18 -> 15 knobs; b3_soft one bound trimmed. Seed shift 0 on all four.
+
+## 2026-11-17 (senior pass, code) - Shared-descriptor translation between families
+
+- New `hornlab_search/geometry/translate.py`: seed family B from family A's shared descriptors
+  (records only). Biradial seed -> fold-warm: width exact, depth 70 mm short (fold-warm's box cannot
+  reach it); -> ext-throat: one step then every larger step leaves the envelope (consistent with its
+  58 % outside box). Residuals are reported, never hidden. `tests/test_geometry_translate.py` 3 passed.
+
+## 2026-11-17 (senior pass, code) - Stage 5 core: geometric parameter-space identifiability, space cards, proposals
+
+- New `hornlab_search/geometry/sensitivity.py`: for any native or generator config, finite-difference
+  surface and shared-descriptor Jacobians in unit coordinates at Sobol points; knob labels
+  (`weak` = whole range moves no point > 1 mm, the mesher fit); coupling, effective dimension,
+  greedy chain-free link proposals (weaker knob follows); feasible steps from the seed; box
+  feasibility by slice; a linear envelope-margin constraint (WP 5.4); and the predicted
+  bad-candidate rate of the first CMA generations per sigma0 - all from records, no mesh/GPU.
+- `geometry/record.py` grid route now resolves exactly like `mesh/build.py` (Klangfilm H/V core,
+  rows recipes, explicit bodies).
+- New tools `space_card.py` (cards + `shared_map.md`) and `space_propose.py` (proposed
+  `__space_v1.yaml` + before/after + seed shift). Cards for five home lanes in
+  `scratch/fable_architecture/space_cards/`. Findings: ext-throat 58 % of the box outside the
+  envelope, predicted bad rate 6 % at sigma0 0.10 vs 34 % at 0.15, one linear constraint explains
+  it (R^2 0.89, width binds 65 %); fold-warm 18 searched / ~12 effective, `a0_deg` weak (0.39 mm),
+  OSSE n~s and k~a_deg parallel; Crowe top 20 % of g_L_mm and g_s mostly refused; b3_soft top
+  20 % of g_theta_h1_deg refused.
+- Merged WP 2.1 (helper): `finalist` tier resolves in config (2x screen DOF cap, 36 freqs, budget
+  profile `fidelity-ladder-10`); CLI/GUI/evaluate wiring open. Helper flagged: today's screen grid
+  is 12 points (18 only with `screen_extra_hz`), verify 25 (29+ only with
+  `verify_points_per_octave`) - the plan's "18/29" is brief-dependent.
+- Tests: `tests/test_geometry_sensitivity.py` 8 + geometry suites 27 passed; config tiers 78 passed.
+
+## 2026-11-17 (senior pass) - Plan §10 implementation-status table added
+
+- `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` §10 lists every WP's status, file and what still needs
+  the Windows machine or an owner decision.
+
+## 2026-11-17 (senior pass, code) - WP 4.2/4.3 decision rules coded before any solve
+
+- New `tools/analysis/u3_authority.py`: the equivalence rule (1 deg per band, both planes, bands
+  0.7-1.1 / 1.1-2.5 / 2.5-5.5 kHz; optional dJ vs floor) gates the variants; the authority rule is
+  U3's unchanged (>= 3 deg intended plane, other plane < half; steering/diagonal try both planes).
+  Written before any data exists, so the lines cannot drift after seeing results. 3 tests pass.
+
+## 2026-11-17 (senior pass, code) - WP 4.2/4.3 made runnable: explicit record body + U3 job writer
+
+- New `design/generators/record_body.py`: `rows.type: canonical_record_v2` recipes carry the record
+  points inline with their digest; resolve/validate re-check the digest (a silent geometry change
+  is refused). Registered in the explicit-body tuples of `grid.py` and `mesh/build.py`.
+- New `tools/analysis/u3_jobs.py`: for `runs/<run>/designs/<hash>` writes `control.yaml` + 7 variant
+  configs (seed = record body) and `manifest.json` (digests, validity, reach, margins). A control
+  config loads and meshes to the host's box (560 x 350 mm on the biradial seed).
+- GPU next (owner C6): `hornlab-search run --config <out>\\control.yaml` at verify fidelity, compare
+  with the stored response (WP 4.2 rule: mean BW within 1 deg per band, dJ within the floor); only
+  then the 7 variants (WP 4.3). Tests: 2 new + 1 mesher test pass; grid/generated suites unchanged
+  (the one pre-existing failure only).
+
+## 2026-11-17 (senior pass, code) - One-command evidence driver for the Windows checkout
+
+- New `tools/analysis/senior_plan_evidence.py`: record shadow + rescore + floor + U3 CPU variants on
+  each named lane's best stored design, into `scratch/fable_architecture/.evidence/<utc>/`.
+  Smoke-tested on a synthetic biradial run (2 passed). Finding: the "vertical timing -> 480 mm"
+  variant fits the acoustic box but is 6 mm over a 480 mm brief in the build box (3 mm wall) - the
+  envelope-convention decision decides whether it is admissible; 460 mm passes both.
+
+## 2026-11-17 (senior pass, code) - Stage 5 WP 5.2: categorical knobs in continuous boxes are flagged
+
+- `config.categorical_searched_keys` + a load-time WARNING when a native config searches
+  `morph_target` / `morph_allow_shrinkage` / `gcurve_type` inside a continuous box (rounded =
+  staircase for CMA/BoTorch). Warning, not refusal, so running configs are untouched. Shipped
+  configs that trigger it: `examples/typologies/ath_core.yaml` and the four
+  `examples/studies/rear_density_2026-11-13/ath_like_rear*.yaml` (`morph_target`). Recommended
+  (owner): split them into one config per morph target.
+
+## 2026-11-17 (senior pass, code) - Stage 7 WP 7.1: protected lanes as data; watchdog only advises on them
+
+- `examples/protected_lanes.yaml` (status: proposed, awaiting owner C5): the A11 lanes with
+  owner-request evidence; the 4 no-evidence lanes are NOT listed.
+- `tools/run_campaign_night.py`: jobs whose config stem is listed are `protected`; a watchdog
+  verdict on them writes `=== WATCHDOG ADVISORY (protected lane) ...` once and does NOT kill.
+  Night YAML `protected_lanes: <path>` picks another file; `protected_lanes: false` turns it off.
+- **Behaviour change once merged:** live nights read the default file automatically, so refusal
+  storms in protected lanes (e.g. a mis-sized sigma0) are logged, not stopped. Owner can opt out
+  per night. Tests: night-runner suites 86 passed.
+
+## 2026-11-17 (senior pass, code) - Stage 1 WP 1.4/1.5: rescore and noise-floor tool
+
+- New `tools/analysis/rescore_identity.py`: `rescore` (history under one brief, per-lane bests,
+  unscorable designs reported) and `floor` (frequency part of the floor from study screen/verify
+  pairs: sd of screen-verify J over all and top-N, Spearman). Uses the parity-exact replay, so v9
+  `score_grid` and `constancy` apply when the brief declares them.
+  `tests/test_tools_analysis_rescore_identity.py` 3 passed. Needs `runs/` (Windows) to produce numbers.
+
+## 2026-11-17 (senior pass, code) - Stage 3 WP 3.3/3.4: record shadow gate tool
+
+- New `tools/analysis/record_shadow.py`: offline shadow of a record-based envelope gate. For each
+  design in the given runs it rebuilds the record (pre-mesh refusals re-materialised from
+  `_knobs`), writes digest/descriptors/margins (acoustic and build-box) to `records.jsonl`, and
+  counts disagreements with the stored outcome. No hot-path change; the switch stays an owner
+  decision after the report. `tests/test_tools_analysis_record_shadow.py` 2 passed.
+- To run on history (Windows, needs `runs/`):
+  `.venv\Scripts\python.exe tools\analysis\record_shadow.py runs\<run> ... --out scratch\rec_shadow`.
+
+## 2026-11-17 (senior pass, code) - Stage 0 WP 0.5: GRID extent false refusals measured and fixed
+
+- T4 (`scratch/fable_architecture/.t4/t4.py`, gmsh, no solve; 64 Sobol knob vectors per config):
+  `grid_ellipse_mod` had 3/3 pre-mesh envelope refusals that the real mesh fits (false refusals),
+  0 misses; `grid_ellipse` 0/0. On the home landscape brief these bounds never reach the box, and
+  no home lane uses the generic radial GRID route, so the realised loss on home campaigns is ~0.
+- Fix (`design/generators/grid.py::envelope_extents`): width/height per plane
+  (`2(max r cos phi + t)`, `2(max r sin phi + t)`) instead of `2(max r + t)` on both. Re-measured:
+  1 false refusal left (1.5 % over by the estimate; the radius-field mouth modulation), 0 misses.
+- Tests touching the estimator: 267 passed; 3 failures all pre-existing at `1d6ebc8`
+  (`test_grid_self_approach...`, two `test_gui_preview_shape` tests).
+
+## 2026-11-17 (senior pass, code) - Stage 4 WP 4.1: U3 freedoms as record edits, meshed for real
+
+- New `hornlab_search/geometry/edits.py`: pinned-throat radial edits; the seven U3 variants; U2
+  validity; `record_to_grid` hand-off. Installed libGLU in the container so gmsh runs: control
+  plus all seven variants of the biradial seed build real point-grid meshes.
+- CPU result (`scratch/fable_architecture/U3_RECORD_EDITS_CPU_2026-11-17.md`): all 8 valid; vertical
+  timing reaches 460/480 mm (failure line not met); 3/7 variants reach >= 5 mm RMS outside the last
+  5 % (termination split is lip-confined; steering small on this seed). Line not moved.
+- Tests: `tests/test_geometry_edits.py` 9 passed (one real-mesh test, `requires_mesher`).
+- With gmsh available, re-ran the 11 mesh tests that failed earlier: all pass except
+  `test_grid_self_approach_classifies_invalid_geometry_and_is_memoized`, which fails identically
+  at `1d6ebc8` (pre-existing: the test's context has no solve cache root).
+
+## 2026-11-17 (senior pass, code) - Stage 1 WP 1.2: dense-grid score identity for objective v9
+
+- New `hornlab_search/metrics/dense_grid.py` (A4/N3 method packaged: PCHIP in log f, uniform
+  58/116/232 points inside the solved range, pressures dropped, no extrapolation). Objective v9
+  takes an opt-in `objective.score_grid: {kind: dense_log, points: N}`; when declared, metrics are
+  re-derived on the dense grid with the production DI rule (`metrics_from_response`) before
+  scoring; it rides `to_block`, so it is part of the score identity. Absent = unchanged. Replay
+  inherits it through the v9 dispatch. Plan: 58 points for v9, 116 with constancy (N3).
+- Tests: 7 new; scoring/replay/config suites 99 passed.
+
+## 2026-11-17 (senior pass, code) - Stage 1 WP 1.1: opt-in constancy term in objective v9
+
+- `objective.constancy: {mode: strict|slope, weight, tolerance[, slope_max_deg_per_decade]}`,
+  ABSENT by default (J unchanged; terms carry `constancy: 0.0`, like `hf_floor`). Declared by a
+  brief only, never from a family name. Strict reproduces S1's formula exactly
+  (`mean(d^2)/25` == raw/100 at tolerance 0.25); slope mode forgives a steady narrowing up to the
+  declared deg/decade. Counted in `worst_valid_v9_j`. Owner decision C2 picks whether any home
+  brief turns it on. Tests: v9 + GUI corridor + replay + config suites 73 passed (the pinned
+  optional-key test now lists `constancy`).
+
+## 2026-11-17 (senior pass, code) - Stage 3 WP 3.1/3.2: canonical surface record module
+
+- New `hornlab_search/geometry/record.py`: the N1b/X4-validated contract-v2 sampler packaged
+  (65 arc-length stations x 61 azimuths, mm), generator routes without meshing (native via
+  `resolve_geometry`, grid, rolled, Klangfilm), record digest, contract §7 descriptors, signed
+  envelope margins (acoustic and build-box views), typed refusals (CAD, ports, zero meridian,
+  non-monotone azimuth). Read-only: no identity, solver or stored-row change.
+- `tests/test_geometry_record.py`: 11 passed (analytic elliptic cone: area, shape index pi/4,
+  wall angle; determinism/digest; refinement; rollback; refusals; real hypex seed without mesh).
+- Ownership of the new `geometry/` package needs orchestrator assignment (CLAUDE.md table).
+
+## 2026-11-17 (senior pass, code) - Stage 0 WP 0.2: search.links now work with generator blocks
+
+- `GeneratedSpace.apply_knob_links` applies links in KNOB space before `materialize`;
+  `search.links.reduce_space` builds a reduced GeneratedSpace (linked knobs leave the CMA
+  dimension, seed recomputed); `apply_links` is a no-op on generator designs; the config refusal
+  is lifted. No links = byte-identical default. The old "refused" test is replaced by real
+  hypex-config tests. `tests/test_search_links.py` + neighbours: 88 passed.
+
+## 2026-11-17 (senior pass, code) - Stage 0 WP 0.1 refusal taxonomy and WP 0.4 parity replay landed
+
+- WP 0.1 (`search/evaluate.py`): post-mesh envelope violations are now kind `invalid_envelope`
+  with error text `post_mesh: ...` (3 sites; were `invalid_geometry`); family errors such as
+  `GeneratorError: invalid_envelope: ...` now map to `invalid_envelope` through
+  `_generator_error_kind` (was a bare `startswith`). New rows only; penalty values unchanged
+  (graded penalty falls back to the flat value without an overshoot). `tests/test_search_refusal_taxonomy.py`.
+- WP 0.4 (`objective/replay.py`): replay dispatches objective v9 (V9Params, objective_v9,
+  resolve_v9_weights) and regenerates metrics with production `metrics_from_response`
+  (sin-theta balloon DI) instead of plain `compute_metrics`. `tests/test_obj_replay_v9_parity.py`.
+- Merged the helper lane's WP 0.3/0.6/0.7 (cohort gate by declared version; night-runner restart
+  idempotency; watchdog best_J and outcome counts).
+- Tests (Linux container, system Python): new + replay + v9 suites green; refusal-kind suites green
+  except 11 mesh tests that fail identically without these changes (libGLU missing for gmsh here).
+
+## 2026-11-17 - Stage-0 fixes WP 0.3 / 0.6 / 0.7 (offline, no GPU, no solves)
+
+- **WP 0.6** `tools/run_campaign_night.py`: `run_night` seeds `done` from an existing
+  `queue_state.json` (same night only; not with `--only`), so a restarted runner never re-runs a
+  finished job. Absent file: unchanged; unreadable/foreign file: warning, unchanged behaviour.
+- **WP 0.7** same file: a watchdog stop now recomputes `best_J` from that run's `search.ndjson`
+  (lowest finite objective among ok rows) and adds an additive `outcome_counts` field
+  (ok / invalid_geometry / invalid_envelope / mesh_too_large / solve_failed / other) plus a note.
+  Historical `summary.jsonl` rows are not rewritten; other records gain no new keys. The
+  `pin_min_valid` / `pin_frac` / `pin_count` exposure part of the plan row is not done here.
+- **WP 0.3** `hornlab_search/bo/cohort.py`: the hard `objective_version != 4` gate is now an
+  identity check: R0 `objective_version` must be known and equal across rows (or equal to the
+  optional `objective_version=` argument), and equal to S0's when S0 stores one. v4 cohorts behave
+  as before; uniform v7 cohorts pool; mixed/missing refuse as `incompatible`. Target, weights,
+  `metric_source` and score/metric policy claims were already compared across rows.
+  Tests: `tests/test_night_runner_restart_and_stop_truth.py`, additions in `tests/test_bo_cohort_gate.py`.
+## 2026-11-17 (senior pass) - Fable senior review: generator decision taken, architecture and staged plan written
+
+- **Senior (high-thinking) reviewer pass** picking up for Fable; not the owner. Docs only, HEAD
+  `1d6ebc8`: no code, config, queue, solve, mesh build or pytest. Two new documents in
+  `scratch/fable_architecture/`: `FABLE_SENIOR_REVIEW_2026-11-17.md` and
+  `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md`; they now take precedence over the handoff.
+- **Lane review confirmed in substance.** Amended: U3 freedoms are tested as canonical-record edits
+  through the point-grid route (after a new 2-solve record-route equivalence check) before any are
+  built, and then only inside the specialist whose construction carries them; U1-bis deferred with a
+  reopen condition and a predeclared parameter cap; X1 ruled accepted for geometry, open for metadata.
+- **Reserved decisions taken:** plural specialist generators, one shared description (record v2); no
+  unified backbone or common carrier; U2 closed, B3/B5 withdrawn; no cross-family model (BoTorch within
+  lanes, CMA-ES builds rows, seeds from stored bests); watchdog stays a reviewed safety net; B1 design
+  selection decoupled from the owner's scoring choice (union of v7 and v9-placeholder top fives).
+- **Corrections registered:** "80x50 is physically unreachable" is a measured observation on sampled
+  designs, not physics (KH-001 scopes Keele to Bi-Radial); constancy is a brief-declared CD intent,
+  never a family default (owner lock: no classification by family name); the noise floor is per score
+  identity (v9 0.113 J vs v9+constancy 0.205 J at the top, N3); the Klangfilm Phase B result
+  (construction-level core moved the beam 25-40 deg; b3_soft 6.401 -> 2.819) was missing from the
+  corpus; `A4_GRID_INDEPENDENT_SCORE.md`, `A5_SOLVER_CALL_TIMING.md`, `A9_CORRIDOR_VS_TERM_SET.md`
+  and `X1_ADDENDUM_KLANGFILM_PROVENANCE.md` are cited but not in git.
+- **Plan:** stages 0-8 with exit gates. Stage 0 (nine truth fixes, all re-verified live at HEAD) and
+  the record module (stage 3.1) are ready to become task files now with no owner input. GPU before
+  matched reruns: B1 20 + equivalence 2 + B2 12-16 = 34-38 solves.
+- **Owner decisions open:** C1-C4 scoring (cards say what each changes; no recommendation, per the
+  standing instruction), C5 protected list, C6 budget (recommended order B1, equivalence, B2, B6),
+  provenance rule (recommended: gate on a record digest of the generated surface, keep the kernel
+  digest informational), envelope convention (recommended: record acoustic and build boxes; brief
+  names which one gates), commit the four missing reports.
+## 2026-11-17 05:0x - Stage 0 WP 0.8 (doc truths + E-012 guard) and WP 0.9 (recipe metadata, additive)
+
+- **WP 0.8.** `tools/night_queue/queue.ps1` header corrected: a started night IS live-reloaded
+  (reorder / insert / remove, PAUSE / STOP; `run_campaign_night.py` ~1233-1250; only `--no-live`
+  reads once). `budget_counts` semantics written in `docs/reference/SEARCH_CONFIG_KEYS.md` from
+  `search/cma.py`: cache hits are free in both modes, refusals consume budget under `new`, are free
+  under `valid`, solve/metrics failures always consume. `flat` (ddof=2, `metrics/smoothness.py`) vs
+  `flat_cv` (ddof=0, `objective/scalar_v7.py`) documented in the new
+  `docs/reference/OBJECTIVE_STD_CONVENTIONS.md` (docstring note in `smoothness.py`); NO math changed
+  and no objective code touched. E-012 guarded: `design/families.py` `to_mesher_config` now refuses a
+  design `mode` key that contradicts `brief.mounting` (GeometryInvalidError) instead of silently
+  overwriting the enclosure flip; freestanding runs and all shipped configs are byte-identical.
+- **WP 0.9 (metadata only; digest rule still owner-pending).** New `design/recipe_meta.py`;
+  `GeneratedSpace.provenance` now carries `recipe_meta` (schema `recipe_meta_v2`: termination kind
+  where knowable else explicit `None`, wall thickness the mesher actually uses with its source -
+  mesher default 6.0 mm freestanding / 0 enclosure, grid route 3.0 mm - and source-cap
+  shape/radius/curvature/angle, radius resolved only on the point-grid route). It is NOT an input of
+  `Design.hash()`, mesh/solve hash or `config_sha` (tested), and `evaluate.py` copies only a fixed key
+  list into dataset provenance. Gap: plain-family (non-generator) designs have no generator block, so
+  they get no metadata until `search/evaluate.py` `_persist` calls `recipe_metadata` (other agent's
+  file; request in NOTES_FOR_SENIOR).
+- Tests: `tests/test_design_recipe_meta.py` (7). gmsh-dependent tests fail in this container
+  (libGLU missing) as before; no GPU.
+## 2026-11-17 - WP 2.1: finalist fidelity tier resolves in config (offline, no solves)
+
+- Added mode `finalist` additively: `FREQ_GRIDS["finalist"]` = 36 points on 300-16,000 Hz (>= 29;
+  same band edges as verify, clipped to `band_hi_hz` like the others), `MODES` gains `finalist`,
+  `types.Mode` likewise. `MeshSettings.dof_cap("finalist")` = `mesh.dof_cap_finalist` when the YAML
+  sets it (new optional key), else `FINALIST_DOF_FACTOR` (2) x `dof_cap_screen`. `mesh_spec("finalist")`
+  and `solve_spec("finalist")` therefore carry their own max_triangles, f_max, freqs and mode, so the
+  finalist mesh and solve identities are distinct. Balloon density follows verify.
+- screen / verify / final specs, hashes and `config_sha` are unchanged (absent key leaves `raw`
+  untouched; `tests/test_config_fidelity_tiers.py` pins this). Budget profile `fidelity-ladder-10`
+  (10 screen + 10 finalist-tier solves counted as `verify_calls`, B1 shape) added to
+  `studies/package.py`; existing profiles unchanged.
+- Findings: frozen screen grid is 12 points (18 only with `screen_extra_hz`) and frozen verify is 25
+  (>= 29 only with `verify_points_per_octave`); the plan's 18/29 describe configured briefs, not the
+  frozen defaults. The pre-existing `final` mode (36 pts, `dof_cap_final`) is untouched and is NOT the
+  finalist tier (its cap equals screen in most examples).
+- OPEN wiring: CLI `--mode` choices (cli.py, gui/jobs.py SEARCH_MODES) still list screen/verify/final;
+  `evaluate.py`/runner dispatch of `finalist` (evaluate.py:1277 is verify-only, owned by another
+  agent); `cli.py:562` and mesh build already accept `mode="finalist"` via `dof_cap`. No example YAML
+  sets `dof_cap_finalist` (default 2x is used). B1 itself (WP 2.2) is not run.
+## 2026-11-17 07:4x - Queue addition: ten "best J still falling" continuations (+200 evals each), live-reloaded
+
+- Owner asked for the ten GUI "give this run more evaluations" candidates at **+200 solves each if not
+  already queued**. None were: no queued job resumed any of the ten run dirs (checked both live night
+  files for the dir ids), so all ten were added as `kind: command` resumes.
+- **8 on the GPU night** (`cd_rrect_2026-11-17`), inserted as jobs 15-22 - after the in-flight
+  `c_rrect_100w_rc2` repair, before the TuRBO pairs - so the newest owner instruction leads.
+  Valid rows before the addition / run dir: `p80x60__ath_core_14in_home700_v7` 171
+  (`20261114T015916Z-screen-db8e2f`), `p80x60__ath_core14_corelaw_v7` 89 (`...020650Z-screen-22931c`),
+  `p80x60__ext_throat_hvlaw_cov_v7` 113 (`...060011Z-screen-9e3528`),
+  `hl__lecleach_iwata_ar_landscape_v7` 80 (`...162516Z-screen-e31b23`), `hl__rolled_es_spiral_v7` 30
+  (`...001222Z-screen-b25d61`), `hl__biradial_es_style_v7` 142 (`...090751Z-screen-37b115`),
+  `hl__biradial_es_style_smooth_v7` 107 (`...193501Z-screen-f008ad`), `hl__rosse_rect_cd_v7_r50_refine`
+  51 (`20261117T053153Z-screen-15f0e4`).
+- **2 on the CPU night** (`bo_cpu_2026-11-17`), after atlas: `sab__lecleach_ctrl` 143
+  (`20261114T220720Z-screen-88d19c`) and `sab__lecleach_fc540` 142 (`20261114T223630Z-screen-86e077`),
+  keeping their original `--backend beat_cpu --cache-dir cache_cpu --dataset-dir dataset_cpu`. A search
+  job inside a cpu night inherits `HORNLAB_BEAT_WORKER_DIR=runs/lanes/cpu/workers`, so
+  `cli._solve_lock` returns a null lock and the GPU lock is not touched.
+- **Resume form is `--budget 200` = 200 NEW evals** (`cli.py:761` prints "budget N new evaluations";
+  `refresh_watchdog` converts its own repairs with total-minus-valid, which is the other convention).
+  No `--config` is passed, so each resume loads its run's own `config.yaml`; stored vs current
+  `config_sha` verified equal for all ten, so none will refuse. Bridge kinds use their own CLI -
+  `rolled_rect_cli.py` (spiral, `grid/rolled_rect_pucker`) and `rosse_rect_cli.py` (r50_refine,
+  `grid/rosse_rect`); the other six use the generic `hornlab-search.exe`.
+- Both files pass `--dry-run` with no MISSING paths: 45 GPU jobs / 3 CPU jobs, no duplicate ids. The
+  GPU runner re-reads the file before every job, so the block takes effect when `t_trit80_rc2`
+  (running, 29 observations) ends.
+- Wall clock of the addition: ~17 h GPU (2.8 / 3.6 / 2.8 / 0.4 / 2.1 / 1.2 / 1.0 / 2.3 h at each run's
+  measured s/eval) plus ~1.4 h CPU, on top of the three 300-solve crowns and 13 x 200 walls jobs
+  already pending. `queue.ps1`'s 14:30 cutoff only stops STARTING new nights, so this runner drains
+  into 2026-11-18 unless the owner trims (`STOP`) or re-orders.
+
+## 2026-11-17 07:1x - Lane review: gate false-PAUSE fixed; klame BO arms are unsupported point-grid designs
+
+- **Both lanes verified on the right queue.** GPU night `cd_rrect_2026-11-17` ran `t_trit80_rc2` under
+  `runs/.gpu.lock` (pid 41452, command `study 1ff9fb9cb6d04e358685213206425478`) with worker dir
+  `runs/lanes/gpu/workers`; CPU night `bo_cpu_2026-11-17` held `runs/.cpu.lane.lock` (pid 57892,
+  `night bo_cpu_2026-11-17`) with `runs/lanes/cpu/workers` and logged `cpu lane: GPU lock and VRAM
+  accounting skipped`. `package.json` carries `lane: gpu|cpu` and `studies/lanes.py` takes the matching
+  lock, so a CPU arm cannot take the GPU lock.
+- **BoTorch recording verified.** `turbo_trit80_rc2`: package `running`, `observation_seq=20` and
+  attempts 20 = observations 20 = `screen/search.ndjson` rows 20 = design dirs 20, with per-row
+  objectives (best J 4.9386). `launches: 0` is not a defect - it is the GUI-launch idempotency ledger
+  (`studies/service.py`); the night executes `studies.cli run --execute` directly.
+- **Gate false-PAUSE (root cause + fix).** `runs/nights/<night>/PAUSE` said `foreign GPU-lock holder`
+  from 06:42:33 while the lock was our own study; the runner honours PAUSE before every job
+  (`run_campaign_night.py:1373`), so all 37 jobs would have stalled after `t_trit80_rc2`. `gate()`
+  attributed holders by argv tokens, but a BO arm holds the lane as `study <study_id>`
+  (`studies/lanes.py`), sharing no token with `run_bo_arm.py --root ...`. Fix:
+  `_study_arm_holder_ours()` resolves that id through the running job's `--root` registry
+  (`<root>/studies.sqlite3`); `gate()` gained an injectable `root`. Regression
+  `tests/test_night_refresh_gate.py` (4 tests pass). Same file: `refresh()` referenced an undefined
+  `young` (a rename to `complete_elsewhere` left it behind), so the "budget covered by a sibling
+  thread" deferral would have raised `NameError` and silently killed a deep tick.
+- **klame BO root cause: unsupported geometry, not the pipe hang.** `t_klame_turbo100` (1238 s, exit 1),
+  `t_klame_scalar100` (1098 s, exit 1) and `t_klame_turbo_cpu` (1521 s, killed after review) all died
+  in `build_proposal` after `training rows: 200`. Direct probe: `status=pool_exhausted,
+  candidates=0`, counts `{'generated': 24, 'geometry_rejected': 24, ...}`; exception
+  `UnsupportedGeometryError: CAD/point-grid designs are unsupported by the canonical radial surface
+  sampler` (`bo/data.py:materialize_geometry`). The c200 config is `generator: {name: grid, rows:
+  {type: klangfilm_lame_v1}}`, so every Sobol candidate is rejected; the 18-20 min was the 513 x 3
+  candidate pool build at ~1-2 s each. The `1482304` stream fix is confirmed good (trit's ~140 KB prep
+  JSON packaged).
+- **Consequences.** No TuRBO/SCALAR arm can run on a klangfilm_lame (grid/point-grid) config, so the
+  backlog's hand-built `c200w` + its TuRBO/SCALAR pair stays unqueued until the BO sampler supports
+  CAD/point-grid; CMA `search` on the same config is unaffected (`c_klame_200`: 201 evals, best J
+  7.4458). Removed `t_klame_turbo100`, `t_klame_turbo100_rc1`, `t_klame_scalar100` from the GPU night
+  file (also stops the watcher re-appending `_rc1`: it needs the job spec present to repair) and the
+  dead arm from the CPU night file; `w_klangfilm_lame_curved_v1_200w1` is a CMA search job and stays.
+  `runs/` is untracked, so those edits are local state only.
+- **Open.** `gpu-clean --lane cpu` returns rc 3 while the GPU lane is live, so CPU jobs record
+  `status: blocked` and take one 120 s retry round trip (observed: RETRY `t_klame_turbo_cpu` -> rc 2 ->
+  `t_atlas_corelaw_turbo_cpu` start). The CPU lane should not be blocked by a GPU holder.
+  Review report (untracked): `runs/nights/refresh/lane_review_20261117T1205Z.md`.
+
 ## 2026-11-17 04:1x - Lane review of the Fable corpus handed to the senior reviewer (not a senior decision)
 
 - The **lower-cost continuation lane agent** (not Fable, not the owner) reviewed all 54 documents in

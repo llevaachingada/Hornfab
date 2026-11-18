@@ -87,7 +87,9 @@ def test_feasibility_note_says_whether_it_fits():
 
 # 30
 @pytest.mark.parametrize("path", sorted([p for p in EXAMPLES.glob("*.yaml")
-                                         if p.name not in ("catalog.yaml", "catalog.gui.yaml")]
+                                         # protected_lanes.yaml is the WP 7.1 protected-lane data file, not a brief
+                                         if p.name not in ("catalog.yaml", "catalog.gui.yaml",
+                                                           "protected_lanes.yaml")]
                                         + list((EXAMPLES / "briefs").glob("*.yaml"))), ids=lambda p: p.name)
 def test_from_dict_round_trips_example_targets(path):
     # every search config AND every design brief carries a target block

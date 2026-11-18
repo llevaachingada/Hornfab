@@ -2,8 +2,8 @@
 
     hornlab-search doctor | version
     hornlab-search selftest --analytic [--tol-db 0.5] [--subdivisions 3] | --crosscheck
-    hornlab-search run      --config <yaml> [--mode screen|verify|final] [--dry-run]
-    hornlab-search search   --config <yaml> [--budget N] [--mode screen] [--resume DIR]
+    hornlab-search run      --config <yaml> [--mode screen|verify|final|finalist] [--dry-run]
+    hornlab-search search   --config <yaml> [--budget N] [--mode screen|verify|final|finalist] [--resume DIR]
     hornlab-search verify   --run <dir> [--top 5 | --designs h1,h2 | --designs-file f.csv]
     hornlab-search report   <run_dir> [--out report.html] [--top 5]
     hornlab-search pin-plan --run <dir|id> [--write-config PATH]
@@ -1551,7 +1551,8 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--n-freqs", type=int, default=5)
     r = sub.add_parser("run", parents=[common], help="evaluate the seed design once")
     r.add_argument("--config", required=True)
-    r.add_argument("--mode", choices=("screen", "verify", "final"), default="screen")
+    r.add_argument("--mode", choices=("screen", "verify", "final", "finalist"), default="screen",
+                   help="fidelity tier (default screen; finalist is the config-resolved wide tier)")
     r.add_argument("--dry-run", action="store_true", help="mesh and estimate; launch no solver")
     r.add_argument("--brief", metavar="PATH",
                    help="brief YAML; overrides config target/weights and is folded into config_sha")
@@ -1562,7 +1563,8 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("--budget", type=int, help="cap on NON-CACHED evaluations (the seed counts)")
     q.add_argument("--max-evals", type=int, dest="max_evals",
                    help="cap on ALL evaluations incl. cache hits (fair comparisons; campaign sets it)")
-    q.add_argument("--mode", choices=("screen", "verify", "final"), default="screen")
+    q.add_argument("--mode", choices=("screen", "verify", "final", "finalist"), default="screen",
+                   help="fidelity tier (default screen; finalist is the config-resolved wide tier)")
     q.add_argument("--resume", metavar="DIR")
     q.add_argument("--allow-config-change", action="store_true",
                    help="resume even if the run's config_sha differs from the current config "
@@ -1631,7 +1633,9 @@ def build_parser() -> argparse.ArgumentParser:
     xg.add_argument("--run", help="run directory: export its top distinct designs")
     xg.add_argument("--config", help="config: export its seed design")
     xs.add_argument("--top", type=int, default=3)
-    xs.add_argument("--mode", choices=("screen", "verify", "final"), default="screen")
+    xs.add_argument("--mode", choices=("screen", "verify", "final", "finalist"), default="screen",
+                    help="fidelity tier used for the mesh (default screen; finalist = the "
+                         "config-resolved wide tier)")
     xs.add_argument("--out", help="output directory (default <run>/step or step/<config name>)")
     sg = sub.add_parser("surrogate", parents=[common], help="phase 2 stage A: train / propose / round")
     sg.add_argument("action", choices=("train", "propose", "round"))
