@@ -20,8 +20,9 @@ mesher-default knob silently depends on the installed mesher's default:
   (``mean ring-0 radius / sin(angle)``, as ``hornlab_mesher`` computes it); on the formula route
   it is ``None`` (``radius_param`` -1 means automatic) because the mesher resolves it internally.
 
-The digest rule for the whole record (``record_digest``, ``kernel_sha256``) is an owner decision
-and is deliberately NOT here.
+The whole-record digest rule (``record_digest``, R12b owner decision 2026-11-18) lives here since
+the D9 pass: geometry-from-record rebuilds gate on the record digest; kernel
+``implementation_sha256`` values are informational.
 """
 from __future__ import annotations
 
@@ -74,18 +75,31 @@ def _mode(design, mounting) -> str:
 
 
 def recipe_metadata(design, *, mounting: dict | None = None, gen: dict | None = None,
-                    grid_inner=None, grid_meta: dict | None = None) -> dict:
+                    grid_inner=None, grid_meta: dict | None = None, record=None) -> dict:
     """The WP 0.9 metadata block for one design. Never raises; unknowns are explicit ``None``.
 
     ``grid_inner`` / ``grid_meta`` (optional) are the point-grid ``inner_points`` (mm) and meta
     the mesher will receive; with them the grid source-cap radius is resolved exactly as the
-    mesher does.
+    mesher does. ``record`` (optional, R12b/D9) is the design's
+    :class:`hornlab_search.geometry.record.SurfaceRecord`; when given, ``record_digest`` records
+    the record's own sha256 (float64 little-endian, the same digest ``canonical_record_v2``
+    gates rebuilds with). THE GATE: geometry-from-record rebuilds must reproduce this digest;
+    ``implementation_sha256`` (kernel files) stays informational. Never an input of any hash.
     """
     try:
         params = design.params or {}
         mode = _mode(design, mounting)
         meta: dict[str, Any] = {"schema": SCHEMA, "mode": mode,
                                 "termination": _termination(design, gen)}
+        if record is not None:
+            meta["record_digest"] = {"value": record.digest(), "source": "surface_record"}
+        elif isinstance(params.get("grid"), dict) and \
+                (params["grid"].get("rows") or {}).get("record_digest"):
+            # canonical_record_v2 routes already carry the gated record digest in the grid meta.
+            meta["record_digest"] = {"value": str(params["grid"]["rows"]["record_digest"]),
+                                     "source": "canonical_record_v2"}
+        else:
+            meta["record_digest"] = {"value": None, "source": "not_recorded"}
         if "grid" in params:
             block = params["grid"] if isinstance(params["grid"], dict) else {}
             wv = _num(block.get("wall_thickness_mm"))

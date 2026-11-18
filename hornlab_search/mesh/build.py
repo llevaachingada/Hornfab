@@ -187,6 +187,28 @@ def _result_to_json(r: MeshResult) -> dict:
             "res_mm": r.res_mm, "bbox_m": list(r.bbox_m), "seconds": r.seconds}
 
 
+def _surface_fit_meta(mcfg, resolved: str | None) -> dict | None:
+    """WP 0.9 / D9 surfaceFit echo (R12b): what the mesher actually used, plus the fallback flag.
+
+    Our configs never pin ``mesh.surface_fit`` today, so the mesher's AUTOMATIC choice applies:
+    it resolves ``auto`` -> ``interpolate`` where the family allows, and retries
+    ``approximate`` when the interpolating fit fails to mesh (hornlab_mesher config_builder
+    ``build_from_config``; an explicit ``interpolate`` is never retried). `fallback` is therefore
+    true exactly when the config asked for automatic and the resolved mode is ``approximate``.
+    The RESOLVED mode comes from the mesher's own BuildResult metadata (``surfaceFit``); unknown
+    on older meshes, in which case nothing is echoed (meta stays byte-identical).
+    """
+    if resolved is None:
+        return None
+    requested = "auto"
+    if isinstance(mcfg, dict):
+        section = mcfg.get("mesh") if isinstance(mcfg.get("mesh"), dict) else {}
+        requested = str(section.get("surface_fit") or section.get("surfaceFit") or "auto")
+    resolved = str(resolved)
+    return {"requested": requested, "resolved": resolved,
+            "fallback": bool(requested == "auto" and resolved == "approximate")}
+
+
 def _result_from_json(d: dict, path: Path, seconds: float) -> MeshResult:
     return MeshResult(path=str(path), n_triangles=int(d["n_triangles"]), n_dof=d.get("n_dof"),
                       quadrants=d["quadrants"], symmetry_plane=d["symmetry_plane"],
@@ -456,6 +478,12 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
             **dict(mid_ports_meta),
             "tag10_triangles": int(summary["tags"].get(MID_PORT_TAG, 0)),
         }
+    surface_fit_meta = _surface_fit_meta(mcfg, (getattr(built, "metadata", None) or {}).get("surfaceFit"))
+    if surface_fit_meta is not None:
+        # WP 0.9 / D9 (R12b) echo: which surfaceFit mode the mesher actually used, and whether the
+        # automatic choice had to fall back interpolating -> approximating. Additive: absent on
+        # meshes whose mesher predates the surfaceFit report, so old mesh_meta.json stay identical.
+        meta["surface_fit"] = surface_fit_meta
     _meta_path(out_dir).write_text(json.dumps(meta, indent=1, sort_keys=True), encoding="utf-8")
     if cache_dir is not None:
         _copy_entry(out_dir, Path(cache_dir) / key)

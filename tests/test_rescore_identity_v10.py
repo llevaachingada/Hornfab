@@ -98,6 +98,26 @@ def test_compare_ranks_within_columns_and_never_pools(tmp_path):
     assert not any(res["columns"][k]["mixed_identity"] for k in cols)
 
 
+def test_mixed_identity_flag_uses_score_identity_not_per_design_ids(tmp_path):
+    """WP 1.4 fix (2026-11-18, owner box): a column's rows legitimately carry one score_id EACH
+    (metric_id folds the design's own arrays), so `mixed_identity` must be computed from the
+    score-identity fields (score code, version, weights, block, brief), not from score_id counts."""
+    a = _fake_run(tmp_path, "ra", "../b.yaml", lane="lane_a")
+    b = _fake_run(tmp_path, "rb", "../b.yaml", lane="lane_a")
+    s10 = RI.rescore([a, b], str(V10), tmp_path / "d10")
+    s9 = RI.rescore([a, b], str(V9), tmp_path / "d9")
+    assert len(s10["score_identity_ids"]) == 1 and s10["mixed_identity"] is False
+    assert len(s9["score_identity_ids"]) == 1 and s9["mixed_identity"] is False
+    # Different briefs (v9 vs v10) under the same designs -> different score identities.
+    assert s10["score_identity_ids"] != s9["score_identity_ids"]
+    # A summary that genuinely carries two identities is reported, not silently merged.
+    summ = json.loads((tmp_path / "d10" / "rescore_summary.json").read_text(encoding="utf-8"))
+    summ["score_identity_ids"].append("fabricated-second-identity")
+    (tmp_path / "d10" / "rescore_summary.json").write_text(json.dumps(summ), encoding="utf-8")
+    res = RI.compare({"v10": tmp_path / "d10"}, tmp_path / "cmp")
+    assert res["columns"]["v10"]["mixed_identity"] is True
+
+
 def test_v7_brief_still_rescores(tmp_path):
     run = _fake_run(tmp_path, "r7", "../b.yaml")
     s = RI.rescore([run], str(V7), tmp_path / "d7")

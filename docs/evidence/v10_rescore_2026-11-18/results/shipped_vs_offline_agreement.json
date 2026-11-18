@@ -1,0 +1,10 @@
+{
+ "check": "v10-shipped brief vs v10-offline brief, same 166-design sample, matched scored rows",
+ "n_matched": 122,
+ "max_abs_delta_j": 0.0,
+ "tolerance": 1e-12,
+ "verdict": "PASS (exact equality)",
+ "shipped_column": "runs/analysis/v10_rescore_2026-11-18/reuse_v10_shipped_sample",
+ "offline_column": "runs/analysis/v10_rescore_2026-11-18/v10 (full fleet, 3949 rows)",
+ "conclusion": "the offline v10 column IS the shipped v10 column numerically; score ids differ by brief name only"
+}

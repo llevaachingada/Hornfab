@@ -1,0 +1,201 @@
+{
+ "brief": "examples\\briefs\\home_landscape_2026-11-18_v10\\room_landscape_80x50_700_hf1440_v10_slope5.yaml",
+ "objective_version": 10,
+ "sampled": true,
+ "sample_n": 166,
+ "sample_seed": 20261118,
+ "full_fleet_column": false,
+ "score_identity_ids": [
+  "0c9ff075a5903fff93c4f9a607229e8bed0b7b6f3d3eb00b7f4d45aed75a633e"
+ ],
+ "mixed_identity": false,
+ "n": 166,
+ "scored": 122,
+ "status_counts": {
+  "additional_data_or_solve_required": 10,
+  "exact_complete": 122,
+  "error": 34
+ },
+ "lane_best": {
+  "hl__osse_rrect_morph_v7": {
+   "j": 2.102386723462086,
+   "run": "20261115T154322Z-screen-07bea2",
+   "design_hash": "436a4d221328"
+  },
+  "hl__osse_rrect_fold_warm_v7": {
+   "j": 2.2446417852708676,
+   "run": "20261116T131710Z-screen-f1a263",
+   "design_hash": "30c8c4f07d1f"
+  },
+  "hl__ext_throat_hvlaw_v8": {
+   "j": 2.433674389796242,
+   "run": "20261116T025728Z-screen-cd60f7",
+   "design_hash": "9fcd21fc1904"
+  },
+  "throat_hv_sweep_A_r15": {
+   "j": 2.5566362984308966,
+   "run": "20261118T133445Z-screen-b16baf",
+   "design_hash": "17b234d6ff98"
+  },
+  "hl__ath_twinray380_landscape_v8": {
+   "j": 2.644080133206057,
+   "run": "20261117T001240Z-screen-7b664f",
+   "design_hash": "85c59331e4a3"
+  },
+  "throat_hv_sweep_A_r20": {
+   "j": 2.672430519784398,
+   "run": "20261118T133540Z-screen-fe2089",
+   "design_hash": "ad427e08a387"
+  },
+  "hl__osse_rrect_morph_v8": {
+   "j": 2.7153637417988037,
+   "run": "20261116T030920Z-screen-5d1082",
+   "design_hash": "7de69ffa75e8"
+  },
+  "hl__ext_throat_hvlaw_v7": {
+   "j": 2.7597324825219203,
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "8acc654ba61f"
+  },
+  "hl__ath_core_petal_hvlaw_v7": {
+   "j": 2.9527481824081754,
+   "run": "20261115T152510Z-screen-a504f6",
+   "design_hash": "e3afac7f62be"
+  },
+  "hl__ath_tritonia_landscape_v8": {
+   "j": 3.4351547402425138,
+   "run": "20261116T044917Z-screen-12eb61",
+   "design_hash": "77496adc957c"
+  },
+  "hl__ath_tritonia_landscape_v9": {
+   "j": 3.541228895616054,
+   "run": "20261117T003115Z-screen-4f7cd5",
+   "design_hash": "29820d4fea6d"
+  },
+  "hl__ath_tritonia_landscape_v7": {
+   "j": 4.045223478092366,
+   "run": "20261116T041232Z-screen-b5380a",
+   "design_hash": "ae7bcb1f46ab"
+  },
+  "hl__rosse_rect_cd_v7": {
+   "j": 4.45760497172589,
+   "run": "20261116T150941Z-screen-0e777a",
+   "design_hash": "f9c3485c78b9"
+  },
+  "hl__crowe_x_osse_cd_v7": {
+   "j": 5.022656221786454,
+   "run": "20261116T152544Z-screen-5f7d93",
+   "design_hash": "a1babe3fdb6e"
+  },
+  "throat_hv_B_search40": {
+   "j": 5.540758945354662,
+   "run": "20261118T150846Z-screen-9a04c5",
+   "design_hash": "5e5c47bd6964"
+  },
+  "throat_hv_sweep_B_o25": {
+   "j": 5.627890076439175,
+   "run": "20261118T133153Z-screen-ca402c",
+   "design_hash": "564bb167f994"
+  },
+  "throat_hv_sweep_B_o50_epw8": {
+   "j": 5.691993725571739,
+   "run": "20261118T150239Z-screen-84d663",
+   "design_hash": "c39d3682995e"
+  },
+  "throat_hv_sweep_B_o50": {
+   "j": 5.698593050477844,
+   "run": "20261118T133254Z-screen-704484",
+   "design_hash": "c39d3682995e"
+  },
+  "throat_hv_sweep_B_ctl": {
+   "j": 5.839628103111526,
+   "run": "20261118T132956Z-screen-f11273",
+   "design_hash": "80f6cde26c54"
+  },
+  "throat_hv_sweep_B_o00_epw8": {
+   "j": 6.06838066971074,
+   "run": "20261118T150417Z-screen-d59c05",
+   "design_hash": "3670cf9479af"
+  },
+  "hl__biradial_es_style_v7": {
+   "j": 6.077358429292099,
+   "run": "20261116T090751Z-screen-37b115",
+   "design_hash": "9b05b8756526"
+  },
+  "throat_hv_sweep_B_o00": {
+   "j": 6.077971088147763,
+   "run": "20261118T133053Z-screen-28c74d",
+   "design_hash": "3670cf9479af"
+  },
+  "throat_hv_sweep_B_o75": {
+   "j": 6.152582629648936,
+   "run": "20261118T133352Z-screen-c5f07c",
+   "design_hash": "51e1807ceca8"
+  },
+  "hl__crowe_x_square_v7": {
+   "j": 6.879467825559416,
+   "run": "20261116T022328Z-screen-87354c",
+   "design_hash": "bdfccef158d3"
+  },
+  "hl__lecleach_iwata_ar_landscape_v7": {
+   "j": 12.965200298975672,
+   "run": "20261115T162516Z-screen-e31b23",
+   "design_hash": "bcfed3b1030d"
+  },
+  "hl__crowe_panel_home_v7": {
+   "j": 13.274830573917633,
+   "run": "20261115T205453Z-screen-32f7c4",
+   "design_hash": "22365b569be9"
+  },
+  "rf__section_axial_home_v7": {
+   "j": 14.253218534820611,
+   "run": "20261116T020629Z-screen-0d29d7",
+   "design_hash": "eb9cd62fbc3f"
+  },
+  "hl__es_style_rollback_v7": {
+   "j": 15.12647386320942,
+   "run": "20261115T161238Z-screen-1b1b6e",
+   "design_hash": "21a09f515914"
+  },
+  "rr__crowe_panel_es600_v7": {
+   "j": 20.592874441199836,
+   "run": "20261115T194455Z-screen-bf9fc8",
+   "design_hash": "6449db987733"
+  },
+  "sp__control_v7": {
+   "j": 20.61614313509154,
+   "run": "20261115T180109Z-screen-0f2ab5",
+   "design_hash": "501f3de8b915"
+  },
+  "sp__moderate_v7": {
+   "j": 20.778211918423448,
+   "run": "20261115T181250Z-screen-1e22a5",
+   "design_hash": "c8a55485e0ef"
+  },
+  "sp__strong_v7": {
+   "j": 22.49767264474869,
+   "run": "20261115T182340Z-screen-35c541",
+   "design_hash": "9c61c8bb3647"
+  },
+  "rr__pucker_hv_strong_v7": {
+   "j": 25.207003725487706,
+   "run": "20261115T165937Z-screen-4d8a33",
+   "design_hash": "f076900d07e9"
+  },
+  "rr__pucker_hv_moderate_v7": {
+   "j": 26.619418898672308,
+   "run": "20261115T164910Z-screen-f94955",
+   "design_hash": "cd7534a46beb"
+  },
+  "rr__reference_v7": {
+   "j": 28.036961161930908,
+   "run": "20261115T163824Z-screen-d4a7c4",
+   "design_hash": "459d947b84f1"
+  },
+  "rf__rect_radial_wide_v7": {
+   "j": 31.219565865855216,
+   "run": "20261116T005943Z-screen-20db0d",
+   "design_hash": "a4614c3dfdc4"
+  }
+ }
+}

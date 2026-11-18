@@ -652,6 +652,23 @@ def record_gate_margin(design, cfg) -> float | None:
         return None
 
 
+def _build_box_m(design, m) -> list | None:
+    """WP 0.9 / D9 (R12, R12b): the BUILD box = the acoustic inner-sheet box (``bbox_m``, the box
+    the envelope gate reads) grown outward by the resolved wall/shell thickness on every side.
+    Conservative on purpose (a printed part must fit inside it, R10); never gates; unknown -> None.
+    """
+    if m is None:
+        return None
+    try:
+        from ..design.recipe_meta import recipe_metadata
+        wall_mm = float((recipe_metadata(design).get("wall_thickness_mm") or {}).get("value") or 0.0)
+    except Exception:  # noqa: BLE001 - bookkeeping, never a failure
+        wall_mm = 0.0
+    t = wall_mm / 1000.0
+    b = m.bbox_m
+    return [b[0] - t, b[1] - t, b[2] - t, b[3] + t, b[4] + t, b[5] + t]
+
+
 def evaluation_to_row(ev: Evaluation, mode: str, n: int, seconds: dict,
                       objective_version: int = 1, *, lane: str | None = None,
                       backend: str | None = None) -> dict:
@@ -669,6 +686,7 @@ def evaluation_to_row(ev: Evaluation, mode: str, n: int, seconds: dict,
         "quadrants": None if m is None else m.quadrants,
         "symmetry_plane": None if m is None else m.symmetry_plane,
         "bbox_m": None if m is None else list(m.bbox_m),
+        "build_box_m": _build_box_m(ev.design, m),
         "res_mm": None if m is None else m.res_mm,
         "peak_vram_mb": None if out is None else out.peak_vram_mb,
         "metrics": metrics_to_json(ev.metrics),

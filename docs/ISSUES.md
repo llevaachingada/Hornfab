@@ -1,5 +1,24 @@
 ﻿# ISSUES
 
+## 2026-11-18 - rescore reuse published + floors; WP 0.9/D9 merged; v7 floor discrepancy open
+
+- CLOSED (WP 1.4/1.5, owner-directed reuse pass): full-fleet v7/v9/v10 columns reused untouched;
+  shipped-vs-offline v10 agreement exact on the sample (max |ΔJ| = 0.0, n=122); slope5 published as
+  a 166-design diagnostic sample; mixed_identity fixed and false on all columns. Results:
+  `docs/evidence/v10_rescore_2026-11-18/results/` (README = the reading pass).
+- OPEN (senior): v7 frequency floor 0.310 J (this pass, top-28 pairs) vs published 0.13 J (D8) —
+  protocol reconciliation before tie calls; see NOTES item 3. v10 0.468 / slope5 0.486 stand.
+- CLOSED (WP 0.9/D9, R12/R12b): surfaceFit echo + fallback flag in mesh_meta; record_digest block
+  in recipe_meta (gates rebuilds via the canonical_record_v2 rule; kernel digests informational);
+  build_box_m rows; classify_recipes.py tool; tests offline. Legacy classification over the REAL
+  runs/ tree not yet executed — run `tools/analysis/classify_recipes.py --runs-root runs --out
+  <new dir>` when the owner wants the counts (read-only, minutes).
+- OPEN (STEP 3 gates): B1 probe results (night), then batch 2 / WP 4.2 / BO _r2; B6 waits only on
+  the owner's budget decision — its lanes and floors are ready (README above).
+- Carry-over opens unchanged: rho20 authority contradicts §10.2's inferred row (senior); range15
+  briefs orphaned by R22 discard (owner/range lane); anchor fallback (R4) research dossier;
+  WP 2.3 combined floor waits on B1.
+
 ## 2026-11-18 - integration closes STEP 1; 2b/2d/2e/2f evidence committed; B1 batch 1 queued
 
 - CLOSED (D10/R21): PR #69 merged (`382c682`), PR #67 merged (`63c23a8`); CLAUDE.md R21 row added;

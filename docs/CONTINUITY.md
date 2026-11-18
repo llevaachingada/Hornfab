@@ -1,5 +1,46 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - reuse rescore published (v7/v10 floors + ties), WP 0.9/D9 merged, mixed_identity fixed (local orchestrator, owner-directed)
+
+- **Owner directive executed (protect → reuse → ≤3 CPU workers → verify → report).** Zero re-scoring
+  of completed columns; only 2×166-design samples + 1 floor pass computed. All `runs/` data
+  read-only; GPU night untouched; thread caps 1. A relaunched full sequence that would have
+  overwritten the completed outputs was killed before its first write (its out dirs are created at
+  write time). Scripts + provenance: `docs/evidence/v10_rescore_2026-11-18/results/` (README with
+  the full reading).
+- **mixed_identity FIXED** (`tools/analysis/rescore_identity.py` + tests): the old flag counted
+  per-design `score_id`s (each folds `metric_id`) → always True on real data. New flag = count of
+  score identities (score code + version + weights + objective block + brief) per column.
+  compare_all v7/v10/v10_slope5: **False, False, False** [measured]. Same design set scored under
+  shipped-vs-offline v10 briefs on the sample: **max |ΔJ| = 0.0 exactly (n=122)** → the offline
+  full-fleet v10 column IS the shipped column numerically.
+- **Floors published (freq part, top-28 pairs, 257 pairs):** v7 **0.310 J**, v10 **0.468 J**,
+  v10_slope5 **0.486 J**. ⚠ v7 0.310 vs the published D8 0.13 — protocol reconciliation flagged
+  (NOTES_FOR_SENIOR item 3; ties keep 0.13 until resolved). slope5's R2 gate is now satisfied
+  (diagnostic ranks only). Combined floor (WP 2.3) waits on B1's mesh part.
+- **Ties under each identity's own floor:** v7: v8/A_r20 tie-pair behind A_r15, fold-warm next;
+  v10: fold_warm ≈ morph ≈ ext_throat_v7 within 0.468 (three constructions inside one floor — the
+  B6 matched-rerun set per R19/R20b). Throat block under v10: v8 < A_r15 < A_r20, best B ~2.7 J
+  out — the G5 park is unchanged by v10.
+- **v10 slope5 sample** (166, diagnostic): lane bests consistent with v10's ordering; its column is
+  marked `sampled: true` — fleet ranks would need one full run (~30 min CPU).
+- **WP 0.9 / D9 (R12/R12b) implemented locally** (the dispatched lane produced nothing and was
+  taken over): `mesh_meta.json` now echoes the mesher `surfaceFit` resolved mode + flags the
+  auto→approximate fallback (`_surface_fit_meta`, additive; explicit interpolate never retried per
+  config_builder); `recipe_meta` gains the `record_digest` block (surface_record /
+  canonical_record_v2 / not_recorded) — record digests GATE rebuilds (canonical_record_v2 gate
+  pre-existing, restated as THE gate), kernel `implementation_sha256` stays informational;
+  evaluation rows gain additive `build_box_m` (acoustic bbox + resolved wall, R12/R10);
+  `tools/analysis/classify_recipes.py` classifies legacy recipes (rebuildable / bridge /
+  record_refused / unverified) CPU-only over runs/. Tests `tests/test_wp09_d9_provenance.py`
+  (9 tests) + regression `test_design_recipe_meta.py` green; no stored row rewritten.
+- **Night causes (WP 0.7)** appended to the night review by the fixer lane: UTF-8 decode rule,
+  9/9 ids classified byte-verbatim; t_trit80_rc2 actually ran 82 calls (counter artifact found);
+  t_ath14 had two launches (10054 crash, then stale-root refuse). Fix candidates listed, no code
+  changed (owner decision 8 pending).
+- B1 batch 1 sits in the live night queue (inserted earlier today, dry-run exit 0); batch 2 /
+  WP 4.2 verify solves / BO `_r2` queue after the probe gates per R6.
+
 ## 2026-11-18 - integration STEP 1 closed on hornfab-all; STEP 2 CPU evidence 2b/2d/2e/2f committed (local orchestrator, R21/R22)
 
 - **PRs merged [verified]:** #69 (cloud→hornfab-all, merge `382c682`), #67 (plan→main, merge

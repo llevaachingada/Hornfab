@@ -34,8 +34,29 @@ if str(REPO) not in sys.path:
 
 def _score(run_dir: Path, h: str, brief, config_path: Path):
     from hornlab_search.objective.replay import replay_run_dir
-    r = replay_run_dir(run_dir, h, brief=brief, config_path=config_path)
-    return r
+    return replay_run_dir(run_dir, h, brief=brief, config_path=config_path)
+
+
+def _row_score_identity(r, brief, objective_block, score_code) -> str:
+    """Identity of the SCORE that produced one row, WITHOUT per-design parts.
+
+    A row's ``score_id`` folds ``metric_id`` (the design's own physical/metric arrays), so two
+    designs under one brief legitimately carry different ``score_id`` values. Whether a set of
+    rows shares ONE score identity is decided by (score code, objective version, weights,
+    objective block, brief identity) — exactly the replay's score-payload fields minus
+    ``metric_id``. 2026-11-18 (WP 1.4): the compare's ``mixed_identity`` previously counted
+    distinct per-design ``score_id`` values and therefore read True on any multi-design column.
+    """
+    from hornlab_search.objective.replay import _hash as _replay_hash
+    return _replay_hash({
+        "kind": "score",
+        "score_code": score_code,
+        "objective_version": r.objective_version,
+        "weights": r.weights,
+        "objective_block": objective_block,
+        "brief_hash": (brief.brief_hash() if brief is not None else None),
+        "brief_name": (brief.name if brief is not None else None),
+    })
 
 
 def _lane(run_dir: Path) -> str:
@@ -59,9 +80,10 @@ def _run_brief_stem(run_dir: Path) -> str | None:
 
 
 def rescore(runs, brief, out: Path, run_brief: str | None = None) -> dict:
-    from hornlab_search.objective.replay import load_brief_context
+    from hornlab_search.objective.replay import load_brief_context, SCORE_CODE_VERSION
     b = load_brief_context(brief)
     rows, ids, skipped = [], set(), []
+    score_identity_ids: set[str] = set()
     for run in runs:
         if not (run / "designs").is_dir():
             continue
@@ -78,6 +100,8 @@ def rescore(runs, brief, out: Path, run_brief: str | None = None) -> dict:
                              "reasons": list(r.reasons)})
                 if r.j is not None:
                     ids.add(r.score_id)
+                    score_identity_ids.add(_row_score_identity(r, b, b.objective_block,
+                                                               SCORE_CODE_VERSION))
             except Exception as exc:  # noqa: BLE001 - reported, never hidden
                 rows.append({"run": run.name, "lane": lane, "design_hash": ddir.name,
                              "status": "error", "error": f"{type(exc).__name__}: {str(exc)[:200]}"})
@@ -96,6 +120,8 @@ def rescore(runs, brief, out: Path, run_brief: str | None = None) -> dict:
                "run_brief_filter": run_brief, "runs_skipped_other_brief": len(skipped),
                "score_ids": sorted(ids), "n": len(rows),
                "scored": sum(r.get("j") is not None for r in rows),
+               "score_identity_ids": sorted(score_identity_ids),
+               "mixed_identity": len(score_identity_ids) > 1,
                "status_counts": _counts(r["status"] for r in rows),
                "lane_best": dict(sorted(best.items(), key=lambda kv: kv[1]["j"]))}
     (out / "rescore_summary.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
@@ -175,9 +201,18 @@ def compare(columns: dict, out: Path) -> dict:
     meta: dict = {}
     for label, d in columns.items():
         summ = json.loads((Path(d) / "rescore_summary.json").read_text(encoding="utf-8"))
+        # mixed_identity: prefer the rescore's own per-row score-identity count (2026-11-18 fix —
+        # per-design score_id values legitimately differ inside one column). Fall back per summary
+        # capability: new field -> derived; legacy summaries only -> the old (broken) semantics.
+        if "score_identity_ids" in summ:
+            mixed = len(summ.get("score_identity_ids", [])) > 1
+        else:
+            mixed = len(summ.get("score_ids", [])) > 1
         meta[label] = {"brief": summ.get("brief"), "objective_version": summ.get("objective_version"),
-                       "score_ids": summ.get("score_ids", []), "scored": summ.get("scored"),
-                       "n": summ.get("n"), "mixed_identity": len(summ.get("score_ids", [])) > 1}
+                       "score_ids": summ.get("score_ids", []),
+                       "score_identity_ids": summ.get("score_identity_ids", []),
+                       "scored": summ.get("scored"), "n": summ.get("n"),
+                       "mixed_identity": mixed}
         best = summ.get("lane_best", {})
         for rank, (lane, row) in enumerate(sorted(best.items(), key=lambda kv: kv[1]["j"]), 1):
             lanes.setdefault(lane, {})[label] = {"j": row["j"], "rank": rank,

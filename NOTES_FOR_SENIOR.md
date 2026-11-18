@@ -1160,7 +1160,14 @@ worktree).
 2. **Night job logs are UTF-8, not UTF-16.** `tools/run_campaign_night.py` opens job logs with
    `encoding="utf-8"`; the handback §9 / review §8 recipe (`-Encoding Unicode`) yields mojibake
    and zero matches. Working decode: `Get-Content -Encoding UTF8`. All 9 §8 ids decoded with it;
-   causes queued for the review append (klame ×2: silent exit=1 in builders; ath14_turbo: BEAT
-   10054 + stale-root refuse; hvlaw ×2: N=0 rows refusal; trit80_rc2: ok/pool_exhausted; cont_p80
-   + cont_biradial: silent exit=1 during solve; c_rrect_100w_rc2: budget-cap refuse). Evidence
-   writing rule updated accordingly for future runs.
+   causes appended to the review (fix candidates listed there — no code changed yet).
+
+3. **v7 frequency floor discrepancy (needs a protocol reconciliation before any tie call).** The
+   rescore tool's new `floor` subcommand (top-28 screen↔verify same-mesh pairs over the home-brief
+   runs, 257 pairs) measures the v7 frequency floor at **0.310 J**
+   (`docs/evidence/v10_rescore_2026-11-18/results/floor_v7_summary.json`), while the PUBLISHED v7
+   floor (D8) is **0.13 J** — a factor ~2.4. Same command shape gives v10 0.468 J and v10_slope5
+   0.486 J (257 pairs each). Until reconciled, ties keep using the published 0.13 (README
+   acceptance #3 wording preserved), but every "A beats B by < floor" call on the critical path
+   should cite WHICH floor it used. Possible causes: different top-N, different pairing, stored-vs-
+   replayed metric differences; not resolved here (owner directive: no scope creep).
