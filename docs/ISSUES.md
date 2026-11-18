@@ -1,5 +1,14 @@
 ﻿# ISSUES
 
+## 2026-11-18 - B1 GPU approval packet ready (WP 2.2 / D7)
+
+- OPEN (owner): approve batch 1 (5 fold-warm x2 probes), optional batch 2 (3 ext_throat_v7 x2
+  probes), optional B1f; all after the BO arms. Packet:
+  `docs/evidence/b1_readiness_2026-11-18/README.md`.
+- OPEN (B1 evidence author): say explicitly that the floor does not cover 3a1038 / 9fcd21 (and
+  likely the A_r15 throat design): infeasible at x2 on this card.
+- CLOSED: `kind: search` with every bound pinned now refused at search(), CLI and night dry-run.
+
 ## 2026-11-18 - v10 rescore not yet run (WP 1.4 / 1.5)
 
 - OPEN (local agent): run the commands in `docs/evidence/v10_rescore_2026-11-18/README.md`

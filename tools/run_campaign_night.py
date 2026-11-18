@@ -541,6 +541,54 @@ def missing_arg_paths(plan: NightPlan, jobs: list[Job] | tuple[Job, ...],
     return out
 
 
+def _search_config_of(argv) -> str | None:
+    """The ``--config`` of a fresh ``search`` argv (None for resumes and non-search argv)."""
+    tokens = [str(t) for t in argv]
+    if not _is_search_argv(tokens) or any(t == "--resume" or t.startswith("--resume=") for t in tokens):
+        return None
+    for i, t in enumerate(tokens):
+        if t == "--config" and i + 1 < len(tokens):
+            return tokens[i + 1]
+        if t.startswith("--config="):
+            return t[len("--config="):]
+    return None
+
+
+def zero_dimension_searches(jobs, repo_root: Path | str | None = None,
+                            free_keys_fn=None) -> tuple[dict[str, str], dict[str, str]]:
+    """Fable WP 2.2 / D7 truth fix: search jobs whose config leaves CMA-ES nothing to search.
+
+    Returns ``(refused, unchecked)``: job id -> refusal text, and job id -> why the check could
+    not run (config failed to load; reported, never fatal here; the job itself will say why).
+    A fully pinned ``kind: search`` job crashed pycma with ``x0=[]`` on 2026-11-18 (part3)."""
+    root = _repo_path(repo_root)
+    refused: dict[str, str] = {}
+    unchecked: dict[str, str] = {}
+    for job in jobs:
+        cfg_txt = _search_config_of(job.argv)
+        if cfg_txt is None:
+            continue
+        path = Path(cfg_txt)
+        if not path.is_absolute():
+            path = root / path
+        if not path.is_file():
+            continue                                   # missing_arg_paths already names it
+        try:
+            if free_keys_fn is None:
+                from hornlab_search.config import load_config
+                from hornlab_search.search.cma import free_search_keys
+                keys = free_search_keys(load_config(path))
+            else:
+                keys = free_keys_fn(path)
+        except Exception as exc:  # noqa: BLE001 - dry-run reports, it does not guess
+            unchecked[job.id] = f"{type(exc).__name__}: {str(exc)[:160]}"
+            continue
+        if not keys:
+            from hornlab_search.search.cma import zero_free_dimensions_message
+            refused[job.id] = zero_free_dimensions_message(path.stem, cfg_txt)
+    return refused, unchecked
+
+
 def _search_argv(job_id: str, spec: dict, cli_exe: Path) -> tuple[str, ...]:
     config = spec.get("config")
     if not config:
@@ -1790,6 +1838,15 @@ def run_night(plan: NightPlan, *, dry_run: bool = False, only: str | None = None
             for line in lines:
                 print(f"  MISSING {line}")
             raise ValueError(f"--dry-run: {len(lines)} path(s) missing; " + "; ".join(lines))
+        refused, unchecked = zero_dimension_searches(jobs, repo_root=root)
+        for job_id, why in unchecked.items():
+            print(f"  NOTE job {job_id}: free-dimension check skipped ({why})")
+        if refused:
+            for job_id, why in refused.items():
+                print(f"  ZERO-DIM job {job_id}: {why}")
+            raise ValueError(f"--dry-run: {len(refused)} search job(s) have zero free dimensions: "
+                             + ", ".join(refused) + " (use kind: command + hornlab-search run "
+                             "--mode screen|finalist for a single design)")
         return []
 
     wait = float(GPU_BUSY_RETRY_WAIT_S if retry_wait_s is None else retry_wait_s)
