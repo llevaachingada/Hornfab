@@ -1,0 +1,38 @@
+{
+ "runs_root": "runs",
+ "scanned": 48474,
+ "seconds": 18.4,
+ "classes": {
+  "rebuildable": 48471,
+  "bridge": 3
+ },
+ "details": {
+  "rebuildable: legacy schema": 30147,
+  "rebuildable: FREEFORM: geometry derives from recipe params": 8322,
+  "rebuildable: lecleach: geometry derives from recipe params": 3087,
+  "rebuildable: salmon_elliptical: geometry derives from recipe params": 2192,
+  "rebuildable: iwata_ar: geometry derives from recipe params": 1196,
+  "rebuildable: osse_rollback: geometry derives from recipe params": 840,
+  "rebuildable: klangfilm_lame: geometry derives from recipe params": 574,
+  "rebuildable: rosse_rect: geometry derives from recipe params": 550,
+  "rebuildable: crowe_panel: geometry derives from recipe params": 519,
+  "rebuildable: lecleach_asym: geometry derives from recipe params": 206,
+  "rebuildable: klangfilm_lame_v1: geometry derives from recipe params": 200,
+  "rebuildable: klangfilm_lame_hv_core: kernel information-digest matches live": 153,
+  "rebuildable: section_pucker: geometry derives from recipe params": 142,
+  "rebuildable: rolled_rect_pucker: geometry derives from recipe params": 140,
+  "rebuildable: rolled_family_section_v1: geometry derives from recipe params": 108,
+  "rebuildable: rolled_rect: geometry derives from recipe params": 32,
+  "rebuildable: rolled_family_rect_v1: geometry derives from recipe params": 32,
+  "rebuildable: klangfilm_ellipse: geometry derives from recipe params": 26,
+  "rebuildable: klangfilm_lame_hv_cd: kernel information-digest matches live": 4,
+  "bridge: klangfilm_lame_hv_core: kernel digest moved since save": 3,
+  "rebuildable: toroidal_rollback: geometry derives from recipe params": 1
+ },
+ "legend": {
+  "rebuildable": "rebuildable",
+  "bridge": "bridge",
+  "record_refused": "record_refused",
+  "unverified": "unverified"
+ }
+}

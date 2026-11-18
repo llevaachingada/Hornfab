@@ -449,5 +449,6 @@ Keep this file current: a new doc gets a line here in the same commit.
 - [Throat A-vs-v8 per-band authority](evidence/throat_hv_2026-11-18/authority_A_vs_v8.json) and [Phase 3 vs B_o50](evidence/throat_hv_2026-11-18/authority_B_p3_vs_o50.json) (+ hv_beamwidth CSV sets; R9 follow-up / 2b)
 - [U3 biradial host study configs](../examples/studies/u3_biradial_es_style_v7/control.yaml) (R8 / 2f; control + 7 variants + manifest validity table)
 - [v10 rescore RESULTS: reused columns, shipped≡offline agreement (max |ΔJ|=0), floors incl. the v7 0.310-vs-0.13 tension, per-lane ties](evidence/v10_rescore_2026-11-18/results/README.md) (+ shipped_vs_offline_agreement.json, floor summaries, compare_all, sample selection + the three reuse/sample scripts; WP 1.4/1.5 owner-directed reuse pass). Night failure causes: [review §-causes section](evidence/night_cd_rrect_2026-11-17_REVIEW_2026-11-18.md).
+- [WP 0.9/D9 legacy-recipe classification counts](evidence/wp09_d9_provenance_2026-11-18/classify_summary.json) (48,471 rebuildable / 3 bridge / 0 refused / 0 unverified; tool `tools/analysis/classify_recipes.py`).
 
 

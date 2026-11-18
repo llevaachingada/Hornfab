@@ -10,9 +10,10 @@
   protocol reconciliation before tie calls; see NOTES item 3. v10 0.468 / slope5 0.486 stand.
 - CLOSED (WP 0.9/D9, R12/R12b): surfaceFit echo + fallback flag in mesh_meta; record_digest block
   in recipe_meta (gates rebuilds via the canonical_record_v2 rule; kernel digests informational);
-  build_box_m rows; classify_recipes.py tool; tests offline. Legacy classification over the REAL
-  runs/ tree not yet executed — run `tools/analysis/classify_recipes.py --runs-root runs --out
-  <new dir>` when the owner wants the counts (read-only, minutes).
+  build_box_m rows; classify_recipes.py tool; tests offline. Legacy classification EXECUTED over
+  the real runs/ tree: 48,471 rebuildable / 3 bridge (klangfilm_hv_core, informational) / 0
+  refused / 0 unverified
+  (docs/evidence/wp09_d9_provenance_2026-11-18/classify_summary.json). WP 0.9/D9 complete.
 - OPEN (STEP 3 gates): B1 probe results (night), then batch 2 / WP 4.2 / BO _r2; B6 waits only on
   the owner's budget decision — its lanes and floors are ready (README above).
 - Carry-over opens unchanged: rho20 authority contradicts §10.2's inferred row (senior); range15
