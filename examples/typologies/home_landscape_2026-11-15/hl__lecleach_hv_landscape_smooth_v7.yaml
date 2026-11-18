@@ -70,6 +70,10 @@ bounds:
   g_stop_a2:
     lo: -0.10
     hi: 0.15
+# LABEL (R14, 2026-11-18): read "published" in the description below as "built on the published JMLC
+# march"; each plane is a JMLC march [published], the H/V pairing and onset ramp are a LABELED HYBRID
+# [reconstruction] (docs/knowledge/contracts/lecleach_iwata_hv.md). The description text is left as is so
+# this lane's config_sha and history stay one identity; any new version must use the corrected wording.
 description: 'HOME LANDSCAPE Le Cleach H/V pair (published ellipsoidal-wavefront construction; owner-picked seed 12 2026-11-16): H/V differ from the expansion itself, lip a smooth continuous rollback. Smooth brief.'
 mesh:
   epw: 6.0

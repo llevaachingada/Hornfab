@@ -1,0 +1,33 @@
+id: 17
+title: blend vs splice — different math for OSSE/tractrix hybrid
+prompt: >
+  A config uses profile_h: {type: splice, first: {type: osse}, second: {type: tractrix}}
+  to join an OSSE front section to a tractrix back section. Someone describes this as
+  "blending" the two profiles. What is the mathematical difference between blend and
+  splice in the registry? Which operation applies at the joint point in a splice,
+  and would a convex weighted sum of radii describe it correctly?
+allowed_read_paths:
+  - hornlab_search/design/generators/registry.py
+  - hornlab_search/design/generators/profiles.py
+answer_key:
+  verdict: >
+    Splice joins two parents at a station with C1 continuity (Hermite bridge when the
+    angle gap exceeds tolerance). Blend linearly interpolates radius across the full
+    length using a weight w. They are different operations: splice is a station joint,
+    blend is a convex sum throughout. The splice is not a convex meridian blend.
+  must_include:
+    - "splice.*c1|hermite.*splice|c1.*joint"
+    - "blend.*linear|blend.*weight|convex.*sum"
+    - "different.*math|different.*operation"
+  must_not_include:
+    - "splice.*blend.*same|blend.*splice.*same"
+    - "convex.*sum.*splice"
+  must_cite_any:
+    - hornlab_search/design/generators/registry.py
+    - hornlab_search/design/generators/profiles.py
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "hornlab_search/design/generators/profiles.py:637"
+    - "hornlab_search/design/generators/profiles.py:1068"
+  negative_control: null

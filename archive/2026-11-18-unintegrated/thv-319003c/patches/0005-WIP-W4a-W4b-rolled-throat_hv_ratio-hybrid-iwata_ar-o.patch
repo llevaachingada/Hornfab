@@ -1,0 +1,331 @@
+From 35194cf8fd1d7b970385e35b5319d8bd883d72d1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 17 Nov 2026 22:24:49 -0500
+Subject: [PATCH 5/7] WIP W4a/W4b: rolled throat_hv_ratio (hybrid) + iwata_ar
+ onset adoption; logs/contract doc pending
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ hornlab_search/design/generators/grid.py      | 48 +++++++++++++--
+ .../design/generators/rolled_family.py        | 29 +++++++--
+ hornlab_search/design/throat_hv.py            |  7 ++-
+ tests/test_design_throat_hv_grid.py           | 57 ++++++++++++++++++
+ tests/test_design_throat_hv_rolled.py         | 59 +++++++++++++++++--
+ 5 files changed, 186 insertions(+), 14 deletions(-)
+
+diff --git a/hornlab_search/design/generators/grid.py b/hornlab_search/design/generators/grid.py
+index 49ac9ab..30a8961 100644
+--- a/hornlab_search/design/generators/grid.py
++++ b/hornlab_search/design/generators/grid.py
+@@ -1928,13 +1928,24 @@ def rows_task_stop(stop0_deg: float, harm: dict, phi, *, lo: float, hi: float) -
+ def _rows_iwata_ar_knobs(knobs: dict, prefix: str = "g") -> dict:
+     """Validated ``rows: {type: iwata_ar}`` knobs (our reconstruction, lib-2 2.2)."""
+     allowed = {f"{prefix}_fc_hz", f"{prefix}_T", f"{prefix}_stop_deg",
+-               f"{prefix}_ar_m", f"{prefix}_ar_p"}
++               f"{prefix}_ar_m", f"{prefix}_ar_p",
++               f"{prefix}_hv_onset_frac", f"{prefix}_section_exp_ramp"}
++    if knobs.get(f"{prefix}_throat_hv_ratio") is not None:
++        raise registry.GeneratorError(
++            f"iwata_ar rows: {prefix}_throat_hv_ratio is not mapped for iwata_ar (its H/V "
++            "split is the AR law; only hv_onset_frac / section_exp_ramp are adopted)")
+     foreign = sorted(str(k) for k in knobs
+                      if str(k).startswith(f"{prefix}_") and k not in allowed)
+     if foreign:
+         raise registry.GeneratorError(
+             f"iwata_ar rows accept only {prefix}_fc_hz / {prefix}_T / {prefix}_stop_deg / "
+-            f"{prefix}_ar_m / {prefix}_ar_p; got foreign knob(s) {foreign}")
++            f"{prefix}_ar_m / {prefix}_ar_p / {prefix}_hv_onset_frac / "
++            f"{prefix}_section_exp_ramp; got foreign knob(s) {foreign}")
++    if (knobs.get(f"{prefix}_section_exp_ramp") is not None
++            and knobs.get(f"{prefix}_ar_p") is not None):
++        raise registry.GeneratorError(
++            f"iwata_ar rows: {prefix}_section_exp_ramp is the AR-law exponent (alias of "
++            f"{prefix}_ar_p); give one, not both")
+     out = {}
+     for name, default in (("fc_hz", ROWS_IWATA_KNOB_DEFAULTS["fc_hz"]),
+                           ("T", ROWS_IWATA_KNOB_DEFAULTS["T"]),
+@@ -1957,9 +1968,25 @@ def _rows_iwata_ar_knobs(knobs: dict, prefix: str = "g") -> dict:
+     if not lo <= out["stop_deg"] <= hi:
+         raise registry.GeneratorError(
+             f"iwata_ar rows: stop_deg must be in [{lo:g}, {hi:g}], got {out['stop_deg']}")
++    hv_block = _rows_throat_hv_block(knobs, prefix, "iwata_ar")
++    if hv_block is not None:
++        if hv_block["section_exp_ramp"] is not None:
++            out["ar_p"] = float(hv_block["section_exp_ramp"])
++        out["_hv"] = hv_block   # only when active: absent = byte-identical dict
+     return out
+ 
+ 
++def iwata_ar_weight(s, ik: dict) -> np.ndarray:
++    """AR-law weight on the arc fraction ``s``: ``s ** ar_p`` (published reconstruction) or,
++    with the shared block, the Ath ramp ``clamp((s - s_on)/(1 - s_on), 0, 1) ** ar_p``. With
++    ``hv_onset_frac`` 0 the ramp is ``s ** ar_p`` exactly (neutrality)."""
++    s = np.asarray(s, dtype=float)
++    hv = ik.get("_hv")
++    if hv is None or hv["hv_onset_frac"] is None:
++        return np.power(s, ik["ar_p"])
++    return throat_hv.ath_ramp(s, hv["hv_onset_frac"], ik["ar_p"])
++
++
+ #: osse_rollback (owner-directed hybrid, 2026-10-28): a constant-directivity OS/OSSE throat wall per
+ #: azimuth, the even-lobe flute ripple, and the tangent-continuous curled lip. Coverage half-angle
+ #: per azimuth a(phi) = a_h cos^2 phi + a_v sin^2 phi (mirror-safe); the lip wrap may follow the
+@@ -2352,8 +2379,18 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
+         xs, ys, _phi_deg, march_meta = profiles_mod.lecleach_exact(
+             r0, ik["fc_hz"], ik["T"], a0, ik["stop_deg"], dl_mm=1.0)
+         xr, yr, L0 = _resample_arc(xs, ys, _spec_int(spec, "n_s", 32, 8))
+-        _AR, y_h, y_v = lecleach_ar_profile(xr, yr, ik["ar_m"], ik["ar_p"],
+-                                            AR_t=ROWS_AR_THROAT_RATIO)
++        if ik.get("_hv") is None or ik["_hv"]["hv_onset_frac"] is None:
++            _AR, y_h, y_v = lecleach_ar_profile(xr, yr, ik["ar_m"], ik["ar_p"],
++                                                AR_t=ROWS_AR_THROAT_RATIO)
++        else:
++            # Shared onset (LABELED HYBRID on the iwata_ar reconstruction): the AR stretch is
++            # zero (round) until hv_onset_frac, then rises with the same exponent ar_p.
++            # Area preservation (y_h * y_v == y^2) is unchanged.
++            l_arc = _arc_length(xr, yr)
++            w_ar = iwata_ar_weight(l_arc / float(l_arc[-1]), ik)
++            _AR = ROWS_AR_THROAT_RATIO + (ik["ar_m"] - ROWS_AR_THROAT_RATIO) * w_ar
++            y_h = yr * np.sqrt(_AR)
++            y_v = yr / np.sqrt(_AR)
+         march_meta = {**march_meta, "ar_m": float(ik["ar_m"]), "ar_p": float(ik["ar_p"]),
+                       "ar_t": float(ROWS_AR_THROAT_RATIO), "L0_mm": float(L0)}
+         out = []
+@@ -2708,6 +2745,9 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
+             "row_stop_actual_deg": [float(m["march"]["stop_deg"]) for m in marches],
+             "sign_conventions": sign_conventions,
+         }
++        if ik.get("_hv") is not None:
++            meta["throat_hv"] = {k: v for k, v in ik["_hv"].items() if v is not None}
++            meta["throat_hv_status"] = throat_hv.STATUS["iwata_ar"]
+     elif kind == "toroidal_rollback":
+         tk = _rows_toroidal_knobs(knob_map, prefix)
+         march0 = marches[0]["march"]
+diff --git a/hornlab_search/design/generators/rolled_family.py b/hornlab_search/design/generators/rolled_family.py
+index d3e2c7e..298c12e 100644
+--- a/hornlab_search/design/generators/rolled_family.py
++++ b/hornlab_search/design/generators/rolled_family.py
+@@ -105,8 +105,6 @@ def _shape(spec, knobs, *, require_digest=False, brief=None):
+         throat = _throat_knobs(knobs)
+     except throat_hv.ThroatHVError as exc:
+         raise GeneratorError(f'rolled-family throat-HV block: {exc}') from exc
+-    if throat['throat_hv_ratio'] not in (None, 1.0):
+-        raise GeneratorError('throat_hv_ratio not supported by rolled family yet')
+     onset_given = throat['hv_onset_frac'] is not None
+     if onset_given and isinstance(knobs, dict) and 'g_relief_start_s' in knobs:
+         raise GeneratorError('hv_onset_frac replaces relief_start_s; give only one')
+@@ -142,13 +140,27 @@ def _shape(spec, knobs, *, require_digest=False, brief=None):
+         axial = shape['axial_h_mm'] != 0 or shape['axial_v_mm'] != 0
+         if (mode in ('smooth', 'axial') and radial) or (mode in ('smooth', 'radial') and axial):
+             raise ValueError('nonzero relief amplitude is inactive in the selected mode')
+-        if replaces_window and not (radial or axial):
+-            raise ValueError('hv_onset_frac/section_exp_ramp are inactive: relief and pucker amplitudes are zero')
++        if replaces_window and not (radial or axial or _ratio_active(throat)):
++            raise ValueError('hv_onset_frac/section_exp_ramp are inactive: relief and pucker amplitudes '
++                             'are zero and throat_hv_ratio is neutral')
+     except (KeyError, TypeError, ValueError) as exc:
+         raise GeneratorError(f'rolled-family shape: {exc}') from exc
+     return shape, kernel, parent
+ 
+ 
++def _ratio_active(throat):
++    return throat['throat_hv_ratio'] not in (None, 1.0)
++
++
++def throat_hv_scale(throat, psi, w):
++    """Per-plane near-throat growth (LABELED HYBRID, 2026-11-18): radial scale
++    ``hv_scale(rho, psi) ** w``. ``w`` is the family's relief window (zero through the source
++    matching region and at the mouth attachment), so rho = 1 / absent is the identity, the
++    throat and the mouth/exterior body are unchanged, and H (psi = 0) runs ahead of V (psi = 90)
++    by ``rho`` only inside the window."""
++    return throat_hv.hv_scale(throat['throat_hv_ratio'], psi) ** w
++
++
+ def relief_window(shape, stations):
+     s = np.asarray(stations, dtype=float)
+     start, peak, end = (shape[k] for k in ('relief_start_s', 'relief_peak_s', 'relief_end_s'))
+@@ -219,12 +231,16 @@ def resolve_grid(block, brief):
+     axial = (shape['axial_h_mm']*np.cos(psi)**2 + shape['axial_v_mm']*np.sin(psi)**2)
+     if np.any(axial):
+         inner[..., 2] += axial*np.cos(4*psi)*w
++    if _ratio_active(throat):
++        scale = throat_hv_scale(throat, psi, w)
++        inner[..., 0] *= scale
++        inner[..., 1] *= scale
+     # A local constriction before the parent's forward roll is not a usable flare.
+     radial = np.hypot(inner[..., 0], inner[..., 1])
+     for row in range(len(inner)):
+         forward = int(np.argmax(original[row, :, 2]))
+         if np.any(np.diff(radial[row, :forward+1]) < -1e-6):
+-            raise GeneratorError('relief creates a constriction before the mouth roll')
++            raise GeneratorError('relief or throat_hv_ratio creates a constriction before the mouth roll')
+     outer = (grid.grid_outer_points(inner, shape['wall_thickness_mm']) if kernel is rolled_rect
+              else kernel.outer_points(inner, parent))
+     for name, sheet in [('inner', inner), ('outer', outer)]:
+@@ -300,6 +316,9 @@ def validate_search_config(spec, seed, bounds, brief):
+                           ) or ('g_section_exp_ramp' in given and bounds['g_section_exp_ramp'].search)
+     strength_away_zero = any(lo > 0 or hi < 0 for k, (lo, hi) in intervals.items()
+                              if k in ('inward_h_mm', 'inward_v_mm', 'axial_h_mm', 'axial_v_mm'))
++    if 'throat_hv_ratio' in intervals:            # a ratio box that excludes 1 keeps position live
++        r_lo, r_hi = intervals['throat_hv_ratio']
++        strength_away_zero = strength_away_zero or r_lo > 1.0 or r_hi < 1.0
+     if position_search and not strength_away_zero:
+         raise GeneratorError('relief position is dormant when all strengths can be zero; pin position')
+     if intervals['width_mm'][0] <= intervals['height_mm'][1]:
+diff --git a/hornlab_search/design/throat_hv.py b/hornlab_search/design/throat_hv.py
+index d3f6f61..3fdf8d9 100644
+--- a/hornlab_search/design/throat_hv.py
++++ b/hornlab_search/design/throat_hv.py
+@@ -41,8 +41,13 @@ STATUS = {
+                       "window remap is a LABELED HYBRID (HornFab construction)."),
+     "lecleach_hv": ("throat_hv_ratio -> per-plane march flare T: each plane is still a JMLC march; "
+                     "the H/V pairing and onset ramp are a LABELED HYBRID."),
++    "iwata_ar": ("hv_onset_frac / section_exp_ramp -> onset and exponent of the AR law "
++                 "AR(l) = 1 + (AR_m - 1) w(l): LABELED HYBRID on the iwata_ar reconstruction "
++                 "(no published onset term); throat_hv_ratio is not mapped."),
+     "rolled": ("all three knobs: LABELED HYBRID (rolled family is an original HornFab "
+-               "construction; no published parent for near-throat H/V terms)."),
++               "construction; no published parent for near-throat H/V terms). throat_hv_ratio -> "
++               "radial scale rho**(cos(2psi)/2 * w) inside the relief window w (zero at the "
++               "source match and the mouth attachment)."),
+ }
+ 
+ 
+diff --git a/tests/test_design_throat_hv_grid.py b/tests/test_design_throat_hv_grid.py
+index 6ee4a1e..e4dec7b 100644
+--- a/tests/test_design_throat_hv_grid.py
++++ b/tests/test_design_throat_hv_grid.py
+@@ -140,3 +140,60 @@ def test_os_knob_validation_is_mesher_free():
+     assert ok["_hv"]["hv_onset_frac"] == 0.5
+     assert "_hv" not in G._rows_osse_rollback_knobs({**SEED, "g_throat_hv_ratio": 1.0})
+     assert throat_hv.STATUS["osse_rollback"]
++
++
++# ---- iwata_ar onset adoption (2026-11-18 W4b; LABELED HYBRID on the reconstruction) ----------
++IW_SPEC = {"rows": {"type": "iwata_ar"}, "n_phi": 15, "n_s": 32, "name": "grid"}
++
++
++def _iw(**extra):
++    k = {"g_fc_hz": 450.0, "g_T": 0.5, "g_stop_deg": 200.0, "g_ar_m": 2.5}
++    k.update(extra)
++    return k
++
++
++def _iw_rows(knobs):
++    return G.rows_per_azimuth(IW_SPEC, knobs, BRIEF)
++
++
++def test_iw_absent_block_and_onset_zero_are_identical():
++    base, meta = _iw_rows(_iw(g_ar_p=1.5))
++    assert "throat_hv" not in meta
++    zero, zmeta = _iw_rows(_iw(g_ar_p=1.5, g_hv_onset_frac=0.0))
++    np.testing.assert_allclose(zero, base, rtol=0, atol=1e-9)
++    assert zmeta["throat_hv"] == {"hv_onset_frac": 0.0}
++    assert zmeta["throat_hv_status"] == throat_hv.STATUS["iwata_ar"]
++
++
++def test_iw_onset_keeps_sections_round_until_onset_then_splits():
++    base, _ = _iw_rows(_iw(g_ar_p=1.5))
++    late, meta = _iw_rows(_iw(g_ar_p=1.5, g_hv_onset_frac=0.5))
++    n = late.shape[1]
++    early_j = int(round(0.3 * (n - 1)))
++    after_j = int(round(0.8 * (n - 1)))
++    assert _half_width_ratio(late, early_j) == pytest.approx(1.0, abs=1e-9)
++    assert _half_width_ratio(base, early_j) > 1.0 + 1e-3
++    assert _half_width_ratio(late, after_j) > 1.0 + 1e-3
++    # same mouth AR (the law still reaches AR_m at l = L0) and the round throat is untouched
++    assert _half_width_ratio(late, n - 1) == pytest.approx(_half_width_ratio(base, n - 1), rel=1e-9)
++    np.testing.assert_array_equal(late[:, 0, :], base[:, 0, :])
++
++
++def test_iw_section_exp_ramp_is_the_ar_exponent_alias():
++    a, _ = _iw_rows(_iw(g_ar_p=2.0))
++    b, meta = _iw_rows(_iw(g_section_exp_ramp=2.0))
++    np.testing.assert_array_equal(a, b)
++    assert meta["ar_p"] == 2.0 and meta["throat_hv"] == {"section_exp_ramp": 2.0}
++    with pytest.raises(registry.GeneratorError, match="alias"):
++        _iw_rows(_iw(g_ar_p=2.0, g_section_exp_ramp=2.0))
++
++
++def test_iw_ratio_is_not_mapped_and_is_refused():
++    with pytest.raises(registry.GeneratorError, match="not mapped for iwata_ar"):
++        _iw_rows(_iw(g_throat_hv_ratio=1.5))
++
++
++@pytest.mark.parametrize("onset", [-0.1, 0.95, float("nan")])
++def test_iw_out_of_range_onset_is_refused(onset):
++    with pytest.raises(registry.GeneratorError):
++        _iw_rows(_iw(g_hv_onset_frac=onset))
+diff --git a/tests/test_design_throat_hv_rolled.py b/tests/test_design_throat_hv_rolled.py
+index 423cf63..9305522 100644
+--- a/tests/test_design_throat_hv_rolled.py
++++ b/tests/test_design_throat_hv_rolled.py
+@@ -97,10 +97,61 @@ def test_zero_relief_amplitude_makes_the_block_inert_and_is_refused(family):
+         rf.design_params(family.gen, knobs, family.brief)
+ 
+ 
+-def test_non_neutral_ratio_is_refused_until_the_family_maps_it(family):
+-    knobs = dict(family.seed_knobs, g_throat_hv_ratio=2.0)
+-    with pytest.raises(GeneratorError, match='throat_hv_ratio not supported by rolled family yet'):
+-        rf.design_params(family.gen, knobs, family.brief)
++def _radius(points):
++    return np.hypot(points[..., 0], points[..., 1])
++
++
++@pytest.mark.parametrize('rho', [1.25, 0.75])
++def test_ratio_maps_to_per_plane_growth_inside_the_window_only(family, rho):
++    """2026-11-18 W4a (LABELED HYBRID): rho scales the radius by rho**(cos(2psi)/2 * w). The
++    throat/source-matching stations and the mouth attachment are unchanged; H (row 0) runs
++    ahead of V (last row) for rho > 1 and behind it for rho < 1."""
++    parent = resolve(family)
++    treated = resolve(family, dict(family.seed_knobs, g_throat_hv_ratio=rho))
++    station = np.array(treated['meta']['stations'])
++    start = family.seed_knobs['g_relief_start_s']
++    before = station <= start
++    assert before.any()
++    np.testing.assert_array_equal(treated['inner_points'][:, before],
++                                  parent['inner_points'][:, before])
++    np.testing.assert_array_equal(treated['inner_points'][:, -2:], parent['inner_points'][:, -2:])
++    r_p, r_t = _radius(parent['inner_points']), _radius(treated['inner_points'])
++    inside = ~before
++    inside[-2:] = False
++    h_ratio = r_t[0, inside] / r_p[0, inside]
++    v_ratio = r_t[-1, inside] / r_p[-1, inside]
++    if rho > 1:
++        assert h_ratio.max() > 1.0 + 1e-6 and np.all(h_ratio >= 1.0 - 1e-12)
++        assert v_ratio.min() < 1.0 - 1e-6 and np.all(v_ratio <= 1.0 + 1e-12)
++    else:
++        assert h_ratio.min() < 1.0 - 1e-6 and v_ratio.max() > 1.0 + 1e-6
++    # bounded by the full per-plane scale sqrt(rho) at the window peak
++    assert h_ratio.max() <= max(rho, 1 / rho) ** 0.5 + 1e-12
++    assert treated['meta']['throat_hv'] == {'throat_hv_ratio': rho}
++    assert throat_hv.STATUS['rolled'] in treated['meta']['notes']
++
++
++def test_ratio_alone_keeps_onset_and_ramp_live_with_zero_relief(family):
++    knobs = with_onset(family, 0.5)
++    knobs['g_inward_h_mm'] = knobs['g_inward_v_mm'] = 0.0
++    knobs['g_throat_hv_ratio'] = 1.2
++    block = rf.design_params(family.gen, knobs, family.brief)['grid']
++    out = rf.resolve_grid(block, family.brief)
++    assert out['meta']['throat_hv'] == {'throat_hv_ratio': 1.2, 'hv_onset_frac': 0.5}
++
++
++def test_illegal_ratio_is_refused_by_the_existing_guards(family):
++    with pytest.raises(GeneratorError):
++        rf.design_params(family.gen, dict(family.seed_knobs, g_throat_hv_ratio=2.0), family.brief)
++
++
++def test_ratio_is_searchable_and_keeps_position_live(family):
++    from hornlab_search.design.space import Bound
++    seed = dict(family.seed_knobs, g_throat_hv_ratio=1.2)
++    bounds = dict(family.bounds, g_throat_hv_ratio=Bound(1.1, 1.3))
++    rf.validate_search_config(family.gen, seed, bounds, family.brief)
++    with pytest.raises(GeneratorError, match='explicit matching bound'):
++        rf.validate_search_config(family.gen, seed, dict(family.bounds), family.brief)
+ 
+ 
+ @pytest.mark.parametrize('onset', [-0.1, 0.95, float('nan')])
+-- 
+2.51.0.windows.1
+

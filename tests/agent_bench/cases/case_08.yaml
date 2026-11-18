@@ -1,0 +1,31 @@
+id: 8
+title: Sloping DI target — not an H/V beamwidth corridor
+prompt: >
+  The brief room_landscape_80x50_700_hf1440_v7_smooth.yaml sets di_slope_target to 5.
+  An engineer interprets this as requiring horizontal beamwidth to stay within ±5 degrees
+  across the band. Is this interpretation correct? What does di_slope_target actually
+  measure, and how should a 5 dB/decade slope target be understood relative to coverage?
+allowed_read_paths:
+  - examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+  - hornlab_search/objective/scalar_v7.py
+answer_key:
+  verdict: >
+    di_slope_target is a DI (directivity index) slope in dB/decade, not an H/V beamwidth
+    corridor. It scores how the on-axis directivity evolves with frequency, independent of
+    the separate coverage (beamwidth) term.
+  must_include:
+    - "directivity index|di.*slope|dislope"
+    - "db.*decade|dB.*oct|db per decade"
+    - "not.*beamwidth|beamwidth.*separate|coverage.*separate"
+  must_not_include:
+    - "h/v.*beamwidth.*corridor"
+    - "beamwidth.*target.*di_slope"
+  must_cite_any:
+    - examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+    - hornlab_search/objective/scalar_v7.py
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml"
+    - "hornlab_search/objective/scalar_v7.py"
+  negative_control: null

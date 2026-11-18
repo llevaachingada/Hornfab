@@ -474,3 +474,133 @@ launch-fatal bare-`search` argv also repaired);
 search_preflight `--from-runs` still refuses history on every loadable lane (raw brief_file
 string identity — C5 remains the owner-gated fix), `hl__klangfilm_lame_curved_v1_c200_w1` adds
 `no_headroom`.
+
+### 10.2 Status 2026-11-18 (cloud senior, branch `cloud/fable-next-2026-11-18` on `hornfab-all-2026-11-18` @ `18ec991`)
+
+Status words: **done** (code + offline tests, or evidence published) · **tool-done-not-run** (code
+exists, needs `runs/` or a solve) · **blocked-on-owner** · **not started**. Labels per claim:
+[verified] re-run here · [code-verified] read in code here · [primary] cited evidence doc ·
+[inferred]. Nothing in this section changes a default, queue, stored row or J.
+
+#### Stage table
+
+| WP | Status | Evidence |
+|---|---|---|
+| 0.1 refusal taxonomy | done | §10 row [primary]; real-run reclassification report still needs `runs/` |
+| 0.2 generator links | done | §10 [primary] |
+| 0.3 cohort by identity | done | §10 [primary]; v10 cohorts refuse mixing (`0720ad1`) [code-verified] |
+| 0.4 parity replay | done; **v10 gate fixed today** | replay refused v10 although it dispatched it; fixed in `ed1b2a5` [verified, `tests/test_rescore_identity_v10.py`] |
+| 0.5 GRID extent | done | §10 [primary] |
+| 0.6 restart idempotency | done | §10 + `04dd5af` [primary] |
+| 0.7 watchdog truth | done (pin_* exposure open) | §10 + `04dd5af` [primary] |
+| 0.8 doc truths | done | §10 [primary]; plus today's zero-dimension guard (§10.2 "11-18 work") |
+| 0.9 recipe schema / provenance | blocked-on-owner (digest rule) | metadata block done (§10); D9 packages the rest |
+| 1.1 constancy term | done (mechanism, off) | §10; owner chose slope-limited, floor first (C2) |
+| 1.2 dense-grid identity | done | §10 |
+| 1.3 home brief | blocked-on-owner, partly answered | C1 = keep v7 for nights + v9/v10 second score; C3 ripple region = `preferred_edge` (v10). Offline rescore briefs written today (`docs/evidence/v10_rescore_2026-11-18/`), NOT shipped in `examples/briefs/` |
+| 1.4 rescore history | tool-done-not-run | `rescore_identity.py` now takes v10, `--run-brief`, `--runs-root`, `compare` (`ed1b2a5`); exact commands in the v10 README |
+| 1.5 frequency floor | tool-done-not-run | same tool, `floor` subcommand; v7 ≈ 0.13 J (D8) until measured under v10 |
+| 2.1 fidelity tiers | done | `--mode finalist` wired [code-verified, `config.py:34,37`]; finalist densifies frequency, not mesh (§10.1) |
+| 2.2 B1 | blocked-on-owner (GPU slots) | packet `docs/evidence/b1_readiness_2026-11-18/README.md` (`681e429`); lines dry-run clean [verified] |
+| 2.3 combined floor | not started | needs B1 |
+| 3.1 / 3.2 record module | done | §10 (`geometry/record.py`); module ownership still to assign |
+| 3.3 / 3.4 shadow gate, history records | tool-done-not-run | `record_shadow.py` |
+| 3.5 H-plane transfer retest | not started | optional |
+| 4.1 CPU variants | done on a biradial seed; host pick blocked-on-owner | §10 |
+| 4.2 / 4.3 equivalence + B2 | tool-done-not-run, blocked-on-owner (C6) | `u3_jobs.py`, `u3_authority.py` |
+| 4.4 build passing freedoms | not started via the record route; **throat block built ahead of its gate** (below) | |
+| 5.1 space cards | done (tool) | `space_card.py` (`afb8236`) |
+| 5.2 categoricals | warning done; split configs blocked-on-owner | §10 |
+| 5.3 σ0 / bound preflight | done (skill + `search_preflight`); `--from-runs` history refused on every lane (C5 brief identity) | §10.1 |
+| 5.4 bounds as record constraints | not started | after 3.3 switch |
+| 6.1 BoTorch on rescored history | not started | after 1.4 run; `offline_scores` is ATH/v4-specific |
+| 6.2 / 6.3 B6, finalists | not started | after stage 1 + floor |
+| 7.1 protected list | done, list `status: proposed` | C5 |
+| 7.2-7.4 | not started | floor, C4 |
+| D6 stage 2b anchor, step 1 | research done, solve blocked-on-owner | `docs/research/typologies/ANCHOR_ST260_RESEARCH_2026-11-18.md` |
+
+#### Where the 2026-11-18 work sits
+
+| Work | Plan placement | Note |
+|---|---|---|
+| Shared near-throat H/V block (`9601509`, `c9423c8`) + sweep Phases 1-3 (`01e6698`) | **Stage 4 freedom, built ahead of its gate** (owner-requested). It skipped 4.1-4.3's record route and was tested directly inside the generators | read with the authority table below; WP 4.4's "never retrofitted" and "new config version" rules were kept (new `_v1` configs) |
+| Objective v10 (`a5e8f3b`, `0720ad1`) | **the §10.1 "new versioned identity" fix** for the v9 corridor ripple mask | v9 J untouched; v10 = v9 + required `ripple_region` |
+| `tests/agent_bench/` (`5d9ec73`), construction contracts (`d2e538e`, `aa1f5e5`), KH-002/003 | **off-plan knowledge track** (no WP number) | useful; not on the critical path |
+| Today: v10 replay gate fix + rescore compare | WP 1.4 / 1.5 | `ed1b2a5` |
+| Today: zero-free-dimension refusal + B1 packet | WP 2.2 / D7 (truth fix in the stage-0 spirit) | `681e429` |
+| Today: ST260 anchor dossier + config | D6 step 1 | research only (`c5ccb44`) |
+
+#### Throat block authority table (re-derived from the part3 CSVs)
+
+Method [verified]: `tools/analysis/u3_authority.authority()` run on
+`docs/evidence/throat_hv_2026-11-18/hv_beamwidth_*.csv` (outermost -6 dB edge, 18 screen
+frequencies; bands 700-1100 (n = 2), 1100-2500 (n = 3), 2500-5500 Hz (n = 6)). U3 rule: ≥ 3° in
+the intended plane in one band, the other plane < half of it. Both planes tried as intended.
+ΔJ uses `phase1_summary.csv` / `p3_evals.csv`; same v7 identity throughout; floor 0.13 J (D8).
+
+| Pair (what changes) | Band deltas ΔH / ΔV (°) 700-1100 · 1100-2500 · 2500-5500 | U3 authority | ΔJ (B − A) | vs 0.13 floor |
+|---|---|---|---|---|
+| **A** A_r15 → A_r20 (rho 1.5 → 2.0) | −0.41/+0.57 · +0.39/+0.37 · +1.28/+0.26 | **no** (max 1.28°) | +0.0435 | tie |
+| **A** v8 (rho 1.0) → A_r15 | whole-band means only: H +0.56, V +0.17 (no v8 per-frequency CSV) | **no** [inferred; per-band confirm: command below] | −0.0192 | **tie** |
+| **A** v8 → A_r20 | whole-band means: H +0.95, V +0.32 | **no** [inferred] | +0.0243 | tie |
+| B_ctl → B_o00 (rho 1→1.5 and onset 0.10→0) | −1.14/+0.51 · +0.65/−0.15 · **+3.30**/+0.95 | yes, H, top band, barely | +0.4063 | real (worse) |
+| B_ctl → B_o25 | +0.86/+0.87 · −0.23/+0.53 · −1.29/−0.31 | no | −0.2169 | real (better) |
+| B_ctl → B_o50 | +2.89/+1.53 · **−3.99**/+1.10 · −5.49/−2.94 | yes, H, 1.1-2.5 kHz | −0.2510 | real (better) |
+| B_ctl → B_o75 | +2.68/+2.84 · **−8.00**/−1.18 · **−6.60**/−1.52 | yes, H, two bands | +0.1891 | real (worse) |
+| B onset only, rho 1.5: o00 → o50 | **+4.02**/+1.02 · **−4.64**/+1.25 · **−8.79**/−3.89 | yes, H, all three bands | −0.6574 | real (better) |
+| B onset only: o00 → o75 | +3.82/+2.33 · **−8.64**/−1.04 · **−9.89**/−2.47 | yes, H | −0.2173 | real |
+| B onset only: o50 → o75 | −0.20/+1.31 · −4.00/−2.28 · −1.10/+1.41 | no (V moves > half) | +0.4401 | real (worse) |
+| B Phase 3 best (rho 1.371, onset 0.320, ramp 2.160) vs seed B_o50 | no per-frequency CSV for the winner | not judged | −0.0896 | **tie** |
+| **B vs A level** | best B 5.6078 vs A_r15 3.0836 | n/a | +2.52 | B not competitive: `load` 3.18 vs 0.0 dominates [primary: part3] |
+
+**Reading.** (1) **On A (ext-throat parent) rho is inert in this envelope**: no band moves 3°,
+and both J gaps to v8 sit far below the 0.13 floor; "A_r15 beats v8 by 0.0192" is a **tie**, not
+a win. (2) **On B the onset knob has real H-plane authority** (up to ~10° narrowing above 1.1 kHz
+with V moving less than half), and the best onset beats B_ctl by more than the floor. (3) **B is
+not competitive under v7** (the no-extension geometry pays ~3.2 J of `load`). (4) Phase 3's
+search gain over its seed (0.0896) is a tie. (5) Phase 2's mesh check (|dJ| ≤ 0.0101 at epw 8)
+covers the B family only; it is not B1.
+
+Per-band confirmation of the A-vs-v8 rows (local, CPU, read-only):
+```
+.venv\Scripts\python.exe tools\analysis\u3_authority.py ^
+  --host runs\20261116T025728Z-screen-cd60f7\designs\9fcd21fc1904 ^
+  --config examples\typologies\throat_hv_2026-11-18\sweep\throat_hv_sweep_A_r15.yaml ^
+  --arm control=runs\20261116T025728Z-screen-cd60f7\designs\9fcd21fc1904 ^
+  --arm rho15=<runs\20261118T133445Z-screen-b16baf\designs\<only dir>> ^
+  --arm rho20=<runs\20261118T133540Z-screen-fe2089\designs\<only dir>> ^
+  --out docs\evidence\throat_hv_2026-11-18\authority_A_vs_v8.json
+```
+(`9fcd21fc1904` = the v8 incumbent per `scratch/fable_architecture/.b1/b1_designs.csv` [primary];
+confirm it is `best.json`'s hash in that run before reading.)
+
+#### Critical path (restated)
+
+1. **Scoring:** run the v10/v9/v7 rescore + floors (WP 1.4/1.5, CPU, commands ready) →
+2. **Mesh floor:** owner approves B1 batch 1 (5 fold-warm x2 probes) → WP 2.3 combined floor →
+3. **Physical truth:** D6 step 1 anchor (ST260, 1-2 solves) → D6 step 2 print-and-measure →
+4. owner picks the nights' score from evidence → B6 matched reruns (WP 6.2) → finalists (6.3) →
+   deliverable (7.4).
+Geometry path in parallel: WP 4.1 host pick → 4.2 equivalence → 4.3 B2. The throat block is
+**parked on A** and recorded as **"authority on B, not competitive under v7"** (G5 proposal).
+
+#### Next three owner decisions
+
+1. **B1 GPU slots** (C6): approve batch 1; optionally batch 2 (3 ext_throat_v7 probes) and B1f.
+2. **D6 step 1 anchor**: accept ST260 as the anchor and its predeclared pass rule; approve 1-2
+   solves once the local agent has pinned a measurement set.
+3. **Integration (D10)**: approve the PR plan (#67 → main; then `hornfab-all` → main; close #68)
+   so nights run `main`.
+
+### 10.3 Owner questions resolved (2026-11-18, cloud senior under owner delegation)
+
+Every owner question open in §10.1, §10.2 and `OWNER_DECISIONS_PACKET_2026-11-17.md` is decided in
+`OWNER_DECISIONS_RESOLVED_2026-11-18.md` (R1-R25), with evidence and a reversal condition each. In
+short: nights stay v7, v10 is the shipped second score (`examples/briefs/home_landscape_2026-11-18_v10/`),
+constancy = slope 5°/decade as its own identity that ranks nothing until its floor exists; B1 batch 1
+approved, batch 2 conditional, B1f dropped; ST260 anchor approved (2 solves, gated on the local source
+check); U3 host = best `hl__biradial_es_style_v7`; throat block parked on A; b06a938 code reverted and
+digests pinned; protected list confirmed, refusal storms still stop protected lanes; geometry gates
+provenance (`record_digest`), kernel digest informs; acoustic box gates, build box recorded; PR plan
+#69 → #67 → hornfab-all → main, close #68. GPU order: B1 → anchor → B1 batch 2 → 4.2 → 4.3 → BO `_r2`
+→ B6. The remaining work is execution only: `LOCAL_AGENT_PROMPT_2026-11-18.md` (repo root).

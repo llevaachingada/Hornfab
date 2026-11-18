@@ -6,7 +6,7 @@ from hornlab_search.objective import replay
 
 def test_replay_accepts_and_dispatches_v9():
     src = inspect.getsource(replay)
-    assert "if version not in (1, 2, 3, 4, 7, 9):" in src
+    assert "if version not in REPLAY_VERSIONS:" in src and 9 in replay.REPLAY_VERSIONS
     assert "objective_v9(metrics, response, True, target, weights, params)" in src
 
 

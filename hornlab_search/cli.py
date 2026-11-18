@@ -732,6 +732,16 @@ def _search_body(args, argv, d) -> int:
     except Exception as exc:  # ConfigError / ValueError — refuse before any GPU work
         print(f"search FAILED: {exc}")
         return 2
+    if not args.resume:
+        # Fable WP 2.2 / D7 truth fix: a fully pinned config would crash pycma (x0=[]) after the
+        # GPU lock and run dir were taken. Refuse here, before the backend warms.
+        from hornlab_search.config import ConfigError
+        try:
+            cma.require_free_dimensions(cfg, cfg_path)
+        except ConfigError as exc:
+            run_dir.rmdir()                      # created above, still empty
+            print(str(exc))
+            return 2
     if args.resume:
         # A resume replays the CMA sequence from search.ndjson and the solve cache; if the config
         # (weights, bounds, target, ...) changed, the replayed work and the stored rows no longer

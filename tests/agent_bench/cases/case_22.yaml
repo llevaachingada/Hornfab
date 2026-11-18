@@ -1,0 +1,31 @@
+id: 22
+title: Klangfilm curved-cap area vs Le Cléac'h planar Lamé area — different quantities
+prompt: >
+  An engineer claims that the Klangfilm-Lamé parent and the Le Cléac'h lecleach_swept_hv
+  construction use "the same area constraint" because both use the Lamé/superellipse
+  formula. What does the contract say about how these two constructions use area? Are
+  the area quantities actually the same, and what is each one locking or reporting?
+allowed_read_paths:
+  - docs/knowledge/contracts/klangfilm_lame_hv.md
+  - hornlab_search/design/generators/lecleach_swept_hv.py
+answer_key:
+  verdict: >
+    They are different quantities. The Klangfilm parent locks curved spherical-cap area
+    (2*pi*R0*h). The lecleach_swept_hv prototype preserves planar section area (pi*r^2).
+    These cannot be equated; the Lamé exponent appears in both but governs different
+    surface integrals.
+  must_include:
+    - "curved.*cap.*area|cap.*area.*2.*pi.*r0|spherical.*cap"
+    - "planar.*section.*area|planar.*lame|pi.*r.*squared"
+    - "different.*area|not.*same.*area"
+  must_not_include:
+    - "same.*area.*constraint"
+    - "equivalent.*area.*both"
+  must_cite_any:
+    - docs/knowledge/contracts/klangfilm_lame_hv.md
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "docs/knowledge/contracts/klangfilm_lame_hv.md:section 4"
+    - "docs/knowledge/contracts/klangfilm_lame_hv.md:section 2"
+  negative_control: null

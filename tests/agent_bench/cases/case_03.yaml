@@ -1,0 +1,34 @@
+id: 3
+title: Le Cléac'h H/V march — shared wavefront or independent marches?
+prompt: >
+  The lecleach H/V pair construction (rows.type: lecleach, with fc_v set) is described
+  in one document as running independent H and V Fourcade marches at fc_h and fc_v
+  respectively. Another source describes a single shared core march. Which description
+  correctly identifies the shared wavefront station sequence? State how the per-plane
+  section semi-axes are derived and why the rollback lip is the same on every azimuth.
+allowed_read_paths:
+  - docs/knowledge/contracts/lecleach_iwata_hv.md
+  - hornlab_search/design/generators/grid.py
+  - examples/typologies/home_landscape_2026-11-15/hl__lecleach_hv_landscape_smooth_v7.yaml
+answer_key:
+  verdict: >
+    One round core march at fc_core = sqrt(fc_h * fc_v) supplies the shared wavefront
+    station x(s). The plane marches at fc_h and fc_v supply the section semi-axes a and b.
+    The rollback lip is the same on every azimuth because it derives from the shared core.
+  must_include:
+    - "shared.*core|core.*march"
+    - "fc_core|sqrt.*fc_h.*fc_v"
+    - "semi.ax|section axis"
+    - "rollback.*same|lip.*same|shared.*rollback"
+  must_not_include:
+    - "independent.*h.*v.*march"
+    - "separate.*rollback"
+  must_cite_any:
+    - docs/knowledge/contracts/lecleach_iwata_hv.md
+    - hornlab_search/design/generators/grid.py
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "docs/knowledge/contracts/lecleach_iwata_hv.md:section 3"
+    - "hornlab_search/design/generators/grid.py:1304"
+  negative_control: null

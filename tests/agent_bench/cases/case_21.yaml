@@ -1,0 +1,34 @@
+id: 21
+title: ATH radial morph zero-amplitude identity and mouth target
+prompt: >
+  The rolled_family implementation with sf_amt=0 on the OSSE rollback should recover
+  the undeformed parent. What does the zero-amplitude identity say about sf_amt=0,
+  and is there a test that confirms this? Also: in the radial relief mode,
+  what is the relief amplitude at psi=45 degrees (the diagonal), and is this
+  the same as the relief at the principal planes?
+allowed_read_paths:
+  - docs/knowledge/contracts/rolled_section_pucker.md
+  - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+  - hornlab_search/design/generators/rolled_family.py
+answer_key:
+  verdict: >
+    With sf_amt=0 (or equivalently all novelty knobs off) the morph is turned off exactly
+    by code condition. At psi=45 degrees radial offset is exactly zero (cos^2(2*psi)=0),
+    so the diagonal is unaffected by radial relief while the principal planes get the
+    full amplitude. No test for sf_amt=0 is noted in the contract.
+  must_include:
+    - "sf_amt.*0.*morph.*off|morph.*off.*amt.*0|zero.*amplitude"
+    - "psi.*45.*zero|diagonal.*zero|cos.*2.*psi.*0"
+    - "principal.*plane.*full|amplitude.*principal"
+  must_not_include:
+    - "sf_amt.*0.*parent.*not.*exact"
+    - "diagonal.*same.*amplitude"
+  must_cite_any:
+    - docs/knowledge/contracts/rolled_section_pucker.md
+    - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "docs/knowledge/contracts/rolled_section_pucker.md:section 4"
+    - "docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md:B6"
+  negative_control: parent_novelty_off

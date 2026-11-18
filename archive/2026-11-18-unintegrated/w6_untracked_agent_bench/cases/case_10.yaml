@@ -1,0 +1,30 @@
+id: 10
+title: 2-degree driver exit tangent — assumption or measurement?
+prompt: >
+  The crowe_hv_area_aspect_v1 generator documentation states that the source tangent
+  angle is 2 degrees. A reviewer wants to use this value as the confirmed HF1440
+  manufacturer specification. Is this appropriate? What is the actual status of the
+  2-degree value in the codebase and what does the contract say about its provenance?
+allowed_read_paths:
+  - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+  - hornlab_search/design/generators/crowe_hv_area_aspect_v1.py
+answer_key:
+  verdict: >
+    The 2-degree exit angle is an assumed value, not a manufacturer measurement.
+    The HF1440 does not publish a numeric exit angle; the brief uses exit_angle_deg 2
+    as a simulation assumption.
+  must_include:
+    - "assumed|assumption|not.*measured|not.*manufacturer"
+    - "2.*degree|exit.*angle.*2"
+    - "hf1440"
+  must_not_include:
+    - "manufacturer.*confirmed|measured.*2.*degree"
+    - "specification.*2.*degree"
+  must_cite_any:
+    - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+    - hornlab_search/design/generators/crowe_hv_area_aspect_v1.py
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md:A5"
+  negative_control: null

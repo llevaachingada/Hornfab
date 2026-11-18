@@ -1,0 +1,27 @@
+{
+  "1": {
+    "text": "The timing function implemented is smootherstep: S_R = 10w³ − 15w⁴ + 6w⁵ (the warped quintic). Its first and second derivatives vanish at u=0 and u=1 by construction (C2 endpoint conditions). Both the aspect ratio and exponent ramps are therefore C2 continuous at both endpoints of the forward flare. The smootherstep timing ensures zero endpoint derivatives in the ramp functions by design. Source: docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md, section A4.",
+    "cited": [
+      "docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md"
+    ]
+  },
+  "4": {
+    "text": "The check should be refused. The Keele formula is a heuristic scoped to Keele Bi-Radial designs (patent US4308932A); it is not universal and must not be applied as a hard gate for JMLC or OSSE families. KH-001 documents this explicitly: the formula was derived for a specific bi-radial geometry and cannot constrain unrelated waveguide families. Actual directivity requires simulation or measurement, not a Keele-formula gate.",
+    "cited": [
+      "docs/knowledge/claims/KH-001_keele_mouth_heuristic.md"
+    ]
+  },
+  "6": {
+    "text": "The comparison is invalid. J values are not comparable across the base brief and the smooth v7 brief because the objectives differ: room_landscape_80x50_700_hf1440_v7_smooth.yaml sets di_slope_target=5 and cov_narrow_ratio=1, while the base brief has di_slope_target=0 and cov_narrow_ratio=2. The smooth brief targets a different DI slope, so a lower J under it does not imply acoustically better performance under the base brief. A matched rescore under the same brief is required before any ranking is meaningful.",
+    "cited": [
+      "docs/evidence/CROWE_KLANGFILM_BRIEF_RESCORE_2026-11-17.md",
+      "examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml"
+    ]
+  },
+  "14": {
+    "text": "The comparison is incomplete. The Crowe run directory and best.json are absent from this worktree; I cannot verify the missing run result. I do not fabricate or infer scores from memory, and cannot reconstruct the comparison without the run artifact. The correct response is to defer. The docs/evidence/CROWE_KLANGFILM_BRIEF_RESCORE_2026-11-17.md records matched rescore figures if they were captured; check that document for any available Crowe J values from a formal rescore.",
+    "cited": [
+      "docs/evidence/CROWE_KLANGFILM_BRIEF_RESCORE_2026-11-17.md"
+    ]
+  }
+}

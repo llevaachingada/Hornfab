@@ -1,4 +1,358 @@
-# CONTINUITY
+﻿# CONTINUITY
+
+## 2026-11-18 - reuse rescore published (v7/v10 floors + ties), WP 0.9/D9 merged, mixed_identity fixed (local orchestrator, owner-directed)
+
+- **Owner directive executed (protect → reuse → ≤3 CPU workers → verify → report).** Zero re-scoring
+  of completed columns; only 2×166-design samples + 1 floor pass computed. All `runs/` data
+  read-only; GPU night untouched; thread caps 1. A relaunched full sequence that would have
+  overwritten the completed outputs was killed before its first write (its out dirs are created at
+  write time). Scripts + provenance: `docs/evidence/v10_rescore_2026-11-18/results/` (README with
+  the full reading).
+- **mixed_identity FIXED** (`tools/analysis/rescore_identity.py` + tests): the old flag counted
+  per-design `score_id`s (each folds `metric_id`) → always True on real data. New flag = count of
+  score identities (score code + version + weights + objective block + brief) per column.
+  compare_all v7/v10/v10_slope5: **False, False, False** [measured]. Same design set scored under
+  shipped-vs-offline v10 briefs on the sample: **max |ΔJ| = 0.0 exactly (n=122)** → the offline
+  full-fleet v10 column IS the shipped column numerically.
+- **Floors published (freq part, top-28 pairs, 257 pairs):** v7 **0.310 J**, v10 **0.468 J**,
+  v10_slope5 **0.486 J**. ⚠ v7 0.310 vs the published D8 0.13 — protocol reconciliation flagged
+  (NOTES_FOR_SENIOR item 3; ties keep 0.13 until resolved). slope5's R2 gate is now satisfied
+  (diagnostic ranks only). Combined floor (WP 2.3) waits on B1's mesh part.
+- **Ties under each identity's own floor:** v7: v8/A_r20 tie-pair behind A_r15, fold-warm next;
+  v10: fold_warm ≈ morph ≈ ext_throat_v7 within 0.468 (three constructions inside one floor — the
+  B6 matched-rerun set per R19/R20b). Throat block under v10: v8 < A_r15 < A_r20, best B ~2.7 J
+  out — the G5 park is unchanged by v10.
+- **v10 slope5 sample** (166, diagnostic): lane bests consistent with v10's ordering; its column is
+  marked `sampled: true` — fleet ranks would need one full run (~30 min CPU).
+- **WP 0.9 / D9 (R12/R12b) implemented locally** (the dispatched lane produced nothing and was
+  taken over): `mesh_meta.json` now echoes the mesher `surfaceFit` resolved mode + flags the
+  auto→approximate fallback (`_surface_fit_meta`, additive; explicit interpolate never retried per
+  config_builder); `recipe_meta` gains the `record_digest` block (surface_record /
+  canonical_record_v2 / not_recorded) — record digests GATE rebuilds (canonical_record_v2 gate
+  pre-existing, restated as THE gate), kernel `implementation_sha256` stays informational;
+  evaluation rows gain additive `build_box_m` (acoustic bbox + resolved wall, R12/R10);
+  `tools/analysis/classify_recipes.py` classifies legacy recipes (rebuildable / bridge /
+  record_refused / unverified) CPU-only over runs/. Tests `tests/test_wp09_d9_provenance.py`
+  (9 tests) + regression `test_design_recipe_meta.py` green; no stored row rewritten.
+- **Night causes (WP 0.7)** appended to the night review by the fixer lane: UTF-8 decode rule,
+  9/9 ids classified byte-verbatim; t_trit80_rc2 actually ran 82 calls (counter artifact found);
+  t_ath14 had two launches (10054 crash, then stale-root refuse). Fix candidates listed, no code
+  changed (owner decision 8 pending).
+- B1 batch 1 sits in the live night queue (inserted earlier today, dry-run exit 0); batch 2 /
+  WP 4.2 verify solves / BO `_r2` queue after the probe gates per R6.
+
+## 2026-11-18 - integration STEP 1 closed on hornfab-all; STEP 2 CPU evidence 2b/2d/2e/2f committed (local orchestrator, R21/R22)
+
+- **PRs merged [verified]:** #69 (cloud→hornfab-all, merge `382c682`), #67 (plan→main, merge
+  `63c23a8`), with the owner-box suite result pasted (4861 passed / 4 known failures / 22 skipped;
+  +23 tests confirmed by def-count deltas 8+7+2+3+2+1, no parametrize). `hornfab-all→main` PRs and
+  #68 close-out follow after the STEP 2 commits. Local `hornfab-all` advanced to `382c682`.
+- **CLAUDE.md R21 ownership row added** (STEP 1.5) above "Need a file you do not own?".
+- **R22 resolved:** uncommitted `scalar_v9.py` v9-math edit DISCARDED
+  (patch archived outside the repo); `tests/test_v9_polar_window.py` deleted (tested only the
+  discarded API); AGENTS.md/`.opencode` agent-config sync committed as doc/config-only (matches the
+  umbrella preset text); `hl__klangfilm_lame_curved_v1_c200w.yaml` KEPT after `tools/shape_check.py`
+  PASS (mesh ok, 4853/24000 dofs, mouth 585x255, depth 196, envelope fits, round coupling).
+- **2b throat authority (R9 follow-up):** `u3_authority.py --csv-dir` runs committed
+  (`authority_A_vs_v8.{json,csv/}`, `authority_B_p3_vs_o50.{json,csv/}`). rho15: authority FALSE
+  (max 1.84° H) as expected; **rho20: authority TRUE (3.12° H, 2500-5500, V < half)** — contradicts
+  §10.2's "v8 → A_r20 no [inferred]" at the threshold; §10.2 rows left for the senior pass
+  (NOTES_FOR_SENIOR 2026-11-18 entry). Phase 3 winner vs B_o50: authority FALSE (fills the
+  "not judged" row as a verified no-authority/tie, ΔJ 0.0896 < 0.13).
+- **2d ST260 anchor (R4):** source check done. Config values were the rev7 PAPER example; the real
+  ST260 device (page + STL) differs: refit of `ST260-19.stl` gives a0 9.45° (19° total), k 2.13,
+  m 0.86, q 5.05 at RMS 0.08 mm (old values 1.33 mm RMS) — `anchor__rosse_st260_v1.yaml` CORRECTED
+  before any solve. **No admissible measured build exists** (6 linked builds checked; distance/
+  gating/step never stated together; one is a simulation): R4 fallback (ATH CORE/Tritonia) recorded;
+  ST260 NOT solved; the 2 approved anchor solves unspent. Evidence:
+  `docs/evidence/anchor_st260_2026-11-18/README.md` (+ `measured/ST260-19.stl`). shape_check:
+  corrected config meshes 944/12000 dofs, mouth 260 ✓, depth 88 ✓; the table's ok=NO is the
+  pre-existing brief-less-config throat-"unknown" property (pre-correction file fails identically).
+- **2e B1 doc fix (WP 2.2):** dated correction appended to
+  `scratch/fable_architecture/.b1/b1_mesh_feasibility.md` — only `3a1038da45d0` and `9fcd21fc1904`
+  are infeasible; `766c…`/`508f…`/`b996…` are probe-grade (batch 2, R5).
+- **2f U3 host (R8):** best stored `hl__biradial_es_style_v7` = run
+  `runs/20261116T090751Z-screen-37b115`, design `9b05b8756526`, J 6.336386 (v7 home brief identity,
+  verified against run.json/best.json/status.json). `u3_jobs.py` wrote
+  `examples/studies/u3_biradial_es_style_v7/` (control + 7 variants; vt_480 and term_sides invalid
+  per the tool's reach table). Control shape_check PASS (3270/24000 dofs, fits, round coupling).
+  WP 4.2 verify solves are queue-ready.
+- **STEP 3 B1 batch 1 inserted into the LIVE night (GPU, R5/R6):** 5 fold-warm ×2 probe jobs
+  (`scratch/fable_architecture/.b1/b1_mesh_night_insert.yaml`) appended AFTER existing pending work
+  of `runs/nights/cd_rrect_2026-11-17.yaml` (backup `cd_rrect_2026-11-17.yaml.bak-20261118-b1`);
+  `run_campaign_night.py --dry-run` exit 0. Batch 2 / anchor / 4.2+ wait on the probe-1 spill gate;
+  the anchor batch is CANCELLED (2d outcome). GPU lane was and stayed BUSY (live job
+  `w_crowe_panel_es600_v7_200w1`); zero direct solves by the orchestrator.
+- **Dry-run NOTE recorded:** 4 queued `home_range15_*` jobs reference
+  `briefs/home_range_v9_h12.yaml` with `oa_excess_tol`+`ripple_window` keys — these exist only in
+  the DISCARDED scalar_v9 math; they will refuse at start against the merged tree (owner/range-lane
+  decision pending: re-home on v10 `ripple_region preferred_edge` or re-pin).
+- **STEP 2a running:** the full rescore sequence (v7/v9/v10 offline + shipped/slope5 + floors +
+  compares) is executing in the background; results commit follows with the acceptance checks.
+
+## 2026-11-18 - owner-box integration started: cloud branch suite green after digest-pin fix (local orchestrator)
+
+- Suite on `cloud/fable-next-2026-11-18` (offline, thread caps 1, -n 6 --dist loadscope):
+  **4861 passed, 4 failed, 22 skipped, 18:42 min** — failures exactly the known 4
+  (`test_v8_key_set…`, `test_b8_lanes…`, 2 × `test_night_bo_arm_wrapper`).
+- Fixed before merge (R7 / WP 0.9): `tests/test_klangfilm_hv_digest_pin.py` pinned the cloud
+  container's `implementation_digest()` values (`ee160698…`/`c65beb16…`), but
+  `implementation_digest()` folds `numpy=<v>;scipy=<v>` into the hash, so those constants cannot
+  hold on another dependency set. Owner box (numpy 2.5.4 / scipy 1.18.1) computes
+  `1304dea3…`/`a032f660…` — and the stored local recipes carry exactly those digests
+  (runs/20261117T071329Z-screen-e4f90d design.json; docs/evidence/klangfilm_hv_2026-11-16/search_box.json),
+  so nothing is locked out. The test now pins the frozen FILE BYTES (same file list + CRLF
+  normalisation as the digest recipe: adapter, kernel, parent, cap, shell) and independently
+  re-checks the digest recipe + version suffix. Kernel files verified byte-identical to
+  pre-b06a938 (`git diff b06a938^ -- <both kernel files>` empty).
+- R22 on the owner box: the uncommitted `scalar_v9.py` edit (adds `ripple_window`/`oa_excess_tol`
+  v9 math) DISCARDED per R22 (copy saved outside the repo);
+  `tests/test_v9_polar_window.py` deleted (it tested only the discarded API);
+  AGENTS.md/.opencode agent-config sync (opencode-go-max preset text + mirror of the umbrella
+  fallback/backgroundJobs block) kept as doc/config-only;
+  `hl__klangfilm_lame_curved_v1_c200w.yaml` kept pending shape_check.
+
+## 2026-11-18 - cloud senior: ALL owner questions resolved under owner delegation (R1-R25) + code
+
+- `scratch/fable_architecture/OWNER_DECISIONS_RESOLVED_2026-11-18.md`: research frame (CTA-2034
+  listening window, Olive preference model, Geddes, Sridhar, repo S1/N3/SIM_VS_REAL) and 25 decisions,
+  each with evidence and a reversal condition. Plan §10.3 summarises them.
+- Code/config set here: v10 home briefs `examples/briefs/home_landscape_2026-11-18_v10/` (base +
+  slope5 constancy on 116 points; R1-R3); Klangfilm H/V kernels restored to pre-b06a938 bytes +
+  `tests/test_klangfilm_hv_digest_pin.py` (R7; facts moved to the contract errata); protected list
+  `status: confirmed`, refusal storms stop protected lanes (R11); night status `ok_no_result` (R16);
+  `replay.REPLAY_VERSIONS` single list + test (R17); `u3_authority --csv-dir` (R18); Crowe-X /
+  Le Cleach YAML comments (config_sha unchanged, verified; R13/R14); GPU job files
+  `docs/evidence/gpu_queue_resolved_2026-11-18/` (anchor, BO `_r2`; dry-run clean).
+- Not done from the cloud: CLAUDE.md ownership row (R21) - the session guard refused the edit; the
+  local prompt adds it.
+- Tests (cloud): 4826 collected, failure set identical to the 18ec991 baseline (no new failures).
+- Execution: `LOCAL_AGENT_PROMPT_2026-11-18.md` (STEP 1 integrate, 2 CPU evidence, 3 GPU order,
+  4 evidence + WP 0.9/D9).
+
+## 2026-11-18 - cloud senior: review of the pushed night record (WP 0.7 / 7.2 / D8)
+
+- Merged `2b35194` (archive of worktree drafts + night cd_rrect_2026-11-17 ledger) into
+  `cloud/fable-next-2026-11-18`. That commit had no CONTINUITY/ISSUES/INDEX entries; INDEX line
+  added here.
+- `docs/evidence/night_cd_rrect_2026-11-17_REVIEW_2026-11-18.md`: throat rows match the evidence
+  exactly; 14.7 h ok / 3.5 h failed / 2.1 h blocked; 0 of 9 BO arms finished (2 owner skips,
+  t_hvlaw x2 refused for too few training rows [code-verified], t_ath14_turbo100 refused,
+  t_klame x2 failed); t_trit80_rc2 recorded ok with 0 evals and no J; pending queue clean under
+  the zero-dimension guard. Handback §9 added.
+
+## 2026-11-18 - cloud senior G6 (Fable D10): HANDOFF refreshed, PR plan, HANDBACK_CLOUD_2026-11-18.md
+
+- `HANDOFF_2026-11-18.md`: cloud additions table, corrections (A_r15 vs v8 is a tie; no A-family
+  onset search; #68 code byte-identical to this branch [verified]), PR plan: #67 -> main; cloud
+  draft -> hornfab-all; one PR hornfab-all -> main; close #68; nights to main at a night boundary.
+- `HANDBACK_CLOUD_2026-11-18.md` (repo root): status summary, per-commit verdicts (all approve),
+  test sets (cloud baseline 20 F + 19 E, final identical, +15 new passing tests), 7 numbered
+  owner decisions, ordered local work list A-H with commands, queue lines, off-plan proposals.
+
+## 2026-11-18 - cloud senior G5 (Fable WP 4.4): throat block parked on A (proposal)
+
+- `docs/evidence/throat_hv_2026-11-18/G5_RECOMMENDATION_2026-11-18.md`: park on A as inert in
+  this envelope; no A_r15 + onset/ramp test. Code-verified: A's seed (`morph_target 0`,
+  `morph_fixed`/`morph_rate` present) makes `families.py:647-651` refuse `hv_onset_frac` /
+  `section_exp_ramp`; native morph keys load but are inert with no morph target.
+- B kept as "H authority, not competitive under v7"; free CPU check via the v10 rescore column.
+- No config written, nothing queued.
+
+## 2026-11-18 - cloud senior G1: plan §10.2 "Status 2026-11-18" (Fable plan §4, §8.2, §10.1)
+
+- `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` §10.2: one status row per WP (done /
+  tool-done-not-run / blocked-on-owner / not started), placement of the 11-18 work (throat block =
+  stage-4 freedom built ahead of its gate; v10 = the §10.1 new-identity fix; agent_bench +
+  contracts = off-plan knowledge track), the throat authority table, critical path, next three
+  owner decisions.
+- Throat authority, re-derived from the part3 CSVs with `u3_authority.authority()` [verified]:
+  A (rho on ext-throat) INERT (≤ 1.28° per band; A_r15 vs v8 ΔJ 0.0192 = TIE under the 0.13
+  floor); B onset has H authority (up to ~10°, V < half; best onset beats B_ctl by 0.251 > floor);
+  B not competitive under v7 (load ~3.2 J); Phase 3 gain 0.0896 over its seed = TIE.
+- INDEX: throat evidence folder line added (was missing).
+
+## 2026-11-18 - cloud senior G4 (Fable D6 step 1): physical anchor = R-OSSE ST260 (research only)
+
+- Pick: Batik's R-OSSE rev7 "ST260" example (1-inch, round, 260 mm; full parameter set published,
+  CC BY-NC-SA 4.0; ST260 page links user builds with measurements). Geddes OS rejected (no exact
+  published dimensions). Dossier: `docs/research/typologies/ANCHOR_ST260_RESEARCH_2026-11-18.md`.
+- Config: `examples/typologies/anchor_2026-11-18/anchor__rosse_st260_v1.yaml` (all bounds pinned,
+  loads + validates [verified]; NOT meshed, shape_check required).
+- Predeclared pass rule: -6 dB beamwidth ±5° per 1/3-octave band (±3° in 2-5 kHz), DI ±1 dB,
+  1-8 kHz, same DI method both sides.
+- Limits: at-horns.eu / diyAudio unreachable from the cloud; values come from the repo's 2026-11-16
+  fetch and must be re-read locally; the measurement set is not yet chosen.
+
+## 2026-11-18 - cloud senior G3 (Fable WP 2.2 / D7): zero-dimension searches refused; B1 readiness
+
+- Truth fix: `search/cma.py::require_free_dimensions` (called first in `search()`), the
+  `hornlab-search search` CLI (exit 2, empty run dir removed) and `tools/run_campaign_night.py
+  --dry-run` now refuse a search whose config leaves CMA-ES no free dimension, naming
+  `hornlab-search run --config <yaml> --mode screen|finalist` / `kind: command`. This is the part3
+  pycma `x0=[]` crash. Tests: `tests/test_search_zero_dimensions.py` (7).
+- Checked: the B1 and B1f lines from b6d3ba4 are `kind: command` -> fidelity_pairs.py (calls
+  evaluate directly), so they never hit the crash; all three night files dry-run clean.
+- Finding: b1_mesh_feasibility.md excludes "the five ext-throat designs" but its own table shows
+  766c/508f/b996 build at x2 (probe grade). Optional 3-job batch written:
+  `docs/evidence/b1_readiness_2026-11-18/b1_mesh_ext_throat_probes.yaml`. The v7 leader 3a1038 and
+  v8 incumbent 9fcd21 remain infeasible on the 8 GB card.
+- No GPU, no queue edit, no default changed.
+
+## 2026-11-18 - cloud senior G2 (Fable WP 1.4 / 1.5): v10 rescore is one local command
+
+- Bug fixed: `objective/replay.py` dispatched v10 but its version gate `(1,2,3,4,7,9)` refused it
+  (`objective_version_not_supported_by_replay`), so a v10 rescore scored zero rows. Gate now
+  includes 10. No stored J, row, config_sha or default changed (v10 is opt-in; no brief in
+  `examples/` uses it).
+- `tools/analysis/rescore_identity.py`: `--run-brief <stem>`, `--runs-root <dir>`, rows carry
+  `stored_j` / `parity_delta`, new `compare` subcommand (per-lane bests side by side, one column
+  per identity, ranks within a column only).
+- New: `docs/evidence/v10_rescore_2026-11-18/` (README with exact local commands + two OFFLINE
+  rescore briefs: v9 corridor = owner's 11-17 second score, v10 = same + `preferred_edge`).
+- Tests: new `tests/test_rescore_identity_v10.py` (8); `test_obj_replay_v9_parity.py` gate string.
+- NOT RUN: needs `runs/` (local agent; commands in the README).
+
+## 2026-11-18 - throat H/V sweep: Phases 1-3 DONE on this branch (owner-authorized GPU)
+
+- Phase 1 (7 single solves, \hornlab-search run\): all ok, v7 identity = v8 stored
+  (20261116T025728Z-screen-cd60f7). **A_r15 (rho 1.5) 3.08361 beats the v8 incumbent 3.10281
+  by 0.0192**; A_r20 3.12713 worse by 0.0243. B family (no ext throat): best B_o50 5.69735
+  (B_ctl 5.94839; the ~5.7-6.4 level is the v7 load term, load 3.2 vs 0.0 - mechanism study).
+- Job-line correction (IMPORTANT): \kind: search, budget: 1\ + every bound \search: false  crashes pycma (x0=[] / ufunc isinf TypeError) - single-design night jobs must be
+  \kind: command\ -> \hornlab-search run --config <yaml> --mode screen\. Three part2 ids
+  (throat_hv_B_*) burned on this; reinserted as throat_hv_run_*.
+- Phase 2 (2 epw8 solves): |dJ| 0.00857/0.01013 -> gate PASSED (0.0101 << 0.25104).
+- Phase 3 (budget 40 search, seed B_o50): 41/41 ok, best J 5.60780 at rho 1.371 / onset 0.320 /
+  ramp 2.160 (run 20261118T150846Z-screen-9a04c5). Track used 9 single solves + one 40-eval
+  search (cap respected; the +1 v8 identity re-solve was unnecessary, identity byte-verified).
+- Evidence: docs/evidence/throat_hv_2026-11-18/ (part3 + phase1_summary.csv + per-config
+  hv_beamwidth/di CSVs + p2/p3 eval CSVs + overlay PNGs). New configs: 3 files in
+  examples/typologies/throat_hv_2026-11-18/sweep/ (2 epw8 + B_search40, shape_checked).
+- Night cd_rrect_2026-11-17 resumed (stale lock pid 15952 taken over); night file edits: 9
+  throat jobs inserted, backup at runs/nights/cd_rrect_2026-11-17.yaml.bak-20261118. Owner
+  authorized skipping the running BO arm; t_ath14_scalar100 (78 obs) and t_corelaw_turbo100
+  were killed and recorded blocked - resume with a FRESH --root. Watcher task
+  HornLabThroatPhase1Poll deleted (track finished).
+
+## 2026-11-18 - BO metric policy for objective v10 staged (PR-D, OWNER-GATED with PR-A)
+
+- `bo/metrics.py`: new `freeze_metric_policy_v10` / `measure_metrics_v10` (schema
+  `bo-physical-metric-v10/1`). Coverage = the v9 profile cost (raw), ripple = the v10
+  `ripple_region` window. `freeze_metric_policy` is unchanged and still accepts v4/v7 only.
+- `assert_single_objective_cohort`: refuses any cohort mixing v4/v7/v9/v10 labels.
+  `bo.cohort.validate_cohort` already refuses mixed versions; a new test pins v7+v10 and v9+v10.
+- Tests: `tests/test_bo_metrics_v10.py`. No wiring into proposals or studies.
+
+## 2026-11-18 - Objective v10 staged (PR-A, OWNER-GATED): v9 + explicit required ripple_region
+
+- New `hornlab_search/objective/scalar_v10.py`, registered as version 10 in `versions.py`,
+  `search/evaluate.py`, `objective/replay.py` and `config.py`. `scalar_v9.py` is NOT edited; v9 J
+  and the v9 tests are unchanged.
+- Code-verified semantics: profile `preferred/min/max_deg` are FULL beamwidths (the v9 cov term
+  compares them with `beamwidth_deg`'s total included angle). So v9 corridor mode inspects
+  +/-(max-min)/2 and v9 target mode inspects +/-preferred (twice the -6 dB edge). The v9
+  docstring's "half-angle" reading does not hold.
+- v10 requires `objective.ripple_region` (no default): `preferred_edge` (+/-preferred/2), `max_edge` (+/-max/2, corridor only; added after E1),
+  `min_edge` (+/-min/2, corridor only) or `{mode: seat_zone_deg, h_deg, v_deg}` (declared total
+  angles). Every other term is v9's. New identity: `v10_score_identity` (sha256 of the block).
+- `tests/test_objective_v8.py` registration assertion updated to the new tuple (still exact).
+- No brief uses v10. The owner picks the region policy before any brief does.
+
+## 2026-11-18 - Agent science benchmark fixtures (WP-K1): tests/agent_bench/
+
+- 24 frozen cases (`cases/case_NN.yaml`): a prompt, the paths the agent may read, and an answer key
+  (must_include / must_not_include / must_cite_any / defer_ok). Keys are sourced from the repo,
+  except case 16, which is `spec_only`. All 7 negative controls are embedded.
+- `scorer.py` grades SAVED answers only; it makes no model calls. Sample good and bad answers live
+  under `answers/`. `tests/test_agent_bench.py` checks the schema, that every path exists, that
+  every regex compiles, and the sample grading.
+
+## 2026-11-18 - Klangfilm H/V kernels: stale seed-mouth comments and frozen-copy SHA docstrings corrected (comments only)
+
+- `_klangfilm_lame_hv_core_v1.py` SEEDS comments now give the recomputed mouths (b1 479.6x239.7,
+  b2 595.0x232.8, b3 472.5x266.1, b4 562.5x261.6 mm; these match PHASE_B_GEOMETRY). The frozen-copy
+  docstrings of both H/V kernels now record the original SHA and today's tools-file SHA.
+- No geometry change. The klangfilm_lame_hv and hv_core family `implementation_sha256` DO change
+  (the digests hash these files), so saved recipes that require the old digest will be refused.
+
+## 2026-11-18 - Construction contracts moved from DRAFT to REVIEWED (senior, docs only)
+
+- All 4 contracts end with a "Senior review" section listing their open items.
+- Klangfilm: the seed-mouth and SHA findings were confirmed by re-running the kernel; the code
+  comments are fixed in a separate owner-gated patch (it changes the family digests).
+- Crowe-X: the header claims `g_L_mm` hi 320 but the bounds say 285. The header comment is
+  annotated; the bounds are unchanged.
+- Le Cleach H/V pair: relabelled [reconstruction]. The YAML `description:` still says "published";
+  rewording it is an owner decision because the value is parsed config.
+
+## 2026-11-18 - Throat H/V follow-ons: rolled rho, iwata_ar onset, R-OSSE verdict, block contract
+
+- Rolled family: `throat_hv_ratio` now maps to the radial scale `rho**(cos(2psi)/2 * w)` inside the
+  relief window `w` (LABELED HYBRID). The window is zero through the source-matching region and at
+  the mouth attachment, so rho = 1 is the identity and the throat and mouth are unchanged. Legal on the
+  v7 seeds for roughly 0.6-1.3; larger values are refused by the existing constriction, envelope and
+  self-approach guards. Searchable; a ratio box that excludes 1 keeps the window position live. The
+  patch's own refusal test was replaced by behaviour tests. The rolled `implementation_sha256`
+  changes again.
+- `lecleach_iwata_ar` (rows `iwata_ar`): `hv_onset_frac` delays the AR law,
+  `AR = 1 + (AR_m - 1) clamp((s - s_on)/(1 - s_on))**ar_p`. Onset 0 equals today's law, to 1e-9.
+  `section_exp_ramp` is an alias of `ar_p` (giving both is refused); rho is refused there. LABELED
+  HYBRID.
+- R-OSSE: no rho. The rev7 primary source describes only an axisymmetric profile.
+- New `docs/knowledge/contracts/throat_hv_block.md`.
+
+## 2026-11-18 - Shared near-throat H/V block implemented (CPU only; mesher and BEM checks pending)
+
+- New `hornlab_search/design/throat_hv.py`: `throat_hv_ratio` (rho), `hv_onset_frac`,
+  `section_exp_ramp`, with one meaning in every family. Absent keys = byte-identical configs,
+  geometry and hashes; rho = 1 = the parent law.
+- Native OSSE: rho -> per-azimuth `k(p) = k*rho**(-cos2p/2)` mesher expression (inside the OS-SE
+  parent; keeps the driver-exit slope). Onset/ramp alias `morph_fixed`/`morph_rate` (the Ath
+  morph). Refused without `morph_target` or alongside the native key.
+- osse_rollback: per-azimuth k; the superformula window uses the Ath ramp (LABELED HYBRID).
+- Le Cleac'h H/V pair: per-plane march T (larger T = faster near-throat growth, eq. 42 plus a
+  numeric test). The onset ramp blends the round core to the H/V ellipse (LABELED HYBRID).
+  `iwata_ar` is untouched.
+- Rolled family: onset/ramp replace the relief window start (now allowed down to 0) and are
+  searchable. rho != 1 is refused (no per-plane throat growth parameter exists yet). Editing
+  `rolled_family.py` changes its `implementation_sha256`, so saved recipes that require the old
+  digest will be refused.
+- Example configs (NOT RUN): `examples/typologies/throat_hv_2026-11-18/` (A: v8 incumbent + rho; B:
+  no round extension + morph to the mouth extent + all three knobs).
+- Tests: 4 new test files. The full suite shows the same 30 failed / 76 errors on main and on this
+  change (all from absent `cma`/`hornlab_mesher` etc.), so there are 0 new failures.
+
+## 2026-11-18 - Near-throat H/V control: audit, research (KH-002), option literature (KH-003)
+
+- Docs only; no code. Root cause in OS generators: `a0` (from `driver.exit_angle_deg`) and `k`
+  are shared by every azimuth, so only `a(phi)` splits H/V, and that split grows late. The
+  `throat_ext_length_mm` extension is round (search pressure pins it short). The rolled and
+  toroidal routes have no near-throat H/V term.
+- Primary-verified: Batík OS-SE allows its parameters to vary around the device, so a per-azimuth
+  `a0`/`k` stays inside the OS-SE parent. R-OSSE is unclassified. Smoothstep section ramps and
+  OS-SE plus elliptical throat extensions are labeled hybrids.
+- Proposed (owner approval pending): one shared throat H/V block (asymmetry ratio, onset fraction,
+  section-exponent ramp), off for symmetric briefs, with H=V reproducing the parent exactly.
+  Family one-off onset knobs are frozen neutral in new configs.
+
+## 2026-11-18 - WP-K0/K1 docs-only: four draft construction contracts, CLAUDE.md routing, Keele scope fix
+
+- Docs and skill text only. No code, config, brief, queue, scoring or GPU change. PR #67 not touched.
+- Added `docs/knowledge/contracts/` (DRAFT, senior review pending): Klangfilm–Lamé H/V and core,
+  CROWE V2A and Crowe-X/OS-SE CD, rolled section pucker, and Le Cléac'h/Iwata H/V. The drafting
+  environment lacked scipy/hornlab_mesher, so no tests were run.
+- Findings for review (not fixed): Klangfilm `cd_core_blend` is a switch (no parent reduction), and
+  the Phase A cap-area residual is pre-deformation. Crowe-X `g_L_mm` header says 320, bounds say 285.
+  The Le Cléac'h H/V plane meridians lose their axial coordinate (arc-fraction stations, `πab`
+  report-only). The rolled station definition is ambiguous.
+- `CLAUDE.md`: added a routing section deferring to `AGENTS.md` precedence. The wave plan and the
+  ownership table are marked historical. Start-here now reads `ACTIVE_STATE` plus the newest log
+  entry only.
+- `hornlab-shape-check`: the Keele K-law is now scoped to a Keele/Bi-Radial starting estimate (KH-001),
+  not a mouth target for every family.
+- Added `docs/knowledge/AGENT_BENCHMARK_SPEC_2026-11-18.md` (24 cases plus negative controls;
+  spec only).
 
 ## 2026-11-18 (local orchestrator) - Night truth (C1) + data-agreement gate (C2) landed; B1 encoding owner-decided; queue repaired
 
@@ -94,7 +448,13 @@
   B1/B1f are unaffected. The scoring-truth track (PR-A..F proposals, qLogNEI/qLogNEHVI later,
   BO `freeze_metric_policy` accepts v4/v7 only) folds into the plan as one track; the throat
   agent's isolated clone runs the read-only evidence E1-E4 into the carrier
-  `evidence_scoring_2026-11-18/`.
+  `evidence_scoring_2026-11-18/`. **Follow-up (same day): the owner answered the ripple
+  policy — `preferred_edge` — and the fix is objective v10, draft PR #68
+  (`feat/objective-v10` @ `2ecfdd5`, verified stacked on this branch, base `ccr-260b4b76-fi6b8j`,
+  to be retargeted to `main` after PR #67; 4790 passed / 40 skipped / 4 known failures, none
+  new). v9 corridor scores remain PROVISIONAL for decisions in this branch until v10 lands
+  canonically; still gated: `0007` (Klangfilm H/V digests), v10 rip tolerance/weight, the
+  throat-block landing target, and the GPU onset sweep.**
 - Commit/coverage note: this entry's code lands in the same push (C1 in
   `feat(tools): night truth`, C2 in `feat(analysis): data-agreement gate`); the queue file is
   untracked (`runs/`), so the queue edits travel as the held-note above, not as commits.
@@ -7880,6 +8240,7 @@ PASS  round-trip        reserved for task 04
 
 **Next action:** dispatch the Wave 1 issues in parallel using the prompt template in `docs/plan/00_ORCHESTRATOR.md` â€” **only after** CP-0 is completed on a clean GPU and the repo is pushed.
 ## Status
+- **Current (cloud senior 2026-11-18):** Owner questions RESOLVED (R1-R25, OWNER_DECISIONS_RESOLVED_2026-11-18.md); execution = LOCAL_AGENT_PROMPT_2026-11-18.md.
 - **Phase:** senior-pass implementation (owner directive 2026-10-24; WP1â€“WP17, no Synergy/MEH). **M1 DONE and pushed** (WP1â€“WP4 offline parts + WP15 repo-side plumbing; Oracle GO). **M2 DONE: WP15 fused CUDA validated on the GPU** â€” ladder, fused GPU test, measured ceiling, 12 kHz verify; Oracle GO recorded in the M2 entry. **M3 DONE** (carry-overs + WP5/WP7/WP8 calibration, zero new searches; Oracle GO-with-fixes ALL applied). **M4 DONE (2026-10-25): WP9 generators (splice/throat_blend/spherical_salmon) + WP9b GRID rows (organic/elliptical/X-shape as labeled hypotheses + HALF models) + `lecleach` SHIPPED after R9-J PASSED (owner chat directive, Fourcade verified, 0.00 mm width) + WP10 GRID adapter** â€” 12 typology smokes green on the GPU, full-vs-quarter PASS, suites 1194/0/1/0 (intended tripwire only), Oracle GO-with-fixes (doc-only) applied. **M5 WP11 DONE (2026-10-25): restarts (IPOP/BIPOP mirroring pycma) + CMA-ME QD atlas (ribs 0.12.0 â€” offline-first, +40 tests, 4 GPU screens proving budget exactness incl. a fired 4-ES BIPOP run; Oracle GO-with-fixes applied; evidence `docs/evidence/M5_WP11_2026-10-25.md`, byte-check 30/30). M5B DONE (2026-10-25): WP14 multicell CATEGORY (CADâ†’STEP route: `tools/cad/multicell.py` + `mesh/step_build.py` + the `cad` recipe/echo/example + `solve.near_correction*`/`solve_precision`/`source_profile_alpha` keys) + WP16/17 fork branches LANDED AND GPU-VALIDATED (Julia 46/46 testsets incl. all four CUDA testsets; selftests 0.020/0.0390 dB; 3-arm A/B worst 4.94e-06 dB) + FORK HOSTED (github.com/llevaachingada/hornlab-beat-bem) + PIN MOVED THERE (`760a1ec`) â€” the test_mesh_pin tripwire RESOLVED, suite 1325/0/0/0; M4 debts finished; multicell PHYSICS DEFERRED (owner â€” mouth-topology defect diagnosed, evidence preserved); CLI selftest lock-kill fix; evidence `docs/evidence/M5B_WP14_WP16_WP17_2026-10-25.md`, byte-check 33/33. M6/WP12 DONE (2026-10-25): enclosure mounting plumbed (brief.mounting â†’ the mesher's OWN keys, âˆ’mnt- cache keys, all echoes) AND MEASURED on two finalists â€” dofs +199.4 % / +106.5 %, both under the unchanged caps, enclosure J improves (a different objective landscape â€” never rank across mountings), reference parity 2.91e-06 dB; **WP13 OWNER-DEFERRED** ("don't know how necessary that is"); suite 1372/0/0/0; evidence `docs/evidence/M6_WP12_2026-10-25.md`, byte-check 21/21.** Waves 0â€“3 + CP-7 complete; CP-8a/b PASS, CP-8c CLOSED, CP-8d still FAILED (surrogate retrain pending more OSSE data â€” unchanged).
 - **Done 2026-10-24:** M1: objective v2 (opt-in, offline re-score over 18,059 records: Spearman Ï(v1,v2) = 0.989, both compare-tier claims SURVIVE, v1 drift 0 â€” `docs/evidence/OBJECTIVE_V2_RESCORE.md`); WP2 driver pins with the embedded-brief grandfather; WP3 shape-only perturb + graded infeasibility; WP4 `freq_weights` + HF verify grid. WP15 repo side: `solve.cuda_fused` flag, env gating, diagnostics proof + refusal (fork branch `hornlab-search/fused-cuda` @ `fa99ee5` in `..\forks\hornlab-beat-bem`; Julia tests green). **M2 (late evening):** fork installed by SHA; ladder analytic **0.020 dB** / crosscheck **0.0390 dB** (both = base references); 3-arm A/B vs stored base-pin runs â‰¤ 2.9e-6 dB / 2.1e-05 deg (bars 0.039 dB / 1Â°); fused GPU test green ([measured] on-axis 0.0000 dB, bw 0.01-deg print precision, z_throat 3.35e-07; stale-host refusal); flag-off bit-determinism finding rebarred to a measured 1e-4 dB floor (base-pin reproduction logged); ceiling measured: fused **fits 15,984 / fails 20,237, SAFE = 12,000** (old path same mesh: 7,389 vs 2,217 MiB, 59.6 vs 9.1 s/freq); four `*_fusedcuda` configs (caps 5000/12000/12000); 12 kHz verify on the flag (4,438 dofs, 2.1 s/freq, 25Ã— fused proven). Evidence `docs/evidence/FUSED_CUDA_2026-10-24.md`; pin on `dev/fused-cuda-pin` ONLY (never main; GitHub hosting = owner action). **M3 (2026-10-25):** carry-overs @ `1dda493` + `solve.source_motion` / `mesh.rear_res_factor` / `mesh.band_split` (+ `stack_responses`, verify-only seam, `mesh_policy: band_split_v1` provenance) + the 17-job measurement pack on the stored WP5 finalists (`tools/m3_measurement_pack.py`); evidence `docs/evidence/MEASUREMENT_PACK_2026-10-24.md`; details in the M3 entry above.
 - **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CADâ†’STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned â€” the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) â€” 2â€“4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.

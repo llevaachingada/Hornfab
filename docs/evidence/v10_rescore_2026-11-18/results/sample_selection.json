@@ -1,0 +1,1189 @@
+{
+ "n": 166,
+ "strata": {
+  "lane_best_union": 58,
+  "per_lane_diversity": 16,
+  "stratified_random": 70,
+  "worst_j_tail": 12,
+  "failure_cases": 10
+ },
+ "seed": 20261118,
+ "selection": [
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "0c7ccc332fff",
+   "reasons": [
+    "failure_case"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "0fd8191245de",
+   "reasons": [
+    "failure_case"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "14e8caaed689",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "198906fa424e",
+   "reasons": [
+    "failure_case"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "21d2c40ce1ce",
+   "reasons": [
+    "failure_case"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "296522dbe9f8",
+   "reasons": [
+    "failure_case"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "3368f7e949c2",
+   "reasons": [
+    "failure_case"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "3da13bc8dd0c",
+   "reasons": [
+    "failure_case"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "4148446cbc1e",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "47797a6f5a62",
+   "reasons": [
+    "failure_case"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "47878c6584d2",
+   "reasons": [
+    "failure_case"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "54ff8adc5f17",
+   "reasons": [
+    "failure_case"
+   ]
+  },
+  {
+   "run": "20261115T143219Z-screen-d3a1bb",
+   "design_hash": "8acc654ba61f",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T150043Z-screen-d1ebf6",
+   "design_hash": "7b2cc9728ba1",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T152510Z-screen-a504f6",
+   "design_hash": "6de05052b46b",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T152510Z-screen-a504f6",
+   "design_hash": "700a9b404650",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T152510Z-screen-a504f6",
+   "design_hash": "7371e77db0b6",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "20261115T152510Z-screen-a504f6",
+   "design_hash": "781ec6defad8",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T152510Z-screen-a504f6",
+   "design_hash": "c73a8ae29ccb",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T152510Z-screen-a504f6",
+   "design_hash": "e3afac7f62be",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T152510Z-screen-a504f6",
+   "design_hash": "ed4609f0fd19",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "20261115T154322Z-screen-07bea2",
+   "design_hash": "1f8dfa9311aa",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T154322Z-screen-07bea2",
+   "design_hash": "436a4d221328",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T154322Z-screen-07bea2",
+   "design_hash": "8808626e6ae8",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T154322Z-screen-07bea2",
+   "design_hash": "a5c4e06ee316",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T154322Z-screen-07bea2",
+   "design_hash": "c860cd9d5018",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T161238Z-screen-1b1b6e",
+   "design_hash": "21a09f515914",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T161238Z-screen-1b1b6e",
+   "design_hash": "64fa4343d26f",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T161238Z-screen-1b1b6e",
+   "design_hash": "cd72e3e8b6a5",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T161238Z-screen-1b1b6e",
+   "design_hash": "d554d03502ca",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T162516Z-screen-e31b23",
+   "design_hash": "00cf398548e8",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T162516Z-screen-e31b23",
+   "design_hash": "1f0e3301c2c6",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T162516Z-screen-e31b23",
+   "design_hash": "42eafa0bfe5c",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T162516Z-screen-e31b23",
+   "design_hash": "611654600ff1",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T162516Z-screen-e31b23",
+   "design_hash": "65fe930bc9c8",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T162516Z-screen-e31b23",
+   "design_hash": "bcfed3b1030d",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T162516Z-screen-e31b23",
+   "design_hash": "c4288099f37b",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T163824Z-screen-d4a7c4",
+   "design_hash": "459d947b84f1",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T163824Z-screen-d4a7c4",
+   "design_hash": "a7f3c0f7a899",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T163824Z-screen-d4a7c4",
+   "design_hash": "dd23c8704459",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T164910Z-screen-f94955",
+   "design_hash": "186097de51e9",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T164910Z-screen-f94955",
+   "design_hash": "3297952f6c0b",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T164910Z-screen-f94955",
+   "design_hash": "cd7534a46beb",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T165937Z-screen-4d8a33",
+   "design_hash": "53adad5079b1",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T165937Z-screen-4d8a33",
+   "design_hash": "547d9c55ca83",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T165937Z-screen-4d8a33",
+   "design_hash": "f076900d07e9",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T171150Z-screen-d66ffb",
+   "design_hash": "0c19cd7a49c4",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T171150Z-screen-d66ffb",
+   "design_hash": "af8f23a1947c",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T180109Z-screen-0f2ab5",
+   "design_hash": "501f3de8b915",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T180109Z-screen-0f2ab5",
+   "design_hash": "75a489825a07",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T180109Z-screen-0f2ab5",
+   "design_hash": "76e94be3e95d",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T181250Z-screen-1e22a5",
+   "design_hash": "173b7a7f4abe",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T181250Z-screen-1e22a5",
+   "design_hash": "c8a55485e0ef",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T181250Z-screen-1e22a5",
+   "design_hash": "f282550e4296",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T182340Z-screen-35c541",
+   "design_hash": "3e4afd691a48",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T182340Z-screen-35c541",
+   "design_hash": "9c61c8bb3647",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T182340Z-screen-35c541",
+   "design_hash": "cbb6b2ecd2e7",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T194455Z-screen-bf9fc8",
+   "design_hash": "288738d7979b",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T194455Z-screen-bf9fc8",
+   "design_hash": "52e8757cc07b",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T194455Z-screen-bf9fc8",
+   "design_hash": "6449db987733",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261115T205453Z-screen-32f7c4",
+   "design_hash": "22365b569be9",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261115T205453Z-screen-32f7c4",
+   "design_hash": "a49417cb04c3",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T213849Z-screen-c35ad4",
+   "design_hash": "08e3ea384546",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261115T213849Z-screen-c35ad4",
+   "design_hash": "9e716133433c",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T005943Z-screen-20db0d",
+   "design_hash": "6a604ec61185",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T005943Z-screen-20db0d",
+   "design_hash": "a4614c3dfdc4",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261116T015510Z-screen-e75ec8",
+   "design_hash": "96a615849e2d",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261116T015510Z-screen-e75ec8",
+   "design_hash": "a5ecfa6e5675",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T020629Z-screen-0d29d7",
+   "design_hash": "eb9cd62fbc3f",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261116T022328Z-screen-87354c",
+   "design_hash": "639c677f7cc6",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T022328Z-screen-87354c",
+   "design_hash": "bdfccef158d3",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261116T025728Z-screen-cd60f7",
+   "design_hash": "5930f7e17637",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T025728Z-screen-cd60f7",
+   "design_hash": "6d4fd553a8b8",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T025728Z-screen-cd60f7",
+   "design_hash": "7932b9d0c765",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T025728Z-screen-cd60f7",
+   "design_hash": "9fcd21fc1904",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261116T030920Z-screen-5d1082",
+   "design_hash": "04b8fed66556",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T030920Z-screen-5d1082",
+   "design_hash": "0618014fb001",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T030920Z-screen-5d1082",
+   "design_hash": "35c94e7b0af2",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T030920Z-screen-5d1082",
+   "design_hash": "5c8864decc06",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261116T030920Z-screen-5d1082",
+   "design_hash": "7de69ffa75e8",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261116T041232Z-screen-b5380a",
+   "design_hash": "6cd9096e1a5f",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261116T041232Z-screen-b5380a",
+   "design_hash": "74fce79acc31",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "20261116T041232Z-screen-b5380a",
+   "design_hash": "acaed285be19",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T041232Z-screen-b5380a",
+   "design_hash": "ae7bcb1f46ab",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261116T044917Z-screen-12eb61",
+   "design_hash": "2bc8f237a4ca",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T044917Z-screen-12eb61",
+   "design_hash": "77496adc957c",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261116T044917Z-screen-12eb61",
+   "design_hash": "c221249bb82d",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T052759Z-screen-44001e",
+   "design_hash": "e5f8413a683f",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T054705Z-screen-570bc6",
+   "design_hash": "f32d2d36187c",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T061215Z-screen-058f0d",
+   "design_hash": "d84afd0f2ff2",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T065413Z-screen-a70423",
+   "design_hash": "61a1dd84b72f",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T065413Z-screen-a70423",
+   "design_hash": "70f66f28b9c3",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T071520Z-screen-1c8608",
+   "design_hash": "735a6b45b69f",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T074832Z-screen-620f81",
+   "design_hash": "77308ed8afa3",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261116T074832Z-screen-620f81",
+   "design_hash": "ae0b662536f0",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T090751Z-screen-37b115",
+   "design_hash": "6ab3e3f0cafa",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T090751Z-screen-37b115",
+   "design_hash": "7e8101ac2ca5",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T090751Z-screen-37b115",
+   "design_hash": "9b05b8756526",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261116T090751Z-screen-37b115",
+   "design_hash": "e54ff2ed1a16",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T090751Z-screen-37b115",
+   "design_hash": "e7c336c23a29",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261116T090751Z-screen-37b115",
+   "design_hash": "ef5c513052bd",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T093400Z-screen-56681d",
+   "design_hash": "8f75c699288c",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T093400Z-screen-56681d",
+   "design_hash": "a780916325f9",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T131710Z-screen-f1a263",
+   "design_hash": "30c8c4f07d1f",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T131710Z-screen-f1a263",
+   "design_hash": "77f2ebdf10cb",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T131710Z-screen-f1a263",
+   "design_hash": "b6f78fd47543",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T150941Z-screen-0e777a",
+   "design_hash": "19c315e26299",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T150941Z-screen-0e777a",
+   "design_hash": "591637a35a68",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T150941Z-screen-0e777a",
+   "design_hash": "7f5f3382008f",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T150941Z-screen-0e777a",
+   "design_hash": "a301d2543a96",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261116T150941Z-screen-0e777a",
+   "design_hash": "f9c3485c78b9",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261116T152544Z-screen-5f7d93",
+   "design_hash": "a1babe3fdb6e",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261116T152544Z-screen-5f7d93",
+   "design_hash": "c83f1fec97c3",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T153619Z-screen-c221aa",
+   "design_hash": "f9c9eb2465cc",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261116T173311Z-screen-96f899",
+   "design_hash": "cf5575f6a146",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261117T001240Z-screen-7b664f",
+   "design_hash": "85c59331e4a3",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261117T003115Z-screen-4f7cd5",
+   "design_hash": "29820d4fea6d",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261117T003115Z-screen-4f7cd5",
+   "design_hash": "6afa0f8d189a",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261117T003115Z-screen-4f7cd5",
+   "design_hash": "b7ee9eea74da",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261117T003115Z-screen-4f7cd5",
+   "design_hash": "d9cf25ddfa4d",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "20261118T132956Z-screen-f11273",
+   "design_hash": "80f6cde26c54",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261118T133053Z-screen-28c74d",
+   "design_hash": "3670cf9479af",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261118T133153Z-screen-ca402c",
+   "design_hash": "564bb167f994",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261118T133254Z-screen-704484",
+   "design_hash": "c39d3682995e",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261118T133352Z-screen-c5f07c",
+   "design_hash": "51e1807ceca8",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261118T133445Z-screen-b16baf",
+   "design_hash": "17b234d6ff98",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261118T133540Z-screen-fe2089",
+   "design_hash": "ad427e08a387",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261118T150239Z-screen-84d663",
+   "design_hash": "c39d3682995e",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261118T150417Z-screen-d59c05",
+   "design_hash": "3670cf9479af",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261118T150846Z-screen-9a04c5",
+   "design_hash": "5e5c47bd6964",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "20261118T150846Z-screen-9a04c5",
+   "design_hash": "62fbd53306eb",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "20261118T150846Z-screen-9a04c5",
+   "design_hash": "eadee2343aff",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "00826f071b24",
+   "reasons": [
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "144521c5f679",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "211cd23358eb",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "297c91c1e49e",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "2a79dffca393",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "2bbbec4e3904",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "3953966d044e",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "41b378f0114f",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "43b30700b429",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "4465749afdb5",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "50be7adf8fc2",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "5c3583a22bc7",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "627c7695afc3",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "685bba46f764",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "6a8f1036394b",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "7c03865d0345",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "7ec2fce2716b",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "82d41d38dd96",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "872c5e5633a4",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "94c1fe3cb583",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "966c4b51d8e8",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "99a5f6a98fe2",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "a23763f1c6fc",
+   "reasons": [
+    "lane_best_v7",
+    "lane_best_v10"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "ab678ba96762",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "ac913db2ea06",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "b0ab4ea262cc",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "b58dc0fb8152",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "b8686fec6f95",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "ba2048252efd",
+   "reasons": [
+    "lane_best_v7"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "c103abc5b9e5",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "cf76145a2dad",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "d6a8dee5cd79",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "f01a2a1d0719",
+   "reasons": [
+    "stratified_random"
+   ]
+  },
+  {
+   "run": "screen",
+   "design_hash": "fa3820cab5ee",
+   "reasons": [
+    "worst_j_tail"
+   ]
+  }
+ ]
+}

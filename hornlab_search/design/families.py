@@ -208,8 +208,21 @@ def azlaw_values(params: dict, p_rad: float) -> dict:
     return {"a_deg": a, "n": n, "s": s}
 
 
+# Shared near-throat H/V block (owner 2026-11-18; hornlab_search/design/throat_hv.py). These keys
+# never reach the mesher as keys: throat_hv_ratio becomes a per-azimuth k(p) expression (OS-SE
+# parent: Batik 2020 s5) and hv_onset_frac / section_exp_ramp become morph_fixed / morph_rate
+# (the published Ath morph). Absent = byte-identical mesher config.
+_THROAT_HV = {
+    "throat_hv_ratio": _f(0.25, 4.0, "H/V throat expansion ratio (1 = round); k(p) = k*rho**(-cos2p/2)",
+                          section="throat_hv"),
+    "hv_onset_frac": _f(0.0, 0.9, "where the section morph starts (alias of morph_fixed)",
+                        section="throat_hv"),
+    "section_exp_ramp": _f(0.5, 8.0, "section morph ramp exponent (alias of morph_rate)",
+                           section="throat_hv"),
+}
+
 _OSSE = {
-    **_THROAT, **_CROSS, **_COMMON, **_MORPH, **_GCURVE, **_AZLAW,
+    **_THROAT, **_CROSS, **_COMMON, **_MORPH, **_GCURVE, **_AZLAW, **_THROAT_HV,
     "L_mm": _f(note="axial length, mm (OSSE only)"),
     "n": _f(note="termination n (> 0 while s != 0)"),
     "s": _f(note="termination s"),
@@ -616,12 +629,41 @@ def validate(design: Design) -> None:
         raise _bad(fam, key, f"not a legal {fam} key (legal: {sorted(table)})")
     for key, v in design.params.items():
         _check_value(fam, key, table[key], v)
+    if fam == "OSSE":
+        _validate_throat_hv(design)
     if fam in ("OSSE", "R-OSSE"):
         _validate_osse_like(design)
     elif fam == "ICW":
         _validate_icw(design)
     elif fam == "FREEFORM":
         _validate_freeform(design)
+
+
+def _validate_throat_hv(design: Design) -> None:
+    """Shared H/V block on native OSSE: one onset knob, never an inactive one."""
+    p = design.params
+    if "throat_hv_ratio" in p and not isinstance(p.get("k", 1.0), (int, float)):
+        raise _bad("OSSE", "throat_hv_ratio", "needs a plain numeric k (it builds the k(p) expression)")
+    for alias, native in (("hv_onset_frac", "morph_fixed"), ("section_exp_ramp", "morph_rate")):
+        if alias in p and native in p:
+            raise _bad("OSSE", alias, f"is an alias of {native}; give one, not both")
+        if alias in p and not int(p.get("morph_target", 0) or 0):
+            raise _bad("OSSE", alias, "has no effect without morph_target (inactive knob)")
+
+
+def throat_hv_mesher_terms(params: dict) -> tuple[dict, dict]:
+    """(profile expressions, morph values) from the shared block; ({}, {}) when absent."""
+    from .throat_hv import mesher_k_expression
+    prof: dict = {}
+    morph: dict = {}
+    rho = params.get("throat_hv_ratio")
+    if rho is not None and float(rho) != 1.0:
+        prof["k"] = mesher_k_expression(float(params.get("k", 1.0)), float(rho))
+    if params.get("hv_onset_frac") is not None:
+        morph["morph_fixed"] = float(params["hv_onset_frac"])
+    if params.get("section_exp_ramp") is not None:
+        morph["morph_rate"] = float(params["section_exp_ramp"])
+    return prof, morph
 
 
 # ------------------------------------------------------------------ enclosure (WP12)
@@ -699,9 +741,13 @@ def to_mesher_config(design: Design, mesh: MeshSpec, res_mm: dict, out_path: Pat
     sections: dict[str, dict] = {"profile": {}, "cross_section": {}, "mesh": {}, "morph": {},
                                  "gcurve": {}}
     exprs = azlaw_expressions(design.params) if design.family == "OSSE" else {}
+    hv_morph: dict = {}
+    if design.family == "OSSE":
+        hv_prof, hv_morph = throat_hv_mesher_terms(design.params)
+        exprs.update(hv_prof)
     for key, value in design.params.items():
         sec = table[key].section
-        if sec == "azlaw":                  # folded into the a / n / s expressions below
+        if sec in ("azlaw", "throat_hv"):   # folded into expressions / morph values below
             continue
         value = copy.deepcopy(exprs.get(key, value))
         if sec == "top":
@@ -718,6 +764,8 @@ def to_mesher_config(design: Design, mesh: MeshSpec, res_mm: dict, out_path: Pat
     for key, expr in exprs.items():
         if key not in design.params:        # the mesher's own default is then the base value
             sections["profile"][key] = expr
+    if hv_morph:
+        sections["morph"].update(hv_morph)
     sections["mesh"].update({
         "quadrants": mesh.quadrants,
         "throat_res_mm": res_mm["throat"],

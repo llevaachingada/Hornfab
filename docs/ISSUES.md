@@ -1,4 +1,192 @@
-# ISSUES
+﻿# ISSUES
+
+## 2026-11-18 - rescore reuse published + floors; WP 0.9/D9 merged; v7 floor discrepancy open
+
+- CLOSED (WP 1.4/1.5, owner-directed reuse pass): full-fleet v7/v9/v10 columns reused untouched;
+  shipped-vs-offline v10 agreement exact on the sample (max |ΔJ| = 0.0, n=122); slope5 published as
+  a 166-design diagnostic sample; mixed_identity fixed and false on all columns. Results:
+  `docs/evidence/v10_rescore_2026-11-18/results/` (README = the reading pass).
+- OPEN (senior): v7 frequency floor 0.310 J (this pass, top-28 pairs) vs published 0.13 J (D8) —
+  protocol reconciliation before tie calls; see NOTES item 3. v10 0.468 / slope5 0.486 stand.
+- CLOSED (WP 0.9/D9, R12/R12b): surfaceFit echo + fallback flag in mesh_meta; record_digest block
+  in recipe_meta (gates rebuilds via the canonical_record_v2 rule; kernel digests informational);
+  build_box_m rows; classify_recipes.py tool; tests offline. Legacy classification over the REAL
+  runs/ tree not yet executed — run `tools/analysis/classify_recipes.py --runs-root runs --out
+  <new dir>` when the owner wants the counts (read-only, minutes).
+- OPEN (STEP 3 gates): B1 probe results (night), then batch 2 / WP 4.2 / BO _r2; B6 waits only on
+  the owner's budget decision — its lanes and floors are ready (README above).
+- Carry-over opens unchanged: rho20 authority contradicts §10.2's inferred row (senior); range15
+  briefs orphaned by R22 discard (owner/range lane); anchor fallback (R4) research dossier;
+  WP 2.3 combined floor waits on B1.
+
+## 2026-11-18 - integration closes STEP 1; 2b/2d/2e/2f evidence committed; B1 batch 1 queued
+
+- CLOSED (D10/R21): PR #69 merged (`382c682`), PR #67 merged (`63c23a8`); CLAUDE.md R21 row added;
+  R22 resolved (v9 edit discarded, range test deleted, AGENTS/.opencode doc-sync committed, c200w
+  yaml kept on a PASSing shape_check). hornfab-all→main PR and #68 close-out: next push.
+- CLOSED (R22 consequence, NEW — owner/range lane): 4 queued `home_range15_*` jobs in the live night
+  use `briefs/home_range_v9_h12.yaml` whose objective block carries `oa_excess_tol`/`ripple_window`;
+  those keys existed only in the discarded uncommitted v9 math and are refused by the merged loader
+  — the jobs will exit at start with a ConfigError unless re-homed (v10 `ripple_region:
+  preferred_edge`) or the brief is re-pinned. No row rewritten; decision open.
+- OPEN (senior, 2b finding): rho20 (A_r20 vs v8) per-band authority TRUE (3.12° H, 2500-5500) in
+  `docs/evidence/throat_hv_2026-11-18/authority_A_vs_v8.json` — §10.2's "no [inferred]" row and the
+  "rho inert" park are contradicted at the threshold; see NOTES_FOR_SENIOR. Phase 3 vs B_o50: no
+  authority (verified).
+- CLOSED (R4, D6 anchor): ST260 source check done; config corrected to the device (a0 9.45°, k 2.13,
+  m 0.86, q 5.05; STL refit 0.08 mm RMS); NO admissible measured build → R4 fallback recorded,
+  ST260 unsolved, 2 anchor solves unspent. A fallback (ATH CORE/Tritonia) research dossier is a NEW
+  open item (typology-research protocol) before any fallback GPU.
+- OPEN (STEP 3, gated): B1 batch 2 (ext_throat probes) waits on batch 1 probe 1 Shared Usage;
+  WP 4.2/4.3 + BO `_r2` queue after that per R6; B6 waits on v10 floors (rescore running).
+- OPEN (WP 0.7): night cause lines are queued for the review append (fixer lane running; fix
+  candidates listed in NOTES - no code changed yet).
+
+## 2026-11-18 - owner-box integration: digest pin was env-dependent (fixed pre-merge); R22 resolved
+
+- FIXED (R7 / WP 0.9, pre-merge): `tests/test_klangfilm_hv_digest_pin.py` pinned absolute
+  `implementation_digest()` values that fold numpy/scipy versions; rewritten to pin frozen file
+  content + digest recipe. Stored local recipes verified unlocked (`1304dea3…`/`a032f660…`).
+- CLOSED (R22): uncommitted `scalar_v9.py` v9-math edit discarded (patch archived outside repo);
+  `tests/test_v9_polar_window.py` deleted (tested only the discarded API); AGENTS.md/.opencode
+  doc/config-only sync kept; c200w yaml kept pending shape_check.
+
+## 2026-11-18 - owner questions: all RESOLVED (R1-R25); remaining work is execution
+
+- CLOSED (decided, see OWNER_DECISIONS_RESOLVED_2026-11-18.md): C1-C6, ripple region and rip
+  tol/weight, constancy, frequency grid, D6 anchor, B1/B1f, U3 host, throat park, b06a938,
+  protected list + refusal storms, provenance rule, envelope convention, Crowe-X g_L_mm, Le Cleach
+  wording, BO re-queue policy, space proposals, categorical split, record_gate, PR plan / integrator,
+  uncommitted scalar_v9 edits, agent bench, b3_soft trim, throat-block landing.
+- OPEN (local agent, execution only): LOCAL_AGENT_PROMPT_2026-11-18.md STEPS 1-4; the CLAUDE.md
+  ownership row (STEP 1.5); WP 0.9/D9 implementation (STEP 4f).
+- Scheduled measurements (not questions): v10/v10_slope5 floors, B1, ST260 anchor, WP 4.2/4.3.
+
+## 2026-11-18 - night cd_rrect_2026-11-17: failure causes not yet read
+
+- OPEN (local agent): read cause lines for t_klame_turbo100, t_klame_scalar100, t_ath14_turbo100,
+  t_hvlaw_turbo100/_scalar100 (row count N), t_trit80_rc2, cont_p80_athcore_corelaw_200,
+  cont_biradial_smooth_200, c_rrect_100w_rc2 (review §8 command); append to the review.
+- OPEN (WP 0.7 proposal): `ok_no_result` status when a job exits 0 with no rows (t_trit80_rc2).
+- OPEN (owner): BO re-queues after the causes; t_hvlaw needs a CMA cohort first.
+
+## 2026-11-18 - integration plan awaits the owner (D10)
+
+- OPEN (owner): approve the PR plan in `HANDOFF_2026-11-18.md` / `HANDBACK_CLOUD_2026-11-18.md` §5.
+- OPEN (local agent): work list A-H in `HANDBACK_CLOUD_2026-11-18.md` §6, starting with the full
+  local suite on `cloud/fable-next-2026-11-18`.
+
+## 2026-11-18 - throat block on A: park decision (owner)
+
+- OPEN (owner): accept "park on A, inert in this envelope" (G5). An A-family morph-target `_v2`
+  is the only legal way to make onset live there; it is a new construction, not recommended.
+- OPEN (local agent, CPU): read the throat runs' rows in the v10 rescore column when it runs.
+
+## 2026-11-18 - plan status §10.2 published; A-vs-v8 per-band authority unconfirmed
+
+- OPEN (local agent, CPU): run the `u3_authority.py` command in plan §10.2 to confirm the A-vs-v8
+  rows per band (cloud had only whole-band means for v8). Expected: no authority.
+- NOTE: "A_r15 beats v8 by 0.0192" is a TIE under the 0.13 floor; do not cite it as a win.
+
+## 2026-11-18 - D6 step 1 anchor (ST260): local source check before any solve
+
+- OPEN (local agent): re-read R-OSSE rev7 + ST260 page, fix config values if they differ, choose
+  an admissible measured build (mounting modelable, distance/gating stated, polar step <= 10 deg),
+  save it under docs/evidence/anchor_st260_<date>/measured/, run shape_check + the mouth/throat
+  property checks.
+- OPEN (owner): accept ST260 + the predeclared pass rule; approve 1-2 solves afterwards.
+
+## 2026-11-18 - B1 GPU approval packet ready (WP 2.2 / D7)
+
+- OPEN (owner): approve batch 1 (5 fold-warm x2 probes), optional batch 2 (3 ext_throat_v7 x2
+  probes), optional B1f; all after the BO arms. Packet:
+  `docs/evidence/b1_readiness_2026-11-18/README.md`.
+- OPEN (B1 evidence author): say explicitly that the floor does not cover 3a1038 / 9fcd21 (and
+  likely the A_r15 throat design): infeasible at x2 on this card.
+- CLOSED: `kind: search` with every bound pinned now refused at search(), CLI and night dry-run.
+
+## 2026-11-18 - v10 rescore not yet run (WP 1.4 / 1.5)
+
+- OPEN (local agent): run the commands in `docs/evidence/v10_rescore_2026-11-18/README.md`
+  (three rescores, compare, two floors), check v7 parity and `mixed_identity: false`, commit the
+  summaries. CPU only.
+- OPEN (owner): v10 rip tolerance/weight are the v9 values in the offline brief; changing them is
+  a new identity. Constancy stays undeclared until its floor is measured.
+- CLOSED: replay refused v10 (gate fixed, tested).
+
+## 2026-11-18 - throat sweep Phases 1-3 complete; two BO arms skipped, resume needs fresh --root
+
+- DONE: Phases 1-3 on cd_rrect_2026-11-17 (A_r15 beats v8 by 0.0192 on the matched v7 identity;
+  Phase 3 best J 5.60780, rho 1.371 / onset 0.320 / ramp 2.160). Evidence:
+  docs/evidence/throat_hv_2026-11-18/.
+- OPEN (queue owner): resume the two killed BO arms with a FRESH --root
+  (runs/night31_2026-11-17/t_ath14_scalar100 had 78 observations; t_corelaw_turbo100) - their
+  package.json files now exist, so the stock resume refuses.
+- OPEN (integrator): single-design night jobs must be kind: command + \hornlab-search run\;
+  kind: search + fully pinned bounds crashes pycma (three part2 handoff job lines affected).
+- NOTE (owner): decision on uncommitted scalar_v9.py / AGENTS.md / .opencode edits still open.
+
+## 2026-11-18 - v10 BO metric policy: wiring waits on the owner
+
+- OPEN (owner): PR-D is usable only after PR-A's ripple-region policy is chosen. No study or
+  Pareto run consumes the v10 policy yet. Keep qLogNEI / qLogNEHVI; no multi-output GP without a
+  held-out ablation.
+
+## 2026-11-18 - v10 ripple region: owner policy needed before any brief uses it
+
+- OPEN (owner): pick the ripple inspection region: preferred_edge / min_edge / seat_zone_deg
+  (per-plane totals) / other. Evidence E1-E4 (`evidence_scoring_2026-11-18/`) informs it.
+- OPEN: BO metric policy for v10 is a separate patch (PR-D). `tools/analysis/brief_truth_replay.py`
+  stays v9-only for now.
+- NOTE: v9 target mode inspects +/-preferred (2x the -6 dB edge); v9 numbers stay PROVISIONAL.
+
+## 2026-11-18 - Agent benchmark: first A/B run not done
+
+- OPEN: run the baseline vs treatment arms (with and without the contracts) and save the answers.
+  Adoption gate: the treatment beats the baseline, with no regression on cases 15 and 16.
+
+## 2026-11-18 - Klangfilm H/V comment patch changes family digests (owner gate)
+
+- OPEN (owner): land the comments-only fix only if no queued job or saved recipe depends on the
+  current klangfilm_lame_hv / hv_core implementation digest. Otherwise defer it.
+- OPEN: add a frozen-vs-tools parity test for both H/V kernels (contract check 5).
+
+## 2026-11-18 - Throat H/V follow-ons: local checks
+
+- OPEN (local): shape_check of a rolled seed with rho 0.8 and 1.25, and of iwata_ar onset 0.5,
+  before any GPU work. Run the full suite against the pre-patch head.
+- CLOSED: the OS-SE "throat pinch" (18 -> 14.2 mm) is the domed source cap (physical tag 2), not
+  the acoustic wall (carrier `analysis_2026-11-18/W7_THROAT_PINCH_VERDICT.md`).
+
+## 2026-11-18 - Shared throat H/V block: local verification before any GPU
+
+- OPEN (owner, local): confirm the pinned `hornlab_mesher` evaluates a p-expression for `k`
+  (shape_check on config A with rho != 1). Run the osse_rollback geometry tests that are skipped
+  without the mesher. Run shape_check plus search_preflight on both configs.
+- OPEN (owner, GPU budget): onset sweep on the 80x50 brief (onset at 0/0.25/0.5/0.75), then a
+  matched screen of config A vs v8.
+- OPEN (design): a rolled-family per-plane throat growth parameter so rho can map there.
+  `lecleach_iwata_ar` adoption. R-OSSE parent status for per-azimuth k is unknown.
+- NOTE: the rolled-family implementation digest changed (file edited).
+
+## 2026-11-18 - Near-throat H/V control for asymmetric briefs (proposal)
+
+- OPEN (owner): approve the shared throat H/V block (CPU code patch plus tests), and approve the BEM
+  onset sweep (90x40, onset at 0/25/50/75 % depth) as a separate GPU budget.
+- OPEN (research): no measured H/V-onset data found in the literature. The R-OSSE azimuthal
+  status is unknown. The Keele and Mantaray claims rest on summaries (scanned or 403 sources).
+
+## 2026-11-18 - WP-K0/K1 draft contracts delivered; senior review and owner checks open
+
+- DONE (docs only): four draft construction contracts in `docs/knowledge/contracts/`, CLAUDE.md
+  routing reconciled with AGENTS.md, Keele scope fix in `hornlab-shape-check`, and the agent
+  benchmark spec.
+- OPEN (senior reviewer): review the four contracts. Decide whether the "published ellipsoidal
+  construction" label on Le Cléac'h H/V should become "reconstruction".
+- OPEN (owner/integrator): Crowe-X `g_L_mm` bound (header 320 vs file 285, plus a diverged copy in
+  `docs/queue/rolled_readiness_2026-11-15/configs/`). Klangfilm kernel SHA docstrings are stale and
+  the b1-b3 SEEDS mouth comments are stale. Run the zero-control tests (Klangfilm, Le Cléac'h H=V,
+  rolled zero-amplitude) in the pinned env.
 
 ## 2026-11-18 (local orchestrator) - Night truth + data-agreement gate landed; bridge-type _w1 lanes fail the stock analysis path; B1 encoding owner-decided
 
@@ -51,6 +239,11 @@
   decisions, the throat sweep (v7) and B1/B1f are unaffected. Parallel read-only evidence
   E1-E4 (corridor-mask tests, offline rerank, lobe diagnostics, ablation matrix) assigned to
   the throat agent's isolated clone, delivered to the carrier `evidence_scoring_2026-11-18/`.
+  **ANSWERED 2026-11-18: `preferred_edge`; fix = objective v10, draft PR #68 (`feat/objective-v10`
+  @ `2ecfdd5`, stacked on `ccr-260b4b76-fi6b8j`, retarget to `main` after PR #67; verification
+  4790 passed / 40 skipped / 4 known failures, none new). v9 corridor scores stay PROVISIONAL
+  for decisions until v10 lands canonically. Open gates: `0007` (Klangfilm H/V digests), v10
+  rip tolerance/weight, the throat-block landing target, the GPU onset sweep, and B1 GPU slots.**
 - OPEN (senior/owner): B1 encoding is decided (mesh convergence, not the `verify,finalist`
   frequency pair - that encoding is B1f); CPU dry-run + feasibility table in progress in
   `scratch/fable_architecture/.b1/`; GPU slots queue after the BO arms once the owner approves

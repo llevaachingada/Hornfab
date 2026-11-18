@@ -461,3 +461,10 @@ never modify `.venv`; never `taskkill /IM julia.exe`; one CUDA solve at a time m
     metric policy (`freeze_metric_policy` accepts v4/v7 only) and the qLogNEI/qLogNEHVI pilot
     come later, gated on E1-E4 + the policy answer. Respect the negative E1 surrogate result:
     no multi-output GP without held-out ablation.
+    **UPDATE 2026-11-18: the policy is ANSWERED — `preferred_edge`** — implemented as objective
+    v10, draft PR #68 (`feat/objective-v10` @ `2ecfdd5`, verified stacked on this branch;
+    retarget to `main` after PR #67; 4790 passed / 40 skipped / 4 known failures, none new).
+    v9 corridor scores stay PROVISIONAL in this branch until v10 lands canonically. Still
+    owner-gated: landing `0007` (Klangfilm H/V digests), v10 rip tolerance/weight, the
+    throat-block landing target (`feat/throat-hv-block` recommended), the GPU onset sweep
+    (after the BO arms and B1), and B1 GPU slots.

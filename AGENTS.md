@@ -261,10 +261,12 @@ $env:NUMEXPR_NUM_THREADS="1"; $env:VECLIB_MAXIMUM_THREADS="1"
 
 ## Agent routing (opencode, this repo)
 
-All agents use the shared **`deepseek-flash-max`** preset defined in
-`~/.config/opencode/oh-my-opencode-slim.json`. `Hrns` and `hornlab-search` are one project; do not
-add a separate preset here. This repo's `.opencode/oh-my-opencode-slim.json` only selects that preset
-and grants the HornLab skills to `fixer` and `designer`; it defines no presets of its own.
+All agents use the shared **`opencode-go-max`** preset defined in this repo's
+`.opencode/oh-my-opencode-slim.json` (and mirrored at `Hrns/.opencode/oh-my-opencode-slim.json`).
+`Hrns` and `hornlab-search` are one project; keep the two preset blocks identical. This repo's
+config selects that preset and grants the HornLab skills to `fixer` and `designer`; it defines no
+other presets. Background-job concurrency and fallback live at the top level of both files and must
+stay in sync.
 
 - **Background agents**: up to 3 concurrent on deepseek and 6 on ollama-cloud.
 - Even with 6 background agents, the same rule binds: **one GPU solve at a time.**

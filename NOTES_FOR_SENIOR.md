@@ -1125,3 +1125,49 @@ if so, `space_propose`'s rewrite of `brief_file` to a repo-relative path is what
 neither, the run's `run.json` brief must be compared directly and the tool message corrected.
 No code changed for this; recorded rather than improvised (rule 10).
 
+
+### 2026-11-18 - feat/woofer-system-v0 single-worktree exception (horn + vented-woofer system project)
+The 2026-11-18 master handoff (HornFab + Boundary Lab modular horn-woofer systems, owner-issued) explicitly
+authorizes ONE task worktree for this project: C:/Users/hunte/Hrns/hornlab-woofer-system-wt, branch
+feat/woofer-system-v0, base 1e9f71b (71 commits past the handoff's verified remote 1d6ebc8). This records the
+owner-requested exception to the 2026-11-12 consolidated-checkout amendment: for THIS project, work happens in
+that single worktree; the canonical checkout is not written by its lanes (parent integrator keeps git control;
+GPU lane status was checked live and is busy - job c_rrect_100w_rc3 on night cd_rrect_2026-11-17 - so the
+project stays CPU-only until a Stage 4 senior gate). No per-worker worktrees are created; the four Stage 1
+lanes share one worktree with disjoint file ownership. Stage 0 committed at 928488f (additive
+hornlab_search/system contracts+provenance; SYS-01 bassbox z_in=e/i red-to-green fix in tools/bassbox.py +
+tests/test_bassbox.py). Saved-horn inventory fact (lane A audit, canonical runs/, read-only): 3047 assets in
+the newest 60 run dirs; 3003 carry complex p_h/p_v/p_balloon as stored but in exp(-i omega t) unit-normal-
+acceleration drive, so 0 assets qualify as EXACT_COMPLEX under the system contracts as stored; the sanctioned
+conversion path is compare/hornfab_side.accel_to_canonical at an import boundary with SCREEN_COMPLEX_APPROX
+labeling only - no phase imputation. Project evidence docs: docs/research/system_woofer_2026-11-18/ (in the
+worktree).
+
+
+### 2026-11-18 - Fable integration findings (local orchestrator; STEPS 2b/2c of LOCAL_AGENT_PROMPT_2026-11-18.md)
+
+1. **rho20 per-band authority contradicts the §10.2 "inferred" row.** `u3_authority.py`
+   per-band run (`docs/evidence/throat_hv_2026-11-18/authority_A_vs_v8.json`, CSVs beside it):
+   rho15 (A_r15 vs v8) authority **false**, max band move 1.84° H — consistent with §10.2. But
+   rho20 (A_r20 vs v8) authority **true**: 3.12° H in 2500-5500 Hz, V 0.56° (< half), i.e. the
+   whole-band means (H +0.95°) masked a just-over-threshold single-band move. §10.2's
+   "A: v8 → A_r20 = no [inferred]" and the broader "rho inert in this envelope" reading are
+   contradicted at the threshold. G5/R9 was NOT re-decided; the two §10.2 rows are left pending
+   senior review instead of being written as "verified no authority". Phase 3 winner vs B_o50
+   (`authority_B_p3_vs_o50.json`): authority **false** — that "not judged" row is now just a
+   verified no-authority/tie row (ΔJ 0.0896 < 0.13). Decide whether marginal single-band rho20
+   authority changes the park, or the 3° U3 threshold needs a "borderline" band.
+2. **Night job logs are UTF-8, not UTF-16.** `tools/run_campaign_night.py` opens job logs with
+   `encoding="utf-8"`; the handback §9 / review §8 recipe (`-Encoding Unicode`) yields mojibake
+   and zero matches. Working decode: `Get-Content -Encoding UTF8`. All 9 §8 ids decoded with it;
+   causes appended to the review (fix candidates listed there — no code changed yet).
+
+3. **v7 frequency floor discrepancy (needs a protocol reconciliation before any tie call).** The
+   rescore tool's new `floor` subcommand (top-28 screen↔verify same-mesh pairs over the home-brief
+   runs, 257 pairs) measures the v7 frequency floor at **0.310 J**
+   (`docs/evidence/v10_rescore_2026-11-18/results/floor_v7_summary.json`), while the PUBLISHED v7
+   floor (D8) is **0.13 J** — a factor ~2.4. Same command shape gives v10 0.468 J and v10_slope5
+   0.486 J (257 pairs each). Until reconciled, ties keep using the published 0.13 (README
+   acceptance #3 wording preserved), but every "A beats B by < floor" call on the critical path
+   should cite WHICH floor it used. Possible causes: different top-N, different pairing, stored-vs-
+   replayed metric differences; not resolved here (owner directive: no scope creep).

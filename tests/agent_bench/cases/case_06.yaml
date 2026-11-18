@@ -1,0 +1,36 @@
+id: 6
+title: Base v7 vs smooth v7 — raw J comparison invalid
+prompt: >
+  A design scored J=16.9 under room_landscape_80x50_700_hf1440_v7.yaml (the base brief)
+  is being compared directly against a design scored J=8.9 under
+  room_landscape_80x50_700_hf1440_v7_smooth.yaml (the smooth variant). Someone concludes
+  the second design is acoustically better because its J is lower. Is this comparison
+  valid? What does the documented evidence say about comparing J values across these
+  two briefs, and what is the correct approach?
+allowed_read_paths:
+  - examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+  - examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+  - docs/evidence/CROWE_KLANGFILM_BRIEF_RESCORE_2026-11-17.md
+  - docs/evidence/NON_CD_SCORE_TRUTH_TABLE_2026-11-16.md
+answer_key:
+  verdict: >
+    The comparison is invalid. J values are not comparable across the base and smooth v7
+    briefs because the objectives differ (di_slope_target, cov_narrow_ratio, di weight).
+    A matched rescore under the same brief is required.
+  must_include:
+    - "not.*comparable|invalid|cannot.*compar"
+    - "di_slope_target|smooth.*brief|objective.*differ"
+    - "rescore|same.*brief"
+  must_not_include:
+    - "valid.*comparison"
+    - "acoustically.*better.*lower.*j"
+  must_cite_any:
+    - examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+    - examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+    - docs/evidence/CROWE_KLANGFILM_BRIEF_RESCORE_2026-11-17.md
+  defer_ok: true
+  key_source: repo
+  evidence:
+    - "docs/evidence/CROWE_KLANGFILM_BRIEF_RESCORE_2026-11-17.md"
+    - "examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml"
+  negative_control: null

@@ -1,0 +1,33 @@
+id: 5
+title: v9-named config resolves to v7 objective via brief_file
+prompt: >
+  A config file named hl__ath_tritonia_landscape_v9.yaml is being reviewed. Someone
+  claims it uses objective v9 scoring because the filename says "v9." What is the
+  actual objective version that will be used when this config is run, and why does
+  the filename not determine the objective? Name the specific brief file the config
+  references and the objective version that brief declares.
+allowed_read_paths:
+  - examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v9.yaml
+  - examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+answer_key:
+  verdict: >
+    The effective objective is v7, not v9. The filename does not determine the objective;
+    the brief_file field resolves to room_landscape_80x50_700_hf1440_v7.yaml which
+    declares objective version 7.
+  must_include:
+    - "v7|version.*7|objective.*7"
+    - "brief_file"
+    - "room_landscape_80x50_700_hf1440_v7"
+    - "filename.*not|name.*not"
+  must_not_include:
+    - "objective.*v9|version.*9.*effective"
+    - "filename.*determines"
+  must_cite_any:
+    - examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v9.yaml
+    - examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v9.yaml:109"
+    - "examples/briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml"
+  negative_control: best_under_v7_not_v9

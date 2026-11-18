@@ -480,6 +480,36 @@ class _RestartSchedule:
             self.large_budget.append(int(evaluations))
 
 
+def zero_free_dimensions_message(name: str, config_path=None) -> str:
+    """Refusal text for a search whose CMA vector would be empty (Fable WP 2.2 / D7 truth fix).
+
+    Found 2026-11-18 (throat sweep part3): a ``kind: search`` night job with every bound
+    ``search: false`` reached pycma with ``x0=[]`` and died ``TypeError: ufunc 'isinf' not
+    supported``. A single design is evaluated with ``run``, never with ``search``."""
+    cfg_txt = str(config_path) if config_path else "<config.yaml>"
+    return (f"search REFUSED: config {name!r} has zero free dimensions (no bound has "
+            "search: true once search.links are removed, so CMA-ES would start from x0=[] and "
+            "pycma crashes). To evaluate this one design run: "
+            f"hornlab-search run --config {cfg_txt} --mode screen   (or --mode finalist for the "
+            "wide tier). In a night queue use kind: command with that argv, not kind: search.")
+
+
+def free_search_keys(cfg) -> list[str]:
+    """The CMA-ES vector keys for ``cfg``: searched bounds minus ``search.links`` (no meshing)."""
+    space = DesignSpace.from_config(cfg)
+    space, _linked = links_mod.reduce_space(space, cfg)
+    return list(space.keys())
+
+
+def require_free_dimensions(cfg, config_path=None) -> list[str]:
+    """Raise ``ConfigError`` when a search would start pycma with ``x0=[]``; else return keys."""
+    keys = free_search_keys(cfg)
+    if not keys:
+        raise ConfigError(zero_free_dimensions_message(str(getattr(cfg, "name", "?")),
+                                                       config_path))
+    return keys
+
+
 def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: int | None = None,
            store=None, cache_dir=None, trace_fraction: float = DEFAULT_TRACE_FRACTION,
            command: str | None = None, config_path=None, lib_shas: dict | None = None,
@@ -492,8 +522,10 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     same amount of search, and a replayed CMA seed would otherwise get its cached prefix for free.
 
     Raises only for things that must stop a run: a mesh units/symmetry bug
-    (``MeshConsistencyError``), KeyboardInterrupt, an unusable backend.
+    (``MeshConsistencyError``), KeyboardInterrupt, an unusable backend, and (``ConfigError``)
+    a config with zero free dimensions, before any run file is written.
     """
+    require_free_dimensions(cfg, config_path)
     if cfg.search.algorithm == "cma_me":
         # WP11b: quality-diversity runs live in their own module; the import is local so the
         # single-ES/restarts path never pulls ribs in (it is an optional extra).

@@ -1,0 +1,34 @@
+id: 18
+title: OSSE-H + tractrix-V construction — H and V parent laws present
+prompt: >
+  A config uses profile_h: {type: osse} and profile_v: {type: tractrix} in the registry
+  typology (per-meridian mode). An engineer claims that since both OSSE and tractrix are
+  present, the design automatically achieves constant directivity at the 3-D junction
+  between H and V meridians. Is this correct? What actually governs the behavior at
+  intermediate azimuths, and which aspect is unmodelled?
+allowed_read_paths:
+  - hornlab_search/design/generators/registry.py
+  - docs/knowledge/typologies/osse_ath.md
+  - docs/knowledge/typologies/classical.md
+answer_key:
+  verdict: >
+    Both parent laws are present but neither governs the 3-D junction. Intermediate
+    azimuths are blended between the H and V meridians; constant directivity is not
+    guaranteed at the junction. The 3-D wavefront behavior at non-principal planes is
+    unmodelled.
+  must_include:
+    - "intermediate.*azimuth|blend.*h.*v|junction"
+    - "not.*constant.*directivity|not.*guaranteed|unmodelled"
+    - "both.*parent|h.*v.*parent"
+  must_not_include:
+    - "automatically.*constant.*directivity"
+    - "junction.*cd|3d.*junction.*governed"
+  must_cite_any:
+    - hornlab_search/design/generators/registry.py
+    - docs/knowledge/typologies/osse_ath.md
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "hornlab_search/design/generators/registry.py:16-17"
+    - "docs/knowledge/typologies/osse_ath.md"
+  negative_control: null

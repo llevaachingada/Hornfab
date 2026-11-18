@@ -1,0 +1,31 @@
+id: 19
+title: Crowe-X/OSSE-CD hypothesis — original or historical Crowe geometry?
+prompt: >
+  The config hl__crowe_x_osse_cd_v7.yaml is labeled Crowe-X on OS-SE CD. A reviewer
+  argues that this is based on historical Crowe ES-600/ES-450 geometry. What does the
+  contract say about the relationship between this construction and historical Crowe
+  geometry? Is this a reproduction of Crowe's proprietary design, and what is its
+  correct status?
+allowed_read_paths:
+  - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+  - examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml
+answer_key:
+  verdict: >
+    This is an original hypothesis construction (ours), not a reproduction of historical
+    Crowe geometry. The Crowe ES-600/450 appears only as visual inspiration; Crowe's
+    proprietary equations are not reproduced. The code label says "labeled
+    hypothesis-shape experiment ... no published name is used."
+  must_include:
+    - "original.*hypothesis|our.*construction|not.*crowe.*reproduction"
+    - "hypothesis|not.*historical.*crowe"
+    - "inspiration.*only|visual.*only"
+  must_not_include:
+    - "reproduction.*crowe|based.*crowe.*equation"
+    - "historical.*crowe.*geometry.*confirmed"
+  must_cite_any:
+    - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md:B1"
+  negative_control: null

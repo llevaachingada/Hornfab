@@ -1,0 +1,14 @@
+﻿THROAT PHASE 1 COMPLETE 2026-11-18T08:38:03 - all 7 throat_hv_run_* jobs have summary rows.
+Next: write LOCAL_RESULTS_2026-11-18_part3.md + hv_beamwidth/di CSVs from the run dirs,
+then Phase 2 (2 epw8 solves), then Phase 3 only if best B beats B_ctl by more than Phase 2 dJ.
+== 2026-11-18T08:38:03 poll
+queue_state: state=running running=t_ath14_scalar100 done=45 pending=20
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+runner_like_processes: 5
+phase1: 7/7 summaries

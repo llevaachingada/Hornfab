@@ -1,0 +1,33 @@
+id: 11
+title: sigma0 on a wide 12-D box with high refusal rate
+prompt: >
+  A 12-knob CMA search was launched with sigma0=0.25 on the full generator bounds.
+  The run produced 45 valid evaluations with 24 at the J=1000 refusal sentinel and
+  zero improvement from the seed. A colleague proposes simply increasing budget to 300.
+  What does the measured evidence say is the actual problem and the correct fix?
+  What sigma0 and bound approach is recommended by the documented analysis?
+allowed_read_paths:
+  - docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md
+  - .claude/skills/hornlab-search-economy/SKILL.md
+answer_key:
+  verdict: >
+    The problem is sigma0 × bound-width too large: sigma0=0.25 on global bounds with
+    12 free keys causes a refusal storm. The fix is to narrow bounds (seed-centered ±30%)
+    and reduce sigma0 (0.10), not increase budget. The measured A/B shows sigma0=0.10
+    with ±30% bounds cut J by 56%.
+  must_include:
+    - "sigma0|step.*size"
+    - "bound.*width|wide.*bound|global.*bound"
+    - "refusal.*storm|refusal.*rate"
+    - "0.10|narrow.*bound"
+  must_not_include:
+    - "increase.*budget.*fix|budget.*solves"
+    - "sigma0.*fine|no.*problem.*sigma"
+  must_cite_any:
+    - docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md
+    - .claude/skills/hornlab-search-economy/SKILL.md
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md"
+  negative_control: null

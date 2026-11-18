@@ -1,0 +1,87 @@
+# [proposed] OFFLINE / NOT-QUEUED rescore brief, Fable WP 1.4 / 1.5 (cloud senior 2026-11-18).
+# NOT an adopted production target and NOT a default. Used ONLY by tools/analysis/rescore_identity.py
+# to score STORED home-brief responses on CPU. No night, queue or search may reference this file.
+# Content = the owner's 2026-11-17 evening second-score decision (OWNER_DECISIONS_PACKET C2 block):
+#   H corridor 60-90 deg (preferred 80) from 700 Hz, V corridor 40-60 deg (preferred 50) from 1000 Hz,
+#   loading on. Constancy is NOT declared: the owner said its noise floor is measured first.
+# Source/envelope/band/weights/tolerances copied from scratch/fable_architecture/.tmp/v9_candidates/
+#   candidate_v_onset_1000.yaml (same HF1440 18 mm exit, 600x480x480 mm, band 350-8000 Hz).
+# v9 identity: PROVISIONAL for decisions (corridor ripple mask inspects +/-(max-min)/2); kept as the side-by-side column only.
+name: home_v9_corridor_h6090_v4060_v1000_rescore
+description: (objective v9, [proposed] offline rescore only) home corridor H 60-90
+  / V 40-60 from 1000 Hz; PROVISIONAL (v9 corridor ripple-mask bug scalar_v9.py:493)
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 600.0
+  max_mouth_h_mm: 480.0
+  max_depth_mm: 480.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  coverage_v_up_deg: null
+  coverage_v_down_deg: null
+  loaded_hi_hz: 5600.0
+  driver_exit_radius_mm: null
+  coverage_profile:
+    mode: corridor
+    interpolation: log_frequency
+    h:
+    - hz: 700
+      preferred_deg: 80
+      min_deg: 60
+      max_deg: 90
+    - hz: 8000
+      preferred_deg: 80
+      min_deg: 60
+      max_deg: 90
+    v:
+    - hz: 1000
+      preferred_deg: 50
+      min_deg: 40
+      max_deg: 60
+    - hz: 8000
+      preferred_deg: 50
+      min_deg: 40
+      max_deg: 60
+objective:
+  version: 9
+  tolerances:
+    cov_profile: 3.0
+    rip: 1.0
+    flat: 1.5
+    load: 0.3
+    dislope: 9.0
+    di_roughness: 1.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: one_sided
+  cov_v_weight: 0.5
+  flat_band: scored
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+weights:
+  cov_profile: 1.0
+  rip: 1.0
+  flat: 0.5
+  load: 1.0
+  dislope: 1.0
+  di_roughness: 1.0
+  flat_cv: 1.0

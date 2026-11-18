@@ -145,3 +145,32 @@ def test_watchdog_on_a_protected_job_only_advises():
     assert "WATCHDOG ADVISORY (protected lane)" in src
     i = src.index("WATCHDOG ADVISORY (protected lane)")
     assert "wd_reason = None" in src[i:i + 400]         # no kill path follows the advisory
+
+
+def test_protected_lane_still_stops_on_a_refusal_storm_only():
+    """C5 resolved 2026-11-18 (R11): refusal storms stop protected lanes; J-based stops advise."""
+    import inspect
+    from tools import run_campaign_night as rcn
+    assert rcn.PROTECTED_STOP_PREFIXES == ("refusal rate",)
+    cfg = dict(rcn.WATCHDOG_DEFAULTS)
+    storm = [{"ok": False, "objective": 1000.0}] * int(max(cfg["min_attempts"], cfg["refusal_window"]) + 1)
+    reason = rcn.watchdog_verdict(storm, cfg)
+    assert reason is not None and reason.startswith(rcn.PROTECTED_STOP_PREFIXES)
+    src = inspect.getsource(rcn)
+    assert "not wd_reason.startswith(PROTECTED_STOP_PREFIXES)" in src
+    status = __import__("yaml").safe_load((Path(__file__).resolve().parents[1]
+                                           / "examples" / "protected_lanes.yaml").read_text(encoding="utf-8"))["status"]
+    assert status == "confirmed"
+
+
+def test_search_job_with_exit_0_and_nothing_recorded_is_ok_no_result(tmp_path):
+    """WP 0.7 (R16, 2026-11-18): t_trit80_rc2 ran 2 h, exit 0, 0 rows, no J and read as ok."""
+    nf = tmp_path / "n.yaml"
+    nf.write_text("night: noresult_t\njobs:\n"
+                  "  - {id: empty_search, kind: command, argv: [hornlab-search.exe, search, --budget, '5']}\n"
+                  "  - {id: plain_cmd, kind: command, argv: [python, -c, pass]}\n", encoding="utf-8")
+    nd = _run(tmp_path, nf, HookRunner())
+    rows = {r["id"]: r for r in map(json.loads, (nd / "summary.jsonl").read_text(encoding="utf-8").splitlines())}
+    assert rows["empty_search"]["status"] == night.STATUS_OK_NO_RESULT == "ok_no_result"
+    assert "nothing was recorded" in rows["empty_search"]["note"]
+    assert rows["plain_cmd"]["status"] == "ok"

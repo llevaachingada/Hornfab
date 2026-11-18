@@ -10,13 +10,23 @@ Keele mouth sizing is not a universal geometric limit; do not silently impose CD
 scoring on intentionally non-CD horns. For new construction/objective priorities,
 continue with `hornlab-typology-research`, reusing existing dossiers.
 
+## Current routing (reconciled with AGENTS.md, 2026-11-18)
+
+`AGENTS.md` owner amendments and its "Precedence" section govern; where this file conflicts with
+them, `AGENTS.md` wins. In particular: work in the one canonical checkout
+(`C:/Users/hunte/Hrns/hornlab-search`), no new worktrees unless the owner asks, and only the parent
+integrator performs git mutations. Current state comes from `docs/ACTIVE_STATE.md` (a pointer, not
+proof of live status) plus the **newest** `CONTINUITY.md` / `ISSUES.md` entries; do not read those
+logs in full. The wave plan and file-ownership table below are **historical provenance**; current
+ownership comes from your task or handoff.
+
 ## Start here
 
 0. **Find anything:** `docs/INDEX.md` (every doc, what it is) and `docs/CODE_MAP.md` (every module and config
    folder). Keep both current: a new doc or module gets a line there in the same commit.
-1. **Read `docs/CONTINUITY.md` first.** It says which wave we are in, the last checkpoint passed,
-   what is next, open blockers, and the measured numbers.
-2. Read `docs/plan/01_CONTRACTS.md` completely (frozen), then **only your own task file**.
+1. **Read `docs/ACTIVE_STATE.md`, then the newest entry of `docs/CONTINUITY.md`** (not the whole log):
+   current queue, last checkpoint, next work, open blockers.
+2. Read `docs/plan/01_CONTRACTS.md` completely (frozen), then **only your own task or handoff**.
 3. Read `TOOLCHAIN.md` for interpreter paths, pinned SHAs, and measured machine numbers.
 4. Read `CONTRIBUTING.md` for branch / commit / PR rules and the 8 hard rules.
 
@@ -43,7 +53,7 @@ License: AGPL-3.0-or-later. Every horn number is a YAML default in `examples/`, 
 
 Interpreter: always `.venv\Scripts\python.exe` (absolute path in `TOOLCHAIN.md`), never bare `python`.
 
-## Wave plan
+## Wave plan (historical; see AGENTS.md)
 
 ```
 WAVE 0   02 env  ->  03 scaffold                               serial, one agent      (CP-0, CP-1)
@@ -56,9 +66,10 @@ A wave starts only after the previous wave's checkpoints pass. Parallelism = wri
 parallel. **One GPU, one solve at a time.** Dispatch prompts: verbatim template in
 `docs/plan/00_ORCHESTRATOR.md`.
 
-## File ownership
+## File ownership (original build plan, historical)
 
-Create and edit **only** your own paths. Read anything.
+Current ownership comes from your task/handoff (AGENTS.md). The rule still binds: create and edit
+**only** your assigned paths; read anything.
 
 | Path | Owner |
 |---|---|
@@ -86,6 +97,12 @@ Create and edit **only** your own paths. Read anything.
 
 **MEH effort (owner, 2026-10-30):** tasks M1-M10 own the paths in `docs/meh/00_MEH_CONTRACTS.md` C13 (additive to the
 table above); `docs/meh/**` is orchestrator-owned and frozen for the effort.
+
+**Fable plan (owner delegation, 2026-11-18, R21):** `hornlab_search/geometry/**`, `tools/analysis/**`,
+`tools/night_queue/fidelity_pairs.py`, `examples/protected_lanes.yaml` and `scratch/fable_architecture/**`
+are owned by the Fable senior lane; the local orchestrator is the single integrator of `hornfab-all-*`
+and `main` (cloud work arrives only as PRs into `hornfab-all-*`). Decisions:
+`scratch/fable_architecture/OWNER_DECISIONS_RESOLVED_2026-11-18.md`.
 
 Need a file you do not own? Do not edit it. Append the exact change to `NOTES_FOR_SENIOR.md`.
 

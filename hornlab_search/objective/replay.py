@@ -50,6 +50,7 @@ import numpy as np
 
 from ..metrics.compute import compute_metrics
 from .scalar_v9 import V9Params, objective_v9, resolve_v9_weights
+from .scalar_v10 import V10Params, objective_v10
 from ..targets.spec import Target
 from ..types import MetricSet, Response
 from .scalar import objective as _objective_v1
@@ -138,7 +139,7 @@ REASONS = {
     R_BAND_NOT_COVERED: "no stored frequency lies inside the requested target band",
     R_F0_NOT_COVERED: "no stored frequency lies at/above the requested f0 inside the band",
     R_UNSUPPORTED_OBJECTIVE: "objective version is not in objective.versions.SUPPORTED_OBJECTIVE_VERSIONS",
-    R_REPLAY_VERSION_UNSUPPORTED: "this replay adapter dispatches only objective versions 1-4, 7 and 9",
+    R_REPLAY_VERSION_UNSUPPORTED: "this replay adapter dispatches only the versions in REPLAY_VERSIONS",
     R_METRIC_ARRAY: "a stored metric array is missing or has the wrong shape",
     R_NO_SCORE_CONFIG: "no weights/objective block (brief or explicit override) were supplied",
     R_NO_TARGET: "no target was available from the record, the brief or an explicit override",
@@ -202,6 +203,10 @@ def _params_from_block(version: int, block: dict | None):
         if block is None:
             raise ValueError("objective v9 needs its objective block (tolerances)")
         return block if isinstance(block, V9Params) else V9Params.from_block(dict(block))
+    if version == 10:
+        if block is None:
+            raise ValueError("objective v10 needs its objective block (tolerances, ripple_region)")
+        return block if isinstance(block, V10Params) else V10Params.from_block(dict(block))
     return None
 
 
@@ -571,6 +576,12 @@ def _identity(
 
 # ------------------------------------------------------------------ dispatch
 
+#: The ONE list of objective versions the replay gate admits; ``_dispatch`` must have a branch for
+#: each (pinned by tests/test_replay_versions_single_source.py). v5 (MEH inputs) and v6 are not
+#: replayable here. Adding an objective version = add it here AND in ``_dispatch`` (the 2026-11-18
+#: v10 gap: dispatch existed, the gate refused it).
+REPLAY_VERSIONS = (1, 2, 3, 4, 7, 9, 10)
+
 def _dispatch(version: int, metrics: MetricSet, response: Response | None, target: Target,
               weights: dict, params):
     if version == 1:
@@ -585,10 +596,15 @@ def _dispatch(version: int, metrics: MetricSet, response: Response | None, targe
         return objective_v7(metrics, response, True, target, weights, params)
     if version == 9:
         return objective_v9(metrics, response, True, target, weights, params)
+    if version == 10:
+        return objective_v10(metrics, response, True, target, weights, params)
     raise ValueError(f"no replay dispatch for objective version {version}")
 
 
 def _weight_for(version: int, weights: dict, key: str, params=None) -> float:
+    if version == 10:
+        p9 = params.v9 if isinstance(params, V10Params) else None
+        return float(resolve_v9_weights(weights, p9).get(key, 0.0))
     if version == 9:
         return float(resolve_v9_weights(weights, params if isinstance(params, V9Params) else None)
                      .get(key, 0.0))
@@ -667,7 +683,7 @@ def _replay_core(
     if not is_supported_objective_version(version):
         return _refuse(meta, arrays, response, stored_metrics, requested_target, brief, version,
                        weights, block, R_UNSUPPORTED_OBJECTIVE)
-    if version not in (1, 2, 3, 4, 7, 9):
+    if version not in REPLAY_VERSIONS:
         return _refuse(meta, arrays, response, stored_metrics, requested_target, brief, version,
                        weights, block, R_REPLAY_VERSION_UNSUPPORTED)
 
