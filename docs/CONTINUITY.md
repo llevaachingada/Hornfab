@@ -1,5 +1,21 @@
 # CONTINUITY
 
+## 2026-11-18 - Throat H/V follow-ons: rolled rho, iwata_ar onset, R-OSSE verdict, block contract
+
+- Rolled family: `throat_hv_ratio` now maps to the radial scale `rho**(cos(2psi)/2 * w)` inside the
+  relief window `w` (LABELED HYBRID). The window is zero through the source-matching region and at
+  the mouth attachment, so rho = 1 is the identity and the throat and mouth are unchanged. Legal on the
+  v7 seeds for roughly 0.6-1.3; larger values are refused by the existing constriction, envelope and
+  self-approach guards. Searchable; a ratio box that excludes 1 keeps the window position live. The
+  patch's own refusal test was replaced by behaviour tests. The rolled `implementation_sha256`
+  changes again.
+- `lecleach_iwata_ar` (rows `iwata_ar`): `hv_onset_frac` delays the AR law,
+  `AR = 1 + (AR_m - 1) clamp((s - s_on)/(1 - s_on))**ar_p`. Onset 0 equals today's law, to 1e-9.
+  `section_exp_ramp` is an alias of `ar_p` (giving both is refused); rho is refused there. LABELED
+  HYBRID.
+- R-OSSE: no rho. The rev7 primary source describes only an axisymmetric profile.
+- New `docs/knowledge/contracts/throat_hv_block.md`.
+
 ## 2026-11-18 - Shared near-throat H/V block implemented (CPU only; mesher and BEM checks pending)
 
 - New `hornlab_search/design/throat_hv.py`: `throat_hv_ratio` (rho), `hv_onset_frac`,

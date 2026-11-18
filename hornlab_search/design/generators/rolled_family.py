@@ -105,8 +105,6 @@ def _shape(spec, knobs, *, require_digest=False, brief=None):
         throat = _throat_knobs(knobs)
     except throat_hv.ThroatHVError as exc:
         raise GeneratorError(f'rolled-family throat-HV block: {exc}') from exc
-    if throat['throat_hv_ratio'] not in (None, 1.0):
-        raise GeneratorError('throat_hv_ratio not supported by rolled family yet')
     onset_given = throat['hv_onset_frac'] is not None
     if onset_given and isinstance(knobs, dict) and 'g_relief_start_s' in knobs:
         raise GeneratorError('hv_onset_frac replaces relief_start_s; give only one')
@@ -142,11 +140,25 @@ def _shape(spec, knobs, *, require_digest=False, brief=None):
         axial = shape['axial_h_mm'] != 0 or shape['axial_v_mm'] != 0
         if (mode in ('smooth', 'axial') and radial) or (mode in ('smooth', 'radial') and axial):
             raise ValueError('nonzero relief amplitude is inactive in the selected mode')
-        if replaces_window and not (radial or axial):
-            raise ValueError('hv_onset_frac/section_exp_ramp are inactive: relief and pucker amplitudes are zero')
+        if replaces_window and not (radial or axial or _ratio_active(throat)):
+            raise ValueError('hv_onset_frac/section_exp_ramp are inactive: relief and pucker amplitudes '
+                             'are zero and throat_hv_ratio is neutral')
     except (KeyError, TypeError, ValueError) as exc:
         raise GeneratorError(f'rolled-family shape: {exc}') from exc
     return shape, kernel, parent
+
+
+def _ratio_active(throat):
+    return throat['throat_hv_ratio'] not in (None, 1.0)
+
+
+def throat_hv_scale(throat, psi, w):
+    """Per-plane near-throat growth (LABELED HYBRID, 2026-11-18): radial scale
+    ``hv_scale(rho, psi) ** w``. ``w`` is the family's relief window (zero through the source
+    matching region and at the mouth attachment), so rho = 1 / absent is the identity, the
+    throat and the mouth/exterior body are unchanged, and H (psi = 0) runs ahead of V (psi = 90)
+    by ``rho`` only inside the window."""
+    return throat_hv.hv_scale(throat['throat_hv_ratio'], psi) ** w
 
 
 def relief_window(shape, stations):
@@ -219,12 +231,16 @@ def resolve_grid(block, brief):
     axial = (shape['axial_h_mm']*np.cos(psi)**2 + shape['axial_v_mm']*np.sin(psi)**2)
     if np.any(axial):
         inner[..., 2] += axial*np.cos(4*psi)*w
+    if _ratio_active(throat):
+        scale = throat_hv_scale(throat, psi, w)
+        inner[..., 0] *= scale
+        inner[..., 1] *= scale
     # A local constriction before the parent's forward roll is not a usable flare.
     radial = np.hypot(inner[..., 0], inner[..., 1])
     for row in range(len(inner)):
         forward = int(np.argmax(original[row, :, 2]))
         if np.any(np.diff(radial[row, :forward+1]) < -1e-6):
-            raise GeneratorError('relief creates a constriction before the mouth roll')
+            raise GeneratorError('relief or throat_hv_ratio creates a constriction before the mouth roll')
     outer = (grid.grid_outer_points(inner, shape['wall_thickness_mm']) if kernel is rolled_rect
              else kernel.outer_points(inner, parent))
     for name, sheet in [('inner', inner), ('outer', outer)]:
@@ -300,6 +316,9 @@ def validate_search_config(spec, seed, bounds, brief):
                           ) or ('g_section_exp_ramp' in given and bounds['g_section_exp_ramp'].search)
     strength_away_zero = any(lo > 0 or hi < 0 for k, (lo, hi) in intervals.items()
                              if k in ('inward_h_mm', 'inward_v_mm', 'axial_h_mm', 'axial_v_mm'))
+    if 'throat_hv_ratio' in intervals:            # a ratio box that excludes 1 keeps position live
+        r_lo, r_hi = intervals['throat_hv_ratio']
+        strength_away_zero = strength_away_zero or r_lo > 1.0 or r_hi < 1.0
     if position_search and not strength_away_zero:
         raise GeneratorError('relief position is dormant when all strengths can be zero; pin position')
     if intervals['width_mm'][0] <= intervals['height_mm'][1]:

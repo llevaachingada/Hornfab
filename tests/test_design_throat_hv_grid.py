@@ -140,3 +140,60 @@ def test_os_knob_validation_is_mesher_free():
     assert ok["_hv"]["hv_onset_frac"] == 0.5
     assert "_hv" not in G._rows_osse_rollback_knobs({**SEED, "g_throat_hv_ratio": 1.0})
     assert throat_hv.STATUS["osse_rollback"]
+
+
+# ---- iwata_ar onset adoption (2026-11-18 W4b; LABELED HYBRID on the reconstruction) ----------
+IW_SPEC = {"rows": {"type": "iwata_ar"}, "n_phi": 15, "n_s": 32, "name": "grid"}
+
+
+def _iw(**extra):
+    k = {"g_fc_hz": 450.0, "g_T": 0.5, "g_stop_deg": 200.0, "g_ar_m": 2.5}
+    k.update(extra)
+    return k
+
+
+def _iw_rows(knobs):
+    return G.rows_per_azimuth(IW_SPEC, knobs, BRIEF)
+
+
+def test_iw_absent_block_and_onset_zero_are_identical():
+    base, meta = _iw_rows(_iw(g_ar_p=1.5))
+    assert "throat_hv" not in meta
+    zero, zmeta = _iw_rows(_iw(g_ar_p=1.5, g_hv_onset_frac=0.0))
+    np.testing.assert_allclose(zero, base, rtol=0, atol=1e-9)
+    assert zmeta["throat_hv"] == {"hv_onset_frac": 0.0}
+    assert zmeta["throat_hv_status"] == throat_hv.STATUS["iwata_ar"]
+
+
+def test_iw_onset_keeps_sections_round_until_onset_then_splits():
+    base, _ = _iw_rows(_iw(g_ar_p=1.5))
+    late, meta = _iw_rows(_iw(g_ar_p=1.5, g_hv_onset_frac=0.5))
+    n = late.shape[1]
+    early_j = int(round(0.3 * (n - 1)))
+    after_j = int(round(0.8 * (n - 1)))
+    assert _half_width_ratio(late, early_j) == pytest.approx(1.0, abs=1e-9)
+    assert _half_width_ratio(base, early_j) > 1.0 + 1e-3
+    assert _half_width_ratio(late, after_j) > 1.0 + 1e-3
+    # same mouth AR (the law still reaches AR_m at l = L0) and the round throat is untouched
+    assert _half_width_ratio(late, n - 1) == pytest.approx(_half_width_ratio(base, n - 1), rel=1e-9)
+    np.testing.assert_array_equal(late[:, 0, :], base[:, 0, :])
+
+
+def test_iw_section_exp_ramp_is_the_ar_exponent_alias():
+    a, _ = _iw_rows(_iw(g_ar_p=2.0))
+    b, meta = _iw_rows(_iw(g_section_exp_ramp=2.0))
+    np.testing.assert_array_equal(a, b)
+    assert meta["ar_p"] == 2.0 and meta["throat_hv"] == {"section_exp_ramp": 2.0}
+    with pytest.raises(registry.GeneratorError, match="alias"):
+        _iw_rows(_iw(g_ar_p=2.0, g_section_exp_ramp=2.0))
+
+
+def test_iw_ratio_is_not_mapped_and_is_refused():
+    with pytest.raises(registry.GeneratorError, match="not mapped for iwata_ar"):
+        _iw_rows(_iw(g_throat_hv_ratio=1.5))
+
+
+@pytest.mark.parametrize("onset", [-0.1, 0.95, float("nan")])
+def test_iw_out_of_range_onset_is_refused(onset):
+    with pytest.raises(registry.GeneratorError):
+        _iw_rows(_iw(g_hv_onset_frac=onset))

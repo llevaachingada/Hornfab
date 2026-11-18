@@ -41,8 +41,13 @@ STATUS = {
                       "window remap is a LABELED HYBRID (HornFab construction)."),
     "lecleach_hv": ("throat_hv_ratio -> per-plane march flare T: each plane is still a JMLC march; "
                     "the H/V pairing and onset ramp are a LABELED HYBRID."),
+    "iwata_ar": ("hv_onset_frac / section_exp_ramp -> onset and exponent of the AR law "
+                 "AR(l) = 1 + (AR_m - 1) w(l): LABELED HYBRID on the iwata_ar reconstruction "
+                 "(no published onset term); throat_hv_ratio is not mapped."),
     "rolled": ("all three knobs: LABELED HYBRID (rolled family is an original HornFab "
-               "construction; no published parent for near-throat H/V terms)."),
+               "construction; no published parent for near-throat H/V terms). throat_hv_ratio -> "
+               "radial scale rho**(cos(2psi)/2 * w) inside the relief window w (zero at the "
+               "source match and the mouth attachment)."),
 }
 
 

@@ -97,10 +97,61 @@ def test_zero_relief_amplitude_makes_the_block_inert_and_is_refused(family):
         rf.design_params(family.gen, knobs, family.brief)
 
 
-def test_non_neutral_ratio_is_refused_until_the_family_maps_it(family):
-    knobs = dict(family.seed_knobs, g_throat_hv_ratio=2.0)
-    with pytest.raises(GeneratorError, match='throat_hv_ratio not supported by rolled family yet'):
-        rf.design_params(family.gen, knobs, family.brief)
+def _radius(points):
+    return np.hypot(points[..., 0], points[..., 1])
+
+
+@pytest.mark.parametrize('rho', [1.25, 0.75])
+def test_ratio_maps_to_per_plane_growth_inside_the_window_only(family, rho):
+    """2026-11-18 W4a (LABELED HYBRID): rho scales the radius by rho**(cos(2psi)/2 * w). The
+    throat/source-matching stations and the mouth attachment are unchanged; H (row 0) runs
+    ahead of V (last row) for rho > 1 and behind it for rho < 1."""
+    parent = resolve(family)
+    treated = resolve(family, dict(family.seed_knobs, g_throat_hv_ratio=rho))
+    station = np.array(treated['meta']['stations'])
+    start = family.seed_knobs['g_relief_start_s']
+    before = station <= start
+    assert before.any()
+    np.testing.assert_array_equal(treated['inner_points'][:, before],
+                                  parent['inner_points'][:, before])
+    np.testing.assert_array_equal(treated['inner_points'][:, -2:], parent['inner_points'][:, -2:])
+    r_p, r_t = _radius(parent['inner_points']), _radius(treated['inner_points'])
+    inside = ~before
+    inside[-2:] = False
+    h_ratio = r_t[0, inside] / r_p[0, inside]
+    v_ratio = r_t[-1, inside] / r_p[-1, inside]
+    if rho > 1:
+        assert h_ratio.max() > 1.0 + 1e-6 and np.all(h_ratio >= 1.0 - 1e-12)
+        assert v_ratio.min() < 1.0 - 1e-6 and np.all(v_ratio <= 1.0 + 1e-12)
+    else:
+        assert h_ratio.min() < 1.0 - 1e-6 and v_ratio.max() > 1.0 + 1e-6
+    # bounded by the full per-plane scale sqrt(rho) at the window peak
+    assert h_ratio.max() <= max(rho, 1 / rho) ** 0.5 + 1e-12
+    assert treated['meta']['throat_hv'] == {'throat_hv_ratio': rho}
+    assert throat_hv.STATUS['rolled'] in treated['meta']['notes']
+
+
+def test_ratio_alone_keeps_onset_and_ramp_live_with_zero_relief(family):
+    knobs = with_onset(family, 0.5)
+    knobs['g_inward_h_mm'] = knobs['g_inward_v_mm'] = 0.0
+    knobs['g_throat_hv_ratio'] = 1.2
+    block = rf.design_params(family.gen, knobs, family.brief)['grid']
+    out = rf.resolve_grid(block, family.brief)
+    assert out['meta']['throat_hv'] == {'throat_hv_ratio': 1.2, 'hv_onset_frac': 0.5}
+
+
+def test_illegal_ratio_is_refused_by_the_existing_guards(family):
+    with pytest.raises(GeneratorError):
+        rf.design_params(family.gen, dict(family.seed_knobs, g_throat_hv_ratio=2.0), family.brief)
+
+
+def test_ratio_is_searchable_and_keeps_position_live(family):
+    from hornlab_search.design.space import Bound
+    seed = dict(family.seed_knobs, g_throat_hv_ratio=1.2)
+    bounds = dict(family.bounds, g_throat_hv_ratio=Bound(1.1, 1.3))
+    rf.validate_search_config(family.gen, seed, bounds, family.brief)
+    with pytest.raises(GeneratorError, match='explicit matching bound'):
+        rf.validate_search_config(family.gen, seed, dict(family.bounds), family.brief)
 
 
 @pytest.mark.parametrize('onset', [-0.1, 0.95, float('nan')])

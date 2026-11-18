@@ -1928,13 +1928,24 @@ def rows_task_stop(stop0_deg: float, harm: dict, phi, *, lo: float, hi: float) -
 def _rows_iwata_ar_knobs(knobs: dict, prefix: str = "g") -> dict:
     """Validated ``rows: {type: iwata_ar}`` knobs (our reconstruction, lib-2 2.2)."""
     allowed = {f"{prefix}_fc_hz", f"{prefix}_T", f"{prefix}_stop_deg",
-               f"{prefix}_ar_m", f"{prefix}_ar_p"}
+               f"{prefix}_ar_m", f"{prefix}_ar_p",
+               f"{prefix}_hv_onset_frac", f"{prefix}_section_exp_ramp"}
+    if knobs.get(f"{prefix}_throat_hv_ratio") is not None:
+        raise registry.GeneratorError(
+            f"iwata_ar rows: {prefix}_throat_hv_ratio is not mapped for iwata_ar (its H/V "
+            "split is the AR law; only hv_onset_frac / section_exp_ramp are adopted)")
     foreign = sorted(str(k) for k in knobs
                      if str(k).startswith(f"{prefix}_") and k not in allowed)
     if foreign:
         raise registry.GeneratorError(
             f"iwata_ar rows accept only {prefix}_fc_hz / {prefix}_T / {prefix}_stop_deg / "
-            f"{prefix}_ar_m / {prefix}_ar_p; got foreign knob(s) {foreign}")
+            f"{prefix}_ar_m / {prefix}_ar_p / {prefix}_hv_onset_frac / "
+            f"{prefix}_section_exp_ramp; got foreign knob(s) {foreign}")
+    if (knobs.get(f"{prefix}_section_exp_ramp") is not None
+            and knobs.get(f"{prefix}_ar_p") is not None):
+        raise registry.GeneratorError(
+            f"iwata_ar rows: {prefix}_section_exp_ramp is the AR-law exponent (alias of "
+            f"{prefix}_ar_p); give one, not both")
     out = {}
     for name, default in (("fc_hz", ROWS_IWATA_KNOB_DEFAULTS["fc_hz"]),
                           ("T", ROWS_IWATA_KNOB_DEFAULTS["T"]),
@@ -1957,7 +1968,23 @@ def _rows_iwata_ar_knobs(knobs: dict, prefix: str = "g") -> dict:
     if not lo <= out["stop_deg"] <= hi:
         raise registry.GeneratorError(
             f"iwata_ar rows: stop_deg must be in [{lo:g}, {hi:g}], got {out['stop_deg']}")
+    hv_block = _rows_throat_hv_block(knobs, prefix, "iwata_ar")
+    if hv_block is not None:
+        if hv_block["section_exp_ramp"] is not None:
+            out["ar_p"] = float(hv_block["section_exp_ramp"])
+        out["_hv"] = hv_block   # only when active: absent = byte-identical dict
     return out
+
+
+def iwata_ar_weight(s, ik: dict) -> np.ndarray:
+    """AR-law weight on the arc fraction ``s``: ``s ** ar_p`` (published reconstruction) or,
+    with the shared block, the Ath ramp ``clamp((s - s_on)/(1 - s_on), 0, 1) ** ar_p``. With
+    ``hv_onset_frac`` 0 the ramp is ``s ** ar_p`` exactly (neutrality)."""
+    s = np.asarray(s, dtype=float)
+    hv = ik.get("_hv")
+    if hv is None or hv["hv_onset_frac"] is None:
+        return np.power(s, ik["ar_p"])
+    return throat_hv.ath_ramp(s, hv["hv_onset_frac"], ik["ar_p"])
 
 
 #: osse_rollback (owner-directed hybrid, 2026-10-28): a constant-directivity OS/OSSE throat wall per
@@ -2352,8 +2379,18 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
         xs, ys, _phi_deg, march_meta = profiles_mod.lecleach_exact(
             r0, ik["fc_hz"], ik["T"], a0, ik["stop_deg"], dl_mm=1.0)
         xr, yr, L0 = _resample_arc(xs, ys, _spec_int(spec, "n_s", 32, 8))
-        _AR, y_h, y_v = lecleach_ar_profile(xr, yr, ik["ar_m"], ik["ar_p"],
-                                            AR_t=ROWS_AR_THROAT_RATIO)
+        if ik.get("_hv") is None or ik["_hv"]["hv_onset_frac"] is None:
+            _AR, y_h, y_v = lecleach_ar_profile(xr, yr, ik["ar_m"], ik["ar_p"],
+                                                AR_t=ROWS_AR_THROAT_RATIO)
+        else:
+            # Shared onset (LABELED HYBRID on the iwata_ar reconstruction): the AR stretch is
+            # zero (round) until hv_onset_frac, then rises with the same exponent ar_p.
+            # Area preservation (y_h * y_v == y^2) is unchanged.
+            l_arc = _arc_length(xr, yr)
+            w_ar = iwata_ar_weight(l_arc / float(l_arc[-1]), ik)
+            _AR = ROWS_AR_THROAT_RATIO + (ik["ar_m"] - ROWS_AR_THROAT_RATIO) * w_ar
+            y_h = yr * np.sqrt(_AR)
+            y_v = yr / np.sqrt(_AR)
         march_meta = {**march_meta, "ar_m": float(ik["ar_m"]), "ar_p": float(ik["ar_p"]),
                       "ar_t": float(ROWS_AR_THROAT_RATIO), "L0_mm": float(L0)}
         out = []
@@ -2708,6 +2745,9 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "row_stop_actual_deg": [float(m["march"]["stop_deg"]) for m in marches],
             "sign_conventions": sign_conventions,
         }
+        if ik.get("_hv") is not None:
+            meta["throat_hv"] = {k: v for k, v in ik["_hv"].items() if v is not None}
+            meta["throat_hv_status"] = throat_hv.STATUS["iwata_ar"]
     elif kind == "toroidal_rollback":
         tk = _rows_toroidal_knobs(knob_map, prefix)
         march0 = marches[0]["march"]

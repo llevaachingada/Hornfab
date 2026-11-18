@@ -1,5 +1,12 @@
 # ISSUES
 
+## 2026-11-18 - Throat H/V follow-ons: local checks
+
+- OPEN (local): shape_check of a rolled seed with rho 0.8 and 1.25, and of iwata_ar onset 0.5,
+  before any GPU work. Run the full suite against the pre-patch head.
+- CLOSED: the OS-SE "throat pinch" (18 -> 14.2 mm) is the domed source cap (physical tag 2), not
+  the acoustic wall (carrier `analysis_2026-11-18/W7_THROAT_PINCH_VERDICT.md`).
+
 ## 2026-11-18 - Shared throat H/V block: local verification before any GPU
 
 - OPEN (owner, local): confirm the pinned `hornlab_mesher` evaluates a p-expression for `k`
