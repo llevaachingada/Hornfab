@@ -138,6 +138,7 @@ def run_pilot(
     geometry_path: str | os.PathLike[str] | None = None,
     runs_root: str | os.PathLike[str] | None = None,
     asset_id: str | None = None,
+    asset: C.HornAsset | None = None,
     scan_limit: int = 300,
     limit_boxes: int = 8,
     out_dir: str | os.PathLike[str] | None = None,
@@ -167,10 +168,11 @@ def run_pilot(
         sys_drivers.require_fidelity(driver, "LF_TS_SCREENING")
 
     # 1. horn asset (optional for the LF-only path but required for the polar screen)
-    asset = converted = None
-    if asset_id:
+    if asset is not None and asset_id is None:
+        asset_id = asset.asset_id
+    elif asset_id:
         asset = horn_import.find_asset(asset_id, runs_root, scan_limit=scan_limit)
-        converted = horn_import.convert_asset(asset)
+    converted = horn_import.convert_asset(asset) if asset is not None else None
 
     # 2. feasible boxes (deterministic grids inside bass_reference). Selection keeps a
     # VOLUME SPREAD of the feasible set (smallest half + largest half of the kept count):

@@ -19,6 +19,47 @@ __all__ = ["main"]
 _TS_DIR = Path(__file__).resolve().parents[2] / "examples" / "systems" / "driver_ts"
 
 
+def _cmd_portfolio(args: argparse.Namespace) -> int:
+    import yaml
+
+    from hornlab_search.system import portfolio
+    from hornlab_search.system.contracts import parse_system_spec_dict
+
+    spec_path = Path(args.spec)
+    if not spec_path.is_file():
+        print(json.dumps({"error": f"spec not found: {spec_path}"}))
+        return 2
+    spec = parse_system_spec_dict(yaml.safe_load(spec_path.read_text(encoding="utf-8")))
+    stems = tuple(args.driver_stem) if args.driver_stem else (
+        "faitalpro_12pr300", "faitalpro_12pr320")
+    result = portfolio.run_portfolio(
+        spec,
+        driver_stems=stems,
+        runs_root=args.runs_root,
+        scan_limit=args.scan_limit,
+        k=args.k,
+        limit_boxes=args.limit_boxes,
+        driver_ts_dir=args.driver_ts_dir,
+        out_dir=args.out,
+    )
+    print(json.dumps({
+        "study_id": result.meta["study_id"],
+        "case_dir": result.meta.get("case_dir"),
+        "selected_assets": len(result.asset_summary),
+        "rejected_count": result.meta["rejected_count"],
+        "n_rows": len(result.rows),
+        "screen_disagree_tol_deg": result.meta["screen_disagree_tol_deg"],
+        "same_budget_per_cell": result.meta["same_budget_per_cell"],
+        "assets": [
+            {"asset_id": a["asset_id"], "family": a["family"], "brief_id": a["brief_id"],
+             "freq_range_hz": a["freq_range_hz"], "cuts_screen_by_xo_deg": a["cuts_screen_by_xo_deg"]}
+            for a in result.asset_summary
+        ],
+    }, indent=2))
+    print(result.report["markdown"])
+    return 0
+
+
 def _cmd_pilot(args: argparse.Namespace) -> int:
     import yaml
 
@@ -105,6 +146,22 @@ def main(argv: list[str] | None = None) -> int:
     p_drivers = sub.add_parser("list-drivers", help="list pilot driver stems")
     p_drivers.add_argument("--driver-ts-dir", default=None)
     p_drivers.set_defaults(func=_cmd_list_drivers)
+
+    p_portfolio = sub.add_parser(
+        "portfolio", help="Stage 3: diverse-horn portfolio screen (identical CPU budget, "
+                          "report-only; NOT a horn leaderboard)")
+    p_portfolio.add_argument("--spec", required=True, metavar="YAML")
+    p_portfolio.add_argument("--driver-stem", action="append", default=None, metavar="STEM",
+                             help="driver stem (repeatable; default: both verified 12-inch)")
+    p_portfolio.add_argument("--k", type=int, default=6, help="portfolio size (4-8 recommended)")
+    p_portfolio.add_argument("--limit-boxes", type=int, default=8)
+    p_portfolio.add_argument("--scan-limit", type=int, default=60,
+                             help="max newest runs scanned for the candidate pool")
+    p_portfolio.add_argument("--runs-root", default=None)
+    p_portfolio.add_argument("--driver-ts-dir", default=None)
+    p_portfolio.add_argument("--out", default=None, metavar="DIR",
+                             help="isolated store root (default system_runs)")
+    p_portfolio.set_defaults(func=_cmd_portfolio)
 
     p_assets = sub.add_parser("list-assets", help="bounded read-only asset inventory")
     p_assets.add_argument("--runs-root", default=None)
