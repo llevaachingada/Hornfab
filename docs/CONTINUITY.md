@@ -1,5 +1,14 @@
 # CONTINUITY
 
+## 2026-11-18 - Agent science benchmark fixtures (WP-K1): tests/agent_bench/
+
+- 24 frozen cases (`cases/case_NN.yaml`): a prompt, the paths the agent may read, and an answer key
+  (must_include / must_not_include / must_cite_any / defer_ok). Keys are sourced from the repo,
+  except case 16, which is `spec_only`. All 7 negative controls are embedded.
+- `scorer.py` grades SAVED answers only; it makes no model calls. Sample good and bad answers live
+  under `answers/`. `tests/test_agent_bench.py` checks the schema, that every path exists, that
+  every regex compiles, and the sample grading.
+
 ## 2026-11-18 - Klangfilm H/V kernels: stale seed-mouth comments and frozen-copy SHA docstrings corrected (comments only)
 
 - `_klangfilm_lame_hv_core_v1.py` SEEDS comments now give the recomputed mouths (b1 479.6x239.7,

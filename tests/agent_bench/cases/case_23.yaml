@@ -1,0 +1,34 @@
+id: 23
+title: Weak geometric knob in space_card — not proof of acoustic insensitivity
+prompt: >
+  A space card from tools/analysis/space_card.py classifies the knob throat_round_hold_mm
+  as "weak" because its surface displacement is below 1 mm per full range at the seed.
+  An engineer concludes this proves the throat hold has no acoustic effect and can be
+  fixed to zero permanently. Is this conclusion supported by the space card evidence?
+  What would actually be needed to claim acoustic insensitivity?
+allowed_read_paths:
+  - tools/analysis/space_card.py
+  - hornlab_search/geometry/sensitivity.py
+  - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+answer_key:
+  verdict: >
+    A "weak" geometric classification from the space card shows the knob moves little
+    surface geometry at the seed point. This is not proof of acoustic insensitivity —
+    acoustic effect requires BEM or measurement evidence. Run evidence (solved rows) is
+    needed to claim acoustic insensitivity.
+  must_include:
+    - "geometric.*weak|weak.*geometry|not.*acoustic"
+    - "not.*proof|does not.*prove|run.*evidence"
+    - "bem|measurement|acoustic.*evidence"
+  must_not_include:
+    - "acoustically.*insensitive.*confirmed"
+    - "space.*card.*proves.*acoustic"
+  must_cite_any:
+    - tools/analysis/space_card.py
+    - hornlab_search/geometry/sensitivity.py
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "hornlab_search/geometry/sensitivity.py:WEAK_MM"
+    - "tools/analysis/space_card.py"
+  negative_control: large_geom_weak_acoustic

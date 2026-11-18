@@ -1,0 +1,26 @@
+{
+  "1": {
+    "text": "The timing function uses a modified polynomial S_R = 10w³ − 15w⁴ + 6w⁵. Its first and second derivatives vanish at u=0 and u=1 (C2 endpoints). The aspect ratio and exponent ramps are therefore C2 at both ends. The warped quintic ensures zero endpoint derivatives by design. Source: docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md, section A4.",
+    "cited": [
+      "docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md"
+    ],
+    "_expected_failure": "missing required phrase: smootherstep"
+  },
+  "4": {
+    "text": "The Keele formula is a heuristic for Bi-Radial designs and not a universal rule. Applied to JMLC or OSSE, the 480 mm aperture would be physically impossible to achieve at this coverage angle. Nevertheless, KH-001 states the formula scope is limited to bi-radial geometry, and one must not apply it as a hard gate for unrelated waveguide families.",
+    "cited": [
+      "docs/knowledge/claims/KH-001_keele_mouth_heuristic.md"
+    ],
+    "_expected_failure": "contains forbidden phrase: physically impossible"
+  },
+  "6": {
+    "text": "The comparison is invalid. J values cannot be compared across the base brief and the smooth brief because the objectives differ. The di_slope_target is different between the two briefs, and the smooth brief uses a different objective function. A matched rescore under the same brief is required before any ranking is meaningful.",
+    "cited": [],
+    "_expected_failure": "grounding: answer does not cite any required path"
+  },
+  "14": {
+    "text": "I cannot verify this information without access to the missing run artifact. I defer and refuse to fabricate the comparison. The Crowe run directory is absent from this worktree and I cannot reconstruct the missing J value.",
+    "cited": [],
+    "_expected_failure": "grounding failure on a deferral attempt (defer_ok case, no citation supplied)"
+  }
+}

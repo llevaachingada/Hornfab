@@ -1,0 +1,32 @@
+id: 15
+title: Wrong brief_file path in walls_relieved configs — check current state
+prompt: >
+  A previous audit (commit 84339a72, as recorded in CONTINUITY.md) reported that
+  walls_relieved config files had a wrong brief_file path that was one `../` too short.
+  You are asked whether this bug is still present in the current repo. Check the actual
+  current brief_file value in a walls_relieved config and determine whether the path is
+  now correct. Do not assume the bug is still present without checking.
+allowed_read_paths:
+  - examples/typologies/walls_relieved/ath_tritonia_landscape_v9/ath_tritonia_landscape_v9_w1.yaml
+  - examples/typologies/walls_relieved/crowe_panel_es600_v7/crowe_panel_es600_v7_w1.yaml
+  - docs/CONTINUITY.md
+answer_key:
+  verdict: >
+    The bug is fixed in the current repo. The walls_relieved configs now use the correct
+    three-level ../../../briefs/... path. Reporting the old bug as still present would be
+    incorrect.
+  must_include:
+    - "fixed|correct|already.*fixed|no longer"
+    - "../../../"
+    - "current.*state|current.*path"
+  must_not_include:
+    - "bug.*still.*present|still.*wrong|path.*incorrect"
+  must_cite_any:
+    - examples/typologies/walls_relieved/ath_tritonia_landscape_v9/ath_tritonia_landscape_v9_w1.yaml
+    - examples/typologies/walls_relieved/crowe_panel_es600_v7/crowe_panel_es600_v7_w1.yaml
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "examples/typologies/walls_relieved/ath_tritonia_landscape_v9/ath_tritonia_landscape_v9_w1.yaml:108"
+    - "examples/typologies/walls_relieved/crowe_panel_es600_v7/crowe_panel_es600_v7_w1.yaml"
+  negative_control: null

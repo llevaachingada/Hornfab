@@ -1,0 +1,32 @@
+id: 2
+title: CROWE V2A DOF count and fixed vs searched knobs
+prompt: >
+  For the crowe_hv_area_aspect_v1 generator operating in its c1 search configuration,
+  state how many knobs are searched (continuous degrees of freedom) and name both the
+  mouth parameters that are held fixed. Explain what p_mouth controls and why it is not
+  searched in c1. Cite the relevant contract or config source.
+allowed_read_paths:
+  - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+  - hornlab_search/design/generators/crowe_hv_area_aspect_v1.py
+  - examples/typologies/crowe_hv_area_aspect_2026-11-16/configs/c1_four_dof_bounds.yaml
+answer_key:
+  verdict: >
+    Four knobs are searched in c1 (height_v_active_mm, L_forward_mm, area_mid_bias,
+    aspect_timing_u50). p_mouth (mouth superellipse exponent) and width_h_active_mm are
+    fixed (not searched). p_mouth controls the section shape at the mouth.
+  must_include:
+    - "four|4"
+    - "p_mouth"
+    - "width_h_active_mm"
+    - "fixed"
+  must_not_include:
+    - "five|6|7|8 continuous"
+    - "p_mouth.*searched"
+  must_cite_any:
+    - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+    - hornlab_search/design/generators/crowe_hv_area_aspect_v1.py
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md:A5"
+  negative_control: inactive_conditional_knob

@@ -1,0 +1,37 @@
+id: 24
+title: Cross-family matched-seed comparison — residual size, objective, solver surface
+prompt: >
+  A researcher wants to compare CROWE V2A (family FREEFORM, crowe_hv_area_aspect_v1)
+  and lecleach_hv (family GRID, rows.type: lecleach) by running both from the same
+  random seed value "1234". They argue this makes the comparison valid because the
+  seed is identical. What conditions must actually be satisfied to claim the comparison
+  is valid? Consider: residual size, source identity, objective identity, and solver
+  surface checks.
+allowed_read_paths:
+  - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+  - docs/knowledge/contracts/lecleach_iwata_hv.md
+  - hornlab_search/objective/scalar_v9.py
+  - .claude/skills/hornlab-search-economy/SKILL.md
+answer_key:
+  verdict: >
+    Matching the seed value is not sufficient. A valid cross-family comparison requires:
+    the same brief/objective version, the same solver surface (mesh resolution, solver
+    settings), the same driver source, and the residual of each mesh must be small
+    relative to the claimed gain. Without these checks the comparison is ungrounded.
+  must_include:
+    - "same.*objective|same.*brief|objective.*version.*match"
+    - "mesh.*residual|fit.*residual|residual.*size"
+    - "solver.*surface|mesh.*resolution|solver.*setting"
+    - "not.*sufficient|seed.*not.*enough"
+  must_not_include:
+    - "seed.*sufficient|same.*seed.*valid"
+  must_cite_any:
+    - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+    - docs/knowledge/contracts/lecleach_iwata_hv.md
+    - .claude/skills/hornlab-search-economy/SKILL.md
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md:A9"
+    - "docs/knowledge/contracts/lecleach_iwata_hv.md"
+  negative_control: small_geom_strong_acoustic

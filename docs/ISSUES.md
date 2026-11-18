@@ -1,5 +1,10 @@
 # ISSUES
 
+## 2026-11-18 - Agent benchmark: first A/B run not done
+
+- OPEN: run the baseline vs treatment arms (with and without the contracts) and save the answers.
+  Adoption gate: the treatment beats the baseline, with no regression on cases 15 and 16.
+
 ## 2026-11-18 - Klangfilm H/V comment patch changes family digests (owner gate)
 
 - OPEN (owner): land the comments-only fix only if no queued job or saved recipe depends on the
