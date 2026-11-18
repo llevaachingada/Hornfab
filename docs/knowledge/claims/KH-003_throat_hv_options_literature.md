@@ -1,0 +1,268 @@
+# KH-003 Throat-region H/V options: literature classification
+
+Date: 2026-11-18. Scope: round compression-driver exit (r0 ~ 12.7-27 mm), asymmetric brief (e.g. 90 H x 40 V).
+Companion to KH-002 and THROAT_HV_CONTROL_AUDIT_2026-11-18.md (code routes).
+
+Labels: [primary] text read; [primary-summary] read via WebFetch summary; [carried] read in KH-002, not re-read here;
+[white-paper] vendor/third-party text; [forum/real-world] forum or snippet; [inferred] my reasoning; [disputed]; [gap].
+
+## 0. Evidence limits
+
+- Batik OS-SE PDF and R-OSSE rev7 PDF: WebFetch returned compressed PDF bytes, no text. OS-SE equations are [carried]
+  from KH-002. R-OSSE equations NOT retrieved; nothing about R-OSSE is classified on primary text.
+- US4308932 (Keele/JBL): claims read via WebFetch summary [primary-summary]; formula fragments as returned.
+- US4187926 (Altec Mantaray): search snippet only. Henricksen & Ureda AES 1978: abstract only (members-only).
+- Geddes "Acoustic Waveguide Theory Revisited" (AES 1993): e-library entry only.
+- Keele AES 1038 (1975): scan, not text-extractable [carried].
+- JBL PT white paper: not located. GoldenKnight note is third party.
+- Le Cleac'h: forum posts and a Scribd lecture seen in results; not opened.
+- EV CD horns, Danley: not retrieved; no claims made.
+
+## 1. Parent laws: what each defines near the throat
+
+### 1.1 OS / OS-SE (Freehafer 1940; Geddes 1989/1993; Batik 2020)
+- Batik OS-SE, Eq. 5 [carried]: r(z) = sqrt(k r0^2 + 2 k r0 z tan a0 + z^2 tan^2 a) + r0(1-k)
+  + (s L/q)[1 - (1 - (q z/L)^n)^(1/n)]. Parameters: r0, a0 throat half-angle, a coverage, k expansion (k=1 OS,
+  k=0 cone), s flare, n superellipse exponent, q truncation, L length.
+- Batik: parameters "may vary around the device ... not necessarily being axisymmetric" [carried].
+- ATH User Guide 2.1.2 [carried]: any "ex" item may depend on azimuth p (e.g. Coverage.Angle = 40 + 10 cos^2 p);
+  Throat.Angle and OS.k are ex-capable.
+- Geddes US7068805 [primary, carried + snippet]: "each cross section of a true OS waveguide would be round"; an
+  elliptical mouth gives only "a twenty to thirty degree difference in the radiated polar angles".
+- Reading: OS is axisymmetric by Geddes' definition. OS-SE is a parametric family whose tool allows azimuth-varying
+  parameters; no published validation of a per-azimuth law exists.
+
+### 1.2 Keele bi-radial (US4308932, JBL) [primary-summary]
+- Two sidewall pairs (H, V), each y = a + b x + c x^n (claim 5), alt. y = a + b x + c e^(x n) (claim 13). Pairs
+  defined separately, so flare rates can differ.
+- a set by throat height; b by throat included angle; n 4-6 (claims 4, 6) or 2-8 (claim 14); n rises with coverage (claim 7).
+- Throat: claims say only that it connects to a driver (claim 1). Description: throat "typically circular", gap
+  "substantially rectangular", joined by a connecting section whose area must diverge monotonically (claims 3, 10;
+  exponentially in claim 11). Smooth join at throat and connecting section (claim 1).
+
+### 1.3 Geddes EC/PS Bi-Spheroidal (US7068805) [primary, carried]
+- Elliptic-cylinder (EC) throat section from a rectangular source, joined to a prolate-spheroidal (PS) section with
+  uncoupled wall angles.
+- Round-to-rectangular throat: gradual transition, "same cross sectional areas maintained or grow at a slow rate".
+  Only primary text found with an explicit area rule for a round-to-rectangular adapter.
+- Join precision "has never been determined", done graphically [carried].
+
+### 1.4 Le Cleac'h JMLC / elliptical JMLC [forum/real-world, snippets]
+- Wavefront = equiphase surface from the throat; earlier methods assume a wavefront shape (quoted).
+- Elliptical/Iwata-JMLC: hyperbolic horns defined by wavefront area change. Iwata hypothesis: width/height ratio
+  varies linearly with distance from throat. Le Cleac'h keeps that ratio law and T = 0.5, rest is his method (quoted).
+- Throat adapter: quadratic adapter preferred over hypex when exit angle differs from throat angle (quoted).
+- Throat cross-section of the elliptical JMLC: not found.
+
+### 1.5 Altec Mantaray [forum/real-world]
+- AES 1978 abstract: tall non-radial mouth, quadric bell.
+- US4187926 snippet: rectangular throat, parallel side walls, diverging top/bottom walls. Non-round throat by patent text.
+
+### 1.6 JBL Progressive Transition [white-paper, marketing-level]
+- Single continuous surface from driver throat to mouth, no diffraction slot (JBL page).
+- GoldenKnight note (third party): sidewalls blend from round throat to a square/rectangular flange; 6-10 contour
+  boundaries. Constant-beamwidth claims are vendor/third-party [disputed]. Compact PT trades some low-frequency V control.
+
+### 1.7 R-OSSE [not retrieved]
+- Forum snippets only (KH-002): parameters R, r0, a0, a, k, r, b, m, q; "rollback" lip. Axisymmetric vs per-azimuth: UNKNOWN.
+
+## 2. Option classification
+
+Key: WITHIN-PARENT-LAW (inside the law's own definition); PARENT-PERMITS-BUT-UNVALIDATED (text or tool allows it,
+no validation); HYBRID (labeled; not a published law); CONTRADICTS-PARENT (breaks the stated definition).
+
+### Option 1. Per-azimuth throat angle a0(phi) in OS / OS-SE
+(i) OS-SE: a0 in Eq. 5 and ex-capable in ATH [carried]. OS: axisymmetric by Geddes' definition [primary, carried].
+(ii) OS-SE: PARENT-PERMITS-BUT-UNVALIDATED. OS: CONTRADICTS-PARENT if varied (HYBRID if used).
+(iii) Zero-control a0_h = a0_v -> parent. dr/dz at z=0 = tan a0(phi); must equal driver exit half-angle where the
+  driver exits; r(0,phi) = r0 for all phi. C1 in phi (cos^2 form is smooth) [inferred].
+(iv) No measured or simulated per-azimuth a0 data retrieved [gap]. Geddes criticizes mouth-only asymmetry, not a0.
+(v) None retrieved.
+
+### Option 2. Per-azimuth expansion factor k(phi) in OS-SE
+(i) k in Eq. 5 (k=1 OS, k=0 cone); OS.k ex-capable [carried].
+(ii) OS-SE: PARENT-PERMITS-BUT-UNVALIDATED. OS (k=1 fixed): CONTRADICTS-PARENT if varied.
+(iii) Zero-control k_h = k_v -> parent. k multiplies the near-throat terms k r0^2 and 2k r0 z tan a0, so it is an
+  early-slope knob [inferred from Eq. 5]. Keep the square root real for all z (k >= 0 is safe; check negative k).
+(iv) Same gap as Option 1. (v) None.
+
+### Option 3. Elliptical / ramped throat extension (round -> ellipse) before the flare; equal vs non-equal area
+(i) Geddes EC: area must stay constant or grow [primary, carried]. Keele connecting section: area monotone
+  non-decreasing (claims 3, 10) [primary-summary]. Le Cleac'h quadratic adapter for angle mismatch [forum].
+  Batik OS-SE has no adapter segment; adding one is outside Eq. 5.
+(ii) Geddes EC section with area rule: WITHIN-PARENT-LAW. Keele connecting section: WITHIN-PARENT-LAW.
+  Elliptical adapter in front of OS-SE: HYBRID (label it). Area-shrinking transition: CONTRADICTS-PARENT (Geddes, Keele).
+(iii) Zero-control: adapter aspect 1 -> length 0 -> parent. A(0) = pi r0^2 (driver). A non-decreasing.
+  Wall angle at driver matches exit angle. C1 at adapter/flare join; C2 preferred, slope kinks diffract [carried].
+(iv) Geddes: join "compromise between minimizing wall-angle discontinuities and letting the ellipse develop enough"
+  [carried]. audioXpress: throat shaping fixes launch shape, not size-frequency law [forum/real-world].
+  No peer-reviewed measurement of an adapter's H/V effect found [gap]. Contrary: one poster says elliptical throat
+  to round mouth avoids pattern flip; another says elliptical beats rectangular [disputed].
+(v) Mantaray and PT use non-round throat sections in shipping products [descriptive only; not performance evidence].
+
+### Option 4. Smoothstep ramp round -> ellipse -> superellipse / rounded rectangle from z = 0 or small fraction
+(i) ATH morph [carried]: r_m = r + ((z-zf)/(L-zf))^gamma (rM - r(L)), gamma >= 1; gamma = 1 gives an abrupt slope
+  change. Power ramp, not smoothstep. Morph.FixedPart = zf/L. Keele/Geddes: no smoothstep. Smoothstep and
+  smootherstep appear only in repo code (audit rows 11-13), not in a cited primary law.
+(ii) HYBRID for the smoothstep ramp. ATH morph (power ramp from zf) is the nearest published form: WITHIN-PARENT for its parameters.
+(iii) Zero-control: amplitude 0 or target = parent outline at L -> parent. r(0,phi) = r0 requires weight 0 at z=0.
+  Smoothstep (3t^2-2t^3) has zero slope at both ends, so C1 at zf holds; power ramp with gamma = 1 does not [inferred].
+  Superellipse |x/a|^p + |y/b|^p = 1 with p ramped from 2 [inferred].
+(iv) ATH morph default gamma = 3, FixedPart = 0: about 1.6% of correction at 25% of length [inferred arithmetic].
+  No measured smoothstep-vs-power comparison found [gap].
+(v) None retrieved.
+
+### Option 5. Early-onset H/V terms for Le Cleac'h wavefront march and R-OSSE-like rollback
+(i) Iwata/Le Cleac'h [forum-quoted]: linear-in-distance width/height ratio; T = 0.5. R-OSSE rollback: NOT retrieved.
+(ii) Le Cleac'h/Iwata with ratio linear from throat (repo: AR law with p = 1): WITHIN-PARENT-LAW, pending Le Cleac'h's
+  own text. Other onsets (p >= 2, late ramp): HYBRID. Early pucker/relief term on rolled horns: HYBRID.
+  R-OSSE rollback: UNKNOWN.
+(iii) Zero-control: AR_m = 1 -> round parent. Area meaning: the march is area-based; an area-preserving AR stretch
+  (y_h y_v = y^2, audit row 6) matches equiphase area accounting [inferred]. AR(0) = 1 locked at throat.
+(iv) No measured early-vs-late onset comparison found [gap]. Le Cleac'h's papers not retrieved.
+(v) Forum spreadsheet threads (Scilab), no performance data [forum/real-world].
+
+### Option 6. Throat-located H/V split (Geddes EC/PS; Keele bi-radial; JBL PT; Mantaray; EV; Danley)
+(i) Geddes EC/PS and Keele pairs: see 1.2-1.3 [primary, carried/summary]. Repo biradial adds a throat blend to
+  remove a throat kink (registry.py:83-88); the patent has no such blend. Mantaray/PT: see 1.5-1.6.
+(ii) Geddes (as patented): WITHIN-PARENT-LAW, numerically unvalidated here. Keele per patent claims: WITHIN-PARENT-LAW.
+  Keele with added throat blend: HYBRID. Mantaray/PT: separate non-round-throat family, not evidence for OS-SE.
+  EV, Danley: not classified.
+(iii) Keele zero-control: equal H/V pairs -> axisymmetric power-series horn [inferred]. Keele throat round, gap
+  rectangular via connecting section [primary-summary]. Geddes adapter area must not shrink [carried]. Wall C1 at
+  join (Keele claim 1).
+(iv) Geddes' 20-30 deg H/V difference for elliptical-mouth OS is his own claim, no measured data retrieved [disputed].
+  Keele AES 1038 unread [carried]. Altec 1978 abstract only. No peer-reviewed bi-radial vs OS H/V comparison found [gap].
+(v) audioXpress [forum/real-world, summary]: loss frequency scales with mouth size and coverage. Pattern-flip
+  reports unverified. Not evidence for throat vs mouth split.
+
+## 3. Cross-cutting findings
+
+1. Option 1-2 keep OS-SE Eq. 5 intact by letting the caller vary parameters. No validation published. [inferred]
+2. OS as Geddes defines it is axisymmetric; H/V OS changes are HYBRID or CONTRADICTS-PARENT.
+3. The published H/V-at-throat laws are Geddes EC/PS and Keele bi-radial. Neither has measured validation in retrieved text [gap].
+4. Round-to-non-round adapters: non-decreasing area is the only rule any retrieved source states [primary-summary, carried].
+5. Most repo weight laws are late (smoothstep, power, cubic morph). No source found that measures whether early onset
+   improves H/V pattern or causes waistbanding [gap].
+6. Mouth size still caps V control frequency [forum/real-world, inferred from audioXpress].
+
+## 4. Consolidation: a shared minimal vocabulary
+
+### 4a. Common minimal set
+Proposed shared knobs (all neutral at zero-control, so a family with no H/V term reduces to its parent):
+- rho = a0_h / a0_v (throat half-angle ratio; 1 = round). Acts at z = 0. Keep within driver exit tolerance.
+- s_on in [0, 1): onset fraction of any H/V weight (0 = at throat). Replaces window-start knobs.
+- p >= 1: ramp exponent / shape of the weight (1 = linear; 2-3 = smooth late; gamma-like).
+- AR_m >= 1: target H/V aspect (mouth or target station). 1 = round.
+- e_end >= 2 (optional): section exponent; 2 = ellipse, needed only for a rounded-rectangle mouth.
+Rules: weight(0) = 0 for any H/V term, so r(0, phi) = r0; amplitude-zero is the neutral point. Encode rho and
+AR_m in log space (u = log rho, v = log AR_m) so 0 is neutral and steps are multiplicative [inferred].
+
+### 4b. How each family's law uses the set
+| Family | rho | s_on | p | AR_m | e_end | Notes |
+|---|---|---|---|---|---|---|
+| OS-SE (Batik) | ex Throat.Angle | morph FixedPart (only onset in tool) | morph Rate (gamma) | morph target aspect | n (termination, not ramp) | Maps directly through morph; rho via ex. Morph has no rho term. |
+| R-OSSE | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | UNKNOWN | Equations not retrieved; do not map. |
+| JMLC / Iwata | locked at 1 (Iwata throat ratio) | 0 (throat-locked) | p = 1 is Iwata's linear law | AR_m is the law's input | n/a | Set collapses to AR_m; rho and s_on are not in the law. |
+| Rolled / relief (repo) | none (throat_turn is a rule) | relief_start_s (floor 0.15, should be 0 for this set) | relief_peak_s shape | pucker amplitude ~ AR_m | n/a | Floor blocks s_on = 0; relax at zero-control. |
+| Keele bi-radial | a_deg H/V pair | throat blend (repo addition) | n (flare, not ramp) | a_h/a_v contour | n/a | rho and AR_m through per-plane angles; no onset term in patent. |
+| Geddes EC/PS | wall angles uncoupled | EC section length ~ s_on | PS flare | EC aspect | n/a | Closest to the set; onset is an adapter length. |
+| Crowe H/V gate (repo) | none | aspect_timing_u50 ~ s_on | fixed exponent 4 | aspect target | section exponent 2 at hold | Good fit; p not searched. |
+
+### 4c. Which family knobs the common set can replace or subsume
+Replace (window/ramp knobs, no published law behind them):
+- sf_start (osse_rollback superformula window) -> s_on.
+- eps_start (lecleach_asym odd-cosine window) -> s_on (already 0; the cubic weight is the issue, so pair with p).
+- relief_start_s (rolled family, floor 0.15) -> s_on; floor should move to 0 when the knob is used for H/V onset.
+- morph_fixed -> s_on; morph_rate -> p (rate 3 is mouth-weighted; rate 1 is abrupt per Batik, so use ~1.5-2 with s_on).
+- aspect_timing_u50 -> s_on (crowe gate); the gate exponent 4 stays fixed.
+- ar_p / g_p (lecleach_ar, iwata_ar) -> p.
+- g_a_h_deg / g_a_v_deg (osse_rollback flare per plane) -> rho-like input for flare; keep as-is, it is already H/V.
+Subsume (partial):
+- throat_ext aspect (osse aspect_ratio) -> AR_m with s_on = 0 and a hold. It is a throat-coupling rule, not a
+  ramp. Keep it as a rule (aspect 1 at the coupling plane), not a search knob.
+- a{k}_throat (grid superellipse, az_* terms) -> rho only for the cos(2 phi) harmonic (k = 1). Higher harmonics
+  (a2..a16) have no equivalent in the set; keep them as family-specific.
+Keep (published-law parameters, not replaceable): Batik n, s, q; Keele a, b, c, n; Iwata T = 0.5; Geddes EC/PS
+wall angles. Replacing these would break the parent law.
+
+### 4d. Optimization literature: parameter count, reparameterization, conditional knobs (CMA-ES)
+- Hansen, "The CMA Evolution Strategy: A Tutorial" (arXiv 1604.00772) [primary, search snippet]: CMA-ES is invariant to
+  rigid transformations of the search space (if the start point is transformed too) and to strictly increasing
+  transformations of f. Invariance under linear reparameterization requires transforming the strategy parameters too,
+  so the encoding matters for adaptation [snippet].
+- Hansen, cma-es.github.io and Auger & Hansen slides [snippet]: population size is the main free setting; reasonable
+  range 5 to 5n; restarts with growing population (IPOP; Auger & Hansen 2005 ARCMA, sci2s.ugr.es PDF) improve global search.
+- Hansen 2003 (Evolutionary Computation) [snippet]: for large enough population the adaptation time is practically
+  independent of population size. Derandomized ES 2001 [snippet]: standard step-size control needs population linear
+  in dimension; CMA's single global step size and covariance avoid this.
+- Comparison of optimizers for high-dimensional problems (arXiv 2101.04525) [snippet, not read]: relevant to parameter
+  count vs algorithm choice; not read.
+- Mixed-integer CMA-ES and the cmaes library (arXiv 2402.01373) [snippet]: gated/discrete variables are supported;
+  encoding of conditional parameters is not described in the snippet.
+- Gap: no retrieved source compares ratio vs absolute encodings, or conditional-knob encodings, for CMA-ES. Treat the
+  following as [inferred] design rules:
+  1. Fewer, log-scaled ratio knobs with neutral zero (4a) beat many absolute knobs: fewer dimensions and a
+     neutral point at the parent.
+  2. Conditional knobs: when a gate is off (amplitude 0 or rho = 1), the other knobs (s_on, p) do nothing and form
+     flat directions. Fix them to a documented default when the gate is closed, or drop them from the search vector.
+  3. Keep the vector at 3-5 continuous H/V knobs per family (4a), default population per Hansen (5 to 5n range above),
+     and use restarts.
+  4. Verify each reparameterization with the zero-control tests (KH-002 section 4) before searching.
+
+## 5. Next steps (owner)
+- Obtain text-extractable Batik OS-SE and R-OSSE rev7 PDFs; Keele AES 1038; Geddes AES 1993; Henricksen & Ureda 1978; Le Cleac'h papers.
+- BEM sweeps (Akabak/ABEC): a0 split, k split, onset s_on in {0, 0.25, 0.5}, adapter length; compare H/V half-widths to nominal a(phi).
+- Zero-control tests from KH-002 section 4 for each family that adopts the common set.
+
+## 6. Summary table
+
+| Option | Verdict | Key source | Evidence strength |
+|---|---|---|---|
+| 1. Per-azimuth a0(phi) in OS / OS-SE | OS-SE: PERMITS-BUT-UNVALIDATED; OS: CONTRADICTS-PARENT | Batik Eq. 5, ATH guide 2.1.2 [carried]; Geddes US7068805 | Weak: no measurement |
+| 2. Per-azimuth k(phi) in OS-SE | OS-SE: PERMITS-BUT-UNVALIDATED; OS: CONTRADICTS-PARENT | Batik Eq. 5 [carried] | Weak |
+| 3. Elliptical / ramped throat extension; area rule | Geddes EC, Keele connecting section: WITHIN-PARENT (equal or growing area); OS-SE + adapter: HYBRID; shrinking area: CONTRADICTS | Geddes US7068805 [carried]; Keele US4308932 [summary] | Moderate for area rule; none for H/V performance |
+| 4. Smoothstep round -> ellipse -> superellipse | HYBRID (ATH morph power ramp is nearest WITHIN-PARENT form) | ATH morph [carried] | Weak: arithmetic only |
+| 5. Early-onset terms for JMLC march and R-OSSE rollback | JMLC linear ratio: WITHIN-PARENT (forum-quoted); other onsets: HYBRID; R-OSSE: UNKNOWN | Le Cleac'h/Iwata via forum quotes | Weak |
+| 6. Throat-located H/V split (Geddes, Keele, PT, Mantaray, EV, Danley) | Geddes, Keele (as patented): WITHIN-PARENT; repo blend on Keele: HYBRID; PT/Mantaray separate family; EV/Danley not classified | Geddes US7068805 [carried]; Keele US4308932 [summary]; Altec US4187926 [snippet] | Moderate for patent construction; weak for performance |
+
+## 7. Sources
+
+Opened or seen in results this session, or carried from KH-002 (marked there as read).
+
+Batik OS-SE Waveguide (PDF, not decodable this session): https://at-horns.eu/release/OS-SE%20Waveguide.pdf
+R-OSSE Waveguide rev7 (PDF, not decodable this session): https://at-horns.eu/release/R-OSSE%20Waveguide%20rev7.pdf
+Ath 4.7.0 User Guide (carried from KH-002): https://at-horns.eu/release/Ath-4.7.0-UserGuide.pdf
+US7068805 Acoustic waveguide for controlled sound radiation (Geddes): https://patents.google.com/patent/US7068805
+US4308932A Loudspeaker horn (Keele, JBL; WebFetch summary): https://patents.google.com/patent/US4308932A/en
+US4308932 (search result): https://uspto.report/patent/grant/4,308,932
+US4187926 (Altec Mantaray throat; search result only): https://uspto.report/patent/grant/4187926
+AES e-library, Henricksen & Ureda 1978 (abstract, search result): https://aes2.org/publications/elibrary-page/?id=3066
+AES e-library, Geddes "Acoustic Waveguide Theory Revisited" (search result): https://aes.org/publications/elibrary-page/?id=6998
+Keele Horn Design AES 1038 (scan; carried from KH-002): https://audioroundtable.com/misc/Keele_Horn_Design_AES_1038.pdf
+Understanding Horn Directivity Control (audioXpress; carried from KH-002): https://audioxpress.com/article/Understanding-Horn-Directivity-Control
+JBL innovation directivity (marketing page, search result): https://jblpro.com/en/innovation-directivity.html
+GoldenKnight CMCD TechNote (third party, search result): https://goknight.com/content/documentation/CMCD_TechNote.pdf
+Le Cleac'h JMMLC horns lecture (Scribd, search result, not opened): https://www.scribd.com/document/363917638/JMMLC-horns-lecture-etf10-pdf
+diyaudio, Geddes on Waveguides (search result): https://diyaudio.com/community/threads/geddes-on-waveguides.103872/page-77
+diyaudio, Acoustic Horn Design - The Easy Way (Ath4) (search result): https://diyaudio.com/community/threads/acoustic-horn-design-the-easy-way-ath4.338806/page-469
+Hansen, The CMA Evolution Strategy: A Tutorial (arXiv 1604.00772, search result): https://arxiv.org/pdf/1604.00772
+CMA-ES project page (search result): https://cma-es.github.io
+Auger & Hansen ARCMA 2005 (search result): https://sci2s.ugr.es/sites/default/files/files/TematicWebSites/EAMHCO/contributionsCEC05/auger05ARCMA.pdf
+Comparison of optimisation algorithms for high-dimensional particle and astrophysics applications (arXiv 2101.04525, search result, not read): https://arxiv.org/pdf/2101.04525
+cmaes python library paper (arXiv 2402.01373, search result): https://arxiv.org/html/2402.01373v3
+
+## Parent-integrator verification (2026-11-18, primary text extracted from the PDFs)
+
+- Batík, *OS-SE Waveguide* (Oct 2020), §5: "note that the OS-SE profile parameters may vary around
+  the device, i.e. not necessarily being axisymmetric". The surface is written `r(z, phi)`. The
+  throat terms `alpha0` (throat opening angle) and `k` (throat expansion factor; k = 1 is the pure OS
+  hyperbola, k = 0 is a cone) are profile parameters. **Verdict: per-azimuth `a0(phi)`/`k(phi)` is
+  within the OS-SE parent's own definition** [primary]. Its acoustic benefit is unvalidated. The
+  morph equations keep `rm(0, phi) = r0`, so the throat stays round at the coupling plane [primary].
+- This supersedes the "carried from KH-002" caveat for OS-SE. Pure Geddes OS remains axisymmetric;
+  varying it is a labeled OS-SE use, not "OS".
+- Batík, *R-OSSE Waveguide rev7*: the text extracted here gives `r0, a0, k, q` as per-profile
+  parameters with BEM sweeps of `a0` and `k` (Figs. 10-20). No azimuth-variation statement was found
+  in the extracted text. R-OSSE stays **unclassified** for per-azimuth throat terms [primary, absence
+  of statement].

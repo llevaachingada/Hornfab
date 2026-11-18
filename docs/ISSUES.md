@@ -1,5 +1,12 @@
 # ISSUES
 
+## 2026-11-18 - Near-throat H/V control for asymmetric briefs (proposal)
+
+- OPEN (owner): approve the shared throat H/V block (CPU code patch plus tests), and approve the BEM
+  onset sweep (90x40, onset at 0/25/50/75 % depth) as a separate GPU budget.
+- OPEN (research): no measured H/V-onset data found in the literature. The R-OSSE azimuthal
+  status is unknown. The Keele and Mantaray claims rest on summaries (scanned or 403 sources).
+
 ## 2026-11-18 - WP-K0/K1 draft contracts delivered; senior review and owner checks open
 
 - DONE (docs only): four draft construction contracts in `docs/knowledge/contracts/`, CLAUDE.md

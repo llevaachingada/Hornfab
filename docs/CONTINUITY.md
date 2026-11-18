@@ -1,5 +1,18 @@
 # CONTINUITY
 
+## 2026-11-18 - Near-throat H/V control: audit, research (KH-002), option literature (KH-003)
+
+- Docs only; no code. Root cause in OS generators: `a0` (from `driver.exit_angle_deg`) and `k`
+  are shared by every azimuth, so only `a(phi)` splits H/V, and that split grows late. The
+  `throat_ext_length_mm` extension is round (search pressure pins it short). The rolled and
+  toroidal routes have no near-throat H/V term.
+- Primary-verified: Batík OS-SE allows its parameters to vary around the device, so a per-azimuth
+  `a0`/`k` stays inside the OS-SE parent. R-OSSE is unclassified. Smoothstep section ramps and
+  OS-SE plus elliptical throat extensions are labeled hybrids.
+- Proposed (owner approval pending): one shared throat H/V block (asymmetry ratio, onset fraction,
+  section-exponent ramp), off for symmetric briefs, with H=V reproducing the parent exactly.
+  Family one-off onset knobs are frozen neutral in new configs.
+
 ## 2026-11-18 - WP-K0/K1 docs-only: four draft construction contracts, CLAUDE.md routing, Keele scope fix
 
 - Docs and skill text only. No code, config, brief, queue, scoring or GPU change. PR #67 not touched.
