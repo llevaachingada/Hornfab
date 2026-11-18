@@ -34,12 +34,23 @@ __all__ = [
     "piston_directivity",
     "first_minus6db_angle",
     "ka",
+    "relative_level_db",
+    "relative_report",
+    "null_mask",
     "SPEED_OF_SOUND_MPS",
+    "REPORT_FLOOR_DB",
+    "NULL_FLAG_DB",
 ]
 
 SPEED_OF_SOUND_MPS: float = float(_DEFAULT_C)
 
 _TINY = 1e-300
+
+#: Finite reporting floor for a relative piston level [dB].  A deep null is clamped here so the
+#: reported curve stays finite; the null itself is carried separately (never hidden).
+REPORT_FLOOR_DB: float = -120.0
+#: A relative level at or below this value is flagged as a deep null (separate from the clamp).
+NULL_FLAG_DB: float = -40.0
 
 
 def _check_radius(a_m: float) -> float:
@@ -122,3 +133,87 @@ def first_minus6db_angle(f: Any, a_m: float, c: float | None = None) -> float:
     if y1 == y0:  # pragma: no cover - a step exactly on the threshold
         return float(a1)
     return float(a0 + (a1 - a0) * (-6.0 - y0) / (y1 - y0))
+
+
+# --------------------------------------------------------------------------- relative fingerprint
+
+def _relative_values(f: Any, a_m: float, theta_deg: Any, c: float | None,
+                     floor_db: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Raw + clamped relative dB and the deep-null mask (all finite, same shape)."""
+    if not (math.isfinite(float(floor_db))):
+        raise ValueError(f"floor_db must be finite, got {floor_db!r}")
+    f_arr = np.asarray(f, dtype=float)
+    theta_arr = np.asarray(theta_deg, dtype=float)
+    # A frequency vector x an angle vector is the fingerprint case: rows=frequencies,
+    # columns=directions.  Scalars keep the ordinary broadcasting behaviour.
+    if f_arr.ndim == 1 and theta_arr.ndim == 1 and f_arr.size > 1 and theta_arr.size > 1:
+        f_eval: Any = f_arr[:, None]
+        theta_eval: Any = theta_arr[None, :]
+    else:
+        f_eval, theta_eval = f_arr, theta_arr
+    directivity = np.asarray(piston_directivity(f_eval, a_m, theta_eval, c=c), dtype=float)
+    magnitude = np.abs(directivity)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        raw = 20.0 * np.log10(magnitude)
+    # D(0) is evaluated exactly as 1.0 by piston_directivity, so raw == 0 at 0 deg.
+    raw = np.asarray(raw, dtype=float)
+    null = (~np.isfinite(raw)) | (raw <= NULL_FLAG_DB)
+    clamped = np.where(np.isfinite(raw), raw, floor_db)
+    clamped = np.maximum(clamped, float(floor_db))
+    return clamped, raw, null
+
+
+def relative_level_db(
+    f: Any,
+    a_m: float,
+    theta_deg: Any,
+    c: float | None = None,
+    *,
+    floor_db: float = REPORT_FLOOR_DB,
+) -> Any:
+    """Relative piston level [dB re on-axis] with a finite reporting floor.
+
+    This is ``20 log10 |2 J1(x)/x|`` (``x = k a sin theta``).  At ``theta = 0`` the value is
+    exactly ``0`` dB because ``piston_directivity`` evaluates the on-axis limit directly; the
+    normalization is therefore continuous through 0 deg (no ``0/0`` branch).
+    """
+    clamped, _raw, _null = _relative_values(f, a_m, theta_deg, c, floor_db)
+    return float(clamped) if np.ndim(clamped) == 0 else clamped
+
+
+def null_mask(
+    f: Any,
+    a_m: float,
+    theta_deg: Any,
+    c: float | None = None,
+) -> Any:
+    """Boolean mask of deep piston nulls (raw relative level ``<= NULL_FLAG_DB``)."""
+    _clamped, _raw, null = _relative_values(f, a_m, theta_deg, c, REPORT_FLOOR_DB)
+    return bool(null) if np.ndim(null) == 0 else null
+
+
+def relative_report(
+    f: Any,
+    a_m: float,
+    theta_deg: Any,
+    c: float | None = None,
+    *,
+    floor_db: float = REPORT_FLOOR_DB,
+) -> dict[str, Any]:
+    """JSON-friendly relative pattern: clamped dB + raw dB + separate null flag + floor.
+
+    ``raw_level_db`` keeps non-finite/null information only through ``null_mask``; it is clamped
+    too so a caller cannot accidentally store ``-inf``.  Every value is finite.
+    """
+    clamped, raw, null = _relative_values(f, a_m, theta_deg, c, floor_db)
+    raw_clamped = np.maximum(np.where(np.isfinite(raw), raw, floor_db), float(floor_db))
+    return {
+        "level_db": clamped,
+        "raw_level_db": raw_clamped,
+        "null_mask": null,
+        "null_count": int(np.count_nonzero(null)),
+        "floor_db": float(floor_db),
+        "null_flag_db": float(NULL_FLAG_DB),
+        "formula": "20*log10(abs(2*J1(k*a*sin(theta))/(k*a*sin(theta))))",
+        "on_axis_db": 0.0,
+    }

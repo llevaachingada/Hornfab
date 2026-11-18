@@ -9,10 +9,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from hornlab_search.system import compatibility as K
 from hornlab_search.system import contracts as C
+from hornlab_search.system import piston
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -160,3 +162,95 @@ def test_query_rejects_malformed_bands() -> None:
         K.Tier0Query(f_lo_hz=8000.0, f_hi_hz=700.0)
     with pytest.raises(ValueError):
         K.Tier0Query(f_lo_hz=float("nan"), f_hi_hz=8000.0)
+
+# --------------------------------------------------------------------------- stage-5 fingerprint
+
+
+def _fingerprint(plane: str, levels: np.ndarray, *,
+                 angles: np.ndarray | None = None,
+                 freqs: tuple[float, ...] = (500.0, 600.0, 700.0, 800.0, 900.0, 1000.0),
+                 a_m: float = 0.11) -> K.HornFingerprint:
+    if angles is None:
+        angles = np.arange(-30.0, 30.1, 10.0)
+    return K.make_fingerprint(
+        plane, np.asarray(freqs, dtype=float), angles, levels,
+        source="synthetic-test")
+
+
+def _piston_levels(freqs: tuple[float, ...], angles: np.ndarray, a_m: float) -> np.ndarray:
+    rel = piston.relative_level_db(
+        np.asarray(freqs, dtype=float)[:, None], a_m, angles[None, :])
+    return 100.0 + np.asarray(rel, dtype=float)
+
+
+def test_h_left_right_parity_and_asymmetry_scores_worse() -> None:
+    angles = np.arange(-30.0, 30.1, 10.0)
+    freqs = (500.0, 600.0, 700.0, 800.0, 900.0, 1000.0)
+    a_m = 0.11
+    levels = _piston_levels(freqs, angles, a_m)
+    symmetric = _fingerprint("H", levels, angles=angles, freqs=freqs, a_m=a_m)
+    mirrored = _fingerprint("H", levels[:, ::-1], angles=angles, freqs=freqs, a_m=a_m)
+
+    e_sym = K.shape_mismatch(symmetric, a_m, 700.0)
+    e_mirror = K.shape_mismatch(mirrored, a_m, 700.0)
+    assert e_sym.accepted and e_mirror.accepted
+    assert e_sym.e_shape_db2 == pytest.approx(e_mirror.e_shape_db2, abs=1e-12)
+
+    asymmetric_levels = levels.copy()
+    asymmetric_levels[:, angles > 0.0] += 2.0
+    asymmetric = _fingerprint("H", asymmetric_levels, angles=angles, freqs=freqs, a_m=a_m)
+    e_asym = K.shape_mismatch(asymmetric, a_m, 700.0)
+    assert e_asym.accepted
+    assert e_asym.e_shape_db2 > e_sym.e_shape_db2 + 1.0
+
+
+def test_hv_planes_stay_separate_and_a_mismatch_scores_worse() -> None:
+    angles = np.arange(-15.0, 15.1, 5.0)
+    freqs = (500.0, 600.0, 700.0, 800.0, 900.0, 1000.0)
+    a_m = 0.11
+    matched = _piston_levels(freqs, angles, a_m)
+
+    h_good = _fingerprint("H", matched, angles=angles, freqs=freqs, a_m=a_m)
+    v_good = _fingerprint("V", matched, angles=angles, freqs=freqs, a_m=a_m)
+    v_bad = _fingerprint("V", matched - 2.0 * np.abs(angles)[None, :],
+                         angles=angles, freqs=freqs, a_m=a_m)
+
+    e_h_good = K.shape_mismatch(h_good, a_m, 700.0)
+    e_v_good = K.shape_mismatch(v_good, a_m, 700.0)
+    e_v_bad = K.shape_mismatch(v_bad, a_m, 700.0)
+    assert e_h_good.e_shape_db2 == pytest.approx(0.0, abs=1e-12)
+    assert e_v_good.e_shape_db2 == pytest.approx(0.0, abs=1e-12)
+    assert e_v_bad.e_shape_db2 > e_v_good.e_shape_db2 + 1.0
+    # Changing only V must not change H (separate planes, no pooled metric).
+    e_h_again = K.shape_mismatch(h_good, a_m, 700.0)
+    assert e_h_again.e_shape_db2 == pytest.approx(e_h_good.e_shape_db2, abs=1e-15)
+
+
+def test_missing_frequency_or_angle_is_rejected_not_interpolated() -> None:
+    angles = np.arange(-30.0, 30.1, 10.0)
+    freqs = (500.0, 600.0, 700.0, 800.0, 900.0, 1000.0)
+    levels = _piston_levels(freqs, angles, 0.11)
+    fp = _fingerprint("H", levels, angles=angles, freqs=freqs)
+
+    band = K.select_overlap_band((500.0, 600.0), 500.0, min_freqs=3)
+    assert band.accepted is False
+    assert any("interpolating" in reason for reason in band.reasons)
+
+    rejected = K.shape_mismatch(fp, 0.11, 500.0, min_freqs=3)
+    assert rejected.accepted is False
+    assert any("interpolating" in reason for reason in rejected.reasons)
+
+    no_axis = K.make_fingerprint(
+        "H", np.asarray(freqs), np.array([-20.0, -10.0, 10.0, 20.0]),
+        np.zeros((len(freqs), 4)), source="synthetic-test")
+    assert no_axis.accepted is False
+    assert any("on-axis" in reason for reason in no_axis.reasons)
+
+
+def test_magnitude_only_asset_refuses_phase_alignment_with_existing_tokens() -> None:
+    asset = _asset("MAGNITUDE_ONLY")
+    with pytest.raises(C.PhaseUnavailable) as excinfo:
+        K.require_phase_alignment(asset)
+    message = str(excinfo.value)
+    assert "MAGNITUDE_ONLY" in message
+    assert "PHASE_ALIGNMENT_UNAVAILABLE" in message

@@ -1,0 +1,34 @@
+# FaitalPRO 10PR320 (8 ohm) - T/S transcribed from the vendor datasheet page.
+# Machine-fetched and parsed on 2026-11-18 from
+# https://faitalpro.com/en/products/LF_Loudspeakers/product_details/index.php?id=101040140
+# (product page title "10PR320 (8 Ohm)"; every value below appears verbatim in the page's
+# "Technical Parameters" table). Published values only; nothing derived, nothing guessed.
+# Xmax is the page's own definition (winding-gap)/2 + gap/3, one-way peak.
+# NOTE: this is an ADDITIVE system-pilot file in a system-owned directory; it does NOT enter
+# examples/drivers (C8 transcriptions) unreviewed.
+name: FaitalPRO 10PR320
+kind: cone
+re_ohm: 5.3
+le_mh: 0.57
+bl_tm: 13.5
+sd_cm2: 347
+xmax_mm: 7.37
+p_aes_w: 300
+fs_hz: 48
+qms: 4.6
+mms_g: 35.0
+mmd_g: 27.7
+cms_mm_per_n: 0.31
+vas_l: 52.7
+rms_kg_s: 2.3
+cutout_mm: 230
+depth_mm: 110
+frame_od_mm: 261
+sens_db_2v83: 96
+source: "https://faitalpro.com/en/products/LF_Loudspeakers/product_details/index.php?id=101040140"
+notes: >
+  Vendor page machine-fetched 2026-11-18. Also published (system-layer use, outside C8 schema):
+  bolt circle 246 mm, flange+gasket 12 mm, net air volume filled by loudspeaker 1.3 dm3 (Vad),
+  Xdamage 17 mm, minimum impedance 6.4 ohm, Qes 0.31, Qts 0.29, EBP 155 Hz, cone surround
+  Triple Roll. Cone depth, surround width and dust cap diameter are NOT printed numerically on
+  the page: installed-tier geometry stays incomplete until maker CAD / measurement.

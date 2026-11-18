@@ -78,3 +78,28 @@ def test_ka_to_zero_is_omnidirectional() -> None:
     assert float(piston.ka(1.0, 1e-3)) < 1e-4
     np.testing.assert_allclose(d, 1.0, rtol=0.0, atol=1e-6)
     assert math.isnan(piston.first_minus6db_angle(1.0, 1e-3))
+
+
+# --------------------------------------------------------------------------- relative fingerprint
+
+
+def test_relative_level_is_zero_on_axis_with_continuous_normalisation() -> None:
+    assert piston.relative_level_db(1000.0, 0.1, 0.0) == pytest.approx(0.0, abs=1e-12)
+    # Approaching 0 deg from both sides converges to the same axis value (no 0/0 branch).
+    eps = 1e-6
+    assert piston.relative_level_db(1000.0, 0.1, eps) == pytest.approx(0.0, abs=1e-9)
+    assert piston.relative_level_db(1000.0, 0.1, -eps) == pytest.approx(0.0, abs=1e-9)
+
+
+def test_deep_null_is_finite_in_report_and_flagged_separately() -> None:
+    # Choose x = first Bessel zero (3.8317) at 8 kHz for a = 0.2 m.
+    a = 0.2
+    f = 8000.0
+    k = 2.0 * math.pi * f / C_AIR
+    theta = math.degrees(math.asin(3.8317 / (k * a)))
+    report = piston.relative_report(f, a, theta)
+    level = float(report["level_db"])
+    assert math.isfinite(level)
+    assert piston.REPORT_FLOOR_DB <= level <= piston.NULL_FLAG_DB
+    assert bool(report["null_mask"]) is True
+    assert report["null_count"] == 1
