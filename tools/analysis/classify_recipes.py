@@ -55,8 +55,8 @@ def _points_digest(inner: np.ndarray, sampler_version: str = "record-v2.0") -> s
 
 def _live_kernel_digest(module_name: str) -> str | None:
     try:
-        import hornlab_search.design.generators as gen_pkg
-        mod = getattr(gen_pkg, module_name)
+        import importlib
+        mod = importlib.import_module(f"hornlab_search.design.generators.{module_name}")
         return mod.implementation_digest()
     except Exception:  # noqa: BLE001 - missing module => cannot verify
         return None
@@ -82,7 +82,12 @@ def classify_design(payload: dict) -> tuple[str, str]:
     """(class, detail) for one design.json payload. Pure; no filesystem access."""
     gen = payload.get("generator")
     if not isinstance(gen, dict):
-        return UNVERIFIED, "no generator block"
+        # Legacy design.json schema (pre-generator era): {design_hash, family, params}. The
+        # design hash and the geometry derive from family + params by construction, so the
+        # record rebuilds without any digest - classified rebuildable, schema flagged.
+        if payload.get("family") and isinstance(payload.get("params"), dict):
+            return REBUILDABLE, "legacy schema (family+params, no generator block): rebuilds from params"
+        return UNVERIFIED, "no generator block and no (family, params) route"
     blocks = _rows_blocks(payload)
     kind = str(next((b.get("type") for b in blocks if b.get("type")),
                     payload.get("family") or ""))

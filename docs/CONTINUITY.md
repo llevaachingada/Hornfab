@@ -1,5 +1,17 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - legacy-recipe classification executed over runs/ (R12b/D9 close-out; read-only)
+
+- `tools/analysis/classify_recipes.py` run over the real `runs/` tree (48,474 design.json records
+  in 18.4 s, single process, thread caps 1, read-only): **48,471 rebuildable** (30,147 of them the
+  legacy `{family, params}` schema — rebuildable from params by construction), **3 bridge**
+  (klangfilm_lame_hv_core designs from 2026-11-17, kernel digest moved since save — informational
+  only per R12b), **0 record_refused, 0 unverified**. Two tool fixes on the way: the legacy-schema
+  class and `importlib` for the live kernel digest. Summary:
+  `docs/evidence/wp09_d9_provenance_2026-11-18/classify_summary.json` (+ classify_rows.jsonl kept
+  under runs/analysis/classify_recipes_2026-11-18/, untracked). WP 0.9/D9 is now complete through
+  its full STEP 4f description.
+
 ## 2026-11-18 - reuse rescore published (v7/v10 floors + ties), WP 0.9/D9 merged, mixed_identity fixed (local orchestrator, owner-directed)
 
 - **Owner directive executed (protect → reuse → ≤3 CPU workers → verify → report).** Zero re-scoring
