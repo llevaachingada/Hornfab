@@ -1,5 +1,14 @@
 ﻿# ISSUES
 
+## 2026-11-18 - v10 rescore not yet run (WP 1.4 / 1.5)
+
+- OPEN (local agent): run the commands in `docs/evidence/v10_rescore_2026-11-18/README.md`
+  (three rescores, compare, two floors), check v7 parity and `mixed_identity: false`, commit the
+  summaries. CPU only.
+- OPEN (owner): v10 rip tolerance/weight are the v9 values in the offline brief; changing them is
+  a new identity. Constancy stays undeclared until its floor is measured.
+- CLOSED: replay refused v10 (gate fixed, tested).
+
 ## 2026-11-18 - throat sweep Phases 1-3 complete; two BO arms skipped, resume needs fresh --root
 
 - DONE: Phases 1-3 on cd_rrect_2026-11-17 (A_r15 beats v8 by 0.0192 on the matched v7 identity;

@@ -12,6 +12,10 @@ Near-throat H/V: [route audit](knowledge/THROAT_HV_CONTROL_AUDIT_2026-11-18.md),
 [KH-003 option literature](knowledge/claims/KH-003_throat_hv_options_literature.md).
 Existing research remains in place; imported recommendations are not implementation mandates.
 
+[v10 rescore, one local command (2026-11-18, WP 1.4/1.5)](evidence/v10_rescore_2026-11-18/README.md):
+the replay gate fix, the two offline v9/v10 rescore briefs, and the exact PowerShell commands for
+per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 frequency floor. Not run.
+
 
 [Orchestrator handoff for the senior plan (2026-11-17)](../scratch/fable_architecture/ORCHESTRATOR_HANDOFF_2026-11-17.md):
 how a lower-cost local orchestrator continues the plan: rules, what exists, first-session verification,
