@@ -1,5 +1,11 @@
 # ISSUES
 
+## 2026-11-18 - v10 BO metric policy: wiring waits on the owner
+
+- OPEN (owner): PR-D is usable only after PR-A's ripple-region policy is chosen. No study or
+  Pareto run consumes the v10 policy yet. Keep qLogNEI / qLogNEHVI; no multi-output GP without a
+  held-out ablation.
+
 ## 2026-11-18 - v10 ripple region: owner policy needed before any brief uses it
 
 - OPEN (owner): pick the ripple inspection region: preferred_edge / min_edge / seat_zone_deg
