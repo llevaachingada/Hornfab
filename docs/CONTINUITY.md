@@ -1,5 +1,27 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - owner-directed queue jump: B1 probes to the front; two tool faults fixed on the way (local orchestrator)
+
+- **Owner asked for B1 at the front of the live night.** Executed with the runner's own mechanics:
+  PAUSE -> reorder night file -> stop the in-flight search(es) -> corrections -> unpause. Backups:
+  `cd_rrect_2026-11-17.yaml.bak-20261118-b1front`, `.bak-20261118-b1rc2`. Stopped: w_ext_throat
+  partial at **92/200 rows** (kept; resume2 queued with `budget: 200` — strict resume treats
+  `--budget` as the CUMULATIVE cap and refused 109, matching the recorded c_rrect_100w_rc2 cause);
+  w_klangfilm fresh run killed at **0 evals** (nothing lost); w_ath_core14 at ~23 s (~1 row).
+  Both killed w_* jobs re-queued under `_r2` ids after the atlas arms. PAUSED/RESUMED logged by
+  the runner; every stop recorded in the queue log.
+- **Fault 1 (committed `8eca641`):** `fidelity_pairs` passed the backend STRING to
+  `worker.warm`/`evaluate` (both need the object) — the first five probes
+  (`b1_mesh_*_20261118`) each burned in ~6 s. Fixed via `cli._backend`-mirroring
+  `_backend_obj` at all four call sites + regression tests.
+- **Fault 2 (no code, doc fix):** the night-queue skill's resume rule said "budget = the missing
+  new evals" — wrong; fixed to "budget = the ORIGINAL cumulative cap" (strict resume refuses a
+  shrink). The empirical rule now matches the c_rrect_100w_rc3 precedent (budget 110 → ok).
+- **Now solving:** `b1_mesh_2f7307c06023_20261118_rc2` — first probe went past the previous crash
+  point in ~3 min, GPU 2538 MiB / 100 % (refined fold-warm solve with memwatch + VRAM record).
+  Queue order now: 5 × b1_rc2 → w_ext resume2 (budget 200) → w_* backlog → atlas BO arms →
+  re-added w_klangfilm/w_ath_core14 `_r2` → (burned old b1 ids skipped).
+
 ## 2026-11-18 - integration carried to main; cloud-resume pointer set (local orchestrator)
 
 - The `classify_recipes` close-out (`e13a1ad`) landed on `hornfab-all-2026-11-18` AFTER PR #70

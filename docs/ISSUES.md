@@ -1,5 +1,20 @@
 ﻿# ISSUES
 
+## 2026-11-18 - B1 probes burned once on a tool fault, re-queued (_rc2); strict-resume semantics recorded
+
+- CLOSED (WP 2.2/D7, commit `8eca641`): fidelity_pairs backend-string fault — the five
+  `b1_mesh_*_20261118` probe ids are burned (ledger keeps them); re-queued as
+  `b1_mesh_*_20261118_rc2` at the FRONT of the live night (owner-directed queue jump). First _rc2
+  probe verified past the crash point (GPU 2538 MiB / 100 %).
+- CLOSED (night-queue resume semantics): `--budget` on a strict resume is the ORIGINAL cumulative
+  cap, not the missing-eval count — the skill line is corrected; ext_throat resume2 queued with
+  `budget: 200` (92/200 rows preserved in runs/20261118T212720Z-screen-c017db).
+- OPEN (queue owner): w_klangfilm + w_ath_core14 were killed at ~0 evals (nothing lost) and
+  re-queued as `_r2` ids after the atlas arms; w_lecleach_* and the remaining w_* backlog continue
+  in order. No cutoff configured.
+- Carry-over opens unchanged from earlier entries (rho20 senior item, v7 floor reconciliation,
+  anchor fallback dossier, range15 brief orphans, B6 budget).
+
 ## 2026-11-18 - rescore reuse published + floors; WP 0.9/D9 merged; v7 floor discrepancy open
 
 - CLOSED (WP 1.4/1.5, owner-directed reuse pass): full-fleet v7/v9/v10 columns reused untouched;
