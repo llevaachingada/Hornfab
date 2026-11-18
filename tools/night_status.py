@@ -17,6 +17,12 @@ run dir has a ``search.ndjson`` whose newest row is older than 30 minutes.
 
 J is comparable only WITHIN a brief (each brief has its own target and weights): the "best" table
 groups by brief.
+
+Row truth (C1, 2026-11-17): a ``## Nights`` row reports what the job itself did. New rows carry
+the runner's ``rows_window``/``best_J_window``/``bo_progress`` and are preferred; old rows are
+re-derived read-only from the job log's argv, the run dir's ``search.ndjson`` rows inside the
+row's recorded [start, end] window, and a BO study root's package journal. A resumed job whose
+real rows exist but cannot be attributed to the window reports ``unknown``, never ``0 evals``.
 """
 from __future__ import annotations
 
@@ -58,6 +64,13 @@ _parse_run_dir = _runner.parse_run_dir
 _count_evals = _runner.count_evals
 _lock_holder_pid = _runner._lock_holder_pid
 _pid_alive = _runner._pid_alive
+_argv_from_log = _runner.parse_argv_from_log
+_run_dir_from_argv = _runner.run_dir_from_argv
+_bo_root_from_argv = _runner.bo_root_from_argv
+_read_bo_progress = _runner.read_bo_progress
+_bo_progress_from_log = _runner.bo_progress_from_log
+_rows_in_window = _runner.rows_in_window
+_summarize_ndjson = _runner.summarize_ndjson
 
 _QUEUE_START_RE = re.compile(r"^=== (\S+) START (\S+) : (.*)$")
 _QUEUE_END_RE = re.compile(r"^=== (\S+) END (\S+) exit (-?\d+)")
@@ -180,8 +193,12 @@ def scan_running_jobs(runs_root: Path, repo_root: Path, *, now: float | None = N
             continue
         for entry in parse_queue_log(text):
             job_log = Path(runs_root) / "nights" / night / f"{entry['id']}.log"
-            run_dir = _parse_run_dir(job_log.read_text(encoding="utf-8", errors="replace")
-                                     if job_log.exists() else "", repo_root=repo_root)
+            job_text = (job_log.read_text(encoding="utf-8", errors="replace")
+                        if job_log.exists() else "")
+            run_dir = _parse_run_dir(job_text, repo_root=repo_root)
+            if run_dir is None:
+                # A running --resume job prints no final summary line; its argv names the run dir.
+                run_dir = _run_dir_from_argv(_argv_from_log(job_text), repo_root=repo_root)
             ndjson = (run_dir / "search.ndjson") if run_dir is not None else None
             newest_age: float | None = None
             if ndjson is not None and ndjson.exists():
@@ -231,6 +248,102 @@ def build_lane_report(runs_root: Path, repo_root: Path, *, now: float | None = N
                              f"(> {NEWEST_ROW_ALERT_S / 60:.0f}) while job {job['id']} runs; "
                              f"check the lane's hosts and {run_text}/search.ndjson")
     return lines
+
+
+# ------------------------------------------------------------------ per-row truth (C1, 2026-11-17)
+#
+# A summary row must say what the job ITSELF did. New rows carry the runner's ``rows_window`` /
+# ``best_J_window`` / ``bo_progress``; old rows are re-derived read-only from the job log's argv,
+# the run dir's search.ndjson (rows inside the row's [start, end] window) and a BO study root's
+# package journal. A resumed job whose real row count is visible but not attributable to the
+# window reports ``unknown``, never ``0 evals``.
+
+
+def _job_log_text(night_dir: Path, job_id) -> str:
+    path = Path(night_dir) / f"{job_id}.log"
+    try:
+        return path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+
+
+def _bo_truth(progress: dict, source: str) -> dict:
+    best = progress.get("best_verify_J")
+    if best is None:
+        best = progress.get("best_screen_J")
+    return {"evals": progress.get("total_calls", 0), "best_J": best, "source": source,
+            "detail": (f"BO screen {progress.get('screen_calls')} "
+                       f"verify {progress.get('verify_calls')} "
+                       f"observations {progress.get('observations')}"),
+            "run_dir": progress.get("root")}
+
+
+def job_truth(row: dict, night_dir: Path, repo_root: Path) -> dict:
+    """What one summary row really did: ``{"evals", "best_J", "source", "detail", "run_dir"}``.
+
+    ``evals`` is an int, or ``"unknown"`` for a resumed job whose real rows exist in the run dir
+    but cannot be attributed to the recorded window.
+    """
+    bo = row.get("bo_progress")
+    if isinstance(bo, dict):
+        return _bo_truth(bo, "summary")
+    if row.get("rows_window") is not None:
+        detail = f"window {row.get('rows_window')} rows, valid {row.get('valid_rows_window')}"
+        return {"evals": row.get("rows_window"),
+                "best_J": row.get("best_J_window", row.get("best_J")),
+                "source": "summary", "detail": detail, "run_dir": row.get("run_dir")}
+
+    log_text = _job_log_text(night_dir, row.get("id"))
+    argv = _argv_from_log(log_text)
+    bo_root = _bo_root_from_argv(argv, repo_root=repo_root)
+    if bo_root is not None:
+        progress = _read_bo_progress(bo_root) or _bo_progress_from_log(log_text)
+        if progress is not None:
+            return _bo_truth(progress, "package progress")
+        return {"evals": "unknown", "best_J": "unknown", "source": "none",
+                "detail": "BO study root unreadable", "run_dir": None}
+
+    run_dir = Path(row["run_dir"]) if row.get("run_dir") else None
+    resumed_dir = _run_dir_from_argv(argv, repo_root=repo_root)
+    resumed = resumed_dir is not None
+    if run_dir is None:
+        parsed = _parse_run_dir(log_text, repo_root=repo_root)
+        if parsed is not None:
+            run_dir = parsed
+    if run_dir is None:
+        run_dir = resumed_dir
+    ndjson = (run_dir / "search.ndjson") if run_dir is not None else None
+    total = _count_evals(ndjson) if ndjson is not None and ndjson.is_file() else 0
+    if ndjson is not None and ndjson.is_file():
+        rows = _rows(ndjson)
+        window = _rows_in_window(rows, row.get("start"), row.get("end"))
+        if window:
+            best, counts = _summarize_ndjson(window)
+            return {"evals": len(window), "best_J": best, "source": "run dir window",
+                    "detail": f"window {len(window)}/{total} rows, valid {counts['ok']}",
+                    "run_dir": str(run_dir)}
+        if total:
+            if resumed:
+                return {"evals": "unknown", "best_J": "unknown", "source": "run dir",
+                        "detail": f"{total} rows in run dir, none attributable to the recorded window",
+                        "run_dir": str(run_dir)}
+            best, counts = _summarize_ndjson(rows)
+            return {"evals": total, "best_J": best, "source": "run dir",
+                    "detail": f"{total} rows (no attributable window)", "run_dir": str(run_dir)}
+    if resumed:
+        return {"evals": "unknown", "best_J": "unknown", "source": "none",
+                "detail": "resumed job but no readable run dir", "run_dir": None}
+    return {"evals": 0, "best_J": None, "source": "none", "detail": "", "run_dir": None}
+
+
+def format_summary_row(row: dict, truth: dict) -> str:
+    """One ``## Nights`` line in the historical shape, with the measured detail appended."""
+    note = "" if row.get("exit_code") == 0 else (
+        f"  <- exit {row.get('exit_code')}: {str(row.get('note'))[:60]}")
+    detail = f" ({truth['detail']})" if truth.get("detail") else ""
+    minutes = round((row.get("seconds") or 0) / 60)
+    return (f"    {row['id']}: best J {truth['best_J']}, {truth['evals']} evals, "
+            f"{minutes} min{detail}{note}")
 
 
 # ------------------------------------------------------------------ process probe (kept from 2026-10-28)
@@ -285,10 +398,10 @@ def main(argv=None) -> int:
         n_jobs = len(re.findall(r"^\s*-\s*\{id:", yml.read_text(encoding="utf-8"), re.M)) if yml.exists() else "?"
         print(f"- **{d.name}**: {len(done)}/{n_jobs} jobs done")
         for j in done:
-            note = "" if j.get("exit_code") == 0 else f"  <- exit {j.get('exit_code')}: {str(j.get('note'))[:60]}"
-            print(f"    {j['id']}: best J {j.get('best_J')}, {j.get('evals_ndjson')} evals, "
-                  f"{round(j.get('seconds', 0) / 60)} min{note}")
-            rd = Path(j["run_dir"]) if j.get("run_dir") else None
+            truth = job_truth(j, d, REPO)
+            print(format_summary_row(j, truth))
+            resolved = truth.get("run_dir") or j.get("run_dir")
+            rd = Path(resolved) if resolved else None
             if rd and (rd / "search.ndjson").exists():
                 for r in _rows(rd / "search.ndjson"):
                     if r.get("ok"):
