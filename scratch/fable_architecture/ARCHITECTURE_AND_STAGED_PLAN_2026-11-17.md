@@ -458,11 +458,19 @@ Status deltas to the table above (2026-11-18): 2.1 finalist tier — wired in CL
 these configs (epw/f_max unchanged, cap not binding) — the tier changes frequency grids only**;
 2.2 B1 — in D7 above; 1.3 — owner answered: keep v7 for nights, add v9 as a free second CPU
 score (H 60-90° from 700 Hz, V 40-60° from 1000 Hz, loading on, slope-limited constancy with
-its noise floor measured on stored data before it counts); 3.3/3.4 — data-agreement gate now
-"unknown"/`unconfirmed (n=…)` for n < 10 (C2, tools/analysis/space_card.py, uncommitted);
-0.6/0.7/3.2 — night-truth fields landed in tools (C1, uncommitted); D4 evidence: shape check
+its noise floor measured on stored data before it counts); **that v9 corridor-mode second score
+is PROVISIONAL per the 2026-11-18 senior addendum §5 (confirmed corridor ripple-mask bug,
+`scalar_v9.py:493`): no ranking/decision from v9 corridor numbers until the owner settles the
+ripple inspection-region policy; the eventual fix is a new versioned objective identity, and
+`scalar_v9.py` is untouched while the uncommitted other-author edits exist**; 3.3/3.4 —
+data-agreement gate now
+"unknown"/`unconfirmed (n=…)` for n < 10 (C2, tools/analysis/space_card.py, committed in
+`afb8236`); 0.6/0.7/3.2 — night-truth fields landed in tools (C1, committed in `04dd5af`);
+B1/B1f tooling + CPU sizing committed in `b6d3ba4` (fold-warm x2 probe-grade, ext-throat
+infeasible on this card); D4 evidence: shape check
 9/14 (the 5 bridge-type `_w1` lanes fail the STOCK `DesignSpace`/`shape_check` path — the night
-jobs now run their bridge CLIs, see `runs/nights/cd_rrect_2026-11-17/held_and_edited_2026-11-18.md`);
+jobs now run their bridge CLIs, see `runs/nights/cd_rrect_2026-11-17/held_and_edited_2026-11-18.md`,
+launch-fatal bare-`search` argv also repaired);
 search_preflight `--from-runs` still refuses history on every loadable lane (raw brief_file
 string identity — C5 remains the owner-gated fix), `hl__klangfilm_lame_curved_v1_c200_w1` adds
 `no_headroom`.

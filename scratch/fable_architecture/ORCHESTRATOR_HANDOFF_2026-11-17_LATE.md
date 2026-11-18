@@ -438,7 +438,11 @@ never modify `.venv`; never `taskkill /IM julia.exe`; one CUDA solve at a time m
 1. §4.1 B1 encoding (blocks the owner's "Add B1 now").
 2. §4.3 the "5 cardable" count.
 3. Which v9 corridor/brief is authoritative for selection vs scoring (WP3 h90→70 v1000 vs the
-   owner's answer-3 brief).
+   owner's answer-3 brief). **2026-11-18: ALL v9 corridor-mode second scores are PROVISIONAL**
+   (senior addendum §5: confirmed corridor ripple-mask bug, `scalar_v9.py:493` — a 70-90°
+   corridor is scored over only ±10°); no ranking/decision from them until the owner settles
+   the ripple inspection-region policy; `scalar_v9.py` untouched while other-author edits exist;
+   any fix becomes a NEW versioned objective identity.
 4. Lane Q3: near-duplicate swap in B1's ten (9fcd21fc1904 ↔ 6d6dd332b282).
 5. Lane Q4: cache reuse for B1 pass 1.
 6. C1 open: retro-classify stop reasons for OLD summary rows? (cheap; owner-visible value).
@@ -448,3 +452,12 @@ never modify `.venv`; never `taskkill /IM julia.exe`; one CUDA solve at a time m
 9. Who integrates master-plan work (D10) — ask with the §9 governance note.
 10. Fold-warm held: does the owner want its queue slot used by anything else, or just shorter
     night? (Default: just remove; do not refill without asking.)
+11. **NEW (2026-11-18, senior addendum §5): ripple "inspection region" policy** — options from
+    the audit §4.1: preferred edge / guaranteed minimum edge / declared seat zone / other.
+    Gates any fix to the confirmed v9 corridor ripple-mask bug (`scalar_v9.py:493`); the v7,
+    B1 and B1f tracks are unaffected. Also folded from the same addendum: the scoring-truth
+    track (PR-A..F proposals) becomes ONE track next to C1-C4; the throat agent runs the
+    parallel read-only evidence E1-E4 into the carrier `evidence_scoring_2026-11-18/`; the BO
+    metric policy (`freeze_metric_policy` accepts v4/v7 only) and the qLogNEI/qLogNEHVI pilot
+    come later, gated on E1-E4 + the policy answer. Respect the negative E1 surrogate result:
+    no multi-output GP without held-out ablation.

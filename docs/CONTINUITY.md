@@ -82,6 +82,19 @@
   outputs. Five-job B1 mesh spec proposed in `.b1/b1_mesh_night_insert.yaml`, NOT queued —
   owner approves GPU slots first. Heavy raw intermediates (replay pools ~40 MB JSON, dry-run
   meshes ~56 MB .msh) left uncommitted, reproducible from the committed dry-run command.
+- **Scoring-truth addendum applied (2026-11-18, carrier
+  `hornfab_patches/SENIOR_DIRECTIVE_2026-11-18.md` §5).** Confirmed in the cloud against
+  `b6d3ba4`: v9 corridor-mode ripple-mask bug at `hornlab_search/objective/scalar_v9.py:493`
+  (passes `hi - lo` as the inspected angle — a 70-90° corridor scores only ±10°). **All v9
+  corridor-mode second scores are now marked PROVISIONAL** (decision packet, plan §10.1,
+  handoff §9.3/9.11): no ranking, winner-pick or queue decision from them until the owner
+  settles the ripple inspection-region policy (preferred edge / guaranteed minimum edge /
+  declared seat zone / other). `scalar_v9.py` untouched while the uncommitted other-author
+  edits exist; any fix becomes a NEW versioned objective identity. v7, the throat sweep and
+  B1/B1f are unaffected. The scoring-truth track (PR-A..F proposals, qLogNEI/qLogNEHVI later,
+  BO `freeze_metric_policy` accepts v4/v7 only) folds into the plan as one track; the throat
+  agent's isolated clone runs the read-only evidence E1-E4 into the carrier
+  `evidence_scoring_2026-11-18/`.
 - Commit/coverage note: this entry's code lands in the same push (C1 in
   `feat(tools): night truth`, C2 in `feat(analysis): data-agreement gate`); the queue file is
   untracked (`runs/`), so the queue edits travel as the held-note above, not as commits.

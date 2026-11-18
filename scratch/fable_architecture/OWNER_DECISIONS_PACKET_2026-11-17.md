@@ -229,3 +229,23 @@ nights' scoring; add v9 as a free second score on CPU — H 60-90° from 700 Hz,
 1000 Hz, loading on; constancy slope-limited, its noise floor measured on stored data before it
 counts. Designs near the top under both scores are the safe picks; the nights' scoring does not
 switch until a physical measurement (stage 2b) shows which score predicts a real horn better.
+
+### PROVISIONAL — v9 corridor-mode second scores (2026-11-18, senior directive addendum §5)
+
+Effective immediately: **every v9 second score computed on a corridor-mode brief is
+PROVISIONAL.** The audit confirmed a v9 corridor-mode ripple-mask bug at
+`hornlab_search/objective/scalar_v9.py:493`: it passes `hi - lo` (the spread of allowed
+beamwidths) as the total inspected angle, so a 70-90° corridor is scored over only ±10°. Until
+the owner settles the ripple inspection-region policy: **no ranking, winner-pick, "safe-pick"
+or queue decision may be taken from v9 corridor numbers.** v7 decisions, the throat sweep
+(v7) and B1 (a mesh check) are unaffected. `scalar_v9.py` is not to be edited while the
+uncommitted other-author edits exist; when fixed, the fix is a NEW versioned objective/score
+identity — the meaning of existing v9 J is never changed. Target mode's `2*preferred` is
+probably correct if `preferred` is a half-angle edge, per the docstring — verify before changing.
+
+**Owner question (added 2026-11-18): what is the ripple "inspection region"?**
+Options from the audit §4.1: (a) preferred edge (the mode mask centres on the preferred/target
+beamwidth edge); (b) guaranteed minimum edge (inspect from the guaranteed edge of the
+corridor); (c) a declared seat zone (a brief-declared angular region, family-free per the CD
+intent lock); (d) other/combined. This settles both the corridor-mode mask and whether target
+mode's `2*preferred` is the right total width before any fix is versioned.

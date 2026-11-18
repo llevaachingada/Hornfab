@@ -40,6 +40,17 @@
   Shared-Usage spill decides per design); x3 cap-bound/never built for all; ext-throat x2/x3
   INFEASIBLE on this card (mesher refuses: symmetry-plane slivers; est. ~21.1 k DOF). 24 tests;
   five per-design job spec `.b1/b1_mesh_night_insert.yaml` PROPOSED, not queued.
+- OPEN (owner, NEW 2026-11-18 senor-directive addendum §5): v9 corridor-mode ripple mask
+  confirmed buggy (`scalar_v9.py:493` passes `hi - lo` as the total inspected angle — a 70-90°
+  corridor is scored over only ±10°). **All v9 corridor-mode second scores are PROVISIONAL**: no
+  ranking, winner-pick or queue decision from v9 corridor numbers until the owner settles the
+  ripple inspection-region policy (preferred edge / guaranteed minimum edge / declared seat
+  zone / other). `scalar_v9.py` untouched while the uncommitted other-author edits exist; any
+  fix is a NEW versioned objective/score identity (existing v9 J meaning never changes). Target
+  mode's `2*preferred` is probably correct per its docstring — verify before changing. v7
+  decisions, the throat sweep (v7) and B1/B1f are unaffected. Parallel read-only evidence
+  E1-E4 (corridor-mask tests, offline rerank, lobe diagnostics, ablation matrix) assigned to
+  the throat agent's isolated clone, delivered to the carrier `evidence_scoring_2026-11-18/`.
 - OPEN (senior/owner): B1 encoding is decided (mesh convergence, not the `verify,finalist`
   frequency pair - that encoding is B1f); CPU dry-run + feasibility table in progress in
   `scratch/fable_architecture/.b1/`; GPU slots queue after the BO arms once the owner approves
