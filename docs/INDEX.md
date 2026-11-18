@@ -14,6 +14,8 @@ Existing research remains in place; imported recommendations are not implementat
 
 [Throat H/V sweep evidence (2026-11-18, Phases 1-3)](evidence/throat_hv_2026-11-18/LOCAL_RESULTS_2026-11-18_part3.md):
 single solves, epw8 mesh check, 40-eval B search, per-config H/V beamwidth and DI CSVs.
+Follow-up proposal: [G5 recommendation](evidence/throat_hv_2026-11-18/G5_RECOMMENDATION_2026-11-18.md)
+(park on A as inert; B has H authority but is not competitive under v7).
 
 [v10 rescore, one local command (2026-11-18, WP 1.4/1.5)](evidence/v10_rescore_2026-11-18/README.md):
 the replay gate fix, the two offline v9/v10 rescore briefs, and the exact PowerShell commands for

@@ -1,5 +1,11 @@
 ﻿# ISSUES
 
+## 2026-11-18 - throat block on A: park decision (owner)
+
+- OPEN (owner): accept "park on A, inert in this envelope" (G5). An A-family morph-target `_v2`
+  is the only legal way to make onset live there; it is a new construction, not recommended.
+- OPEN (local agent, CPU): read the throat runs' rows in the v10 rescore column when it runs.
+
 ## 2026-11-18 - plan status §10.2 published; A-vs-v8 per-band authority unconfirmed
 
 - OPEN (local agent, CPU): run the `u3_authority.py` command in plan §10.2 to confirm the A-vs-v8
