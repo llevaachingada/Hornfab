@@ -1,5 +1,11 @@
 ﻿# ISSUES
 
+## 2026-11-18 - plan status §10.2 published; A-vs-v8 per-band authority unconfirmed
+
+- OPEN (local agent, CPU): run the `u3_authority.py` command in plan §10.2 to confirm the A-vs-v8
+  rows per band (cloud had only whole-band means for v8). Expected: no authority.
+- NOTE: "A_r15 beats v8 by 0.0192" is a TIE under the 0.13 floor; do not cite it as a win.
+
 ## 2026-11-18 - D6 step 1 anchor (ST260): local source check before any solve
 
 - OPEN (local agent): re-read R-OSSE rev7 + ST260 page, fix config values if they differ, choose

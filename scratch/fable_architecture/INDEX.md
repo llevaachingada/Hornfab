@@ -292,7 +292,7 @@ verify rank stability, held-out GP ranking at 100–231 rows, and refusal-margin
 | `ORCHESTRATOR_HANDOFF_2026-11-17.md` | **handoff for the local orchestrator**: rules, inventory, verification, stage-5 workflow, ordered tasks |
 | `U3_RECORD_EDITS_CPU_2026-11-17.md` | U3 CPU stage on a biradial seed |
 | `space_cards/` | parameter-space cards and `__space_v1` proposals for five lanes |
-| `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` | **target architecture and staged plan**: layers, contracts, stages 0-8 with work packages and exit gates, GPU budget, invariants, task-file template and readiness |
+| `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` | **target architecture and staged plan**: layers, contracts, stages 0-8 with work packages and exit gates, GPU budget, invariants, task-file template and readiness; §10.2 = status 2026-11-18 per WP, placement of the 11-18 work, the throat authority table, critical path and next owner decisions |
 
 ## Tracked digest
 

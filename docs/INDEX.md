@@ -12,6 +12,9 @@ Near-throat H/V: [route audit](knowledge/THROAT_HV_CONTROL_AUDIT_2026-11-18.md),
 [KH-003 option literature](knowledge/claims/KH-003_throat_hv_options_literature.md).
 Existing research remains in place; imported recommendations are not implementation mandates.
 
+[Throat H/V sweep evidence (2026-11-18, Phases 1-3)](evidence/throat_hv_2026-11-18/LOCAL_RESULTS_2026-11-18_part3.md):
+single solves, epw8 mesh check, 40-eval B search, per-config H/V beamwidth and DI CSVs.
+
 [v10 rescore, one local command (2026-11-18, WP 1.4/1.5)](evidence/v10_rescore_2026-11-18/README.md):
 the replay gate fix, the two offline v9/v10 rescore briefs, and the exact PowerShell commands for
 per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 frequency floor. Not run.
@@ -38,6 +41,7 @@ backbone, new freedoms tested on the record before any are built, search inside 
 safety net; owner decision cards for C1-C6. The target architecture, stages 0-8 with gates, GPU budget
 (about 34-38 solves before matched reruns) and the task-file conversion guide are in
 [ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md](../scratch/fable_architecture/ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md).
+Its §10.2 (2026-11-18) is the current per-WP status, the throat-block authority table and the critical path.
 Docs only; no code, solve or queue change.
 
 [Owner decisions packet (2026-11-17)](../scratch/fable_architecture/OWNER_DECISIONS_PACKET_2026-11-17.md):
