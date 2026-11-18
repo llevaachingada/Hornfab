@@ -1,0 +1,33 @@
+id: 4
+title: Keele mouth-size heuristic applied as hard gate for JMLC/OSSE
+prompt: >
+  An automated feasibility check refuses an OSSE design because its vertical aperture
+  of 480 mm is smaller than the value predicted by the Keele Bi-Radial formula
+  (W ≈ 25 000/(A × f)) at 700 Hz with A = 50 degrees. It labels this design
+  "physically impossible." Should this check be applied as a hard gate for
+  JMLC and OSSE families? What does the documented knowledge claim say about the
+  scope of this formula, and what is the correct response?
+allowed_read_paths:
+  - docs/knowledge/claims/KH-001_keele_mouth_heuristic.md
+  - docs/knowledge/typologies/lecleach_iwata.md
+  - docs/knowledge/typologies/osse_ath.md
+answer_key:
+  verdict: >
+    The Keele formula is a heuristic scoped to Keele Bi-Radial designs (patent US4308932A).
+    It must not be applied as a universal hard gate for JMLC, OSSE, or other families.
+    The check should be refused; actual directivity requires simulation or measurement.
+  must_include:
+    - "heuristic|empirical"
+    - "not.*universal|scope.*keele|biradial|bi-radial"
+    - "jmlc|osse"
+    - "refuse|must not|not apply|cannot.*gate"
+  must_not_include:
+    - "physically impossible"
+    - "valid gate.*osse|hard.*gate.*all"
+  must_cite_any:
+    - docs/knowledge/claims/KH-001_keele_mouth_heuristic.md
+  defer_ok: true
+  key_source: repo
+  evidence:
+    - "docs/knowledge/claims/KH-001_keele_mouth_heuristic.md"
+  negative_control: null

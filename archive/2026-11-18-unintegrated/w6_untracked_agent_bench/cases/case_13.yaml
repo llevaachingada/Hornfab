@@ -1,0 +1,36 @@
+id: 13
+title: Geometry refusal vs envelope refusal vs DOF refusal — three distinct categories
+prompt: >
+  A config submission results in three different rejection messages from the pipeline:
+  (a) the mouth width exceeds the brief envelope maximum, (b) the generated meridian
+  produces a non-monotone radius, and (c) a searched knob index exceeds the allowed
+  degree-of-freedom count for the generator. Classify each of these as a geometry
+  refusal, an envelope refusal, or a DOF refusal. Explain what each means and what
+  should be fixed.
+allowed_read_paths:
+  - hornlab_search/design/generators/crowe_hv_area_aspect_v1.py
+  - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+  - .claude/skills/hornlab-shape-check/SKILL.md
+answer_key:
+  verdict: >
+    (a) envelope refusal — brief constraint exceeded; fix by reducing mouth size or
+    widening the envelope. (b) geometry refusal — generator produces an invalid shape;
+    fix bounds or seed. (c) DOF refusal — config declares more searched keys than the
+    generator supports; fix the config.
+  must_include:
+    - "envelope.*refusal|invalid.*envelope|envelope.*exceeded"
+    - "geometry.*refusal|non-monotone|invalid.*geometry"
+    - "dof.*refusal|degree.*freedom|searched.*key"
+    - "three.*separate|separate.*categor|distinct"
+  must_not_include:
+    - "all.*same.*error|same.*type.*refusal"
+  must_cite_any:
+    - hornlab_search/design/generators/crowe_hv_area_aspect_v1.py
+    - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+    - .claude/skills/hornlab-shape-check/SKILL.md
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "hornlab_search/design/generators/crowe_hv_area_aspect_v1.py"
+    - "docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md:A2"
+  negative_control: null

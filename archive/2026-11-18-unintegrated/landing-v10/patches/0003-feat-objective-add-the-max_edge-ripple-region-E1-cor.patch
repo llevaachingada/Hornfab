@@ -1,0 +1,152 @@
+From 2ecfdd58c7a052f19280abbc1f18b6f4105a853f Mon Sep 17 00:00:00 2001
+From: h <hunter.singleton@gmail.com>
+Date: Wed, 18 Nov 2026 08:38:52 -0500
+Subject: [PATCH 3/3] feat(objective): add the max_edge ripple region (E1
+ corridor alternative)
+
+Sync PR-A with the carrier's final patch: max_edge inspects +/-max/2 and is corridor-only. The owner's preferred_edge remains the first-brief policy; max_edge is an explicit opt-in. Targeted v10/BO/manifest suite: 118 passed, 1 known baseline failure.
+---
+ docs/CONTINUITY.md                     |  6 ++++--
+ docs/ISSUES.md                         |  5 +++--
+ hornlab_search/config.py               |  6 +++---
+ hornlab_search/objective/scalar_v10.py | 13 ++++++++-----
+ tests/test_objective_v10.py            | 20 ++++++++++++++++----
+ 5 files changed, 34 insertions(+), 16 deletions(-)
+
+diff --git a/docs/CONTINUITY.md b/docs/CONTINUITY.md
+index 3c4ec91..9b298cb 100644
+--- a/docs/CONTINUITY.md
++++ b/docs/CONTINUITY.md
+@@ -19,8 +19,10 @@
+   +/-(max-min)/2 and v9 target mode inspects +/-preferred (twice the -6 dB edge). The v9
+   docstring's "half-angle" reading does not hold.
+ - v10 requires `objective.ripple_region` (no default): `preferred_edge` (+/-preferred/2),
+-  `min_edge` (+/-min/2, corridor only) or `{mode: seat_zone_deg, h_deg, v_deg}` (declared total
+-  angles). Every other term is v9's. New identity: `v10_score_identity` (sha256 of the block).
++  `min_edge` (+/-min/2, corridor only), `max_edge` (+/-max/2, corridor only; added 2026-11-18
++  after E1 because `min_edge` cannot see a mid-corridor defect) or
++  `{mode: seat_zone_deg, h_deg, v_deg}` (declared total angles). Every other term is v9's.
++  New identity: `v10_score_identity` (sha256 of the block).
+ - `tests/test_objective_v8.py` registration assertion updated to the new tuple (still exact).
+ - **Owner decision 2026-11-18: `ripple_region = preferred_edge`** for the first briefs
+   (+/-preferred/2 per plane, the -6 dB edges). `min_edge` and `seat_zone_deg` remain explicit
+diff --git a/docs/ISSUES.md b/docs/ISSUES.md
+index 6b4402e..adce428 100644
+--- a/docs/ISSUES.md
++++ b/docs/ISSUES.md
+@@ -9,8 +9,9 @@
+ ## 2026-11-18 - v10 ripple region: owner chose preferred_edge
+ 
+ - DONE (owner, 2026-11-18): the first v10 briefs use `ripple_region: preferred_edge`
+-  (+/-preferred/2 per plane: the -6 dB edges). `min_edge` and `seat_zone_deg` remain explicit
+-  opt-ins; E1-E4 can change the policy for later briefs.
++  (+/-preferred/2 per plane: the -6 dB edges). `min_edge`, `max_edge` (conservative corridor
++  alternative; added after E1) and `seat_zone_deg` remain explicit opt-ins; E1-E4 can change the
++  policy for later briefs.
+ - DONE: the dataset manifest version census includes 10 (`tests/test_dataset_manifest.py`).
+   Full suite on the v10 lane: 4 known failures, 4724 passed, 40 skipped in 7:08.
+ - OPEN: no brief uses v10 yet. The BO metric policy (PR-D) is separate; no study or Pareto run
+diff --git a/hornlab_search/config.py b/hornlab_search/config.py
+index dd905d5..0d2ee9e 100644
+--- a/hornlab_search/config.py
++++ b/hornlab_search/config.py
+@@ -429,9 +429,9 @@ def _require_v9_coverage_profile(objective, target, where: str) -> None:
+         mode = region if isinstance(region, str) else (region or {}).get("mode")             if isinstance(region, dict) else None
+         profile = target.get("coverage_profile") if isinstance(target, dict) else None
+         pmode = profile.get("mode") if isinstance(profile, dict) else None
+-        if mode == "min_edge" and pmode != "corridor":
+-            raise ConfigError(f"{where}: objective.ripple_region min_edge needs a corridor-mode "
+-                              f"target.coverage_profile (min_deg), got mode {pmode!r}")
++        if mode in ("min_edge", "max_edge") and pmode != "corridor":
++            raise ConfigError(f"{where}: objective.ripple_region {mode} needs a corridor-mode "
++                              f"target.coverage_profile (min_deg/max_deg), got mode {pmode!r}")
+ 
+ 
+ GRID_KEYS = ("verify_points_per_octave", "screen_extra_hz")
+diff --git a/hornlab_search/objective/scalar_v10.py b/hornlab_search/objective/scalar_v10.py
+index 9e36aac..06bce4e 100644
+--- a/hornlab_search/objective/scalar_v10.py
++++ b/hornlab_search/objective/scalar_v10.py
+@@ -20,6 +20,8 @@ owner's (audit 01 section 4.1) and a brief that omits it is refused:
+ * ``ripple_region: preferred_edge`` - inspect ``+/- preferred/2`` (the preferred -6 dB edges);
+ * ``ripple_region: min_edge`` - inspect ``+/- min/2`` (the guaranteed-minimum edges; corridor
+   mode only, refused for a target-mode profile);
++* ``ripple_region: max_edge`` - inspect ``+/- max/2`` (the widest permitted edges; corridor mode
++  only). Added 2026-11-18 after E1: ``min_edge`` cannot see a mid-corridor defect;
+ * ``ripple_region: {mode: seat_zone_deg, h_deg: H, v_deg: V}`` - an explicitly declared TOTAL
+   inspected angle per plane, constant over frequency.
+ 
+@@ -59,7 +61,7 @@ __all__ = ["objective_v10", "V10Params", "V10_ALL_KEYS", "V10_RIPPLE_REGIONS",
+ 
+ #: v10 reports exactly v9's key set (only the meaning of ``rip`` changes).
+ V10_ALL_KEYS = V9_ALL_KEYS
+-V10_RIPPLE_REGIONS = ("preferred_edge", "min_edge", "seat_zone_deg")
++V10_RIPPLE_REGIONS = ("preferred_edge", "min_edge", "max_edge", "seat_zone_deg")
+ V10_SCORE_IDENTITY_NAME = "objective_v10_ripple_region"
+ _SEAT_KEYS = {"mode", "h_deg", "v_deg"}
+ _MAX_TOTAL_DEG = 360.0
+@@ -162,10 +164,11 @@ def v10_inspected_total_deg(target: Target, plane: str, freq_hz: float, region:
+     pref, lo, _hi = _profile_at(_plane_anchors(target, plane), float(freq_hz))
+     if mode == "preferred_edge":
+         return float(pref)
+-    if lo is None or _profile_mode(target) != "corridor":
+-        raise ValueError("ripple_region min_edge needs a corridor-mode coverage profile "
+-                         "(min_deg present)")
+-    return float(lo)
++    edge = lo if mode == "min_edge" else _hi
++    if edge is None or _profile_mode(target) != "corridor":
++        raise ValueError(f"ripple_region {mode} needs a corridor-mode coverage profile "
++                         "(min_deg/max_deg present)")
++    return float(edge)
+ 
+ 
+ def _v10_ripple_values(metrics, resp, target: Target, band: np.ndarray, region: dict):
+diff --git a/tests/test_objective_v10.py b/tests/test_objective_v10.py
+index 07db364..0fbc560 100644
+--- a/tests/test_objective_v10.py
++++ b/tests/test_objective_v10.py
+@@ -131,11 +131,21 @@ def test_inspected_total_angles_per_option():
+         assert v10_inspected_total_deg(t, "v", f, {"mode": "preferred_edge"}) == 50.0
+         assert v10_inspected_total_deg(t, "h", f, {"mode": "min_edge"}) == 70.0
+         assert v10_inspected_total_deg(t, "v", f, {"mode": "min_edge"}) == 40.0
++        assert v10_inspected_total_deg(t, "h", f, {"mode": "max_edge"}) == 90.0
++        assert v10_inspected_total_deg(t, "v", f, {"mode": "max_edge"}) == 60.0
+         seat = {"mode": "seat_zone_deg", "h_deg": 120.0, "v_deg": 30.0}
+         assert v10_inspected_total_deg(t, "h", f, seat) == 120.0
+         assert v10_inspected_total_deg(t, "v", f, seat) == 30.0
+-    with pytest.raises(ValueError, match="corridor"):
+-        v10_inspected_total_deg(_target_mode(), "h", 1000.0, {"mode": "min_edge"})
++    for mode in ("min_edge", "max_edge"):
++        with pytest.raises(ValueError, match="corridor"):
++            v10_inspected_total_deg(_target_mode(), "h", 1000.0, {"mode": mode})
++
++
++def test_max_edge_sees_a_defect_beyond_the_preferred_edge():
++    """E1 (2026-11-18): H bump at +/-42.5 deg is outside preferred +/-40 but inside max +/-45."""
++    t, r = _corridor(), _resp(h_bump_deg=42.5)
++    assert _rip(objective_v10, t, r, _p10("preferred_edge")) == pytest.approx(0.0, abs=1e-9)
++    assert _rip(objective_v10, t, r, _p10("max_edge")) > 0.05
+ 
+ 
+ # ------------------------------------------------------------------ adversarial windows
+@@ -254,13 +264,15 @@ def test_config_loads_v10_and_refuses_min_edge_for_target_mode(tmp_path):
+     assert V10Params.from_block(out["objective"]).ripple_region == {"mode": "preferred_edge"}
+     with pytest.raises(ConfigError, match="min_edge"):
+         load_brief(_brief(tmp_path, "min_edge", mode="target"))
++    with pytest.raises(ConfigError, match="max_edge"):
++        load_brief(_brief(tmp_path, "max_edge", mode="target"))
+ 
+ 
+ def test_score_identity_is_new_stable_and_region_specific():
+     ids = {name: v10_score_identity(_p10(region))["sha256"] for name, region in (
+-        ("pref", "preferred_edge"), ("min", "min_edge"),
++        ("pref", "preferred_edge"), ("min", "min_edge"), ("max", "max_edge"),
+         ("seat", {"mode": "seat_zone_deg", "h_deg": 120.0, "v_deg": 60.0}))}
+-    assert len(set(ids.values())) == 3
++    assert len(set(ids.values())) == 4
+     # Pinned: any change to the v10 block normalisation changes the identity on purpose.
+     assert ids["pref"] == PINNED_PREFERRED_EDGE_SHA
+     block = _p10("preferred_edge").to_block()
+-- 
+2.51.0.windows.1
+

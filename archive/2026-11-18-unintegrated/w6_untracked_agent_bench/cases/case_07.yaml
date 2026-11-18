@@ -1,0 +1,30 @@
+id: 7
+title: v9 distd and diag — diagnostic or weighted terms?
+prompt: >
+  In objective v9, a user wants to increase the weight of the distd term to 2.0 and the
+  diag term to 2.0 in the brief because they think these are core scoring terms like
+  coverage. What would happen? Are distd and diag part of the total J in v9, and what
+  constraints apply to their weights? Cite the scalar_v9 source.
+allowed_read_paths:
+  - hornlab_search/objective/scalar_v9.py
+  - hornlab_search/objective/scalar_v7.py
+answer_key:
+  verdict: >
+    distd and diag are owner-locked unweighted diagnostics in v9 — their weight is fixed
+    at 0 and they never contribute to total J. A brief cannot turn them on through the
+    weights field. They are reported raw only.
+  must_include:
+    - "owner.locked|locked.*weight.*0|weight.*0"
+    - "not.*total|never.*total|unweighted"
+    - "distd"
+    - "diag"
+  must_not_include:
+    - "weight.*2.*distd|distd.*weighted"
+    - "part.*total.*j.*distd"
+  must_cite_any:
+    - hornlab_search/objective/scalar_v9.py
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "hornlab_search/objective/scalar_v9.py:V9_UNWEIGHTED_KEYS"
+  negative_control: null

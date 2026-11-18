@@ -1,0 +1,377 @@
+﻿== 2026-11-18T08:31:38 poll
+queue_state: state=running running=throat_hv_run_B_o00 done=38 pending=27
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:31:54 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:07 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:08 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:08 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:09 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:09 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:10 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:10 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:11 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:11 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:12 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:12 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:13 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:13 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:14 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:14 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: pending
+throat_hv_run_B_o00: pending
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 0/7 summaries
+== 2026-11-18T08:32:27 poll
+queue_state: state=running running=throat_hv_run_B_o25 done=39 pending=26
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: pending
+throat_hv_run_B_o50: pending
+throat_hv_run_B_o75: pending
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 2/7 summaries
+== 2026-11-18T08:35:27 poll
+queue_state: state=running running=throat_hv_run_A_r15 done=42 pending=23
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: pending
+throat_hv_run_A_r20: pending
+runner_like_processes: 5
+phase1: 5/7 summaries
+== 2026-11-18T08:38:03 poll
+queue_state: state=running running=t_ath14_scalar100 done=45 pending=20
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+runner_like_processes: 5
+phase1: 7/7 summaries
+== 2026-11-18T08:40:02 poll
+queue_state: state=running running=t_ath14_scalar100 done=45 pending=20
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: pending
+throat_hv_p2_B_o00_epw8: pending
+phase2: 0/2 summaries
+runner_like_processes: 5
+== 2026-11-18T08:46:01 poll
+queue_state: state=running running=t_ath14_scalar100 done=45 pending=20
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: pending
+throat_hv_p2_B_o00_epw8: pending
+phase2: 0/2 summaries
+runner_like_processes: 5
+== 2026-11-18T09:01:02 poll
+queue_state: state=running running=t_ath14_scalar100 done=45 pending=20
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: pending
+throat_hv_p2_B_o00_epw8: pending
+phase2: 0/2 summaries
+runner_like_processes: 5
+== 2026-11-18T09:16:02 poll
+queue_state: state=running running=t_ath14_scalar100 done=45 pending=20
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: pending
+throat_hv_p2_B_o00_epw8: pending
+phase2: 0/2 summaries
+runner_like_processes: 5
+== 2026-11-18T09:31:02 poll
+queue_state: state=running running=t_ath14_scalar100 done=45 pending=20
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: pending
+throat_hv_p2_B_o00_epw8: pending
+phase2: 0/2 summaries
+runner_like_processes: 5
+== 2026-11-18T09:46:02 poll
+queue_state: state=running running=t_ath14_scalar100 done=45 pending=20
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: pending
+throat_hv_p2_B_o00_epw8: pending
+phase2: 0/2 summaries
+runner_like_processes: 5
+== 2026-11-18T09:57:42 poll
+queue_state: state=running running=t_ath14_scalar100 done=45 pending=20
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: pending
+throat_hv_p2_B_o00_epw8: pending
+phase2: 0/2 summaries
+runner_like_processes: 5
+== 2026-11-18T10:01:01 poll
+queue_state: state=running running=t_ath14_scalar100 done=45 pending=20
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: pending
+throat_hv_p2_B_o00_epw8: pending
+phase2: 0/2 summaries
+runner_like_processes: 5
+== 2026-11-18T10:06:04 poll
+queue_state: state=running running=t_corelaw_turbo100 done=50 pending=17
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: exit=0 status=ok bestJ=5.688783437071884 evals=1
+throat_hv_p2_B_o00_epw8: exit=0 status=ok bestJ=6.344570593530784 evals=1
+phase2: 2/2 summaries
+runner_like_processes: 5
+== 2026-11-18T10:16:01 poll
+queue_state: state=running running=throat_hv_p3_B_search40 done=51 pending=17
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: exit=0 status=ok bestJ=5.688783437071884 evals=1
+throat_hv_p2_B_o00_epw8: exit=0 status=ok bestJ=6.344570593530784 evals=1
+phase2: 2/2 summaries
+runner_like_processes: 5
+== 2026-11-18T10:31:02 poll
+queue_state: state=running running=t_corelaw_scalar100 done=52 pending=16
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: exit=0 status=ok bestJ=5.688783437071884 evals=1
+throat_hv_p2_B_o00_epw8: exit=0 status=ok bestJ=6.344570593530784 evals=1
+phase2: 2/2 summaries
+runner_like_processes: 5
