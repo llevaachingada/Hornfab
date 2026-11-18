@@ -1,0 +1,1580 @@
+From 4ac209540a34d480bc3439a1065c0cbff4db6d1e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 18 Nov 2026 01:18:41 +0000
+Subject: [PATCH 4/7] feat(design): shared near-throat H/V block for OSSE,
+ osse_rollback, Le Cleach H/V and rolled
+
+throat_hv_ratio / hv_onset_frac / section_exp_ramp with one meaning across families.
+Absent keys = byte-identical geometry and hashes. CPU-tested; mesher and BEM checks pending.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01WHcQokM5UyK9TkXkDrFgGA
+---
+ docs/CODE_MAP.md                              |   1 +
+ docs/CONTINUITY.md                            |  21 ++
+ docs/ISSUES.md                                |  11 +
+ .../hl__ext_throat_hvlaw_throathv_v1.yaml     | 224 +++++++++++++++++
+ .../hl__osse_throathv_morph_v1.yaml           | 226 ++++++++++++++++++
+ hornlab_search/design/families.py             |  52 +++-
+ hornlab_search/design/generators/grid.py      | 105 +++++++-
+ .../design/generators/rolled_family.py        |  68 +++++-
+ hornlab_search/design/params/knobs_native.py  |  36 +++
+ hornlab_search/design/throat_hv.py            |  99 ++++++++
+ tests/test_design_throat_hv_grid.py           | 142 +++++++++++
+ tests/test_design_throat_hv_osse.py           | 111 +++++++++
+ tests/test_design_throat_hv_rolled.py         | 141 +++++++++++
+ 13 files changed, 1215 insertions(+), 22 deletions(-)
+ create mode 100644 examples/typologies/throat_hv_2026-11-18/hl__ext_throat_hvlaw_throathv_v1.yaml
+ create mode 100644 examples/typologies/throat_hv_2026-11-18/hl__osse_throathv_morph_v1.yaml
+ create mode 100644 hornlab_search/design/throat_hv.py
+ create mode 100644 tests/test_design_throat_hv_grid.py
+ create mode 100644 tests/test_design_throat_hv_osse.py
+ create mode 100644 tests/test_design_throat_hv_rolled.py
+
+diff --git a/docs/CODE_MAP.md b/docs/CODE_MAP.md
+index cac2cfa..ce5350d 100644
+--- a/docs/CODE_MAP.md
++++ b/docs/CODE_MAP.md
+@@ -124,6 +124,7 @@ bempp_cpu) â†’ `metrics` (beamwidth, ripple, DI, impedance) â†’ `objec
+ | `cli.py` | All commands: doctor, run, search, verify, report, compare, export-step, families, campaign, gpu-clean, selftest, dataset, surrogate, ab-bl (A/B check against Boundary Lab; wired to `compare/cli.py`). |
+ | `config.py` | YAML â†’ Config; briefs (`load_brief`, `--brief`, embedded brief), `--cma-seed`, `generator:` configs, frequency grids; WP2 driver pins (native families pinned to the brief's driver on FRESH briefs; grandfathered on embedded run-configs), WP4 `verify_points_per_octave` HF verify grid, `objective.version`, `solve.cuda_fused` (WP15, beat_cuda only); `extends:` YAML inheritance (`_load_yaml_extends`, resolved before `config_sha`/solve hash, recursive, cycle-detected); `solve.julia_threads` (CPU lane, host scheduling only, NOT part of solve hash). |
+ | `types.py`, `constants.py` | Frozen contract types (Design, MeshResult, MetricSet, â€¦); physical constants. |
++| `design/throat_hv.py` | Shared near-throat H/V block (throat_hv_ratio, hv_onset_frac, section_exp_ramp): one meaning across OSSE, osse_rollback, Le Cleac'h H/V and rolled; absent = byte-identical. |
+ | `design/families.py` | Legal keys per family (OSSE, R-OSSE, ICW, FREEFORM), validation, mesher config. |
+ | `design/recipe_meta.py` | WP 0.9 recipe metadata v2 (2026-11-17): termination kind, mesher wall thickness actually used, resolved source-cap shape/radius/curvature/angle. Non-identity: written as `design.json["generator"]["recipe_meta"]`, never hashed. |
+ | `design/params/` | **Parameter single-source-of-truth (2026-10-25, P9)**: an annotation layer OVER the authorities, never re-homing them â€” hard limits stay in `families.KeySpec`, defaults in `registry.DEFAULT_KNOBS`/`grid.py` constants, seeds/bounds in `examples/**`, catalog identity in `examples/catalog.yaml`. `schema.py` frozen KnobDoc/TypologyDoc + validation; `knobs_generators.py` (26 entries) / `knobs_rows.py` (36 base names; `split_rows_knob` strips `g_`, pattern keys for the G8 `a{k}_*` pairs) / `knobs_native.py` (63; bare-name + root-of-path resolution for nested FREEFORM/ICW-seed keys) all authored as prose + structure with **zero typed horn numbers**; `catalog.py` builder (`DOMAINS = ("generators", "rows", "native")`, per-knob `bounds_source` = the exact `{file, key}` a bounds edit must target, published `validation_authority`, per-typology default read live from the config seed via `families.param_get`); import-light `__init__.py` (proven numpy-blocked; never raises). Generates: `tools/gen_param_catalog.py` + `tests/test_param_catalog.py` (FAIL-not-warn both-ways drift gate) â†’ `gui/static/param-catalog.v1.json` (the wire contract, served by the existing static handler â€” the GUI consumes it with no route and no frozen-payload change) + `docs/reference/{PARAMETERS,TYPOLOGIES}.md`. |
+diff --git a/docs/CONTINUITY.md b/docs/CONTINUITY.md
+index 3ca3dbe..0b1f917 100644
+--- a/docs/CONTINUITY.md
++++ b/docs/CONTINUITY.md
+@@ -1,5 +1,26 @@
+ # CONTINUITY
+ 
++## 2026-11-18 - Shared near-throat H/V block implemented (CPU only; mesher and BEM checks pending)
++
++- New `hornlab_search/design/throat_hv.py`: `throat_hv_ratio` (rho), `hv_onset_frac`,
++  `section_exp_ramp`, with one meaning in every family. Absent keys = byte-identical configs,
++  geometry and hashes; rho = 1 = the parent law.
++- Native OSSE: rho -> per-azimuth `k(p) = k*rho**(-cos2p/2)` mesher expression (inside the OS-SE
++  parent; keeps the driver-exit slope). Onset/ramp alias `morph_fixed`/`morph_rate` (the Ath
++  morph). Refused without `morph_target` or alongside the native key.
++- osse_rollback: per-azimuth k; the superformula window uses the Ath ramp (LABELED HYBRID).
++- Le Cleac'h H/V pair: per-plane march T (larger T = faster near-throat growth, eq. 42 plus a
++  numeric test). The onset ramp blends the round core to the H/V ellipse (LABELED HYBRID).
++  `iwata_ar` is untouched.
++- Rolled family: onset/ramp replace the relief window start (now allowed down to 0) and are
++  searchable. rho != 1 is refused (no per-plane throat growth parameter exists yet). Editing
++  `rolled_family.py` changes its `implementation_sha256`, so saved recipes that require the old
++  digest will be refused.
++- Example configs (NOT RUN): `examples/typologies/throat_hv_2026-11-18/` (A: v8 incumbent + rho; B:
++  no round extension + morph to the mouth extent + all three knobs).
++- Tests: 4 new test files. The full suite shows the same 30 failed / 76 errors on main and on this
++  change (all from absent `cma`/`hornlab_mesher` etc.), so there are 0 new failures.
++
+ ## 2026-11-18 - Near-throat H/V control: audit, research (KH-002), option literature (KH-003)
+ 
+ - Docs only; no code. Root cause in OS generators: `a0` (from `driver.exit_angle_deg`) and `k`
+diff --git a/docs/ISSUES.md b/docs/ISSUES.md
+index e5c7e1a..02720eb 100644
+--- a/docs/ISSUES.md
++++ b/docs/ISSUES.md
+@@ -1,5 +1,16 @@
+ # ISSUES
+ 
++## 2026-11-18 - Shared throat H/V block: local verification before any GPU
++
++- OPEN (owner, local): confirm the pinned `hornlab_mesher` evaluates a p-expression for `k`
++  (shape_check on config A with rho != 1). Run the osse_rollback geometry tests that are skipped
++  without the mesher. Run shape_check plus search_preflight on both configs.
++- OPEN (owner, GPU budget): onset sweep on the 80x50 brief (onset at 0/0.25/0.5/0.75), then a
++  matched screen of config A vs v8.
++- OPEN (design): a rolled-family per-plane throat growth parameter so rho can map there.
++  `lecleach_iwata_ar` adoption. R-OSSE parent status for per-azimuth k is unknown.
++- NOTE: the rolled-family implementation digest changed (file edited).
++
+ ## 2026-11-18 - Near-throat H/V control for asymmetric briefs (proposal)
+ 
+ - OPEN (owner): approve the shared throat H/V block (CPU code patch plus tests), and approve the BEM
+diff --git a/examples/typologies/throat_hv_2026-11-18/hl__ext_throat_hvlaw_throathv_v1.yaml b/examples/typologies/throat_hv_2026-11-18/hl__ext_throat_hvlaw_throathv_v1.yaml
+new file mode 100644
+index 0000000..a09aba5
+--- /dev/null
++++ b/examples/typologies/throat_hv_2026-11-18/hl__ext_throat_hvlaw_throathv_v1.yaml
+@@ -0,0 +1,224 @@
++# 2026-11-18: copy of hl__ext_throat_hvlaw_v8 (unchanged) + the shared near-throat H/V block.
++# Only change: throat_hv_ratio (k(p) = k*rho**(-cos2p/2), OS-SE parent, Batik 2020 s5), seed 1.0 =
++# the v8 incumbent geometry exactly. Brief is 80H x 50V, so rho > 1 (H opens sooner) is the expected side.
++# NOT YET RUN. Verify locally: mesher accepts a p-expression for k (shape_check), then screen.
++name: hl__ext_throat_hvlaw_throathv_v1
++family: OSSE
++seed_params:
++  r0_mm: 27.0507
++  a0_deg: 4.5
++  a_deg: 24.9504
++  L_mm: 254.874
++  n: 6.0
++  s: 0.50842
++  q: 0.996
++  k: 1.0
++  exponent: 2.0
++  aspect_ratio: 1.0
++  throat_ext_length_mm: 79.696
++  throat_ext_angle_deg: 4.32035
++  slot_length_mm: 0.0
++  morph_target: 0
++  morph_width_mm: 500.0
++  morph_height_mm: 660.0
++  morph_corner_mm: 35.0
++  morph_exponent: 4.0
++  morph_rate: 4.1236
++  morph_fixed: 0.0
++  morph_allow_shrinkage: 0
++  wall_thickness_mm: 5.0
++  az_sf_m: 4.0
++  az_sf_n1: 7.4958
++  az_sf_n2: 12.4449
++  az_sf_n3: 13.4442
++  az_sf_a: 1.0
++  az_sf_b: 0.8569
++  az_a_cos_pow: 1.06777
++  az_n_cos2_amp: 0.0
++  az_a_sf_amp: 0.0
++  az_a_cos_amp: 15.5759
++  az_s_cos2_amp: 0.071279
++  throat_hv_ratio: 1.0
++bounds:
++  r0_mm:
++    lo: 27.0507
++    hi: 27.0507
++    search: false
++  a0_deg:
++    lo: 4.5
++    hi: 4.5
++    search: false
++  a_deg:
++    lo: 15.0
++    hi: 40.0
++  L_mm:
++    lo: 180.0
++    hi: 330.0
++  n:
++    lo: 4.0
++    hi: 8.0
++  s:
++    lo: 0.3
++    hi: 0.9
++  q:
++    lo: 0.996
++    hi: 0.996
++    search: false
++  k:
++    lo: 1.0
++    hi: 1.0
++    search: false
++  exponent:
++    lo: 2.0
++    hi: 2.0
++    search: false
++  aspect_ratio:
++    lo: 1.0
++    hi: 1.0
++    search: false
++  throat_ext_length_mm:
++    lo: 40.0
++    hi: 220.0
++  throat_ext_angle_deg:
++    lo: 1.5
++    hi: 6.0
++  slot_length_mm:
++    lo: 0.0
++    hi: 0.0
++    search: false
++  morph_target:
++    lo: 0
++    hi: 0
++    search: false
++  morph_width_mm:
++    lo: 500.0
++    hi: 500.0
++    search: false
++  morph_height_mm:
++    lo: 660.0
++    hi: 660.0
++    search: false
++  morph_corner_mm:
++    lo: 35.0
++    hi: 35.0
++    search: false
++  morph_exponent:
++    lo: 4.0
++    hi: 4.0
++    search: false
++  morph_rate:
++    lo: 4.1236
++    hi: 4.1236
++    search: false
++  morph_fixed:
++    lo: 0.0
++    hi: 0.0
++    search: false
++  morph_allow_shrinkage:
++    lo: 0
++    hi: 0
++    search: false
++  wall_thickness_mm:
++    lo: 5.0
++    hi: 5.0
++    search: false
++  az_sf_m:
++    lo: 4.0
++    hi: 4.0
++    search: false
++  az_sf_n1:
++    lo: 7.4958
++    hi: 7.4958
++    search: false
++  az_sf_n2:
++    lo: 12.4449
++    hi: 12.4449
++    search: false
++  az_sf_n3:
++    lo: 13.4442
++    hi: 13.4442
++    search: false
++  az_sf_a:
++    lo: 1.0
++    hi: 1.0
++    search: false
++  az_sf_b:
++    lo: 0.8569
++    hi: 0.8569
++    search: false
++  az_a_cos_pow:
++    lo: 0.5
++    hi: 6.0
++  az_n_cos2_amp:
++    lo: 0.0
++    hi: 0.0
++    search: false
++  az_a_sf_amp:
++    lo: 0.0
++    hi: 0.0
++    search: false
++  az_a_cos_amp:
++    lo: 0.0
++    hi: 25.0
++  az_s_cos2_amp:
++    lo: -0.45
++    hi: 0.5
++  throat_hv_ratio:
++    lo: 0.7
++    hi: 2.5
++target:
++  coverage_h_deg: 80.0
++  coverage_v_deg: 60.0
++  band_lo_hz: 350.0
++  band_hi_hz: 8000.0
++  di_target_db: null
++  di_slope_target: 0.0
++  z_min: 0.5
++  f0_hz: 700.0
++  loaded_hi_hz: 5600.0
++  freq_weights:
++    band_hz:
++    - - 2500.0
++      - 5500.0
++      - 2.0
++weights:
++  cov: 1.0
++  rip: 1.0
++  di: 0.3
++  dislope: 0.5
++  flat: 0.5
++  load: 1.0
++  distd: 0.5
++  diag: 0.5
++  flat_cv: 0.5
++mesh:
++  epw: 6.0
++  quadrants: '1'
++  dof_cap_screen: 24000
++  dof_cap_verify: 24000
++  dof_cap_final: 24000
++  dof_per_triangle: 0.51
++solve:
++  backend: beat_cuda
++  distance_m: 10.0
++  angle_count: 73
++  balloon: true
++  balloon_points_screen: 512
++  balloon_points_verify: 1024
++  gmres_tol: 1.0e-05
++  timeout_s: 900
++  cuda_fused: true
++search:
++  algorithm: cma
++  sigma0: 0.22
++  seed: 1234
++  budget: 100
++  popsize: null
++  tolfun: 0.001
++  infeasible_penalty: graded
++  budget_counts: valid
++  max_attempts: 260
++description: 'HOME LANDSCAPE 80Hx50V: OSSE ext-throat + per-direction wall angle (cosine
++  law, wider H than V), no mouth morph (the mouth follows the walls), no K-law sizing
++  | v8: az cos-pow / throat-ext / s-cos2 re-opened, n unlocked'
++brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+diff --git a/examples/typologies/throat_hv_2026-11-18/hl__osse_throathv_morph_v1.yaml b/examples/typologies/throat_hv_2026-11-18/hl__osse_throathv_morph_v1.yaml
+new file mode 100644
+index 0000000..fbb5b33
+--- /dev/null
++++ b/examples/typologies/throat_hv_2026-11-18/hl__osse_throathv_morph_v1.yaml
+@@ -0,0 +1,226 @@
++# 2026-11-18: shared near-throat H/V block exploration (NOT YET RUN). From hl__ext_throat_hvlaw_v8 with the
++# ROUND throat extension removed (its winners pinned short), the Ath morph to a rounded rectangle turned on,
++# and the three shared knobs searched: throat_hv_ratio, hv_onset_frac (=morph_fixed), section_exp_ramp
++# (=morph_rate). New config identity; v8 history untouched. Run shape_check + search_preflight first.
++# morph_width/height 0 = the mouth's own extent (v8 carried an inactive 500x660 PORTRAIT target).
++# r0_mm/a0_deg = the brief's driver exit (18.0 mm, 2.0 deg): no extension, so the horn starts at the driver.
++name: hl__osse_throathv_morph_v1
++family: OSSE
++seed_params:
++  r0_mm: 18.0
++  a0_deg: 2.0
++  a_deg: 24.9504
++  L_mm: 254.874
++  n: 6.0
++  s: 0.50842
++  q: 0.996
++  k: 1.0
++  exponent: 2.0
++  aspect_ratio: 1.0
++  throat_ext_length_mm: 0.0
++  throat_ext_angle_deg: 4.32035
++  slot_length_mm: 0.0
++  morph_target: 1
++  morph_width_mm: 0.0
++  morph_height_mm: 0.0
++  morph_corner_mm: 35.0
++  morph_exponent: 4.0
++  morph_allow_shrinkage: 0
++  wall_thickness_mm: 5.0
++  az_sf_m: 4.0
++  az_sf_n1: 7.4958
++  az_sf_n2: 12.4449
++  az_sf_n3: 13.4442
++  az_sf_a: 1.0
++  az_sf_b: 0.8569
++  az_a_cos_pow: 1.06777
++  az_n_cos2_amp: 0.0
++  az_a_sf_amp: 0.0
++  az_a_cos_amp: 15.5759
++  az_s_cos2_amp: 0.071279
++  throat_hv_ratio: 1.0
++  hv_onset_frac: 0.1
++  section_exp_ramp: 2.0
++bounds:
++  r0_mm:
++    lo: 18.0
++    hi: 18.0
++    search: false
++  a0_deg:
++    lo: 2.0
++    hi: 2.0
++    search: false
++  a_deg:
++    lo: 15.0
++    hi: 40.0
++  L_mm:
++    lo: 180.0
++    hi: 330.0
++  n:
++    lo: 4.0
++    hi: 8.0
++  s:
++    lo: 0.3
++    hi: 0.9
++  q:
++    lo: 0.996
++    hi: 0.996
++    search: false
++  k:
++    lo: 1.0
++    hi: 1.0
++    search: false
++  exponent:
++    lo: 2.0
++    hi: 2.0
++    search: false
++  aspect_ratio:
++    lo: 1.0
++    hi: 1.0
++    search: false
++  throat_ext_length_mm:
++    lo: 0.0
++    hi: 0.0
++    search: false
++  throat_ext_angle_deg:
++    lo: 4.32035
++    hi: 4.32035
++    search: false
++  slot_length_mm:
++    lo: 0.0
++    hi: 0.0
++    search: false
++  morph_target:
++    lo: 1
++    hi: 1
++    search: false
++  morph_width_mm:
++    lo: 0.0
++    hi: 0.0
++    search: false
++  morph_height_mm:
++    lo: 0.0
++    hi: 0.0
++    search: false
++  morph_corner_mm:
++    lo: 35.0
++    hi: 35.0
++    search: false
++  morph_exponent:
++    lo: 4.0
++    hi: 4.0
++    search: false
++  morph_allow_shrinkage:
++    lo: 0
++    hi: 0
++    search: false
++  wall_thickness_mm:
++    lo: 5.0
++    hi: 5.0
++    search: false
++  az_sf_m:
++    lo: 4.0
++    hi: 4.0
++    search: false
++  az_sf_n1:
++    lo: 7.4958
++    hi: 7.4958
++    search: false
++  az_sf_n2:
++    lo: 12.4449
++    hi: 12.4449
++    search: false
++  az_sf_n3:
++    lo: 13.4442
++    hi: 13.4442
++    search: false
++  az_sf_a:
++    lo: 1.0
++    hi: 1.0
++    search: false
++  az_sf_b:
++    lo: 0.8569
++    hi: 0.8569
++    search: false
++  az_a_cos_pow:
++    lo: 0.5
++    hi: 6.0
++  az_n_cos2_amp:
++    lo: 0.0
++    hi: 0.0
++    search: false
++  az_a_sf_amp:
++    lo: 0.0
++    hi: 0.0
++    search: false
++  az_a_cos_amp:
++    lo: 0.0
++    hi: 25.0
++  az_s_cos2_amp:
++    lo: -0.45
++    hi: 0.5
++  throat_hv_ratio:
++    lo: 0.7
++    hi: 2.5
++  hv_onset_frac:
++    lo: 0.0
++    hi: 0.5
++  section_exp_ramp:
++    lo: 1.0
++    hi: 4.0
++target:
++  coverage_h_deg: 80.0
++  coverage_v_deg: 60.0
++  band_lo_hz: 350.0
++  band_hi_hz: 8000.0
++  di_target_db: null
++  di_slope_target: 0.0
++  z_min: 0.5
++  f0_hz: 700.0
++  loaded_hi_hz: 5600.0
++  freq_weights:
++    band_hz:
++    - - 2500.0
++      - 5500.0
++      - 2.0
++weights:
++  cov: 1.0
++  rip: 1.0
++  di: 0.3
++  dislope: 0.5
++  flat: 0.5
++  load: 1.0
++  distd: 0.5
++  diag: 0.5
++  flat_cv: 0.5
++mesh:
++  epw: 6.0
++  quadrants: '1'
++  dof_cap_screen: 24000
++  dof_cap_verify: 24000
++  dof_cap_final: 24000
++  dof_per_triangle: 0.51
++solve:
++  backend: beat_cuda
++  distance_m: 10.0
++  angle_count: 73
++  balloon: true
++  balloon_points_screen: 512
++  balloon_points_verify: 1024
++  gmres_tol: 1.0e-05
++  timeout_s: 900
++  cuda_fused: true
++search:
++  algorithm: cma
++  sigma0: 0.22
++  seed: 1234
++  budget: 100
++  popsize: null
++  tolfun: 0.001
++  infeasible_penalty: graded
++  budget_counts: valid
++  max_attempts: 260
++description: 'HOME LANDSCAPE 80Hx50V: OSSE ext-throat + per-direction wall angle (cosine
++  law, wider H than V), no mouth morph (the mouth follows the walls), no K-law sizing
++  | v8: az cos-pow / throat-ext / s-cos2 re-opened, n unlocked'
++brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+diff --git a/hornlab_search/design/families.py b/hornlab_search/design/families.py
+index ac675ac..71ebe7e 100644
+--- a/hornlab_search/design/families.py
++++ b/hornlab_search/design/families.py
+@@ -208,8 +208,21 @@ def azlaw_values(params: dict, p_rad: float) -> dict:
+     return {"a_deg": a, "n": n, "s": s}
+ 
+ 
++# Shared near-throat H/V block (owner 2026-11-18; hornlab_search/design/throat_hv.py). These keys
++# never reach the mesher as keys: throat_hv_ratio becomes a per-azimuth k(p) expression (OS-SE
++# parent: Batik 2020 s5) and hv_onset_frac / section_exp_ramp become morph_fixed / morph_rate
++# (the published Ath morph). Absent = byte-identical mesher config.
++_THROAT_HV = {
++    "throat_hv_ratio": _f(0.25, 4.0, "H/V throat expansion ratio (1 = round); k(p) = k*rho**(-cos2p/2)",
++                          section="throat_hv"),
++    "hv_onset_frac": _f(0.0, 0.9, "where the section morph starts (alias of morph_fixed)",
++                        section="throat_hv"),
++    "section_exp_ramp": _f(0.5, 8.0, "section morph ramp exponent (alias of morph_rate)",
++                           section="throat_hv"),
++}
++
+ _OSSE = {
+-    **_THROAT, **_CROSS, **_COMMON, **_MORPH, **_GCURVE, **_AZLAW,
++    **_THROAT, **_CROSS, **_COMMON, **_MORPH, **_GCURVE, **_AZLAW, **_THROAT_HV,
+     "L_mm": _f(note="axial length, mm (OSSE only)"),
+     "n": _f(note="termination n (> 0 while s != 0)"),
+     "s": _f(note="termination s"),
+@@ -616,6 +629,8 @@ def validate(design: Design) -> None:
+         raise _bad(fam, key, f"not a legal {fam} key (legal: {sorted(table)})")
+     for key, v in design.params.items():
+         _check_value(fam, key, table[key], v)
++    if fam == "OSSE":
++        _validate_throat_hv(design)
+     if fam in ("OSSE", "R-OSSE"):
+         _validate_osse_like(design)
+     elif fam == "ICW":
+@@ -624,6 +639,33 @@ def validate(design: Design) -> None:
+         _validate_freeform(design)
+ 
+ 
++def _validate_throat_hv(design: Design) -> None:
++    """Shared H/V block on native OSSE: one onset knob, never an inactive one."""
++    p = design.params
++    if "throat_hv_ratio" in p and not isinstance(p.get("k", 1.0), (int, float)):
++        raise _bad("OSSE", "throat_hv_ratio", "needs a plain numeric k (it builds the k(p) expression)")
++    for alias, native in (("hv_onset_frac", "morph_fixed"), ("section_exp_ramp", "morph_rate")):
++        if alias in p and native in p:
++            raise _bad("OSSE", alias, f"is an alias of {native}; give one, not both")
++        if alias in p and not int(p.get("morph_target", 0) or 0):
++            raise _bad("OSSE", alias, "has no effect without morph_target (inactive knob)")
++
++
++def throat_hv_mesher_terms(params: dict) -> tuple[dict, dict]:
++    """(profile expressions, morph values) from the shared block; ({}, {}) when absent."""
++    from .throat_hv import mesher_k_expression
++    prof: dict = {}
++    morph: dict = {}
++    rho = params.get("throat_hv_ratio")
++    if rho is not None and float(rho) != 1.0:
++        prof["k"] = mesher_k_expression(float(params.get("k", 1.0)), float(rho))
++    if params.get("hv_onset_frac") is not None:
++        morph["morph_fixed"] = float(params["hv_onset_frac"])
++    if params.get("section_exp_ramp") is not None:
++        morph["morph_rate"] = float(params["section_exp_ramp"])
++    return prof, morph
++
++
+ # ------------------------------------------------------------------ enclosure (WP12)
+ 
+ #: SEARCH-side mounting plan token -> the mesher's own ``plan_type``. Only the rounded rectangle
+@@ -699,9 +741,13 @@ def to_mesher_config(design: Design, mesh: MeshSpec, res_mm: dict, out_path: Pat
+     sections: dict[str, dict] = {"profile": {}, "cross_section": {}, "mesh": {}, "morph": {},
+                                  "gcurve": {}}
+     exprs = azlaw_expressions(design.params) if design.family == "OSSE" else {}
++    hv_morph: dict = {}
++    if design.family == "OSSE":
++        hv_prof, hv_morph = throat_hv_mesher_terms(design.params)
++        exprs.update(hv_prof)
+     for key, value in design.params.items():
+         sec = table[key].section
+-        if sec == "azlaw":                  # folded into the a / n / s expressions below
++        if sec in ("azlaw", "throat_hv"):   # folded into expressions / morph values below
+             continue
+         value = copy.deepcopy(exprs.get(key, value))
+         if sec == "top":
+@@ -718,6 +764,8 @@ def to_mesher_config(design: Design, mesh: MeshSpec, res_mm: dict, out_path: Pat
+     for key, expr in exprs.items():
+         if key not in design.params:        # the mesher's own default is then the base value
+             sections["profile"][key] = expr
++    if hv_morph:
++        sections["morph"].update(hv_morph)
+     sections["mesh"].update({
+         "quadrants": mesh.quadrants,
+         "throat_res_mm": res_mm["throat"],
+diff --git a/hornlab_search/design/generators/grid.py b/hornlab_search/design/generators/grid.py
+index 878dd18..49ac9ab 100644
+--- a/hornlab_search/design/generators/grid.py
++++ b/hornlab_search/design/generators/grid.py
+@@ -56,6 +56,7 @@ import numpy as np
+ 
+ from . import profiles as profiles_mod
+ from . import registry
++from .. import throat_hv
+ 
+ #: Grid knobs whose defaults are NOT registry.DEFAULT_KNOBS (the GRID-only shape freedoms).
+ GRID_DEFAULTS: dict[str, float] = {
+@@ -1075,6 +1076,22 @@ def _rows_lip_mm(knobs: dict, prefix: str, name: str = "r_lip_mm") -> float:
+     return r
+ 
+ 
++_THROAT_HV_KNOB_NAMES = tuple(throat_hv.KEYS)
++
++
++def _rows_throat_hv_block(knobs: dict, prefix: str, route: str) -> dict | None:
++    """Shared near-throat H/V block (``throat_hv``), parsed OUTSIDE every defaults dict.
++
++    Returns ``None`` when no key is present or the block is neutral (rho 1 and no
++    onset/ramp), so an absent block leaves rows, meta and design hashes byte-identical.
++    """
++    try:
++        block = throat_hv.parse(knobs, f"{prefix}_")
++    except throat_hv.ThroatHVError as exc:
++        raise registry.GeneratorError(f"{route} rows: {exc}") from exc
++    return block if throat_hv.is_active(block) else None
++
++
+ def _rows_lecleach_knobs(knobs: dict, prefix: str = "g") -> dict:
+     """Validated ``rows: {type: lecleach}`` knobs: ``fc_hz``, ``T``, ``stop_deg``, lip.
+ 
+@@ -1086,7 +1103,8 @@ def _rows_lecleach_knobs(knobs: dict, prefix: str = "g") -> dict:
+     allowed = {f"{prefix}_fc_hz", f"{prefix}_T", f"{prefix}_stop_deg", f"{prefix}_r_lip_mm",
+                f"{prefix}_fc_h_hz", f"{prefix}_fc_v_hz",
+                f"{prefix}_stop_cos2k", f"{prefix}_stop_sin2k1",
+-               f"{prefix}_bend_sin1_mm"}
++               f"{prefix}_bend_sin1_mm",
++               *(f"{prefix}_{n}" for n in _THROAT_HV_KNOB_NAMES)}
+     foreign = sorted(str(k) for k in knobs
+                      if str(k).startswith(f"{prefix}_") and k not in allowed)
+     if foreign:
+@@ -1131,9 +1149,18 @@ def _rows_lecleach_knobs(knobs: dict, prefix: str = "g") -> dict:
+                 "ratio of 1.5-3.0 (920x330 datasheet = 567/203 = 2.8; "
+                 "JMLC_FAMILY_VARIANTS_2026-10-25.md section 2.1(c)) + a safety margin), "
+                 f"got fc_h_hz {fc_h_hz} / fc_v_hz {fc_v_hz}")
+-    return {"fc_hz": fc, "T": T, "stop_deg": stop,
+-            "fc_h_hz": fc_h_hz, "fc_v_hz": fc_v_hz,
+-            "r_lip_mm": _rows_lip_mm(knobs, prefix)}
++    out = {"fc_hz": fc, "T": T, "stop_deg": stop,
++           "fc_h_hz": fc_h_hz, "fc_v_hz": fc_v_hz,
++           "r_lip_mm": _rows_lip_mm(knobs, prefix)}
++    hv_block = _rows_throat_hv_block(knobs, prefix, "lecleach")
++    if hv_block is not None:
++        if fc_h_hz is None:
++            raise registry.GeneratorError(
++                f"lecleach rows: {prefix}_throat_hv_ratio / {prefix}_hv_onset_frac / "
++                f"{prefix}_section_exp_ramp need the fc_h/fc_v pair (an inactive "
++                "conditional knob must not be searched)")
++        out["throat_hv"] = hv_block   # only when active: absent = byte-identical dict
++    return out
+ 
+ 
+ #: A cos(phi) (odd cosine) term breaks the left-right mirror; the rows model is only
+@@ -1364,15 +1391,26 @@ def _rows_lecleach_hv_marches(lk: dict, harm: dict, phis: np.ndarray, r0: float,
+     # the lip zone, so the rim ring is the ellipse-tube roll: the lip is continuous all
+     # the way round (r_lip = 0 returns the marches untouched, byte-identical default).
+     r_lip = float(lk["r_lip_mm"])
++    hv = lk.get("throat_hv")
++    # Shared near-throat block: rho scales the per-plane flare T (larger T = faster
++    # expansion, S(l) = S0 [cosh + T sinh]^2, eq 42).  None -> today's T on both planes.
++    t_h = t_v = float(lk["T"])
++    if hv is not None and hv.get("throat_hv_ratio") is not None:
++        rho = hv["throat_hv_ratio"]
++        t_h = float(lk["T"]) * float(throat_hv.hv_scale(rho, 0.0))
++        t_v = float(lk["T"]) * float(throat_hv.hv_scale(rho, 0.5 * math.pi))
++        if not (math.isfinite(t_h) and math.isfinite(t_v) and t_h >= 0.0 and t_v >= 0.0):
++            raise registry.GeneratorError(
++                f"lecleach hv rows: per-plane T out of range (T_h {t_h}, T_v {t_v}; T >= 0)")
+     _xs, _ys, _phi_deg, march_meta = profiles_mod.lecleach_exact(
+         r0, fc_core, lk["T"], a0, max(stop_h, stop_v), dl_mm=1.0)
+-    core_x, _core_y, _L0 = _resample_arc(*_append_lip_torus(_xs, _ys, r_lip), n_s)
++    core_x, core_r, _L0 = _resample_arc(*_append_lip_torus(_xs, _ys, r_lip), n_s)
+     xh, r_h, _L0h = _resample_arc(*_append_lip_torus(
+         *profiles_mod.lecleach_exact(
+-            r0, fc_h, lk["T"], a0, stop_h, dl_mm=1.0)[:2], r_lip), n_s)
++            r0, fc_h, t_h, a0, stop_h, dl_mm=1.0)[:2], r_lip), n_s)
+     xv, r_v, _L0v = _resample_arc(*_append_lip_torus(
+         *profiles_mod.lecleach_exact(
+-            r0, fc_v, lk["T"], a0, stop_v, dl_mm=1.0)[:2], r_lip), n_s)
++            r0, fc_v, t_v, a0, stop_v, dl_mm=1.0)[:2], r_lip), n_s)
+     if np.any(r_h <= 0.0) or np.any(r_v <= 0.0):
+         raise registry.GeneratorError(
+             "lecleach hv rows: a plane march radius is not strictly positive")
+@@ -1380,7 +1418,18 @@ def _rows_lecleach_hv_marches(lk: dict, harm: dict, phis: np.ndarray, r0: float,
+         raise registry.GeneratorError(
+             "lecleach hv rows: resampled stations lost the n_s + 1 contract")
+     a_ax, b_ax = r_h, r_v
+-    area_ratio = float(r_h[-1] * r_v[-1])
++    if hv is not None and (hv.get("hv_onset_frac") is not None
++                           or hv.get("section_exp_ramp") is not None):
++        # Ath morph weight on the shared arc-fraction station: round core section
++        # (r_m, the core march radius) until the onset, then blend to the plane axes.
++        w_s = throat_hv.ath_ramp(np.arange(n_s + 1, dtype=float) / n_s,
++                                 hv.get("hv_onset_frac"), hv.get("section_exp_ramp"))
++        a_ax = core_r + w_s * (r_h - core_r)
++        b_ax = core_r + w_s * (r_v - core_r)
++        if np.any(a_ax <= 0.0) or np.any(b_ax <= 0.0):
++            raise registry.GeneratorError(
++                "lecleach hv rows: the onset ramp left a non-positive section axis")
++    area_ratio = float(a_ax[-1] * b_ax[-1])
+     core_note = [
+         "fc_core_hz", float(fc_core),
+         "plane_stop_h_deg", float(stop_h),
+@@ -1422,6 +1471,12 @@ def _rows_lecleach_hv_marches(lk: dict, harm: dict, phis: np.ndarray, r0: float,
+             "resample": False,
+             "march": march_meta,
+         })
++    if hv is not None:
++        core_note += [
++            "throat_hv", {k: v for k, v in hv.items() if v is not None},
++            "throat_hv_status", throat_hv.STATUS["lecleach_hv"],
++            "throat_hv_plane_T", {"T_h": t_h, "T_v": t_v},
++        ]
+     hv_meta = dict(zip(core_note[0::2], core_note[1::2]))
+     for row in rows:
+         row["hv_meta"] = hv_meta
+@@ -1940,7 +1995,8 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
+     """Validated ``rows: {type: osse_rollback}`` knobs (OS wall + flutes + curled lip)."""
+     names = tuple(ROWS_OSSE_ROLL_KNOB_DEFAULTS)
+     allowed = ({f"{prefix}_{n}" for n in names}
+-               | {f"{prefix}_ripple_lobes", f"{prefix}_ripple_amp_mm", f"{prefix}_ripple_start"})
++               | {f"{prefix}_ripple_lobes", f"{prefix}_ripple_amp_mm", f"{prefix}_ripple_start"}
++               | {f"{prefix}_{n}" for n in _THROAT_HV_KNOB_NAMES})
+     foreign = sorted(str(k) for k in knobs
+                      if str(k).startswith(f"{prefix}_") and k not in allowed)
+     if foreign:
+@@ -2004,6 +2060,20 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
+     if out["wrap_cos_amp"] > 0.0 and not out["ripple_lobes"]:
+         raise registry.GeneratorError(
+             "osse_rollback rows: wrap_cos_amp follows the flute count; set ripple_lobes")
++    hv_block = _rows_throat_hv_block(knobs, prefix, "osse_rollback")
++    if hv_block is not None:
++        window = hv_block["hv_onset_frac"] is not None or hv_block["section_exp_ramp"] is not None
++        if window:
++            if out["sf_m"] == 0.0 or out["sf_amt"] == 0.0:
++                raise registry.GeneratorError(
++                    "osse_rollback rows: hv_onset_frac / section_exp_ramp drive the "
++                    "superformula window; they need sf_m and sf_amt > 0 (an inactive "
++                    "conditional knob must not be searched)")
++            if hv_block["hv_onset_frac"] is not None and out["sf_start"] != 0.0:
++                raise registry.GeneratorError(
++                    "osse_rollback rows: hv_onset_frac replaces sf_start (one onset knob "
++                    "only); leave sf_start at 0 when hv_onset_frac is set")
++        out["_hv"] = hv_block   # only when active: absent = byte-identical dict
+     return out
+ 
+ 
+@@ -2013,6 +2083,10 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
+     out = []
+     lobes = int(ok["ripple_lobes"])
+     sf_m = int(ok["sf_m"])
++    hv = ok.get("_hv")
++    hv_rho = None if hv is None else hv["throat_hv_ratio"]
++    hv_window = hv is not None and (hv["hv_onset_frac"] is not None
++                                    or hv["section_exp_ramp"] is not None)
+ 
+     def superformula(ph):
+         q = np.asarray(ph, dtype=float) * sf_m / 4.0
+@@ -2035,7 +2109,9 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
+                 ang = 0.25 * math.pi + abs(x)
+         c2, s2 = math.cos(ang) ** 2, math.sin(ang) ** 2
+         a_phi = ok["a_h_deg"] * c2 + ok["a_v_deg"] * s2
+-        prm = {"type": "OSSE", "r0": r0, "a0": a0, "L": ok["L_mm"], "a": a_phi, "k": ok["k"],
++        prm = {"type": "OSSE", "r0": r0, "a0": a0, "L": ok["L_mm"], "a": a_phi,
++               "k": (ok["k"] if hv_rho is None
++                     else ok["k"] * float(throat_hv.hv_scale_inverse(hv_rho, float(phi)))),
+                "s": ok["s"], "n": ok["n"], "q": ok["q"]}
+         try:
+             pts = np.asarray(profile_points(prm, ROWS_OSSE_ROLL_SAMPLES, float(phi)), dtype=float)
+@@ -2049,7 +2125,9 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
+                 f"{np.degrees(phi):.1f} deg for these knobs")
+         if sf_m and ok["sf_amt"] > 0.0:
+             l_arc = _arc_length(xs, ys)
+-            w_sf = _rows_eps_window(l_arc / float(l_arc[-1]), ok["sf_start"])
++            frac = l_arc / float(l_arc[-1])
++            w_sf = (throat_hv.ath_ramp(frac, hv["hv_onset_frac"], hv["section_exp_ramp"])
++                    if hv_window else _rows_eps_window(frac, ok["sf_start"]))
+             ys = ys * (1.0 + ok["sf_amt"] * w_sf * (float(superformula(float(phi))) / sf_mean - 1.0))
+             if not np.all(ys > 0.0):
+                 raise registry.GeneratorError(
+@@ -2668,7 +2746,7 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
+             "construction_label": OSSE_ROLL_LABEL,
+             "source_auto_angle_deg": a0,
+             "wall_thickness_mm": wt,
+-            **{k: float(v) for k, v in ok.items() if k != "ripple_lobes"},
++            **{k: float(v) for k, v in ok.items() if k not in ("ripple_lobes", "_hv")},
+             "ripple_lobes": int(ok["ripple_lobes"]),
+             "lip_model": ("[inferred] tangent-continuous circular lip arc (C1 at the joint) "
+                           "curling back; wrap(phi) = wrap_deg (1 + wrap_cos_amp cos(N phi))"),
+@@ -2679,6 +2757,9 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
+         }
+         if ok["ripple_lobes"]:
+             meta["ripple_label"] = ROWS_RIPPLE_LABEL
++        if ok.get("_hv") is not None:
++            meta["throat_hv"] = {k: v for k, v in ok["_hv"].items() if v is not None}
++            meta["throat_hv_status"] = throat_hv.STATUS["osse_rollback"]
+     elif kind == "lecleach_asym":
+         assert asym is not None
+         march0 = marches[0]["march"]
+diff --git a/hornlab_search/design/generators/rolled_family.py b/hornlab_search/design/generators/rolled_family.py
+index a535316..d3e2c7e 100644
+--- a/hornlab_search/design/generators/rolled_family.py
++++ b/hornlab_search/design/generators/rolled_family.py
+@@ -13,6 +13,7 @@ from pathlib import Path
+ import numpy as np
+ from . import _rolled_rect_v1 as rolled_rect, _crowe_section_v2 as crowe_panel
+ from .registry import GeneratorError
++from .. import throat_hv
+ 
+ KINDS = ('rolled_family_rect_v1', 'rolled_family_section_v1')
+ MODES = ('smooth', 'radial', 'axial', 'hybrid')
+@@ -70,6 +71,18 @@ def _parent(shape, kind):
+     return crowe_panel, {k: shape[k] for k in crowe_panel.SHAPE_KEYS}
+ 
+ 
++def _throat_knobs(knobs):
++    """Shared near-throat H/V block read from the g_-prefixed knobs; absent keys stay None."""
++    if not isinstance(knobs, dict):
++        return throat_hv.parse({})
++    present = {k: knobs[k] for k in ('g_'+x for x in throat_hv.KEYS) if knobs.get(k) is not None}
++    return throat_hv.parse(present, prefix='g_')
++
++
++def _throat_window_start(shape, throat):
++    return throat['hv_onset_frac'] if throat['hv_onset_frac'] is not None else shape['relief_start_s']
++
++
+ def _shape(spec, knobs, *, require_digest=False, brief=None):
+     if not is_family_spec(spec) or set(spec)-SPEC_KEYS:
+         raise GeneratorError('invalid rolled-family specification')
+@@ -88,18 +101,36 @@ def _shape(spec, knobs, *, require_digest=False, brief=None):
+         if brief is not None and saved_driver != _driver(brief.get('driver')):
+             raise GeneratorError('rolled-family driver differs from saved recipe')
+     kind = rows['type']
+-    expected = {'g_'+k for k in shape_keys(kind)-GRID_KEYS}
++    try:
++        throat = _throat_knobs(knobs)
++    except throat_hv.ThroatHVError as exc:
++        raise GeneratorError(f'rolled-family throat-HV block: {exc}') from exc
++    if throat['throat_hv_ratio'] not in (None, 1.0):
++        raise GeneratorError('throat_hv_ratio not supported by rolled family yet')
++    onset_given = throat['hv_onset_frac'] is not None
++    if onset_given and isinstance(knobs, dict) and 'g_relief_start_s' in knobs:
++        raise GeneratorError('hv_onset_frac replaces relief_start_s; give only one')
++    replaces_window = onset_given or throat['section_exp_ramp'] is not None
++    given = {'g_'+k for k in throat_hv.KEYS
++             if isinstance(knobs, dict) and knobs.get('g_'+k) is not None}
++    base = shape_keys(kind)-GRID_KEYS
++    if onset_given:
++        base = base-{'relief_start_s'}
++    expected = {'g_'+k for k in base} | given
+     if not isinstance(knobs, dict) or set(knobs) != expected:
+         raise GeneratorError(f'rolled-family knob mismatch: expected {sorted(expected)}')
+     try:
+-        shape = {k: knobs['g_'+k] for k in shape_keys(kind)-GRID_KEYS}
++        shape = {k: knobs['g_'+k] for k in base}
+         shape.update({k: spec[k] for k in GRID_KEYS})
+         if any(isinstance(x, bool) or not isinstance(x, (int, float)) or not math.isfinite(x)
+                for x in shape.values()):
+             raise ValueError('all shape values must be finite numbers')
+         kernel, parent = _parent(shape, kind)
+         kernel.validate_shape(parent)
+-        if not .15 <= shape['relief_start_s'] < shape['relief_peak_s'] < shape['relief_end_s'] <= .96:
++        if onset_given:
++            if not 0 <= throat['hv_onset_frac'] < shape['relief_peak_s'] < shape['relief_end_s'] <= .96:
++                raise ValueError('need 0 <= hv_onset_frac < peak < end <= .96')
++        elif not .15 <= shape['relief_start_s'] < shape['relief_peak_s'] < shape['relief_end_s'] <= .96:
+             raise ValueError('need .15 <= relief start < peak < end <= .96')
+         for key in ('inward_h_mm', 'inward_v_mm'):
+             if not 0 <= shape[key] <= .15*shape['height_mm']:
+@@ -111,6 +142,8 @@ def _shape(spec, knobs, *, require_digest=False, brief=None):
+         axial = shape['axial_h_mm'] != 0 or shape['axial_v_mm'] != 0
+         if (mode in ('smooth', 'axial') and radial) or (mode in ('smooth', 'radial') and axial):
+             raise ValueError('nonzero relief amplitude is inactive in the selected mode')
++        if replaces_window and not (radial or axial):
++            raise ValueError('hv_onset_frac/section_exp_ramp are inactive: relief and pucker amplitudes are zero')
+     except (KeyError, TypeError, ValueError) as exc:
+         raise GeneratorError(f'rolled-family shape: {exc}') from exc
+     return shape, kernel, parent
+@@ -122,6 +155,16 @@ def relief_window(shape, stations):
+     return rolled_rect.smoothstep((s-start)/(peak-start))*rolled_rect.smoothstep((end-s)/(end-peak))
+ 
+ 
++def _window(shape, stations, throat):
++    """Relief weight; with the shared block the start is the ATH ramp, the end taper is unchanged."""
++    if throat['hv_onset_frac'] is None and throat['section_exp_ramp'] is None:
++        return relief_window(shape, stations)
++    s = np.asarray(stations, dtype=float)
++    end, peak = shape['relief_end_s'], shape['relief_peak_s']
++    start_ramp = throat_hv.ath_ramp(s, _throat_window_start(shape, throat), throat['section_exp_ramp'])
++    return start_ramp*rolled_rect.smoothstep((end-s)/(end-peak))
++
++
+ def _source_check(kernel, parent, driver):
+     # Check the actual continuous base, not just its driver metadata. The relief
+     # window is identically zero throughout this source neighbourhood.
+@@ -155,9 +198,10 @@ def resolve_grid(block, brief):
+         ds, vertical, _, _, _, _ = kernel._sweep(parent, driver)
+         ascending = np.arange(int(np.argmax(vertical[:, 1]))+1)
+         source_end = float(np.interp(parent['throat_blend_mm'], vertical[ascending, 1], ds[ascending]))
+-    if shape['relief_start_s'] <= source_end:
++    throat = _throat_knobs(block.get('knobs'))
++    if _throat_window_start(shape, throat) <= source_end:
+         raise GeneratorError('relief onset intersects the source matching region')
+-    w = relief_window(shape, stations)
++    w = _window(shape, stations, throat)
+     if np.any(w[-2:] != 0):
+         raise GeneratorError('relief reaches the exterior-body attachment normal')
+     inner = original.copy()
+@@ -202,6 +246,9 @@ def resolve_grid(block, brief):
+                 mouth_w_mm=float(extents[0]), mouth_h_mm=float(extents[1]), x_span_mm=float(extents[2]),
+                 source_auto_angle_deg=driver['exit_angle_deg'], driver=driver,
+                 implementation_sha256=implementation_digest(), stations=stations.tolist())
++    if throat_hv.is_active(throat):
++        meta['throat_hv'] = {k: v for k, v in throat.items() if v is not None}
++        meta['notes'] = [*meta.get('notes', []), throat_hv.STATUS['rolled']]
+     return {'inner_points': inner, 'outer_points': outer, 'meta': meta}
+ 
+ 
+@@ -221,7 +268,10 @@ def validate_grid_params(block):
+ def validate_search_config(spec, seed, bounds, brief):
+     """Reject dormant dimensions, clipping and independently overlapping windows."""
+     shape, _, _ = _shape(spec, seed, brief=brief)
+-    expected = {'g_'+k for k in shape_keys(spec['rows']['type'])-GRID_KEYS}
++    given = {'g_'+k for k in throat_hv.KEYS if isinstance(seed, dict) and seed.get('g_'+k) is not None}
++    onset = 'g_hv_onset_frac' in given
++    expected = {'g_'+k for k in shape_keys(spec['rows']['type'])-GRID_KEYS
++                if not (onset and k == 'relief_start_s')} | given
+     if set(bounds) != expected:
+         raise GeneratorError('every rolled-family knob needs an explicit matching bound')
+     intervals = {}
+@@ -242,10 +292,12 @@ def validate_search_config(spec, seed, bounds, brief):
+             for axis in ('h', 'v'):
+                 if intervals[f'{prefix}_{axis}_mm'] != (0., 0.):
+                     raise GeneratorError(f'{prefix} relief is inactive in mode {mode}')
+-    start, peak, end = (intervals[k] for k in ('relief_start_s', 'relief_peak_s', 'relief_end_s'))
++    start_key = 'hv_onset_frac' if onset else 'relief_start_s'
++    start, peak, end = (intervals[k] for k in (start_key, 'relief_peak_s', 'relief_end_s'))
+     if not start[1] < peak[0] or not peak[1] < end[0]:
+         raise GeneratorError('independent relief position bounds overlap')
+-    position_search = any(bounds['g_'+k].search for k in ('relief_start_s', 'relief_peak_s', 'relief_end_s'))
++    position_search = any(bounds['g_'+k].search for k in (start_key, 'relief_peak_s', 'relief_end_s')
++                          ) or ('g_section_exp_ramp' in given and bounds['g_section_exp_ramp'].search)
+     strength_away_zero = any(lo > 0 or hi < 0 for k, (lo, hi) in intervals.items()
+                              if k in ('inward_h_mm', 'inward_v_mm', 'axial_h_mm', 'axial_v_mm'))
+     if position_search and not strength_away_zero:
+diff --git a/hornlab_search/design/params/knobs_native.py b/hornlab_search/design/params/knobs_native.py
+index 4680e00..7c2e5fa 100644
+--- a/hornlab_search/design/params/knobs_native.py
++++ b/hornlab_search/design/params/knobs_native.py
+@@ -755,6 +755,42 @@ NATIVE_KNOBS: dict[str, KnobDoc] = {
+         doc_ref=("docs/research/typologies/ATH_CORE_TWINRAY_MORPH_2026-10-25.md",
+                  "## 5b. Per-direction law (the exact CORE construction)"),
+     ),
++    "throat_hv_ratio": _make(
++        "throat_hv_ratio",
++        label='Throat H/V ratio',
++        unit=None,
++        summary='Opens the horizontal throat sooner than the vertical (or the reverse); 1 = round.',
++        detail=('Shared near-throat H/V block. The OS-SE expansion factor varies around the horn: '
++                'k(p) = k * rho^(-cos 2p / 2). The driver-exit slope tan(a0) is unchanged, so the '
++                'throat stays round and tangent to the driver. Within the OS-SE parent (Batik 2020 s5).'),
++        formula='k(p) = k * throat_hv_ratio ** (-cos(2p)/2)',
++        physical='Starts the H/V coverage split at the throat instead of near the mouth.',
++        code_ref=_FAM + "throat_hv_mesher_terms",
++        doc_ref=("docs/knowledge/claims/KH-003_throat_hv_options_literature.md",
++                 "## Parent-integrator verification (2026-11-18, primary text extracted from the PDFs)"),
++    ),
++    "hv_onset_frac": _make(
++        "hv_onset_frac",
++        label='H/V onset fraction',
++        unit=None,
++        summary='Where along the horn the section morph starts (0 = at the throat).',
++        detail='Shared-block alias of morph_fixed (Ath morph). Needs morph_target; give this or morph_fixed, not both.',
++        formula='factor = clamp((t - hv_onset_frac)/(1 - hv_onset_frac), 0, 1)^section_exp_ramp',
++        physical='Moves the start of the round-to-target section change toward or away from the driver.',
++        code_ref=_FAM + "throat_hv_mesher_terms",
++        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
++    ),
++    "section_exp_ramp": _make(
++        "section_exp_ramp",
++        label='Section ramp exponent',
++        unit=None,
++        summary='How fast the section goes from round to the target outline after the onset.',
++        detail='Shared-block alias of morph_rate (Ath morph). Needs morph_target; give this or morph_rate, not both.',
++        formula='factor = clamp((t - hv_onset_frac)/(1 - hv_onset_frac), 0, 1)^section_exp_ramp',
++        physical='Low = early, gradual change; high = late, abrupt change.',
++        code_ref=_FAM + "throat_hv_mesher_terms",
++        doc_ref=(_MESHER, "### 6a. Cross-section morphing (ALL formula families)"),
++    ),
+     "az_a_cos_pow": _make(
+         "az_a_cos_pow",
+         label='Per-direction cos power',
+diff --git a/hornlab_search/design/throat_hv.py b/hornlab_search/design/throat_hv.py
+new file mode 100644
+index 0000000..d3f6f61
+--- /dev/null
++++ b/hornlab_search/design/throat_hv.py
+@@ -0,0 +1,99 @@
++"""Shared near-throat H/V block (owner-approved 2026-11-18).
++
++Three knobs with ONE meaning in every family that adopts them. Each family maps them onto its own
++published law. This is shared vocabulary, not a universal generator. Research basis:
++``docs/knowledge/claims/KH-002_*``, ``KH-003_*`` and ``docs/knowledge/THROAT_HV_CONTROL_AUDIT_2026-11-18.md``.
++
++``throat_hv_ratio`` (rho, 1 = neutral)
++    H/V asymmetry of the throat expansion. rho > 1 opens the horizontal plane sooner than the
++    vertical one. The per-azimuth scale is ``rho ** (+-cos(2p)/2)``: it equals ``rho**(1/2)`` on the
++    H axis (p = 0) and ``rho**(-1/2)`` on the V axis (p = 90 deg). The geometric mean is preserved,
++    the mirror planes are kept, and rho = 1 is exactly 1 at every azimuth. Families use
++    :func:`hv_scale` (larger = faster throat growth) or :func:`hv_scale_inverse` (for a parameter
++    where larger = slower growth, e.g. OS ``k``).
++
++``hv_onset_frac`` (s_on) and ``section_exp_ramp`` (gamma)
++    Where the H/V or section-shape departure starts (0 = at the throat) and its ramp exponent, via
++    the ATH morph factor ``w(t) = clamp((t - s_on) / (1 - s_on), 0, 1) ** gamma`` (Ath user guide,
++    cross-section morphing). ``t`` is the family's own axial or arc fraction.
++
++Neutrality contract: absent keys = today's geometry byte-for-byte; rho = 1 = the parent law.
++"""
++
++from __future__ import annotations
++
++import math
++
++import numpy as np
++
++KEYS = ("throat_hv_ratio", "hv_onset_frac", "section_exp_ramp")
++RATIO_RANGE = (0.25, 4.0)
++ONSET_RANGE = (0.0, 0.9)
++RAMP_RANGE = (0.5, 8.0)
++ATH_DEFAULT_RAMP = 3.0
++
++#: Provenance label per family mapping (verdicts from KH-003 plus the primary OS-SE check).
++STATUS = {
++    "OSSE": ("throat_hv_ratio -> per-azimuth k(p): WITHIN the OS-SE parent (Batik 2020 s5: profile "
++             "parameters may vary around the device); k keeps the driver-exit slope tan(a0). "
++             "hv_onset_frac/section_exp_ramp -> morph_fixed/morph_rate: the published Ath morph."),
++    "osse_rollback": ("throat_hv_ratio -> per-azimuth k: within OS-SE for the wall; the superformula "
++                      "window remap is a LABELED HYBRID (HornFab construction)."),
++    "lecleach_hv": ("throat_hv_ratio -> per-plane march flare T: each plane is still a JMLC march; "
++                    "the H/V pairing and onset ramp are a LABELED HYBRID."),
++    "rolled": ("all three knobs: LABELED HYBRID (rolled family is an original HornFab "
++               "construction; no published parent for near-throat H/V terms)."),
++}
++
++
++class ThroatHVError(ValueError):
++    """Illegal shared-block value."""
++
++
++def parse(params: dict, prefix: str = "") -> dict:
++    """Validated block values; absent keys are ``None`` (meaning: keep the family's own default)."""
++    out: dict = {}
++    for key, (lo, hi) in zip(KEYS, (RATIO_RANGE, ONSET_RANGE, RAMP_RANGE)):
++        raw = params.get(prefix + key)
++        if raw is None:
++            out[key] = None
++            continue
++        v = float(raw)
++        if not math.isfinite(v) or not lo <= v <= hi:
++            raise ThroatHVError(f"{prefix}{key} must be in [{lo:g}, {hi:g}], got {raw!r}")
++        out[key] = v
++    return out
++
++
++def is_active(block: dict) -> bool:
++    """True when the block can change geometry (a non-neutral ratio or any onset/ramp value)."""
++    rho = block.get("throat_hv_ratio")
++    return (rho is not None and rho != 1.0) or block.get("hv_onset_frac") is not None \
++        or block.get("section_exp_ramp") is not None
++
++
++def hv_scale(rho: float | None, phi):
++    """``rho ** (cos(2 phi) / 2)``: sqrt(rho) on H, 1/sqrt(rho) on V, exactly 1 when rho is 1/None."""
++    if rho is None or rho == 1.0:
++        return np.ones_like(np.asarray(phi, dtype=float)) if np.ndim(phi) else 1.0
++    val = float(rho) ** (0.5 * np.cos(2.0 * np.asarray(phi, dtype=float)))
++    return val if np.ndim(phi) else float(val)
++
++
++def hv_scale_inverse(rho: float | None, phi):
++    """Reciprocal of :func:`hv_scale` (for a parameter where larger = slower throat growth)."""
++    s = hv_scale(rho, phi)
++    return 1.0 / s
++
++
++def ath_ramp(t, onset: float | None, gamma: float | None):
++    """Ath morph factor ``clamp((t - s_on)/(1 - s_on), 0, 1) ** gamma`` (s_on 0, gamma 3 default)."""
++    s_on = 0.0 if onset is None else float(onset)
++    g = ATH_DEFAULT_RAMP if gamma is None else float(gamma)
++    x = np.clip((np.asarray(t, dtype=float) - s_on) / (1.0 - s_on), 0.0, 1.0)
++    return x ** g
++
++
++def mesher_k_expression(k: float, rho: float) -> str:
++    """Mesher p-expression for the per-azimuth OS-SE ``k(p) = k * rho ** (-cos(2p)/2)``."""
++    return f"{float(k)!r}*{float(rho)!r}**(-0.5*cos(2*p))"
+diff --git a/tests/test_design_throat_hv_grid.py b/tests/test_design_throat_hv_grid.py
+new file mode 100644
+index 0000000..6ee4a1e
+--- /dev/null
++++ b/tests/test_design_throat_hv_grid.py
+@@ -0,0 +1,142 @@
++"""Shared near-throat H/V block (throat_hv) in the grid rows routes. Offline, CPU only.
++
++Le Cleac'h pair: rho scales the per-plane flare T (larger T = faster expansion, eq 42);
++onset/ramp blend the round core section into the plane axes. osse_rollback: rho -> per-azimuth k,
++onset/ramp -> the superformula window (needs hornlab_mesher, skipped when absent).
++"""
++from __future__ import annotations
++
++import math
++
++import numpy as np
++import pytest
++
++from hornlab_search.design import throat_hv
++from hornlab_search.design.generators import grid as G
++from hornlab_search.design.generators import profiles as P
++from hornlab_search.design.generators import registry
++
++BRIEF = {"driver": {"exit_radius_mm": 18.0, "exit_angle_deg": 2.0}}
++LC_SPEC = {"rows": {"type": "lecleach"}, "n_phi": 15, "n_s": 32, "name": "grid"}
++OS_SPEC = {"rows": {"type": "osse_rollback"}, "n_phi": 13, "n_s": 40, "span": "quarter"}
++
++
++def _lc(**extra):
++    k = {"g_fc_hz": 450.0, "g_fc_h_hz": 450.0, "g_fc_v_hz": 800.0, "g_T": 0.6, "g_stop_deg": 200.0}
++    k.update(extra)
++    return k
++
++
++def _lc_rows(knobs):
++    return G.rows_per_azimuth(LC_SPEC, knobs, BRIEF)
++
++
++def _half_width_ratio(grid, j):
++    """H over V section radius at station j (phi = 0 row over phi = 90 row)."""
++    r = np.hypot(grid[:, j, 0], grid[:, j, 1])
++    return float(r[0] / r[-1])
++
++
++# ---- Le Cleac'h pair -------------------------------------------------------------------------
++def test_lc_absent_and_neutral_rho_are_identical():
++    base, _ = _lc_rows(_lc())
++    one, _ = _lc_rows(_lc(g_throat_hv_ratio=1.0))
++    np.testing.assert_array_equal(base, one)
++
++
++def test_lc_rho_opens_h_sooner_and_keeps_round_throat():
++    base, _ = _lc_rows(_lc())
++    hi, _ = _lc_rows(_lc(g_throat_hv_ratio=2.0))
++    j = int(round(0.25 * (base.shape[1] - 1)))
++    assert _half_width_ratio(hi, j) > _half_width_ratio(base, j)
++    r0 = np.hypot(hi[:, 0, 0], hi[:, 0, 1])
++    np.testing.assert_allclose(r0, 18.0, atol=1e-9)
++    np.testing.assert_array_equal(hi[:, 0, :], base[:, 0, :])
++
++
++def test_T_direction_larger_T_is_faster_expansion():
++    """Direction evidence: at equal fc/stop the larger T has the larger radius at equal arc fraction."""
++    def r_at(T):
++        xs, ys, _p, _m = P.lecleach_exact(18.0, 500.0, T, 2.0, 200.0, dl_mm=1.0)
++        return float(G._resample_arc(xs, ys, 32)[1][8])
++    assert r_at(1.0) > r_at(0.4)
++
++
++def test_lc_onset_leaves_early_stations_round():
++    grid, _ = _lc_rows(_lc(g_hv_onset_frac=0.5))
++    n_s = grid.shape[1] - 1
++    r = np.hypot(grid[:, :, 0], grid[:, :, 1])
++    xs, ys, _p, _m = P.lecleach_exact(18.0, math.sqrt(450.0 * 800.0), 0.6, 2.0, 200.0, dl_mm=1.0)
++    core_r = G._resample_arc(xs, ys, n_s)[1]
++    early = [j for j in range(n_s + 1) if j / n_s < 0.5]
++    for j in early:
++        np.testing.assert_allclose(r[:, j], core_r[j], atol=1e-9)
++    assert abs(r[0, -1] - r[-1, -1]) > 1.0   # the mouth is still H/V split
++
++
++def test_lc_refusals():
++    for bad in ({"g_throat_hv_ratio": 9.0}, {"g_hv_onset_frac": 0.95}, {"g_section_exp_ramp": 0.1}):
++        with pytest.raises(registry.GeneratorError):
++            _lc_rows(_lc(**bad))
++    with pytest.raises(registry.GeneratorError):      # block needs the fc pair
++        G.rows_per_azimuth(LC_SPEC, {"g_fc_hz": 450.0, "g_T": 0.6, "g_stop_deg": 200.0,
++                                     "g_throat_hv_ratio": 2.0}, BRIEF)
++
++
++def test_lc_meta_carries_provenance_only_when_active():
++    _g, meta = _lc_rows(_lc(g_throat_hv_ratio=2.0))
++    assert "LABELED HYBRID" in meta["throat_hv_status"]
++    _g, meta0 = _lc_rows(_lc())
++    assert "throat_hv_status" not in meta0
++
++
++# ---- osse_rollback (needs the mesher) --------------------------------------------------------
++SEED = {"g_a_h_deg": 45.0, "g_a_v_deg": 45.0, "g_k": 1.0, "g_L_mm": 200.0, "g_r_lip_mm": 20.0,
++        "g_wrap_deg": 90.0}
++SF = {"g_sf_m": 4, "g_sf_amt": 0.3}
++
++
++def _os(knobs):
++    pytest.importorskip("hornlab_mesher")
++    return G._rows_marches(OS_SPEC, {**SEED, **knobs}, BRIEF)
++
++
++def _same(a, b):
++    assert len(a) == len(b)
++    for ra, rb in zip(a, b):
++        np.testing.assert_array_equal(ra["x"], rb["x"])
++        np.testing.assert_array_equal(ra["y"], rb["y"])
++
++
++def test_os_absent_and_neutral_rho_identical():
++    _same(_os({}), _os({"g_throat_hv_ratio": 1.0}))
++
++
++def test_os_rho_changes_h_vs_v_only_off_neutral():
++    base, hi = _os({}), _os({"g_throat_hv_ratio": 2.0})
++    j = 100
++    assert hi[0]["y"][j] > base[0]["y"][j] and hi[-1]["y"][j] < base[-1]["y"][j]   # H opens sooner
++
++
++def test_os_onset_ramp_and_refusals():
++    pytest.importorskip("hornlab_mesher")
++    ramp = _os({**SF, "g_hv_onset_frac": 0.5})
++    assert len(ramp) == OS_SPEC["n_phi"]
++    for bad in ({**SF, "g_hv_onset_frac": 0.5, "g_sf_start": 0.2},   # two onset knobs
++                {"g_hv_onset_frac": 0.5},                             # sf_m == 0
++                {"g_sf_m": 4, "g_hv_onset_frac": 0.5},                # sf_amt == 0
++                {"g_throat_hv_ratio": 9.0}):
++        with pytest.raises(registry.GeneratorError):
++            _os(bad)
++
++
++def test_os_knob_validation_is_mesher_free():
++    """The refusals live in the knob validator, so they run without hornlab_mesher."""
++    for bad in ({**SF, "g_hv_onset_frac": 0.5, "g_sf_start": 0.2}, {"g_hv_onset_frac": 0.5},
++                {"g_sf_m": 4, "g_hv_onset_frac": 0.5}, {"g_throat_hv_ratio": 9.0}):
++        with pytest.raises(registry.GeneratorError):
++            G._rows_osse_rollback_knobs({**SEED, **bad})
++    ok = G._rows_osse_rollback_knobs({**SEED, **SF, "g_hv_onset_frac": 0.5})
++    assert ok["_hv"]["hv_onset_frac"] == 0.5
++    assert "_hv" not in G._rows_osse_rollback_knobs({**SEED, "g_throat_hv_ratio": 1.0})
++    assert throat_hv.STATUS["osse_rollback"]
+diff --git a/tests/test_design_throat_hv_osse.py b/tests/test_design_throat_hv_osse.py
+new file mode 100644
+index 0000000..23ff484
+--- /dev/null
++++ b/tests/test_design_throat_hv_osse.py
+@@ -0,0 +1,111 @@
++"""Shared near-throat H/V block: shared math and the native OSSE mapping (CPU, no mesher)."""
++from __future__ import annotations
++
++import copy
++import math
++
++import numpy as np
++import pytest
++
++from hornlab_search.design import throat_hv
++from hornlab_search.design.families import to_mesher_config, validate
++from hornlab_search.mesh import sizing
++from hornlab_search.types import Design, GeometryInvalidError, MeshSpec
++
++OSSE = dict(r0_mm=17.78, a_deg=37.5, a0_deg=15.5, L_mm=260.0, n=4.0, s=0.7, q=0.995, k=1.0,
++            exponent=2.0, aspect_ratio=1.0)
++MORPH = dict(morph_target=3, morph_width_mm=500.0, morph_height_mm=300.0, morph_exponent=4.0)
++
++
++def _cfg(params, tmp_path):
++    ms = MeshSpec(epw=6.0, f_max_hz=10000.0, quadrants="1", max_triangles=73600)
++    return to_mesher_config(Design("OSSE", copy.deepcopy(params)), ms,
++                            sizing.res_mm_for(6.0, 10000.0), tmp_path / "m.msh")
++
++
++# ------------------------------------------------------------------ shared math
++
++def test_hv_scale_is_exact_identity_at_rho_one():
++    phi = np.linspace(0.0, 2.0 * math.pi, 37)
++    assert np.array_equal(throat_hv.hv_scale(1.0, phi), np.ones_like(phi))
++    assert throat_hv.hv_scale(None, 0.3) == 1.0
++
++
++def test_hv_scale_axes_mirror_and_geometric_mean():
++    rho = 2.25
++    assert throat_hv.hv_scale(rho, 0.0) == pytest.approx(1.5)
++    assert throat_hv.hv_scale(rho, math.pi / 2) == pytest.approx(1.0 / 1.5)
++    for p in (0.2, 0.7, 1.1):                          # mirror planes x and y
++        assert throat_hv.hv_scale(rho, p) == pytest.approx(throat_hv.hv_scale(rho, -p))
++        assert throat_hv.hv_scale(rho, p) == pytest.approx(throat_hv.hv_scale(rho, math.pi - p))
++    assert throat_hv.hv_scale(rho, 0.0) * throat_hv.hv_scale(rho, math.pi / 2) == pytest.approx(1.0)
++
++
++def test_ath_ramp_matches_ath_morph_factor():
++    t = np.array([0.0, 0.25, 0.5, 0.75, 1.0])
++    w = throat_hv.ath_ramp(t, 0.5, 2.0)
++    assert np.allclose(w, [0.0, 0.0, 0.0, 0.25, 1.0])
++    assert throat_hv.ath_ramp(1.0, None, None) == 1.0
++    assert throat_hv.ath_ramp(0.5, None, None) == pytest.approx(0.125)   # Ath default gamma 3
++
++
++def test_parse_ranges():
++    assert throat_hv.parse({}) == dict.fromkeys(throat_hv.KEYS)
++    with pytest.raises(throat_hv.ThroatHVError):
++        throat_hv.parse({"throat_hv_ratio": 5.0})
++    with pytest.raises(throat_hv.ThroatHVError):
++        throat_hv.parse({"g_hv_onset_frac": 0.95}, prefix="g_")
++
++
++def test_os_k_expression_keeps_driver_slope_and_splits_planes():
++    """OS-SE base(z) with k(p): slope at z=0 is tan(a0) on every azimuth; H grows sooner."""
++    r0, a0, a, rho = 18.0, math.radians(2.0), math.radians(40.0), 4.0
++
++    def base(z, k):
++        return math.sqrt((k * r0) ** 2 + 2 * k * r0 * z * math.tan(a0) + (z * math.tan(a)) ** 2) \
++            + r0 * (1 - k)
++
++    k_h = 1.0 * throat_hv.hv_scale_inverse(rho, 0.0)
++    k_v = 1.0 * throat_hv.hv_scale_inverse(rho, math.pi / 2)
++    dz = 1e-6
++    for k in (k_h, k_v):
++        assert base(0.0, k) == pytest.approx(r0)
++        assert (base(dz, k) - base(0.0, k)) / dz == pytest.approx(math.tan(a0), rel=1e-3)
++    assert base(40.0, k_h) > base(40.0, 1.0) > base(40.0, k_v)
++
++
++# ------------------------------------------------------------------ native OSSE mapping
++
++def test_absent_block_is_byte_identical(tmp_path):
++    assert _cfg(OSSE, tmp_path) == _cfg({**OSSE}, tmp_path)
++    cfg = _cfg(OSSE, tmp_path)
++    assert cfg["profile"]["k"] == 1.0
++    assert not any(k in cfg.get("profile", {}) for k in throat_hv.KEYS)
++
++
++def test_ratio_one_is_byte_identical(tmp_path):
++    assert _cfg({**OSSE, "throat_hv_ratio": 1.0}, tmp_path) == _cfg(OSSE, tmp_path)
++
++
++def test_ratio_becomes_k_expression(tmp_path):
++    cfg = _cfg({**OSSE, "throat_hv_ratio": 2.0}, tmp_path)
++    expr = cfg["profile"]["k"]
++    assert isinstance(expr, str) and "cos(2*p)" in expr
++    val = eval(expr, {"cos": math.cos, "p": 0.0})        # noqa: S307 - our own literal expression
++    assert val == pytest.approx(1.0 / math.sqrt(2.0))
++    assert "throat_hv_ratio" not in cfg["profile"]
++
++
++def test_onset_and_ramp_alias_morph(tmp_path):
++    cfg = _cfg({**OSSE, **MORPH, "hv_onset_frac": 0.1, "section_exp_ramp": 1.5}, tmp_path)
++    assert cfg["morph"]["morph_fixed"] == 0.1 and cfg["morph"]["morph_rate"] == 1.5
++    assert "hv_onset_frac" not in cfg["morph"]
++
++
++def test_refusals():
++    with pytest.raises(GeometryInvalidError):          # inactive without a morph target
++        validate(Design("OSSE", {**OSSE, "hv_onset_frac": 0.1}))
++    with pytest.raises(GeometryInvalidError):          # alias and native both given
++        validate(Design("OSSE", {**OSSE, **MORPH, "hv_onset_frac": 0.1, "morph_fixed": 0.2}))
++    with pytest.raises(GeometryInvalidError):          # out of range
++        validate(Design("OSSE", {**OSSE, "throat_hv_ratio": 9.0}))
+diff --git a/tests/test_design_throat_hv_rolled.py b/tests/test_design_throat_hv_rolled.py
+new file mode 100644
+index 0000000..423cf63
+--- /dev/null
++++ b/tests/test_design_throat_hv_rolled.py
+@@ -0,0 +1,141 @@
++"""CPU contracts for the shared near-throat H/V block in the rolled family."""
++import numpy as np
++import pytest
++
++from conftest import REPO
++from hornlab_search.config import load_config
++from hornlab_search.design import throat_hv
++from hornlab_search.design.space import DesignSpace
++from hornlab_search.design.generators import rolled_family as rf
++from hornlab_search.design.generators.registry import GeneratorError
++
++
++@pytest.fixture(params=['rect', 'section'])
++def family(request):
++    cfg = load_config(REPO / 'examples/typologies/rolled_family_2026-11-15' /
++                      f'rf__{request.param}_radial_v7.yaml')
++    return DesignSpace.from_config(cfg)
++
++
++def resolve(space, knobs=None):
++    if knobs is None:
++        block = space.seed.params['grid']
++    else:
++        block = rf.design_params(space.gen, knobs, space.brief)['grid']
++    return rf.resolve_grid(block, space.brief)
++
++
++def neutral(space):
++    knobs = dict(space.seed_knobs)
++    knobs['g_inward_h_mm'] = knobs['g_inward_v_mm'] = 0.0
++    return knobs
++
++
++def with_onset(space, onset):
++    knobs = dict(space.seed_knobs)
++    del knobs['g_relief_start_s']
++    knobs['g_hv_onset_frac'] = onset
++    return knobs
++
++
++def test_absent_keys_leave_geometry_meta_and_knobs_unchanged(family):
++    assert not any(('g_'+k) in family.seed_knobs for k in throat_hv.KEYS)
++    assert throat_hv.is_active(rf._throat_knobs(family.seed_knobs)) is False
++    treated = resolve(family)
++    assert 'throat_hv' not in treated['meta']
++    assert throat_hv.STATUS['rolled'] not in treated['meta'].get('notes', [])
++    # Neutral ratio is the identity: an explicit 1.0 must not change any point.
++    knobs = dict(family.seed_knobs, g_throat_hv_ratio=1.0)
++    explicit = resolve(family, knobs)
++    np.testing.assert_array_equal(explicit['inner_points'], treated['inner_points'])
++    np.testing.assert_array_equal(explicit['outer_points'], treated['outer_points'])
++    assert 'throat_hv' not in explicit['meta']
++
++
++def test_onset_half_leaves_stations_before_it_undeformed(family):
++    parent = resolve(family, neutral(family))
++    treated = resolve(family, with_onset(family, 0.5))
++    station = np.array(treated['meta']['stations'])
++    before = station < 0.5
++    assert before.any() and (~before).any()
++    np.testing.assert_array_equal(treated['inner_points'][:, before],
++                                  parent['inner_points'][:, before])
++    np.testing.assert_array_equal(treated['outer_points'][:, before],
++                                  parent['outer_points'][:, before])
++    assert not np.array_equal(treated['inner_points'][:, ~before],
++                              parent['inner_points'][:, ~before])
++
++
++def test_active_block_is_labelled(family):
++    treated = resolve(family, with_onset(family, 0.5))
++    assert treated['meta']['throat_hv'] == {'hv_onset_frac': 0.5}
++    assert throat_hv.STATUS['rolled'] in treated['meta']['notes']
++
++
++def test_section_ramp_alone_keeps_family_start_and_labels(family):
++    knobs = dict(family.seed_knobs, g_section_exp_ramp=2.0)
++    treated = resolve(family, knobs)
++    assert treated['meta']['throat_hv'] == {'section_exp_ramp': 2.0}
++    assert throat_hv.STATUS['rolled'] in treated['meta']['notes']
++
++
++def test_onset_zero_is_accepted_by_the_knob_parser(family):
++    block = rf._throat_knobs(with_onset(family, 0.0))
++    assert block['hv_onset_frac'] == 0.0
++
++
++def test_onset_with_relief_start_is_refused(family):
++    knobs = dict(family.seed_knobs, g_hv_onset_frac=0.5)
++    with pytest.raises(GeneratorError, match='replaces relief_start_s'):
++        rf.design_params(family.gen, knobs, family.brief)
++
++
++def test_zero_relief_amplitude_makes_the_block_inert_and_is_refused(family):
++    knobs = with_onset(family, 0.5)
++    knobs['g_inward_h_mm'] = knobs['g_inward_v_mm'] = 0.0
++    with pytest.raises(GeneratorError, match='amplitudes are zero'):
++        rf.design_params(family.gen, knobs, family.brief)
++
++
++def test_non_neutral_ratio_is_refused_until_the_family_maps_it(family):
++    knobs = dict(family.seed_knobs, g_throat_hv_ratio=2.0)
++    with pytest.raises(GeneratorError, match='throat_hv_ratio not supported by rolled family yet'):
++        rf.design_params(family.gen, knobs, family.brief)
++
++
++@pytest.mark.parametrize('onset', [-0.1, 0.95, float('nan')])
++def test_out_of_range_onset_is_refused(family, onset):
++    with pytest.raises(GeneratorError):
++        rf.design_params(family.gen, with_onset(family, onset), family.brief)
++
++
++def test_onset_past_peak_is_refused(family):
++    with pytest.raises(GeneratorError, match='hv_onset_frac < peak'):
++        rf.design_params(family.gen, with_onset(family, 0.9), family.brief)
++
++
++def test_onset_and_ramp_are_searchable(family):
++    """The shared knobs take the place of relief_start_s in the search box."""
++    from hornlab_search.design.space import Bound
++    seed = {k: v for k, v in family.seed_knobs.items() if k != 'g_relief_start_s'}
++    peak = family.bounds['g_relief_peak_s']
++    seed.update(g_hv_onset_frac=0.0, g_section_exp_ramp=2.0)
++    bounds = {k: v for k, v in family.bounds.items() if k != 'g_relief_start_s'}
++    bounds['g_hv_onset_frac'] = Bound(0.0, min(0.1, peak.lo - 0.01))
++    bounds['g_section_exp_ramp'] = Bound(1.0, 3.0)
++    ih = bounds['g_inward_h_mm']                     # strength away from zero: position is live
++    lo = max(ih.lo, 0.25 * ih.hi)
++    bounds['g_inward_h_mm'] = Bound(lo, ih.hi)
++    seed['g_inward_h_mm'] = min(max(seed['g_inward_h_mm'], lo), ih.hi)
++    rf.validate_search_config(family.gen, seed, bounds, family.brief)
++    # and a box that lets every strength reach zero still refuses the dormant position search
++    with pytest.raises(GeneratorError, match='dormant'):
++        rf.validate_search_config(family.gen, seed, {**bounds, 'g_inward_h_mm': ih}, family.brief)
++
++
++def test_missing_bound_for_shared_knob_is_refused(family):
++    seed = {k: v for k, v in family.seed_knobs.items() if k != 'g_relief_start_s'}
++    seed['g_hv_onset_frac'] = 0.0
++    bounds = {k: v for k, v in family.bounds.items() if k != 'g_relief_start_s'}
++    with pytest.raises(GeneratorError, match='explicit matching bound'):
++        rf.validate_search_config(family.gen, seed, bounds, family.brief)
+-- 
+2.51.0.windows.1
+

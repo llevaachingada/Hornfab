@@ -1,0 +1,33 @@
+id: 20
+title: Rolled axial vs radial pucker — different deformation directions
+prompt: >
+  The rolled family supports both radial and axial relief modes. An engineer says both
+  modes produce the same type of "pucker" because both use a window function. Is this
+  correct? What are the specific geometric differences between radial inward relief and
+  axial relief in the rolled_family implementation? Can an axial displacement at psi=45
+  degrees be confused with radial inward displacement?
+allowed_read_paths:
+  - docs/knowledge/contracts/rolled_section_pucker.md
+  - hornlab_search/design/generators/rolled_family.py
+answer_key:
+  verdict: >
+    Radial inward relief moves x and y (scales rho inward, zero at psi=45 by cos^2(2psi)).
+    Axial relief adds dz (along the axis). At psi=45 degrees radial offset is exactly zero
+    while axial offset is non-zero (scaled by cos(4*psi)). They are categorically distinct
+    and must not be confused.
+  must_include:
+    - "radial.*inward|inward.*x.*y|rho.*inward"
+    - "axial.*dz|axial.*z"
+    - "different.*direction|distinct|not.*same"
+  must_not_include:
+    - "same.*pucker|identical.*mode"
+    - "radial.*axial.*same.*effect"
+  must_cite_any:
+    - docs/knowledge/contracts/rolled_section_pucker.md
+    - hornlab_search/design/generators/rolled_family.py
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "docs/knowledge/contracts/rolled_section_pucker.md:section 4"
+    - "hornlab_search/design/generators/rolled_family.py"
+  negative_control: separate_categorical_lanes

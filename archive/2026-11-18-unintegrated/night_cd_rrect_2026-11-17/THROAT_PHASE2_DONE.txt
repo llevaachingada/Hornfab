@@ -1,0 +1,18 @@
+﻿THROAT PHASE 2 COMPLETE 2026-11-18T10:06:04 - both epw8 runs have summary rows.
+GATE: Phase 3 runs only if (5.9484 - best_B) > max |dJ| of the two epw8 pairs.
+best_B Phase 1 = B_o50 J 5.69735 (improvement over B_ctl = 0.25104).
+Job line if the gate passes: see docs/evidence/throat_hv_2026-11-18/LOCAL_RESULTS_2026-11-18_part3.md
+== 2026-11-18T10:06:04 poll
+queue_state: state=running running=t_corelaw_turbo100 done=50 pending=17
+throat_hv_run_B_ctl: exit=0 status=ok bestJ=5.948389472869655 evals=1
+throat_hv_run_B_o00: exit=0 status=ok bestJ=6.354703295654734 evals=1
+throat_hv_run_B_o25: exit=0 status=ok bestJ=5.731505950368582 evals=1
+throat_hv_run_B_o50: exit=0 status=ok bestJ=5.697347590819433 evals=1
+throat_hv_run_B_o75: exit=0 status=ok bestJ=6.137449703222328 evals=1
+throat_hv_run_A_r15: exit=0 status=ok bestJ=3.0836066533455413 evals=1
+throat_hv_run_A_r20: exit=0 status=ok bestJ=3.127129082291978 evals=1
+phase1: 7/7 summaries
+throat_hv_p2_B_o50_epw8: exit=0 status=ok bestJ=5.688783437071884 evals=1
+throat_hv_p2_B_o00_epw8: exit=0 status=ok bestJ=6.344570593530784 evals=1
+phase2: 2/2 summaries
+runner_like_processes: 5

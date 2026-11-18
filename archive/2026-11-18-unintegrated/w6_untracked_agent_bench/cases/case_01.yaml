@@ -1,0 +1,35 @@
+id: 1
+title: CROWE V2A endpoint timing (warped-quintic)
+prompt: >
+  You are reviewing the crowe_hv_area_aspect_v1 generator. A colleague reports that
+  the endpoint timing function S_R used in this generator is a simple sigmoid, but notes
+  that in the code the endpoint derivatives at u=0 and u=1 are not zero — implying
+  the shape can be reintroduced. Identify the actual timing function implemented, state
+  whether its first and second derivatives vanish at both endpoints, and explain the
+  consequence for the aspect and exponent ramps. Cite the relevant source.
+allowed_read_paths:
+  - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+  - hornlab_search/design/generators/crowe_hv_area_aspect_v1.py
+answer_key:
+  verdict: >
+    The timing function is smootherstep (10w³−15w⁴+6w⁵, the warped quintic), not a
+    simple sigmoid. Its first and second derivatives vanish at u=0 and u=1 by
+    construction (chain rule with w'(0) finite). The aspect ratio and exponent ramps are
+    therefore C2 at both ends of the forward flare.
+  must_include:
+    - smootherstep
+    - "s_r.*0.*1|first.*second.*deriv|c2.*end|endpoint.*zero"
+    - "warped|quintic|10w|6w"
+    - "aspect"
+  must_not_include:
+    - "simple sigmoid"
+    - "not zero at the endpoints"
+  must_cite_any:
+    - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+    - hornlab_search/design/generators/crowe_hv_area_aspect_v1.py
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md:A4"
+    - "hornlab_search/design/generators/crowe_hv_area_aspect_v1.py:181"
+  negative_control: null

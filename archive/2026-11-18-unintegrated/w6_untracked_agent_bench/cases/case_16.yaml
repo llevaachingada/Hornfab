@@ -1,0 +1,28 @@
+id: 16
+title: Routine GUI copy change — no acoustic library, no review needed
+prompt: >
+  A pull request changes a button label in the hornlab_search GUI from "Run Search"
+  to "Start Optimization" and updates the corresponding tooltip text in
+  hornlab_search/gui/data.py. No search algorithm, objective, brief, generator, or
+  mesh code is touched. Should this PR trigger an acoustic review or load any acoustic
+  library? What is the correct assessment?
+allowed_read_paths:
+  - hornlab_search/gui/data.py
+  - CLAUDE.md
+answer_key:
+  verdict: >
+    No acoustic review is needed. This is a UI copy change only — no acoustic library
+    should be loaded, no geometry/objective/solver code is affected.
+  must_include:
+    - "no.*acoustic.*review|not.*acoustic|ui.*only|copy.*change"
+    - "no.*acoustic.*library|does not.*affect.*acoustic"
+  must_not_include:
+    - "acoustic.*review.*required"
+    - "load.*acoustic.*library.*button"
+  must_cite_any:
+    - hornlab_search/gui/data.py
+    - CLAUDE.md
+  defer_ok: false
+  key_source: spec_only
+  evidence: []
+  negative_control: null

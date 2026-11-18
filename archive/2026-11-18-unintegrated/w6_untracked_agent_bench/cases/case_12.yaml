@@ -1,0 +1,32 @@
+id: 12
+title: no_headroom on a converged incumbent
+prompt: >
+  After a search run completes, the best design hash in the new run matches the seed —
+  the seed was taken from the previous run's best result. The best J at eval 0 equals
+  the best J across all evaluations. An operator flags this as a CMA bug. Is it a bug?
+  What is the correct diagnosis, and what does the documented guidance say about this
+  pattern?
+allowed_read_paths:
+  - .claude/skills/hornlab-search-economy/SKILL.md
+  - docs/CONTINUITY.md
+answer_key:
+  verdict: >
+    This is not a bug. The pattern is called no_headroom: the seed equals the converged
+    optimum so the run has nothing to improve. The correct response is to provide a reason
+    to search (new DOF, new brief) or use a smaller sigma0 for refinement.
+  must_include:
+    - "no_headroom|converged.*optimum|seed.*best|best.*seed"
+    - "not.*bug"
+    - "nothing.*improve|no.*headroom|converged"
+  must_not_include:
+    - "cma.*bug|solver.*bug"
+    - "increase.*budget.*fix"
+  must_cite_any:
+    - .claude/skills/hornlab-search-economy/SKILL.md
+    - docs/CONTINUITY.md
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - ".claude/skills/hornlab-search-economy/SKILL.md"
+    - "docs/CONTINUITY.md:no_headroom"
+  negative_control: null

@@ -1,0 +1,497 @@
+From 5d671ebfa6dbc04f33660cfc16690419c02fc9d6 Mon Sep 17 00:00:00 2001
+From: h <hunter.singleton@gmail.com>
+Date: Wed, 18 Nov 2026 08:13:06 -0500
+Subject: [PATCH 6/7] docs(knowledge): review the construction contracts and
+ add the shared throat-H/V contract
+
+W5: move the four 2026-11-18 drafts to REVIEWED; correct the Crowe-X g_L_mm header to the applied 285 bound, the Le Cleac'h YAML label to reconstruction, and the Klangfilm SEEDS mouth comments to the slope-law values. W4d: add contracts/throat_hv_block.md with the shared vocabulary, invariants, per-family verdicts and local evidence. W4ab: record the full-suite comparison (4 known failures, 4766 passed, 40 skipped; targeted 223 passed, 1 skipped). No GPU/BEM/objective/brief/queue change.
+---
+ docs/CONTINUITY.md                            |  21 +++
+ docs/INDEX.md                                 |   2 +-
+ docs/ISSUES.md                                |  16 ++
+ docs/knowledge/README.md                      |   2 +-
+ docs/knowledge/contracts/README.md            |  18 +-
+ .../contracts/crowe_v2a_and_crowe_x_osse.md   |  11 +-
+ docs/knowledge/contracts/klangfilm_lame_hv.md |  12 +-
+ docs/knowledge/contracts/lecleach_iwata_hv.md |  15 +-
+ .../contracts/rolled_section_pucker.md        |   6 +-
+ docs/knowledge/contracts/throat_hv_block.md   | 156 ++++++++++++++++++
+ .../hl__crowe_x_osse_cd_v7.yaml               |   2 +-
+ .../hl__lecleach_hv_landscape_smooth_v7.yaml  |   2 +-
+ .../generators/_klangfilm_lame_hv_core_v1.py  |   8 +-
+ 13 files changed, 242 insertions(+), 29 deletions(-)
+ create mode 100644 docs/knowledge/contracts/throat_hv_block.md
+
+diff --git a/docs/CONTINUITY.md b/docs/CONTINUITY.md
+index 0b1f917..b07cffa 100644
+--- a/docs/CONTINUITY.md
++++ b/docs/CONTINUITY.md
+@@ -1,5 +1,26 @@
+ # CONTINUITY
+ 
++## 2026-11-18 - Throat-H/V contracts reviewed; shared-block contract written; W4ab full suite reconciled
++
++- **W4d:** added `docs/knowledge/contracts/throat_hv_block.md` (REVIEWED): the shared vocabulary,
++  neutrality/identity invariants, per-family verdicts (OS-SE parent vs labeled hybrids), local
++  evidence and limits. It records that R-OSSE is not mapped (unclassified), that the 18 -> 14.2 mm
++  "pinch" is the domed source cap (tag 2), not the wall, and that the rolled rho legal range on
++  the current seeds is ~0.6-1.3 (not the module range).
++- **W5:** moved the four 2026-11-18 drafts from DRAFT to REVIEWED and applied the docs-only
++  fixes: Crowe-X `g_L_mm` header now reports the applied `hi: 285` (the recorded 320 widening is
++  an open owner question); the Le Cleac'h H/V YAML label is now "reconstruction of a published
++  H/V ellipsoidal principle"; the Klangfilm `SEEDS` mouth comments are corrected to the
++  slope-law values (480x240, 595x233, 473x266, 563x262). Kernel SHA docstrings are refreshed in a
++  separate code commit; that commit changes `implementation_sha256` for both Klangfilm H/V
++  families, so saved recipes pinning the old digest are refused (no example config pins it).
++- **W4ab completion:** rolled `throat_hv_ratio` and `iwata_ar` onset/ramp now have a full-suite
++  comparison on `319003c` + 0001-0004 + W4ab: 4 failed (the known baseline set), 4766 passed,
++  40 skipped in 6:30; targeted throat/rolled/Le Cleac'h tests 223 passed, 1 skipped. This
++  supersedes the 0004 entry's "iwata_ar untouched / rolled rho refused" statements.
++- No GPU, BEM, brief, objective, bound or queue change. The onset sweep and the matched A-vs-v8
++  screen remain GPU asks.
++
+ ## 2026-11-18 - Shared near-throat H/V block implemented (CPU only; mesher and BEM checks pending)
+ 
+ - New `hornlab_search/design/throat_hv.py`: `throat_hv_ratio` (rho), `hv_onset_frac`,
+diff --git a/docs/INDEX.md b/docs/INDEX.md
+index f23434e..a5c084c 100644
+--- a/docs/INDEX.md
++++ b/docs/INDEX.md
+@@ -5,7 +5,7 @@ applicability rules; compact family cards, [source catalog](knowledge/SOURCES.md
+ [seed metadata](knowledge/sources.yaml), [Keele claim](knowledge/claims/KH-001_keele_mouth_heuristic.md),
+ [claim](knowledge/templates/claim.md) / [family](knowledge/templates/typology.md) templates,
+ and the preserved [supplied compilation](knowledge/imported/HornFab_Research_Knowledge_Base_2026-11-16.md).
+-Draft hybrid [construction contracts](knowledge/contracts/README.md) and the
++Reviewed hybrid [construction contracts](knowledge/contracts/README.md) and the
+ [agent science benchmark spec](knowledge/AGENT_BENCHMARK_SPEC_2026-11-18.md) (2026-11-18, WP-K0/K1).
+ Near-throat H/V: [route audit](knowledge/THROAT_HV_CONTROL_AUDIT_2026-11-18.md),
+ [KH-002 research](knowledge/claims/KH-002_throat_hv_asymmetry_research.md),
+diff --git a/docs/ISSUES.md b/docs/ISSUES.md
+index 02720eb..e9cc48d 100644
+--- a/docs/ISSUES.md
++++ b/docs/ISSUES.md
+@@ -1,5 +1,21 @@
+ # ISSUES
+ 
++## 2026-11-18 - Throat-H/V contracts reviewed; W4ab verified; shared block still CPU-only
++
++- DONE (docs, W4d/W5): `throat_hv_block.md` contract added; the four drafts are REVIEWED with the
++  Crowe-X `g_L_mm` header, the Le Cleac'h reconstruction label and the Klangfilm seed comments
++  corrected. Open items stay listed in each contract.
++- DONE (verification, W4ab): full offline suite on the throat-H/V lane = 4 known baseline
++  failures, 4766 passed, 40 skipped; targeted 223 passed, 1 skipped. Rolled rho is seed-limited to
++  ~0.6-1.3 by the constriction guard; do not search outside the legal box without a geometry fix.
++- OPEN (owner, digest): the Klangfilm kernel SHA docstrings are refreshed in a separate code
++  commit, which changes `implementation_sha256` for both H/V families. Saved rolled/Klangfilm
++  recipes that pin the old digest are refused; re-issue the digest before reusing them.
++- OPEN (GPU budget): the onset sweep (0/0.25/0.5/0.75) and the matched A-vs-v8 screen are still
++  the acoustic test. No result in this pass says whether early onset helps.
++- OPEN (research): R-OSSE stays unclassified for per-azimuth parameters (rev7 extracted text has
++  no such statement). The `a0(phi)` proposal is not implemented.
++
+ ## 2026-11-18 - Shared throat H/V block: local verification before any GPU
+ 
+ - OPEN (owner, local): confirm the pinned `hornlab_mesher` evaluates a p-expression for `k`
+diff --git a/docs/knowledge/README.md b/docs/knowledge/README.md
+index 79e0aec..9642bc7 100644
+--- a/docs/knowledge/README.md
++++ b/docs/knowledge/README.md
+@@ -31,7 +31,7 @@ resolved targets; a DI slope target does not itself define sloping beamwidth tar
+ | MEH / multiple-entry | [Family card](typologies/meh.md) |
+ | Derived morphs / rolled and experimental forms | [Family card](typologies/experimental_morphs.md) |
+ 
+-Hybrid and new-law **construction contracts** (draft, 2026-11-18): [contracts/](contracts/README.md).
++Hybrid and new-law **construction contracts** (reviewed, 2026-11-18): [contracts/](contracts/README.md).
+ 
+ ## Authority and history
+ 
+diff --git a/docs/knowledge/contracts/README.md b/docs/knowledge/contracts/README.md
+index 8b0e502..bb4d0f9 100644
+--- a/docs/knowledge/contracts/README.md
++++ b/docs/knowledge/contracts/README.md
+@@ -1,6 +1,13 @@
+ # Scientific construction contracts (WP-K0 drafts, 2026-11-18)
+ 
+-Status: **DRAFT for senior review.** These are read-only extraction drafts. Each claim is labeled
++Status: **REVIEWED (local senior pass, 2026-11-18).** The four original drafts were reviewed
++against the code and the local test environment; the factual fixes are applied and the remaining
++open items are listed in each contract's §9/§10 (or the equivalent Verification status section).
++The `throat_hv_block.md` contract is new in this pass. Labels are unchanged: [published] /
++[derived] / [reconstruction] / [original-hypothesis] / [code-verified] / [unverified]. Drafting
++ran without scipy or the mesher; the review pass ran the full offline suite (4 known failures,
++4766 passed, 40 skipped on the throat-H/V patch lane at `319003c`) and the targeted contract/family
++tests (223 passed, 1 skipped). Each claim is labeled
+ [published] / [derived] / [reconstruction] / [original-hypothesis] / [code-verified] /
+ [unverified]. No tests were run while drafting (scipy and hornlab_mesher were absent from the
+ drafting environment), so test claims mean "a test exists", not "the test passes".
+@@ -11,9 +18,10 @@ three replaces the others. Contracts do not authorize code, bound, brief or queu
+ 
+ | Contract | Construction | Headline finding for review |
+ |---|---|---|
+-| [klangfilm_lame_hv.md](klangfilm_lame_hv.md) | Klangfilm–Lamé H/V and H/V core | `cd_core_blend` acts as a switch, so the core never reduces to the parent. The Phase A residual hides the lost curved-cap lock. Kernel SHA docstrings are stale. |
+-| [crowe_v2a_and_crowe_x_osse.md](crowe_v2a_and_crowe_x_osse.md) | CROWE V2A (4-DOF) and Crowe-X on OS-SE CD (original hybrid) | Crowe-X `g_L_mm`: the header says it was widened to 320, but the bounds still say 285. OS-SE attribution is mixed. |
+-| [rolled_section_pucker.md](rolled_section_pucker.md) | Rolled rect, section pucker, radial relief | The station definition is ambiguous (phi=pi/4 arc vs the meridian arc). Legacy pucker configs are CLI-only. |
+-| [lecleach_iwata_hv.md](lecleach_iwata_hv.md) | Le Cléac'h/Iwata AR and the H/V ellipse extension | The H/V plane meridians lose their own axial coordinate. Stations are arc-fraction, not wavefront. `πab` is report-only. H=V reduces exactly to the parent. |
++| [klangfilm_lame_hv.md](klangfilm_lame_hv.md) | Klangfilm–Lamé H/V and H/V core | `cd_core_blend` acts as a switch, so the core never reduces to the parent. The Phase A residual hides the lost curved-cap lock. Kernel SHA docstrings refreshed in the separate W5 code patch (this changes `implementation_sha256`); seed mouth comments corrected. |
++| [crowe_v2a_and_crowe_x_osse.md](crowe_v2a_and_crowe_x_osse.md) | CROWE V2A (4-DOF) and Crowe-X on OS-SE CD (original hybrid) | Crowe-X `g_L_mm`: the header now reports the file's applied `hi: 285`; the recorded 320 widening remains an open owner question. OS-SE attribution is mixed. |
++| [rolled_section_pucker.md](rolled_section_pucker.md) | Rolled rect, section pucker, radial relief | The station definition is ambiguous (phi=pi/4 arc vs the meridian arc). Legacy pucker configs are CLI-only. The new shared-block mapping (`throat_hv_ratio` inside the relief window) is a labeled hybrid. |
++| [lecleach_iwata_hv.md](lecleach_iwata_hv.md) | Le Cléac'h/Iwata AR and the H/V ellipse extension | The H/V plane meridians lose their own axial coordinate. Stations are arc-fraction, not wavefront. `πab` is report-only. H=V reduces exactly to the parent. The YAML label now says reconstruction. |
++| [throat_hv_block.md](throat_hv_block.md) | Shared near-throat H/V block (OSSE, osse_rollback, Le Cléac'h H/V, iwata_ar, rolled) | One validated vocabulary with a neutrality contract; per-family provenance is labeled (parent or hybrid). Acoustic benefit is unvalidated; R-OSSE is not mapped. |
+ 
+ Agent evaluation of these contracts: [AGENT_BENCHMARK_SPEC_2026-11-18.md](../AGENT_BENCHMARK_SPEC_2026-11-18.md).
+diff --git a/docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md b/docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+index 946d442..f757e67 100644
+--- a/docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
++++ b/docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+@@ -1,6 +1,9 @@
+ # Construction contracts: Crowe V2A area/aspect law and Crowe-X on OS-SE CD
+ 
+-Drafted 2026-11-18 against HornFab main @1d6ebc8. Read-only review; no solves, meshes, BEM or tests run (`scipy` and `hornlab_mesher` are not importable here). Labels: [published] [derived] [reconstruction] [original-hypothesis] [code-verified] [unverified]. Paths relative to repo root. Two independent contracts; claims do not transfer between them.
++Drafted 2026-11-18 against HornFab main @1d6ebc8. **Status: REVIEWED (local senior pass,
++2026-11-18):** the `g_L_mm` header is corrected to the applied bound (285); open items remain in
++B9/B10. The review lane ran the full offline suite (4 known failures, 4766 passed, 40 skipped) and
++the targeted tests below. Read-only review; no solves, meshes or BEM were run. Labels: [published] [derived] [reconstruction] [original-hypothesis] [code-verified] [unverified]. Paths relative to repo root. Two independent contracts; claims do not transfer between them.
+ 
+ ---
+ 
+@@ -151,7 +154,7 @@ Coordinates: `x` (axial, mm, from coupling plane), `y` (radius, mm), `φ` (azimu
+ |---|---|---|---|---|
+ | `g_a_h_deg` | OSSE, φ=0 | H coverage and width | searched | YAML [33,40] (study box). Module [5,85] (`:1939-1957`). Seed 36.39 from screen run `620f81` (external, `runs/` absent) |
+ | `g_a_v_deg` | OSSE, φ=90 | V coverage | searched | [20,28]; module as above |
+-| `g_L_mm` | OSSE depth | Envelope W, H, depth | searched | YAML `hi: 285` (`:56`). Header `:14` says widened to 320 on 2026-11-16, **not reflected in the file**. Module [10,1000]. Unresolved. |
++| `g_L_mm` | OSSE depth | Envelope W, H, depth | searched | YAML `hi: 285` (`:56`). Header `:14` corrected 2026-11-18: the watchdog note records a 320 proposal, but the applied bound is 285. Widening to 320 remains an **open owner question**; module [10,1000]. |
+ | `g_s` | OSSE termination | Mouth flare | searched | [0.2,0.45] (study box, `s=0` is a flat cone) |
+ | `g_n` | OSSE termination | Bowl vs plate | searched | [1.8,3.2] (study box) |
+ | `g_r_lip_mm` | Lip | Roll radius | searched | [8,30]. Module cap `ROWS_MAX_R_LIP_MM=100` (`:170`) |
+@@ -190,11 +193,11 @@ Coordinates: `x` (axial, mm, from coupling plane), `y` (radius, mm), `φ` (azimu
+ 
+ - **Analytic / tests:** from code reading [code-verified, not executed]. Tests skip without `hornlab_mesher`.
+ - **Sampled / meshed / BEM / measured:** cited in queue and HOME docs; no run artifacts in the clone. Seed J 5.344 **unverified**.
+-- **Gaps:** OSSE formula external (`hornlab_mesher.profile_formulas`), attribution inconsistent (Magnus vs Batík); morph mean is global, so mouth size shifts with `sf_amt`; no check that CD survives morph and lip; wrap capped at 200° and searched ≤160°, so no ~270° Crowe roll (not claimed); BIRADIAL study §5b ranges are stale against the YAML box; `g_L_mm` mismatch (B5).
++- **Gaps:** OSSE formula external (`hornlab_mesher.profile_formulas`), attribution inconsistent (Magnus vs Batík); morph mean is global, so mouth size shifts with `sf_amt`; no check that CD survives morph and lip; wrap capped at 200° and searched ≤160°, so no ~270° Crowe roll (not claimed); BIRADIAL study §5b ranges are stale against the YAML box; `g_L_mm` 285 vs the proposed 320 (B5; the header is corrected, the bound is unchanged).
+ 
+ ### B10. CPU-first checks and open questions
+ 
+ 1. Install `hornlab_mesher`, run the OSSE tests (CPU). Add `sf_amt=0` and all-rows `a_h=a_v` identity tests.
+ 2. Pre-check envelope at seed and bound corners with `rows_grid_points`; locate the 21/24 refusals.
+-3. Compare per-row effective exit angles (`marches`) with nominal `a(φ)`. Reconcile `g_L_mm` (285 vs 320) and the two YAML copies.
++3. Compare per-row effective exit angles (`marches`) with nominal `a(φ)`. Resolve the owner question on `g_L_mm` (applied 285 vs recorded 320) and the two YAML copies.
+ - **Q1.** Is a CD brief valid for a morph-plus-lip design? **Q2.** OS-SE attribution: Magnus or Batík? **Q3.** Should the superformula mean be per row?
+diff --git a/docs/knowledge/contracts/klangfilm_lame_hv.md b/docs/knowledge/contracts/klangfilm_lame_hv.md
+index 278f749..8cd5999 100644
+--- a/docs/knowledge/contracts/klangfilm_lame_hv.md
++++ b/docs/knowledge/contracts/klangfilm_lame_hv.md
+@@ -1,6 +1,8 @@
+ # Contract: Klangfilm-Lame H/V (Phase A) and H/V core (Phase B)
+ 
+-Status: draft for senior review, 2026-11-18, HornFab main @1d6ebc8. Not a generator spec. Labels: [published] [derived] [reconstruction] [original-hypothesis] [code-verified] [unverified]. Code cites are `file:line` under `hornlab_search/design/generators/` (abbrev `G/`). I could not run the tests (no scipy in this sandbox); only numpy snippets were run. Family and YAML names are not evidence of any construction.
++Status: **REVIEWED (local senior pass, 2026-11-18), HornFab main @1d6ebc8.** Not a generator spec.
++The seed mouth comments are corrected and the kernel SHA docstrings are refreshed in the separate
++W5 code patch (that patch changes `implementation_sha256`); open items remain in §9/§10. Labels: [published] [derived] [reconstruction] [original-hypothesis] [code-verified] [unverified]. Code cites are `file:line` under `hornlab_search/design/generators/` (abbrev `G/`). I could not run the tests (no scipy in this sandbox); only numpy snippets were run. Family and YAML names are not evidence of any construction.
+ 
+ ## 1. Identity
+ 
+@@ -11,7 +13,7 @@ Status: draft for senior review, 2026-11-18, HornFab main @1d6ebc8. Not a genera
+ | KL-HV-B | `klangfilm_lame_hv_core`, `klangfilm-lame-hv-core-v1` | `_klangfilm_lame_hv_core_v1.py` | `klangfilm_lame_hv_core_family.py:33` | original-hypothesis; not a spherical-wave horn at all when enabled |
+ 
+ Research sources (unfrozen, tested): `tools/geometry/klangfilm_lame{,_hv,_hv_core}.py`. Dates: 2026-11-16 (parent, Phase A), 2026-11-17 (Phase A/B BEM A/B). Each adapter hashes adapter+kernel+parent+cap+shell+numpy/scipy versions into `implementation_sha256` (`klangfilm_lame_hv_core_family.py:49`).
+-Drift [code-verified]: the "Frozen copy ... SHA256" docstrings (`_hv_v1.py:42`, `_hv_core_v1.py:46`) do not match `sha256sum` of the current tools files (7fc93d63..., 214d4f15...; line-ending normalised). Today the core copy differs from tools only by docstring+imports (diff), the Phase A copy by BOM/docstring/imports. Only the v1 parent has a frozen-vs-research parity test (`tests/test_klangfilm_lame_family.py:47`); none for the H/V kernels.
++Drift [code-verified]: the "Frozen copy ... SHA256" docstrings (`_klangfilm_lame_hv_v1.py:42`, `_klangfilm_lame_hv_core_v1.py:46`) were refreshed on 2026-11-18 to the current line-ending-normalised tools hashes (`7fc93d63...`, `214d4f15...`). The change is in a separate W5 code patch because it changes `implementation_sha256` for both H/V families; saved recipes that pin the old digest are refused (no example config pins it). Today the core copy differs from tools only by docstring+imports (diff), the Phase A copy by BOM/docstring/imports. Only the v1 parent has a frozen-vs-research parity test (`tests/test_klangfilm_lame_family.py:47`); none for the H/V kernels.
+ 
+ ## 2. Lineage (claim supported by each ancestor, and no more)
+ 
+@@ -97,8 +99,8 @@ All B keys have bounds P only: no document derives them; `_CORE_BOUNDS` provenan
+ 
+ ## 7. Seeds (all geometry-only; Phase A and B seeds were later BEM-solved in the A/B lane, none queued, none approved)
+ 
+-`examples/typologies/klangfilm_hv_2026-11-16/configs/` (18 files): a0 (blend 0, canonical genes from `runs/20261116T205942Z-screen-8b22b5/best.json`, fc 494.44, aspect 2.076, p 5.006, end 1.795), a0_epw9, a1, a2 (10/5 and 14/5 deg), a1_h_only/a2_v_only (single-axis, base-chord pinned), a3/a4 (negative V gain, expected refusal), a3b/a4b (respec to 0), a5 (fc 400, over envelope, `report_only`), stage_a_search (4 knobs), b1_balanced..b4_wide_h, b3_epw9, ab_cd_policy (never solved, policy resolution only, points at BASE v7 brief). README states "Geometry-only hypotheses ... not acoustic winners" and that H/V are true wall half-angles. Seeds b1-b4 are our hypotheses; the Phase B `SEEDS` dict (`_hv_core_v1.py:286`) is the same set.
+-Stale seed comments [code-verified by recomputing the slope law]: `_hv_core_v1.py:287-298` say b1 mouth ~521x262, b2 ~561x244, b3 ~498x258; the law gives W/H 479.6/239.7, 595.0/232.8, 472.5/266.1 (b4 562.5/261.6), matching PHASE_B_GEOMETRY.md (480/240, 595/233, 473/266, 563/262). Trust the table, not the comments.
++`examples/typologies/klangfilm_hv_2026-11-16/configs/` (18 files): a0 (blend 0, canonical genes from `runs/20261116T205942Z-screen-8b22b5/best.json`, fc 494.44, aspect 2.076, p 5.006, end 1.795), a0_epw9, a1, a2 (10/5 and 14/5 deg), a1_h_only/a2_v_only (single-axis, base-chord pinned), a3/a4 (negative V gain, expected refusal), a3b/a4b (respec to 0), a5 (fc 400, over envelope, `report_only`), stage_a_search (4 knobs), b1_balanced..b4_wide_h, b3_epw9, ab_cd_policy (never solved, policy resolution only, points at BASE v7 brief). README states "Geometry-only hypotheses ... not acoustic winners" and that H/V are true wall half-angles. Seeds b1-b4 are our hypotheses; the Phase B `SEEDS` dict (`_klangfilm_lame_hv_core_v1.py:286`) is the same set.
++Stale seed comments [code-verified by recomputing the slope law]: `_klangfilm_lame_hv_core_v1.py:287-298` said b1 mouth ~521x262, b2 ~561x244, b3 ~498x258; the law gives W/H 479.6/239.7, 595.0/232.8, 472.5/266.1 (b4 562.5/261.6), matching PHASE_B_GEOMETRY.md (480/240, 595/233, 473/266, 563/262). The comments were corrected on 2026-11-18; trust the table over any future comment drift.
+ Parent configs (not this contract's family): `home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1*.yaml` (base, c200, seeds B,D,E,E2,E3,P1-P4,S1-S4,V5) and `walls_relieved/*curved_v1{,_c200}`; provenance in headers: owner-directed seeds 2026-11-16, end_frac box 1.0-1.6 and fc floor 300 by owner edit, "NOT Ahlswede 2019 exact", not queued. `dual_lame_2026-11-16/k01` uses `klangfilm_lame_v1` with imported seed manifests, "unvalidated and unsolved" per `DUAL_LAME_INTEGRATION_2026-11-16.md`.
+ 
+ ## 8. Objective fit (read from configs, not family)
+@@ -119,5 +121,5 @@ Known construction gaps: no returning lip/rollback in KL-HV-B (docs say beak is
+ 
+ ## 10. Proposed CPU-first checks and open questions
+ 
+-Checks (numpy only, minutes): (1) add `cd_core_blend` in (0,1) assertion that B is a switch, or document it; (2) test A with blend=1, theta=chord base, gains 0 equals parent to 1e-12; (3) test B cone limit and `|rho(phi=0,pi/2)|` equals a,b for p up to 8; (4) recompute the post-deformation curved-cap residual of A seeds with `lame_cap_area` and report it; (5) hash-parity test frozen vs tools H/V kernels, refresh docstring SHAs and seed comments; (6) sampled planar-section area table `C(p)ab` vs cap area for B seeds to quantify "wavefront area" mismatch; (7) mesh-resolution sweep on beak/lip (dz vs n_s) because B stations are uniform in z, not arc; (8) extend the monotone test to b4.
++Checks (numpy only, minutes): (1) add `cd_core_blend` in (0,1) assertion that B is a switch, or document it; (2) test A with blend=1, theta=chord base, gains 0 equals parent to 1e-12; (3) test B cone limit and `|rho(phi=0,pi/2)|` equals a,b for p up to 8; (4) recompute the post-deformation curved-cap residual of A seeds with `lame_cap_area` and report it; (5) hash-parity test frozen vs tools H/V kernels (docstring SHAs and seed comments refreshed 2026-11-18; the parity test is still open); (6) sampled planar-section area table `C(p)ab` vs cap area for B seeds to quantify "wavefront area" mismatch; (7) mesh-resolution sweep on beak/lip (dz vs n_s) because B stations are uniform in z, not arc; (8) extend the monotone test to b4.
+ Questions for senior review: Are `_CORE_BOUNDS` (theta1<=60, beak ranges) to be promoted from P to a stated basis? Should the beak be treated as a lip (current evidence: H coverage missing without a rolled lip, widening the mouth did not help)? Is `cd_core_blend` as a class switch acceptable vs an honest `core_class` key? Is any claim allowed that Phase A H/V angles "control" beamwidth given A2 0.00 deg? Is a single smooth-brief BEM at the assumed 2 deg source cap enough to rank B3?
+diff --git a/docs/knowledge/contracts/lecleach_iwata_hv.md b/docs/knowledge/contracts/lecleach_iwata_hv.md
+index 2fd9503..1385225 100644
+--- a/docs/knowledge/contracts/lecleach_iwata_hv.md
++++ b/docs/knowledge/contracts/lecleach_iwata_hv.md
+@@ -1,7 +1,8 @@
+ # Contract: Le Cleac'h / Iwata-AR and the H/V ellipsoidal pair (cross-check)
+ 
+-Date: 2026-11-18. Repo: HornFab main @1d6ebc8 (read-only review). Scope: does the H/V
+-adaptation lose the published parent construction? Labels: [published] [derived]
++Date: 2026-11-18. Repo: HornFab main @1d6ebc8 (read-only review). **Status: REVIEWED (local
++senior pass, 2026-11-18):** the YAML label is corrected to reconstruction; open items remain in
++§9/§12. Scope: does the H/V adaptation lose the published parent construction? Labels: [published] [derived]
+ [reconstruction] [original-hypothesis] [code-verified] [unverified].
+ 
+ ## 1. Identity
+@@ -13,8 +14,9 @@ adaptation lose the published parent construction? Labels: [published] [derived]
+ - **C-B `lecleach_hv_pair`**: grid rows `type: lecleach` with `g_fc_v_hz` set
+   (dispatch grid.py:2180-2186 -> `_rows_lecleach_hv_marches`, grid.py:1304-1430).
+   Config: home_landscape_2026-11-15/hl__lecleach_hv_landscape_smooth_v7.yaml.
+-  Status: [reconstruction] of a [published] principle. The YAML description calling it
+-  "published ellipsoidal-wavefront construction" OVERSTATES the code (see 4, 9).
++  Status: [reconstruction] of a [published] principle. The YAML description (corrected
++  2026-11-18) now says "reconstruction of a published H/V ellipsoidal principle"; the earlier
++  "published ellipsoidal-wavefront construction" label overstated the code (see 4, 9).
+ 
+ ## 2. Lineage (what each ancestor supports)
+ | Source | Supports | Does NOT support |
+@@ -132,8 +134,9 @@ Preserved: the round core is the exact Fourcade march; H = V with no harmonic re
+ the mouth rim is convex (tests V2-V4).
+ 
+ **C-A (AR):** planar area exact (a b = y^2); parent wavefront area S(l) not preserved and
+-untested [unverified]; AR law [original-hypothesis]. **Label fix:** C-B YAML description and
+-the `docs/knowledge` card should say "reconstruction; planar section area; plane meridian radii only".
++untested [unverified]; AR law [original-hypothesis]. **Label fix:** the C-B YAML description now says
++"reconstruction of a published H/V ellipsoidal principle"; the `docs/knowledge` card should also add
++"planar section area; plane meridian radii only" (still open).
+ 
+ ## 11. Proposed CPU-first checks (no GPU)
+ 1. Install scipy in a venv; run the two lecleach_hv tests and the iwata_ar1 test.
+diff --git a/docs/knowledge/contracts/rolled_section_pucker.md b/docs/knowledge/contracts/rolled_section_pucker.md
+index 00b11ed..d20c493 100644
+--- a/docs/knowledge/contracts/rolled_section_pucker.md
++++ b/docs/knowledge/contracts/rolled_section_pucker.md
+@@ -1,6 +1,10 @@
+ # Construction contract: rolled family, section pucker, and radial inward relief
+ 
+-Drafted 2026-11-18 against HornFab main @1d6ebc8. Read-only review of code and dossiers; no solves, tests or meshes were run in this pass. Labels: [published] [derived] [reconstruction] [original-hypothesis] [code-verified] [unverified].
++Drafted 2026-11-18 against HornFab main @1d6ebc8. **Status: REVIEWED (local senior pass,
++2026-11-18):** open items remain in §9/§10; the review lane ran the full offline suite (4 known
++failures, 4766 passed, 40 skipped) and the targeted rolled/throat tests. The shared-block mapping
++(`throat_hv_ratio` inside the relief window) is a labeled hybrid. Read-only review of code and
++dossiers; no solves or meshes were run. Labels: [published] [derived] [reconstruction] [original-hypothesis] [code-verified] [unverified].
+ 
+ ## 1. Identity
+ 
+diff --git a/docs/knowledge/contracts/throat_hv_block.md b/docs/knowledge/contracts/throat_hv_block.md
+new file mode 100644
+index 0000000..0a45ad2
+--- /dev/null
++++ b/docs/knowledge/contracts/throat_hv_block.md
+@@ -0,0 +1,156 @@
++# Contract: shared near-throat H/V block (`throat_hv`)
++
++Date: 2026-11-18. Repo: HornFab PR #67 head `319003c` plus the throat-H/V patch set (0001-0004,
++W4ab). **Status: REVIEWED (local senior pass, 2026-11-18).** Labels: [published] [derived]
++[reconstruction] [original-hypothesis] [code-verified] [unverified] [measured]. Code cites are
++relative to the repo root. This contract is vocabulary and invariants; it is not a generator spec
++and does not authorize a brief, bound, scoring or queue change.
++
++## 1. Why one block exists
++
++The 2026-11-18 route audit (`docs/knowledge/THROAT_HV_CONTROL_AUDIT_2026-11-18.md`) found that the
++OS family's throat angle `a0` and expansion `k` are shared by every azimuth, so an asymmetric
++coverage law `a(phi)` only splits H/V late, once the `z^2 tan^2(a)` term becomes comparable to the
++throat terms. The routes that already split near the throat (biradial, Geddes EC/PS, qtw, the
++Crowe aspect gate) are family-specific. The shared block is a minimal common vocabulary for the
++routes that adopt it, not a universal law:
++
++- `throat_hv_ratio` (rho, 1 = neutral): per-azimuth throat growth ratio.
++- `hv_onset_frac` (s_on): where a family's H/V or section-shape departure starts.
++- `section_exp_ramp` (gamma): the ramp exponent of that departure.
++
++Each family maps the block onto its own law and carries a provenance label. The same key can be
++`WITHIN-PARENT-LAW` in one family and a labeled hybrid in another; the label travels in the
++generator `meta` and in `throat_hv.STATUS`.
++
++## 2. Definitions (single source: `hornlab_search/design/throat_hv.py`)
++
++| Key | Range | Meaning | Code |
++|---|---|---|---|
++| `throat_hv_ratio` | `[0.25, 4.0]` | H/V growth ratio; 1 = neutral | `RATIO_RANGE`, `hv_scale`, `hv_scale_inverse` |
++| `hv_onset_frac` | `[0.0, 0.9]` | onset fraction of the H/V weight (0 = at the throat) | `ONSET_RANGE`, `ath_ramp` |
++| `section_exp_ramp` | `[0.5, 8.0]` | ramp exponent (Ath morph `gamma`) | `RAMP_RANGE`, `ath_ramp` |
++
++- **Azimuth scale.** `hv_scale(rho, phi) = rho ** (cos(2*phi)/2)`: `sqrt(rho)` on H (phi = 0),
++  `1/sqrt(rho)` on V (phi = 90 deg), exactly 1 on the diagonals. The geometric mean is preserved
++  and the mirror planes are kept. `hv_scale_inverse` is the reciprocal, for parameters where a
++  larger value means slower growth (the OS expansion `k`).
++- **Mesher expression.** `mesher_k_expression(k, rho)` emits `k * rho ** (-0.5*cos(2*p))`; the
++  mesher evaluates it per azimuth `p`. The driver-exit slope `tan(a0)` is untouched.
++- **Ramp.** `ath_ramp(t, s_on, gamma) = clamp((t - s_on) / (1 - s_on), 0, 1) ** gamma`, the Ath
++  morph form [published: Ath 4.7.0 User Guide 4.1.2]. `s_on` defaults to 0 when only the ramp is
++  given; `gamma` defaults to 3 (`ATH_DEFAULT_RAMP`) when only the onset is given.
++- **No default at the block level.** Absent keys mean "keep the family's own geometry". There is
++  no implicit rho or onset, and no brief gets one added.
++
++## 3. Neutrality and identity invariants
++
++I1. **Absent keys are byte-identical.** The block is parsed outside every defaults dict; when it
++    is absent or neutral, the rows, meta, points and design hashes are the parent's. Pinned by
++    the family tests (`test_*_absent_block_and_onset_zero_are_identical`,
++    `test_ratio_maps_to_per_plane_growth_inside_the_window_only` for rho != 1 but absent
++    elsewhere, and the v9 parity test for the objective side).
++I2. **rho = 1 is the exact parent.** `hv_scale` returns 1 at every azimuth; the family parser
++    drops the block as inactive. No near-1 tolerance is used.
++I3. **The throat stays round.** `r(0, phi) = r0` and the wall slope at the coupling plane remains
++    the driver exit half-angle. The OS `k(p)` changes the growth rate after `z = 0`; the rolled
++    scale is zero at the source match; the Le Cleac'h plane `T` changes the march shape but not
++    `r(0)`. No family in this block adds a non-round throat coupling plane.
++I4. **Mirror planes survive.** The only azimuth dependence is `cos(2*phi)` (or `cos(2*psi)` in the
++    rolled section). There is no odd term, so left/right and top/bottom mirror symmetry is kept.
++I5. **Area rules are respected where a parent states one.** A round-to-non-round adapter must not
++    shrink area (Geddes EC/PS; Keele connecting section) [published, carried]. The block does not
++    add an adapter. Where the family has an area identity (the Le Cleac'h AR law,
++    `y_h*y_v = y^2`), the mapping preserves it.
++I6. **No inactive conditional knob is searchable.** Family parsers refuse the block where its
++    window is inactive: native OSSE onset/ramp need `morph_target`; osse_rollback needs
++    `sf_m`/`sf_amt > 0` and refuses `sf_start` together with `hv_onset_frac`; the Le Cleac'h pair
++    needs `fc_h_hz`/`fc_v_hz`; `iwata_ar` refuses `throat_hv_ratio` and the `ar_p` alias pair;
++    the rolled family refuses `hv_onset_frac` together with `relief_start_s` and refuses a
++    non-neutral rho when its geometry would be unchanged.
++I7. **No objective, brief, bound or queue change.** The block is generator vocabulary. It does
++    not alter any objective version, default, brief, score identity or queue entry.
++I8. **The source and mouth are not redefined.** The rolled scale is confined to the relief
++    window, which is zero through the source-matching region and at the mouth attachment. The OS
++    per-azimuth `k` acts on the wall between the throat and the mouth, not on the source cap.
++
++## 4. Per-family mappings and verdicts
++
++| Family / route | Mapping | Verdict | Evidence |
++|---|---|---|---|
++| Native `OSSE` | rho -> per-azimuth `k(p)`; onset/ramp -> `morph_fixed`/`morph_rate` | rho: **WITHIN OS-SE parent** (Batik 2020 §5: profile parameters may vary around the device; surface `r(z,phi)`). Onset/ramp: **WITHIN the Ath morph** (published form). Acoustic benefit **unvalidated**. | `families.py: _THROAT_HV`, `_validate_throat_hv`, `throat_hv_mesher_terms`; KH-003 §1.1 and parent verification |
++| `osse_rollback` | rho -> per-azimuth `k`; onset/ramp -> the superformula window (`sf_start` replacement) | Wall: within OS-SE. Window remap: **LABELED HYBRID** (HornFab construction). | `grid.py: _rows_osse_rollback_knobs`, `_rows_osse_rollback_marches` |
++| Le Cleac'h H/V pair (`rows: lecleach` with `fc_h_hz`/`fc_v_hz`) | rho -> per-plane march `T` (larger T = faster expansion); onset/ramp -> round-core-to-ellipse blend | Each plane is still a JMLC/Fourcade march. The pairing and onset ramp are **LABELED HYBRID**. | `grid.py: _rows_lecleach_hv_marches`; `profiles.py: lecleach_exact` |
++| `lecleach_iwata_ar` (`iwata_ar` rows) | onset/ramp -> AR-law weight `AR(l) = 1 + (AR_m - 1) * w(l)`; `section_exp_ramp` aliases `ar_p`; rho is refused | **LABELED HYBRID** on the iwata_ar reconstruction (no published onset term). `s_on = 0` gives `s ** ar_p` exactly. | `grid.py: _rows_iwata_ar_knobs`, `iwata_ar_weight` |
++| Rolled family (`rolled_family_rect_v1` / `_section_v1`) | rho -> radial scale `rho ** (cos(2*psi)/2 * w)` inside the relief window `w`; onset/ramp move the window start and exponent | **LABELED HYBRID**; the rolled family is an original HornFab construction with no published parent for near-throat H/V terms. | `rolled_family.py: throat_hv_scale`, `resolve_grid`, `_shape` |
++| `R-OSSE` | none | **NOT MAPPED.** Batik *R-OSSE Waveguide rev7* extracted text gives `r0, a0, k, q` as per-profile parameters with BEM sweeps of `a0`/`k`; no per-azimuth parameter statement was found. It stays **unclassified**, not axisymmetric-by-proof and not per-azimuth. | KH-003 parent verification; W4c decision |
++| Pure Geddes OS | none | A per-azimuth `k`/`a0` would contradict the axisymmetric definition; use OS-SE, not "OS", for this block. | KH-002 §1.4; Geddes US7068805 |
++
++## 5. Local evidence (this pass)
++
++- **Full offline suite, throat-H/V lane** (`319003c` + 0001-0004 + W4ab), exact command:
++  `.venv\Scripts\python.exe -m pytest -m "not slow and not gpu and not crosscheck" -n 6
++  --dist loadscope -p no:cacheprovider` → **4 failed, 4766 passed, 40 skipped in 390.67 s
++  (0:06:30)**. The 4 failures are the pre-existing `319003c` set: `test_objective_v8` key set,
++  `test_b8_lanes_bounded_gui` host-cleanup scan, and 2 `test_night_bo_arm_wrapper`. No new
++  failure. [measured]
++- **Baseline on clean `319003c`:** 4 failed, 4703 passed, 40 skipped in 433.63 s. The patch lane
++  adds 63 passing tests and changes no failure. [measured]
++- **Targeted throat/rolled/Le Cleac'h tests:** 223 passed, 1 skipped
++  (`test_mesh_throat_check.py` stored-campaign skip) across the four 0004 test files,
++  `test_param_catalog`, `test_design_families`, the rolled geometry and Le Cleac'h H/V tests.
++  [measured]
++- **Pinned mesher accepts the per-azimuth k expression:** prior local run on `3682173` (isolated
++  clone, full suite) reported 0 new failures and a successful `shape_check` with a per-azimuth
++  `k`; the current pass did not re-run the mesher. [measured, prior pass]
++- **Throat “pinch” is not a wall pinch:** the 18.0 → ~14.2 mm contraction about 5 mm from the
++  source plane is the domed source cap (tag 2; sag 0.314 mm = R − sqrt(R² − r²), R = r/sin 2°),
++  not the acoustic wall. The wall rises steadily from 18.0 mm. [measured, mesh probe; W7 verdict]
++- **No GPU, no BEM, no acoustic evidence** in this pass. The onset sweep (0/0.25/0.5/0.75) and the
++  matched screen A vs v8 are still a GPU ask in `evidence_2026-11-18/LOCAL_RESULTS_2026-11-18_part2.md`.
++  The block is a geometry hypothesis until those runs land. [unverified]
++
++## 6. Known limits and open items
++
++1. **Rolled rho legal range is seed-dependent.** On the current rolled seeds, the construction
++   accepts roughly `0.6 <= rho <= 1.3`; values near 2.0 are refused by the existing
++   “constriction before the mouth roll” guard. The module range `[0.25, 4.0]` is not a legal
++   search box for those seeds. Do not widen the box until the guard is understood; the tests use
++   0.75 and 1.25 only.
++2. **rho is a growth-rate knob, not a throat angle.** It cannot set `a0(phi)` or the driver-exit
++   slope. The audit's `a0_h/a0_v` proposal remains a proposal, not code.
++3. **The per-azimuth OS-SE law is permitted, not acoustically validated.** No measured onset data
++   was found; the published sources give the form, not a performance guarantee.
++4. **R-OSSE is unmapped** and stays unclassified. Revisit only if primary text shows per-azimuth
++   parameters.
++5. **The Le Cleac'h H/V pair still loses each plane's axial coordinate** (the separate
++   `lecleach_iwata_hv.md` contract). This block does not fix that.
++6. **`iwata_ar` remains a reconstruction**, and its onset term is a labeled hybrid; the published
++   Iwata law is the linear ratio (onset 0, exponent 1).
++7. **The rolled family's implementation digest changes** when `rolled_family.py` changes; saved
++   recipes that pin the old digest are refused. This is expected and must be stated in the PR.
++8. **Acoustic ranking is unknown.** No GPU result in this pass says whether early onset helps,
++   hurts or is neutral; the sweep is the test.
++
++## 7. Test index
++
++- `tests/test_design_throat_hv_osse.py` — native OSSE mapping, k expression, morph aliases,
++  inactive-knob refusals.
++- `tests/test_design_throat_hv_grid.py` — osse_rollback window, Le Cleac'h pair, iwata_ar onset,
++  rho-not-mapped refusal.
++- `tests/test_design_throat_hv_rolled.py` — rolled per-plane growth inside the relief window,
++  source/mouth invariance, searchable ratio, constriction refusal.
++- `tests/test_design_generators_grid_osse_rollback.py` — parent regression for the rollback route.
++- `tests/test_design_generators_lecleach_hv.py`, `test_lecleach_swept_hv_adapter.py`,
++  `test_lecleach_swept_hv_prototype.py`, `test_rolled_family_geometry.py`,
++  `test_param_catalog.py`, `test_design_families.py` — parent and catalog regressions.
++
++## 8. Sources
++
++- `docs/knowledge/THROAT_HV_CONTROL_AUDIT_2026-11-18.md` (route audit; root cause).
++- `docs/knowledge/claims/KH-002_throat_hv_asymmetry_research.md` (primary OS-SE/Ath/Geddes).
++- `docs/knowledge/claims/KH-003_throat_hv_options_literature.md` (option classification; Batik
++  OS-SE §5 parent verification; R-OSSE absence).
++- Batik, *OS-SE Waveguide* (2020), §5 [primary]; Ath 4.7.0 User Guide 2.1.2/4.1.2 [primary];
++  Geddes US7068805 [primary, carried]; Keele US4308932 [primary-summary].
++- `hornlab_patches/analysis_2026-11-18/W7_THROAT_PINCH_VERDICT.md` (source-cap verdict).
+diff --git a/examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml b/examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml
+index f242827..14c5fa9 100644
+--- a/examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml
++++ b/examples/typologies/home_landscape_2026-11-15/hl__crowe_x_osse_cd_v7.yaml
+@@ -11,7 +11,7 @@
+ #  - the 'chunky bar' rim is the lip: r_lip >= 30 with wrap >= 140 (old seeds) is a thick bar and overshoots W;
+ #    lip 8-30 mm / wrap 80-160 deg are searched so the BEM decides whether a big roll pays.
+ # Fixed for the look: sf_m 4, sf_n1 1.8 (between round and star), sf_n2 7 (straight edges), sf_start 0.25, k 1, q 0.996.
+-# 2026-11-16 08:xx: watchdog bound-pins widened {'g_L_mm': (200.0, 320.0)}; seed = best of runs/20261116T074832Z-screen-620f81 (J 5.344). Name kept so the BO cohort stays one task.
++# 2026-11-16 08:xx: watchdog proposed {'g_L_mm': (200.0, 320.0)}; the applied bound below is still hi 285 (open owner question; header corrected 2026-11-18). Seed = best of runs/20261116T074832Z-screen-620f81 (J 5.344). Name kept so the BO cohort stays one task.
+ name: hl__crowe_x_osse_cd_v7
+ family: FREEFORM
+ brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+diff --git a/examples/typologies/home_landscape_2026-11-15/hl__lecleach_hv_landscape_smooth_v7.yaml b/examples/typologies/home_landscape_2026-11-15/hl__lecleach_hv_landscape_smooth_v7.yaml
+index 3663f97..e63462a 100644
+--- a/examples/typologies/home_landscape_2026-11-15/hl__lecleach_hv_landscape_smooth_v7.yaml
++++ b/examples/typologies/home_landscape_2026-11-15/hl__lecleach_hv_landscape_smooth_v7.yaml
+@@ -70,7 +70,7 @@ bounds:
+   g_stop_a2:
+     lo: -0.10
+     hi: 0.15
+-description: 'HOME LANDSCAPE Le Cleach H/V pair (published ellipsoidal-wavefront construction; owner-picked seed 12 2026-11-16): H/V differ from the expansion itself, lip a smooth continuous rollback. Smooth brief.'
++description: 'HOME LANDSCAPE Le Cleach H/V pair (reconstruction of a published H/V ellipsoidal principle; owner-picked seed 12 2026-11-16): H/V differ from the expansion itself, lip a smooth continuous rollback. Smooth brief.'
+ mesh:
+   epw: 6.0
+   quadrants: '1'
+diff --git a/hornlab_search/design/generators/_klangfilm_lame_hv_core_v1.py b/hornlab_search/design/generators/_klangfilm_lame_hv_core_v1.py
+index b488d86..bf5bde9 100644
+--- a/hornlab_search/design/generators/_klangfilm_lame_hv_core_v1.py
++++ b/hornlab_search/design/generators/_klangfilm_lame_hv_core_v1.py
+@@ -284,22 +284,22 @@ LEGACY_GENES = dict(fc_hz=494.4393461867, aspect=2.0759495982, lame_p=5.00635495
+                     source_blend_ratio=0.0, entry_half_angle_deg=2.0,
+                     wall_thickness_mm=3.0, n_phi=19, n_s=64)
+ SEEDS = {
+-    # b1 balanced: L 380, mouth ~ 521 x 262 mm (A0's mouth is 541 x 261), 48 / 24.5 deg end slopes
++    # b1 balanced: L 380, mouth ~ 480 x 240 mm by the slope law (A0 is 541 x 261), 48 / 24.5 deg end slopes
+     "b1": dict(cd_core_blend=1.0, theta_h0_deg=8.0, theta_v0_deg=5.0, theta_h1_deg=48.0,
+                theta_v1_deg=24.5, core_length_mm=380.0, lame_p_mouth=4.0,
+                lame_start_frac=0.25, lame_end_frac=0.90, beak_h_setback_mm=15.0,
+                beak_v_projection_mm=0.0, beak_diagonal_mm=0.0, beak_start_frac=0.85),
+-    # b2 wide: L 420, mouth ~ 561 x 244 mm, stronger H taper and a wider Lamé mouth
++    # b2 wide: L 420, mouth ~ 595 x 233 mm by the slope law, stronger H taper and a wider Lamé mouth
+     "b2": dict(cd_core_blend=1.0, theta_h0_deg=12.0, theta_v0_deg=4.0, theta_h1_deg=50.5,
+                theta_v1_deg=22.0, core_length_mm=420.0, lame_p_mouth=4.8,
+                lame_start_frac=0.30, lame_end_frac=0.92, beak_h_setback_mm=25.0,
+                beak_v_projection_mm=0.0, beak_diagonal_mm=0.0, beak_start_frac=0.88),
+-    # b3 soft: L 340, mouth ~ 498 x 258 mm, gentler end slopes and a rounder lip
++    # b3 soft: L 340, mouth ~ 473 x 266 mm by the slope law, gentler end slopes and a rounder lip
+     "b3": dict(cd_core_blend=1.0, theta_h0_deg=7.0, theta_v0_deg=6.0, theta_h1_deg=52.1,
+                theta_v1_deg=30.4, core_length_mm=340.0, lame_p_mouth=3.0,
+                lame_start_frac=0.20, lame_end_frac=0.95, beak_h_setback_mm=10.0,
+                beak_v_projection_mm=5.0, beak_diagonal_mm=0.0, beak_start_frac=0.90),
+-    # b4: B3 widened to A0's mouth class (563 x 262 x 405) — the targeted H-widening follow-up
++    # b4: B3 widened to A0's mouth class (~563 x 262 mm, depth 405) — the targeted H-widening follow-up
+     "b4": dict(cd_core_blend=1.0, theta_h0_deg=7.0, theta_v0_deg=6.0, theta_h1_deg=53.0,
+                theta_v1_deg=25.0, core_length_mm=400.0, lame_p_mouth=3.0,
+                lame_start_frac=0.20, lame_end_frac=0.95, beak_h_setback_mm=10.0,
+-- 
+2.51.0.windows.1
+

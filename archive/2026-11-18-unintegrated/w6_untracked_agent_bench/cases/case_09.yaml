@@ -1,0 +1,34 @@
+id: 9
+title: mesh.msh vs generator points — solver truth and fit residual
+prompt: >
+  A researcher claims that the generator's crossSections (output wall points) define
+  the exact horn shape used in BEM calculations. They note that mesh.msh is just a
+  derived artifact. Is this correct? Explain what the mesh file represents relative
+  to the generator output, what determines the shape actually solved by the BEM solver,
+  and what metric indicates how well the meshed surface fits the requested profile.
+allowed_read_paths:
+  - tests/fixtures/crowe_v2a/c0_quarter_screen_8k/mesh.msh
+  - tests/fixtures/crowe_v2a/c0_quarter_screen_8k/mesh_meta.json
+  - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+answer_key:
+  verdict: >
+    The mesh.msh is the solver truth — the BEM operates on the meshed surface, not on the
+    generator wall points directly. The mesher interpolates the generator output; a fit
+    residual (or mesh_meta quality metric) records how closely the mesh approximates the
+    requested profile.
+  must_include:
+    - "mesh.*solver.*truth|solver.*mesh|mesh.*truth"
+    - "fit.*residual|residual|mesh.*approx"
+    - "generator.*output|generator.*point|crosssection"
+  must_not_include:
+    - "generator.*exact.*solver|crosssection.*exact.*bem"
+  must_cite_any:
+    - tests/fixtures/crowe_v2a/c0_quarter_screen_8k/mesh.msh
+    - tests/fixtures/crowe_v2a/c0_quarter_screen_8k/mesh_meta.json
+    - docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md
+  defer_ok: false
+  key_source: repo
+  evidence:
+    - "tests/fixtures/crowe_v2a/c0_quarter_screen_8k/mesh.msh"
+    - "docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md:A9"
+  negative_control: mesh_fidelity_shift

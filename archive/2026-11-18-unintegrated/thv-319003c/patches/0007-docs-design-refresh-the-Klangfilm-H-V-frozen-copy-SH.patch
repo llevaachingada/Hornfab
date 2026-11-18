@@ -1,0 +1,41 @@
+From 6606247b899fb9d8c5122ecd66fcf243d56176bf Mon Sep 17 00:00:00 2001
+From: h <hunter.singleton@gmail.com>
+Date: Wed, 18 Nov 2026 08:13:09 -0500
+Subject: [PATCH 7/7] docs(design): refresh the Klangfilm H/V frozen-copy SHA
+ docstrings
+
+The frozen-copy docstrings now name the current tools sources (line-ending-normalised SHA256 7fc93d63... and 214d4f15...). This is a comment-only source change, but implementation_digest hashes the kernel bytes, so implementation_sha256 changes for both Klangfilm H/V families; saved recipes that pin the old digest are refused. No example config pins it.
+---
+ hornlab_search/design/generators/_klangfilm_lame_hv_core_v1.py | 2 +-
+ hornlab_search/design/generators/_klangfilm_lame_hv_v1.py      | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/hornlab_search/design/generators/_klangfilm_lame_hv_core_v1.py b/hornlab_search/design/generators/_klangfilm_lame_hv_core_v1.py
+index bf5bde9..6872b45 100644
+--- a/hornlab_search/design/generators/_klangfilm_lame_hv_core_v1.py
++++ b/hornlab_search/design/generators/_klangfilm_lame_hv_core_v1.py
+@@ -44,7 +44,7 @@ Scope / honesty
+   separate control and is not implemented.
+ 
+ Frozen copy: reproduced from ``tools/geometry/klangfilm_lame_hv_core.py`` (SHA256
+-1782f009b050d0a41bebcf86eb8898d383044b0c41cdb25db3b5dcb7b57bad54). It must stay in sync with that reviewed source; regenerate rather than hand-edit.
++214d4f153032614b97ada46f3597417337f97279dd295c3c23020a29418d1818). It must stay in sync with that reviewed source; regenerate rather than hand-edit.
+ """
+ from __future__ import annotations
+ 
+diff --git a/hornlab_search/design/generators/_klangfilm_lame_hv_v1.py b/hornlab_search/design/generators/_klangfilm_lame_hv_v1.py
+index e38f176..541bcfd 100644
+--- a/hornlab_search/design/generators/_klangfilm_lame_hv_v1.py
++++ b/hornlab_search/design/generators/_klangfilm_lame_hv_v1.py
+@@ -40,7 +40,7 @@ Throat provenance: the parent's raw wall half-angle is derived (9.3669 deg at fc
+ wall tangent or claims it is an HF1440 datasheet value.
+ 
+ Frozen copy: reproduced from ``tools/geometry/klangfilm_lame_hv.py`` (SHA256
+-cbb23cc02d9b5d135e1ec46b4d0f3fdac68f8120c313b1a8ffe8e360672bea02). It must stay in sync with that
++7fc93d6303081da30e36b9cd48ae2a962ff166814d87601e45db6324b3ca8f64). It must stay in sync with that
+ reviewed source; regenerate rather than hand-edit.
+ """
+ from __future__ import annotations
+-- 
+2.51.0.windows.1
+
