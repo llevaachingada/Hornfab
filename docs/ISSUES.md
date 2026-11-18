@@ -1,5 +1,51 @@
 # ISSUES
 
+## 2026-11-18 (local orchestrator) - Night truth + data-agreement gate landed; bridge-type _w1 lanes fail the stock analysis path; B1 encoding owner-decided
+
+- DONE (C1, tools): `tools/run_campaign_night.py` + `tools/night_status.py` now record/report per
+  job the rows the job itself created (resume-window counting), BO package progress (read-only
+  sqlite), a log tail and a stop-reason class; "0 evals" is gone for resumed work (verified:
+  `cont_p80_athcore_corelaw_200` 182 rows/159 valid/J 4.8097; `t_trit80_rc2` 80 screen calls).
+  Tests: `tests/test_night_status_truth.py` (13) + 46 regression tests pass.
+- DONE (C2, tools): `space_card._data_agreement` "unknown"/`unconfirmed (n=...)` unless
+  n >= 10; no data-justified link on unknown. Tests: `tests/test_space_card_data_agreement.py`
+  (7). Senior do-not "never claim data disagrees for n < 10" is enforced in the tool now.
+- DONE (queue, live night `cd_rrect_2026-11-17`): owner-approved edits (rrect BO arm ->
+  `c_rrect_100w_rc3` --budget 110; atlas arms to the end; fold-warm held) PLUS a launch-fatal
+  repair: all 12 queued `w_*_200w1` jobs had bare `search` argv[0]; `kind: command` runs argv
+  verbatim, so they would all have died at launch. Fixed (8 stock -> `.venv/Scripts/
+  hornlab-search.exe`, 5 bridge-type -> their `tools/geometry/*_cli.py`). Owner's manual PAUSE
+  removed on the owner's word; night resumed into the BO arms. Queue file is untracked; details
+  in `runs/nights/cd_rrect_2026-11-17/held_and_edited_2026-11-18.md`.
+- DONE (D4 evidence on the fixed state): shape check 9/14; `search_preflight --from-runs`:
+  seed-in-box everywhere, history still refused on every loadable lane (raw brief_file string),
+  so expected hits remain uncomputed; `hl__klangfilm_lame_curved_v1_c200_w1` is `no_headroom`;
+  Crowe marked not-queueable-without-warm_start+reason (append-only) in the decision packet +
+  card.
+- OPEN (owner C5): brief identity by digest instead of the raw `brief_file` string - the 2026-11-17
+  path fix (commits `84339a7`) made the `_w1` configs LOADABLE but cannot restore warm-start/
+  preflight history identity at a different directory depth; only the digest fix can.
+- OPEN (tools, low): the stock analysis path (`space_card`, `shape_check`, `search_preflight`,
+  `DesignSpace.from_config`) refuses the 5 bridge `rows` types (`section_pucker`, `crowe_panel`,
+  `klangfilm_lame`, `rosse_rect`, plus legacy `rolled_*` outside bridges); the night jobs run
+  them via bridge CLIs. Carding those lanes needs either a bridge-install import shim in the
+  analysis path or carding via the bridge CLIs (senior's "5 cardable" ambiguity noted in the
+  handoff).
+- OPEN (senior/owner): B1 encoding is decided (mesh convergence, not the `verify,finalist`
+  frequency pair - that encoding is B1f); CPU dry-run + feasibility table in progress in
+  `scratch/fable_architecture/.b1/`; GPU slots queue after the BO arms once the owner approves
+  the table. Note: `dof_cap_finalist` does not densify the mesh for these configs (epw/f_max
+  unchanged); a real mesh check needs an epw/f_max refinement path.
+- OPEN (tools, low): `tests/test_night_bo_arm_wrapper.py` (2) monkeypatch `subprocess.call/run`
+  but `tools/night_queue/run_bo_arm.py` has used `Popen` since `1482304` - pre-existing at
+  `1d6ebc8`/`3682173`, untouched.
+- DONE (docs/proposals): plan amendments D5-D10 in `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md`
+  §10.1; corrected C2 explanation + "what J pays for today" table in the decision packet;
+  orchestrator handoff `ORCHESTRATOR_HANDOFF_2026-11-17_LATE.md`. Governance: second-writer
+  commits `f5db35e`/`3682173`; throat-H/V patch set (clone
+  `.claude/worktrees/agent-a527a7d28dc77734a`, tip `5af0048`) integrates after this push +
+  post-drain suite; its GPU steps queue at the end after the BO arms and B1.
+
 ## 2026-11-17 (acoustic-truth lane) - WP1-WP3 hardened (independent review + reproduction)
 
 - DONE: static compliance review + fresh-input reproduction of commit f5db35e; all headline claims

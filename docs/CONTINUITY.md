@@ -1,5 +1,74 @@
 # CONTINUITY
 
+## 2026-11-18 (local orchestrator) - Night truth (C1) + data-agreement gate (C2) landed; B1 encoding owner-decided; queue repaired
+
+- **C1 night truth** (`tools/run_campaign_night.py`, `tools/night_status.py`, new
+  `tests/test_night_status_truth.py`, 13 tests): the runner now records, additively, per summary
+  row: `rows_before/rows_after/rows_window/valid_rows_window/best_J_window` (a `--resume` job
+  reports the work IT did), `bo_progress` (BO arms read `studies.sqlite3` read-only), a ~15-line
+  `log_tail`, and a `stop_reason` class (9 values); `night_status` prefers the new fields and
+  re-derives old rows read-only - a resume row with real rows but no attribution reads
+  "unknown", never "0 evals". Verified on real data [measured]:
+  `cont_p80_athcore_corelaw_200: best J 4.8097, 182 evals (window 182/282, valid 159)`;
+  `t_trit80_rc2: best J 5.5235, 82 evals (BO screen 80 verify 2, observations 80)`. The live
+  runner picks the new fields up on its next launch (not mid-night). Known pre-existing failure
+  `tests/test_night_bo_arm_wrapper.py` (2, monkeypatch-Popen mismatch since `1482304`) untouched.
+- **C2 data-agreement gate** (`tools/analysis/space_card.py`, new
+  `tests/test_space_card_data_agreement.py`, 7 tests): `_data_agreement` is "unknown" when the
+  top decile is absent or n < 10 (True/False only at n >= 10, `MIN_LINK_ROWS = 10`); cards render
+  `unconfirmed (n=...)`; unknown never yields a data-justified `action: link`; `data_agrees`
+  values unchanged for backward compatibility. Senior rule enforced: never claim "data
+  disagrees" for n < 10.
+- **B1 (mesh fidelity) - owner encoding decision 2026-11-18**: B1 must test MESH convergence
+  (same ten designs/brief/identity, SAME frequency grid as the reference solve; refinement =
+  higher epw and/or tighter throat/mouth/rear resolution; realized triangle/DOF counts reported
+  for both meshes; per-design |ΔJ| + per-term deltas vs the numerical floor; "mesh-sensitive"
+  flags; 8 GB feasibility per design before queuing with the quarter/half model; non-fitting
+  designs marked "mesh check infeasible on this card" and left out of the conclusion; memwatch +
+  baseline/peak VRAM + sysmem Shared-Usage check mandatory). The frequency-grid pair encoding is
+  renamed **B1f** and never read as mesh convergence. Key coding finding: `dof_cap_finalist`
+  does NOT densify the mesh for these configs (epw/f_max unchanged; the cap is not binding) -
+  the finalist tier changes frequency grids only. B1 CPU dry-run (build both meshes, no solves,
+  epw x2 and x3 candidates) and the feasibility table are in preparation
+  (`scratch/fable_architecture/.b1/`); GPU slots wait for owner approval of the table.
+- **Queue edits on the live night `cd_rrect_2026-11-17`** (owner-approved; documented in
+  `runs/nights/cd_rrect_2026-11-17/held_and_edited_2026-11-18.md`): `t_rrect_turbo300` replaced
+  by `c_rrect_100w_rc3` (`rosse_rect_cli search --resume 20261117T070118Z-screen-8627f8 --budget
+  110`); the two atlas turbo300 arms moved to the end; `w_osse_rrect_fold_warm_v7_200w1` HELD
+  (warm-start identity pending C5; links withdrawn). **argv repair:** all 12 queued
+  `w_*_200w1` jobs had bare `search` argv[0] (kind:command runs argv verbatim, which would have
+  failed at launch with FileNotFoundError); fixed to `.venv/Scripts/hornlab-search.exe` (8
+  stock) and `.venv/Scripts/python.exe tools/geometry/<bridge>_cli.py search` (5 bridge:
+  control->section_pucker_cli, crowe->crowe_panel_cli, klame->klangfilm_lame_cli, rosse
+  r120/r50->rosse_rect_cli). Post-fix: full YAML parse, 54 unique ids, argv audit clean, runner
+  `--dry-run` clean. Owner's manual PAUSE (0-byte, set 2026-11-17 20:12, unrelated to this
+  work) removed with the owner's word; night resumed into the BO arms (`t_ath14_turbo100`
+  running, merged lock fix in effect).
+- **D4 evidence (rerun on the fixed state)** (`scratch/fable_architecture/.evidence/
+  shape_check_proposals_20261118.log`, `search_preflight_20261118/`): shape check **9/14** -
+  the 5 bridge-type `_w1` lanes fail the STOCK `DesignSpace.from_config`/`shape_check` path
+  (`unknown rows type '...'` for section_pucker/crowe_panel/klangfilm_lame/rosse_rect; they are
+  bridge-CLI configs); the 9 loadable lanes pass everything. `search_preflight --from-runs`:
+  seed in own box everywhere (exit 0), but **history refused on every loadable lane** - native
+  lanes via `warm_start`'s brief-identity refusal, generator lanes via the raw-string fallback
+  (`../../briefs/...` vs `../../../briefs/...`) - so **no expected-hits number computed** (C5,
+  digest identity, remains the owner-gated fix; the path fix alone cannot unblock it). New
+  `no_headroom`: `hl__klangfilm_lame_curved_v1_c200_w1` (seed = prior best). Crowe marking
+  "not queueable without warm_start + reason" appended to the decision packet + the lane card.
+- **Plan amendments D5-D10** written into `ARCHITECTURE_AND_STAGED_PLAN_2026-11-17.md` §10.1
+  (proposals, nothing auto-applies); the corrected C2 explanation + the "what J pays for today"
+  table recorded in the owner decision packet. Full handoff:
+  `scratch/fable_architecture/ORCHESTRATOR_HANDOFF_2026-11-17_LATE.md`. Second-writer commits
+  `f5db35e`/`3682173` recorded for the D10 one-integrator question; the throat-H/V patch set
+  (4 patches, clone `.claude/worktrees/agent-a527a7d28dc77734a`, tip `5af0048`) waits for
+  integration after this push + the post-drain suite. Isolated-clone test run re-verified by a
+  second independent agent (`tmp_thv_test`: 0 new failures, mesher accepts k-expression); my
+  duplicated pytest run in the clone was stopped on owner instruction.
+- Commit/coverage note: this entry's code lands in the same push (C1 in
+  `feat(tools): night truth`, C2 in `feat(analysis): data-agreement gate`); the queue file is
+  untracked (`runs/`), so the queue edits travel as the held-note above, not as commits.
+
+
 ## 2026-11-17 (acoustic-truth lane) — WP1–WP3 hardening pass (independent review + reproduction)
 
 - Two read-only lanes (static compliance review; independent fresh-input reproduction) audited the
