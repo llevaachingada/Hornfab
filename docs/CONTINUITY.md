@@ -19,8 +19,10 @@
   +/-(max-min)/2 and v9 target mode inspects +/-preferred (twice the -6 dB edge). The v9
   docstring's "half-angle" reading does not hold.
 - v10 requires `objective.ripple_region` (no default): `preferred_edge` (+/-preferred/2),
-  `min_edge` (+/-min/2, corridor only) or `{mode: seat_zone_deg, h_deg, v_deg}` (declared total
-  angles). Every other term is v9's. New identity: `v10_score_identity` (sha256 of the block).
+  `min_edge` (+/-min/2, corridor only), `max_edge` (+/-max/2, corridor only; added 2026-11-18
+  after E1 because `min_edge` cannot see a mid-corridor defect) or
+  `{mode: seat_zone_deg, h_deg, v_deg}` (declared total angles). Every other term is v9's.
+  New identity: `v10_score_identity` (sha256 of the block).
 - `tests/test_objective_v8.py` registration assertion updated to the new tuple (still exact).
 - **Owner decision 2026-11-18: `ripple_region = preferred_edge`** for the first briefs
   (+/-preferred/2 per plane, the -6 dB edges). `min_edge` and `seat_zone_deg` remain explicit

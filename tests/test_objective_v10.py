@@ -131,11 +131,21 @@ def test_inspected_total_angles_per_option():
         assert v10_inspected_total_deg(t, "v", f, {"mode": "preferred_edge"}) == 50.0
         assert v10_inspected_total_deg(t, "h", f, {"mode": "min_edge"}) == 70.0
         assert v10_inspected_total_deg(t, "v", f, {"mode": "min_edge"}) == 40.0
+        assert v10_inspected_total_deg(t, "h", f, {"mode": "max_edge"}) == 90.0
+        assert v10_inspected_total_deg(t, "v", f, {"mode": "max_edge"}) == 60.0
         seat = {"mode": "seat_zone_deg", "h_deg": 120.0, "v_deg": 30.0}
         assert v10_inspected_total_deg(t, "h", f, seat) == 120.0
         assert v10_inspected_total_deg(t, "v", f, seat) == 30.0
-    with pytest.raises(ValueError, match="corridor"):
-        v10_inspected_total_deg(_target_mode(), "h", 1000.0, {"mode": "min_edge"})
+    for mode in ("min_edge", "max_edge"):
+        with pytest.raises(ValueError, match="corridor"):
+            v10_inspected_total_deg(_target_mode(), "h", 1000.0, {"mode": mode})
+
+
+def test_max_edge_sees_a_defect_beyond_the_preferred_edge():
+    """E1 (2026-11-18): H bump at +/-42.5 deg is outside preferred +/-40 but inside max +/-45."""
+    t, r = _corridor(), _resp(h_bump_deg=42.5)
+    assert _rip(objective_v10, t, r, _p10("preferred_edge")) == pytest.approx(0.0, abs=1e-9)
+    assert _rip(objective_v10, t, r, _p10("max_edge")) > 0.05
 
 
 # ------------------------------------------------------------------ adversarial windows
@@ -254,13 +264,15 @@ def test_config_loads_v10_and_refuses_min_edge_for_target_mode(tmp_path):
     assert V10Params.from_block(out["objective"]).ripple_region == {"mode": "preferred_edge"}
     with pytest.raises(ConfigError, match="min_edge"):
         load_brief(_brief(tmp_path, "min_edge", mode="target"))
+    with pytest.raises(ConfigError, match="max_edge"):
+        load_brief(_brief(tmp_path, "max_edge", mode="target"))
 
 
 def test_score_identity_is_new_stable_and_region_specific():
     ids = {name: v10_score_identity(_p10(region))["sha256"] for name, region in (
-        ("pref", "preferred_edge"), ("min", "min_edge"),
+        ("pref", "preferred_edge"), ("min", "min_edge"), ("max", "max_edge"),
         ("seat", {"mode": "seat_zone_deg", "h_deg": 120.0, "v_deg": 60.0}))}
-    assert len(set(ids.values())) == 3
+    assert len(set(ids.values())) == 4
     # Pinned: any change to the v10 block normalisation changes the identity on purpose.
     assert ids["pref"] == PINNED_PREFERRED_EDGE_SHA
     block = _p10("preferred_edge").to_block()

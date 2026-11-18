@@ -429,9 +429,9 @@ def _require_v9_coverage_profile(objective, target, where: str) -> None:
         mode = region if isinstance(region, str) else (region or {}).get("mode")             if isinstance(region, dict) else None
         profile = target.get("coverage_profile") if isinstance(target, dict) else None
         pmode = profile.get("mode") if isinstance(profile, dict) else None
-        if mode == "min_edge" and pmode != "corridor":
-            raise ConfigError(f"{where}: objective.ripple_region min_edge needs a corridor-mode "
-                              f"target.coverage_profile (min_deg), got mode {pmode!r}")
+        if mode in ("min_edge", "max_edge") and pmode != "corridor":
+            raise ConfigError(f"{where}: objective.ripple_region {mode} needs a corridor-mode "
+                              f"target.coverage_profile (min_deg/max_deg), got mode {pmode!r}")
 
 
 GRID_KEYS = ("verify_points_per_octave", "screen_extra_hz")

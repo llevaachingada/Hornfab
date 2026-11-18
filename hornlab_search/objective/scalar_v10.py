@@ -20,6 +20,8 @@ owner's (audit 01 section 4.1) and a brief that omits it is refused:
 * ``ripple_region: preferred_edge`` - inspect ``+/- preferred/2`` (the preferred -6 dB edges);
 * ``ripple_region: min_edge`` - inspect ``+/- min/2`` (the guaranteed-minimum edges; corridor
   mode only, refused for a target-mode profile);
+* ``ripple_region: max_edge`` - inspect ``+/- max/2`` (the widest permitted edges; corridor mode
+  only). Added 2026-11-18 after E1: ``min_edge`` cannot see a mid-corridor defect;
 * ``ripple_region: {mode: seat_zone_deg, h_deg: H, v_deg: V}`` - an explicitly declared TOTAL
   inspected angle per plane, constant over frequency.
 
@@ -59,7 +61,7 @@ __all__ = ["objective_v10", "V10Params", "V10_ALL_KEYS", "V10_RIPPLE_REGIONS",
 
 #: v10 reports exactly v9's key set (only the meaning of ``rip`` changes).
 V10_ALL_KEYS = V9_ALL_KEYS
-V10_RIPPLE_REGIONS = ("preferred_edge", "min_edge", "seat_zone_deg")
+V10_RIPPLE_REGIONS = ("preferred_edge", "min_edge", "max_edge", "seat_zone_deg")
 V10_SCORE_IDENTITY_NAME = "objective_v10_ripple_region"
 _SEAT_KEYS = {"mode", "h_deg", "v_deg"}
 _MAX_TOTAL_DEG = 360.0
@@ -162,10 +164,11 @@ def v10_inspected_total_deg(target: Target, plane: str, freq_hz: float, region: 
     pref, lo, _hi = _profile_at(_plane_anchors(target, plane), float(freq_hz))
     if mode == "preferred_edge":
         return float(pref)
-    if lo is None or _profile_mode(target) != "corridor":
-        raise ValueError("ripple_region min_edge needs a corridor-mode coverage profile "
-                         "(min_deg present)")
-    return float(lo)
+    edge = lo if mode == "min_edge" else _hi
+    if edge is None or _profile_mode(target) != "corridor":
+        raise ValueError(f"ripple_region {mode} needs a corridor-mode coverage profile "
+                         "(min_deg/max_deg present)")
+    return float(edge)
 
 
 def _v10_ripple_values(metrics, resp, target: Target, band: np.ndarray, region: dict):
