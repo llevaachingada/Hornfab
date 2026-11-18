@@ -1,5 +1,13 @@
 # ISSUES
 
+## 2026-11-18 - v10 ripple region: owner policy needed before any brief uses it
+
+- OPEN (owner): pick the ripple inspection region: preferred_edge / min_edge / seat_zone_deg
+  (per-plane totals) / other. Evidence E1-E4 (`evidence_scoring_2026-11-18/`) informs it.
+- OPEN: BO metric policy for v10 is a separate patch (PR-D). `tools/analysis/brief_truth_replay.py`
+  stays v9-only for now.
+- NOTE: v9 target mode inspects +/-preferred (2x the -6 dB edge); v9 numbers stay PROVISIONAL.
+
 ## 2026-11-18 - Agent benchmark: first A/B run not done
 
 - OPEN: run the baseline vs treatment arms (with and without the contracts) and save the answers.
