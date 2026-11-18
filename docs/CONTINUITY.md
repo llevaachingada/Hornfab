@@ -1,5 +1,21 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - B1 batch 1 COMPLETE (5/5 exit 0, no spill); batch 2 + WP 4.2 queued (local orchestrator)
+
+- **B1 batch 1 ran clean after the backend-object fix**: all five fold-warm x2 probes exit 0,
+  ~3.5-4 min each (refined solve + memwatch + verified teardown), GPU peaks ~2.6 GB dedicated,
+  **no Shared-Usage spill on any probe** → the R5 batch-2 gate is MET. First datum:
+  `2f7307c06023` ref J 4.14130 → refined J 4.12597 (dJ −0.01533 > the 0.0057 threshold →
+  **mesh-sensitive**), 28,489 tri / 14,519 dof. Full per-design records accumulate in
+  `runs/b1_mesh_2026-11-18/` (+ memwatch JSONs per probe under runs/nights/b1_mesh_2026-11-18/).
+  B1 evidence document + combined floor record (WP 2.3): next commit batch once batch 2 lands.
+- **Queued behind the probes** (gate-satisfied per R5/R6, dry-run exit 0):
+  3 × ext-throat x2 probes (`b1_mesh_*_20261118_batch2`, from the cloud-verified insert file) and
+  the **WP 4.2 biradial-control verify solve** (`wp42_biradial_control_verify_20261118`,
+  `--mode verify` on the U3 control — kind: command per the single-design rule).
+- Live now: `w_ext_throat_hvlaw_cov_v7_200w1_resume2` with `budget: 200`
+  (strict-resume cumulative cap — accepted; 92 rows preserved, ~108 new evals to run).
+
 ## 2026-11-18 - owner-directed queue jump: B1 probes to the front; two tool faults fixed on the way (local orchestrator)
 
 - **Owner asked for B1 at the front of the live night.** Executed with the runner's own mechanics:

@@ -1,5 +1,14 @@
 ﻿# ISSUES
 
+## 2026-11-18 - B1 batch 1 complete; batch 2 + 4.2 queued; ext_throat partial resumes with cap 200
+
+- DONE: B1 batch 1 = 5/5 probes exit 0, no Shared-Usage spill (R5 gate met). Batch 2 (3 ext-throat
+  probes) + the WP 4.2 biradial-control verify solve are queued behind the live resume2.
+  Evidence accumulation: runs/b1_mesh_2026-11-18/ (+ per-probe memwatch JSONs). B1 evidence doc +
+  combined floor record (WP 2.3) after batch 2 lands.
+- DONE: ext_throat 200-eval screen resumed (resume2) with the corrected cumulative cap; 92 rows
+  preserved. BO `_r2` arms stay deferred per R15 (B1 not fully landed + anchor absent).
+
 ## 2026-11-18 - B1 probes burned once on a tool fault, re-queued (_rc2); strict-resume semantics recorded
 
 - CLOSED (WP 2.2/D7, commit `8eca641`): fidelity_pairs backend-string fault — the five
