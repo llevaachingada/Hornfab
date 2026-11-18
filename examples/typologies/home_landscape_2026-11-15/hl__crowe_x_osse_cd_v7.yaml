@@ -12,6 +12,8 @@
 #    lip 8-30 mm / wrap 80-160 deg are searched so the BEM decides whether a big roll pays.
 # Fixed for the look: sf_m 4, sf_n1 1.8 (between round and star), sf_n2 7 (straight edges), sf_start 0.25, k 1, q 0.996.
 # 2026-11-16 08:xx: watchdog bound-pins widened {'g_L_mm': (200.0, 320.0)}; seed = best of runs/20261116T074832Z-screen-620f81 (J 5.344). Name kept so the BO cohort stays one task.
+# 2026-11-18 senior review: the 320 widening above is NOT in the bounds (g_L_mm hi: 285.0 is what
+# the search uses); intent is an owner question (docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md).
 name: hl__crowe_x_osse_cd_v7
 family: FREEFORM
 brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml

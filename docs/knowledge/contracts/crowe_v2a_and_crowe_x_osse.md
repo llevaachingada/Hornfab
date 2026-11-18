@@ -198,3 +198,13 @@ Coordinates: `x` (axial, mm, from coupling plane), `y` (radius, mm), `φ` (azimu
 2. Pre-check envelope at seed and bound corners with `rows_grid_points`; locate the 21/24 refusals.
 3. Compare per-row effective exit angles (`marches`) with nominal `a(φ)`. Reconcile `g_L_mm` (285 vs 320) and the two YAML copies.
 - **Q1.** Is a CD brief valid for a morph-plus-lip design? **Q2.** OS-SE attribution: Magnus or Batík? **Q3.** Should the superformula mean be per row?
+
+## Senior review (2026-11-18): REVIEWED
+
+- Confirmed: `hl__crowe_x_osse_cd_v7.yaml` header line 14 says `g_L_mm` was widened to
+  (200, 320), but the bounds say `hi: 285.0`. The bounds are what the search uses, so the header is
+  wrong. Docs-only fix: the header comment is annotated (comments do not enter the parsed config or
+  its identity). Whether 320 was intended is an owner question; widening the bound is a new search
+  box, not a docs fix.
+- Open: OS-SE attribution (Magnus vs Batik) for the external formula; the diverged queue copy of the
+  YAML; and whether CD survives the morph and lip (no check exists).

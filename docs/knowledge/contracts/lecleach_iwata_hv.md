@@ -147,3 +147,17 @@ the `docs/knowledge` card should say "reconstruction; planar section area; plane
 - Label C-B as reconstruction and defer the 2019 wavefront transform?
 - Does the owner's look (4.png) need the x-offset, or is the stop harmonic enough?
 - g_fc_hz in the pair seed is ignored: remove or document?
+
+## Senior review (2026-11-18): REVIEWED
+
+- Confirmed [code-verified]: the H/V pair takes the core march's axial coordinate for both planes
+  and uses per-plane arc fractions. It does not use `a = r_m^2/b`. The evidence holds, so the
+  construction is a **[reconstruction]** of a published principle, not the "published
+  ellipsoidal-wavefront construction" its YAML description claims.
+- Not edited here: `hl__lecleach_hv_landscape_smooth_v7.yaml` carries the claim in its
+  `description:` value. That is parsed config, not a comment. Owner decision: reword it (it may
+  touch the config identity) or leave it and rely on this contract.
+- 2026-11-18: `iwata_ar` adopted `hv_onset_frac` / `section_exp_ramp` (see `throat_hv_block.md`).
+  Onset 0 equals today's law.
+- Open: a wavefront-area check for the pair (`pi a b` is report-only), and the plane-meridian
+  axial-coordinate loss (section 4).

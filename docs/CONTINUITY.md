@@ -1,5 +1,15 @@
 # CONTINUITY
 
+## 2026-11-18 - Construction contracts moved from DRAFT to REVIEWED (senior, docs only)
+
+- All 4 contracts end with a "Senior review" section listing their open items.
+- Klangfilm: the seed-mouth and SHA findings were confirmed by re-running the kernel; the code
+  comments are fixed in a separate owner-gated patch (it changes the family digests).
+- Crowe-X: the header claims `g_L_mm` hi 320 but the bounds say 285. The header comment is
+  annotated; the bounds are unchanged.
+- Le Cleach H/V pair: relabelled [reconstruction]. The YAML `description:` still says "published";
+  rewording it is an owner decision because the value is parsed config.
+
 ## 2026-11-18 - Throat H/V follow-ons: rolled rho, iwata_ar onset, R-OSSE verdict, block contract
 
 - Rolled family: `throat_hv_ratio` now maps to the radial scale `rho**(cos(2psi)/2 * w)` inside the

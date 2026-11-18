@@ -168,3 +168,12 @@ Points for the contrast: (a) az_a_sf_amp is a native hypothesis knob, not a publ
 ## 12. Immediate reading path
 
 `docs/knowledge/README.md`; `docs/knowledge/typologies/experimental_morphs.md` (it states radial and axial relief are different mechanisms); `docs/research/typologies/ROLLED_FAMILY_MASTER_RESEARCH_2026-11-15.md`; `docs/research/typologies/SECTION_PUCKER_RESEARCH_2026-11-15.md`; `docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md`; `docs/research/typologies/ROLLED_FAMILY_EVIDENCE_HANDOFF_2026-11-15.md`.
+
+## Senior review (2026-11-18): REVIEWED
+
+- No factual correction needed in this pass. 2026-11-18: the rolled family now maps
+  `throat_hv_ratio` (LABELED HYBRID, inside the relief window; see `throat_hv_block.md`). The
+  implementation digest changes with that patch.
+- Open: the station-definition ambiguity (phi = pi/4 arc vs the meridian arc); legacy pucker
+  configs that only the CLI can run; the acoustic justification of the section H/V ranges
+  [unverified].

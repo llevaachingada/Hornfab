@@ -121,3 +121,16 @@ Known construction gaps: no returning lip/rollback in KL-HV-B (docs say beak is 
 
 Checks (numpy only, minutes): (1) add `cd_core_blend` in (0,1) assertion that B is a switch, or document it; (2) test A with blend=1, theta=chord base, gains 0 equals parent to 1e-12; (3) test B cone limit and `|rho(phi=0,pi/2)|` equals a,b for p up to 8; (4) recompute the post-deformation curved-cap residual of A seeds with `lame_cap_area` and report it; (5) hash-parity test frozen vs tools H/V kernels, refresh docstring SHAs and seed comments; (6) sampled planar-section area table `C(p)ab` vs cap area for B seeds to quantify "wavefront area" mismatch; (7) mesh-resolution sweep on beak/lip (dz vs n_s) because B stations are uniform in z, not arc; (8) extend the monotone test to b4.
 Questions for senior review: Are `_CORE_BOUNDS` (theta1<=60, beak ranges) to be promoted from P to a stated basis? Should the beak be treated as a lip (current evidence: H coverage missing without a rolled lip, widening the mouth did not help)? Is `cd_core_blend` as a class switch acceptable vs an honest `core_class` key? Is any claim allowed that Phase A H/V angles "control" beamwidth given A2 0.00 deg? Is a single smooth-brief BEM at the assumed 2 deg source cap enough to rank B3?
+
+## Senior review (2026-11-18): REVIEWED
+
+- Confirmed [code-verified, re-run]: the stale SEEDS mouth comments. The kernel today gives b1
+  479.6x239.7, b2 595.0x232.8, b3 472.5x266.1 and b4 562.5x261.6 mm (`make_grid`, driver 18 mm /
+  2 deg). Corrected in the comments-only patch `W5code_0005` (owner-gated: it changes the family
+  implementation digests).
+- Confirmed: the frozen-copy SHA docstrings are stale. The tools files now hash to `7fc93d63...` and
+  `214d4f15...`. The docstrings are corrected in the same patch to record both SHAs; no parity test
+  exists yet.
+- Open: (1) the `cd_core_blend` switch-vs-blend semantics; (2) the post-deformation curved-cap
+  residual of the A seeds; (3) a frozen-vs-tools parity test; (4) the mesh-resolution sweep on the
+  beak/lip. These are checks 1, 4, 5 and 7 of section 9, unchanged.

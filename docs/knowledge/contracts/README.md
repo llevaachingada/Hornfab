@@ -1,6 +1,6 @@
 # Scientific construction contracts (WP-K0 drafts, 2026-11-18)
 
-Status: **DRAFT for senior review.** These are read-only extraction drafts. Each claim is labeled
+Status: **REVIEWED (senior, 2026-11-18)**; each contract ends with its open items. They began as read-only extraction drafts. Each claim is labeled
 [published] / [derived] / [reconstruction] / [original-hypothesis] / [code-verified] /
 [unverified]. No tests were run while drafting (scipy and hornlab_mesher were absent from the
 drafting environment), so test claims mean "a test exists", not "the test passes".
