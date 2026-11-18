@@ -1,0 +1,12 @@
+# FaitalPRO 12PR320 - system geometry doc (schema v1, hornlab_search.system.drivers).
+# ONLY the values printed on the vendor page (machine-verified 2026-11-18):
+#   https://faitalpro.com/en/products/LF_Loudspeakers/product_details/index.php?id=101050135
+# Cone depth / surround width / dust cap / mounting depth are NOT publisher-printed:
+# they stay absent and installed-tier claims remain refused until maker CAD or measurement.
+driver_id: faitalpro_12pr320
+measured_by: manufacturer
+cutout_mm: 282
+frame_od_mm: 316
+depth_mm: 135
+sourced_from:
+  - "https://faitalpro.com/en/products/LF_Loudspeakers/product_details/index.php?id=101050135"

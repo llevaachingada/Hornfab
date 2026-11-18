@@ -1,0 +1,32 @@
+# FaitalPRO 12PR320 (8 ohm) - T/S transcribed from the vendor datasheet page.
+# Machine-verified against https://faitalpro.com/en/products/LF_Loudspeakers/product_details/index.php?id=101050135
+# on 2026-11-18 (parent provenance review; BASELINE.md "Driver data provenance").
+# Published values only; nothing derived, nothing guessed. Xmax is the page's own definition
+# (winding-gap)/2 + gap/3, one-way peak. NOTE: this is an ADDITIVE system-pilot file in a
+# system-owned directory; it does NOT enter examples/drivers (C8 transcriptions) unreviewed.
+name: FaitalPRO 12PR320
+kind: cone
+re_ohm: 5.3
+le_mh: 0.67
+bl_tm: 13.5
+sd_cm2: 539
+xmax_mm: 7.37
+p_aes_w: 300
+fs_hz: 42
+qms: 7.8
+mms_g: 51.4
+mmd_g: 37.3
+cms_mm_per_n: 0.28
+vas_l: 113.3
+rms_kg_s: 1.7
+cutout_mm: 282
+depth_mm: 135
+frame_od_mm: 316
+sens_db_2v83: 97
+source: "https://faitalpro.com/en/products/LF_Loudspeakers/product_details/index.php?id=101050135"
+notes: >
+  Vendor page 2026-11-18. Also published (system-layer use, outside C8 schema): bolt circle
+  298.5 mm, flange+gasket 12.0 mm, net air volume filled by loudspeaker 1.9 dm3 (Vad),
+  Xdamage 17 mm, minimum impedance 6.4 ohm, Qes 0.39, Qts 0.37. Cone geometry (cone depth,
+  surround width, dust cap diameter) is NOT printed numerically on the page: installed-tier
+  geometry stays incomplete until maker CAD / measurement.

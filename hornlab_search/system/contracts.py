@@ -672,7 +672,10 @@ def canonical_json(obj: Any) -> str:
         if isinstance(o, (int, float)) and not isinstance(o, bool):
             return round(float(o), 12)
         if isinstance(o, Mapping):
-            return {k: _fix(v) for k, v in sorted(o.items())}
+            # Keys are normalized to strings and sorted lexicographically: JSON round-trips
+            # (np.savez/cache stores, manifests) always produce string keys, so write and
+            # reload must canonicalize identically regardless of the original key type.
+            return {str(k): _fix(v) for k, v in sorted(o.items(), key=lambda kv: str(kv[0]))}
         if isinstance(o, (list, tuple)):
             return [_fix(v) for v in o]
         if isinstance(o, np.ndarray):
