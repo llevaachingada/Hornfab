@@ -31,6 +31,15 @@
   them via bridge CLIs. Carding those lanes needs either a bridge-install import shim in the
   analysis path or carding via the bridge CLIs (senior's "5 cardable" ambiguity noted in the
   handoff).
+- DONE (B1 prep, 2026-11-18): `tools/night_queue/fidelity_pairs.py` now carries three labelled
+  paths — B1f frequency check (renamed; outputs say NOT mesh convergence), B1 mesh-convergence
+  refine mode (same stored screen row as reference, same screen grid, only `cfg.mesh.epw`
+  scaled; refined solve-hash == stored solve-hash verified for all ten), and a CPU mesh-sizing
+  dry run. Realized table in `scratch/fable_architecture/.b1/b1_mesh_feasibility.md`: fold-warm
+  x2 (epw 12) = 14 270-15 388 quarter-DOF, probe-grade (inside the 8.9-15.7 k OOM transition,
+  Shared-Usage spill decides per design); x3 cap-bound/never built for all; ext-throat x2/x3
+  INFEASIBLE on this card (mesher refuses: symmetry-plane slivers; est. ~21.1 k DOF). 24 tests;
+  five per-design job spec `.b1/b1_mesh_night_insert.yaml` PROPOSED, not queued.
 - OPEN (senior/owner): B1 encoding is decided (mesh convergence, not the `verify,finalist`
   frequency pair - that encoding is B1f); CPU dry-run + feasibility table in progress in
   `scratch/fable_architecture/.b1/`; GPU slots queue after the BO arms once the owner approves

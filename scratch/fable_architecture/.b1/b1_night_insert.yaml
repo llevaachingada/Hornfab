@@ -1,0 +1,25 @@
+# B1f — FREQUENCY-FIDELITY CHECK (renamed 2026-11-18). **NOT B1, NOT mesh convergence.**
+#
+# The old B1 pair encoding measured the same mesh at verify (29 freqs) vs finalist (36 freqs); the
+# mesh resolution is unchanged, so it is B1f only. The owner decision of 2026-11-18 requires B1 to
+# test MESH convergence; that proposal is in b1_mesh_night_insert.yaml (probe-grade, after the BO
+# arms, pending owner approval). This file is kept so the frequency check has an honest name.
+#
+# Insert this single job only if the owner still wants the B1f frequency check. PREPARED, not queued.
+night: b1f_frequency_fidelity_2026-11-18
+lane: gpu
+jobs:
+- id: b1f_frequency_fidelity_20261118
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/night_queue/fidelity_pairs.py
+  - --designs-file
+  - scratch/fable_architecture/.b1/b1_designs.csv
+  - --modes
+  - verify,finalist
+  - --out
+  - runs/b1f_freq_2026-11-18

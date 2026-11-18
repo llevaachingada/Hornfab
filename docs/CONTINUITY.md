@@ -64,6 +64,24 @@
   integration after this push + the post-drain suite. Isolated-clone test run re-verified by a
   second independent agent (`tmp_thv_test`: 0 new failures, mesher accepts k-expression); my
   duplicated pytest run in the clone was stopped on owner instruction.
+- **B1 CPU dry-run landed (2026-11-18, real mesher, no solves).** Realized sizing
+  (`scratch/fable_architecture/.b1/b1_mesh_feasibility.md`): epw ×2 (12) builds at the existing
+  24 k screen cap for the five fold-warm designs at 14 270-15 388 quarter DOF — INSIDE the
+  measured 8.9-15.7 k OOM transition, i.e. **probe-grade**, each a per-design fresh-process job
+  with Shared-Usage spill adjudication; epw ×3 (18) is cap-bound for every design (true size
+  31.8-49.3 k DOF; build.py refuses at 1.5× cap pre-mesh and deletes above cap post-build, so
+  "cap-bound" = not built, never coarsened); the five ext-throat designs are **excluded**
+  ("mesh check infeasible on this card, est. ~21.1 k DOF" — the mesher also refuses the finer
+  geometry: symmetry-plane slivers at epw 12/18). Same-grid contract verified: refined
+  SolveSpec.hash == stored solve hash for all ten. Per-term deltas read from stored rows
+  (`terms` + `metrics`, di_source balloon) — no reference re-solve needed; mesh-sensitivity
+  gain threshold 0.0057 J (smallest non-degenerate finalist gap in the set). Hygiene hooks in
+  `tools/night_queue/fidelity_pairs.py`: --teardown-per-design (verified worker shutdown),
+  --record-vram (baseline/peak/dedicated/SHARED per design; shared > 512 MiB = spilled = failed),
+  memwatch per job. B1f (frequency-fidelity) renamed and labelled NOT-mesh-convergence in its
+  outputs. Five-job B1 mesh spec proposed in `.b1/b1_mesh_night_insert.yaml`, NOT queued —
+  owner approves GPU slots first. Heavy raw intermediates (replay pools ~40 MB JSON, dry-run
+  meshes ~56 MB .msh) left uncommitted, reproducible from the committed dry-run command.
 - Commit/coverage note: this entry's code lands in the same push (C1 in
   `feat(tools): night truth`, C2 in `feat(analysis): data-agreement gate`); the queue file is
   untracked (`runs/`), so the queue edits travel as the held-note above, not as commits.

@@ -1,0 +1,746 @@
+{
+  "check": "B1-mesh-convergence",
+  "stored_resolution_only": "reference built at the run's stored epw; no solve was run",
+  "quarter_oom_onset_dof": 8900,
+  "quarter_oom_upper_dof": 15700,
+  "designs": [
+    {
+      "run": "runs/20261116T130335Z-screen-ab4fb9",
+      "design_hash": "2f7307c06023",
+      "stored": {
+        "n_triangles": 7220,
+        "n_dof": 3751,
+        "J": 4.141300154806476
+      },
+      "candidates": {
+        "ref": {
+          "epw": 6.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "8e789cd0deef",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 7220,
+          "n_nodes_used": 3751,
+          "dof": 3751,
+          "res_mm": {
+            "mouth": 7.145833333333333,
+            "rear": 10.71875,
+            "throat": 3.5729166666666665
+          },
+          "seconds": 0.03,
+          "est_dof_scaled": 3751,
+          "verdict": "fits: 3751 DOF below the 8.9k quarter OOM onset"
+        },
+        "x2": {
+          "epw": 12.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "55b293e12d36",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 28489,
+          "n_nodes_used": 14519,
+          "dof": 14530,
+          "res_mm": {
+            "mouth": 3.5729166666666665,
+            "rear": 5.359375,
+            "throat": 1.7864583333333333
+          },
+          "seconds": 0.11,
+          "est_dof_scaled": 15004,
+          "verdict": "borderline: 14530 DOF inside the 8.9k-15.7k quarter OOM transition"
+        },
+        "x3": {
+          "epw": 18.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "e694b4cbbcd7",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": true,
+          "seconds": 0.08,
+          "error": "mesh_too_large: pre-mesh estimate ~73612 triangles (~37542 dofs) is over 1.5x the dof cap 24000 at f_max=8000 Hz, epw=18, quadrants='1'; no mesh was generated",
+          "est_dof_scaled": 33759,
+          "diagnostic": {
+            "ok": true,
+            "n_triangles": 65246,
+            "n_nodes_used": 33045,
+            "dof": 33276,
+            "cap": 96000,
+            "error": null,
+            "seconds": 0.26,
+            "res_mm": {
+              "mouth": 2.3819444444444446,
+              "rear": 3.572916666666667,
+              "throat": 1.1909722222222223
+            },
+            "cap_lifted": 96000
+          },
+          "verdict": "CAP-BOUND at 24000 DOF: not a refinement at the existing cap; true mesh 33276 DOF -> mesh check infeasible on this card (est. 33276 DOF)"
+        }
+      }
+    },
+    {
+      "run": "runs/20261116T130335Z-screen-ab4fb9",
+      "design_hash": "507e7257c091",
+      "stored": {
+        "n_triangles": 7304,
+        "n_dof": 3791,
+        "J": 3.948517629630978
+      },
+      "candidates": {
+        "ref": {
+          "epw": 6.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "8e789cd0deef",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 7304,
+          "n_nodes_used": 3791,
+          "dof": 3791,
+          "res_mm": {
+            "mouth": 7.145833333333333,
+            "rear": 10.71875,
+            "throat": 3.5729166666666665
+          },
+          "seconds": 0.02,
+          "est_dof_scaled": 3791,
+          "verdict": "fits: 3791 DOF below the 8.9k quarter OOM onset"
+        },
+        "x2": {
+          "epw": 12.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "55b293e12d36",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 28547,
+          "n_nodes_used": 14545,
+          "dof": 14559,
+          "res_mm": {
+            "mouth": 3.5729166666666665,
+            "rear": 5.359375,
+            "throat": 1.7864583333333333
+          },
+          "seconds": 0.11,
+          "est_dof_scaled": 15164,
+          "verdict": "borderline: 14559 DOF inside the 8.9k-15.7k quarter OOM transition"
+        },
+        "x3": {
+          "epw": 18.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "e694b4cbbcd7",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": true,
+          "seconds": 0.08,
+          "error": "mesh_too_large: pre-mesh estimate ~73987 triangles (~37733 dofs) is over 1.5x the dof cap 24000 at f_max=8000 Hz, epw=18, quadrants='1'; no mesh was generated",
+          "est_dof_scaled": 34119,
+          "diagnostic": {
+            "ok": true,
+            "n_triangles": 63799,
+            "n_nodes_used": 32310,
+            "dof": 32538,
+            "cap": 96000,
+            "error": null,
+            "seconds": 0.24,
+            "res_mm": {
+              "mouth": 2.3819444444444446,
+              "rear": 3.572916666666667,
+              "throat": 1.1909722222222223
+            },
+            "cap_lifted": 96000
+          },
+          "verdict": "CAP-BOUND at 24000 DOF: not a refinement at the existing cap; true mesh 32538 DOF -> mesh check infeasible on this card (est. 32538 DOF)"
+        }
+      }
+    },
+    {
+      "run": "runs/20261116T130335Z-screen-ab4fb9",
+      "design_hash": "ced63c6a01a1",
+      "stored": {
+        "n_triangles": 7408,
+        "n_dof": 3844,
+        "J": 3.8251103358873593
+      },
+      "candidates": {
+        "ref": {
+          "epw": 6.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "8e789cd0deef",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 7408,
+          "n_nodes_used": 3844,
+          "dof": 3844,
+          "res_mm": {
+            "mouth": 7.145833333333333,
+            "rear": 10.71875,
+            "throat": 3.5729166666666665
+          },
+          "seconds": 0.02,
+          "est_dof_scaled": 3844,
+          "verdict": "fits: 3844 DOF below the 8.9k quarter OOM onset"
+        },
+        "x2": {
+          "epw": 12.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "55b293e12d36",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 28979,
+          "n_nodes_used": 14762,
+          "dof": 14780,
+          "res_mm": {
+            "mouth": 3.5729166666666665,
+            "rear": 5.359375,
+            "throat": 1.7864583333333333
+          },
+          "seconds": 0.12,
+          "est_dof_scaled": 15376,
+          "verdict": "borderline: 14780 DOF inside the 8.9k-15.7k quarter OOM transition"
+        },
+        "x3": {
+          "epw": 18.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "e694b4cbbcd7",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": true,
+          "seconds": 0.06,
+          "error": "mesh_too_large: pre-mesh estimate ~74987 triangles (~38243 dofs) is over 1.5x the dof cap 24000 at f_max=8000 Hz, epw=18, quadrants='1'; no mesh was generated",
+          "est_dof_scaled": 34596,
+          "diagnostic": {
+            "ok": true,
+            "n_triangles": 64739,
+            "n_nodes_used": 32784,
+            "dof": 33017,
+            "cap": 96000,
+            "error": null,
+            "seconds": 0.26,
+            "res_mm": {
+              "mouth": 2.3819444444444446,
+              "rear": 3.572916666666667,
+              "throat": 1.1909722222222223
+            },
+            "cap_lifted": 96000
+          },
+          "verdict": "CAP-BOUND at 24000 DOF: not a refinement at the existing cap; true mesh 33017 DOF -> mesh check infeasible on this card (est. 33017 DOF)"
+        }
+      }
+    },
+    {
+      "run": "runs/20261116T130335Z-screen-ab4fb9",
+      "design_hash": "688ffe811b6a",
+      "stored": {
+        "n_triangles": 7313,
+        "n_dof": 3796,
+        "J": 3.8923038305210476
+      },
+      "candidates": {
+        "ref": {
+          "epw": 6.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "8e789cd0deef",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 7313,
+          "n_nodes_used": 3796,
+          "dof": 3796,
+          "res_mm": {
+            "mouth": 7.145833333333333,
+            "rear": 10.71875,
+            "throat": 3.5729166666666665
+          },
+          "seconds": 0.03,
+          "est_dof_scaled": 3796,
+          "verdict": "fits: 3796 DOF below the 8.9k quarter OOM onset"
+        },
+        "x2": {
+          "epw": 12.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "55b293e12d36",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 29221,
+          "n_nodes_used": 14881,
+          "dof": 14903,
+          "res_mm": {
+            "mouth": 3.5729166666666665,
+            "rear": 5.359375,
+            "throat": 1.7864583333333333
+          },
+          "seconds": 0.11,
+          "est_dof_scaled": 15184,
+          "verdict": "borderline: 14903 DOF inside the 8.9k-15.7k quarter OOM transition"
+        },
+        "x3": {
+          "epw": 18.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "e694b4cbbcd7",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": true,
+          "seconds": 0.06,
+          "error": "mesh_too_large: pre-mesh estimate ~73881 triangles (~37679 dofs) is over 1.5x the dof cap 24000 at f_max=8000 Hz, epw=18, quadrants='1'; no mesh was generated",
+          "est_dof_scaled": 34164,
+          "diagnostic": {
+            "ok": true,
+            "n_triangles": 63877,
+            "n_nodes_used": 32355,
+            "dof": 32578,
+            "cap": 96000,
+            "error": null,
+            "seconds": 0.33,
+            "res_mm": {
+              "mouth": 2.3819444444444446,
+              "rear": 3.572916666666667,
+              "throat": 1.1909722222222223
+            },
+            "cap_lifted": 96000
+          },
+          "verdict": "CAP-BOUND at 24000 DOF: not a refinement at the existing cap; true mesh 32578 DOF -> mesh check infeasible on this card (est. 32578 DOF)"
+        }
+      }
+    },
+    {
+      "run": "runs/20261116T130335Z-screen-ab4fb9",
+      "design_hash": "78f599e8a1d2",
+      "stored": {
+        "n_triangles": 7391,
+        "n_dof": 3837,
+        "J": 4.031742939832851
+      },
+      "candidates": {
+        "ref": {
+          "epw": 6.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "8e789cd0deef",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 7391,
+          "n_nodes_used": 3837,
+          "dof": 3837,
+          "res_mm": {
+            "mouth": 7.145833333333333,
+            "rear": 10.71875,
+            "throat": 3.5729166666666665
+          },
+          "seconds": 0.04,
+          "est_dof_scaled": 3837,
+          "verdict": "fits: 3837 DOF below the 8.9k quarter OOM onset"
+        },
+        "x2": {
+          "epw": 12.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "55b293e12d36",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 28859,
+          "n_nodes_used": 14705,
+          "dof": 14719,
+          "res_mm": {
+            "mouth": 3.5729166666666665,
+            "rear": 5.359375,
+            "throat": 1.7864583333333333
+          },
+          "seconds": 0.18,
+          "est_dof_scaled": 15348,
+          "verdict": "borderline: 14719 DOF inside the 8.9k-15.7k quarter OOM transition"
+        },
+        "x3": {
+          "epw": 18.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "e694b4cbbcd7",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": true,
+          "seconds": 0.22,
+          "error": "mesh_too_large: pre-mesh estimate ~74663 triangles (~38078 dofs) is over 1.5x the dof cap 24000 at f_max=8000 Hz, epw=18, quadrants='1'; no mesh was generated",
+          "est_dof_scaled": 34533,
+          "diagnostic": {
+            "ok": true,
+            "n_triangles": 64521,
+            "n_nodes_used": 32682,
+            "dof": 32906,
+            "cap": 96000,
+            "error": null,
+            "seconds": 0.57,
+            "res_mm": {
+              "mouth": 2.3819444444444446,
+              "rear": 3.572916666666667,
+              "throat": 1.1909722222222223
+            },
+            "cap_lifted": 96000
+          },
+          "verdict": "CAP-BOUND at 24000 DOF: not a refinement at the existing cap; true mesh 32906 DOF -> mesh check infeasible on this card (est. 32906 DOF)"
+        }
+      }
+    },
+    {
+      "run": "runs/20261115T143219Z-screen-d3a1bb",
+      "design_hash": "3a1038da45d0",
+      "stored": {
+        "n_triangles": 10175,
+        "n_dof": 5275,
+        "J": 3.102805201974035
+      },
+      "candidates": {
+        "ref": {
+          "epw": 6.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "8e789cd0deef",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 10175,
+          "n_nodes_used": 5275,
+          "dof": 5275,
+          "res_mm": {
+            "mouth": 7.145833333333333,
+            "rear": 7.145833333333333,
+            "throat": 3.5729166666666665
+          },
+          "seconds": 0.06,
+          "est_dof_scaled": 5275,
+          "verdict": "fits: 5275 DOF below the 8.9k quarter OOM onset"
+        },
+        "x2": {
+          "epw": 12.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "55b293e12d36",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": false,
+          "seconds": 39.83,
+          "error": "invalid_geometry: mesh build failed: 23 non-sliver triangle(s) lie entirely in the x=0 symmetry plane; the geometry is defective",
+          "est_dof_scaled": 21100,
+          "verdict": "mesh check infeasible on this card (est. 21100 DOF); mesher refused at epw 12: invalid_geometry"
+        },
+        "x3": {
+          "epw": 18.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "e694b4cbbcd7",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": true,
+          "seconds": 0.07,
+          "error": "mesh_too_large: pre-mesh estimate ~79936 triangles (~40767 dofs) is over 1.5x the dof cap 24000 at f_max=8000 Hz, epw=18, quadrants='1'; no mesh was generated",
+          "est_dof_scaled": 47475,
+          "diagnostic": {
+            "ok": false,
+            "n_triangles": null,
+            "n_nodes_used": null,
+            "dof": null,
+            "cap": 96000,
+            "error": "invalid_geometry: mesh build failed: 264 non-sliver triangle(s) lie entirely in the x=0 symmetry plane; the geometry is defective",
+            "seconds": 156.66,
+            "res_mm": null,
+            "cap_lifted": 96000
+          },
+          "verdict": "CAP-BOUND at 24000 DOF (not a refinement at the existing cap); diagnostic build refused: invalid_geometry; also mesh check infeasible on this card (est. 47475 DOF)"
+        }
+      }
+    },
+    {
+      "run": "runs/20261116T025728Z-screen-cd60f7",
+      "design_hash": "9fcd21fc1904",
+      "stored": {
+        "n_triangles": 10173,
+        "n_dof": 5274,
+        "J": 3.1028085892200576
+      },
+      "candidates": {
+        "ref": {
+          "epw": 6.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "8e789cd0deef",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 10173,
+          "n_nodes_used": 5274,
+          "dof": 5274,
+          "res_mm": {
+            "mouth": 7.145833333333333,
+            "rear": 7.145833333333333,
+            "throat": 3.5729166666666665
+          },
+          "seconds": 0.07,
+          "est_dof_scaled": 5274,
+          "verdict": "fits: 5274 DOF below the 8.9k quarter OOM onset"
+        },
+        "x2": {
+          "epw": 12.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "55b293e12d36",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": false,
+          "seconds": 40.14,
+          "error": "invalid_geometry: mesh build failed: 24 non-sliver triangle(s) lie entirely in the x=0 symmetry plane; the geometry is defective",
+          "est_dof_scaled": 21096,
+          "verdict": "mesh check infeasible on this card (est. 21096 DOF); mesher refused at epw 12: invalid_geometry"
+        },
+        "x3": {
+          "epw": 18.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "e694b4cbbcd7",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": true,
+          "seconds": 0.06,
+          "error": "mesh_too_large: pre-mesh estimate ~79936 triangles (~40767 dofs) is over 1.5x the dof cap 24000 at f_max=8000 Hz, epw=18, quadrants='1'; no mesh was generated",
+          "est_dof_scaled": 47466,
+          "diagnostic": {
+            "ok": false,
+            "n_triangles": null,
+            "n_nodes_used": null,
+            "dof": null,
+            "cap": 96000,
+            "error": "invalid_geometry: mesh build failed: 263 non-sliver triangle(s) lie entirely in the x=0 symmetry plane; the geometry is defective",
+            "seconds": 154.99,
+            "res_mm": null,
+            "cap_lifted": 96000
+          },
+          "verdict": "CAP-BOUND at 24000 DOF (not a refinement at the existing cap); diagnostic build refused: invalid_geometry; also mesh check infeasible on this card (est. 47466 DOF)"
+        }
+      }
+    },
+    {
+      "run": "runs/20261115T143219Z-screen-d3a1bb",
+      "design_hash": "766c9b1ba8a9",
+      "stored": {
+        "n_triangles": 7149,
+        "n_dof": 3725,
+        "J": 3.2994798299416743
+      },
+      "candidates": {
+        "ref": {
+          "epw": 6.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "8e789cd0deef",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 7149,
+          "n_nodes_used": 3725,
+          "dof": 3725,
+          "res_mm": {
+            "mouth": 7.145833333333333,
+            "rear": 7.145833333333333,
+            "throat": 3.5729166666666665
+          },
+          "seconds": 0.04,
+          "est_dof_scaled": 3725,
+          "verdict": "fits: 3725 DOF below the 8.9k quarter OOM onset"
+        },
+        "x2": {
+          "epw": 12.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "55b293e12d36",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 27953,
+          "n_nodes_used": 14270,
+          "dof": 14270,
+          "res_mm": {
+            "mouth": 3.5729166666666665,
+            "rear": 3.5729166666666665,
+            "throat": 1.7864583333333333
+          },
+          "seconds": 0.19,
+          "est_dof_scaled": 14900,
+          "verdict": "borderline: 14270 DOF inside the 8.9k-15.7k quarter OOM transition"
+        },
+        "x3": {
+          "epw": 18.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "e694b4cbbcd7",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": true,
+          "seconds": 10.88,
+          "error": "mesh_too_large: mesh build failed: generated mesh contains 62,439 triangles, exceeding the effective limit 54,118; increase the relevant mm resolution, raise max_triangles, or set allow_large_mesh=true explicitly",
+          "est_dof_scaled": 33525,
+          "diagnostic": {
+            "ok": true,
+            "n_triangles": 62439,
+            "n_nodes_used": 31664,
+            "dof": 31844,
+            "cap": 96000,
+            "error": null,
+            "seconds": 0.42,
+            "res_mm": {
+              "mouth": 2.3819444444444446,
+              "rear": 2.3819444444444446,
+              "throat": 1.1909722222222223
+            },
+            "cap_lifted": 96000
+          },
+          "verdict": "CAP-BOUND at 24000 DOF: not a refinement at the existing cap; true mesh 31844 DOF -> mesh check infeasible on this card (est. 31844 DOF)"
+        }
+      }
+    },
+    {
+      "run": "runs/20261115T143219Z-screen-d3a1bb",
+      "design_hash": "508f907726d3",
+      "stored": {
+        "n_triangles": 7685,
+        "n_dof": 3999,
+        "J": 3.3051498327540285
+      },
+      "candidates": {
+        "ref": {
+          "epw": 6.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "8e789cd0deef",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 7685,
+          "n_nodes_used": 3999,
+          "dof": 3999,
+          "res_mm": {
+            "mouth": 7.145833333333333,
+            "rear": 7.145833333333333,
+            "throat": 3.5729166666666665
+          },
+          "seconds": 0.05,
+          "est_dof_scaled": 3999,
+          "verdict": "fits: 3999 DOF below the 8.9k quarter OOM onset"
+        },
+        "x2": {
+          "epw": 12.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "55b293e12d36",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 30164,
+          "n_nodes_used": 15388,
+          "dof": 15388,
+          "res_mm": {
+            "mouth": 3.5729166666666665,
+            "rear": 3.5729166666666665,
+            "throat": 1.7864583333333333
+          },
+          "seconds": 0.21,
+          "est_dof_scaled": 15996,
+          "verdict": "borderline: 15388 DOF inside the 8.9k-15.7k quarter OOM transition"
+        },
+        "x3": {
+          "epw": 18.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "e694b4cbbcd7",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": true,
+          "seconds": 0.04,
+          "error": "mesh_too_large: pre-mesh estimate ~76272 triangles (~38899 dofs) is over 1.5x the dof cap 24000 at f_max=8000 Hz, epw=18, quadrants='1'; no mesh was generated",
+          "est_dof_scaled": 35991,
+          "diagnostic": {
+            "ok": true,
+            "n_triangles": 67421,
+            "n_nodes_used": 34177,
+            "dof": 34385,
+            "cap": 96000,
+            "error": null,
+            "seconds": 0.45,
+            "res_mm": {
+              "mouth": 2.3819444444444446,
+              "rear": 2.3819444444444446,
+              "throat": 1.1909722222222223
+            },
+            "cap_lifted": 96000
+          },
+          "verdict": "CAP-BOUND at 24000 DOF: not a refinement at the existing cap; true mesh 34385 DOF -> mesh check infeasible on this card (est. 34385 DOF)"
+        }
+      }
+    },
+    {
+      "run": "runs/20261115T143219Z-screen-d3a1bb",
+      "design_hash": "b996da551021",
+      "stored": {
+        "n_triangles": 7714,
+        "n_dof": 4009,
+        "J": 3.5742756197945944
+      },
+      "candidates": {
+        "ref": {
+          "epw": 6.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "8e789cd0deef",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 7714,
+          "n_nodes_used": 4009,
+          "dof": 4009,
+          "res_mm": {
+            "mouth": 7.145833333333333,
+            "rear": 7.145833333333333,
+            "throat": 3.5729166666666665
+          },
+          "seconds": 0.06,
+          "est_dof_scaled": 4009,
+          "verdict": "fits: 4009 DOF below the 8.9k quarter OOM onset"
+        },
+        "x2": {
+          "epw": 12.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "55b293e12d36",
+          "cap": 24000,
+          "ok": true,
+          "cap_bound": false,
+          "n_triangles": 30081,
+          "n_nodes_used": 15336,
+          "dof": 15342,
+          "res_mm": {
+            "mouth": 3.5729166666666665,
+            "rear": 3.5729166666666665,
+            "throat": 1.7864583333333333
+          },
+          "seconds": 0.2,
+          "est_dof_scaled": 16036,
+          "verdict": "borderline: 15342 DOF inside the 8.9k-15.7k quarter OOM transition"
+        },
+        "x3": {
+          "epw": 18.0,
+          "f_max_hz": 8000.0,
+          "mesh_hash": "e694b4cbbcd7",
+          "cap": 24000,
+          "ok": false,
+          "cap_bound": true,
+          "seconds": 0.06,
+          "error": "mesh_too_large: pre-mesh estimate ~74826 triangles (~38161 dofs) is over 1.5x the dof cap 24000 at f_max=8000 Hz, epw=18, quadrants='1'; no mesh was generated",
+          "est_dof_scaled": 36081,
+          "diagnostic": {
+            "ok": true,
+            "n_triangles": 96642,
+            "n_nodes_used": 48927,
+            "dof": 49288,
+            "cap": 96000,
+            "error": null,
+            "seconds": 0.69,
+            "res_mm": {
+              "mouth": 2.3819444444444446,
+              "rear": 2.3819444444444446,
+              "throat": 1.1909722222222223
+            },
+            "cap_lifted": 96000
+          },
+          "verdict": "CAP-BOUND at 24000 DOF: not a refinement at the existing cap; true mesh 49288 DOF -> mesh check infeasible on this card (est. 49288 DOF)"
+        }
+      }
+    }
+  ]
+}
