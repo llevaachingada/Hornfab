@@ -304,6 +304,37 @@ V-terminal width/hold changes the radiation plane, not the throat impedance, so 
 "beamwidth movement is not a horn improvement" concern, confirmed at the score level: the first 40 evals
 replayed as cache hits and the 40 new ones found nothing.
 
+### 9f. #7 ATH TwinRay380 v10 — real gain from its seed, but it never had the 1.7726 design
+
+Run `20261119T175926Z-screen-8454e6`, watchdog at **31 valid / 31 rows, 0 refusals**:
+
+| | value |
+|---|---|
+| seed J (v10) | 3.5212 |
+| best J (n 25, `bff6107b01a1`) | **2.5748** |
+| gain | 0.946 (above floor) |
+| published offline v10 best for this lane | 1.7726 (`20261117T001240Z-screen-7b664f`, design `85c59331e4a3`) |
+| delta to it | **+0.80 ⇒ outside the floor** |
+| best terms | cov 0.018, flat 0.486, **load 0.747**, dislope 0.388, di_roughness 0.495, flat_cv 0.465 |
+
+**Seeding audit (measured) — this is the important part.** The B6 s1 configs are seeded from the lane's
+*original* seed, not from the design that produced the published v10 lane best. Verified parameter-by-
+parameter against `search.ndjson` rows:
+
+| B6 s1 config | seed vs published-best design | seed J_v10 | published best J_v10 |
+|---|---|---|---|
+| twinray380 v8 | 13 of 27 shared knobs differ (e.g. `L_mm` 203.4 vs 311.6, `morph_height_mm` 357 vs 440) | 3.5212 | 1.7726 |
+| osse_rrect morph v7 | 14 of 31 differ (`L_mm` 250 vs 282, `n` 6.90 vs 8.21, `morph_rate` 3.0 vs 3.67) | 3.0570 | 1.4305 |
+| fold_warm / ext_throat | published `lane_best.run` is the dataset shard `"screen"` (no run dir), so the comparison is by J only | 1.8693 / 2.8692 | 1.4214 / 1.5710 |
+
+Consequence [measured, applied]: the 0.12–0.80 J shortfalls of the B6 s1 lanes are **not** evidence that
+the offline v10 numbers are wrong, and **not** a capability verdict on those constructions. The s1 runs
+re-found the basin from a different start. A genuine "matched continuation" for s2 must warm-start each
+lane at the **published best design's run + design hash**, not at the lane seed. Until that is run, the
+published v10 lane bests (fold 1.4214, morph 1.4305, ext 1.5710, twinray 1.7726) remain the ranking
+evidence and the PRIORITY10 s1 numbers are reproduction checks only.
+
+
 
 
 
