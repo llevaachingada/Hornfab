@@ -108,9 +108,9 @@ risks:
   - {id: R17, level: LOW, status: open, wp: WP1, title: "BL meshed port vs bassbox end-correction are different models", evidence: "assemble._box_to_vented_source"}
 
 decisions:
-  - {id: 1, question: "Accept demo transducer shape for v0, or procure maker CAD now?", recommendation: "Procure 12PR300 drawings; it gates all real box-axis work.", status: open}
-  - {id: 2, question: "Allow taller fronts (e.g. 560 mm) and re-screen, or keep 371 mm and pick drivers that fit?", recommendation: "Both need real geometry first (decision 1).", status: open}
-  - {id: 3, question: "Channel-calibration policy: explicit-calibration API vs velocity-driven re-solves vs electrodynamic conversion?", recommendation: "Explicit per-channel calibration records (option a).", status: open}
-  - {id: 4, question: "Keep analog DSP prototypes this round, or add digital biquad realization now?", recommendation: "Analog for research; biquads later.", status: open}
-  - {id: 5, question: "Far-field/observation standard for declared curves (distance, angular grid, seat window)?", recommendation: "Declare one before any listening-window curve.", status: open}
-  - {id: 6, question: "BL solve authorization: per-case token registry or free-form token?", recommendation: "Typed record (who/why/scope) written into the case manifest.", status: open}
+  - {id: 1, question: "Accept demo transducer shape for v0, or procure maker CAD now?", recommendation: "Procure 12PR300 drawings; it gates all real box-axis work.", status: open, blocks: "real driver shape (panel fit / real-shape staging)"}
+  - {id: 2, question: "Allow taller fronts (e.g. 560 mm) and re-screen, or keep 371 mm and pick drivers that fit?", recommendation: "Both need real geometry first (decision 1).", status: open, blocks: "taller-front re-screen"}
+  - {id: 3, question: "Channel-calibration policy: explicit-calibration API vs velocity-driven re-solves vs electrodynamic conversion?", recommendation: "Explicit per-channel calibration records (option a).", status: open, blocks: "crossover system sum"}
+  - {id: 4, question: "Keep analog DSP prototypes this round, or add digital biquad realization now?", recommendation: "Analog for research; biquads later.", status: open, blocks: "digital DSP realization"}
+  - {id: 5, question: "Far-field/observation standard for declared curves (distance, angular grid, seat window)?", recommendation: "Declare one before any listening-window curve.", status: open, blocks: "declared listening-window curves"}
+  - {id: 6, question: "BL solve authorization: per-case token registry or free-form token?", recommendation: "Typed record (who/why/scope) written into the case manifest.", status: open, blocks: "GUI-started Boundary Lab solves"}

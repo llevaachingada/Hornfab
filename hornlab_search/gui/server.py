@@ -526,6 +526,8 @@ class App:
         if sub == "specs" and len(parts) == 1:
             from . import data_hw_new as NEW
             return NEW.hw_specs(self.root)
+        if sub == "overview" and len(parts) == 1:
+            return HW.hw_overview(self.root, self.system_store)
         raise FileNotFoundError("/".join(["hw", *parts]))
 
     def _budget_hint(self, q: dict) -> dict:

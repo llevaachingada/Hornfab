@@ -296,6 +296,26 @@ def test_new_system_dispatch(env, tmp_path: Path) -> None:
         app.post("/api/hw/spec/save", {"name": "../escape", "spec": spec})
 
 
+def test_overview_next_step_is_computed_from_disk(env) -> None:
+    from hornlab_search.gui.server import App
+
+    root, store = env
+    assert HW.overview_next_step([], {})["id"] == "new"
+    study = {"study_id": "0123456789abcdef", "counts": {"shortlist_rows": 3}}
+    assert HW.overview_next_step([study], {"staged": 0, "solved": 0})["id"] == "stage"
+    assert HW.overview_next_step([study], {"staged": 0, "solved": 2})["id"] == "compare"
+    assert HW.overview_next_step([study], {"staged": 0, "solved": 1})["id"] == "read"
+    assert HW.overview_next_step([study], {"staged": 7, "solved": 0})["id"] == "solve"
+    assert HW.overview_next_step([study], {"staged": 0, "solved": 0,
+                                           "shortlist_rows": 0})["id"] == "stage"
+
+    app = App(root, system_store=store)
+    ov = app.get("/api/hw/overview", {})
+    assert ov["kpis"]["solved"] == 1 and ov["next_step"]["id"] == "read"
+    assert len(ov["recent_cases"]) <= 5
+    assert ov["readiness"]["risks_total"] == 1 and ov["readiness"]["open_decisions"][0]["id"] == 1
+
+
 def test_committed_registry_parses_and_names_real_cases() -> None:
     repo = Path(__file__).resolve().parents[2]
     HW._CACHE.clear()

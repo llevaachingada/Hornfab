@@ -729,3 +729,91 @@ def hw_readiness(root: Path, store: Path) -> dict:
             "updated": registry.get("updated"), "handoff": registry.get("handoff"),
             "risks": registry.get("risks") or [], "decisions": registry.get("decisions") or [],
             "counts": cases["counts"], "declared_missing": cases["declared_missing"]}
+
+
+# --------------------------------------------------------------------------- overview (P8)
+
+def overview_next_step(studies: list[dict], counts: dict) -> dict:
+    """The one next action, computed from disk (never guessed in JS).
+
+    Order: no studies -> start a new system; a shortlist with no Boundary Lab case -> check one
+    in BL; two or more solved -> compare; one solved -> read it; staged only -> open a staged case
+    (solving needs decision 6); otherwise run a screen.
+    """
+    solved = int(counts.get("solved") or 0)
+    staged = int(counts.get("staged") or 0)
+    shortlist = sum(int((s.get("counts") or {}).get("shortlist_rows") or 0) for s in studies)
+    if not studies and not (staged or solved):
+        return {"id": "new", "label": "Start a new system",
+                "href": "#/hw/new",
+                "why": "No screen study exists yet. Pick a horn, drivers and box limits, then screen."}
+    if studies and shortlist and not (staged or solved):
+        newest = studies[0]["study_id"]
+        return {"id": "stage", "label": "Check a shortlisted design in Boundary Lab",
+                "href": f"#/hw/screen/{newest}",
+                "why": f"Shortlist ready ({shortlist} designs). Boundary Lab proves the box can be built."}
+    if solved >= 2:
+        return {"id": "compare", "label": "Compare two solved cases", "href": "#/hw/compare",
+                "why": f"{solved} solved cases; A/B the differences on the shared grid."}
+    if solved == 1:
+        return {"id": "read", "label": "Read the solved results", "href": "#/hw/cases",
+                "why": "One case is solved; open it for per-channel response, polars and provenance."}
+    if staged:
+        return {"id": "solve", "label": "Open a staged case", "href": "#/hw/cases",
+                "why": f"{staged} staged and validated; solving needs owner approval (decision 6)."}
+    return {"id": "screen", "label": "Run a screen", "href": "#/hw/new",
+            "why": "A study exists but no shortlist rows were produced."}
+
+
+def _case_row_brief(row: dict) -> dict:
+    return {k: row.get(k) for k in (
+        "key", "ref", "gate", "experiment", "case", "state", "solve", "box", "horn",
+        "clearance", "fidelity", "motor", "transducer_shape", "created_utc", "tokens")}
+
+
+def hw_overview(root: Path, store: Path) -> dict:
+    """The Overview: KPIs + the next step + recents, all derived from disk/registry."""
+    from . import data_hw_screen as SW          # lazy: data_hw_screen imports this module
+
+    registry = load_registry(root)
+    cases = hw_cases(root, store)
+    try:
+        screens = SW.hw_screens(root, store)
+    except Exception as exc:  # noqa: BLE001 - an unreadable study list is shown, never hidden
+        screens = {"studies": [], "errors": [f"{type(exc).__name__}: {exc}"]}
+    studies = screens.get("studies") or []
+    counts = cases.get("counts") or {}
+    shortlist_total = sum(int((s.get("counts") or {}).get("shortlist_rows") or 0) for s in studies)
+    decisions = [d for d in (registry.get("decisions") or [])
+                 if str(d.get("status") or "").lower() == "open"]
+    risks = registry.get("risks") or []
+    by_level: dict[str, int] = {}
+    for r in risks:
+        key = str(r.get("level") or "UNKNOWN")
+        by_level[key] = by_level.get(key, 0) + 1
+    return {
+        "store": cases.get("store"),
+        "registry": REGISTRY_REL.as_posix(),
+        "registry_error": registry.get("error"),
+        "counts": counts,
+        "kpis": {
+            "screens": len(studies),
+            "shortlisted": shortlist_total,
+            "checked_in_bl": int(counts.get("staged") or 0) + int(counts.get("solved") or 0),
+            "solved": int(counts.get("solved") or 0),
+            "blocked_decisions": len(decisions),
+        },
+        "next_step": overview_next_step(studies, counts),
+        "recent_screens": [{k: s.get(k) for k in (
+            "study_id", "mtime_utc", "horn", "driver_count", "counts", "counts_missing",
+            "claim", "replay_count", "byte_identical")} for s in studies[:3]],
+        "recent_cases": [_case_row_brief(r) for r in (cases.get("cases") or [])[:5]],
+        "readiness": {
+            "updated": registry.get("updated"),
+            "open_decisions": decisions,
+            "risks_total": len(risks),
+            "risks_by_level": by_level,
+        },
+        "screen_errors": screens.get("errors") or [],
+        "declared_missing": cases.get("declared_missing") or [],
+    }
