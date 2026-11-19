@@ -17,8 +17,9 @@
 - DONE: Klangfilm record lane (c200w parent) -> Phase B core at the c200 mouth 585 x 255 inner, beak
   searched; rolled section lane -> whole-shape rect pair (225 cap / 270 control, depth ratio opened).
 - DONE: ext_throat_v8 dropped by shape_check refusal; warm-start `from_runs` resolved by hand.
-- OPEN (local): the night-queue resolver's glob misses `runs/study-*/{screen,verify}/designs` (same
-  family as the "screen" run-name loss); configs resolved by hand this time.
+- DONE: the night-queue resolver now finds `runs/<study>/{screen,verify}/designs/<hash>` and writes the
+  full relative path (before it emitted `runs/verify`, losing the study dir); regression test added,
+  3/3 pass. The SCOUT40 configs remain hand-resolved in the committed state.
 ## 2026-11-19 - horn + woofer system merged; GUI completion P0-P9 in progress
 
 - DONE (local orchestrator): `feat/woofer-system-v0` merged into `hornfab-all-2026-11-18`; pre-merge

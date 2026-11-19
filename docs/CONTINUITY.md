@@ -1,5 +1,14 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - resolve_warm_runs: study-layout fix (local orchestrator, CPU)
+
+- `tools/night_queue/resolve_warm_runs.py` now finds `runs/<study>/<screen|verify>/designs/<hash>` and
+  writes the full `runs/<study>/<mode>` relative path (before: the one-level glob missed the study
+  layout, and the substitution emitted `runs/verify`, losing the study dir). Selection is newest by
+  run-dir mtime with a path tiebreak. Regression test
+  `test_study_layout_screen_and_verify_resolve`; focused suite 3/3 pass. Safe during the live night
+  (the runner does not use this tool; the SCOUT40 configs are already hand-resolved).
+
 ## 2026-11-19 23:35 - SCOUT40 night LAUNCHED (local orchestrator)
 
 - Launched detached able_scout40_2026-11-19 (18 jobs) at 23:35 local / 04:35Z: controller pid **16596**
