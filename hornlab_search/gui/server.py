@@ -82,7 +82,7 @@ class App:
         self.runs = (runs or self.root / "runs").resolve()
         self.analysis_dir = (Path(analysis_dir) if analysis_dir is not None
                              else self.runs / "analysis").resolve()
-        self.jobs = JobManager(self.root, self.runs)
+        self.jobs = JobManager(self.root, self.runs, system_root=self.system_store)
         self._study_service = study_service
         self._study_jobs = study_jobs
         self._study_runs = study_runs
@@ -514,6 +514,18 @@ class App:
             # Accept both ?keys=a,b and repeated ?keys=a&keys=b.
             keys = [k for v in (q.get("keys") or []) for k in str(v).split(",") if k]
             return CMP.hw_compare_matrix(self.root, self.system_store, keys)
+        if sub == "assets" and len(parts) == 1:
+            from . import data_hw_new as NEW
+            return NEW.hw_assets(self.root, self.system_store)
+        if sub == "drivers" and len(parts) == 1:
+            from . import data_hw_new as NEW
+            return NEW.hw_drivers(self.root, self.system_store)
+        if sub == "spec-defaults" and len(parts) == 1:
+            from . import data_hw_new as NEW
+            return NEW.hw_spec_defaults(self.root)
+        if sub == "specs" and len(parts) == 1:
+            from . import data_hw_new as NEW
+            return NEW.hw_specs(self.root)
         raise FileNotFoundError("/".join(["hw", *parts]))
 
     def _budget_hint(self, q: dict) -> dict:
@@ -585,8 +597,17 @@ class App:
         if head == "hw":
             # Horn + woofer pure recompute endpoints (no solver, no Boundary Lab, no writes).
             from . import data_hw_screen as SW
+            from . import data_hw_new as NEW
             if len(parts) == 2 and parts[1] == "panel-fit":
                 return SW.panel_fit(body or {})
+            if len(parts) == 3 and parts[1] == "spec" and parts[2] == "validate":
+                payload = body or {}
+                spec = payload.get("spec") if isinstance(payload, dict) and "spec" in payload else payload
+                return NEW.validate_spec(spec or {})
+            if len(parts) == 3 and parts[1] == "spec" and parts[2] == "save":
+                payload = body or {}
+                return NEW.save_spec(self.root, str(payload.get("name") or ""),
+                                     payload.get("spec") or {}, replace=bool(payload.get("replace")))
             raise FileNotFoundError(path)
         if head == "studies":
             from hornlab_search.studies.schema import StudyError
@@ -641,7 +662,15 @@ class App:
                 p = D.save_user_brief(self.root, str(body.get("name", "")), body.get("brief") or {})
                 return {"ok": True, "path": p.relative_to(self.root).as_posix()}
             if head == "preview":                       # the exact command a launch would run (same validation)
-                argv, gpu = self.jobs.build_argv(str(body.get("kind", "")), body.get("args") or {})
+                kind = str(body.get("kind", ""))
+                args = body.get("args") or {}
+                if kind.startswith("hw-"):
+                    # hw-* jobs run through tools/system/gui_system_job.py, not the stock CLI;
+                    # the preview must print the command that will really run (never a lie).
+                    prev = self.jobs.preview(kind, args)
+                    return {"command": prev["command"], "gpu": prev["gpu"], "entry": prev.get("entry"),
+                            "gpu_busy": None}
+                argv, gpu = self.jobs.build_argv(kind, args)
                 from .jobs import _quote
                 return {"command": "hornlab-search " + " ".join(_quote(x) for x in argv), "gpu": gpu,
                         "gpu_busy": self.jobs.gpu_busy() if gpu else None}

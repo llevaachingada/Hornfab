@@ -312,6 +312,7 @@ def _row(store: Path, case: Path, declared: dict[str, dict]) -> dict:
         "clearance": clearance,
         "declared": bool(decl),
         "ref": decl.get("ref"), "gate": decl.get("gate"), "note": decl.get("note"),
+        "evidence": decl.get("evidence"),
         "fidelity": decl.get("fidelity") or "UNDECLARED",
         "motor": decl.get("motor") or motor_fact or "UNDECLARED",
         "motor_fact": motor_fact,
@@ -697,6 +698,9 @@ def hw_basis(root: Path, store: Path, key: str, domain: str) -> dict:
             # Point probes: one curve per observation point (real cases have one point each).
             item["spl_db"] = [_db(v) for v in mag[:, 0]]
             item["phase_deg"] = [float(np.degrees(np.angle(v))) for v in p[:, 0]]
+            # Unwrapped in Python (never in JS): continuous phase for the wrapped/unwrapped toggle.
+            item["phase_unwrapped_deg"] = [float(v) for v in
+                                           np.degrees(np.unwrap(np.angle(p[:, 0])))]
             if obs.count > 1:
                 item["spl_db_points"] = [[_db(v) for v in row] for row in mag]
                 item["phase_deg_points"] = [[float(np.degrees(np.angle(v))) for v in row] for row in p]

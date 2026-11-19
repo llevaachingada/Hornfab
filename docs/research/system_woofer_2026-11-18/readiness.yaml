@@ -18,6 +18,7 @@ cases:
   - key: bl_smoke/20261118T225108Z-smoke-42536-01d15001
     ref: "#1"
     gate: W3 smoke (3 freqs)
+    evidence: FIRST_BEM_EVIDENCE.md section Run 2 - the solve
     fidelity: COUPLED_VENTED_FEM_BEM_LEM
     motor: demo
     transducer_shape: demo
@@ -25,6 +26,7 @@ cases:
   - key: bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a
     ref: "#2"
     gate: G4 wide basis (25 freqs, 200-2500 Hz)
+    evidence: FIRST_BEM_EVIDENCE.md section G4 wide basis
     fidelity: COUPLED_VENTED_FEM_BEM_LEM
     motor: demo
     transducer_shape: demo
@@ -32,6 +34,7 @@ cases:
   - key: bl_g6_offset30/20261118T235110Z-assembly-21668-c17f7cf6
     ref: "#3"
     gate: G6 geometry challenge (horn +10 mm)
+    evidence: FIRST_BEM_EVIDENCE.md section G6 geometry challenge
     fidelity: COUPLED_VENTED_FEM_BEM_LEM
     motor: demo
     transducer_shape: demo
@@ -40,6 +43,7 @@ cases:
   - key: bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e
     ref: "#4"
     gate: motor axis, real 12PR300 T/S, seed box
+    evidence: FIRST_BEM_EVIDENCE.md section motor-axis A/B (2026-11-19)
     fidelity: COUPLED_VENTED_FEM_BEM_LEM
     motor: real
     transducer_shape: demo
@@ -47,6 +51,7 @@ cases:
   - key: bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9
     ref: "#5"
     gate: motor axis, demo motor twin, seed box
+    evidence: FIRST_BEM_EVIDENCE.md section motor-axis A/B (2026-11-19)
     fidelity: COUPLED_VENTED_FEM_BEM_LEM
     motor: demo
     transducer_shape: demo
@@ -54,24 +59,28 @@ cases:
   - key: bl_motor12pr/20261119T010537Z-real_driver-48792-9d89b3df
     ref: "#6"
     gate: real motor, default box (WP2 column)
+    evidence: FIRST_REFERENCE_CASE.json (staged, not solved)
     fidelity: COUPLED_VENTED_FEM_BEM_LEM
     motor: real
     transducer_shape: demo
   - key: bl_ref_case/20261118T223335Z-ref_case-61644-32976a2a
     ref: "R0"
     gate: vented-only R0, demo motor, default box (WP2 column)
+    evidence: FIRST_REFERENCE_CASE.json (staged, not solved)
     fidelity: COUPLED_VENTED_FEM_BEM_LEM
     motor: demo
     transducer_shape: demo
   - key: bl_r4_tower_box/20261119T001041Z-ref_case-40216-b32bb5a2
     ref: "R4"
     gate: screen top cell (115 L, 170 cm2 port)
+    evidence: SCREENING_EVIDENCE.md section 11 - BL-generator panel-fit pre-check
     motor: demo
     transducer_shape: demo
     note: Refused by BL's panel-fit rule; recorded, not a bug.
   - key: bl_ref_case/20261118T231100Z-assembly-62864-f62bf799
     ref: "-"
     gate: 0 mm horn offset staging (never solved)
+    evidence: GUI_SYSTEM_PLAN_2026-11-19.md section 0 - R16 clearance finding
     motor: demo
     transducer_shape: demo
     horn_source: ideal_velocity

@@ -33,6 +33,8 @@ RESTARTS_MAX_CAP = 64                                  # mirrors config._validat
 MAX_EVALS_CAP = 1_000_000                              # GUI sanity cap for --max-evals
 FAMILIES = re.compile(r"^[a-z0-9_]+(,[a-z0-9_]+)*$")
 CLI_BOOT = "import sys; from hornlab_search.cli import main; sys.exit(main(sys.argv[1:]))"
+#: Repo-relative entry script for every system (Horn + woofer) CPU job kind (``hw-*``).
+HW_ENTRY = "tools/system/gui_system_job.py"
 
 
 def auto_backend() -> str | None:
@@ -75,12 +77,22 @@ class Job:
     entry: str | None = None
 
     def view(self, tail: int = 40) -> dict:
-        prefix = f"python {self.entry}" if self.entry else "hornlab-search"
         return {"id": self.id, "kind": self.kind, "argv": self.argv, "gpu": self.gpu,
-                "command": prefix + " " + " ".join(_quote(a) for a in self.argv),
+                "command": command_line(self.argv, self.entry),
                 "entry": self.entry,
                 "status": self.status, "returncode": self.returncode,
                 "started": self.started, "ended": self.ended, "log_tail": D.tail_text(self.log, tail)}
+
+
+def command_line(argv: list[str], entry: str | None = None) -> str:
+    """The exact command a job/preview runs, using the one prefix rule.
+
+    Stock ``hornlab-search`` jobs print ``hornlab-search ...``; a job with ``Job.entry`` prints
+    ``python <repo-relative entry> ...``. The launcher, ``Job.view`` and ``/api/preview`` must all
+    go through this function so a preview can never lie about what will really run.
+    """
+    prefix = f"python {entry}" if entry else "hornlab-search"
+    return prefix + " " + " ".join(_quote(a) for a in argv)
 
 
 def _quote(a: str) -> str:
@@ -90,8 +102,14 @@ def _quote(a: str) -> str:
 class JobManager:
     QUEUE_POLL_S = 5.0                     # lazy pump thread: how often a queued resume re-checks the GPU
 
-    def __init__(self, root: Path, runs: Path):
+    def __init__(self, root: Path, runs: Path, system_root: Path | None = None):
         self.root, self.runs = root.resolve(), runs.resolve()
+        # Horn + woofer system store; GUI screen jobs write ``screens/<study>/`` under it. The
+        # server may point it at an external store (handoff P0); the default keeps the old layout.
+        # Deliberately not resolved: the canonical checkout's ``system_runs`` may be a junction,
+        # and keeping the literal path lets the preview stay repo-relative.
+        self.system_root = (Path(system_root) if system_root is not None
+                            else self.root / "system_runs")
         self.dir = self.runs / "gui_jobs"
         self.jobs: dict[str, Job] = {}
         self._lock = threading.Lock()
@@ -345,6 +363,15 @@ class JobManager:
                     "--top", self._int(a.get("top", 5), 1, 25, "top"), *brief], True
         if kind == "report":
             return ["report", self._run_id(a.get("run"))], False
+        if kind == "hw-screen":
+            # P5: a CPU-only deterministic woofer/cabinet/XO/placement screen. The system data
+            # layer owns the whole validation (repo-contained spec, 16-hex saved asset, real driver
+            # stems, bounded integer knobs, beat_cpu only); this branch only forwards its argv.
+            from . import data_hw_new as HWN
+            try:
+                return HWN.screen_argv(self.root, a, system_root=self.system_root), False
+            except HWN.ScreenArgError as exc:
+                raise JobError(str(exc)) from None
         raise JobError(f"unknown job kind: {kind!r}")
 
     # ------------------------------------------------------------------ lifecycle
@@ -363,8 +390,34 @@ class JobManager:
         resume = (args or {}).get("resume")
         return kind == "search" and resume not in (None, "", False, True)
 
+    @staticmethod
+    def _is_hw(kind: str) -> bool:
+        return str(kind).startswith("hw-")
+
+    def _hw_busy(self, kind: str) -> str | None:
+        """The refusal for a second system job / a live CPU lane holder, or ``None``.
+
+        System jobs are CPU work: one at a time from this GUI, and never beside a live holder of
+        ``runs/.cpu.lane.lock`` (read with ``data._lane_lock``; the holder is never touched).  The
+        lane check is read-only, so a stale lock (dead pid) does not block a launch.
+        """
+        if not self._is_hw(kind):
+            return None
+        if any(self._is_hw(j.kind) and j.status == "running" for j in self.jobs.values()):
+            return "a system job started from this GUI is still running"
+        lock = D._lane_lock(self.runs, "cpu")
+        if lock and lock.get("alive"):
+            holder = str(lock.get("user") or lock.get("command") or "unknown holder")
+            if lock.get("pid") is not None:
+                holder = f"{holder}, pid {lock['pid']}"
+            return f"CPU lane busy ({holder})"
+        return None
+
     def launch(self, kind: str, args: dict) -> Job:
         argv, gpu = self.build_argv(kind, args)
+        busy_hw = self._hw_busy(kind)
+        if busy_hw:
+            raise JobError(busy_hw)
         with self._lock:
             if gpu:
                 # Strict FIFO: a continuation already waiting has first claim on the GPU even when
@@ -398,7 +451,27 @@ class JobManager:
         self.dir.mkdir(parents=True, exist_ok=True)
         jid = _dt.datetime.now().strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:6]
         return Job(jid, kind, argv, self.dir / f"{jid}.log", gpu, status=status,
-                   entry=self._bridge_entry(argv))
+                   entry=self._entry_for(kind, argv))
+
+    def _entry_for(self, kind: str, argv: list[str]) -> str | None:
+        """The repo-relative entry script for a kind: every ``hw-*`` system job uses the same
+        bridge (``tools/system/gui_system_job.py``); every other kind keeps the config-derived
+        geometry bridge behaviour unchanged."""
+        if str(kind).startswith("hw-"):
+            return HW_ENTRY
+        return self._bridge_entry(argv)
+
+    def preview(self, kind: str, args: dict) -> dict:
+        """The exact command and GPU class a launch would use, through the same validation.
+
+        ``server.py``'s ``/api/preview`` must call this (or ``command_line`` with ``Job.entry``)
+        for ``hw-*`` kinds; a preview that prints ``hornlab-search`` while the job runs
+        ``python tools/system/gui_system_job.py`` would be a lie.
+        """
+        argv, gpu = self.build_argv(kind, args)
+        entry = self._entry_for(kind, argv)
+        return {"command": command_line(argv, entry), "entry": entry, "gpu": gpu,
+                "argv": argv}
 
     def _boot(self, job: Job) -> list[str]:
         """Interpreter + entry point for one job: its bridge geometry CLI when the config needs a

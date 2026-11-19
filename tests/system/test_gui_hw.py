@@ -81,7 +81,8 @@ def env(tmp_path: Path):
         "schema: hw_readiness_v1\nupdated: 2026-11-19\nhandoff: x.md\n"
         "cases:\n"
         "  - {key: bl_motor/20261119T000000Z-solved-1-aaaa, ref: '#4', gate: motor A,"
-        " fidelity: COUPLED_VENTED_FEM_BEM_LEM, motor: real, transducer_shape: demo}\n"
+        " fidelity: COUPLED_VENTED_FEM_BEM_LEM, motor: real, transducer_shape: demo,"
+        " evidence: FIRST_BEM_EVIDENCE.md section motor-axis A/B}\n"
         "  - {key: bl_gone/20261101T000000Z-x-9-ffff, ref: '#9', gate: deleted}\n"
         "risks:\n  - {id: R1, level: CRITICAL, status: open, wp: WP4, title: t, evidence: e}\n"
         "decisions:\n  - {id: 1, question: q, recommendation: r, status: open}\n",
@@ -102,6 +103,7 @@ def test_ledger_states_tokens_and_declarations(env) -> None:
     solved = rows["bl_motor/20261119T000000Z-solved-1-aaaa"]
     assert solved["state"] == "solved" and solved["solve"]["done"] == solved["solve"]["total"] == 2
     assert solved["fidelity"] == "COUPLED_VENTED_FEM_BEM_LEM" and solved["motor"] == "real"
+    assert "FIRST_BEM_EVIDENCE" in solved["evidence"]         # registry evidence pointer exposed
     assert solved["box"]["width_mm"] == 320.0 and solved["box"]["port_area_cm2"] == 28.0
 
     ok = rows["bl_horn/20261118T000000Z-ok-2-bbbb"]
@@ -171,6 +173,10 @@ def test_basis_is_per_excitation_and_never_summed(env) -> None:
     probe = HW.hw_basis(root, store, key, "observation:probe:on_axis")
     assert [e["id"] for e in probe["excitations"]] == ["excitation:woofer", "excitation:horn"]
     assert all(len(e["spl_db"]) == 2 and len(e["spl_db_points"][0]) == 2 for e in probe["excitations"])
+    # Phase is unwrapped in Python; consecutive unwrapped steps cannot jump a full turn.
+    for e in probe["excitations"]:
+        steps = [abs(b - a) for a, b in zip(e["phase_unwrapped_deg"], e["phase_unwrapped_deg"][1:])]
+        assert not steps or max(steps) < 180.0
     assert not any("sum" in k or "combined" in k for k in probe)
     polar = HW.hw_basis(root, store, key, "observation:horizontal-polar")
     for e in polar["excitations"]:
@@ -251,6 +257,43 @@ def test_server_dispatch(env) -> None:
         app.get("/api/hw/compare", {"a": [solved], "b": ["bl_horn/20261118T000000Z-ok-2-bbbb"]})
     with pytest.raises(FileNotFoundError):
         app.get("/api/hw/nope", {})
+
+
+def test_new_system_dispatch(env, tmp_path: Path) -> None:
+    """P5: asset/driver inventory, spec validate/save and the hw-screen preview prefix."""
+    from hornlab_search.gui.server import App
+
+    root, store = env
+    repo = Path(__file__).resolve().parents[2]
+    shutil.copytree(repo / "examples" / "systems", root / "examples" / "systems")
+    app = App(root, system_store=store)
+
+    assert app.get("/api/hw/assets", {})["assets"] is not None
+    assert any(d["driver_id"] for d in app.get("/api/hw/drivers", {})["drivers"])
+    defaults = app.get("/api/hw/spec-defaults", {})
+    assert defaults["source"].endswith("two_way_80x50_700_research.yaml")
+    spec = defaults["spec"]
+
+    assert app.post("/api/hw/spec/validate", {"spec": spec})["ok"] is True
+    bad = app.post("/api/hw/spec/validate", {"spec": {"not_a_key": 1}})
+    assert bad["ok"] is False and bad["errors"]
+
+    saved = app.post("/api/hw/spec/save", {"name": "tmp_user_spec", "spec": spec})
+    assert isinstance(saved, str) and saved.endswith("examples/systems/user/tmp_user_spec.yaml")
+    path = root / saved
+    assert path.is_file() and b"\r\n" not in path.read_bytes()
+    with pytest.raises(ValueError):
+        app.post("/api/hw/spec/save", {"name": "tmp_user_spec", "spec": spec})
+    assert app.post("/api/hw/spec/save", {"name": "tmp_user_spec", "spec": spec,
+                                          "replace": True}) == saved
+
+    prev = app.post("/api/preview", {"kind": "hw-screen", "args": {
+        "spec": saved, "asset_id": "0123456789abcdef",
+        "drivers": ["faitalpro_12pr300"]}})
+    assert prev["command"].startswith("python tools/system/gui_system_job.py screen")
+    assert prev["gpu"] is False and "beat_cpu" not in prev["command"]
+    with pytest.raises(ValueError):
+        app.post("/api/hw/spec/save", {"name": "../escape", "spec": spec})
 
 
 def test_committed_registry_parses_and_names_real_cases() -> None:
