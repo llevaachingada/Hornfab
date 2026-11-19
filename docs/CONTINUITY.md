@@ -40,6 +40,23 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - Requeue results 1-3; b3_soft v2 continuation queued (local orchestrator)
+
+- **`s40w__klangfilm_b3_soft`: best J 2.841** (34 evals) from the SCOUT40 control 3.540 -> a
+  **0.70 J gain, above the 0.31 floor**. It was then stopped by the bound-pinned watchdog at the HIGH
+  limit of `g_theta_h1_deg [36.5, 60]`; 60 is the KERNEL's hard ceiling (`_CORE_BOUNDS` theta_h1/v1
+  5..60), so this is a pin_ignore case. Requeued as **`s40w2__klangfilm_b3_soft`** (position 12,
+  `watchdog: {pin_ignore: [g_beak_v_projection_mm, g_theta_h1_deg, g_theta_v1_deg]}`), warm-started
+  from the 2.841 best (mean hash 15a8c964d592, sigma 0.1), same smooth v7 brief; shape-check pass,
+  warm start verified.
+- **`s40w__lecleach_hv_smooth`: 8.036 vs 8.037** -> tie; the widened V floor (400) bought nothing
+  (seed start, no warm start), so the lecleach lane is not promising on this brief.
+- **`s40w__iwata_ar_smooth`: 6.671 vs 6.763** -> 0.09 J gain, below the 0.31 floor (tie).
+- **`s40w__klangfilm_hvcore_c200mouth`** still running (24 evals, best 10.108, i.e. no gain from the
+  H-setback widening so far); watch for a third pin at the 30 mm box or a stall.
+- Night order: ... six originals, five s40w requeues, s40w2__klangfilm_b3_soft, s40__vt_v1, then the
+  rest of the tail.
+
 ## 2026-11-19 - Requeue preflight closed; first requeue read (local orchestrator)
 
 - Focused preflight of the two narrowed Klangfilm requeues (`scratch/preflight_scout40w_klangfilm_2026-11-19.log`,

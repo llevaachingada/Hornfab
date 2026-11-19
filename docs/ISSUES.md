@@ -22,6 +22,13 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - Requeue results 1-3; b3_soft v2 queued
+
+- DONE: s40w__klangfilm_b3_soft 2.841 (from 3.540; above floor) -> v2 continuation queued after its
+  hard-ceiling theta_h1 pin (pin_ignore, warm start 2.841).
+- NOTE: lecleach requeue 8.036 vs 8.037 (tie); iwata 6.671 vs 6.763 (+0.09, below floor).
+- OPEN: c200mouth requeue running (10.108 at 24 evals; no gain yet).
+
 ## 2026-11-19 - Requeue preflight closed; lecleach requeue = no gain (flag)
 
 - DONE: focused preflight for the narrowed Klangfilm requeues (hits 5.53 and 23.08; both ok).

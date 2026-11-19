@@ -61,6 +61,15 @@ jobs:
     timeout_s: 3600
     config: examples/typologies/scout40w_2026-11-19/scout40w__klangfilm_lame_hv_stage_a.yaml
     watchdog: {pin_ignore: [g_h_mid_gain_mm, g_v_mid_gain_mm]}
+  # v2 continuation: the SCOUT40W b3_soft requeue reached 2.841 and pinned at the kernel hard
+  # ceiling theta_h1 60 -> pin_ignore on the hard limits, warm-started from the 2.841 best.
+  - id: s40w2__klangfilm_b3_soft
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    config: examples/typologies/scout40w_2026-11-19/scout40w2__klangfilm_b3_soft.yaml
+    watchdog: {pin_ignore: [g_beak_v_projection_mm, g_theta_h1_deg, g_theta_v1_deg]}
   - {id: s40__vt_v1, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/studies/u3_biradial_es_style_v7/vt_v1.yaml}
   - {id: s40__fold_warm_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
