@@ -55,6 +55,11 @@
 - OPEN (staging): real 10-inch BL case still needs maker cone/surround/dust-cap dimensions; BL
   stages its demo cone without them.
 
+## 2026-11-19 - Horn sheets: set B added, dated, larger text
+
+- DONE (render): set A 61 horns (sheets 01-21) and set B 4 new horns (sheets 22-23), all dated.
+- OPEN: the stray letter near the first V cut on sheet 1 is still unidentified.
+
 ## 2026-11-19 - Last-24h horn sheets: score column added
 
 - DONE (render): score column on all 21 sheets; see `docs/renders/2026-11-19-last-day-horns/README.md`.

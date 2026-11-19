@@ -21,7 +21,7 @@ def segments(cut):
             segs.append([a, b])
     return np.array(segs)
 
-rows = [l.split() for l in Path("scratch/last_day/targets.txt").read_text().splitlines() if l.strip()]
+rows = [l.split() for l in Path(sys.argv[1] if len(sys.argv) > 1 else "scratch/last_day/targets.txt").read_text().splitlines() if l.strip()]
 for run_dir, h in rows:
     mesh_path = Path(run_dir) / "designs" / h / "mesh.msh"
     try:

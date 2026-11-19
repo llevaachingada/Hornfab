@@ -1,91 +1,97 @@
 # Last-24h solved horns: contact sheets
 
-61 unique best designs from runs dated 2026-11-18 (after 14:00 local) through 2026-11-19, each with a completed solve (`ok: true`, balloon DI). Sheets are 200 dpi, three designs per sheet, sorted by brief then balloon J.
-Columns per row: isometric, top-skew (camera from +y), V cut (x=0), H cut (y=0), V dispersion, H dispersion, scores.
-Scores column: J (total), the saved score terms from `best.json` (not additive to J), f11 and lfp20, and -6 dB coverage, DI and ripple at 1.07 kHz and 2.27 kHz from `metrics.json`.
-J is comparable only within a brief. Regenerate with `render_last_day.py` (viz env, pyvista) then `compose_last_day.py` (project venv).
+Rendered 2026-11-19 17:24 EST. Set A: 61 horns solved 2026-11-18 14:00 to 2026-11-19 13:51 EST (sheets 01-21). Set B: 4 horns solved 2026-11-19 15:22 to 15:59 EST, new since set A (sheets 22-23).
+Each sheet: isometric, top-skew, V cut (x=0), H cut (y=0), V and H dispersion, and a scores column (J total, saved `best.json` terms, not additive to J; f11, lfp20; -6 dB coverage, DI and ripple at 1.07 and 2.27 kHz). Row header gives brief, family, J, hash and solve time. J is comparable only within a brief.
+Regenerate: `render_last_day.py` (viz env) then `compose_last_day.py TARGETS PREFIX START WINDOW` (project venv). Target lists: `targets_setA.txt`, `targets_setB.txt`.
 
-- **last_day_sheet_01.png**
-  - `104ea26b21ca` 20261118T212720Z-screen-c017db | OSSE | J=5.724 | run 20261118T212720Z-screen-c017db
-  - `3bc892e2d6db` ath_core14_corelaw_v7_w1 | OSSE | J=5.389 | run 20261118T224502Z-screen-ab7bb7
-  - `f07cbf168091` control | FREEFORM | J=6.499 | run 20261118T235528Z-verify-72cdcc
-- **last_day_sheet_02.png**
-  - `6449db987733` crowe_panel_es600_v7_w1 | FREEFORM | J=22.542 | run 20261118T203926Z-screen-b0d36f
-  - `cf3279721cb9` diag_pull | FREEFORM | J=6.587 | run 20261119T000237Z-verify-097654
-  - `bff6107b01a1` hl__ath_twinray380_landscape_v8__b6_v10_s1 | OSSE | J=2.575 | run 20261119T175926Z-screen-8454e6
-- **last_day_sheet_03.png**
-  - `e3647c749203` hl__crowe_v2a_c1_v10__p10_s1 | FREEFORM | J=6.732 | run 20261119T185139Z-screen-67e549
-  - `925868ab64d9` hl__ext_throat_hvlaw_v7__b6_v10_s1 | OSSE | J=1.792 | run 20261119T174850Z-screen-2d9f2a
-  - `3bfcc80b743a` hl__klangfilm_b3_soft_v10__p10_s1 | FREEFORM | J=3.599 | run 20261119T184606Z-screen-c6db2d
-- **last_day_sheet_04.png**
-  - `3c4aa3350077` hl__klangfilm_lame_c200_record_control_smooth | FREEFORM | J=7.447 | run 20261119T165650Z-screen-f30e50
-  - `2edf3ea06d10` hl__klangfilm_lame_c200_vbeak_v10_v1 | FREEFORM | J=8.391 | run 20261119T165732Z-screen-3ebb94
-  - `cfc32f70f7b8` hl__osse_rrect_fold_warm_v7__b6_v10_s1 | OSSE | J=1.543 | run 20261119T173516Z-screen-c6a93f
-- **last_day_sheet_05.png**
-  - `e3ae6c49b8a3` hl__osse_rrect_morph_v7__b6_v10_s1 | OSSE | J=1.577 | run 20261119T181029Z-screen-c3b6c6
-  - `96790c88352e` hl__rolled_rect_hybrid_vbeak_v10_v1 | FREEFORM | J=9.305 | run 20261119T172313Z-screen-081506
-  - `d16ae26ca974` hl__rolled_rect_record_vbeak_v10_v1 | FREEFORM | J=15.320 | run 20261119T170937Z-screen-ba0f14
-- **last_day_sheet_06.png**
-  - `aae8e85a519a` klangfilm_lame_curved_v1_w1 | FREEFORM | J=7.821 | run 20261118T223405Z-screen-765760
-  - `5a5fa1c976c2` lecleach_ctrl_w1 | FREEFORM | J=0.669 | run 20261118T195131Z-screen-8cd85f
-  - `6acbafc0f7ba` lecleach_fc540_T_narrow_w1 | FREEFORM | J=0.702 | run 20261118T202232Z-screen-baa0eb
-- **last_day_sheet_07.png**
-  - `34186cb1666c` lecleach_fc540_w1 | FREEFORM | J=0.670 | run 20261118T200653Z-screen-31495a
-  - `4d2985321ccf` scout40__ath_core_petal_hvlaw_v7 | OSSE | J=4.892 | run 20261119T082618Z-screen-2fb8dc
-  - `febde0373489` scout40__crowe_v2a_c1 | FREEFORM | J=4.879 | run 20261119T043506Z-screen-54878f
-- **last_day_sheet_08.png**
-  - `9b5428e6dec8` scout40__crowe_x_osse_cd_v7 | FREEFORM | J=5.345 | run 20261119T090559Z-screen-9b8767
-  - `3c5dae091e52` scout40__crowe_x_square_v7 | FREEFORM | J=7.911 | run 20261119T092235Z-screen-690db0
-  - `c1d088b8b92f` scout40__ext_throat_hvlaw_v7 | OSSE | J=3.565 | run 20261119T075629Z-screen-015bfc
-- **last_day_sheet_09.png**
-  - `58bde4024d87` scout40__fold_warm_v7 | OSSE | J=3.754 | run 20261119T074356Z-screen-7c9137
-  - `e4d38596e2a8` scout40__klangfilm_b3_soft | FREEFORM | J=3.540 | run 20261119T051630Z-screen-ce7a3f
-  - `14e53020adbe` scout40__klangfilm_hvcore_c200mouth | FREEFORM | J=10.156 | run 20261119T051833Z-screen-64eea7
-- **last_day_sheet_10.png**
-  - `f2054faaa9d4` scout40__klangfilm_lame_hv_stage_a | FREEFORM | J=8.393 | run 20261119T053037Z-screen-394fb1
-  - `5381c9cea1ec` scout40__lecleach_hv_smooth_v7 | FREEFORM | J=8.037 | run 20261119T050354Z-screen-7ebf9c
-  - `04501fa6edc8` scout40__lecleach_iwata_ar_smooth_v7 | FREEFORM | J=6.763 | run 20261119T050957Z-screen-53fe3d
-- **last_day_sheet_11.png**
-  - `cf716e738ef8` scout40__morph_v8 | OSSE | J=3.402 | run 20261119T081214Z-screen-8470bd
-  - `8ba61395b295` scout40__rf_rect_axial_cap225 | FREEFORM | J=19.721 | run 20261119T092938Z-screen-2de348
-  - `9c39541262aa` scout40__rf_rect_axial_control270 | FREEFORM | J=19.706 | run 20261119T094135Z-screen-382cb5
-- **last_day_sheet_12.png**
-  - `efe4a8959d85` scout40__rosse_rect_cd_v7 | FREEFORM | J=4.560 | run 20261119T085256Z-screen-c2203f
-  - `2979e2d125ce` scout40__tritonia_v8 | OSSE | J=5.325 | run 20261119T083421Z-screen-ab2159
-  - `73cf78b059a5` scout40__tritonia_v9 | OSSE | J=5.289 | run 20261119T090801Z-screen-6a429f
-- **last_day_sheet_13.png**
-  - `b35c19653487` scout40w2__crowe_x_square_v7 | FREEFORM | J=7.618 | run 20261119T144903Z-screen-0ec862
-  - `b6430673c2e9` scout40w2__fold_warm_v7 | OSSE | J=3.682 | run 20261119T134012Z-screen-50fbd8
-  - `ee85bcd2ad67` scout40w2__klangfilm_b3_soft | FREEFORM | J=2.800 | run 20261119T073330Z-screen-723756
-- **last_day_sheet_14.png**
-  - `69aca6e15dca` scout40w2__morph_v8 | OSSE | J=3.232 | run 20261119T135116Z-screen-28debc
-  - `fab20de9dd19` scout40w2__petal_hvlaw_v7 | OSSE | J=4.196 | run 20261119T143027Z-screen-401992
-  - `3f90557b9b31` scout40w2__tritonia_v8 | OSSE | J=5.373 | run 20261119T140149Z-screen-f8fffb
-- **last_day_sheet_15.png**
-  - `5f689f0f4865` scout40w2__tritonia_v9 | OSSE | J=4.878 | run 20261119T141723Z-screen-433f54
-  - `be9ab290d3cf` scout40w3__crowe_x_square_v7 | FREEFORM | J=7.598 | run 20261119T161820Z-screen-9fda2a
-  - `680d4bcde649` scout40w3__fold_warm_v7 | OSSE | J=3.695 | run 20261119T145538Z-screen-a277c4
-- **last_day_sheet_16.png**
-  - `b0caf1a829a5` scout40w3__morph_v8 | OSSE | J=3.757 | run 20261119T150842Z-screen-18b29b
-  - `74d8eed97268` scout40w3__petal_hvlaw_v7 | OSSE | J=4.162 | run 20261119T155454Z-screen-d1a61d
-  - `018057bc29c9` scout40w3__rosse_rect_cd_v7 | FREEFORM | J=4.690 | run 20261119T162153Z-screen-d2b7d3
-- **last_day_sheet_17.png**
-  - `cded84a911d2` scout40w3__tritonia_v8 | OSSE | J=4.891 | run 20261119T152446Z-screen-d98c8d
-  - `3ea64988763d` scout40w3__tritonia_v9 | OSSE | J=5.003 | run 20261119T153950Z-screen-5d766f
-  - `15a8c964d592` scout40w__klangfilm_b3_soft | FREEFORM | J=2.841 | run 20261119T063219Z-screen-8deb7b
-- **last_day_sheet_18.png**
-  - `00753b8200ac` scout40w__klangfilm_hvcore_c200mouth | FREEFORM | J=10.020 | run 20261119T064153Z-screen-b97a4e
-  - `7be037ff53c5` scout40w__klangfilm_lame_hv_stage_a | FREEFORM | J=8.350 | run 20261119T065506Z-screen-dab24f
-  - `1dab547b5a86` scout40w__lecleach_hv_smooth_v7 | FREEFORM | J=8.036 | run 20261119T061856Z-screen-833a3d
-- **last_day_sheet_19.png**
-  - `06a008612260` scout40w__lecleach_iwata_ar_smooth_v7 | FREEFORM | J=6.671 | run 20261119T062638Z-screen-03ae3c
-  - `045bec7ab6be` steer_early | FREEFORM | J=6.440 | run 20261119T000058Z-verify-d1b149
-  - `40e15bef7e5a` steer_late | FREEFORM | J=6.504 | run 20261119T000144Z-verify-b4504d
-- **last_day_sheet_20.png**
-  - `41356be7a7c6` term_topbottom | FREEFORM | J=6.335 | run 20261119T000013Z-verify-85d3a2
-  - `55e4bab20cc9` vt_460 | FREEFORM | J=8.804 | run 20261118T235929Z-verify-27d780
-  - `ed00e69fb0a6` vt_v1 | FREEFORM | J=6.322 | run 20261119T175753Z-screen-471446
-- **last_day_sheet_21.png**
-  - `0705e7b08d4f` vt_v1 | FREEFORM | J=6.327 | run 20261119T060516Z-screen-13c866
+## Set A (sheets 01-21)
+- **last_day_setA_01.png**
+  - `104ea26b21ca` | solved 2026-11-18 16:27 EST | 20261118T212720Z-screen-c017db | OSSE | J=5.724 | run 20261118T212720Z-screen-c017db
+  - `3bc892e2d6db` | solved 2026-11-18 17:45 EST | ath_core14_corelaw_v7_w1 | OSSE | J=5.389 | run 20261118T224502Z-screen-ab7bb7
+  - `f07cbf168091` | solved 2026-11-18 18:55 EST | control | FREEFORM | J=6.499 | run 20261118T235528Z-verify-72cdcc
+- **last_day_setA_02.png**
+  - `6449db987733` | solved 2026-11-18 15:39 EST | crowe_panel_es600_v7_w1 | FREEFORM | J=22.542 | run 20261118T203926Z-screen-b0d36f
+  - `cf3279721cb9` | solved 2026-11-18 19:02 EST | diag_pull | FREEFORM | J=6.587 | run 20261119T000237Z-verify-097654
+  - `bff6107b01a1` | solved 2026-11-19 12:59 EST | hl__ath_twinray380_landscape_v8__b6_v10_s1 | OSSE | J=2.575 | run 20261119T175926Z-screen-8454e6
+- **last_day_setA_03.png**
+  - `e3647c749203` | solved 2026-11-19 13:51 EST | hl__crowe_v2a_c1_v10__p10_s1 | FREEFORM | J=6.732 | run 20261119T185139Z-screen-67e549
+  - `925868ab64d9` | solved 2026-11-19 12:48 EST | hl__ext_throat_hvlaw_v7__b6_v10_s1 | OSSE | J=1.792 | run 20261119T174850Z-screen-2d9f2a
+  - `3bfcc80b743a` | solved 2026-11-19 13:46 EST | hl__klangfilm_b3_soft_v10__p10_s1 | FREEFORM | J=3.599 | run 20261119T184606Z-screen-c6db2d
+- **last_day_setA_04.png**
+  - `3c4aa3350077` | solved 2026-11-19 11:56 EST | hl__klangfilm_lame_c200_record_control_smooth | FREEFORM | J=7.447 | run 20261119T165650Z-screen-f30e50
+  - `2edf3ea06d10` | solved 2026-11-19 11:57 EST | hl__klangfilm_lame_c200_vbeak_v10_v1 | FREEFORM | J=8.391 | run 20261119T165732Z-screen-3ebb94
+  - `cfc32f70f7b8` | solved 2026-11-19 12:35 EST | hl__osse_rrect_fold_warm_v7__b6_v10_s1 | OSSE | J=1.543 | run 20261119T173516Z-screen-c6a93f
+- **last_day_setA_05.png**
+  - `e3ae6c49b8a3` | solved 2026-11-19 13:10 EST | hl__osse_rrect_morph_v7__b6_v10_s1 | OSSE | J=1.577 | run 20261119T181029Z-screen-c3b6c6
+  - `96790c88352e` | solved 2026-11-19 12:23 EST | hl__rolled_rect_hybrid_vbeak_v10_v1 | FREEFORM | J=9.305 | run 20261119T172313Z-screen-081506
+  - `d16ae26ca974` | solved 2026-11-19 12:09 EST | hl__rolled_rect_record_vbeak_v10_v1 | FREEFORM | J=15.320 | run 20261119T170937Z-screen-ba0f14
+- **last_day_setA_06.png**
+  - `aae8e85a519a` | solved 2026-11-18 17:34 EST | klangfilm_lame_curved_v1_w1 | FREEFORM | J=7.821 | run 20261118T223405Z-screen-765760
+  - `5a5fa1c976c2` | solved 2026-11-18 14:51 EST | lecleach_ctrl_w1 | FREEFORM | J=0.669 | run 20261118T195131Z-screen-8cd85f
+  - `6acbafc0f7ba` | solved 2026-11-18 15:22 EST | lecleach_fc540_T_narrow_w1 | FREEFORM | J=0.702 | run 20261118T202232Z-screen-baa0eb
+- **last_day_setA_07.png**
+  - `34186cb1666c` | solved 2026-11-18 15:06 EST | lecleach_fc540_w1 | FREEFORM | J=0.670 | run 20261118T200653Z-screen-31495a
+  - `4d2985321ccf` | solved 2026-11-19 03:26 EST | scout40__ath_core_petal_hvlaw_v7 | OSSE | J=4.892 | run 20261119T082618Z-screen-2fb8dc
+  - `febde0373489` | solved 2026-11-18 23:35 EST | scout40__crowe_v2a_c1 | FREEFORM | J=4.879 | run 20261119T043506Z-screen-54878f
+- **last_day_setA_08.png**
+  - `9b5428e6dec8` | solved 2026-11-19 04:05 EST | scout40__crowe_x_osse_cd_v7 | FREEFORM | J=5.345 | run 20261119T090559Z-screen-9b8767
+  - `3c5dae091e52` | solved 2026-11-19 04:22 EST | scout40__crowe_x_square_v7 | FREEFORM | J=7.911 | run 20261119T092235Z-screen-690db0
+  - `c1d088b8b92f` | solved 2026-11-19 02:56 EST | scout40__ext_throat_hvlaw_v7 | OSSE | J=3.565 | run 20261119T075629Z-screen-015bfc
+- **last_day_setA_09.png**
+  - `58bde4024d87` | solved 2026-11-19 02:43 EST | scout40__fold_warm_v7 | OSSE | J=3.754 | run 20261119T074356Z-screen-7c9137
+  - `e4d38596e2a8` | solved 2026-11-19 00:16 EST | scout40__klangfilm_b3_soft | FREEFORM | J=3.540 | run 20261119T051630Z-screen-ce7a3f
+  - `14e53020adbe` | solved 2026-11-19 00:18 EST | scout40__klangfilm_hvcore_c200mouth | FREEFORM | J=10.156 | run 20261119T051833Z-screen-64eea7
+- **last_day_setA_10.png**
+  - `f2054faaa9d4` | solved 2026-11-19 00:30 EST | scout40__klangfilm_lame_hv_stage_a | FREEFORM | J=8.393 | run 20261119T053037Z-screen-394fb1
+  - `5381c9cea1ec` | solved 2026-11-19 00:03 EST | scout40__lecleach_hv_smooth_v7 | FREEFORM | J=8.037 | run 20261119T050354Z-screen-7ebf9c
+  - `04501fa6edc8` | solved 2026-11-19 00:09 EST | scout40__lecleach_iwata_ar_smooth_v7 | FREEFORM | J=6.763 | run 20261119T050957Z-screen-53fe3d
+- **last_day_setA_11.png**
+  - `cf716e738ef8` | solved 2026-11-19 03:12 EST | scout40__morph_v8 | OSSE | J=3.402 | run 20261119T081214Z-screen-8470bd
+  - `8ba61395b295` | solved 2026-11-19 04:29 EST | scout40__rf_rect_axial_cap225 | FREEFORM | J=19.721 | run 20261119T092938Z-screen-2de348
+  - `9c39541262aa` | solved 2026-11-19 04:41 EST | scout40__rf_rect_axial_control270 | FREEFORM | J=19.706 | run 20261119T094135Z-screen-382cb5
+- **last_day_setA_12.png**
+  - `efe4a8959d85` | solved 2026-11-19 03:52 EST | scout40__rosse_rect_cd_v7 | FREEFORM | J=4.560 | run 20261119T085256Z-screen-c2203f
+  - `2979e2d125ce` | solved 2026-11-19 03:34 EST | scout40__tritonia_v8 | OSSE | J=5.325 | run 20261119T083421Z-screen-ab2159
+  - `73cf78b059a5` | solved 2026-11-19 04:08 EST | scout40__tritonia_v9 | OSSE | J=5.289 | run 20261119T090801Z-screen-6a429f
+- **last_day_setA_13.png**
+  - `b35c19653487` | solved 2026-11-19 09:49 EST | scout40w2__crowe_x_square_v7 | FREEFORM | J=7.618 | run 20261119T144903Z-screen-0ec862
+  - `b6430673c2e9` | solved 2026-11-19 08:40 EST | scout40w2__fold_warm_v7 | OSSE | J=3.682 | run 20261119T134012Z-screen-50fbd8
+  - `ee85bcd2ad67` | solved 2026-11-19 02:33 EST | scout40w2__klangfilm_b3_soft | FREEFORM | J=2.800 | run 20261119T073330Z-screen-723756
+- **last_day_setA_14.png**
+  - `69aca6e15dca` | solved 2026-11-19 08:51 EST | scout40w2__morph_v8 | OSSE | J=3.232 | run 20261119T135116Z-screen-28debc
+  - `fab20de9dd19` | solved 2026-11-19 09:30 EST | scout40w2__petal_hvlaw_v7 | OSSE | J=4.196 | run 20261119T143027Z-screen-401992
+  - `3f90557b9b31` | solved 2026-11-19 09:01 EST | scout40w2__tritonia_v8 | OSSE | J=5.373 | run 20261119T140149Z-screen-f8fffb
+- **last_day_setA_15.png**
+  - `5f689f0f4865` | solved 2026-11-19 09:17 EST | scout40w2__tritonia_v9 | OSSE | J=4.878 | run 20261119T141723Z-screen-433f54
+  - `be9ab290d3cf` | solved 2026-11-19 11:18 EST | scout40w3__crowe_x_square_v7 | FREEFORM | J=7.598 | run 20261119T161820Z-screen-9fda2a
+  - `680d4bcde649` | solved 2026-11-19 09:55 EST | scout40w3__fold_warm_v7 | OSSE | J=3.695 | run 20261119T145538Z-screen-a277c4
+- **last_day_setA_16.png**
+  - `b0caf1a829a5` | solved 2026-11-19 10:08 EST | scout40w3__morph_v8 | OSSE | J=3.757 | run 20261119T150842Z-screen-18b29b
+  - `74d8eed97268` | solved 2026-11-19 10:54 EST | scout40w3__petal_hvlaw_v7 | OSSE | J=4.162 | run 20261119T155454Z-screen-d1a61d
+  - `018057bc29c9` | solved 2026-11-19 11:21 EST | scout40w3__rosse_rect_cd_v7 | FREEFORM | J=4.690 | run 20261119T162153Z-screen-d2b7d3
+- **last_day_setA_17.png**
+  - `cded84a911d2` | solved 2026-11-19 10:24 EST | scout40w3__tritonia_v8 | OSSE | J=4.891 | run 20261119T152446Z-screen-d98c8d
+  - `3ea64988763d` | solved 2026-11-19 10:39 EST | scout40w3__tritonia_v9 | OSSE | J=5.003 | run 20261119T153950Z-screen-5d766f
+  - `15a8c964d592` | solved 2026-11-19 01:32 EST | scout40w__klangfilm_b3_soft | FREEFORM | J=2.841 | run 20261119T063219Z-screen-8deb7b
+- **last_day_setA_18.png**
+  - `00753b8200ac` | solved 2026-11-19 01:41 EST | scout40w__klangfilm_hvcore_c200mouth | FREEFORM | J=10.020 | run 20261119T064153Z-screen-b97a4e
+  - `7be037ff53c5` | solved 2026-11-19 01:55 EST | scout40w__klangfilm_lame_hv_stage_a | FREEFORM | J=8.350 | run 20261119T065506Z-screen-dab24f
+  - `1dab547b5a86` | solved 2026-11-19 01:18 EST | scout40w__lecleach_hv_smooth_v7 | FREEFORM | J=8.036 | run 20261119T061856Z-screen-833a3d
+- **last_day_setA_19.png**
+  - `06a008612260` | solved 2026-11-19 01:26 EST | scout40w__lecleach_iwata_ar_smooth_v7 | FREEFORM | J=6.671 | run 20261119T062638Z-screen-03ae3c
+  - `045bec7ab6be` | solved 2026-11-18 19:00 EST | steer_early | FREEFORM | J=6.440 | run 20261119T000058Z-verify-d1b149
+  - `40e15bef7e5a` | solved 2026-11-18 19:01 EST | steer_late | FREEFORM | J=6.504 | run 20261119T000144Z-verify-b4504d
+- **last_day_setA_20.png**
+  - `41356be7a7c6` | solved 2026-11-18 19:00 EST | term_topbottom | FREEFORM | J=6.335 | run 20261119T000013Z-verify-85d3a2
+  - `55e4bab20cc9` | solved 2026-11-18 18:59 EST | vt_460 | FREEFORM | J=8.804 | run 20261118T235929Z-verify-27d780
+  - `ed00e69fb0a6` | solved 2026-11-19 12:57 EST | vt_v1 | FREEFORM | J=6.322 | run 20261119T175753Z-screen-471446
+- **last_day_setA_21.png**
+  - `0705e7b08d4f` | solved 2026-11-19 01:05 EST | vt_v1 | FREEFORM | J=6.327 | run 20261119T060516Z-screen-13c866
 
-Scripts: `render_last_day.py` adds a top-skew camera (`t`) on top of `tools/render/render_views.py`; its inputs are the run dirs in `targets.txt` (not committed).
+## Set B (sheets 22-23)
+- **last_day_setB_22.png**
+  - `83e9a487a1e1` | solved 2026-11-19 15:59 EST | hl__crowe_es_biradial_rr_v7 | FREEFORM | J=9.236 | run 20261119T205913Z-screen-dc4693
+  - `12bacd1580c5` | solved 2026-11-19 15:22 EST | hl__crowe_v2a_c1_v10__p10_s1 | FREEFORM | J=6.478 | run 20261119T202253Z-screen-95b3ef
+  - `d261bfc901b4` | solved 2026-11-19 15:54 EST | hl__lecleach_hv_landscape_smooth_v7 | FREEFORM | J=7.887 | run 20261119T205402Z-screen-5ea048
+- **last_day_setB_23.png**
+  - `5f7fbfc276b9` | solved 2026-11-19 15:51 EST | p11__lecleach_ar_landscape_smooth | FREEFORM | J=8.079 | run 20261119T205130Z-screen-5dbd97

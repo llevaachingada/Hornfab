@@ -61,6 +61,13 @@
 - **State.** GPU/CPU lanes free; nothing queued. Not done: no GPU solve, no BL staging, no PR #75
   action (still OPEN/draft, superseded locally at 627b880), no push.
 
+## 2026-11-19 - Horn sheets: set B added, dated, larger text
+
+- Rendered 2026-11-19 17:24 EST. Set A: 61 horns solved 2026-11-18 14:00 to 2026-11-19 13:51 EST (sheets 01-21).
+  Set B: 4 newly solved horns 2026-11-19 15:22 to 15:59 EST (sheets 22-23). Every sheet and row carries its date.
+- Text enlarged (scores column, labels, titles). Older sheet versions removed from the folder; history keeps them.
+  Index: `docs/renders/2026-11-19-last-day-horns/README.md`.
+
 ## 2026-11-19 - Last-24h horn sheets: score column added (renders)
 
 - Sheets re-rendered at 200 dpi with a scores column per design: J (total), the saved `best.json` terms
