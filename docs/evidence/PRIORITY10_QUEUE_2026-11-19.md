@@ -356,6 +356,25 @@ The four B6 s1 lanes now read: fold 1.5433, morph 1.5769, ext_throat 1.7919, twi
 reproduction ranking of 1 < 2 < 5 < 7 that matches the published order for fold/morph/ext and shows the
 twinray seed mismatch (§9f).
 
+### 9h. #9 Klangfilm b3_soft re-homed on v10 — well-loaded, DI-slope-limited, fails its own bar
+
+Run `20261119T184606Z-screen-c6db2d`, watchdog at **30 valid / 31 rows**:
+
+| | value |
+|---|---|
+| seed J (v10) | **3.7428** (the CPU-replay best, so eval 0 is exactly the re-scored design) |
+| best J | **3.5988** |
+| gain | **0.144** — below the 0.4677 floor ⇒ nothing |
+| delta to v10 leader | +2.18 J |
+| best terms | cov 0.150, flat 0.394, **load 0.000**, **dislope 2.102**, di_roughness 0.567, flat_cv 0.245 |
+
+Reading [measured]: the Klangfilm core is **perfectly loaded** (`load 0.0`) — its problem under v10 is
+DI-vs-frequency slope plus roughness, not throat impedance. The authored knob box (beak/corner/length
+angles) barely moves either, so the family's v10 position is a construction ceiling, not a search
+failure. This is the same mechanism that sank #1/#2 (dislope), now confirmed on a third Klangfilm
+variant: **Dislope, not loading, is the Klangfilm family's v10 wall.**
+
+
 
 ## 10. Reconciliation for the compact-horn / woofer-crossover handoff (2026-11-19, later same day)
 
