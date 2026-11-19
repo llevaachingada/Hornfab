@@ -77,6 +77,14 @@
   (`system/`, `system/boundarylab/`, `gui/data_hw.py`+`hw.js`).
 - GUI runs from the canonical checkout with `--system-store C:/Users/hunte/Hrns/hornlab-woofer-system-wt/system_runs`
   (the store is gitignored and holds absolute worktree paths; never copy or move it).
+- Post-merge baseline (same command): 862 tests, 1 failure (`test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_or_process_kill_paths`,
+  PRE-EXISTING, same as the pre-merge baseline), 0 errors, 7 env-gated real-BL skips
+  (junit `hw_p0_baseline.xml`). The worktree's 2 `test_gui_preview_shape` failures do not exist on
+  hornfab-all; they were base-version artifacts, not G0-caused.
+- Environment: `hornlab-search/system_runs` is a Windows directory junction to the worktree store
+  (`New-Item -ItemType Junction`), because `motor_map.SEED_PATH` and the clearance replay tests
+  hardcode `<repo>/system_runs`. Single physical store; removing the junction leaves the data intact.
+- `#/hw/cases` verified live in the canonical checkout (HTTP 200, 38 cases) with the §9 command.
 
 ## 2026-11-18 - Run artifacts archived to docs/evidence/runs (owner request)
 

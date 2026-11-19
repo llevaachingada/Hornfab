@@ -27,6 +27,8 @@
 - OPEN (this pass): GUI completion P0-P9 per `docs/research/system_woofer_2026-11-18/GUI_COMPLETION_HANDOFF_2026-11-19.md`;
   owner gates B-E (screen-launch approval, GUI stage+validate, decision 6 authorization record,
   decision 3 calibration policy) are open questions to the owner.
+- DONE (P0): post-merge baseline 862 tests / 1 pre-existing failure / 0 errors / 7 gated skips;
+  `#/hw/cases` loads from the canonical checkout. Local env: `system_runs` junction -> worktree store.
 - OPEN (senior, carried): decision 6 authorization record shape; decision 3 calibration policy (R1).
 
 ## 2026-11-18 - Run artifacts archived to docs/evidence/runs
