@@ -127,6 +127,20 @@ Readings **[measured, applied]**:
 - `run_campaign_night.py --dry-run --admission …`: **admission accepted, 11 jobs**, every argv valid,
   no zero-free-dimension search.
 
+### 5b. Control gate result (measured at launch, 2026-11-19T11:57 local)
+
+`p10__fv2_kl_record_control` — `hornlab-search run --mode screen`, 1 solve, run
+`runs/20261119T165650Z-screen-f30e50`:
+
+```
+terms (raw): cov=1.09  rip=0.04333  di=0  dislope=0.7269  flat=0.3433  load=0.7171  penalty=0  total J=7.44663  n_nan=0  DI source=balloon
+run OK: seed J=7.44663, 4835 dofs, solve 23.5 s
+```
+
+Stored parent J is 7.4458 → **|ΔJ| = 0.0008**, inside the predeclared 0.05 J tolerance. The
+canonical-record route replays the c200 parent acoustically, so lane #1 was allowed to start
+(`p10__fv2_klangfilm_vbeak`, run `20261119T165732Z-screen-3ebb94`).
+
 ## 6. Staged execution order
 
 `p10__fv2_kl_record_control` → `fv2_klangfilm_vbeak` (#1) → `fv2_rolled_record_vbeak` (#2) →

@@ -31,12 +31,14 @@ git log --oneline -5; git status --porcelain
 
 ## State, at write time
 
-- **GPU lane:** live night `cd_rrect_2026-11-17` (backlog job running; B1 batch 1 = 5 fold-warm x2
-  probe jobs appended AFTER the backlog, runner `--dry-run` exit 0). Do not start another GPU job.
-- **CPU lane:** free (rescore evidence published; see `docs/evidence/v10_rescore_2026-11-18/results/README.md`).
-- **Objective versions:** never rank J across versions; v7 = nights' score (R1), v10 = shipped
-  second score, v10_slope5 = its own identity (floor 0.486 J published; diagnostic). Never edit
-  `hornlab_search/objective/scalar_v9.py`.
+- **GPU lane:** live night `fable_priority10_2026-11-19` (launched 2026-11-19 11:56 local, 11 jobs, the
+  owner ten-horn handoff; controller pid 7436, admission packet in `docs/queue/`). It chained behind
+  `fable_scout40w2_2026-11-19` via `-WaitPid`, which finished first. Manifest + registry:
+  `docs/evidence/PRIORITY10_QUEUE_2026-11-19.md`. Do not start another GPU job; one solve at a time.
+- **CPU lane:** free (PRIORITY10 v10 re-scores published under `runs/analysis/v10_priority10_2026-11-19/`).
+- **Objective versions:** never rank J across versions; v7 = nights' default (R1), v10 = shipped
+  second score and OPT-IN ONLY (this night runs it by owner handoff), v10_slope5 = its own identity
+  (floor 0.486 J published; diagnostic). Never edit `hornlab_search/objective/scalar_v9.py`.
 
 ## Where the rest lives (bounded reads)
 
