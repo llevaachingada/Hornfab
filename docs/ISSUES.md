@@ -1,5 +1,12 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Senior review queue closed (§2.1-§2.4); owner actions open
+
+- DONE: §2.3 judgment calls and §2.4 steer planes reviewed; u3_authority SE + grade shipped.
+- OPEN (owner): vt bounds [350, 465] + success > 0.3105 J consent.
+- OPEN (owner box): diff shipped vs offline v10 brief YAMLs (expect name-only).
+- OPEN (local): §10.2 rows; legacy class relabel + 20-record rebuild sample; B6 readout fold_warm = tie.
+
 ## 2026-11-19 - Senior verdicts: rho20 park stands (borderline); v7 floor re-pinned to 0.31 J
 
 - DONE (senior §2.1): rho20 = borderline authority, rho knob inert, G5 park stands; §10.2 rows to

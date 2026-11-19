@@ -49,3 +49,23 @@ def test_write_arm_csv_round_trips_through_band_means(tmp_path):
     rows = list(csv.DictReader(p.open(encoding="utf-8")))
     back = tuple(np.array([float(r[k]) for r in rows]) for k in ("freq_hz", "bw_h_deg", "bw_v_deg"))
     assert UA.band_means(*back) == UA.band_means(*arm)
+
+
+def test_grade_borderline_for_the_committed_rho20_case_and_authority_for_a_clear_move():
+    import csv
+    from pathlib import Path
+    d = Path(__file__).resolve().parents[1] / "docs/evidence/throat_hv_2026-11-18/authority_A_vs_v8"
+
+    def load(name):
+        rows = list(csv.DictReader(open(d / f"hv_beamwidth_{name}.csv", encoding="utf-8")))
+        return tuple(np.array([float(r[k]) for r in rows]) for k in ("freq_hz", "bw_h_deg", "bw_v_deg"))
+
+    r = UA.authority(load("control"), load("rho20"), "rho20")
+    assert r["authority"] is True  # predeclared rule unchanged
+    assert r["grade"] == "borderline"
+    via = r["via"][0]
+    assert abs(via["delta_deg"] - 3.12) < 0.01 and abs(via["se_deg"] - 0.44) < 0.01
+    f = np.geomspace(700, 5500, 24)
+    ctl = (f, np.full_like(f, 80.0), np.full_like(f, 50.0))
+    big = (f, np.full_like(f, 80.0), np.full_like(f, 50.0) + 10.0 + 0.1 * np.sin(f))
+    assert UA.authority(ctl, big, "vt_460")["grade"] == "authority"

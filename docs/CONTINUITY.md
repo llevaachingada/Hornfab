@@ -1,5 +1,18 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Senior verdicts §2.3 + §2.4 complete; u3_authority gains SE + grade (cloud Fable senior)
+
+- **§2.3:** accept mixed_identity fix, B1 sd(dJ) (note: all 8 dJ negative, use RMS ~0.015 J for
+  absolute J), 0.0057 threshold, 166-sample (needs one brief-YAML diff on the owner box), ST260
+  STL basis. **Amend** legacy `rebuildable` (digest-unverified; 20-record rebuild sample before any
+  legacy finalist). **Overrule** vt bounds: [350, 465] (the control is 350 mm; [440, 465] boxes
+  the search around the +2.30 J point).
+- **§2.4:** steer_early/late = ("h","v") confirmed; inert only at this 1.3-1.5 mm edit on this host.
+- **Code:** `tools/analysis/u3_authority.py` adds `se_deg` + `grade` (authority/borderline); the
+  predeclared `authority` flag is unchanged. Tests 5/5 (`tests/test_tools_analysis_u3_authority.py`).
+- All four senior items of HANDBACK_LOCAL_2026-11-18 §2 are now answered in
+  `scratch/fable_architecture/SENIOR_VERDICTS_2026-11-19.md`.
+
 ## 2026-11-19 - Senior verdicts on handback §2.1 (rho20) and §2.2 (v7 floor) (cloud Fable senior)
 
 - **Verdict file:** `scratch/fable_architecture/SENIOR_VERDICTS_2026-11-19.md` (CPU, committed data only).
