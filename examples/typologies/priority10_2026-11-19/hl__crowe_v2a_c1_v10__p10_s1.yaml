@@ -1,0 +1,76 @@
+# PRIORITY10 #10 (2026-11-19, local orchestrator per the owner's ten-horn handoff).
+# CROWE area/aspect four-DOF v2a, NON-CD-aware v10 pilot. Same source geometry/law, driver and the four
+# searched DOF as `scout40__crowe_v2a_c1`; the discrete throat hold (0 mm) and mouth exponent (3.25) stay
+# FIXED so this lane tests the area/timing trade-off only. Solver-surface geometry-truth audit is already
+# DONE (docs/evidence/CROWE_V2A_SOLVER_SURFACE_TRUTH_2026-11-17.md); nothing here changes source or mesh.
+#
+# CPU-first measurement (before any GPU): run `20261119T043506Z-screen-54878f` (exact config sha
+# 806e6474b008, 40/40 valid) replayed under the shipped v10 brief in
+# `runs/analysis/v10_priority10_2026-11-19/crowe_v2a_c1`:
+#   seed design 1c206df9912f (this config's seed)  J_v10 10.4104
+#   run best    febde0373489 (v7 J 4.8787)        J_v10  7.0685
+# So this family sits 5.6-9.0 J behind the v10 leaders (1.42-1.57) even at its best stored point. It is
+# therefore LAST in the night and expected to be dropped by the cutoff: it answers a construction question
+# (does v10 read the area/timing trade-off differently from v7-smooth?) and is not a leaderboard candidate.
+# The v7-smooth run improved monotonically to its last eval (8.58 -> 4.88 at row 39 of 40), so the box is
+# not exhausted; that is the only justification for spending GPU on it.
+name: hl__crowe_v2a_c1_v10__p10_s1
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-18_v10/room_landscape_80x50_700_hf1440_v10.yaml
+generator:
+  name: crowe_hv_area_aspect_v1
+  n_anchors: 29
+  wall_thickness_mm: 3.0
+  width_h_active_mm: 580.0
+  p_mouth: 3.25
+  throat_round_hold_mm: 0.0
+  seed_policy: explicit
+seed_params:
+  height_v_active_mm: 474.0
+  L_forward_mm: 300.0
+  area_mid_bias: 0.0
+  aspect_timing_u50: 0.5
+bounds:
+  height_v_active_mm:
+    lo: 300.0
+    hi: 474.0
+  L_forward_mm:
+    lo: 220.0
+    hi: 340.0
+  area_mid_bias:
+    lo: -0.15
+    hi: 0.15
+  aspect_timing_u50:
+    lo: 0.35
+    hi: 0.65
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 61915
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 300
+description: 'PRIORITY10 #10 (2026-11-19): CROWE v2a four-DOF (height_v_active, L_forward, area_mid_bias,
+  aspect_timing_u50) on the shipped v10 brief; throat hold 0 mm and mouth exponent 3.25 FIXED. Seed =
+  scout40__crowe_v2a_c1 seed. Measured seed J_v10 10.4104, stored-family best J_v10 7.0685 -> 5.6 J behind
+  the v10 leaders; queued last, expected cutoff drop, 40 valid.'

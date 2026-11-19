@@ -1,5 +1,33 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Fable v2 integrated + PRIORITY10 ten-horn queue staged
+
+- **Fable v2 landed by explicit reviewed diff** (branch `claude/adoring-ramanujan-1m4b3g`, commits
+  `a93ac18`+`d902a33`, 2 commits on a stale base): `geometry/edits.vertical_beak` +
+  `lip_clearance_mm`, `design/generators/record_body.py` record-edit knobs (`g_vt_mm`, `g_vt_hold`,
+  `g_beak_v_mm`, `g_beak_start`) and `outer_offset: normal`, the 4 `examples/typologies/fable_v2_2026-11-19/`
+  configs, `tests/test_design_record_body_beak.py`, and the research doc. Both code files were
+  byte-identical to the merge base, so the patch is additive. **Not** taken: the branch's edit to
+  `docs/queue/fable_scout40_2026-11-19.yaml` (4 new jobs above a completed night) and its coupled
+  `tests/test_queue_fable_scout40.py` (would assert 22 jobs) - the new jobs were extracted into a
+  separate night instead, so the old night can never be rerun wholesale.
+  Verification: `compileall` OK; `tests/test_design_record_body_beak.py` 7 passed;
+  `-k "record_body or vertical_timing or edits"` 29 passed / 1 skipped (botorch absent);
+  `shape_check` OK on all 4 configs; `search_preflight --samples 48` -> c200 beak 0/48, rolled
+  record 20/48 mesh-cap, rolled hybrid 2/48.
+- **Night `fable_priority10_2026-11-19`** (`docs/queue/fable_priority10_2026-11-19.yaml` + admission):
+  11 jobs, the owner handoff's ten experiments deduplicated by physical identity, ordered #1 #2 #3,
+  B6 s1 (#4, #5), #8, B6 s1 (#7, #6), then #9/#10. Launch is serialized behind
+  `fable_scout40w2_2026-11-19` (`queue.ps1 -WaitPid`) - no concurrent GPU runner.
+- **CPU-first v10 re-scores** (`runs/analysis/v10_priority10_2026-11-19/`, identity
+  `8892be0f…`, `mixed_identity: false`): Klangfilm b3_soft best 3.7428 (seed = `3545b3e078ac`),
+  CROWE v2a best 7.0685 (seed `1c206df9912f` = 10.4104), biradial vt_v1 best 5.2808. Scale check:
+  the published-corridor brief reproduces J byte-identically on a fresh run.
+- **Promotion holds**: petal W3 4.16163 vs W2 4.1960 = tie (no v10 campaign); tritonia v8 W3 4.8911
+  is a real +0.48 but tritonia v9 W3 5.0032 is worse than its W2 - both wait for `verify` polars.
+- State/provenance: `docs/evidence/PRIORITY10_QUEUE_2026-11-19.md`. Note local `main` is 22 commits
+  ahead of this branch (GUI P2/P3), unrelated uncommitted GUI edits were left untouched.
+
 ## 2026-11-19 - Owner gates B and C answered (horn + woofer GUI)
 
 - **Gate B** (before P5): asked "May the GUI launch CPU screen jobs, and may it write user specs to

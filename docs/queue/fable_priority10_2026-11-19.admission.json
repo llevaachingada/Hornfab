@@ -1,0 +1,19 @@
+{
+  "night": "fable_priority10_2026-11-19",
+  "allowed_job_ids": [
+    "p10__fv2_kl_record_control",
+    "p10__fv2_klangfilm_vbeak",
+    "p10__fv2_rolled_record_vbeak",
+    "p10__fv2_rolled_hybrid",
+    "p10__b6_fold_warm_s1",
+    "p10__b6_ext_throat_s1",
+    "p10__vt_v1_probe80",
+    "p10__b6_twinray_s1",
+    "p10__b6_morph_s1",
+    "p10__klangfilm_b3_soft_v10",
+    "p10__crowe_v2a_v10"
+  ],
+  "objective_default": "v7 (nights) / v10 opt-in for this night only - see the v10 brief header",
+  "dedupe": "config_sha + design-mesh-solve triple; W3 owner jobs excluded; #8 is the same config at a larger budget (cache replays the first 40)",
+  "planned_by": "local orchestrator, owner ten-horn handoff 2026-11-19"
+}
