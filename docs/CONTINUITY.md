@@ -60,6 +60,19 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40W2: petal WIN (+0.70) -> w3; crowe_x osse no-headroom (local orchestrator)
+
+- **`s40x__petal_hvlaw_v7`: best 4.196 vs the control 4.892 -> +0.70 J, ABOVE the floor.** The
+  resample_strict fix is validated by a real gain. It then pinned at the HIGH limit of `q [0.9, 1]`;
+  every shipped OSSE config caps q at 1 (37 configs; no OSSE q > 1 exists), so this is a pin_ignore
+  case. W3 `scout40w3__petal_hvlaw_v7` keeps resample_strict, warm-starts from 4.196 (mean
+  fab20de9dd19) and is appended as `s40x3__petal_hvlaw_v7` with `watchdog: {pin_ignore: [q]}` (job 13).
+- **`s40x__crowe_x_osse_cd_v7`: no gain - the best was still the seed (J 5.345) after 30 valid evals.**
+  The preflight had predicted `no_headroom` (the config seed IS the lane best). A requeue with the
+  same seed/box repeats it, so this lane is recorded as a **no-headroom negative, not requeued**;
+  it needs a new DOF/box or a different seed to be worth GPU time.
+- `s40x__crowe_x_square_v7` running (11 evals, best 7.907 vs the 7.911 control - flat so far).
+
 ## 2026-11-19 - SCOUT40W2: tritonia v9 WIN (+0.41) -> w3; petal running (local orchestrator)
 
 - **`s40x__tritonia_v9`: best 4.878 vs the SCOUT40 control 5.289 -> +0.41 J, ABOVE the v7 0.31 floor.**

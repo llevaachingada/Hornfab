@@ -31,6 +31,14 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - W2: petal +0.70 (win) -> w3; crowe_x osse no-headroom
+
+- WIN: petal 4.892 -> 4.196 (+0.70, above floor); W3 with pin_ignore q (OSSE cap 1), warm from 4.196,
+  appended.
+- NEGATIVE: crowe_x osse no gain (seed = lane best, preflight no_headroom) - NOT requeued; needs a new
+  DOF/box/seed to be worth GPU time.
+- LIVE: crowe_x square (7.907 vs 7.911 at 11 evals); then rosse and the W3 continuations.
+
 ## 2026-11-19 - W2: tritonia v9 +0.41 (above floor) -> w3 appended
 
 - WIN: tritonia v9 5.289 -> 4.878 (+0.41, above the 0.31 floor); W3 (az_fold_v_deg high -10, warm
