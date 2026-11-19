@@ -1,0 +1,72 @@
+{
+ "n_designs_in_cube": 16270,
+ "percentiles_p10_p50_p90": {
+  "lfp": [
+   500.0,
+   961.6,
+   1487.1
+  ],
+  "h850": [
+   79.2,
+   97.6,
+   124.6
+  ],
+  "v850": [
+   79.0,
+   105.7,
+   130.6
+  ],
+  "h1000": [
+   68.9,
+   86.0,
+   113.1
+  ],
+  "v1000": [
+   68.6,
+   94.6,
+   118.1
+  ],
+  "h1250": [
+   60.1,
+   74.7,
+   101.5
+  ],
+  "v1250": [
+   60.0,
+   81.2,
+   103.9
+  ],
+  "v1600": [
+   59.3,
+   77.4,
+   98.4
+  ]
+ },
+ "corridor_counts": {
+  "H60-100_and_V<=75_at_850": 273,
+  "H60-100_and_V<=75_at_1000": 4587,
+  "H60-100_and_V<=75_at_1250": 4132
+ },
+ "qualifying_rule": "V<=75 @1k, V<=70 @1.25k, H 60-100 @1k, lfp20<=625 Hz",
+ "n_qualifying": 393,
+ "qualifying_by_config_and_r0": {
+  "atlas__ath_core | r0 25.4": 237,
+  "atlas__core_law | r0 25.4": 47,
+  "crease__core_law_v4 | r0 25.4": 19,
+  "native__ath_core_v4 | r0 25.4": 15,
+  "ridge__ath_core_law8_v4 | r0 25.4": 15,
+  "crease__core_law | r0 25.4": 9,
+  "sab__core_law_wide24k | r0 25.4": 9,
+  "sab__core_law_narrow24k | r0 25.4": 9,
+  "b2t__lecleach_iwata_ar_v4 | r0 None": 7,
+  "stageB_shape__crease_core_law | r0 25.4": 6,
+  "joint__crease_core_law | r0 25.4": 6,
+  "native__ath_core_v4_narrow | r0 25.4": 5,
+  "osse_baseline | r0 17.78": 2,
+  "stageC_polish__crease_core_law | r0 25.4": 2,
+  "hl__ath_twinray380_landscape_v8 | r0 18.0": 2,
+  "native__ath_core | r0 25.4": 1,
+  "quatrefoil__union_noflute_v4 | r0 None": 1,
+  "stageA_macro__crease_core_law | r0 25.4": 1
+ }
+}

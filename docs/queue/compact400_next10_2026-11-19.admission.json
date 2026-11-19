@@ -1,0 +1,18 @@
+{
+  "night": "compact400_next10_2026-11-19",
+  "allowed_job_ids": [
+    "c4n__01_fold_warm",
+    "c4n__02_morph",
+    "c4n__03_ext_throat",
+    "c4n__06_twinray",
+    "c4n__04_petal_hvlaw",
+    "c4n__05_tritonia_v8",
+    "c4n__07_ath_core_14in",
+    "c4n__08_lecleach_iwata_ar",
+    "c4n__09_fold_warm_v10_s2w",
+    "c4n__10_ext_throat_v10_s2w"
+  ],
+  "objective": "c4n__01..08 run the NEW compact400_xo1000_1400_hf1440_v10xo brief identity (objective v10 scalar unchanged; 400 mm cube; F_X 1 kHz) and are ranked only inside it against its own floor; c4n__09/10 stay on the home v10 identity of their source configs (floor 0.4677) - never ranked across identities",
+  "dedupe": "all ten configs are new config_shas; the compact lanes have no sha-matched run anywhere (new brief); the two home lanes differ from b6 s2 by widened bounds + the published-best seed",
+  "planned_by": "Fable senior (owner-directed), 2026-11-19; staged, not launched"
+}

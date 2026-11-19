@@ -1,5 +1,17 @@
 ﻿# ISSUES
 
+## 2026-11-19 - compact400 (400 mm cube) + next-10 night staged
+
+- DONE (CPU): compact400 brief identity + floor 0.1293 J + stored bar 1.7302; 10 configs shape-checked
+  and preflighted; night `docs/queue/compact400_next10_2026-11-19.yaml` dry-run OK. Readout:
+  `docs/research/compact400_2026-11-19/README.md`.
+- OPEN (owner): approve GPU time (~3-5 h) and launch the staged night (command in README section 5).
+- OPEN (after the night): re-measure the compact400 floor on its own screen->verify pairs (the
+  published 0.1293 comes from 600 mm-class pairs); verify any lane winner that beats 1.7302 by > floor;
+  run `xo_loading_report.py --fx 1000` on it (report-only).
+- OPEN (carried): ATH core at r0 18 and ext-throat lanes refuse ~half of uniform box samples
+  (invalid_geometry); `resample_strict` absorbs it, but watch valid/attempt ratios.
+
 ## 2026-11-19 - Q3 night: continuations + never-run typologies
 
 - DONE (GPU): `q3_more_solves_2026-11-19`, 6/6 jobs, ~45 min. Continuations proved the point cheaply:

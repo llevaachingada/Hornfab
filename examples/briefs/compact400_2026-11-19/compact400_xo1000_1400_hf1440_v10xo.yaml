@@ -1,0 +1,126 @@
+# COMPACT 400 mm-CUBE CROSSOVER BRIEF IDENTITY - 2026-11-19 (Fable senior, CPU-authoring only).
+#
+# WHAT THIS IS: a NEW brief identity, not a new objective. Built exactly like
+#   examples/briefs/compact_2026-11-19/compact_xo900_1250_hf1440_v10xo.yaml: the shipped objective v10
+#   scalar is reused UNCHANGED and only this brief's envelope and target block differ. Owner request
+#   2026-11-19: "new horns under a 400 mm cubed bounding box". NEVER rankable against v7 / v10 /
+#   v10_slope5 / compact_xo900. Floor: docs/research/compact400_2026-11-19/README.md.
+#
+# ENVELOPE (product constraint, not acoustics): outer mouth W <= 400, H <= 400; max_depth_mm 385
+#   because the post-mesh gate allows depth + 15 mm (search/evaluate.py ENVELOPE_DEPTH_ALLOWANCE_MM),
+#   so admitted designs are <= 400 mm on every axis including the shell.
+#
+# WHY F_X 1000 Hz AND THE CORRIDOR ONSET AT 1000 Hz (measured, not a law):
+#   - 16,270 already-solved designs whose outer bbox fits 400^3 (all runs, CPU scan of stored
+#     metrics.json, 2026-11-19): at 850 Hz only 273 hold H 60-100 with V <= 75, at 1000 Hz 4,587 do.
+#     Median V beamwidth: 106 deg at 850 Hz, 95 at 1 kHz, 81 at 1.25 kHz; best 10 % <= 69 / 60 deg at
+#     1 / 1.25 kHz. 850 Hz (the compact_xo900 onset) is therefore mostly unreachable in this box.
+#   - Loading reuses the register's crossover screen: zero load penalty iff lfp20 <= F_X / 1.6
+#     = 625 Hz (objective/scalar_v7._load, lfp_crossover_ratio 1.6).
+#   - Keele mouth sizing is NOT used to set these numbers (docs/knowledge/claims/KH-001); they come
+#     from the solved population above. That population is dominated by 2-inch (r0 25.4) ATH
+#     core-law horns; for the HF1440 1.4-inch throat at this size it is an applicability GAP,
+#     which is exactly what the first compact400 screens measure.
+#
+# CORRIDOR (exploratory scoring priority, not a CD law): H 60-100 (pref 80), V 40-75 (pref 50) from
+#   1000 Hz, held from 1400 Hz to 8 kHz (profile parser holds the last anchor). Preferred 80/50 is the
+#   owner's home-horn shape, kept so ripple_region preferred_edge means the same thing as in v10.
+#
+# BAND 350-8000 Hz retained (cov_below_f0 one_sided): sub-crossover frequencies stay scored for
+#   rip/flat/load; a wide pattern there is free, a narrow one is charged.
+#
+# Same HF1440 driver block (exit radius 18.0 mm, 2.0 deg - the 2 deg tangent is a source-model
+#   assumption, see docs/knowledge/imported/HornFab_Research_Knowledge_Base_2026-11-16.md:455).
+name: compact400_xo1000_1400_hf1440_v10xo
+description: '(objective v10 target-variant; NEW compact 400 mm-cube identity) F_X 1000 Hz, corridor
+  H 60-100 (pref 80) and V 40-75 (pref 50) from 1000 Hz, held from 1400 Hz; band 350-8000 Hz; HF1440;
+  envelope 400x400 mouth, depth 385 (+15 gate = 400). NOT objective v11; NEVER rankable against
+  v7/v10/compact_xo900.'
+driver:
+  exit_angle_deg: 2.0
+  exit_radius_mm: 18.0
+envelope:
+  max_depth_mm: 385.0
+  max_mouth_h_mm: 400.0
+  max_mouth_w_mm: 400.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_profile:
+    h:
+    # Exploratory scoring priority (not a law): H corridor from the 1 kHz crossover.
+    - hz: 1000
+      max_deg: 100
+      min_deg: 60
+      preferred_deg: 80
+    - hz: 1400
+      max_deg: 100
+      min_deg: 60
+      preferred_deg: 80
+    interpolation: log_frequency
+    mode: corridor
+    v:
+    # Exploratory scoring priority (not a law): V corridor from 1 kHz, held 1400 Hz -> 8 kHz.
+    - hz: 1000
+      max_deg: 75
+      min_deg: 40
+      preferred_deg: 50
+    - hz: 1400
+      max_deg: 75
+      min_deg: 40
+      preferred_deg: 50
+  coverage_v_deg: 50.0
+  coverage_v_down_deg: null
+  coverage_v_up_deg: null
+  di_slope_target: 0.0
+  di_target_db: null
+  driver_exit_radius_mm: null
+  # F_X and both plane onsets at the 1 kHz crossover (measured basis in the header).
+  f0_hz: 1000.0
+  f0_v_hz: 1000.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov_profile: 1.0
+  di_roughness: 1.0
+  dislope: 1.0
+  flat: 0.5
+  flat_cv: 1.0
+  load: 1.0
+  rip: 1.0
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+objective:
+  cov_below_f0: one_sided
+  cov_narrow_ratio: 2.0
+  cov_v_weight: 0.5
+  flat_band: scored
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  tolerances:
+    cov_profile: 3.0
+    di_roughness: 1.0
+    dislope: 9.0
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3
+    rip: 1.0
+  version: 10
+  ripple_region: preferred_edge

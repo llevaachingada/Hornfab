@@ -1,0 +1,65 @@
+name: c4_08_lecleach_iwata_ar__scout40__lecleach_iwata_ar_smooth_v7
+family: FREEFORM
+brief_file: ../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml
+generator:
+  name: grid
+  rows:
+    type: iwata_ar
+  n_phi: 15
+  n_s: 32
+  seed_policy: explicit
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 451.1604341678
+  g_T: 0.6134115688
+  g_stop_deg: 100.5904316551
+  g_ar_m: 1.3121954431
+  g_ar_p: 1.1240323912
+bounds:
+  g_fc_hz:
+    lo: 420.0
+    hi: 900.0
+  g_T:
+    lo: 0.4
+    hi: 0.9
+  g_stop_deg:
+    lo: 88.0
+    hi: 200.0
+  g_ar_m:
+    lo: 1.0
+    hi: 2.4
+  g_ar_p:
+    lo: 0.5
+    hi: 2.0
+description: Le Cleac'h / Iwata AR rows march; its best (400x305x244) already fits the cube. Generated
+  by scratch/fable_architecture/compact400_2026-11-19/make_configs.py from examples/typologies/scout40_2026-11-19/scout40__lecleach_iwata_ar_smooth_v7.yaml;
+  compact400 identity (400 mm cube, F_X 1 kHz); 60 VALID evals, CMA; size knobs re-bounded to the cube,
+  every other knob inherited
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 40008
+  budget: 60
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 108

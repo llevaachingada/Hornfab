@@ -1289,3 +1289,21 @@ Withdrawn from the audit: F6's inference, decision 4 (the six-design dense solve
   - item 3, the optional dense re-solve (owner-gated GPU);
   - the V corridor onset decision.
 - **Not touched:** the unrelated uncommitted GUI edits in the working tree (`hornlab_search/gui/*`, `tools/gui`, `tools/system`, untracked hw-stage files). They are not in this commit.
+
+## 2026-11-19 (late) - Fable senior: compact400 (400 mm cube) identity + next-10 night STAGED
+
+- **Measured (CPU).** 16,270 stored designs fit a 400 mm cube. The 1 kHz corridor is reached mostly by
+  2-inch ATH core-law horns: only 2 HF1440 designs qualify. A 1.4-inch horn in this box is the archive's
+  least-explored cell. The compact register's slate (460-590 mm) never targeted it.
+- **Decided (within delegation, no default changed).**
+  - New opt-in brief identity `compact400_xo1000_1400_hf1440_v10xo`: v10 scalar unchanged, envelope
+    400/400/385, F_X 1 kHz.
+  - Floor 0.1293 J. It is fleet-sourced, so re-measure it on compact400 pairs after the night.
+  - Stored bar 1.7302 (TwinRay `bbe858b5b6a4`).
+- **Staged, not launched:** `docs/queue/compact400_next10_2026-11-19.yaml`. 8 cube lanes plus the two
+  home v10 s2w warm starts that Q3 asked for. All shape_check PASS and preflighted.
+- **Integrator:** launch needs owner GPU approval (~3-5 h). The jobs are independent of the GUI lane's
+  uncommitted work, which was left out of this commit, as was the other lane's
+  `BUDGET_DRIVER_SHORTLIST_AUDIT_2026-11-19.md` and its INDEX line.
+- **Applicability gap (recorded in the brief).** The population that motivates the 1 kHz onset is 2-inch.
+  Whether the HF1440 throat holds it in this box is what the lanes measure. Ideal-source screens only.

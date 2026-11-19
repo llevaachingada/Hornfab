@@ -1,5 +1,35 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - compact400: 400 mm-cube horns + next-10 night STAGED (Fable senior, CPU only)
+
+- **Owner ask:** have 10 next queue items ready, focused on the best improvement opportunities and on
+  new horns inside a 400 mm cube. GPU and CPU lanes were free and nothing ran on the GPU. **The night is staged, not launched**,
+  because GPU budget stays with the owner.
+- **Measured gap** (`scratch/fable_architecture/compact400_2026-11-19/scan_400cube.py`): 16,270 stored
+  solved designs fit 400^3. 393 hold H 60-100 / V <= 75 at 1 kHz with lfp20 <= 625 Hz, but 375 of those are
+  2-inch ATH core-law and only **2 are HF1440 1.4-inch** (TwinRay). At 850 Hz only 273 of 16,270 hold the
+  corridor, so the compact_xo900 onset is out of reach at this size. The "compact" register
+  slate is 460-590 mm wide; none of it was a 400 mm horn.
+- **New brief identity** `examples/briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml`:
+  objective v10 scalar unchanged; envelope 400/400/385 (+15 gate); F_X 1 kHz; H 60-100 / V 40-75 from
+  1 kHz, held 1.4-8 kHz; never rankable against v7/v10/compact_xo900. **Floor 0.1293 J** (257 pairs,
+  fleet-sourced; re-measure on compact400 pairs). CPU rescore of 978 stored in-cube HF1440 designs:
+  the **bar is 1.7302** (TwinRay `bbe858b5b6a4`, 367x377x255); the October 90x60 horns are 2.14-2.31
+  (too short, V too wide at 1 kHz).
+- **Night `docs/queue/compact400_next10_2026-11-19.yaml` (+ admission), dry-run OK, 10 jobs:**
+  8 cube lanes c4_01-08 (fold_warm, morph, ext-throat, TwinRay seeded at the bar, petal A1, tritonia
+  A3, ATH core law at r0 18, Iwata AR) + 2 home v10 s2w (fold_warm L_mm hi 330; ext-throat
+  `az_a_cos_pow` lo 0.5; both seeded at the published bests, closing the Q3 open item). All 10
+  `shape_check` PASS (cube seeds 367-400 mm max side, 1.7-3.5k dof) and load; `search_preflight`
+  --samples 32 on each. OSSE lanes use `resample_strict` (their refusals are `invalid_geometry`,
+  which `graded` does not touch). ext-throat's 34-56 % uniform-box refusal rate is the family's box: the
+  unwidened source shows the same 21 of 32.
+- **Files:** configs `examples/typologies/compact400_2026-11-19/` (generator
+  `scratch/fable_architecture/compact400_2026-11-19/make_configs.py`); readout and evidence
+  `docs/research/compact400_2026-11-19/`. INDEX and CODE_MAP rows were added. The other lane's uncommitted GUI
+  edits and its budget-driver audit (and its INDEX line) were left out of this commit.
+- **State.** GPU free; nothing running. Launch command in the README section 5.
+
 ## 2026-11-19 - Compact slate: owner decisions executed (CPU only, no GPU)
 
 - **Owner decisions.** Next compact-horn move = author the crossover-aware identity first (no new
