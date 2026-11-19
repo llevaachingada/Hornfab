@@ -334,6 +334,25 @@ lane at the **published best design's run + design hash**, not at the lane seed.
 published v10 lane bests (fold 1.4214, morph 1.4305, ext 1.5710, twinray 1.7726) remain the ranking
 evidence and the PRIORITY10 s1 numbers are reproduction checks only.
 
+## 10. Reconciliation for the compact-horn / woofer-crossover handoff (2026-11-19, later same day)
+
+The owner's second handoff (compact sculptural horns + woofer crossover) says to reconcile commit and
+queue status before acting. Measured now:
+
+| Item | Status |
+|---|---|
+| `origin/main` | `138d88a2163c` — unchanged, so **PR #75 is not merged upstream** (the Fable branch tip `d902a33b1db` is still the only delta) |
+| `gh pr view 75` | **unavailable from this session** — `gh` cannot resolve `llevachingada/Hornfab` (auth/visibility), so PR metadata is UNVERIFIED; `git ls-remote` confirms the refs above |
+| Our tree | commits `627b880` + evidence commits are **local only** (not pushed): they contain the PR's four configs + record-edit code + tests, deliberately **without** its SCOUT40 queue prepend |
+| SCOUT40 / W2 / W3 | **finished**; results in `runs/nights/*/summary.jsonl`. Nothing from them is re-queued |
+| PRIORITY10 night | running (`#6 morph` at the time of writing, then `#9`, `#10`); it owns the GPU lane |
+| New GPU work | **not authorised by this session** — the compact-horn handoff's T2 allowance (0–4 isolated + ≤2 verify) stays unspent until its shortlist exists and the lane is free |
+| Shared-tree hazard | another lane currently has uncommitted edits to `tools/analysis/rescore_identity.py` and its test; the CPU sub-agent was told not to touch them |
+
+The compact-horn candidate register itself is owned by the CPU sub-agent
+(`docs/research/compact_horn_system_2026-11-19/`), not by this document.
+
+
 
 
 
