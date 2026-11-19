@@ -1,5 +1,16 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Fable senior: score-term audit + Gate A (XO loading)
+
+- DONE: audit of the shipped v10 home brief; parity |dJ| = 0.0 on 271 designs.
+- DONE: dislope = 0, side-lobe and max_edge hypotheses rejected.
+- DONE: XO "hump" diagnosed as unit-acceleration referencing (corrected). `load` stays.
+- DONE: `tools/analysis/xo_loading_report.py` (report-only).
+- FIXED: rescore rows lost nested run paths (`run_path` added).
+- OPEN (owner): V corridor onset. 40-60 deg V from 1 kHz sits at the 480 mm envelope limit (~63 deg measured); accept it or move the onset to ~1.2 kHz.
+- OPEN (owner, GPU): optional dense re-solve of 3 designs (fold_warm 00826f071b24, ext_throat a23763f1c6fc, rosse fd45d3b5e62f), 1/24 oct, 450-1800 Hz.
+- OPEN (finalists): driver choice (HF1440 or another 1.4" driver), and an impedance fit for absolute level/headroom. Minimum crossovers limit the field at 700 Hz.
+
 ## 2026-11-19 - Owner gates B/C answered; GUI polish in flight
 
 - DONE (owner): gate B = "Yes to both (Recommended)" - GUI may launch CPU screen jobs and write

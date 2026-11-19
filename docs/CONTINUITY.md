@@ -1,5 +1,31 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Fable senior: score-term audit + Gate A crossover-loading diagnosis (CPU only, committed)
+
+- **Verdict.** The "650-900 Hz loading hump" reported earlier today was unit-acceleration referencing, not acoustics.
+  - The solver drives unit normal acceleration (`meta.spl_reference`).
+  - Per unit velocity, fold_warm 00826f071b24 is +1.3/+2.8 dB of power at 643/828 Hz relative to 2 kHz. That equals 10 log10 of its Re z ratio (1.93/1.03).
+  - Balloon power over throat input power is 0.95-1.00 for all six audit designs on both grids.
+  - The feature is one near-cutoff Re z overshoot, not a resonance train.
+  - rosse_rect_cd and tritonia_v9 are 5-8 dB under-loaded at 643-828 Hz, so `load` charges a real deficit.
+  - The real ripple is ext_throat a23763f1c6fc: Re z 0.59 at 1.2-1.4 kHz.
+- **Driver-independent.** The ranking holds for all 32 members of an [inferred] 1.4"-exit driver bracket.
+  - The owner has said the driver is open; it need not be the HF1440.
+  - No 1.4" pro driver checked publishes Mmd, Sd or fs.
+- **Score policy.** v10 and `dislope` are unchanged, and no v11 is justified.
+  - dislope = 0 promotes beaming horns (audit F1). Side lobes (F3) and max_edge (F4) were rejected.
+  - Screen->verify floor: `load` explains 56% of the variance. The directivity sub-J SD is 0.055 J on the top-28. That is a grid sensitivity, not a confidence interval.
+  - Audit decision 3 (the hold on J-only continuations) is lifted. Decision 2 (no B6 reruns on the current grid) stands.
+- **Code.**
+  - New `tools/analysis/xo_loading_report.py`, report-only XO diagnostics. 6 tests, including a pulsating-sphere energy-balance check.
+  - `tools/analysis/rescore_identity.py` rows now also carry `run_path` (audit F8: 35 nested rows had stored only `screen`). `run` is unchanged.
+  - 19 targeted tests pass.
+- **Evidence.**
+  - Reproducible outputs: `docs/evidence/xo_loading_gateA_2026-11-19/`.
+  - Reports and scripts, force-added under `scratch/fable_architecture/`: `score_term_audit_2026-11-19/` (F6 banner-corrected) and `xo_loading_gateA_2026-11-19/`.
+- **Provenance.** 205 hashes have more than one design dir. 9 of them are on different meshes (up to 0.21 dB), so the same hash is not the same field.
+- **Not done (owner-gated).** Optional dense re-solve: 3 designs, 1/24 oct, 450-1800 Hz, `HORNLAB_GPU_LOCK=refuse`. No GPU, queue, default or score identity was touched. Unrelated uncommitted GUI edits in the tree were left alone.
+
 ## 2026-11-19 - Fable v2 integrated + PRIORITY10 ten-horn queue staged
 
 - **Fable v2 landed by explicit reviewed diff** (branch `claude/adoring-ramanujan-1m4b3g`, commits

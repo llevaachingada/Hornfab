@@ -1210,3 +1210,82 @@ directories classify as `unknown`, never crash), and `read_headless_result()` de
 `bl_results.read_bl_headless_result` with no duplicated payload parsing. Pinned by
 `tests/system/test_import_results_hook.py` (4 tests). The `BLOCKED_BY_BL_RESULT_FORMAT`
 disclosure remains open (it needs a real solved run to close); the hook itself is DONE.
+
+## 2026-11-19 Fable senior: score-term audit of the v10 home brief (append-only; integrator action requested)
+
+CPU-only replay of stored responses (exact parity to the published v10 fleet column). Full write-up and
+reproducible script: `scratch/fable_architecture/score_term_audit_2026-11-19/` (REPORT.md,
+score_term_audit.py; outputs in `runs/analysis/score_term_audit_2026-11-19/`). Nothing committed, no queue
+touched, no default changed.
+
+- Every top v7/v10 family (fold_warm, morph, ext_throat) passes `load` through a ~half-octave Re(Z) hump of
+  ~1.8x at 650-900 Hz (on the 700 Hz XO) with a +8-9 dB on-axis / +10-11 dB power bump; corridor-compliant
+  rosse_rect_cd / tritonia (RMS miss 0.08-0.3 deg) lose 1.2-2.5 J on `load` alone.
+- `load` is 56% of screen->verify variance; directivity sub-J floor is 0.055 J on the top-28 (vs 0.468).
+- `dislope` (58% of J) is the de facto corridor enforcer; weight 0 promotes beaming horns. Rejected:
+  dislope=0, a side-lobe term, preferred_edge->max_edge.
+- Requests for the integrator: (1) hold B6 matched reruns of fold_warm/morph/ext_throat on the current grid;
+  (2) queue when the GPU lane frees: one dense 400-1400 Hz (1/12 oct) re-solve of six stored geometries
+  listed in REPORT.md decision 4, HORNLAB_GPU_LOCK=refuse; (3) `tools/analysis/rescore_identity.py` rows
+  store the leaf run name ("screen") for nested study-* runs - 35/271 audited rows unlocatable from the row;
+  store the path relative to runs/.
+- Owner question (blocks any new score identity): does "loading to 700 Hz" admit a resonant Re(Z) hump, or
+  must loading be smooth/broadband with no in-band resonance (the 2026-11-15 research criterion)?
+
+## 2026-11-19 Fable senior: Gate A correction to the score-term audit (XO "hump")
+
+The full write-up is `scratch/fable_architecture/xo_loading_gateA_2026-11-19/REPORT.md`. It was a CPU, read-only replay; outputs are in `runs/analysis/xo_loading_gateA_2026-11-19/`.
+
+**Correction.** The audit's F6 "+8-9 dB on-axis / +10-11 dB power at 650-900 Hz" were unit-ACCELERATION levels. The solver drives unit normal acceleration (`meta.spl_reference`).
+- At unit velocity, fold_warm is -1.6/+1.5 dB on-axis and +1.3/+2.8 dB power at 643/828 Hz relative to 2 kHz.
+- The power figure equals 10 log10(Re z ratio), 2.7 dB.
+- Balloon power over throat input power is 0.96-1.00 for all six designs on both grids, so the stored data are consistent.
+- The feature is one Re z overshoot near cutoff (max 1.8-1.9, reactance crossing zero, |Gamma| 0.58 -> 0.13). It is not a standing-wave train.
+- rosse and tritonia are 5-8 dB UNDER-loaded at 643-828 Hz. With an HF1440-class driver bracket and an ideal 700 Hz HP they sit 6-9 dB below fold_warm at 643 Hz. `load` charges them for a real deficit.
+- The real ripple is ext_throat a23763f1c6fc: Re z 0.59 at 1.2-1.4 kHz and a 3.1 dB power residual. That is a finalist check item.
+
+Withdrawn from the audit: F6's inference, decision 4 (the six-design dense solve as framed), decision 5 (the owner question on resonant loading) and decision 3 (the hold on J-only continuations). F1-F5, F7, F8 and decision 2 (no B6 reruns on the current grid) stand.
+
+**Requests to the integrator (please commit; Fable does not run git):**
+1. Commit `scratch/fable_architecture/xo_loading_gateA_2026-11-19/`, the correction banner in `scratch/fable_architecture/score_term_audit_2026-11-19/REPORT.md`, and the audit script folder. They are not on public main yet.
+2. Commit the additive provenance fix in `tools/analysis/rescore_identity.py`: rows gain `run_path` relative to runs/, and `run` is unchanged. It comes with a test in `tests/test_tools_analysis_rescore_identity.py`; 13 tests pass. Historical rescore files are not rewritten.
+3. Replace the earlier dense-solve request with an optional, owner-gated job: 3 designs (fold_warm 00826f071b24, ext_throat a23763f1c6fc, rosse fd45d3b5e62f) at 1/24 octave over 450-1800 Hz with `HORNLAB_GPU_LOCK=refuse`. Its purposes are the overshoot Q, the ext_throat dip and dense input for a ringing check. Nothing in the scorer waits on it.
+4. Duplicate hashes: 205 hashes have more than one design dir. Of those, 95 are screen+verify pairs, 99 are bit-identical, 2 differ by under 1e-6, and 9 are on different meshes (epw12 refine), differing by up to 0.21 dB. The same hash does not mean the same field. Resolve rows by their own run (`run_path`).
+
+**Owner decisions still open:**
+1. The V corridor onset (audit F5).
+2. GPU time for item 3.
+3. Real HF1440 T/S data, from an impedance-jig fit or from FaitalPRO. Bl, Mmd, Sd and fs are unpublished.
+
+### 2026-11-19 addendum: the driver is open (owner)
+
+- The owner says HF1440 is not the only option. The Gate A horn conclusions are driver-independent across all 32 bracket drivers:
+  - fold_warm over rosse: +4.3 to +7.4 dB on-axis at 828 Hz re 2 kHz, and +5.4 to +9.2 dB at 643 Hz with a 700 Hz HP;
+  - fold_warm over tritonia: at least +2.6 dB;
+  - fold_warm smoother than rosse by 1.3-2.2 dB.
+- The bracket's Bl of 12-18 covers the published 1.4" values: 18 Sound ND1460A 13.5 and RCF ND950 17.6.
+- No 1.4" pro driver checked publishes Mmd, Sd or fs. That covers HF1440, ND1460A, NSD1424BTN, NSD1460N, ND950, CDX14-3040 and CD-1114Fe.
+- Published minimum crossovers (all 1.4" exit):
+
+  | Rating | Drivers |
+  |---|---|
+  | 0.7 kHz | HF1440, CD-1114Fe |
+  | 0.8 kHz | ND1460A |
+  | 1.0 kHz | CDX14-3040 |
+  | 1.2 kHz | NSD1424BTN |
+
+- The real-driver owner decision is retired. Driver choice now matters only for absolute level and headroom, and that needs an impedance fit whichever driver is chosen.
+
+### 2026-11-19 closing: owner directed commit + push of the Fable senior work
+
+- **Commit and push.** The owner directed the commit and push in chat: "get all this buttoned up ... commit push". The commit is on `hornfab-all-2026-11-18`.
+- **Committed items 1-2 of the Gate A integrator requests:**
+  - the reports and scripts, force-added under `scratch/fable_architecture/` (the score-term audit with its F6 correction banner, and Gate A);
+  - `docs/evidence/xo_loading_gateA_2026-11-19/`;
+  - the `run_path` provenance fix and its test.
+- **New:** `tools/analysis/xo_loading_report.py`, the report-only finalist diagnostic recommended by Gate A.
+  - Use it on V2 or PR #75 candidates against their exact host controls, before any acoustic-superiority claim.
+- **Still open:**
+  - item 3, the optional dense re-solve (owner-gated GPU);
+  - the V corridor onset decision.
+- **Not touched:** the unrelated uncommitted GUI edits in the working tree (`hornlab_search/gui/*`, `tools/gui`, `tools/system`, untracked hw-stage files). They are not in this commit.

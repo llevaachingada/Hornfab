@@ -59,6 +59,17 @@ def _row_score_identity(r, brief, objective_block, score_code) -> str:
     })
 
 
+def _run_path(run: Path) -> str:
+    """The run dir relative to its nearest ``runs`` ancestor, POSIX form (``study-x/screen``).
+
+    ``run.name`` alone is the LEAF (``screen``) for runs nested under ``study-*/``, which made 35 v10
+    rescore rows unlocatable (score-term audit 2026-11-19, F8). Rows keep ``run`` unchanged and add
+    this field. Falls back to the path as given when no ``runs`` ancestor exists."""
+    parts = Path(run).resolve().parts
+    idx = [i for i, x in enumerate(parts) if x == "runs"]
+    return "/".join(parts[idx[-1] + 1:]) if idx else Path(run).as_posix()
+
+
 def _lane(run_dir: Path) -> str:
     try:
         import yaml
@@ -94,7 +105,7 @@ def rescore(runs, brief, out: Path, run_brief: str | None = None) -> dict:
         for ddir in sorted((run / "designs").glob("*")):
             try:
                 r = _score(run, ddir.name, b, run / "config.yaml")
-                rows.append({"run": run.name, "lane": lane, "design_hash": ddir.name,
+                rows.append({"run": run.name, "run_path": _run_path(run), "lane": lane, "design_hash": ddir.name,
                              "status": r.status, "j": r.j, "score_id": r.score_id,
                              "stored_j": r.stored_j, "parity_delta": r.parity_delta,
                              "reasons": list(r.reasons)})
@@ -103,7 +114,7 @@ def rescore(runs, brief, out: Path, run_brief: str | None = None) -> dict:
                     score_identity_ids.add(_row_score_identity(r, b, b.objective_block,
                                                                SCORE_CODE_VERSION))
             except Exception as exc:  # noqa: BLE001 - reported, never hidden
-                rows.append({"run": run.name, "lane": lane, "design_hash": ddir.name,
+                rows.append({"run": run.name, "run_path": _run_path(run), "lane": lane, "design_hash": ddir.name,
                              "status": "error", "error": f"{type(exc).__name__}: {str(exc)[:200]}"})
     out.mkdir(parents=True, exist_ok=True)
     with (out / "rescore.jsonl").open("w", encoding="utf-8") as f:
@@ -175,11 +186,11 @@ def floor(runs, brief, out: Path, top: int) -> dict:
                 s = _score(run, h, b, run / "config.yaml")
                 v = _score(vdir, h, b, run / "config.yaml")
             except Exception as exc:  # noqa: BLE001
-                detail.append({"run": run.name, "design_hash": h, "error": str(exc)[:200]})
+                detail.append({"run": run.name, "run_path": _run_path(run), "design_hash": h, "error": str(exc)[:200]})
                 continue
             ids.update(x.score_id for x in (s, v) if x.j is not None)
             pairs.append((s.j, v.j))
-            detail.append({"run": run.name, "design_hash": h, "screen_j": s.j, "verify_j": v.j})
+            detail.append({"run": run.name, "run_path": _run_path(run), "design_hash": h, "screen_j": s.j, "verify_j": v.j})
     stats = floor_stats(pairs, top)
     summary = {"brief": str(brief), "score_ids": sorted(ids), **stats,
                "note": "frequency part only; the mesh part comes from B1 (stage 2)"}

@@ -1,0 +1,5977 @@
+[
+ {
+  "design_hash": "508f907726d3",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T143219Z-screen-d3a1bb\\designs\\508f907726d3",
+   "runs\\b1_mesh_2026-11-18\\20261115T143219Z-screen-d3a1bb__refine_epw12\\designs\\508f907726d3"
+  ],
+  "same_grid": true,
+  "same_n_dof": false,
+  "n_dof": [
+   3999,
+   15388
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T143219Z-screen-d3a1bb",
+   "20261115T143219Z-screen-d3a1bb__refine_epw12"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.01905583709251722,
+  "max_abs_dspl_h_db": 0.17068637268056364
+ },
+ {
+  "design_hash": "64efc34b7396",
+  "n_dirs": 4,
+  "dirs": [
+   "runs\\20261115T143219Z-screen-d3a1bb\\designs\\64efc34b7396",
+   "runs\\20261115T150043Z-screen-d1ebf6\\designs\\64efc34b7396",
+   "runs\\20261119T075629Z-screen-015bfc\\designs\\64efc34b7396",
+   "runs\\20261119T174850Z-screen-2d9f2a\\designs\\64efc34b7396"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3709,
+   3709,
+   3709,
+   3709
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T143219Z-screen-d3a1bb",
+   "20261115T150043Z-screen-d1ebf6",
+   "20261119T075629Z-screen-015bfc",
+   "20261119T174850Z-screen-2d9f2a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "766c9b1ba8a9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T143219Z-screen-d3a1bb\\designs\\766c9b1ba8a9",
+   "runs\\b1_mesh_2026-11-18\\20261115T143219Z-screen-d3a1bb__refine_epw12\\designs\\766c9b1ba8a9"
+  ],
+  "same_grid": true,
+  "same_n_dof": false,
+  "n_dof": [
+   3725,
+   14270
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T143219Z-screen-d3a1bb",
+   "20261115T143219Z-screen-d3a1bb__refine_epw12"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.014974595741874567,
+  "max_abs_dspl_h_db": 0.16118622829643314
+ },
+ {
+  "design_hash": "b996da551021",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T143219Z-screen-d3a1bb\\designs\\b996da551021",
+   "runs\\b1_mesh_2026-11-18\\20261115T143219Z-screen-d3a1bb__refine_epw12\\designs\\b996da551021"
+  ],
+  "same_grid": true,
+  "same_n_dof": false,
+  "n_dof": [
+   4009,
+   15336
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T143219Z-screen-d3a1bb",
+   "20261115T143219Z-screen-d3a1bb__refine_epw12"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.010145480463530485,
+  "max_abs_dspl_h_db": 0.12641792553126763
+ },
+ {
+  "design_hash": "4d428cd969c9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T152510Z-screen-a504f6\\designs\\4d428cd969c9",
+   "runs\\20261115T152510Z-screen-a504f6\\verify\\designs\\4d428cd969c9"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3654,
+   3654
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T152510Z-screen-a504f6",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "781ec6defad8",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T152510Z-screen-a504f6\\designs\\781ec6defad8",
+   "runs\\20261115T152510Z-screen-a504f6\\verify\\designs\\781ec6defad8"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4865,
+   4865
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T152510Z-screen-a504f6",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "8251e19f009d",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T152510Z-screen-a504f6\\designs\\8251e19f009d",
+   "runs\\20261115T152510Z-screen-a504f6\\verify\\designs\\8251e19f009d"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3956,
+   3956
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T152510Z-screen-a504f6",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "c73a8ae29ccb",
+  "n_dirs": 4,
+  "dirs": [
+   "runs\\20261115T152510Z-screen-a504f6\\designs\\c73a8ae29ccb",
+   "runs\\20261119T082618Z-screen-2fb8dc\\designs\\c73a8ae29ccb",
+   "runs\\20261119T143027Z-screen-401992\\designs\\c73a8ae29ccb",
+   "runs\\20261119T155454Z-screen-d1a61d\\designs\\c73a8ae29ccb"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3085,
+   3085,
+   3085,
+   3085
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T152510Z-screen-a504f6",
+   "20261119T082618Z-screen-2fb8dc",
+   "20261119T143027Z-screen-401992",
+   "20261119T155454Z-screen-d1a61d"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "1f8dfa9311aa",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T154322Z-screen-07bea2\\designs\\1f8dfa9311aa",
+   "runs\\20261115T154322Z-screen-07bea2\\verify\\designs\\1f8dfa9311aa"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3758,
+   3758
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T154322Z-screen-07bea2",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "2ef2f5bdd5ba",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T154322Z-screen-07bea2\\designs\\2ef2f5bdd5ba",
+   "runs\\20261115T154322Z-screen-07bea2\\verify\\designs\\2ef2f5bdd5ba"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3944,
+   3944
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T154322Z-screen-07bea2",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "c74a75f63b00",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T154322Z-screen-07bea2\\designs\\c74a75f63b00",
+   "runs\\20261115T154322Z-screen-07bea2\\verify\\designs\\c74a75f63b00"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3510,
+   3510
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T154322Z-screen-07bea2",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "0971e8d73526",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T161238Z-screen-1b1b6e\\designs\\0971e8d73526",
+   "runs\\20261115T161238Z-screen-1b1b6e\\verify\\designs\\0971e8d73526"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   1632,
+   1632
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T161238Z-screen-1b1b6e",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "51084183f533",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T161238Z-screen-1b1b6e\\designs\\51084183f533",
+   "runs\\20261115T161238Z-screen-1b1b6e\\verify\\designs\\51084183f533"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   1475,
+   1475
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T161238Z-screen-1b1b6e",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "d554d03502ca",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T161238Z-screen-1b1b6e\\designs\\d554d03502ca",
+   "runs\\20261115T161238Z-screen-1b1b6e\\verify\\designs\\d554d03502ca"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   1527,
+   1527
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T161238Z-screen-1b1b6e",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "03a238d5addd",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T162516Z-screen-e31b23\\designs\\03a238d5addd",
+   "runs\\20261115T162516Z-screen-e31b23\\verify\\designs\\03a238d5addd"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   1732,
+   1732
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T162516Z-screen-e31b23",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "55432eb7479b",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T162516Z-screen-e31b23\\designs\\55432eb7479b",
+   "runs\\20261116T034337Z-screen-eeef98\\designs\\55432eb7479b"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   1515,
+   1515
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T162516Z-screen-e31b23",
+   "20261116T034337Z-screen-eeef98"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "90c1c0bcf6cb",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T162516Z-screen-e31b23\\designs\\90c1c0bcf6cb",
+   "runs\\20261115T162516Z-screen-e31b23\\verify\\designs\\90c1c0bcf6cb"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   1652,
+   1652
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T162516Z-screen-e31b23",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "dfc7246a97c5",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T162516Z-screen-e31b23\\designs\\dfc7246a97c5",
+   "runs\\20261115T162516Z-screen-e31b23\\verify\\designs\\dfc7246a97c5"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   1550,
+   1550
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T162516Z-screen-e31b23",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "dd23c8704459",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T163824Z-screen-d4a7c4\\designs\\dd23c8704459",
+   "runs\\20261115T163824Z-screen-d4a7c4\\verify\\designs\\dd23c8704459"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4134,
+   4134
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T163824Z-screen-d4a7c4",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "186097de51e9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T164910Z-screen-f94955\\designs\\186097de51e9",
+   "runs\\20261115T164910Z-screen-f94955\\verify\\designs\\186097de51e9"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4122,
+   4122
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T164910Z-screen-f94955",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "f076900d07e9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T165937Z-screen-4d8a33\\designs\\f076900d07e9",
+   "runs\\20261115T165937Z-screen-4d8a33\\verify\\designs\\f076900d07e9"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3894,
+   3894
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T165937Z-screen-4d8a33",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "03815665f4a1",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\03815665f4a1",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\03815665f4a1"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3090,
+   3090
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "0c19cd7a49c4",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\0c19cd7a49c4",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\0c19cd7a49c4"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2914,
+   2914
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "0e750be03d85",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\0e750be03d85",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\0e750be03d85"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2935,
+   2935
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "13345339d0fb",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\13345339d0fb",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\13345339d0fb"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3342,
+   3342
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "1c0ef4de039f",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\1c0ef4de039f",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\1c0ef4de039f"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2814,
+   2814
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "288738d7979b",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\288738d7979b",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\288738d7979b"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2894,
+   2894
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "32d70e705ace",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\32d70e705ace",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\32d70e705ace"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3182,
+   3182
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "3532d8146314",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\3532d8146314",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\3532d8146314"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2844,
+   2844
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "3ab50793b773",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\3ab50793b773",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\3ab50793b773"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3314,
+   3314
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "4af1fd39b806",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\4af1fd39b806",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\4af1fd39b806"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3135,
+   3135
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "5d4e46c3975b",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\5d4e46c3975b",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\5d4e46c3975b"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3261,
+   3261
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "5faa9ab7f575",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\5faa9ab7f575",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\5faa9ab7f575"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3262,
+   3262
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "5ffe58d494e9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\5ffe58d494e9",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\5ffe58d494e9"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3198,
+   3198
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "61a8420c1fe8",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\61a8420c1fe8",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\61a8420c1fe8"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3159,
+   3159
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "63d5d2d5af82",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\63d5d2d5af82",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\63d5d2d5af82"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2837,
+   2837
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "6f1fb9f6edce",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\6f1fb9f6edce",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\6f1fb9f6edce"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3215,
+   3215
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "6f80b690c50e",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\6f80b690c50e",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\6f80b690c50e"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2792,
+   2792
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "6fcc485759a5",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\6fcc485759a5",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\6fcc485759a5"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3212,
+   3212
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "732de1c20994",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\732de1c20994",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\732de1c20994"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3197,
+   3197
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "791293d62a83",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\791293d62a83",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\791293d62a83"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3137,
+   3137
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "7e454d58122c",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\7e454d58122c",
+   "runs\\20261115T171150Z-screen-d66ffb\\verify\\designs\\7e454d58122c",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\7e454d58122c"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3084,
+   3084,
+   3084
+  ],
+  "n_freqs": [
+   18,
+   29,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "verify",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "7f473d98c2e8",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\7f473d98c2e8",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\7f473d98c2e8"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2953,
+   2953
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "85be02da00be",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\85be02da00be",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\85be02da00be"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3254,
+   3254
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "93b3d8cdbf9f",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\93b3d8cdbf9f",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\93b3d8cdbf9f"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3302,
+   3302
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "9df00a3af761",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\9df00a3af761",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\9df00a3af761"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3306,
+   3306
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "a4ae038b1710",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\a4ae038b1710",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\a4ae038b1710"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2874,
+   2874
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "adff9169d1c0",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\adff9169d1c0",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\adff9169d1c0"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3116,
+   3116
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "af8f23a1947c",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\af8f23a1947c",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\af8f23a1947c"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3144,
+   3144
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "bd99db0c9cf9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\bd99db0c9cf9",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\bd99db0c9cf9"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3093,
+   3093
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "c7f079768f29",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\c7f079768f29",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\c7f079768f29"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3176,
+   3176
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "e1fc1bb5a5d5",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\e1fc1bb5a5d5",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\e1fc1bb5a5d5"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2815,
+   2815
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "e30417178329",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T171150Z-screen-d66ffb\\designs\\e30417178329",
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\e30417178329"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3070,
+   3070
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T171150Z-screen-d66ffb",
+   "20261115T194455Z-screen-bf9fc8"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "75a489825a07",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T180109Z-screen-0f2ab5\\designs\\75a489825a07",
+   "runs\\20261115T180109Z-screen-0f2ab5\\verify\\designs\\75a489825a07"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3566,
+   3566
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T180109Z-screen-0f2ab5",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "c8a55485e0ef",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T181250Z-screen-1e22a5\\designs\\c8a55485e0ef",
+   "runs\\20261115T181250Z-screen-1e22a5\\verify\\designs\\c8a55485e0ef"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3462,
+   3462
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T181250Z-screen-1e22a5",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "9c61c8bb3647",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T182340Z-screen-35c541\\designs\\9c61c8bb3647",
+   "runs\\20261115T182340Z-screen-35c541\\verify\\designs\\9c61c8bb3647"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3525,
+   3525
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T182340Z-screen-35c541",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "6449db987733",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261115T194455Z-screen-bf9fc8\\designs\\6449db987733",
+   "runs\\20261115T194455Z-screen-bf9fc8\\verify\\designs\\6449db987733",
+   "runs\\20261118T203926Z-screen-b0d36f\\designs\\6449db987733"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   2941,
+   2941,
+   2941
+  ],
+  "n_freqs": [
+   18,
+   29,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T194455Z-screen-bf9fc8",
+   "verify",
+   "20261118T203926Z-screen-b0d36f"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "963a04d249d3",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261115T205453Z-screen-32f7c4\\designs\\963a04d249d3",
+   "runs\\20261115T213849Z-screen-c35ad4\\designs\\963a04d249d3"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4423,
+   4423
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261115T205453Z-screen-32f7c4",
+   "20261115T213849Z-screen-c35ad4"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "d99b73012d8e",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T015510Z-screen-e75ec8\\designs\\d99b73012d8e",
+   "runs\\20261116T020629Z-screen-0d29d7\\designs\\d99b73012d8e"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3988,
+   3988
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T015510Z-screen-e75ec8",
+   "20261116T020629Z-screen-0d29d7"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "2d05c4b6317f",
+  "n_dirs": 5,
+  "dirs": [
+   "runs\\20261116T021728Z-screen-3943f0\\designs\\2d05c4b6317f",
+   "runs\\20261116T022328Z-screen-87354c\\designs\\2d05c4b6317f",
+   "runs\\20261119T092235Z-screen-690db0\\designs\\2d05c4b6317f",
+   "runs\\20261119T144903Z-screen-0ec862\\designs\\2d05c4b6317f",
+   "runs\\20261119T161820Z-screen-9fda2a\\designs\\2d05c4b6317f"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4170,
+   4170,
+   4170,
+   4170,
+   4170
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T021728Z-screen-3943f0",
+   "20261116T022328Z-screen-87354c",
+   "20261119T092235Z-screen-690db0",
+   "20261119T144903Z-screen-0ec862",
+   "20261119T161820Z-screen-9fda2a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 4.180573851626778e-07,
+  "max_abs_dspl_h_db": 6.9623660401418874e-06
+ },
+ {
+  "design_hash": "7de69ffa75e8",
+  "n_dirs": 5,
+  "dirs": [
+   "runs\\20261116T030920Z-screen-5d1082\\designs\\7de69ffa75e8",
+   "runs\\20261116T030920Z-screen-5d1082\\verify\\designs\\7de69ffa75e8",
+   "runs\\20261119T081214Z-screen-8470bd\\designs\\7de69ffa75e8",
+   "runs\\20261119T135116Z-screen-28debc\\designs\\7de69ffa75e8",
+   "runs\\20261119T150842Z-screen-18b29b\\designs\\7de69ffa75e8"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3758,
+   3758,
+   3758,
+   3758,
+   3758
+  ],
+  "n_freqs": [
+   18,
+   29,
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T030920Z-screen-5d1082",
+   "verify",
+   "20261119T081214Z-screen-8470bd",
+   "20261119T135116Z-screen-28debc",
+   "20261119T150842Z-screen-18b29b"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "8a7f0b197de6",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T030920Z-screen-5d1082\\designs\\8a7f0b197de6",
+   "runs\\20261116T030920Z-screen-5d1082\\verify\\designs\\8a7f0b197de6"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3686,
+   3686
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T030920Z-screen-5d1082",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "b2636b2d0821",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T035652Z-screen-e30021\\designs\\b2636b2d0821",
+   "runs\\20261116T041232Z-screen-b5380a\\designs\\b2636b2d0821"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   6774,
+   6774
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T035652Z-screen-e30021",
+   "20261116T041232Z-screen-b5380a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "1666a6323bea",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T044917Z-screen-12eb61\\designs\\1666a6323bea",
+   "runs\\20261116T054705Z-screen-570bc6\\designs\\1666a6323bea"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4320,
+   4320
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T044917Z-screen-12eb61",
+   "20261116T054705Z-screen-570bc6"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "76eee5ccd976",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T044917Z-screen-12eb61\\designs\\76eee5ccd976",
+   "runs\\20261116T044917Z-screen-12eb61\\verify\\designs\\76eee5ccd976"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5367,
+   5367
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T044917Z-screen-12eb61",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "cf99fdeab801",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T044917Z-screen-12eb61\\designs\\cf99fdeab801",
+   "runs\\20261116T044917Z-screen-12eb61\\verify\\designs\\cf99fdeab801"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5433,
+   5433
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T044917Z-screen-12eb61",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "35485dfcedd0",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T052759Z-screen-44001e\\designs\\35485dfcedd0",
+   "runs\\20261116T052759Z-screen-44001e\\verify\\designs\\35485dfcedd0"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4713,
+   4713
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T052759Z-screen-44001e",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "75770221a322",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T052759Z-screen-44001e\\designs\\75770221a322",
+   "runs\\20261116T052759Z-screen-44001e\\verify\\designs\\75770221a322"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4419,
+   4419
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T052759Z-screen-44001e",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "a575f55c809b",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T052759Z-screen-44001e\\designs\\a575f55c809b",
+   "runs\\20261116T060140Z-screen-679c6f\\designs\\a575f55c809b"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3506,
+   3506
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T052759Z-screen-44001e",
+   "20261116T060140Z-screen-679c6f"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "03e6a1163066",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T054705Z-screen-570bc6\\designs\\03e6a1163066",
+   "runs\\20261116T054705Z-screen-570bc6\\verify\\designs\\03e6a1163066"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3570,
+   3570
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T054705Z-screen-570bc6",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "8c1ea8ed47fb",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T054705Z-screen-570bc6\\designs\\8c1ea8ed47fb",
+   "runs\\20261116T054705Z-screen-570bc6\\verify\\designs\\8c1ea8ed47fb"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4170,
+   4170
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T054705Z-screen-570bc6",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "2ce29244bb9e",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T060140Z-screen-679c6f\\designs\\2ce29244bb9e",
+   "runs\\20261116T060140Z-screen-679c6f\\verify\\designs\\2ce29244bb9e"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4730,
+   4730
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T060140Z-screen-679c6f",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "31b3d70eb05f",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T060140Z-screen-679c6f\\designs\\31b3d70eb05f",
+   "runs\\20261116T060140Z-screen-679c6f\\verify\\designs\\31b3d70eb05f"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4202,
+   4202
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T060140Z-screen-679c6f",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "009818fb4119",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\009818fb4119",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\009818fb4119"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3306,
+   3306
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T081139Z-screen-63158a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "17bee0e0a378",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\17bee0e0a378",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\17bee0e0a378"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3342,
+   3342
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T081139Z-screen-63158a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "27fe89821845",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\27fe89821845",
+   "runs\\20261116T061215Z-screen-058f0d\\verify\\designs\\27fe89821845"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3547,
+   3547
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "61f368f62761",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\61f368f62761",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\61f368f62761"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3053,
+   3053
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T081139Z-screen-63158a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "7b0a1988625d",
+  "n_dirs": 5,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\7b0a1988625d",
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\7b0a1988625d",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\7b0a1988625d",
+   "runs\\20261116T090751Z-screen-37b115\\designs\\7b0a1988625d",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\7b0a1988625d"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3117,
+   3117,
+   3117,
+   3117,
+   3117
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T071520Z-screen-1c8608",
+   "20261116T081139Z-screen-63158a",
+   "20261116T090751Z-screen-37b115",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "83d33cb3dd2f",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\83d33cb3dd2f",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\83d33cb3dd2f"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3197,
+   3197
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T081139Z-screen-63158a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "85b0a4f7b683",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\85b0a4f7b683",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\85b0a4f7b683"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3609,
+   3609
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T081139Z-screen-63158a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "8b531f92dffe",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\8b531f92dffe",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\8b531f92dffe"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3073,
+   3073
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T081139Z-screen-63158a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "997986cf3726",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\997986cf3726",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\997986cf3726"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3137,
+   3137
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T081139Z-screen-63158a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "a5f929375535",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\a5f929375535",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\a5f929375535"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3153,
+   3153
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T081139Z-screen-63158a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "be2523d196c8",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\be2523d196c8",
+   "runs\\20261116T061215Z-screen-058f0d\\verify\\designs\\be2523d196c8"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3249,
+   3249
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "c179623fa28d",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\c179623fa28d",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\c179623fa28d"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3040,
+   3040
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T081139Z-screen-63158a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "cdcc7e8dd9bd",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T061215Z-screen-058f0d\\designs\\cdcc7e8dd9bd",
+   "runs\\20261116T081139Z-screen-63158a\\designs\\cdcc7e8dd9bd"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3344,
+   3344
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T061215Z-screen-058f0d",
+   "20261116T081139Z-screen-63158a"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "22be80ea5a07",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T064438Z-screen-8defc1\\designs\\22be80ea5a07",
+   "runs\\20261116T064438Z-screen-8defc1\\verify\\designs\\22be80ea5a07"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4212,
+   4212
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T064438Z-screen-8defc1",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "4d86f55074ed",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261116T064438Z-screen-8defc1\\designs\\4d86f55074ed",
+   "runs\\20261116T073857Z-screen-7b9313\\designs\\4d86f55074ed",
+   "runs\\20261116T093400Z-screen-56681d\\designs\\4d86f55074ed"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3340,
+   3340,
+   3340
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T064438Z-screen-8defc1",
+   "20261116T073857Z-screen-7b9313",
+   "20261116T093400Z-screen-56681d"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "af12709a6fca",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T064438Z-screen-8defc1\\designs\\af12709a6fca",
+   "runs\\20261116T064438Z-screen-8defc1\\verify\\designs\\af12709a6fca"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3796,
+   3796
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T064438Z-screen-8defc1",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "7f4c515cedd0",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261116T065413Z-screen-a70423\\designs\\7f4c515cedd0",
+   "runs\\20261116T074832Z-screen-620f81\\designs\\7f4c515cedd0",
+   "runs\\20261116T095336Z-screen-7fc9b7\\designs\\7f4c515cedd0"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4473,
+   4473,
+   4473
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T065413Z-screen-a70423",
+   "20261116T074832Z-screen-620f81",
+   "20261116T095336Z-screen-7fc9b7"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "901d855c40c9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T065413Z-screen-a70423\\designs\\901d855c40c9",
+   "runs\\20261116T065413Z-screen-a70423\\verify\\designs\\901d855c40c9"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4577,
+   4577
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T065413Z-screen-a70423",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "b4ea3b525a2a",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T065413Z-screen-a70423\\designs\\b4ea3b525a2a",
+   "runs\\20261116T065413Z-screen-a70423\\verify\\designs\\b4ea3b525a2a"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4112,
+   4112
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T065413Z-screen-a70423",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "29015c053ad0",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\29015c053ad0",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\29015c053ad0"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3384,
+   3384
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "2ce9120339a4",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\2ce9120339a4",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\2ce9120339a4"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3294,
+   3294
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "3eb37bed6227",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\3eb37bed6227",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\3eb37bed6227"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3360,
+   3360
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "5215af5401f9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\5215af5401f9",
+   "runs\\20261116T071520Z-screen-1c8608\\verify\\designs\\5215af5401f9"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3219,
+   3219
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "53935eab9213",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\53935eab9213",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\53935eab9213"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3180,
+   3180
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "54137913a603",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\54137913a603",
+   "runs\\20261116T071520Z-screen-1c8608\\verify\\designs\\54137913a603"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3203,
+   3203
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "543552a2aec8",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\543552a2aec8",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\543552a2aec8"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3163,
+   3163
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "5b5b625381bc",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\5b5b625381bc",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\5b5b625381bc"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3634,
+   3634
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "5f029e1b2fc8",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\5f029e1b2fc8",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\5f029e1b2fc8"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3034,
+   3034
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "b59c2cb3804e",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\b59c2cb3804e",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\b59c2cb3804e"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2778,
+   2778
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "b939cc85989c",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\b939cc85989c",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\b939cc85989c"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3217,
+   3217
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "e32814bdaaa6",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T071520Z-screen-1c8608\\designs\\e32814bdaaa6",
+   "runs\\20261116T193501Z-screen-f008ad\\designs\\e32814bdaaa6"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   2715,
+   2715
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T071520Z-screen-1c8608",
+   "20261116T193501Z-screen-f008ad"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "8b4688b44233",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T073857Z-screen-7b9313\\designs\\8b4688b44233",
+   "runs\\20261116T073857Z-screen-7b9313\\verify\\designs\\8b4688b44233"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4004,
+   4004
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T073857Z-screen-7b9313",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "b230ed907f05",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T073857Z-screen-7b9313\\designs\\b230ed907f05",
+   "runs\\20261116T073857Z-screen-7b9313\\verify\\designs\\b230ed907f05"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3825,
+   3825
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T073857Z-screen-7b9313",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "6ca73e01c97b",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T074832Z-screen-620f81\\designs\\6ca73e01c97b",
+   "runs\\20261116T074832Z-screen-620f81\\verify\\designs\\6ca73e01c97b"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4172,
+   4172
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T074832Z-screen-620f81",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "77308ed8afa3",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T074832Z-screen-620f81\\designs\\77308ed8afa3",
+   "runs\\20261116T074832Z-screen-620f81\\verify\\designs\\77308ed8afa3"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4393,
+   4393
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T074832Z-screen-620f81",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "0fd2ea981eee",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T085415Z-screen-0a228d\\designs\\0fd2ea981eee",
+   "runs\\20261116T085415Z-screen-0a228d\\verify\\designs\\0fd2ea981eee"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3826,
+   3826
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T085415Z-screen-0a228d",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "8f5e4ea9919d",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T085415Z-screen-0a228d\\designs\\8f5e4ea9919d",
+   "runs\\20261116T085415Z-screen-0a228d\\verify\\designs\\8f5e4ea9919d"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3775,
+   3775
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T085415Z-screen-0a228d",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "0004bf3995ed",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T090751Z-screen-37b115\\designs\\0004bf3995ed",
+   "runs\\20261116T090751Z-screen-37b115\\verify\\designs\\0004bf3995ed"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3353,
+   3353
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T090751Z-screen-37b115",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "0d72914a37cd",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T090751Z-screen-37b115\\designs\\0d72914a37cd",
+   "runs\\20261116T090751Z-screen-37b115\\verify\\designs\\0d72914a37cd"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   2758,
+   2758
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T090751Z-screen-37b115",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "4b1ce3e8b146",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T093400Z-screen-56681d\\designs\\4b1ce3e8b146",
+   "runs\\20261116T093400Z-screen-56681d\\verify\\designs\\4b1ce3e8b146"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4731,
+   4731
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T093400Z-screen-56681d",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "ce7bc43dc6bd",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T093400Z-screen-56681d\\designs\\ce7bc43dc6bd",
+   "runs\\20261116T093400Z-screen-56681d\\verify\\designs\\ce7bc43dc6bd"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4353,
+   4353
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T093400Z-screen-56681d",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "0070dac9e12b",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T095336Z-screen-7fc9b7\\designs\\0070dac9e12b",
+   "runs\\20261116T095336Z-screen-7fc9b7\\verify\\designs\\0070dac9e12b"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4472,
+   4472
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T095336Z-screen-7fc9b7",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "2c922317f1c7",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T095336Z-screen-7fc9b7\\designs\\2c922317f1c7",
+   "runs\\20261116T095336Z-screen-7fc9b7\\verify\\designs\\2c922317f1c7"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4448,
+   4448
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T095336Z-screen-7fc9b7",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "2f7307c06023",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T130335Z-screen-ab4fb9\\designs\\2f7307c06023",
+   "runs\\b1_mesh_2026-11-18\\20261116T130335Z-screen-ab4fb9__refine_epw12\\designs\\2f7307c06023"
+  ],
+  "same_grid": true,
+  "same_n_dof": false,
+  "n_dof": [
+   3751,
+   14519
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T130335Z-screen-ab4fb9",
+   "20261116T130335Z-screen-ab4fb9__refine_epw12"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.008684948099560238,
+  "max_abs_dspl_h_db": 0.20689403719024213
+ },
+ {
+  "design_hash": "507e7257c091",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T130335Z-screen-ab4fb9\\designs\\507e7257c091",
+   "runs\\b1_mesh_2026-11-18\\20261116T130335Z-screen-ab4fb9__refine_epw12\\designs\\507e7257c091"
+  ],
+  "same_grid": true,
+  "same_n_dof": false,
+  "n_dof": [
+   3791,
+   14545
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T130335Z-screen-ab4fb9",
+   "20261116T130335Z-screen-ab4fb9__refine_epw12"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.008085744917115344,
+  "max_abs_dspl_h_db": 0.14800285076110242
+ },
+ {
+  "design_hash": "688ffe811b6a",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261116T130335Z-screen-ab4fb9\\designs\\688ffe811b6a",
+   "runs\\20261116T130335Z-screen-ab4fb9\\verify\\designs\\688ffe811b6a",
+   "runs\\b1_mesh_2026-11-18\\20261116T130335Z-screen-ab4fb9__refine_epw12\\designs\\688ffe811b6a"
+  ],
+  "same_grid": false,
+  "same_n_dof": false,
+  "n_dof": [
+   3796,
+   3796,
+   14881
+  ],
+  "n_freqs": [
+   18,
+   29,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T130335Z-screen-ab4fb9",
+   "verify",
+   "20261116T130335Z-screen-ab4fb9__refine_epw12"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "78f599e8a1d2",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T130335Z-screen-ab4fb9\\designs\\78f599e8a1d2",
+   "runs\\b1_mesh_2026-11-18\\20261116T130335Z-screen-ab4fb9__refine_epw12\\designs\\78f599e8a1d2"
+  ],
+  "same_grid": true,
+  "same_n_dof": false,
+  "n_dof": [
+   3837,
+   14705
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T130335Z-screen-ab4fb9",
+   "20261116T130335Z-screen-ab4fb9__refine_epw12"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.008500473998766423,
+  "max_abs_dspl_h_db": 0.13536973599245172
+ },
+ {
+  "design_hash": "8544e97bc940",
+  "n_dirs": 9,
+  "dirs": [
+   "runs\\20261116T130335Z-screen-ab4fb9\\designs\\8544e97bc940",
+   "runs\\20261116T130335Z-screen-ab4fb9\\verify\\designs\\8544e97bc940",
+   "runs\\20261116T131710Z-screen-f1a263\\designs\\8544e97bc940",
+   "runs\\20261116T131710Z-screen-f1a263\\verify\\designs\\8544e97bc940",
+   "runs\\20261116T153619Z-screen-c221aa\\designs\\8544e97bc940",
+   "runs\\20261119T074356Z-screen-7c9137\\designs\\8544e97bc940",
+   "runs\\20261119T134012Z-screen-50fbd8\\designs\\8544e97bc940",
+   "runs\\20261119T145538Z-screen-a277c4\\designs\\8544e97bc940",
+   "runs\\20261119T173516Z-screen-c6a93f\\designs\\8544e97bc940"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3828,
+   3828,
+   3828,
+   3828,
+   3828,
+   3828,
+   3828,
+   3828,
+   3828
+  ],
+  "n_freqs": [
+   18,
+   29,
+   18,
+   29,
+   18,
+   18,
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T130335Z-screen-ab4fb9",
+   "verify",
+   "20261116T131710Z-screen-f1a263",
+   "verify",
+   "20261116T153619Z-screen-c221aa",
+   "20261119T074356Z-screen-7c9137",
+   "20261119T134012Z-screen-50fbd8",
+   "20261119T145538Z-screen-a277c4",
+   "20261119T173516Z-screen-c6a93f"
+  ],
+  "leaf_collision": true
+ },
+ {
+  "design_hash": "ced63c6a01a1",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T130335Z-screen-ab4fb9\\designs\\ced63c6a01a1",
+   "runs\\b1_mesh_2026-11-18\\20261116T130335Z-screen-ab4fb9__refine_epw12\\designs\\ced63c6a01a1"
+  ],
+  "same_grid": true,
+  "same_n_dof": false,
+  "n_dof": [
+   3844,
+   14762
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T130335Z-screen-ab4fb9",
+   "20261116T130335Z-screen-ab4fb9__refine_epw12"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.007128633032412255,
+  "max_abs_dspl_h_db": 0.17446045982011427
+ },
+ {
+  "design_hash": "30c8c4f07d1f",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T131710Z-screen-f1a263\\designs\\30c8c4f07d1f",
+   "runs\\20261116T131710Z-screen-f1a263\\verify\\designs\\30c8c4f07d1f"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3854,
+   3854
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T131710Z-screen-f1a263",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "1824ba0eb197",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T145634Z-screen-e4c778\\designs\\1824ba0eb197",
+   "runs\\20261116T145634Z-screen-e4c778\\verify\\designs\\1824ba0eb197"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4598,
+   4598
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T145634Z-screen-e4c778",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "570c5fce85a0",
+  "n_dirs": 4,
+  "dirs": [
+   "runs\\20261116T145634Z-screen-e4c778\\designs\\570c5fce85a0",
+   "runs\\20261116T145634Z-screen-e4c778\\verify\\designs\\570c5fce85a0",
+   "runs\\20261116T150941Z-screen-0e777a\\designs\\570c5fce85a0",
+   "runs\\20261116T150941Z-screen-0e777a\\verify\\designs\\570c5fce85a0"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4737,
+   4737,
+   4737,
+   4737
+  ],
+  "n_freqs": [
+   18,
+   29,
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T145634Z-screen-e4c778",
+   "verify",
+   "20261116T150941Z-screen-0e777a",
+   "verify"
+  ],
+  "leaf_collision": true
+ },
+ {
+  "design_hash": "1f91c24b38d9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T150941Z-screen-0e777a\\designs\\1f91c24b38d9",
+   "runs\\20261117T044541Z-screen-ffe3dc\\designs\\1f91c24b38d9"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   5160,
+   5160
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T150941Z-screen-0e777a",
+   "20261117T044541Z-screen-ffe3dc"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "f607737ed5f5",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T150941Z-screen-0e777a\\designs\\f607737ed5f5",
+   "runs\\20261116T150941Z-screen-0e777a\\verify\\designs\\f607737ed5f5"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4822,
+   4822
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T150941Z-screen-0e777a",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "13c1d2d1a2cd",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\13c1d2d1a2cd",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\13c1d2d1a2cd",
+   "runs\\20261119T144231Z-screen-c57a35\\designs\\13c1d2d1a2cd"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3065,
+   3065,
+   3065
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767",
+   "20261119T144231Z-screen-c57a35"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "1880f9ed93e8",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\1880f9ed93e8",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\1880f9ed93e8"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4041,
+   4041
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "230255ee99e0",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\230255ee99e0",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\230255ee99e0",
+   "runs\\20261119T144231Z-screen-c57a35\\designs\\230255ee99e0"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4067,
+   4067,
+   4067
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767",
+   "20261119T144231Z-screen-c57a35"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "3303463422d7",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\3303463422d7",
+   "runs\\20261116T152544Z-screen-5f7d93\\verify\\designs\\3303463422d7"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4374,
+   4374
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "366ffa01180b",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\366ffa01180b",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\366ffa01180b"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3307,
+   3307
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "3836ccaf362a",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\3836ccaf362a",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\3836ccaf362a"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3943,
+   3943
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "3f0a50f811a8",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\3f0a50f811a8",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\3f0a50f811a8"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3493,
+   3493
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "4043f5dd7feb",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\4043f5dd7feb",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\4043f5dd7feb"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3737,
+   3737
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "407604ad7496",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\407604ad7496",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\407604ad7496"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3502,
+   3502
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "4784a31e69cf",
+  "n_dirs": 4,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\4784a31e69cf",
+   "runs\\20261116T152544Z-screen-5f7d93\\verify\\designs\\4784a31e69cf",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\4784a31e69cf",
+   "runs\\20261119T144231Z-screen-c57a35\\designs\\4784a31e69cf"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4038,
+   4038,
+   4038,
+   4038
+  ],
+  "n_freqs": [
+   18,
+   29,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "verify",
+   "20261119T090559Z-screen-9b8767",
+   "20261119T144231Z-screen-c57a35"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "4abd15d83245",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\4abd15d83245",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\4abd15d83245",
+   "runs\\20261119T144231Z-screen-c57a35\\designs\\4abd15d83245"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3861,
+   3861,
+   3861
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767",
+   "20261119T144231Z-screen-c57a35"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "55c44c7dab06",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\55c44c7dab06",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\55c44c7dab06"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4079,
+   4079
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "56b153633f43",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\56b153633f43",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\56b153633f43"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3996,
+   3996
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "5bbfbd7413f4",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\5bbfbd7413f4",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\5bbfbd7413f4"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4018,
+   4018
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "5f16faab5f42",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\5f16faab5f42",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\5f16faab5f42"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3768,
+   3768
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "64a23c6e5479",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\64a23c6e5479",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\64a23c6e5479"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3445,
+   3445
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "712a6d72448a",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\712a6d72448a",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\712a6d72448a"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3352,
+   3352
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "7477ae38c09a",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\7477ae38c09a",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\7477ae38c09a"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4319,
+   4319
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "8264cdf4a8b9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\8264cdf4a8b9",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\8264cdf4a8b9"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3918,
+   3918
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "87158e2bff6b",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\87158e2bff6b",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\87158e2bff6b"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3964,
+   3964
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "8a37c61097e5",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\8a37c61097e5",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\8a37c61097e5"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3756,
+   3756
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "909fb0b856eb",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\909fb0b856eb",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\909fb0b856eb"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3955,
+   3955
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "923b281ab49e",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\923b281ab49e",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\923b281ab49e"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3539,
+   3539
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "93dc06694613",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\93dc06694613",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\93dc06694613"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3209,
+   3209
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "9a4e0a6b0ea6",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\9a4e0a6b0ea6",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\9a4e0a6b0ea6",
+   "runs\\20261119T144231Z-screen-c57a35\\designs\\9a4e0a6b0ea6"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4000,
+   4000,
+   4000
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767",
+   "20261119T144231Z-screen-c57a35"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "9b5428e6dec8",
+  "n_dirs": 4,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\9b5428e6dec8",
+   "runs\\20261116T152544Z-screen-5f7d93\\verify\\designs\\9b5428e6dec8",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\9b5428e6dec8",
+   "runs\\20261119T144231Z-screen-c57a35\\designs\\9b5428e6dec8"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4411,
+   4411,
+   4411,
+   4411
+  ],
+  "n_freqs": [
+   18,
+   29,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "verify",
+   "20261119T090559Z-screen-9b8767",
+   "20261119T144231Z-screen-c57a35"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "b95141ab50a1",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\b95141ab50a1",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\b95141ab50a1"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3838,
+   3838
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "b9f49356e8f9",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\b9f49356e8f9",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\b9f49356e8f9"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4080,
+   4080
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "ced2457f7e22",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\ced2457f7e22",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\ced2457f7e22"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3563,
+   3563
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "d324aeb24677",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\d324aeb24677",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\d324aeb24677"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3701,
+   3701
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "d5b2eabbb003",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\d5b2eabbb003",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\d5b2eabbb003"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3872,
+   3872
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "d7ef762ab76b",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\d7ef762ab76b",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\d7ef762ab76b",
+   "runs\\20261119T144231Z-screen-c57a35\\designs\\d7ef762ab76b"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4332,
+   4332,
+   4332
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767",
+   "20261119T144231Z-screen-c57a35"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "da37d2d8ce11",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\da37d2d8ce11",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\da37d2d8ce11"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3709,
+   3709
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "e4d633726a6a",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\e4d633726a6a",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\e4d633726a6a"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4290,
+   4290
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "e5caf617c5e0",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\e5caf617c5e0",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\e5caf617c5e0"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4129,
+   4129
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "f7f76c0cafc2",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\f7f76c0cafc2",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\f7f76c0cafc2"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3431,
+   3431
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "fefe5dbc2852",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261116T152544Z-screen-5f7d93\\designs\\fefe5dbc2852",
+   "runs\\20261119T090559Z-screen-9b8767\\designs\\fefe5dbc2852",
+   "runs\\20261119T144231Z-screen-c57a35\\designs\\fefe5dbc2852"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   3267,
+   3267,
+   3267
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T152544Z-screen-5f7d93",
+   "20261119T090559Z-screen-9b8767",
+   "20261119T144231Z-screen-c57a35"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "6d6dd332b282",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T153619Z-screen-c221aa\\designs\\6d6dd332b282",
+   "runs\\20261116T153619Z-screen-c221aa\\verify\\designs\\6d6dd332b282"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4313,
+   4313
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T153619Z-screen-c221aa",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "6becea152012",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T173311Z-screen-96f899\\designs\\6becea152012",
+   "runs\\20261116T173311Z-screen-96f899\\verify\\designs\\6becea152012"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5128,
+   5128
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T173311Z-screen-96f899",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "cf5575f6a146",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261116T173311Z-screen-96f899\\designs\\cf5575f6a146",
+   "runs\\20261116T173311Z-screen-96f899\\verify\\designs\\cf5575f6a146"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4409,
+   4409
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261116T173311Z-screen-96f899",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "110504da67df",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261117T001240Z-screen-7b664f\\designs\\110504da67df",
+   "runs\\20261119T175926Z-screen-8454e6\\designs\\110504da67df"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4401,
+   4401
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261117T001240Z-screen-7b664f",
+   "20261119T175926Z-screen-8454e6"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "c535bbf5e771",
+  "n_dirs": 7,
+  "dirs": [
+   "runs\\20261117T003115Z-screen-4f7cd5\\designs\\c535bbf5e771",
+   "runs\\20261119T083421Z-screen-ab2159\\designs\\c535bbf5e771",
+   "runs\\20261119T090801Z-screen-6a429f\\designs\\c535bbf5e771",
+   "runs\\20261119T140149Z-screen-f8fffb\\designs\\c535bbf5e771",
+   "runs\\20261119T141723Z-screen-433f54\\designs\\c535bbf5e771",
+   "runs\\20261119T152446Z-screen-d98c8d\\designs\\c535bbf5e771",
+   "runs\\20261119T153950Z-screen-5d766f\\designs\\c535bbf5e771"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   5408,
+   5408,
+   5408,
+   5408,
+   5408,
+   5408,
+   5408
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18,
+   18,
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261117T003115Z-screen-4f7cd5",
+   "20261119T083421Z-screen-ab2159",
+   "20261119T090801Z-screen-6a429f",
+   "20261119T140149Z-screen-f8fffb",
+   "20261119T141723Z-screen-433f54",
+   "20261119T152446Z-screen-d98c8d",
+   "20261119T153950Z-screen-5d766f"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0,
+  "max_abs_dspl_h_db": 0.0
+ },
+ {
+  "design_hash": "ece7bb6a7dbe",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261117T003115Z-screen-4f7cd5\\designs\\ece7bb6a7dbe",
+   "runs\\20261117T003115Z-screen-4f7cd5\\verify\\designs\\ece7bb6a7dbe"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5112,
+   5112
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261117T003115Z-screen-4f7cd5",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "3670cf9479af",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\20261118T133053Z-screen-28c74d\\designs\\3670cf9479af",
+   "runs\\20261118T150417Z-screen-d59c05\\designs\\3670cf9479af"
+  ],
+  "same_grid": true,
+  "same_n_dof": false,
+  "n_dof": [
+   4861,
+   8471
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261118T133053Z-screen-28c74d",
+   "20261118T150417Z-screen-d59c05"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.002147900715727874,
+  "max_abs_dspl_h_db": 0.16343190626516346
+ },
+ {
+  "design_hash": "c39d3682995e",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\20261118T133254Z-screen-704484\\designs\\c39d3682995e",
+   "runs\\20261118T150239Z-screen-84d663\\designs\\c39d3682995e",
+   "runs\\20261118T150846Z-screen-9a04c5\\designs\\c39d3682995e"
+  ],
+  "same_grid": true,
+  "same_n_dof": false,
+  "n_dof": [
+   4765,
+   8259,
+   4765
+  ],
+  "n_freqs": [
+   18,
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "20261118T133254Z-screen-704484",
+   "20261118T150239Z-screen-84d663",
+   "20261118T150846Z-screen-9a04c5"
+  ],
+  "leaf_collision": false,
+  "max_abs_dz": 0.0026357644301834445,
+  "max_abs_dspl_h_db": 0.08590541951977215
+ },
+ {
+  "design_hash": "3f6533769704",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-0c9805ad97208a2e\\screen\\designs\\3f6533769704",
+   "runs\\study-0c9805ad97208a2e\\verify\\designs\\3f6533769704"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3973,
+   3973
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "ba2048252efd",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-0c9805ad97208a2e\\screen\\designs\\ba2048252efd",
+   "runs\\study-0c9805ad97208a2e\\verify\\designs\\ba2048252efd"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4021,
+   4021
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "7ec2fce2716b",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-3a54c233d15fa7cb\\screen\\designs\\7ec2fce2716b",
+   "runs\\study-3a54c233d15fa7cb\\verify\\designs\\7ec2fce2716b"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5442,
+   5442
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "8d1d52af3fc0",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-3a54c233d15fa7cb\\screen\\designs\\8d1d52af3fc0",
+   "runs\\study-3a54c233d15fa7cb\\verify\\designs\\8d1d52af3fc0"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5514,
+   5514
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "a17c2a1906d1",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-3a54c233d15fa7cb\\screen\\designs\\a17c2a1906d1",
+   "runs\\study-3a54c233d15fa7cb\\verify\\designs\\a17c2a1906d1"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5513,
+   5513
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "a85a008a932e",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-3a54c233d15fa7cb\\screen\\designs\\a85a008a932e",
+   "runs\\study-3a54c233d15fa7cb\\verify\\designs\\a85a008a932e"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5332,
+   5332
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "d3ae26eea71b",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-3a54c233d15fa7cb\\screen\\designs\\d3ae26eea71b",
+   "runs\\study-3a54c233d15fa7cb\\verify\\designs\\d3ae26eea71b"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5423,
+   5423
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "d5bd1f15d47a",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-3a54c233d15fa7cb\\screen\\designs\\d5bd1f15d47a",
+   "runs\\study-3a54c233d15fa7cb\\verify\\designs\\d5bd1f15d47a"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5546,
+   5546
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "4592a894c8c8",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-3ddea3acb9d6fd51\\screen\\designs\\4592a894c8c8",
+   "runs\\study-3ddea3acb9d6fd51\\verify\\designs\\4592a894c8c8"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5496,
+   5496
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "5c3583a22bc7",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-3ddea3acb9d6fd51\\screen\\designs\\5c3583a22bc7",
+   "runs\\study-3ddea3acb9d6fd51\\verify\\designs\\5c3583a22bc7"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5472,
+   5472
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "7c03865d0345",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-48298edcdb4292b3\\screen\\designs\\7c03865d0345",
+   "runs\\study-48298edcdb4292b3\\verify\\designs\\7c03865d0345"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5060,
+   5060
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "d99a17c92938",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-48298edcdb4292b3\\screen\\designs\\d99a17c92938",
+   "runs\\study-48298edcdb4292b3\\verify\\designs\\d99a17c92938"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5093,
+   5093
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "303931be5bdd",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-4e1a6a9cd4bb5201\\screen\\designs\\303931be5bdd",
+   "runs\\study-4e1a6a9cd4bb5201\\verify\\designs\\303931be5bdd"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4192,
+   4192
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "4b28ad864c67",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-4e1a6a9cd4bb5201\\screen\\designs\\4b28ad864c67",
+   "runs\\study-4e1a6a9cd4bb5201\\verify\\designs\\4b28ad864c67"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3212,
+   3212
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "71c15d1e4f99",
+  "n_dirs": 3,
+  "dirs": [
+   "runs\\study-4e1a6a9cd4bb5201\\screen\\designs\\71c15d1e4f99",
+   "runs\\study-4e1a6a9cd4bb5201\\verify\\designs\\71c15d1e4f99",
+   "runs\\study-96649869d5111f25\\screen\\designs\\71c15d1e4f99"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3956,
+   3956,
+   3956
+  ],
+  "n_freqs": [
+   18,
+   29,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify",
+   "screen"
+  ],
+  "leaf_collision": true
+ },
+ {
+  "design_hash": "7290b76cac68",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-4e1a6a9cd4bb5201\\screen\\designs\\7290b76cac68",
+   "runs\\study-96649869d5111f25\\screen\\designs\\7290b76cac68"
+  ],
+  "same_grid": true,
+  "same_n_dof": true,
+  "n_dof": [
+   4077,
+   4077
+  ],
+  "n_freqs": [
+   18,
+   18
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "screen"
+  ],
+  "leaf_collision": true,
+  "max_abs_dz": 7.025022280331382e-07,
+  "max_abs_dspl_h_db": 1.488907283686558e-05
+ },
+ {
+  "design_hash": "72a5cab8ce05",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-4e1a6a9cd4bb5201\\screen\\designs\\72a5cab8ce05",
+   "runs\\study-4e1a6a9cd4bb5201\\verify\\designs\\72a5cab8ce05"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4077,
+   4077
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "a23763f1c6fc",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-4e1a6a9cd4bb5201\\screen\\designs\\a23763f1c6fc",
+   "runs\\study-4e1a6a9cd4bb5201\\verify\\designs\\a23763f1c6fc"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4115,
+   4115
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "c3e0fac317ad",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-4e1a6a9cd4bb5201\\screen\\designs\\c3e0fac317ad",
+   "runs\\study-4e1a6a9cd4bb5201\\verify\\designs\\c3e0fac317ad"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4143,
+   4143
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "85f814f7517a",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-7738f3d4821e852a\\screen\\designs\\85f814f7517a",
+   "runs\\study-7738f3d4821e852a\\verify\\designs\\85f814f7517a"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5141,
+   5141
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "96cf093c9305",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-7738f3d4821e852a\\screen\\designs\\96cf093c9305",
+   "runs\\study-7738f3d4821e852a\\verify\\designs\\96cf093c9305"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   5249,
+   5249
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "255e166c49ba",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-9d248c75218573cd\\screen\\designs\\255e166c49ba",
+   "runs\\study-9d248c75218573cd\\verify\\designs\\255e166c49ba"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3603,
+   3603
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "4fd6dfb8b69c",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-9d248c75218573cd\\screen\\designs\\4fd6dfb8b69c",
+   "runs\\study-9d248c75218573cd\\verify\\designs\\4fd6dfb8b69c"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4014,
+   4014
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "55f937aea9f7",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-9d248c75218573cd\\screen\\designs\\55f937aea9f7",
+   "runs\\study-9d248c75218573cd\\verify\\designs\\55f937aea9f7"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3443,
+   3443
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "733cc20351ff",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-9d248c75218573cd\\screen\\designs\\733cc20351ff",
+   "runs\\study-9d248c75218573cd\\verify\\designs\\733cc20351ff"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3970,
+   3970
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "7c1a5cb2af40",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-9d248c75218573cd\\screen\\designs\\7c1a5cb2af40",
+   "runs\\study-9d248c75218573cd\\verify\\designs\\7c1a5cb2af40"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3212,
+   3212
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "922359e77e80",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-9d248c75218573cd\\screen\\designs\\922359e77e80",
+   "runs\\study-9d248c75218573cd\\verify\\designs\\922359e77e80"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   4121,
+   4121
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "22d262dcf81f",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-e312cd2d498983d8\\screen\\designs\\22d262dcf81f",
+   "runs\\study-e312cd2d498983d8\\verify\\designs\\22d262dcf81f"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3114,
+   3114
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "41bb51eafece",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-e312cd2d498983d8\\screen\\designs\\41bb51eafece",
+   "runs\\study-e312cd2d498983d8\\verify\\designs\\41bb51eafece"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   1617,
+   1617
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "5e780f8cb776",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-e312cd2d498983d8\\screen\\designs\\5e780f8cb776",
+   "runs\\study-e312cd2d498983d8\\verify\\designs\\5e780f8cb776"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   2240,
+   2240
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "902b44c0d48f",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-e312cd2d498983d8\\screen\\designs\\902b44c0d48f",
+   "runs\\study-e312cd2d498983d8\\verify\\designs\\902b44c0d48f"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   2443,
+   2443
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "d8508621a241",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-e312cd2d498983d8\\screen\\designs\\d8508621a241",
+   "runs\\study-e312cd2d498983d8\\verify\\designs\\d8508621a241"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3883,
+   3883
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ },
+ {
+  "design_hash": "fad6afe66428",
+  "n_dirs": 2,
+  "dirs": [
+   "runs\\study-e312cd2d498983d8\\screen\\designs\\fad6afe66428",
+   "runs\\study-e312cd2d498983d8\\verify\\designs\\fad6afe66428"
+  ],
+  "same_grid": false,
+  "same_n_dof": true,
+  "n_dof": [
+   3625,
+   3625
+  ],
+  "n_freqs": [
+   18,
+   29
+  ],
+  "backend": [
+   "beat_cuda",
+   "beat_cuda"
+  ],
+  "leaf_names": [
+   "screen",
+   "verify"
+  ],
+  "leaf_collision": false
+ }
+]

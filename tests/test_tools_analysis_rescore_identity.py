@@ -42,3 +42,12 @@ def test_rescore_reports_unscorable_designs_instead_of_hiding_them(tmp_path):
     assert s["n"] == 1 and s["scored"] == 0 and s["lane_best"] == {}
     row = json.loads((tmp_path / "out" / "rescore.jsonl").read_text().splitlines()[0])
     assert row["design_hash"] == "abc" and row["status"] != "exact_complete"
+
+
+def test_run_path_keeps_nested_study_runs_locatable(tmp_path):
+    """F8 (score-term audit 2026-11-19): a nested run's leaf name ("screen") is not unique."""
+    nested = tmp_path / "runs" / "study-abc" / "screen"
+    nested.mkdir(parents=True)
+    assert RI._run_path(nested) == "study-abc/screen"
+    assert RI._run_path(tmp_path / "runs" / "20261116T130335Z-screen-ab4fb9") == "20261116T130335Z-screen-ab4fb9"
+    assert RI._run_path(tmp_path / "elsewhere").endswith("elsewhere")
