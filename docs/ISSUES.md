@@ -1,5 +1,11 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Night fable_vt_b6 ready for owner launch
+
+- OPEN (owner): B6 budget (120 valid per arm, 2 seeds proposed) and the lane set (3 leaders + twinray tail).
+- OPEN (owner box): shape_check all 9 configs, search_preflight (`--from-runs` per lane), copy to
+  runs/nights/, dry-run, launch detached with a cutoff.
+
 ## 2026-11-19 - Typology review done; vt floor 320
 
 - DONE: typology correctness review; H/V pair label fixed; vt bounds 320-465.

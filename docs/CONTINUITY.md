@@ -1,5 +1,17 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Night plan for the new freedom + B6 written (not launched; cloud Fable senior)
+
+- **Night file** `docs/queue/fable_vt_b6_2026-11-19.yaml` (9 jobs, dry-run parses): 1) vt_v1 probe
+  (80 evals, v7, from the exact host); 2-7) **B6 / WP 6.2** matched reruns of the three v10 leaders
+  that tie inside one floor (ext_throat_hvlaw_v7, osse_rrect_fold_warm_v7, osse_rrect_morph_v7):
+  120 VALID evals, v10 brief, seeds 61901/61902, s1 for all before any s2; 8-9) twinray380 v8 tail.
+- **Configs** `examples/typologies/b6_2026-11-19/` (8): R19 `__space_v1` applied for ext_throat
+  (sigma0 0.10) and fold_warm (a0 fix); R20b `record_gate: shadow` on ext_throat; v10 brief replaces
+  target/weights (all load as objective 10). Guard test `tests/test_queue_fable_vt_b6.py`.
+- Estimate [inferred, skill table: 10-30 s/eval for 2-7k dof quarter models]: vt ~0.5-1 h; each B6 arm
+  ~0.5-1.5 h incl. refusals -> 6-10 h for jobs 1-7. Owner box: shape_check + search_preflight, then launch.
+
 ## 2026-11-19 - vt floor 320 (owner); typology correctness review (cloud Fable senior)
 
 - **Owner: vt bounds now 320-465 mm** (floor raised from 275 to limit the pinched lip). `vt_v1.yaml` +
