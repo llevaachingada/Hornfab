@@ -40,6 +40,20 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - Requeue preflight closed; first requeue read (local orchestrator)
+
+- Focused preflight of the two narrowed Klangfilm requeues (`scratch/preflight_scout40w_klangfilm_2026-11-19.log`,
+  exit 0): b3_soft expected hits **5.53** (>3), 14/64 sampled refusals; c200mouth expected hits
+  **23.08** (>3), 27/64 sampled refusals (uniform box, upper bound); both `ok` with `graded_inert`
+  notes only. The earlier all-four-widening pass (31/64 and 20/64 refusals, hits 0.29 and 1.15) is why
+  the boxes were narrowed to the binding key.
+- **First requeue read:** `s40w__lecleach_hv_smooth` finished its 40 evals at **best J 8.186** vs the
+  original's 8.037 (which stopped at 34 valid). The widened V floor (400) did not produce a gain; the
+  requeue also starts from the seed (its warm start is unreadable), so this is a no-gain flag, not a
+  controlled win/loss on the floor alone. The v10 rescore + the remaining requeues decide the lane.
+- Remaining requeues in order: iwata (340 floor, warm start OK), b3_soft (pin_ignore, warm start OK),
+  c200mouth (H setback 0-30, warm start OK), stage_a (pin_ignore, warm start OK).
+
 ## 2026-11-19 - Warm-start fix + requeue corrections (local orchestrator, owner-directed)
 
 - **Production warm start could not read generated rows.** `families.resolve_path` only walks

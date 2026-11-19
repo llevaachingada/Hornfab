@@ -22,6 +22,13 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - Requeue preflight closed; lecleach requeue = no gain (flag)
+
+- DONE: focused preflight for the narrowed Klangfilm requeues (hits 5.53 and 23.08; both ok).
+- NOTE: s40w__lecleach_hv_smooth best 8.186 vs original 8.037 (seed start, no warm start) -> no gain
+  at the widened V floor; read with the v10 rescore before any lane call.
+- OPEN: watch iwata / b3_soft / c200mouth / stage_a requeues for results or watchdog stops.
+
 ## 2026-11-19 - Warm-start fix + requeue corrections
 
 - DONE: `warmstart._param_get` now reads `params.grid.knobs`; test added, focused suite 8/8.
