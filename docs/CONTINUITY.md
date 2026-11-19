@@ -1,5 +1,27 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Top-designs export for cloud agents (CPU only, no GPU)
+
+- **Owner ask:** export the top-10 highest-scored designs for every typology and score set from GPU
+  solves, with all available acoustic data, typology, score, dimensions and geometry parameters; make
+  it a reusable script, register it in CODE_MAP/INDEX, commit and push. **No GPU was used; `runs/`
+  was read-only.**
+- **Tool:** `tools/data/top_designs.py` scans every real `runs/**/search.ndjson` (archive/`_inputs`/
+  `_backup*` skipped), admits provable CUDA rows, dedupes physical solves, ranks ascending J within
+  typology + objective version, and writes the bundle. `--group-by score-config` splits one version
+  by resolved objective+weights+target when strict same-brief comparison is needed. Tests:
+  `tests/test_tools_data_top_designs.py` (**11 passed**).
+- **Measured scope:** 807 ndjson files, 51,192 rows scanned (43,379 GPU), 37,588 unique scored
+  physical solves, **52 typology×score-set groups, 437 selected designs**, 437/437 with stored
+  response arrays. Snapshot 2026-11-19T23:40:55Z, repo HEAD `ddfba68`; the live compact400 night was
+  still appending runs, so regenerate after it finishes to capture new solves.
+- **Data:** `docs/top_designs/` — README (schema/grouping/caveats/queries), `top_designs.csv`
+  (632 KB, 160 flat columns), `top_designs.json` (6.4 MB; shared score configs/runs + nested designs
+  with metric arrays), `top_designs_acoustics.npz` (13.8 MB; H/V cuts, full balloon SPL+directions,
+  complex throat impedance). Raw complex pressure is not copied (local `response.npz` is the source).
+- **Registered:** CODE_MAP and INDEX rows in the same commit. The other lane's uncommitted GUI edits
+  and its budget-driver INDEX row were left untouched and excluded from staging.
+
 ## 2026-11-19 - Appended 7 x 80-eval continuations to the LIVE compact400 queue (local orchestrator)
 
 - **Live queue polled first:** `compact400_next10_2026-11-19` is running (controller pid 23752,

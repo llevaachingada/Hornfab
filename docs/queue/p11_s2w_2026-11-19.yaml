@@ -1,0 +1,31 @@
+# P11 S2W night (2026-11-19, local orchestrator; owner-approved at 80 VALID per lane).
+# The measured follow-up to Q3: both v10 leader lanes are BOUND-PINNED, not budget-limited.
+#   fold_warm: 3/6 of the top 6 at the HIGH limit of L_mm [228.712, 271.912] -> widen hi to 300.
+#   ext_throat: 5/6 of the top 6 at the LOW limit of az_a_cos_pow [1, 6] -> widen lo to 0.75
+#     (0.5 was tried first; uniform-box refusals did not improve, so 0.75 is the shipped widen).
+# Both lanes are seeded AT THE PUBLISHED v10 lane best (not the lane seed - the s1 seeding defect):
+#   fold  seed = 00826f071b24 (J_v10 1.4214), params 1:1 from the study design.json, all inside bounds.
+#   ext   seed = a23763f1c6fc (J_v10 1.5710), params 1:1 EXCEPT the two s1 frozen pins, which win:
+#         r0_mm 27.0507 (published 26.990, 0.2 % off) and a0_deg 4.5 (published 5.602, 1.1 deg off).
+# Provenance recorded in each config's description block. Preflights: fold 24/24 valid; ext box
+# ~62 % uniform-sampling refusals (invalid_geometry) - an UPPER BOUND away from the seed (the tool's
+# own caveat; the s1 run did 31 valid/39 rows on the same box), so this job relaxes the refusal stop.
+# Success test (predeclared): beat the published best (1.4214 / 1.5710) by > v10 floor 0.4677; ties are ties.
+night: p11_s2w_2026-11-19
+lane: gpu
+jobs:
+  - id: p11__fold_warm_s2w
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 7200
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/priority10_2026-11-19/hl__osse_rrect_fold_warm_v7__p11_v10_s2w.yaml
+  - id: p11__ext_throat_s2w
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 7200
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/priority10_2026-11-19/hl__ext_throat_hvlaw_v7__p11_v10_s2w.yaml
+    watchdog: {refusal_max: 0.65}

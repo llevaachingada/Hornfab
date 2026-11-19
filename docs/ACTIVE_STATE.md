@@ -31,11 +31,15 @@ git log --oneline -5; git status --porcelain
 
 ## State, at write time
 
-- **GPU lane:** FREE. `q3_more_solves_2026-11-19` finished 6/6 (~45 min): the v10 leaders are
-  **box-limited** (fold L_mm high, ext-throat az_a_cos_pow low), crowe v2a closed at 6.4779 (tie),
-  first-ever solves of Le Cleach H/V 7.8865 and Crowe ES biradial 9.2355, new rows type `lecleach_ar`
-  storm-limited. Evidence: `docs/evidence/Q3_MORE_SOLVES_2026-11-19.md`. Next GPU move (if authorised):
-  v10 s2 with widened L_mm / az_a_cos_pow + warm starts at the published best designs.
+- **GPU lane:** LIVE — `compact400_next10_2026-11-19` (the compact-slate lane; do not start anything).
+  Its s2w lanes measured: fold **1.3738** (first v10 design below the published 1.4214, tie by floor),
+  ext 1.5710 at 10 valid (inconclusive); morph 1.4243, twinray 1.4568 — three constructions inside one
+  floor of the leader. The p11_s2w night was stopped at launch with zero GPU spent (full duplicate of
+  their s2w lanes); its two configs remain in-tree as a fallback (narrower ext widen + relaxed
+  refusal stop). Evidence: `docs/evidence/Q3_MORE_SOLVES_2026-11-19.md` addendum.
+- **Q3 (done, ~45 min):** v10 leaders are **box-limited** (fold L_mm high, ext-throat az_a_cos_pow
+  low), crowe v2a closed at 6.4779 (tie), first-ever solves of Le Cleach H/V 7.8865 and Crowe ES
+  biradial 9.2355, new rows type `lecleach_ar` storm-limited.
 - **Staged, NOT launched (owner GPU approval needed):** `docs/queue/compact400_next10_2026-11-19.yaml`
   - 8 lanes for horns inside a 400 mm cube under the new `compact400` identity: floor 0.1293 J, stored bar 1.7302.
   - 2 home v10 s2w warm starts.

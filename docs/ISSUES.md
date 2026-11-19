@@ -1,5 +1,34 @@
 ﻿# ISSUES
 
+## 2026-11-19 - P11 s2w attempted; superseded by the compact-slate night (no GPU spent)
+
+- RESOLVED (coordination): the p11_s2w night (box-widened v10 s2 seeded at the published bests, 80
+  valid) collided at launch with `compact400_next10_2026-11-19`, which had independently generated the
+  same s2w lanes from the same Q3 finding and was already running them (its ext s2w held the GPU lock
+  from 18:34:00). This night was stopped cleanly with ZERO jobs run and zero GPU seconds; the lock
+  holder was never touched.
+- DEDUPE: the compact lane's ext s2w is strictly wider (`az_a_cos_pow` lo 0.5, `L_mm` [180,330]) with
+  the same brief/seed/budget -> the p11 ext config is dominated and dropped; their fold s2w covered
+  fold. The two `p11_v10_s2w` configs stay in-tree as provenance + fallback (narrower ext widen +
+  refusal-tolerant watchdog) if their 10-valid ext result stays inconclusive.
+- MEASURED (their night): fold s2w **1.3738** (first v10 design below the published 1.4214; a tie by
+  the 0.4677 floor), ext s2w 1.5710 at 10 valid (inconclusive), morph 1.4243, twinray 1.4568 - three
+  constructions now inside one floor of the leader.
+- OPEN (owner/GPU): the v10 leaderboard is now a 4-way inside-floor cluster (fold 1.3738, morph
+  1.4243, twinray 1.4568, ext 1.5710). Ranking them needs verify-grid solves (same source/mesh/grid),
+  not more screen evals. Do not queue while `compact400_next10_2026-11-19` is live.
+
+## 2026-11-19 - Top-designs export for cloud agents
+
+- DONE (CPU, no GPU): `tools/data/top_designs.py` + `docs/top_designs/` bundle (52 typology×score
+  groups, 437 designs, full acoustic NPZ) + README + CODE_MAP/INDEX rows; tests
+  `tests/test_tools_data_top_designs.py` 11 passed. Snapshot 2026-11-19T23:40:55Z (HEAD `ddfba68`).
+- OPEN (owner/cloud): consume the bundle for cross-typology analysis; if the live compact400 night
+  adds winners, regenerate with `tools/data/top_designs.py` and commit the refreshed files.
+- NOTE: rank only within objective version; `unversioned` is its own set (pre-provenance rows).
+  Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
+  raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
+
 ## 2026-11-19 - 7 x 80-eval continuations appended to the live compact400 queue
 
 - DONE: polled the live queue (compact400 night, job 9/10, GPU locked), checked overlap, appended 7

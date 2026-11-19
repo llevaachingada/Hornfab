@@ -1,0 +1,199 @@
+# P11 v10 S2W (ext lane, 2026-11-19, local orchestrator): box-widened s2 seeded at the PUBLISHED
+# v10 lane best. See the description block for the exact provenance and deviations. 80 VALID (owner).
+name: hl__ext_throat_hvlaw_v7__p11_v10_s2w
+family: OSSE
+seed_params:
+  r0_mm: 27.0507
+  a0_deg: 4.5
+  a_deg: 27.2988140869
+  L_mm: 236.7415459141
+  n: 6.0
+  s: 0.5431598021
+  q: 0.996
+  k: 1.0
+  exponent: 2.0
+  aspect_ratio: 1.0
+  throat_ext_length_mm: 91.6490393703
+  throat_ext_angle_deg: 5.602404984
+  slot_length_mm: 0.0
+  morph_target: 0.0
+  morph_width_mm: 500.0
+  morph_height_mm: 660.0
+  morph_corner_mm: 35.0
+  morph_exponent: 4.0
+  morph_rate: 4.1236
+  morph_fixed: 0.0
+  morph_allow_shrinkage: 0.0
+  wall_thickness_mm: 5.0
+  az_sf_m: 4.0
+  az_sf_n1: 7.4958
+  az_sf_n2: 12.4449
+  az_sf_n3: 13.4442
+  az_sf_a: 1.0
+  az_sf_b: 0.8569
+  az_a_cos_pow: 1.4548282196
+  az_n_cos2_amp: 0.0
+  az_a_sf_amp: 0.0
+  az_a_cos_amp: 15.6890552232
+  az_s_cos2_amp: 0.1325941888
+bounds:
+  r0_mm:
+    lo: 27.0507
+    hi: 27.0507
+    search: false
+  a0_deg:
+    lo: 4.5
+    hi: 4.5
+    search: false
+  a_deg:
+    lo: 15.0
+    hi: 40.0
+  L_mm:
+    lo: 180.0
+    hi: 330.0
+  n:
+    lo: 6.0
+    hi: 6.0
+    search: false
+  s:
+    lo: 0.3
+    hi: 0.9
+  q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  k:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  exponent:
+    lo: 2.0
+    hi: 2.0
+    search: false
+  aspect_ratio:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  throat_ext_length_mm:
+    lo: 60.0
+    hi: 220.0
+  throat_ext_angle_deg:
+    lo: 1.5
+    hi: 6.0
+  slot_length_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  morph_target:
+    lo: 0
+    hi: 0
+    search: false
+  morph_width_mm:
+    lo: 500.0
+    hi: 500.0
+    search: false
+  morph_height_mm:
+    lo: 660.0
+    hi: 660.0
+    search: false
+  morph_corner_mm:
+    lo: 35.0
+    hi: 35.0
+    search: false
+  morph_exponent:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  morph_rate:
+    lo: 4.1236
+    hi: 4.1236
+    search: false
+  morph_fixed:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  morph_allow_shrinkage:
+    lo: 0
+    hi: 0
+    search: false
+  wall_thickness_mm:
+    lo: 5.0
+    hi: 5.0
+    search: false
+  az_sf_m:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  az_sf_n1:
+    lo: 7.4958
+    hi: 7.4958
+    search: false
+  az_sf_n2:
+    lo: 12.4449
+    hi: 12.4449
+    search: false
+  az_sf_n3:
+    lo: 13.4442
+    hi: 13.4442
+    search: false
+  az_sf_a:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  az_sf_b:
+    lo: 0.8569
+    hi: 0.8569
+    search: false
+  az_a_cos_pow:
+    lo: 0.75
+    hi: 6.0
+  az_n_cos2_amp:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  az_a_sf_amp:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  az_a_cos_amp:
+    lo: 0.0
+    hi: 25.0
+  az_s_cos2_amp:
+    lo: -0.25
+    hi: 0.5
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.1
+  seed: 61932
+  budget: 80
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  record_gate: shadow
+description: 'P11 v10 S2W (2026-11-19): the Q3 continuation proved this lane BOUND-PINNED
+  at the LOW limit of az_a_cos_pow (5/6 of the top 6, watchdog verdict). Widen: az_a_cos_pow
+  lo 1 -> 0.5. Seed = the PUBLISHED v10 lane best a23763f1c6fc (J_v10 1.5710, published
+  column run "screen"), params taken 1:1 from runs/study-4e1a6a9cd4bb5201/screen/designs/a23763f1c6fc/design.json
+  EXCEPT the two s1 frozen pins, which win over the published values: r0_mm 27.0507
+  (published 26.990, 0.2 % off) and a0_deg 4.5 (published 5.602, 1.1 deg off) - recorded
+  here, no other change. 80 VALID (owner), CMA seed 61932. Success = beat 1.5710 by
+  > v10 floor 0.4677; ties are ties.'
+brief_file: ../../briefs/home_landscape_2026-11-18_v10/room_landscape_80x50_700_hf1440_v10.yaml

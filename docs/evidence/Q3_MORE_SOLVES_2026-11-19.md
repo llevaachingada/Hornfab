@@ -72,3 +72,31 @@ From a coverage scan of 408 example configs against 702 current runs (config_sha
    can actually beat 1.4214 / 1.5710.
 2. **Fix the `lecleach_ar` box** (narrow AR/stop), re-preflight with the storm-aware expectation, rerun 40.
 3. Leave crowe v2a closed; leave Crowe ES biradial parked with its one data point.
+
+## Addendum — the s2w step was executed by the parallel compact-slate lane (superseded this attempt)
+
+The s2w night proposed above was authored here (`docs/queue/p11_s2w_2026-11-19.yaml`, two configs
+`hl__osse_rrect_fold_warm_v7__p11_v10_s2w` / `hl__ext_throat_hvlaw_v7__p11_v10_s2w`, seeded at the
+published bests, 80 valid as the owner asked) — but while it was being launched, the parallel
+compact-slate night `compact400_next10_2026-11-19` had independently generated the same s2w lanes from
+the same Q3 finding, with a **broader** box, and was already running them. Measured collisions and
+resolution:
+
+- Their ext s2w job held the GPU lock from 18:34:00 (one minute before this night's launch); this
+  night's first job never started (blocked at pre-hygiene, `HORNLAB_GPU_LOCK=refuse`). The night was
+  **paused, then stopped cleanly** (STOP file, then the runner terminated) with **zero jobs run and
+  zero GPU seconds spent** - no lock fight, no perturbation of their solves.
+- Dedupe verdict: their `h_10_ext_throat_v10_s2w` = same brief, same published-best seed
+  (a23763f1c6fc, same knob values incl. the two frozen pins), budget 80, and a **strictly wider** box
+  (`az_a_cos_pow` lo 0.5 vs this 0.75; `L_mm` [180, 330] vs unchanged) -> this lane's ext config is
+  **dominated** and was dropped. Their `h_09_fold_warm_v10_s2w` likewise covered fold.
+- Their measured s2w results so far (their `summary.jsonl`): **fold s2w 1.3738** (30 valid) - the
+  first v10 design below the published 1.4214 (a tie by the 0.4677 floor, but the widened box does
+  find better designs) - and **ext s2w 1.5710 at 10 valid** (inconclusive: the run stopped almost
+  immediately; the published best was not beaten in those evals). Morph s1-side 1.4243 and
+  twinray 1.4568 also appeared, pulling three constructions inside one floor of the leader.
+- This tree's two `p11_v10_s2w` configs remain as provenance and as a **fallback**: if the compact
+  lane's ext s2w result stays inconclusive at 10 valid, a rerun with this lane's narrower
+  `az_a_cos_pow lo 0.75` + the refusal-tolerant watchdog (`refusal_max 0.65`) is the prepared,
+  dedupe-checked next step. Do not queue either while `compact400_next10_2026-11-19` is live.
+

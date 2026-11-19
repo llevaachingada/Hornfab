@@ -1,0 +1,11 @@
+{
+  "night": "p11_s2w_2026-11-19",
+  "allowed_job_ids": [
+    "p11__fold_warm_s2w",
+    "p11__ext_throat_s2w"
+  ],
+  "objective": "v10 (both lanes' own identity, same shipped brief as s1; never ranked against v7 lanes)",
+  "dedupe": "new configs (widened box + published-best seed); fold seed 00826f071b24, ext seed a23763f1c6fc with two frozen pins forced to the s1 values (r0_mm 27.0507, a0_deg 4.5) - recorded in the config descriptions",
+  "budget": "80 valid per lane (owner), CMA seeds 61931/61932",
+  "planned_by": "local orchestrator, 2026-11-19"
+}
