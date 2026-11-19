@@ -40,6 +40,21 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - Requeues all closed: b3_soft 2.800; stage_a tie (local orchestrator)
+
+- **`s40w2__klangfilm_b3_soft` (v2 continuation): best J 2.800** (41 evals, exit 0) from 2.841. The
+  chain is **3.540 -> 2.841 -> 2.800**: 0.74 J below the original SCOUT40 control and slightly better
+  than the historical 2.819 (100-eval) b3 run. The lane is the strongest SCOUT40 result so far and a
+  B6 candidate; the block is its known construction gap (no returning lip), not the search.
+- **`s40w__klangfilm_lame_hv_stage_a`: 8.350 vs 8.393** -> +0.043 (tie, sub-floor). The Phase A lane
+  does not move on this brief; the two hard-floor pins (mid-gains at 0) are physics, not box.
+- Requeue summary (all same v7-smooth briefs, originals as controls):
+  b3_soft 2.841+2.800 (win); lecleach 8.036 (tie); iwata 6.671 (+0.09, tie); c200mouth 10.02 (tie);
+  stage_a 8.350 (tie).
+- Night now at 13/20: `s40__fold_warm_v7` running (warm start removed; seed = lane best), then
+  ext_throat_v7, morph_v8, petal, tritonia v8, rosse_rect (command), crowe_x osse, tritonia v9,
+  crowe_x square, rolled 225/270 pair.
+
 ## 2026-11-19 - c200mouth requeue closed; continuous-read notes (local orchestrator)
 
 - **`s40w__klangfilm_hvcore_c200mouth`: best J 10.02** (43 evals, exit 0) vs 10.156 before -> +0.14 J,

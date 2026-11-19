@@ -22,6 +22,13 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - Requeues all closed; b3_soft 2.800
+
+- DONE: five requeues + the b3 v2 continuation all finished; b3_soft chain 3.540 -> 2.841 -> 2.800
+  (0.74 J under the control; B6 candidate). lecleach/iwata/c200mouth/stage_a are ties.
+- OPEN: night tail (fold_warm onward) + the morning v10 rescore; any further exit-75 gets the same
+  widen-or-pin_ignore requeue.
+
 ## 2026-11-19 - c200mouth requeue = tie; stage_a running
 
 - NOTE: s40w__klangfilm_hvcore_c200mouth 10.02 vs 10.156 (tie, below floor); the H-setback widening
