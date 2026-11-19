@@ -1,5 +1,23 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - P3 mesh endpoint + P4 A/B compare layer (horn + woofer GUI)
+
+- `data_hw.py::hw_mesh` (additive): `GET /api/hw/mesh/<exp>/<case>?part=box|horn` -> flat mm
+  verts/tris + bbox; box = staged `exterior.msh` (parent resolved for solve-only cases), horn =
+  manifest mesh read only through `_inside` with scale/translation applied. Deterministic
+  vertex-cluster decimation above 60 k triangles (`decimated` flag); non-triangle meshes and
+  out-of-store paths refused by name. Real calls: wide box 2010 tris (9.3 ms warm), horn 5950 tris.
+- `data_hw_compare.py` (new): `GET /api/hw/compare?a=&b=` refuses `GRID_MISMATCH` /
+  `PROBE_SET_MISMATCH` / `EXCITATION_MISMATCH` as data; on success per-probe/per-excitation
+  |B_a/B_b| dB + wrapped delta phase + per-band rows. The recorded-evidence statistic
+  `100*max|p_a-p_b|/max|p_b|` reproduces motor A/B LF 119.835 % and XO 140.2-149.4 % (probe band
+  600-1200 Hz) and G6 0.5751 (woofer down30) / 0.3558 (horn down30) exactly; the display bands
+  (LF<500, XO 500-1500, HF>1500) are labelled as display choices. `hw_compare_matrix` emits cells +
+  adjacent-pair edges (`GET /api/hw/compare-matrix?keys=a,b`), wired and tested.
+- Tests: `tests/system/test_gui_hw_mesh.py` (11) + `test_gui_hw_compare.py` (8) + dispatch
+  assertions in `test_gui_hw.py`; the recorded motor/G6 numbers are asserted against the real dirs
+  (skip when absent), not widened. Total focused GUI-data tests: 64 passing.
+
 ## 2026-11-19 - P2 screen data layer + panel-fit recompute (horn + woofer GUI)
 
 - New `gui/data_hw_screen.py`: allow-listed screen-study reads (`system_runs/woofer_seed*`,

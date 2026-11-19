@@ -414,6 +414,177 @@ def _geometry(store: Path, case: Path, row: dict, horn: dict | None) -> dict | N
     return out
 
 
+# --------------------------------------------------------------------------- 3-D mesh (P3)
+
+_FRAME = "BL project frame: x width, y height, z forward (front face at max z)"
+_TRI_CAP = 60000
+_MESH_PARTS = ("box", "horn")
+
+
+def _rel(p: Path, base: Path) -> str:
+    """Store-relative posix name (the caller only ever passes contained files)."""
+    try:
+        return p.resolve().relative_to(base).as_posix()
+    except ValueError:
+        return p.name
+
+
+def _mesh_arrays(path: Path) -> tuple[np.ndarray, np.ndarray]:
+    """(float64 points, int64 triangle indices) from ``meshio``, triangles only.
+
+    A mesh with no triangle cells is refused by name, never silently returned empty.
+    """
+    def read():
+        import meshio
+        mesh = meshio.read(path)
+        found: dict[str, int] = {}
+        for cell in mesh.cells:
+            found[cell.type] = found.get(cell.type, 0) + int(len(cell.data))
+        tris = [np.asarray(c.data, dtype=np.int64) for c in mesh.cells if c.type == "triangle"]
+        tris = [t for t in tris if len(t)]
+        if not tris:
+            types = ", ".join(f"{k} ({v})" for k, v in sorted(found.items())) or "no cells"
+            raise ValueError(f"{Path(path).name}: no triangle cells (found: {types})")
+        return np.asarray(mesh.points, dtype=np.float64), np.vstack(tris)
+    return _cached(("meshio",) + _stamp(Path(path)), read)
+
+
+def _surface_area(points: np.ndarray, tris: np.ndarray) -> float:
+    a, b, c = points[tris[:, 0]], points[tris[:, 1]], points[tris[:, 2]]
+    return float(0.5 * np.linalg.norm(np.cross(b - a, c - a), axis=1).sum())
+
+
+def _cluster(points: np.ndarray, tris: np.ndarray, pitch: float,
+             lo: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Vertex clustering: snap to a ``pitch`` grid anchored at ``lo``, merge, drop junk.
+
+    Retained vertices keep their first-occurrence order from the input array; retained
+    triangles likewise keep their original order.
+    """
+    grid = np.rint((points - lo) / pitch).astype(np.int64)
+    uniq, first, inv = np.unique(grid, axis=0, return_index=True, return_inverse=True)
+    inv = np.asarray(inv).reshape(-1)
+    order = np.argsort(first, kind="stable")
+    rank = np.empty(order.size, dtype=np.int64)
+    rank[order] = np.arange(order.size, dtype=np.int64)
+    verts = lo + uniq[order].astype(np.float64) * pitch
+    t = rank[inv][tris]
+    keep = (t[:, 0] != t[:, 1]) & (t[:, 1] != t[:, 2]) & (t[:, 0] != t[:, 2])
+    t = t[keep]
+    if t.size:
+        _, idx = np.unique(np.sort(t, axis=1), axis=0, return_index=True)
+        t = t[np.sort(idx)]
+    return verts, t
+
+
+def _decimate(points: np.ndarray, tris: np.ndarray,
+              cap: int = _TRI_CAP) -> tuple[np.ndarray, np.ndarray, bool]:
+    """Deterministic vertex clustering down to <= ``cap`` triangles.
+
+    The pitch starts from the surface area and the bbox and grows until the clustered
+    mesh fits: identical input always yields identical vertices and triangles.
+    """
+    lo = points.min(0)
+    ext = float(np.max(points.max(0) - lo))
+    area = _surface_area(points, tris)
+    pitch = 1.4 * math.sqrt(area / cap) if area > 0.0 and cap > 0 else 0.0
+    pitch = max(pitch, ext / 64.0, ext * 1e-6, 1e-9)
+    verts, t = points, tris
+    for _ in range(80):
+        verts, t = _cluster(points, tris, pitch, lo)
+        if len(t) <= cap:
+            return verts, t, True
+        pitch *= 1.25
+    return verts, t, True                           # pitch > bbox: collapses to a handful
+
+
+def _mesh_payload(key: str, part: str, verts: np.ndarray, tris: np.ndarray,
+                  source_files: list[str], frame: str, decimated: bool) -> dict:
+    if len(verts):
+        lo, hi = verts.min(0), verts.max(0)
+        bbox = [[round(float(v), 6) for v in lo], [round(float(v), 6) for v in hi]]
+    else:
+        bbox = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+    return {
+        "key": key, "part": part, "units": "mm", "frame": frame,
+        "verts": np.round(np.asarray(verts, dtype=np.float64), 6).reshape(-1).tolist(),
+        "tris": np.asarray(tris, dtype=np.int64).reshape(-1).tolist(),
+        "bbox": bbox, "triangle_count": int(len(tris)), "decimated": bool(decimated),
+        "source_files": source_files,
+    }
+
+
+def hw_mesh(root: Path, store: Path, key: str, part: str) -> dict:
+    """One part of a case's geometry in mm, flat arrays ready for a WebGL viewer.
+
+    ``part="box"`` is the enclosure surface from the case's own ``bl_output/*/exterior.msh``
+    (a solve-only case uses the staged parent it solved). ``part="horn"`` is the manifest's
+    ``spec.horn.mesh_path``, scaled and translated into the BL project frame; a path outside
+    the store is refused before any read. Triangle-only, no solver, no Boundary Lab import.
+    """
+    if part not in _MESH_PARTS:
+        raise ValueError(f"bad mesh part {part!r}: expected one of {', '.join(_MESH_PARTS)}")
+    case = _resolve_case(store, key)
+    payload, _ = _load_manifest(case)
+    _, horn, parent = _source_params(store, payload)
+    base = Path(store).resolve()
+
+    if part == "box":
+        owner = case if parent is None else _resolve_case(store, parent)
+        files = sorted(p for p in owner.glob("bl_output/*/exterior.msh")
+                       if p.is_file() and base in p.resolve().parents)
+        if not files:
+            raise FileNotFoundError(
+                f"{key}: no enclosure exterior mesh (bl_output/*/exterior.msh) inside the store")
+        source_files = [_rel(p, base) for p in files]
+        stamps = tuple(_stamp(p) for p in files)
+
+        def build_box():
+            chunks, off = [], 0
+            for p in files:
+                v, t = _mesh_arrays(p)
+                chunks.append((v, t + off))
+                off += len(v)
+            verts = np.vstack([v for v, _ in chunks]) * 1000.0      # BL meshes are metres
+            tris = np.vstack([t for _, t in chunks])
+            dec = len(tris) > _TRI_CAP
+            if dec:
+                verts, tris, dec = _decimate(verts, tris)
+            return _mesh_payload(key, "box", verts, tris, source_files, _FRAME, dec)
+
+        return _cached(("hwmesh", "box", key, *stamps), build_box)
+
+    horn = horn if isinstance(horn, dict) else {}
+    mesh_path = horn.get("mesh_path")
+    if not mesh_path:
+        raise FileNotFoundError(f"{key}: no horn mesh recorded (spec.horn.mesh_path missing)")
+    path = _inside(store, mesh_path)
+    if path is None:
+        resolved = Path(mesh_path).resolve()
+        if base not in resolved.parents:
+            raise FileNotFoundError(
+                f"horn mesh {resolved} is outside the store {base}; refusing to read it")
+        raise FileNotFoundError(f"horn mesh {resolved} is not a file inside the store")
+    raw_scale = horn.get("scale_factor")
+    scale = 1.0 if raw_scale is None else float(raw_scale)
+    t_mm = np.asarray(horn.get("translation_mm") or (0.0, 0.0, 0.0), dtype=np.float64)
+    if t_mm.shape != (3,):
+        raise ValueError(f"{key}: horn translation_mm must be three numbers, "
+                         f"got {horn.get('translation_mm')!r}")
+    stamps = _stamp(path)
+
+    def build_horn():
+        pts, tris = _mesh_arrays(path)
+        verts = (pts * scale + t_mm / 1000.0) * 1000.0
+        dec = len(tris) > _TRI_CAP
+        if dec:
+            verts, tris, dec = _decimate(verts, tris)
+        return _mesh_payload(key, "horn", verts, tris, [_rel(path, base)],
+                             _FRAME + "; horn mesh scaled and translated into it", dec)
+
+    return _cached(("hwmesh", "horn", key, stamps, scale, tuple(t_mm.tolist())), build_horn)
+
+
 def _run_view(case: Path) -> dict | None:
     if not (case / "run" / "manifest.json").is_file():
         return None

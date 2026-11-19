@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Horn + woofer GUI P3/P4 backend
+
+- DONE: mesh endpoint (decimation, containment) and A/B compare (mismatch tokens, recorded motor
+  G6 numbers reproduced; matrix edges). Endpoints wired + dispatch-tested.
+- FIXED in wiring: the matrix route originally read only the first `?keys=` value (0 edges for two
+  keys); it now accepts both `?keys=a,b` and repeated `?keys=` (regression asserted).
+- OPEN (this pass): P1 UI revision, P2 screens UI, P3 3-D viewer, P4 compare UI.
+
 ## 2026-11-19 - Horn + woofer GUI P1/P2 progress
 
 - DONE (P2 backend): screen study reader + panel-fit recompute + endpoints; 33 new tests green;

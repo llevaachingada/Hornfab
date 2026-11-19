@@ -502,6 +502,18 @@ class App:
         if sub == "screen" and len(parts) == 2:
             from . import data_hw_screen as SW
             return SW.hw_screen(self.root, self.system_store, parts[1])
+        if sub == "mesh" and len(parts) == 3:
+            part = (q.get("part") or ["box"])[0]
+            return HW.hw_mesh(self.root, self.system_store, f"{parts[1]}/{parts[2]}", part)
+        if sub == "compare" and len(parts) == 1:
+            from . import data_hw_compare as CMP
+            return CMP.hw_compare(self.root, self.system_store,
+                                  (q.get("a") or [""])[0], (q.get("b") or [""])[0])
+        if sub == "compare-matrix" and len(parts) == 1:
+            from . import data_hw_compare as CMP
+            # Accept both ?keys=a,b and repeated ?keys=a&keys=b.
+            keys = [k for v in (q.get("keys") or []) for k in str(v).split(",") if k]
+            return CMP.hw_compare_matrix(self.root, self.system_store, keys)
         raise FileNotFoundError("/".join(["hw", *parts]))
 
     def _budget_hint(self, q: dict) -> dict:

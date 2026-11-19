@@ -233,6 +233,22 @@ def test_server_dispatch(env) -> None:
     with pytest.raises(ValueError):
         app.post("/api/hw/panel-fit", {"height_mm": 9999, "port_throat_area_cm2": 170.0,
                                        "net_volume_l": 115.0, "wall_mm": 18.0})
+    # P3: both mesh parts are wired (the staged fixture has an exterior and a horn mesh).
+    box = app.get("/api/hw/mesh/bl_horn/20261118T000000Z-ok-2-bbbb", {"part": ["box"]})
+    horn = app.get("/api/hw/mesh/bl_horn/20261118T000000Z-ok-2-bbbb", {"part": ["horn"]})
+    assert box["triangle_count"] > 0 and box["units"] == "mm"
+    assert horn["triangle_count"] > 0 and horn["bbox"][0][2] == pytest.approx(17.0)
+    with pytest.raises(ValueError):
+        app.get("/api/hw/mesh/bl_horn/20261118T000000Z-ok-2-bbbb", {"part": ["walls"]})
+    # P4: A/B compare is wired; a case compared with itself is comparable and never summed.
+    solved = "bl_motor/20261119T000000Z-solved-1-aaaa"
+    cmp = app.get("/api/hw/compare", {"a": [solved], "b": [solved]})
+    assert cmp["ok"] is True and "bands" in cmp
+    assert not any("sum" in k.lower() or "combined" in k.lower() for k in cmp)
+    mat = app.get("/api/hw/compare-matrix", {"keys": [solved]})
+    assert len(mat["cells"]) == 1 and mat["edges"] == []
+    with pytest.raises(FileNotFoundError):
+        app.get("/api/hw/compare", {"a": [solved], "b": ["bl_horn/20261118T000000Z-ok-2-bbbb"]})
     with pytest.raises(FileNotFoundError):
         app.get("/api/hw/nope", {})
 
