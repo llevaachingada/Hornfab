@@ -1,5 +1,12 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Fable v2 lanes queued (Klangfilm vbeak, rolled vbeak + hybrid)
+
+- OPEN (owner box): shape_check/dof the 4 `fable_v2_2026-11-19` configs; job 1 (record control) must reproduce
+  J 7.446 +-0.05 or lane 2 is untrusted.
+- NOTE: comment-only kernel edits change `implementation_sha256` (b06a938): saved Klangfilm recipes are refused
+  ("bridge" class). Rebuild-from-knobs works; consider a digest that ignores docstrings.
+
 ## 2026-11-18 - Run artifacts archived to docs/evidence/runs
 
 - DONE (local orchestrator): hl__klangfilm_lame_curved_v1 (f30bd2), _c200 (517217) and

@@ -17,7 +17,10 @@ def _cfg_path(job):
 
 def test_scout40_jobs_are_budgeted_and_grouped():
     jobs = yaml.safe_load(NIGHT.read_text(encoding="utf-8"))["jobs"]
-    assert len(jobs) == 18 and len({j["id"] for j in jobs}) == 18
+    assert len(jobs) == 22 and len({j["id"] for j in jobs}) == 22
+    v2 = [j for j in jobs if j["id"].startswith("fv2__")]
+    assert [j["id"] for j in jobs[:4]] == [j["id"] for j in v2] and len(v2) == 4
+    jobs = [j for j in jobs if not j["id"].startswith("fv2__")]
     smooth = 0
     for j in jobs:
         p = _cfg_path(j)
@@ -36,3 +39,4 @@ def test_scout40_jobs_are_budgeted_and_grouped():
             assert ws["top_k"] == 10 and not ws.get("allow_cross_brief", False)
     assert smooth == 6
     assert all("smooth" in str(yaml.safe_load(_cfg_path(j).read_text(encoding="utf-8"))["brief_file"]) for j in jobs[:6])
+

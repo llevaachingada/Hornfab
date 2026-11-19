@@ -32,24 +32,41 @@ def points_digest(inner: np.ndarray, sampler_version: str = SAMPLER_VERSION) -> 
     return h.hexdigest()
 
 
+#: Outer-shell constructions: "grid" = ``grid.grid_outer_points`` (default; the WP 4.2-validated
+#: route), "normal" = ``lame_shell.offset_quarter_surface`` (sampled 3D surface normal + self-approach
+#: check), the shell the Klangfilm-Lame families build, so a Klangfilm host replays its own shell.
+OUTER_OFFSETS = ("grid", "normal")
+
+
 def spec_from_record(rec, *, wall_thickness_mm: float, source_auto_angle_deg: float,
-                     name: str = "grid") -> dict:
+                     name: str = "grid", outer_offset: str = "grid") -> dict:
     """The grid recipe for a :class:`geometry.record.SurfaceRecord` (inline points)."""
     inner = np.asarray(rec.inner, dtype=float)
+    if outer_offset not in OUTER_OFFSETS:
+        raise GeneratorError(f"{KIND}: outer_offset must be one of {OUTER_OFFSETS}")
+    extra = {} if outer_offset == "grid" else {"outer_offset": outer_offset}
     return {"name": name, "n_phi": int(inner.shape[0]), "n_s": int(inner.shape[1]),
             "wall_thickness_mm": float(wall_thickness_mm),
             "rows": {"type": KIND, "implementation_sha256": points_digest(inner, rec.sampler_version),
                      "sampler_version": rec.sampler_version,
                      "source_auto_angle_deg": float(source_auto_angle_deg),
                      "edit": (rec.meta or {}).get("edit"),
+                     **extra,
                      "points": inner.tolist()}}
 
 
-# WP 4.4 (senior verdict 2026-11-19): the U3 vertical-timing freedom as two searched knobs on an
-# explicit record body. ``g_vt_mm`` = total V-wall mouth height (mm); ``g_vt_hold`` = how much the
-# early V-wall growth is held back (0 = none). (host mouth height, 0) reproduces the host exactly,
-# so the control is inside the space; a single height knob at fixed hold could not express it.
+# WP 4.4 (senior verdict 2026-11-19): record-edit freedoms as searched knobs on an explicit record body.
+#   vertical timing (pair): ``g_vt_mm`` = total V-wall mouth height (mm); ``g_vt_hold`` = how much the early
+#     V-wall growth is held back (0 = none). (host mouth height, 0) reproduces the host exactly.
+#   V-lip beak (2026-11-19): ``g_beak_v_mm`` = axial projection of the top/bottom lips (0 = none);
+#     optional ``g_beak_start`` = wall fraction where it starts (default 0.7; inert at 0 mm).
+# Every knob has a host value inside its bounds, so the control is always reachable.
 VT_KNOBS = ("g_vt_hold", "g_vt_mm")
+BEAK_KNOBS = ("g_beak_v_mm", "g_beak_start")
+ALL_KNOBS = VT_KNOBS + BEAK_KNOBS
+BEAK_START_DEFAULT = 0.7
+#: a rolled lip may approach its own body, never closer than this (or the host's own clearance)
+MIN_LIP_CLEARANCE_MM = 2.0
 
 
 def _host_record(inner, rows):
@@ -63,42 +80,65 @@ def _host_record(inner, rows):
 def _knob_values(knobs) -> dict | None:
     if not knobs:
         return None
-    unknown = sorted(set(knobs) - set(VT_KNOBS))
+    unknown = sorted(set(knobs) - set(ALL_KNOBS))
     if unknown:
-        raise GeneratorError(f"{KIND}: unknown knobs {unknown}; allowed {list(VT_KNOBS)}")
-    missing = [k for k in VT_KNOBS if k not in knobs]
-    if missing:
-        raise GeneratorError(f"{KIND}: vertical timing needs both {list(VT_KNOBS)}, missing {missing}")
-    vals = {k: float(knobs[k]) for k in VT_KNOBS}
+        raise GeneratorError(f"{KIND}: unknown knobs {unknown}; allowed {list(ALL_KNOBS)}")
+    vals = {k: float(knobs[k]) for k in knobs}
     if not all(np.isfinite(v) for v in vals.values()):
-        raise GeneratorError(f"{KIND}: vt knobs must be finite")
-    if not 0.0 <= vals["g_vt_hold"] <= 0.9:
-        raise GeneratorError(f"{KIND}: g_vt_hold {vals['g_vt_hold']} outside [0, 0.9]")
-    if vals["g_vt_mm"] <= 0.0:
-        raise GeneratorError(f"{KIND}: g_vt_mm must be positive")
+        raise GeneratorError(f"{KIND}: record-edit knobs must be finite")
+    if any(k in vals for k in VT_KNOBS):
+        missing = [k for k in VT_KNOBS if k not in vals]
+        if missing:
+            raise GeneratorError(f"{KIND}: vertical timing needs both {list(VT_KNOBS)}, missing {missing}")
+        if not 0.0 <= vals["g_vt_hold"] <= 0.9:
+            raise GeneratorError(f"{KIND}: g_vt_hold {vals['g_vt_hold']} outside [0, 0.9]")
+        if vals["g_vt_mm"] <= 0.0:
+            raise GeneratorError(f"{KIND}: g_vt_mm must be positive")
+    if "g_beak_start" in vals and "g_beak_v_mm" not in vals:
+        raise GeneratorError(f"{KIND}: g_beak_start needs g_beak_v_mm")
+    if not -30.0 <= vals.get("g_beak_v_mm", 0.0) <= 60.0:
+        raise GeneratorError(f"{KIND}: g_beak_v_mm {vals['g_beak_v_mm']} outside [-30, 60]")
+    if not 0.3 <= vals.get("g_beak_start", BEAK_START_DEFAULT) <= 0.95:
+        raise GeneratorError(f"{KIND}: g_beak_start {vals['g_beak_start']} outside [0.3, 0.95]")
     return vals
 
 
 def apply_knobs(inner: np.ndarray, rows: dict, knobs) -> tuple[np.ndarray, str | None]:
-    """Apply the vt edit to verified host points; refuse a result that fails the U2 structure
-    checks (fold before the lip, shrinking W/H before the lip, non-positive radius)."""
+    """Apply the record edits (vertical timing, then the V-lip beak) to verified host points.
+
+    Validity is RELATIVE to the host: a U2 structure check (fold before the lip, shrinking W/H before
+    the lip, non-positive radius) refuses the edit only if the host passed it, so rolled-lip hosts
+    (which fold back by design) can be edited; the lip may not come closer to the body than
+    ``MIN_LIP_CLEARANCE_MM`` (or the host's own clearance, if smaller)."""
     vals = _knob_values(knobs)
     if vals is None:
         return inner, rows.get("edit")
     from hornlab_search.geometry import edits
     host = _host_record(inner, rows)
-    v = edits.vertical_timing(host, mouth_height_mm=vals["g_vt_mm"], strength=vals["g_vt_hold"])
-    chk = edits.validity(v)
-    if not chk["ok"]:
-        bad = sorted(k for k, x in chk.items() if x is False)
-        raise GeneratorError(f"{KIND}: vt edit (h={vals['g_vt_mm']:g}, hold={vals['g_vt_hold']:g}) "
-                             f"fails structure checks {bad}")
-    return v.inner, v.meta.get("edit")
+    v = host
+    names = []
+    if "g_vt_mm" in vals:
+        v = edits.vertical_timing(v, mouth_height_mm=vals["g_vt_mm"], strength=vals["g_vt_hold"])
+        names.append(v.meta.get("edit"))
+    if vals.get("g_beak_v_mm", 0.0) != 0.0:
+        v = edits.vertical_beak(v, projection_mm=vals["g_beak_v_mm"],
+                                start=vals.get("g_beak_start", BEAK_START_DEFAULT))
+        names.append(v.meta.get("edit"))
+    ref, chk = edits.validity(host), edits.validity(v)
+    bad = sorted(k for k, x in chk.items() if x is False and ref.get(k) is True)
+    if bad:
+        raise GeneratorError(f"{KIND}: record edit {vals} fails structure checks the host passes {bad}")
+    need = min(MIN_LIP_CLEARANCE_MM, edits.lip_clearance_mm(host))
+    got = edits.lip_clearance_mm(v)
+    if got < need - 1e-9:
+        raise GeneratorError(f"{KIND}: record edit {vals} brings the lip within {got:.2f} mm of the wall "
+                             f"(minimum {need:.2f} mm)")
+    return v.inner, " + ".join(n for n in names if n) or None
 
 
-def host_mouth_height_mm(inner: np.ndarray) -> float:
-    """The (g_vt_mm, g_vt_hold=0) value that reproduces the host exactly."""
-    return float(2.0 * np.linalg.norm(np.asarray(inner, float)[-1, -1, :2]))
+def host_value(inner: np.ndarray, knob: str) -> float | None:
+    """The knob value that reproduces the host exactly (None: inert at the host, any value is fine)."""
+    return {"g_vt_mm": host_mouth_height_mm(inner), "g_vt_hold": 0.0, "g_beak_v_mm": 0.0}.get(knob)
 
 
 def design_params(spec, knobs, brief) -> dict:
@@ -110,22 +150,27 @@ def design_params(spec, knobs, brief) -> dict:
 
 
 def validate_search_config(spec, seed, bounds, brief) -> None:
-    """Every vt knob needs a seed and an explicit bound; the bounds must contain the host
-    (control) point so the search can return to the unedited horn."""
+    """Every knob needs a seed and an explicit bound; each bound must contain the host value of its
+    knob so the search can return to the unedited horn."""
     if not seed:
         return
     vals = _knob_values(seed)
-    if not isinstance(bounds, dict) or set(bounds) != set(VT_KNOBS):
-        raise GeneratorError(f"{KIND}: bounds must name exactly {list(VT_KNOBS)}")
+    if not isinstance(bounds, dict) or set(bounds) != set(vals):
+        raise GeneratorError(f"{KIND}: bounds must name exactly the seeded knobs {sorted(vals)}")
     inner = np.asarray(((spec or {}).get("rows") or {}).get("points"), dtype=float)
-    ctl = {"g_vt_mm": host_mouth_height_mm(inner), "g_vt_hold": 0.0}
-    for k in VT_KNOBS:
+    for k in sorted(vals):
         lo, hi = float(bounds[k].lo), float(bounds[k].hi)
         if not lo <= vals[k] <= hi:
             raise GeneratorError(f"{KIND}: seed {k}={vals[k]:g} outside [{lo:g}, {hi:g}]")
-        if not lo - 1e-6 <= ctl[k] <= hi + 1e-6:
+        h = host_value(inner, k)
+        if h is not None and not lo - 1e-6 <= h <= hi + 1e-6:
             raise GeneratorError(f"{KIND}: bounds of {k} [{lo:g}, {hi:g}] exclude the host value "
-                                 f"{ctl[k]:.1f} (control must be reachable)")
+                                 f"{h:.1f} (control must be reachable)")
+
+
+def host_mouth_height_mm(inner: np.ndarray) -> float:
+    """The (g_vt_mm, g_vt_hold=0) value that reproduces the host exactly."""
+    return float(2.0 * np.linalg.norm(np.asarray(inner, float)[-1, -1, :2]))
 
 
 def resolve_grid(block, brief) -> dict:
@@ -150,7 +195,15 @@ def resolve_grid(block, brief) -> dict:
     if (brief or {}).get("mounting"):
         raise GeneratorError(f"{KIND}: explicit record bodies are freestanding only in this pass")
     t = float(block.get("wall_thickness_mm", 3.0))
-    outer = grid.grid_outer_points(inner, t)
+    mode = str(rows.get("outer_offset") or "grid")
+    if mode not in OUTER_OFFSETS:
+        raise GeneratorError(f"{KIND}: outer_offset must be one of {OUTER_OFFSETS}")
+    if mode == "normal":
+        from . import lame_shell
+        outer, _ = lame_shell.offset_quarter_surface(inner, t)
+        grid.check_self_approach(inner, outer, t)
+    else:
+        outer = grid.grid_outer_points(inner, t)
     angle = float(rows.get("source_auto_angle_deg", 0.0))
     if not abs(angle) > 1e-9:
         raise GeneratorError(f"{KIND}: source_auto_angle_deg must be nonzero")

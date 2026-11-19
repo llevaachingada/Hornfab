@@ -71,6 +71,34 @@ def vertical_timing(rec: SurfaceRecord, *, mouth_height_mm: float, hold: float =
     return apply_radial_edit(rec, delta, name=f"vertical_timing(h={mouth_height_mm},k={strength})")
 
 
+def vertical_beak(rec: SurfaceRecord, *, projection_mm: float, start: float = 0.7) -> SurfaceRecord:
+    """V-lip beak (2026-11-19): axial offset ``dz = +D sin^2(phi) Q((u - start)/(1 - start))`` after
+    ``start`` of the wall (Q = C2 quintic gate), so the top/bottom lips project forward while the side
+    walls stay put. Same construction as the Klangfilm Phase B ``beak_v_projection_mm``
+    (``design/generators/_klangfilm_lame_hv_core_v1.py``), here as a record edit so it applies to any
+    host, including rolled lips. D = 0 is an exact no-op. [original-hypothesis] acoustic role."""
+    u, phi = _grid_uv(rec)
+    w = np.sin(0.5 * math.pi * phi) ** 2
+    x = np.clip((u - start) / max(1.0 - start, 1e-9), 0.0, 1.0)
+    gate = np.where(u >= start, x ** 3 * (10.0 - 15.0 * x + 6.0 * x ** 2), 0.0)
+    dz = float(projection_mm) * w * gate
+    new = rec.inner.copy()
+    new[:, :, 2] = new[:, :, 2] + dz
+    meta = {**rec.meta, "edit": f"vertical_beak(D={projection_mm},start={start})",
+            "parent_digest": rec.digest()}
+    return dataclasses.replace(rec, inner=new, meta=meta)
+
+
+def lip_clearance_mm(rec: SurfaceRecord) -> float:
+    """Minimum distance from the last (lip) station to the wall stations before the last three:
+    a rolled lip that curls into its own body gets a small value (the Phase B kernel's check)."""
+    lip = rec.inner[:, -1, :]
+    body = rec.inner[:, :-3, :].reshape(-1, 3)
+    if body.size == 0:
+        return float("inf")
+    return float(np.linalg.norm(lip[:, None, :] - body[None, :, :], axis=-1).min())
+
+
 def termination_split(rec: SurfaceRecord, *, side: str, extra_mm: float = 15.0) -> SurfaceRecord:
     """U3 (b): extra outward flare in the last ``LIP_FRACTION`` of the wall on the sides
     (``side='h'``) or on top and bottom (``side='v'``) only."""

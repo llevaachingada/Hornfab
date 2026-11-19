@@ -1,5 +1,21 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Fable v2: Klangfilm-Lame c200 + rolled h12 rebuilt on v10 with V opening + V-lip beak; queued first (cloud Fable senior)
+
+- Diagnosis from the archived runs (`docs/evidence/runs/`): both lose most J to the v7 `diag` term (round 65-deg
+  diagonal reference; 46 % of c200, 27 % of h12) which does not apply to landscape mouths; Klangfilm V has no
+  pattern control below ~2.3 kHz (223 mm V mouth, 219 mm of box height unused); rolled H blows out 103->136 deg at
+  1-1.8 kHz. Scorer: **v10 corridor** (H 60-90 / V 40-60; owner allowed a range or 60x40).
+- Code: `geometry/edits.vertical_beak` + `lip_clearance_mm`; `record_body` knobs `g_beak_v_mm` / `g_beak_start`
+  (plus vt), host-relative validity (rolled hosts), `rows.outer_offset: normal` (Klangfilm's own shell). Klangfilm
+  host replays the family geometry bit-for-bit; rolled host replays exactly. Tests `test_design_record_body_beak.py`
+  (8) + vt (10) pass.
+- Lanes `examples/typologies/fable_v2_2026-11-19/` (4) inserted at the TOP of SCOUT40 (now 22 jobs): record control
+  (1 solve, smooth), Klangfilm vbeak (60), rolled record vbeak (40), rolled hybrid 13-knob (80). Rationale +
+  predeclared pass rules: `docs/research/typologies/FABLE_V2_KLANGFILM_ROLLED_2026-11-19.md`.
+- Found: the saved c200 recipe is refused at HEAD ("implementation differs") because b06a938's comment-only kernel
+  edit changed the digest; rebuilt from the same knobs (math unchanged, mesh bbox matches the archived mesh).
+
 ## 2026-11-18 - Run artifacts archived to docs/evidence/runs (owner request)
 
 - Owner asked that three run dirs be committed/pushed with geometry + scores. `runs/` is gitignored,
