@@ -1,5 +1,14 @@
 ﻿# ISSUES
 
+## 2026-11-19 - 7 x 80-eval continuations appended to the live compact400 queue
+
+- DONE: polled the live queue (compact400 night, job 9/10, GPU locked), checked overlap, appended 7
+  continuations (jobs 11-17) to the live + docs/queue night files. Warm starts + shape_check pass.
+- OPEN (after the appended jobs): read the compact400 winners (morph 1.4243 / twinray 1.4568 / fold
+  1.4677 vs the 1.7302 bar) and the v7 lanes (petal 4.162, tri v8 4.891, tri v9 4.878, b3 2.800);
+  v10 rescore for the v7 rows; B6 lane set.
+- NOTE: mixed briefs in one night file; the append header states J is not comparable across groups.
+
 ## 2026-11-19 - compact400 (400 mm cube) + next-10 night staged
 
 - DONE (CPU): compact400 brief identity + floor 0.1293 J + stored bar 1.7302; 10 configs shape-checked

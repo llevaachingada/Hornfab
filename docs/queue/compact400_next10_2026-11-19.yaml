@@ -96,3 +96,63 @@ jobs:
     timeout_s: 5400
     env: {HORNLAB_GPU_LOCK: refuse}
     config: examples/typologies/compact400_2026-11-19/h_10_ext_throat_v10_s2w__hl__ext_throat_hvlaw_v7__b6_v10_s2.yaml
+  # ---- APPENDED 2026-11-19 (local orchestrator, owner-directed): 80-eval continuations from the
+  # SCOUT40W2/W3 findings and the compact400 winners. Mixed briefs: c4x_* = compact400 (v10xo),
+  # scout40w4__* = v7 home (petal/tritonia) and v7 smooth (klangfilm b3) -> J is NOT comparable
+  # across groups. Every lane warm-starts at its finished best; the measured pins ride pin_ignore.
+  - id: c4x_01_morph_cont
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4x_01_morph_cont.yaml
+    watchdog: {pin_ignore: [morph_width_mm]}
+  - id: c4x_02_twinray_cont
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4x_02_twinray_cont.yaml
+    watchdog: {pin_ignore: [k]}
+  - id: c4x_03_fold_cont
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4x_03_fold_cont.yaml
+    watchdog: {pin_ignore: [q]}
+  - id: w4__petal_hvlaw_v7
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/scout40w4_2026-11-19/scout40w4__petal_hvlaw_v7.yaml
+    watchdog: {pin_ignore: [q]}
+  - id: w4__tritonia_v8
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/scout40w4_2026-11-19/scout40w4__tritonia_v8.yaml
+    watchdog: {pin_ignore: [az_fold_v_deg, az_fold_v_width_deg, morph_width_mm]}
+  - id: w4__tritonia_v9
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/scout40w4_2026-11-19/scout40w4__tritonia_v9.yaml
+    watchdog: {pin_ignore: [az_fold_v_deg, az_fold_v_width_deg, morph_width_mm]}
+  - id: w4__klangfilm_b3_soft
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/scout40w4_2026-11-19/scout40w4__klangfilm_b3_soft.yaml
+    watchdog: {pin_ignore: [g_beak_v_projection_mm, g_theta_h1_deg, g_theta_v1_deg]}

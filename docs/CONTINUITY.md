@@ -1,5 +1,32 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Appended 7 x 80-eval continuations to the LIVE compact400 queue (local orchestrator)
+
+- **Live queue polled first:** `compact400_next10_2026-11-19` is running (controller pid 23752,
+  runner 27612/46928, GPU lock held by the job); job 9/10 (`c4n__09_fold_warm_v10_s2w`) was at 6 rows.
+  No interruption was made; the jobs below were APPENDED to `runs/nights/compact400_next10_...yaml`
+  and its `docs/queue` source; the runner re-reads the file at every job boundary.
+- **My night `fable_scout40w2` finished 15/15** (recorded earlier): petal 4.162, tritonia v8 4.891,
+  tritonia v9 4.878, crowe_x square 7.598, fold/morph ties (closed), rosse tie, crowe_x osse no-headroom.
+  These are the v7 home/smooth briefs; the compact400 night runs the v10xo compact brief - J is NOT
+  comparable across the groups (the append header says so in the file).
+- **Appended (jobs 11-17, each budget 80, 5400 s, HORNLAB_GPU_LOCK=refuse, warm start at its best):**
+  1. `c4x_01_morph_cont` (compact400): from 1.4243, morph_width widened to the 400 mm envelope.
+  2. `c4x_02_twinray_cont` (compact400): from 1.4568, k widened to 2.5 (osse_baseline documented range).
+  3. `c4x_03_fold_cont` (compact400): from 1.4677, q widened to the OSSE cap 1.0.
+  4. `w4__petal_hvlaw_v7` (v7 home): from 4.162, q cap pin-ignored.
+  5. `w4__tritonia_v8` (v7 home): from 4.891, az_fold_v widened to -10, fold knobs pin-ignored.
+  6. `w4__tritonia_v9` (v7 home): from 4.878 (the W2 best; the W3's az_fold_v widen regressed), keep
+     the W2 angle box, az_fold_v_width widened to 3..40, fold knobs pin-ignored.
+  7. `w4__klangfilm_b3_soft` (v7 smooth): from 2.800 (3.540 -> 2.841 -> 2.800), hard ceilings pin-ignored.
+- **Gates:** all 7 production warm starts read OK (means 2.8002 / 4.1616 / 4.8911 / 4.8785 / 1.4243 /
+  1.4568 / 1.4677 at budget 80); `shape_check` all PASS (2.8-5.4k / 24000 dof). Configs:
+  `examples/typologies/scout40w4_2026-11-19/` and `examples/typologies/compact400_2026-11-19/c4x_*`.
+- **Overlap check:** the live night already reuses my `scout40w3` petal/tritonia_v8 configs at the
+  400-cube brief (c4_04/c4_05), and its jobs 9-10 are the other lane's v10 s2w widenings. The appended
+  compact continuations target the lanes that BEAT the compact400 bar 1.7302 (morph/twinray/fold); the
+  v7 lanes are distinct briefs. No duplication of the v10 s2w work.
+
 ## 2026-11-19 - compact400: 400 mm-cube horns + next-10 night STAGED (Fable senior, CPU only)
 
 - **Owner ask:** have 10 next queue items ready, focused on the best improvement opportunities and on
