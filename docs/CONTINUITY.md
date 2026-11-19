@@ -60,6 +60,18 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40W2: morph W3 appended; tritonia v8 running (local orchestrator)
+
+- `s40x__morph_v8` (W2, morph_rate widened): best **3.232** (25 evals) vs the control 3.402 (+0.17,
+  sub-floor), then stopped by a **refusal storm 44%** over the last 25 attempts (not a pin). The
+  documented remedy is `infeasible_penalty: resample_strict` + `error_policy: retry_same_then_stop`
+  (a widen would add illegal territory). W3 continuation
+  `examples/typologies/scout40w2_2026-11-19/scout40w3__morph_v8.yaml` keeps the widened morph_rate,
+  adds that pair, and warm-starts from 3.232 (mean 69aca6e15dca); appended as `s40x3__morph_v8`
+  (job 10). Shape-check pass.
+- Night `fable_scout40w2_2026-11-19` is on job 3: `s40x__tritonia_v8` (21 evals, best 5.373 vs the
+  5.325 control; the morph_width pin_ignore is active).
+
 ## 2026-11-19 - SCOUT40W2 progress: fold w3 appended; morph running (local orchestrator)
 
 - `s40x__fold_warm` (W2, az_fold_h widened): best **3.682** (31 evals) vs the SCOUT40 control 3.754

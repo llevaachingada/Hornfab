@@ -31,6 +31,12 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - W2: morph W3 appended (refusal storm -> resample_strict)
+
+- DONE: morph W3 (resample_strict + error_policy, warm from 3.232) appended; fold W3 also queued.
+- LIVE: fable_scout40w2 job 3/10 (tritonia_v8, 5.373 vs 5.325).
+- OPEN: archive the W2 runs when done; morning v10 rescore + B6.
+
 ## 2026-11-19 - W2 progress: fold w3 appended
 
 - DONE: fold W3 continuation appended (both fold widths 3..40, warm from 3.682).
