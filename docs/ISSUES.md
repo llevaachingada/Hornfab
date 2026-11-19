@@ -31,6 +31,13 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - SCOUT40W2 preflight notes
+
+- NOTE: petal 37.5% sampled refusals (box-limited; resample_strict keeps budget valid); crowe_x osse
+  no_headroom (seed == prior best; local continuation); crowe_x square report empty, exit 0.
+- LIVE: fable_scout40w2 (fold_warm at 24 evals, 3.682 vs 3.754).
+- OPEN: archive the W2 runs when the night finishes; then the v10 rescore + B6.
+
 ## 2026-11-19 - SCOUT40W2 launched (8 tail watchdog lanes)
 
 - DONE: the eight later exit-75 lanes requeued with measured fixes (2 widens, 3 hard-limit

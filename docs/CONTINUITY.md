@@ -60,6 +60,21 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40W2 preflight notes (local orchestrator)
+
+- Focused preflight of the three resample_strict lanes (`scratch/preflight_scout40w2_2026-11-19.log`,
+  exit 0, no hard faults):
+  - `petal_hvlaw_v7`: 24/64 sampled refusals (37.5%, invalid_geometry), predicted 25 valid of 40 -
+    the box/genotype, not the penalty, is the limiter; `resample_strict` keeps the budget valid but
+    the lane may run slowly. Recorded; the run continues.
+  - `crowe_x_osse_cd_v7`: `no_headroom` - the seed design hash EQUALS the prior best (the config seed
+    was set to the lane best), so this run is a local continuation, not a new search; 18/64 refusals
+    (invalid_envelope), expected hits 2.23. Recorded; the run continues as the owner-directed requeue.
+  - `crowe_x_square_v7`: report section empty in the mixed-encoding log; the script exited 0 (no hard
+    fault). Recorded as such.
+- Night `fable_scout40w2_2026-11-19` running: `s40x__fold_warm` at 24 evals, best J 3.682 vs the
+  SCOUT40 control 3.754 (+0.07 so far, sub-floor). Remaining jobs follow sequentially.
+
 ## 2026-11-19 - SCOUT40W2 follow-on night launched (8 tail watchdog lanes)
 
 - The eight remaining SCOUT40 lanes stopped by the watchdog are requeued as
