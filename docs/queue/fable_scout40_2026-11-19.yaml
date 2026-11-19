@@ -8,23 +8,32 @@
 # Read it as "which spaces still move": a lane whose best improves by MORE than the floor (v7 0.31 J) in 40 evals
 # is promising and goes to the matched B6 rerun; a smaller gain is a tie with noise. v10 ranking = free offline
 # rescore afterwards (R1: nights search on v7).
-# Two briefs: jobs 1-13 home v7 (CD intent); jobs 14-17 the SMOOTH brief (non-CD constructions, own brief by
-# design); J is NOT comparable between the two groups.
+# Two briefs: jobs 1-6 the SMOOTH brief (non-CD constructions, owner: run first); jobs 7-18 home v7 (CD intent) ; J is NOT comparable between the two groups.
 # Order = priority; timeout 1 h per job; the cutoff drops the tail. Estimate [inferred]: 15-45 min per job,
-# 18 jobs ~6-12 h.
+# 18 jobs ~6-12 h. Owner edit 2026-11-19: smooth group first, +2 Klangfilm-Lame versions, morph v7 / twinray v8 removed.
 night: fable_scout40_2026-11-19
 lane: gpu
 jobs:
+  # ---- SMOOTH brief group first (owner); own J scale, not comparable with home v7 ----
+  - {id: s40__crowe_v2a_c1, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__crowe_v2a_c1.yaml}
+  - {id: s40__lecleach_hv_smooth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__lecleach_hv_smooth_v7.yaml}
+  - {id: s40__iwata_ar_smooth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__lecleach_iwata_ar_smooth_v7.yaml}
+  - {id: s40__klangfilm_b3_soft, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_b3_soft.yaml}
+  - {id: s40__klangfilm_lame_c200w, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_lame_c200w.yaml}
+  - {id: s40__klangfilm_lame_hv_stage_a, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_lame_hv_stage_a.yaml}
+  # ---- home v7 brief (CD intent) ----
   - {id: s40__vt_v1, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/studies/u3_biradial_es_style_v7/vt_v1.yaml}
   - {id: s40__fold_warm_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__fold_warm_v7.yaml}
-  - {id: s40__morph_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
-     config: examples/typologies/scout40_2026-11-19/scout40__morph_v7.yaml}
   - {id: s40__ext_throat_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__ext_throat_hvlaw_v7.yaml}
-  - {id: s40__twinray380_v8, kind: search, mode: screen, budget: 40, timeout_s: 3600,
-     config: examples/typologies/scout40_2026-11-19/scout40__twinray380_v8.yaml}
   - {id: s40__ext_throat_v8, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__ext_throat_hvlaw_v8.yaml}
   - {id: s40__morph_v8, kind: search, mode: screen, budget: 40, timeout_s: 3600,
@@ -44,15 +53,6 @@ jobs:
      config: examples/typologies/scout40_2026-11-19/scout40__tritonia_v9.yaml}
   - {id: s40__crowe_x_square_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__crowe_x_square_v7.yaml}
-  # ---- SMOOTH brief group (non-CD by design; own J scale) ----
-  - {id: s40__crowe_v2a_c1, kind: search, mode: screen, budget: 40, timeout_s: 3600,
-     config: examples/typologies/scout40_2026-11-19/scout40__crowe_v2a_c1.yaml}
-  - {id: s40__lecleach_hv_smooth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
-     config: examples/typologies/scout40_2026-11-19/scout40__lecleach_hv_smooth_v7.yaml}
-  - {id: s40__iwata_ar_smooth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
-     config: examples/typologies/scout40_2026-11-19/scout40__lecleach_iwata_ar_smooth_v7.yaml}
-  - {id: s40__klangfilm_b3_soft, kind: search, mode: screen, budget: 40, timeout_s: 3600,
-     config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_b3_soft.yaml}
   # ---- tail ----
   - {id: s40__rf_section_axial_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__rf_section_axial_home_v7.yaml}

@@ -1,5 +1,15 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - SCOUT40 owner edits: smooth group first, +2 Klangfilm-Lame, morph v7 / twinray v8 out (cloud Fable senior)
+
+- Night `docs/queue/fable_scout40_2026-11-19.yaml` now 18 jobs: 1-6 SMOOTH brief (Crowe V2A c1, Le Cleac'h H/V,
+  Iwata-AR smooth, Klangfilm b3_soft, **Klangfilm-Lame parent c200w** (seed = c200 best J 7.446),
+  **Klangfilm-Lame H/V Phase A stage_a_search** (4 knobs)); 7 vt_v1; 8-17 home v7 warm-started lanes; 18 tail.
+  Removed: osse_rrect_morph_v7, ath_twinray380_v8 (owner).
+- Rejected as Lame candidates: Phase B b2_wide / b4_wide_h (0 searched dims: geometry diagnostics; the runner
+  refuses them); hl__klangfilm_lame_curved_v1 base (legacy bridge rows type `klangfilm_lame`).
+- Tests: night guard + all session suites pass offline (see PR #74).
+
 ## 2026-11-19 - SCOUT40 night written (owner: budget ~40, more typologies, <= 14 h); B6 deferred
 
 - **Night** `docs/queue/fable_scout40_2026-11-19.yaml` (18 jobs, dry-run clean, 1 h timeout each, est. 6-12 h):

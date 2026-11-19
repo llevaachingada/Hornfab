@@ -1,5 +1,9 @@
 ﻿# ISSUES
 
+## 2026-11-19 - SCOUT40 reordered per owner (smooth first, +2 Lame); ready for local launch
+
+- OPEN (local orchestrator): merge PR #74 -> hornfab-all-2026-11-18 -> main (R21), then the launch steps in the PR/handoff.
+
 ## 2026-11-19 - SCOUT40 night ready; B6 deferred behind it
 
 - OPEN (owner box): `resolve_warm_runs.py` (must print OK), shape_check + preflight, dry-run, launch with a 14 h cutoff.

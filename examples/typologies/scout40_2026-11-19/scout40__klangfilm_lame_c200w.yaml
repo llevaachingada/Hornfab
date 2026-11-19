@@ -1,0 +1,82 @@
+name: scout40__klangfilm_lame_c200w
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: klangfilm_lame_v1
+  n_phi: 19
+  n_s: 64
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_fc_hz: 480.025490162
+  g_aspect: 2.2943176545
+  g_lame_p: 4.3132596277
+  g_end_frac: 1.4600397463
+  g_rim_sweep_ratio: 0.000461305
+  g_morph_frac: 0.3583215648
+  g_source_blend_ratio: 0.0
+  g_entry_half_angle_deg: 2.0
+bounds:
+  g_fc_hz:
+    lo: 432.0
+    hi: 800.0
+  g_aspect:
+    lo: 1.15
+    hi: 2.53
+  g_lame_p:
+    lo: 2.0
+    hi: 6.0
+  g_end_frac:
+    lo: 1.05
+    hi: 1.55
+  g_rim_sweep_ratio:
+    lo: -0.15
+    hi: 0.3
+  g_morph_frac:
+    lo: 0.15
+    hi: 0.65
+  g_source_blend_ratio:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_entry_half_angle_deg:
+    lo: 2.0
+    hi: 2.0
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 41351
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  error_policy: retry_same_then_stop
+  max_attempts: 500
+description: 'SCOUT40 2026-11-19: 40 valid evals from the config seed; smooth brief;
+  source examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_c200w.yaml;
+  Klangfilm-Lame parent, seed = c200 best (J 7.446), walls relieved. KLANGFILM smooth
+  walls-relieved CMA-200: c200 best (J 7.446) as seed; the three  walls of the c200
+  run moved/widened per tools/analysis/walls.py + owner direction: fc_lo 480->432,
+  aspect_hi 2.3->2.53, rim_sweep_lo 0->-0.15 (kernel-legal; ne'

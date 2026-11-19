@@ -34,4 +34,5 @@ def test_scout40_jobs_are_budgeted_and_grouped():
         ws = raw["search"].get("warm_start")
         if ws:
             assert ws["top_k"] == 10 and not ws.get("allow_cross_brief", False)
-    assert smooth == 4
+    assert smooth == 6
+    assert all("smooth" in str(yaml.safe_load(_cfg_path(j).read_text(encoding="utf-8"))["brief_file"]) for j in jobs[:6])
