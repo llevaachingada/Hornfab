@@ -40,6 +40,33 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40 night complete; full evidence bundle pushed (local orchestrator)
+
+- **Night `fable_scout40_2026-11-19` is DONE** (24/24 jobs, `QUEUE DONE` 05:02 local). Fourteen jobs
+  were stopped by the runner's **watchdog** (exit 75) with partial results kept: five early requeues
+  plus `s40w2` handled them; the later tail stops are: fold_warm_v7 (az_fold_h_deg high 0 -> a widen
+  case, kernel allows +/-40), morph_v8 (morph_rate low 1 -> widen to 0.5), tritonia_v8/v9
+  (morph_width high 590 -> brief-envelope limit -> pin_ignore), rosse_rect_cd_v7 (g_tmax high 1 ->
+  kernel max -> pin_ignore), and three refusal storms (petal 41%, crowe_x osse 33%, crowe_x square
+  31%) -> step/box fix (`resample_strict`), not a widen.
+- **Evidence bundle: `docs/evidence/runs/scout40_2026-11-19/`** (24 runs, ~48.6 MB). Per run:
+  `config.yaml` (seed + bounds), `run.json` (objective version, warm start, lib SHAs),
+  `search.ndjson` + `scores.csv` (every eval's params, score `terms`, and the per-frequency
+  `bw_h_deg`/`bw_v_deg` beamwidth, `di_db` directivity, ripple, on-axis, throat impedance arrays +
+  scalars), `summary.json`, and the best design's `design.json` (geometry), `metrics.json`,
+  `mesh_meta.json`, `mesh.msh`, `response.npz` (angular cut/balloon data). Plus the night yaml,
+  queue log, summary, preflight and warm-start audit logs, and a README that states the schema and
+  the comparability rules (J only within a brief/version; v10 is an offline rescore).
+- **New tool:** `tools/analysis/archive_run.py` (reusable run->evidence packer; INDEX + CODE_MAP
+  updated). `mesh.msh`/`response.npz` are force-added (gitignored under `runs/`).
+- Headline results (v7 scores; see the bundle table for all): klangfilm b3_soft **2.800**
+  (3.540 -> 2.841 -> 2.800), rolled pair **19.72 / 19.71** (terminal 225 vs 270 made no difference),
+  fold_warm 3.754, ext_throat 3.565, morph 3.402, petal 4.892 (16 valid, refusals), tritonia v8
+  5.325 / v9 5.289, rosse 4.560, crowe_x osse 5.345 / square 7.911.
+- Open next: the follow-on requeue night for the eight later watchdog lanes (not yet queued), then
+  the morning v10 rescore + B6 lane set. The GUI lane still has uncommitted working-tree files (not
+  this lane's).
+
 ## 2026-11-19 - Requeues all closed: b3_soft 2.800; stage_a tie (local orchestrator)
 
 - **`s40w2__klangfilm_b3_soft` (v2 continuation): best J 2.800** (41 evals, exit 0) from 2.841. The

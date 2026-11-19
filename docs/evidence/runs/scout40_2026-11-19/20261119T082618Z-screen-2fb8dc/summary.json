@@ -1,0 +1,111 @@
+{
+  "run": "20261119T082618Z-screen-2fb8dc",
+  "config_name": "scout40__ath_core_petal_hvlaw_v7",
+  "family": "OSSE",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "seed_params": {
+    "r0_mm": 18.0,
+    "a0_deg": 1.9863,
+    "L_mm": 250.0,
+    "a_deg": 24.0,
+    "n": 6.9046,
+    "s": 0.7503,
+    "q": 0.9869,
+    "k": 1.2163,
+    "exponent": 2.0,
+    "aspect_ratio": 1.0,
+    "s1": 1.1799,
+    "s2": 0.0286,
+    "morph_target": 0,
+    "morph_width_mm": 540.0,
+    "morph_height_mm": 400.0,
+    "morph_corner_mm": 15.0,
+    "morph_exponent": 4.5,
+    "morph_rate": 3.46,
+    "morph_fixed": 0.0,
+    "morph_allow_shrinkage": 0,
+    "az_sf_m": 4.0,
+    "az_sf_n1": 7.4958,
+    "az_sf_n2": 12.4449,
+    "az_sf_n3": 13.4442,
+    "az_sf_a": 1.0,
+    "az_sf_b": 0.8569,
+    "az_a_cos_pow": 2.0,
+    "az_n_cos2_amp": 0.0,
+    "az_a_sf_amp": 3.0,
+    "az_a_cos_amp": 14.0,
+    "az_s_cos2_amp": 0.0
+  },
+  "bounds": {
+    "a0_deg": {
+      "lo": 1.0,
+      "hi": 3.0
+    },
+    "L_mm": {
+      "lo": 160.0,
+      "hi": 340.0
+    },
+    "a_deg": {
+      "lo": 12.0,
+      "hi": 36.0
+    },
+    "n": {
+      "lo": 2.0,
+      "hi": 10.0
+    },
+    "s": {
+      "lo": 0.2,
+      "hi": 1.2
+    },
+    "q": {
+      "lo": 0.9,
+      "hi": 1.0
+    },
+    "k": {
+      "lo": 0.3,
+      "hi": 3.0
+    },
+    "az_a_cos_pow": {
+      "lo": 1.0,
+      "hi": 6.0
+    },
+    "az_a_sf_amp": {
+      "lo": 0.0,
+      "hi": 8.0
+    },
+    "az_a_cos_amp": {
+      "lo": 0.0,
+      "hi": 25.0
+    },
+    "az_s_cos2_amp": {
+      "lo": -0.25,
+      "hi": 0.5
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.05,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "graded",
+    "budget_counts": "valid"
+  },
+  "warm_start_config": {
+    "from_runs": [
+      "runs/20261115T152510Z-screen-a504f6"
+    ],
+    "top_k": 10,
+    "sigma_from_spread": true
+  },
+  "warm_start_run": null,
+  "rows": 27,
+  "valid": 16,
+  "best_n": 16,
+  "best_J": 4.892450973881702,
+  "best_design_hash": "4d2985321ccf",
+  "best_json_hash": "4d2985321ccf",
+  "missing": []
+}

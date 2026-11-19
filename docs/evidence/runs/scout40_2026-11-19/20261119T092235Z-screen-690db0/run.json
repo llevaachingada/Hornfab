@@ -1,0 +1,369 @@
+{
+ "backend": "beat_cuda",
+ "cma_seed": 1234,
+ "command": "hornlab-search search --config examples/typologies/scout40_2026-11-19/scout40__crowe_x_square_v7.yaml --budget 40 --mode screen",
+ "config": {
+  "bounds": {
+   "g_L_mm": {
+    "hi": 240.0,
+    "lo": 210.0
+   },
+   "g_a_h_deg": {
+    "hi": 36.0,
+    "lo": 32.0
+   },
+   "g_a_v_deg": {
+    "hi": 36.0,
+    "lo": 32.0
+   },
+   "g_k": {
+    "hi": 1.0,
+    "lo": 1.0,
+    "search": false
+   },
+   "g_n": {
+    "hi": 2.4,
+    "lo": 1.8
+   },
+   "g_q": {
+    "hi": 0.996,
+    "lo": 0.996,
+    "search": false
+   },
+   "g_r_lip_mm": {
+    "hi": 30.0,
+    "lo": 18.0
+   },
+   "g_s": {
+    "hi": 0.4,
+    "lo": 0.25
+   },
+   "g_sf_ab": {
+    "hi": 1.0,
+    "lo": 1.0,
+    "search": false
+   },
+   "g_sf_amt": {
+    "hi": 0.8,
+    "lo": 0.4
+   },
+   "g_sf_m": {
+    "hi": 4,
+    "lo": 4,
+    "search": false
+   },
+   "g_sf_n1": {
+    "hi": 1.5,
+    "lo": 1.5,
+    "search": false
+   },
+   "g_sf_n2": {
+    "hi": 6.0,
+    "lo": 6.0,
+    "search": false
+   },
+   "g_sf_start": {
+    "hi": 0.12,
+    "lo": 0.12,
+    "search": false
+   },
+   "g_wrap_deg": {
+    "hi": 150.0,
+    "lo": 90.0
+   }
+  },
+  "brief": {
+   "description": "(objective v7) HOME living-room horn, LANDSCAPE 80H x 50V, vertical half-weighted, no K-law mouth, pattern+loading from 700 Hz XO, HF1440 1.4-inch, 600W x 480H x 480D envelope, band 350-8000 Hz",
+   "driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "envelope": {
+    "max_depth_mm": 480.0,
+    "max_mouth_h_mm": 480.0,
+    "max_mouth_w_mm": 600.0
+   },
+   "grid": {
+    "screen_extra_hz": [
+     250,
+     315,
+     400,
+     2573,
+     3311,
+     4260
+    ],
+    "verify_points_per_octave": 6
+   },
+   "name": "room_landscape_80x50_700_hf1440_v7",
+   "objective": {
+    "bw8k_floor": 0.75,
+    "cov_below_f0": "mask",
+    "cov_narrow_ratio": 2.0,
+    "cov_v_weight": 0.5,
+    "flat_band": "scored",
+    "lfp_crossover_ratio": 1.6,
+    "lfp_re_z": 0.2,
+    "loaded_re_z": 0.5,
+    "tolerances": {
+     "cov": 3.0,
+     "di": 0.4,
+     "diag": 2.0,
+     "dislope": 9.0,
+     "distd": 2.0,
+     "flat": 1.5,
+     "flat_cv": 1.5,
+     "load": 0.3,
+     "rip": 1.0
+    },
+    "version": 7
+   },
+   "source": {
+    "cap": "auto"
+   },
+   "symmetry": "hv",
+   "target": {
+    "band_hi_hz": 8000.0,
+    "band_lo_hz": 350.0,
+    "coverage_h_deg": 80.0,
+    "coverage_v_deg": 50.0,
+    "di_slope_target": 0.0,
+    "di_target_db": null,
+    "f0_hz": 700.0,
+    "f0_v_hz": 700.0,
+    "freq_weights": {
+     "band_hz": [
+      [
+       2500.0,
+       5500.0,
+       2.0
+      ]
+     ]
+    },
+    "loaded_hi_hz": 5600.0,
+    "z_min": 0.5
+   },
+   "weights": {
+    "cov": 1.0,
+    "di": 0.3,
+    "diag": 1.0,
+    "dislope": 1.0,
+    "distd": 0.5,
+    "flat": 0.5,
+    "flat_cv": 1.0,
+    "load": 1.0,
+    "rip": 1.0
+   }
+  },
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "description": "SCOUT40 2026-11-19 (cloud Fable senior): 40 valid evals, warm from the lane best (top 10); source examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml; R19 no_headroom -> warm start instead of space card. Gains below the floor are ties. Near-square Crowe-X-inspired probe: four concave panels, diagonal ridge, 479x479 mouth; look-first, not Crowe geometry",
+  "family": "FREEFORM",
+  "feasibility": {
+   "derivation": [
+    {
+     "knob": "-",
+     "note": "seed_policy explicit: derivation skipped"
+    }
+   ],
+   "envelope_mouth_h_mm": 480.0,
+   "envelope_mouth_w_mm": 600.0,
+   "f0_hz": 700.0,
+   "f0_v_hz": 700.0,
+   "feasible_v": false,
+   "feasible_w": true,
+   "held_coverage_v_deg": 75.5952380952381,
+   "held_coverage_w_deg": 60.476190476190474,
+   "required_mouth_h_mm": 725.7142857142857,
+   "required_mouth_w_mm": 453.57142857142856,
+   "rule": "d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)",
+   "screen_freqs_below_f0": 2,
+   "screen_freqs_total": 12,
+   "verify_freqs_below_f0": 7,
+   "verify_freqs_total": 25
+  },
+  "generator": {
+   "n_phi": 33,
+   "n_s": 56,
+   "name": "grid",
+   "rows": {
+    "type": "osse_rollback"
+   },
+   "seed_policy": "explicit",
+   "span": "quarter",
+   "wall_thickness_mm": 3.0
+  },
+  "grid": {
+   "screen_extra_hz": [
+    250,
+    315,
+    400,
+    2573,
+    3311,
+    4260
+   ],
+   "verify_points_per_octave": 6
+  },
+  "mesh": {
+   "dof_cap_final": 24000,
+   "dof_cap_screen": 24000,
+   "dof_cap_verify": 24000,
+   "dof_per_triangle": 0.51,
+   "epw": 6.0,
+   "quadrants": "1"
+  },
+  "name": "scout40__crowe_x_square_v7",
+  "objective": {
+   "bw8k_floor": 0.75,
+   "cov_below_f0": "mask",
+   "cov_narrow_ratio": 2.0,
+   "cov_v_weight": 0.5,
+   "flat_band": "scored",
+   "lfp_crossover_ratio": 1.6,
+   "lfp_re_z": 0.2,
+   "loaded_re_z": 0.5,
+   "tolerances": {
+    "cov": 3.0,
+    "di": 0.4,
+    "diag": 2.0,
+    "dislope": 9.0,
+    "distd": 2.0,
+    "flat": 1.5,
+    "flat_cv": 1.5,
+    "load": 0.3,
+    "rip": 1.0
+   },
+   "version": 7
+  },
+  "search": {
+   "algorithm": "cma",
+   "budget": 40,
+   "budget_counts": "valid",
+   "infeasible_penalty": "graded",
+   "popsize": null,
+   "seed": 1234,
+   "sigma0": 0.2,
+   "tolfun": 0.001,
+   "warm_start": {
+    "from_runs": [
+     "runs/20261116T022328Z-screen-87354c"
+    ],
+    "sigma_from_spread": true,
+    "top_k": 10
+   }
+  },
+  "seed_params": {
+   "g_L_mm": 220.0,
+   "g_a_h_deg": 34.0,
+   "g_a_v_deg": 34.0,
+   "g_k": 1.0,
+   "g_n": 2.0,
+   "g_q": 0.996,
+   "g_r_lip_mm": 24.0,
+   "g_s": 0.32,
+   "g_sf_ab": 1.0,
+   "g_sf_amt": 0.6,
+   "g_sf_m": 4,
+   "g_sf_n1": 1.5,
+   "g_sf_n2": 6.0,
+   "g_sf_start": 0.12,
+   "g_wrap_deg": 120.0
+  },
+  "solve": {
+   "angle_count": 73,
+   "backend": "beat_cuda",
+   "balloon": true,
+   "balloon_points_screen": 512,
+   "balloon_points_verify": 1024,
+   "cuda_fused": true,
+   "distance_m": 10.0,
+   "gmres_tol": 1e-05,
+   "timeout_s": 900
+  },
+  "target": {
+   "band_hi_hz": 8000.0,
+   "band_lo_hz": 350.0,
+   "coverage_h_deg": 80.0,
+   "coverage_v_deg": 50.0,
+   "di_slope_target": 0.0,
+   "di_target_db": null,
+   "f0_hz": 700.0,
+   "f0_v_hz": 700.0,
+   "freq_weights": {
+    "band_hz": [
+     [
+      2500.0,
+      5500.0,
+      2.0
+     ]
+    ]
+   },
+   "loaded_hi_hz": 5600.0,
+   "z_min": 0.5
+  },
+  "weights": {
+   "cov": 1.0,
+   "di": 0.3,
+   "diag": 1.0,
+   "dislope": 1.0,
+   "distd": 0.5,
+   "flat": 0.5,
+   "flat_cv": 1.0,
+   "load": 1.0,
+   "rip": 1.0
+  }
+ },
+ "config_name": "scout40__crowe_x_square_v7",
+ "config_path": "examples/typologies/scout40_2026-11-19/scout40__crowe_x_square_v7.yaml",
+ "config_sha": "4c33251640e8",
+ "created_utc": "2026-11-19T09:22:54Z",
+ "dataset_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\dataset",
+ "family": "FREEFORM",
+ "lib_shas": {
+  "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+  "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+  "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+  "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+  "hornlab_search": "9541eb73999610fe4a9ad9c5e73a25201b04e912"
+ },
+ "mode": "screen",
+ "objective_version": 7,
+ "run_id": "20261119T092235Z-screen-690db0",
+ "runtime": {
+  "gpu": [
+   "NVIDIA GeForce RTX 4060 Laptop GPU, 610.62, 8188 MiB"
+  ],
+  "julia": "julia version 1.12.7",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "sources": [
+   {
+    "module": "hornlab_beat_bem",
+    "n_files": 111,
+    "sha256": "2fb5ad6c0f0900ef68c2a79761208474815a583d4b6c782bb8c08486561e5543"
+   },
+   {
+    "module": "hornlab_mesher",
+    "n_files": 66,
+    "sha256": "47d00e50f8d7cb8de813b3dcb41d1bcdf893d404424a7689d70f2ca5792949da"
+   },
+   {
+    "module": "hornlab_bempp_bem",
+    "n_files": 21,
+    "sha256": "08f71637ae90cc4900971b15b043320ef4e0a26a3fe884aaacecb35b5c8fc794"
+   }
+  ]
+ },
+ "started_utc": "2026-11-19T09:22:54Z",
+ "status": "running",
+ "toolchain": {
+  "beat_status": "`{'available': True, 'reason': 'NVIDIA GPU detected and Julia CUDA.functional() confirmed a usable device', 'state': 'ready', 'version': '0.2.0', 'backend': 'cuda'}`",
+  "cpu": "Intel(R) Core(TM) i7-14650HX, 16 cores / 24 threads",
+  "driver": "610.62; CUDA UMD version 13.3",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop, 8 GB (8188 MiB)",
+  "os": "Microsoft Windows 11 Pro 10.0.26200, build 26200",
+  "present": true,
+  "python": "`C:\\Users\\hunte\\Hrns\\hornlab-search\\.venv\\Scripts\\python.exe` 3.12.10",
+  "ram": "31.7 GB",
+  "sha256": "7e829ed0af8ece14"
+ },
+ "trace_fraction": 0.05
+}

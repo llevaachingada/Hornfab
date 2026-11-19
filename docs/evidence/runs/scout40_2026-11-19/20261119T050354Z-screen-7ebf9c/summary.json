@@ -1,0 +1,57 @@
+{
+  "run": "20261119T050354Z-screen-7ebf9c",
+  "config_name": "scout40__lecleach_hv_smooth_v7",
+  "family": "FREEFORM",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+  "seed_params": {
+    "g_fc_hz": 340.0,
+    "g_fc_h_hz": 340.0,
+    "g_fc_v_hz": 520.0,
+    "g_T": 1.0,
+    "g_stop_deg": 215.0,
+    "g_r_lip_mm": 0.0,
+    "g_stop_a2": 0.05
+  },
+  "bounds": {
+    "g_fc_h_hz": {
+      "lo": 300.0,
+      "hi": 750.0
+    },
+    "g_fc_v_hz": {
+      "lo": 450.0,
+      "hi": 1000.0
+    },
+    "g_T": {
+      "lo": 0.4,
+      "hi": 1.0
+    },
+    "g_stop_deg": {
+      "lo": 165.0,
+      "hi": 230.0
+    },
+    "g_stop_a2": {
+      "lo": -0.1,
+      "hi": 0.15
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.2,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "graded",
+    "budget_counts": "valid"
+  },
+  "warm_start_config": null,
+  "warm_start_run": null,
+  "rows": 42,
+  "valid": 34,
+  "best_n": 40,
+  "best_J": 8.03711687018752,
+  "best_design_hash": "5381c9cea1ec",
+  "best_json_hash": "5381c9cea1ec",
+  "missing": []
+}

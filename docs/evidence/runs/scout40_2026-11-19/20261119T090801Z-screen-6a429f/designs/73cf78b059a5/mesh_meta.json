@@ -1,0 +1,95 @@
+{
+ "key": "73cf78b059a5-8e789cd0deef",
+ "mesher_config": {
+  "cross_section": {
+   "aspect_ratio": 1.0,
+   "exponent": 2.0
+  },
+  "formula": "OSSE",
+  "mesh": {
+   "allow_large_mesh": false,
+   "max_triangles": 216471,
+   "mouth_res_mm": 7.145833333333333,
+   "quadrants": "1",
+   "rear_res_mm": 7.145833333333333,
+   "scale_to_metres": true,
+   "throat_res_mm": 3.5729166666666665
+  },
+  "mode": "freestanding",
+  "morph": {
+   "morph_allow_shrinkage": 1,
+   "morph_corner_mm": 20.4491635087,
+   "morph_exponent": 4.0,
+   "morph_fixed": 0.0,
+   "morph_height_mm": 414.0215034478,
+   "morph_rate": 1.4414256326,
+   "morph_target": 1,
+   "morph_width_mm": 558.4267198458
+  },
+  "output": {
+   "path": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261119T090801Z-screen-6a429f\\designs\\73cf78b059a5\\mesh.msh"
+  },
+  "profile": {
+   "L_mm": 217.5218731547,
+   "a0_deg": 8.5784756478,
+   "a_deg": "49.5345980813 + -14.8192767952*abs(cos(p))**2.0 + -27.6642911281*abs(sin(p))**8.428782258556872",
+   "k": 1.1962720983,
+   "n": 7.2716374243,
+   "q": 0.9767704801,
+   "r0_mm": 18.0,
+   "s": 0.9370526758,
+   "s1": 1.0,
+   "s2": 0.015
+  }
+ },
+ "rear_res_factor": 1.0,
+ "result": {
+  "bbox_m": [
+   0.0,
+   0.0,
+   -0.006000000000000001,
+   0.28027539578857896,
+   0.2086057890661866,
+   0.29048248298420837
+  ],
+  "n_dof": null,
+  "n_triangles": 9354,
+  "path": "C:\\Users\\hunte\\Hrns\\hornlab-search\\runs\\20261119T090801Z-screen-6a429f\\designs\\73cf78b059a5\\mesh.msh",
+  "quadrants": "1",
+  "res_mm": {
+   "mouth": 7.145833333333333,
+   "rear": 7.145833333333333,
+   "throat": 3.5729166666666665
+  },
+  "seconds": 4.0756409000605345,
+  "symmetry_plane": "yz+xz"
+ },
+ "summary": {
+  "area_m2": 0.1662391824538002,
+  "bbox_m": [
+   0.0,
+   0.0,
+   -0.006000000000000001,
+   0.28027539578857896,
+   0.2086057890661866,
+   0.29048248298420837
+  ],
+  "format": "2.2 0 8",
+  "n_nodes": 4818,
+  "n_nodes_used": 4818,
+  "n_triangles": 9354,
+  "tag_names": {
+   "1": "SD1G0",
+   "2": "SD1D1001"
+  },
+  "tags": {
+   "1": 9296,
+   "2": 58
+  }
+ },
+ "surface_fit": {
+  "fallback": false,
+  "requested": "auto",
+  "resolved": "interpolate"
+ }
+}

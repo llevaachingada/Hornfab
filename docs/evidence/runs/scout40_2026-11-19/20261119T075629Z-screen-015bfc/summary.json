@@ -1,0 +1,96 @@
+{
+  "run": "20261119T075629Z-screen-015bfc",
+  "config_name": "scout40__ext_throat_hvlaw_v7",
+  "family": "OSSE",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "seed_params": {
+    "r0_mm": 27.0507,
+    "a0_deg": 4.5,
+    "a_deg": 24.0,
+    "L_mm": 250.0,
+    "n": 6.0,
+    "s": 0.55,
+    "q": 0.996,
+    "k": 1.0,
+    "exponent": 2.0,
+    "aspect_ratio": 1.0,
+    "throat_ext_length_mm": 115.0,
+    "throat_ext_angle_deg": 4.5,
+    "slot_length_mm": 0.0,
+    "morph_target": 0,
+    "morph_width_mm": 500.0,
+    "morph_height_mm": 660.0,
+    "morph_corner_mm": 35.0,
+    "morph_exponent": 4.0,
+    "morph_rate": 4.1236,
+    "morph_fixed": 0.0,
+    "morph_allow_shrinkage": 0,
+    "wall_thickness_mm": 5.0,
+    "az_sf_m": 4.0,
+    "az_sf_n1": 7.4958,
+    "az_sf_n2": 12.4449,
+    "az_sf_n3": 13.4442,
+    "az_sf_a": 1.0,
+    "az_sf_b": 0.8569,
+    "az_a_cos_pow": 2.0,
+    "az_n_cos2_amp": 0.0,
+    "az_a_sf_amp": 0.0,
+    "az_a_cos_amp": 14.0,
+    "az_s_cos2_amp": 0.0
+  },
+  "bounds": {
+    "a_deg": {
+      "lo": 15.0,
+      "hi": 40.0
+    },
+    "L_mm": {
+      "lo": 180.0,
+      "hi": 330.0
+    },
+    "s": {
+      "lo": 0.3,
+      "hi": 0.9
+    },
+    "throat_ext_length_mm": {
+      "lo": 60.0,
+      "hi": 220.0
+    },
+    "throat_ext_angle_deg": {
+      "lo": 1.5,
+      "hi": 6.0
+    },
+    "az_a_cos_pow": {
+      "lo": 1.0,
+      "hi": 6.0
+    },
+    "az_a_cos_amp": {
+      "lo": 0.0,
+      "hi": 25.0
+    },
+    "az_s_cos2_amp": {
+      "lo": -0.25,
+      "hi": 0.5
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.1,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "graded",
+    "budget_counts": "valid",
+    "record_gate": "shadow"
+  },
+  "warm_start_config": null,
+  "warm_start_run": null,
+  "rows": 51,
+  "valid": 41,
+  "best_n": 3,
+  "best_J": 3.565450827952507,
+  "best_design_hash": "c1d088b8b92f",
+  "best_json_hash": "c1d088b8b92f",
+  "missing": []
+}

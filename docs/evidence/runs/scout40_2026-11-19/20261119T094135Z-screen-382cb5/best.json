@@ -1,0 +1,68 @@
+{
+ "design_hash": "9c39541262aa",
+ "di_source": "balloon",
+ "eval_no": 27,
+ "family": "FREEFORM",
+ "mode": "screen",
+ "objective": 19.706252895630566,
+ "ok": true,
+ "params": {
+  "grid": {
+   "knobs": {
+    "g_axial_h_mm": 4.8234791639,
+    "g_axial_v_mm": 2.1628150642,
+    "g_decay": 0.7499910903,
+    "g_depth_h_ratio": 1.0172291599,
+    "g_depth_mm": 232.2216646577,
+    "g_height_mm": 299.0,
+    "g_inward_h_mm": 0.0,
+    "g_inward_v_mm": 0.0,
+    "g_rect_exponent": 11.9675997321,
+    "g_rect_turn_deg": 65.0,
+    "g_relief_end_s": 0.96,
+    "g_relief_peak_s": 0.8,
+    "g_relief_start_s": 0.5,
+    "g_terminal_deg": 270.0,
+    "g_throat_turn_deg": 25.0,
+    "g_width_mm": 542.0
+   },
+   "n_phi": 65,
+   "n_s": 128,
+   "rows": {
+    "driver": {
+     "exit_angle_deg": 2.0,
+     "exit_radius_mm": 18.0
+    },
+    "implementation_sha256": "9bab82616bb4e47c98b6ba25dd84cdc52315e6969b71f68b1ed83e91eaaf5ca9",
+    "mode": "axial",
+    "schema": "rolled-family-master-v1",
+    "type": "rolled_family_rect_v1"
+   },
+   "span": "quarter",
+   "wall_thickness_mm": 3.0
+  }
+ },
+ "terms": {
+  "cov": 3.8984342090181947,
+  "di": 3.760465077538244,
+  "di_estimated": 0.0,
+  "diag": 5.141809358758571,
+  "dislope": 8.720114720756479,
+  "distd": 1.2535915246489395,
+  "f11_hz": 5600.0,
+  "flat": 0.10964093070484916,
+  "flat_cv": 0.12149253439630442,
+  "lfp20_hz": 437.34166713693816,
+  "lfp50_hz": 510.65657115999875,
+  "load": 0.0,
+  "loaded_hi_hz": 5600.0,
+  "n_in_band": 13,
+  "n_nan": 0,
+  "oa_excess_raw": 0.0,
+  "penalty": 0.0,
+  "rez_min_from_fx": 1.005872915204284,
+  "rip": 0.014646321762649956,
+  "total": 19.706252895630566
+ },
+ "written_utc": "2026-11-19T09:56:27Z"
+}

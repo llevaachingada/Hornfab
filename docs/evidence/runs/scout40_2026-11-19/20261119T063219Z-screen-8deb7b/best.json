@@ -1,0 +1,72 @@
+{
+ "design_hash": "15a8c964d592",
+ "di_source": "balloon",
+ "eval_no": 31,
+ "family": "FREEFORM",
+ "mode": "screen",
+ "objective": 2.84115842822621,
+ "ok": true,
+ "params": {
+  "grid": {
+   "knobs": {
+    "g_aspect": 2.0759495982,
+    "g_beak_diagonal_mm": 0.6884914185,
+    "g_beak_h_setback_mm": 5.7342431677,
+    "g_beak_start_frac": 0.9521904727,
+    "g_beak_v_projection_mm": 0.02716872,
+    "g_cd_core_blend": 1.0,
+    "g_core_length_mm": 307.7942226867,
+    "g_end_frac": 1.7953432921,
+    "g_entry_half_angle_deg": 2.0,
+    "g_fc_hz": 494.4393461867,
+    "g_lame_end_frac": 0.8390024565,
+    "g_lame_p": 5.0063549541,
+    "g_lame_p_mouth": 3.6054661708,
+    "g_lame_start_frac": 0.1899798259,
+    "g_morph_frac": 0.3,
+    "g_rim_sweep_ratio": 0.004898754,
+    "g_source_blend_ratio": 0.0,
+    "g_theta_h0_deg": 6.9173281212,
+    "g_theta_h1_deg": 59.1207510626,
+    "g_theta_v0_deg": 7.3436235543,
+    "g_theta_v1_deg": 39.4995816034
+   },
+   "n_phi": 19,
+   "n_s": 64,
+   "rows": {
+    "driver": {
+     "exit_angle_deg": 2.0,
+     "exit_radius_mm": 18.0
+    },
+    "implementation_sha256": "1304dea310810fb4df02af38c465713e9938279fc76207f13ce2909adf1159af",
+    "schema": "klangfilm-lame-hv-core-canonical-v1",
+    "type": "klangfilm_lame_hv_core"
+   },
+   "span": "quarter",
+   "wall_thickness_mm": 3.0
+  }
+ },
+ "terms": {
+  "cov": 0.7816590061649669,
+  "di": 0.0,
+  "di_estimated": 0.0,
+  "diag": 0.5231906765911536,
+  "dislope": 0.028957858679711655,
+  "distd": 0.7185766673139883,
+  "f11_hz": 5600.0,
+  "flat": 0.4123696382350491,
+  "flat_cv": 0.15368350356757274,
+  "lfp20_hz": 416.49104304190945,
+  "lfp50_hz": 524.8780570053863,
+  "load": 0.0,
+  "loaded_hi_hz": 5600.0,
+  "n_in_band": 13,
+  "n_nan": 0,
+  "oa_excess_raw": 0.0,
+  "penalty": 0.0,
+  "rez_min_from_fx": 0.851114587413734,
+  "rip": 0.42890589679129254,
+  "total": 2.84115842822621
+ },
+ "written_utc": "2026-11-19T06:41:20Z"
+}

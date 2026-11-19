@@ -1,0 +1,104 @@
+# SCOUT40 night (cloud Fable senior plan, 2026-11-19; owner: "budget ~40, more typologies, up to 14 h").
+# NOT launched from the cloud. Owner box, in order:
+#   1) .venv\Scripts\python.exe tools/night_queue/resolve_warm_runs.py examples/typologies/scout40_2026-11-19
+#      (fills the 2 @design warm starts, checks every from_runs dir exists; must print OK)
+#   2) shape_check + search_preflight on the configs, 3) copy to runs\nights\, dry-run, launch detached, -Cutoff.
+# What this night is: a SCOUTING pass, not a ranking. 40 valid evals per lane, warm-started from each lane's own
+# best (top 10, sigma from their spread) where history exists, R19 space fixes applied where approved.
+# Read it as "which spaces still move": a lane whose best improves by MORE than the floor (v7 0.31 J) in 40 evals
+# is promising and goes to the matched B6 rerun; a smaller gain is a tie with noise. v10 ranking = free offline
+# rescore afterwards (R1: nights search on v7).
+# Two briefs: jobs 1-6 the SMOOTH brief (non-CD constructions, owner: run first); jobs 7-18 home v7 (CD intent) ; J is NOT comparable between the two groups.
+# Order = priority; timeout 1 h per job; the cutoff drops the tail. Estimate [inferred]: 15-45 min per job,
+# 18 jobs ~6-12 h. Owner edit 2026-11-19: smooth group first, +2 Klangfilm-Lame versions, morph v7 / twinray v8 removed.
+# LOCAL INTEGRATOR EDITS 2026-11-19 evening (owner-directed geometry fixes; CPU-verified):
+#   - ext_throat_v8 DROPPED: shape_check refusal (throat 42.1 x 42.1 vs 36.0 mm exit mismatch).
+#   - Klangfilm record lane (c200w, klangfilm_lame_v1) -> Phase B H/V core seeded to the c200 mouth
+#     585 x 255 mm INNER, searching the 4 beak keys. Verified offline: 0 angle inflections both axes,
+#     strictly increasing radii, mouth 585.000 x 255.000 (scratch/verify_construction_2026-11-19.py).
+#     Keeps b3_soft (the 2.819 smooth-brief core lane) and the Phase A stage_a lane.
+#   - Rolled section lane -> whole-shape rect PAIR: terminal 225 cap vs 270 control, same seed/bounds
+#     (depth_h_ratio opened 0.68-1.05, seed 1.0). Verified offline: H-wall inflections 2 -> 0 when the
+#     fixed 0.68 depth split is removed. The 225 cap is the source-defensible top of the owner's band
+#     (the sources warn 160-200 deg cavity; 270 is the documented 240-275 family range).
+night: fable_scout40_2026-11-19
+lane: gpu
+jobs:
+  # ---- SMOOTH brief group first (owner); own J scale, not comparable with home v7 ----
+  - {id: s40__crowe_v2a_c1, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__crowe_v2a_c1.yaml}
+  - {id: s40__lecleach_hv_smooth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__lecleach_hv_smooth_v7.yaml}
+  - {id: s40__iwata_ar_smooth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__lecleach_iwata_ar_smooth_v7.yaml}
+  - {id: s40__klangfilm_b3_soft, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_b3_soft.yaml}
+  - {id: s40__klangfilm_hvcore_c200mouth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_hvcore_c200mouth.yaml}
+  - {id: s40__klangfilm_lame_hv_stage_a, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_lame_hv_stage_a.yaml}
+  # ---- home v7 brief (CD intent) ----
+  # ---- OWNER REQUEUES 2026-11-19 (bound-pinned watchdog exits; same briefs/objective so J is
+  # comparable with the four originals; widened per shape-check + kernel/dossier ranges; warm-started
+  # from each lane's box-limited best; the originals are the controls) ----
+  - {id: s40w__lecleach_hv_smooth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w_2026-11-19/scout40w__lecleach_hv_smooth_v7.yaml}
+  - {id: s40w__iwata_ar_smooth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w_2026-11-19/scout40w__lecleach_iwata_ar_smooth_v7.yaml}
+  - id: s40w__klangfilm_b3_soft
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    config: examples/typologies/scout40w_2026-11-19/scout40w__klangfilm_b3_soft.yaml
+    watchdog: {pin_ignore: [g_beak_v_projection_mm]}
+  - {id: s40w__klangfilm_hvcore_c200mouth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w_2026-11-19/scout40w__klangfilm_hvcore_c200mouth.yaml}
+  - id: s40w__klangfilm_lame_hv_stage_a
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    config: examples/typologies/scout40w_2026-11-19/scout40w__klangfilm_lame_hv_stage_a.yaml
+    watchdog: {pin_ignore: [g_h_mid_gain_mm, g_v_mid_gain_mm]}
+  # v2 continuation: the SCOUT40W b3_soft requeue reached 2.841 and pinned at the kernel hard
+  # ceiling theta_h1 60 -> pin_ignore on the hard limits, warm-started from the 2.841 best.
+  - id: s40w2__klangfilm_b3_soft
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    config: examples/typologies/scout40w_2026-11-19/scout40w2__klangfilm_b3_soft.yaml
+    watchdog: {pin_ignore: [g_beak_v_projection_mm, g_theta_h1_deg, g_theta_v1_deg]}
+  - {id: s40__vt_v1, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/studies/u3_biradial_es_style_v7/vt_v1.yaml}
+  - {id: s40__fold_warm_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__fold_warm_v7.yaml}
+  - {id: s40__ext_throat_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__ext_throat_hvlaw_v7.yaml}
+  # s40__ext_throat_v8 DROPPED 2026-11-19 (local integrator): shape_check refusal — throat 42.1 x 42.1 mm
+  # vs 36.0 mm exit mismatch. Not fixed (bounds not widened per handoff).
+  - {id: s40__morph_v8, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__morph_v8.yaml}
+  - {id: s40__petal_hvlaw_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__ath_core_petal_hvlaw_v7.yaml}
+  - {id: s40__tritonia_v8, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__tritonia_v8.yaml}
+  - id: s40__rosse_rect_cd_v7
+    kind: command
+    timeout_s: 3600
+    argv: [.venv/Scripts/python.exe, tools/geometry/rosse_rect_cli.py, search,
+           --config, examples/typologies/scout40_2026-11-19/scout40__rosse_rect_cd_v7.yaml, --mode, screen, --budget, "40"]
+  - {id: s40__crowe_x_osse_cd_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__crowe_x_osse_cd_v7.yaml}
+  - {id: s40__tritonia_v9, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__tritonia_v9.yaml}
+  - {id: s40__crowe_x_square_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__crowe_x_square_v7.yaml}
+  # ---- tail ----
+  # Owner edit 2026-11-19 evening: rolled section lane -> rolled WHOLE-SHAPE pair (terminal 225 cap vs
+  # 270 control; horizontal depth ratio opened). The section kind has no terminal_deg knob.
+  - {id: s40__rf_rect_cap225, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__rf_rect_axial_cap225.yaml}
+  - {id: s40__rf_rect_control270, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__rf_rect_axial_control270.yaml}

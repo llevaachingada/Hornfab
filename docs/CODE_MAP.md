@@ -50,6 +50,7 @@ owner knobs (`bend_radius_mm` front arc, `throat_ellipse`); `klangfilm_ellipse_c
 Analysis/queue tools (2026-11-16, concurrent session): `tools/analysis/optimizer_switch.py` (advisory per-run optimizer
 decision report), `tools/analysis/queue_score_audit.py` (read-only inventory of a queue's scoring contracts),
 `tools/night_queue/run_matched_home.py` (frozen-cohort matched BO/CMA home comparison: prepare once, run arms).
+`tools/analysis/archive_run.py` (2026-11-19: pack a finished run into `docs/evidence/runs/<bundle>/` — run/config/best/rows + flattened `scores.csv` + best design/mesh/response, for cloud review).
 Acoustic-truth analyzers (2026-11-17, owner master plan `docs/research/HORNFAB_ACOUSTIC_TRUTH_MASTER_PLAN_2026-11-17.md`,
 WP1–WP3, all CPU/read-only, zero solver calls): `tools/analysis/crowe_mesh_truth.py` (CROWE V2A law vs actual BEM
 inner wall — analytic sections vs projected triangle distances, per-case p99/RMS/bias, FABLE v2 relative rule,

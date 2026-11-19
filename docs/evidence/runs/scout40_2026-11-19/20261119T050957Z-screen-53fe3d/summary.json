@@ -1,0 +1,55 @@
+{
+  "run": "20261119T050957Z-screen-53fe3d",
+  "config_name": "scout40__lecleach_iwata_ar_smooth_v7",
+  "family": "FREEFORM",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+  "seed_params": {
+    "g_fc_hz": 459.5,
+    "g_T": 0.597,
+    "g_stop_deg": 110.8,
+    "g_ar_m": 1.167,
+    "g_ar_p": 1.016
+  },
+  "bounds": {
+    "g_fc_hz": {
+      "lo": 420.0,
+      "hi": 900.0
+    },
+    "g_T": {
+      "lo": 0.4,
+      "hi": 0.9
+    },
+    "g_stop_deg": {
+      "lo": 88.0,
+      "hi": 200.0
+    },
+    "g_ar_m": {
+      "lo": 1.0,
+      "hi": 2.4
+    },
+    "g_ar_p": {
+      "lo": 0.5,
+      "hi": 2.0
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.1,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "graded",
+    "budget_counts": "valid"
+  },
+  "warm_start_config": null,
+  "warm_start_run": null,
+  "rows": 41,
+  "valid": 40,
+  "best_n": 25,
+  "best_J": 6.76344642372337,
+  "best_design_hash": "04501fa6edc8",
+  "best_json_hash": "04501fa6edc8",
+  "missing": []
+}

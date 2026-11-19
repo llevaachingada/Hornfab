@@ -1,0 +1,705 @@
+{
+ "design_hash": "febde0373489",
+ "family": "FREEFORM",
+ "generator": {
+  "brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+  "brief_hash": "89e7b98566b5",
+  "derived": {
+   "aspect_timing": {
+    "fixed_round_hold_mm": 0.0,
+    "gate_at_u50": 0.499711259635,
+    "u50": 0.6422313899,
+    "u50_z_mm": 208.855,
+    "warp_q": 1.7951026774553798
+   },
+   "construction_label": "crowe-hv-area-aspect-v1: forward area/aspect superellipse; V2A four-variable contract; our construction, not Crowe CAD; no returned lip or X crease",
+   "deferred_phase2": [
+    "returned_lip_roll",
+    "rim_setback",
+    "x_crease",
+    "independent_area_late",
+    "independent_aspect_mid_late",
+    "throat_blend_length_study"
+   ],
+   "driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "fixed": {
+    "n_anchors": 29,
+    "p_mouth": 3.25,
+    "throat_round_hold_mm": 0.0,
+    "wall_thickness_mm": 3.0,
+    "width_h_active_mm": 580.0
+   },
+   "forward": {
+    "L_mm": 325.2020323403,
+    "area_mid_bias": -0.1494963333,
+    "area_mouth_mm2": 156392.82748814812,
+    "area_ratio": 153.6462441904742,
+    "area_throat_mm2": 1017.8760197630929,
+    "aspect_mouth": 1.930146194959506,
+    "delta_log_area": 5.03465284434981,
+    "height_v_mm": 300.4953725861,
+    "m0": 0.25062536166163396,
+    "mouth_h_mm": 300.4953725861,
+    "mouth_w_mm": 580.0,
+    "p_mouth": 3.25,
+    "width_h_mm": 580.0
+   },
+   "implementation_sha256": "6cd9e4d7db492017be307170b7bcb8343abb4dfd8a0c9ad3ac1d8ebc56e98862",
+   "kind": "crowe_hv_area_aspect_v1",
+   "min_forward_radius_margin_mm": 0.005554021582863555,
+   "mouth": {
+    "area_mm2": 156392.827488148,
+    "aspect": 1.930146194959506,
+    "p": 3.25,
+    "tangent_h_deg": 75.713561,
+    "tangent_v_deg": 63.825901
+   },
+   "not_claimed": [
+    "acoustic readiness",
+    "Crowe CAD equivalence",
+    "roll geometry",
+    "X-crease geometry",
+    "full-system performance",
+    "BO readiness"
+   ],
+   "schema": "crowe-hv-area-aspect-v1",
+   "search_keys": [
+    "L_forward_mm",
+    "area_mid_bias",
+    "aspect_timing_u50",
+    "height_v_active_mm"
+   ],
+   "section_cuts_mm": [
+    {
+     "a_mm": 18.0,
+     "area_mm2": 1017.876,
+     "area_ratio_to_throat": 1.0,
+     "aspect": 1.0,
+     "aspect_gate": 0.0,
+     "b_mm": 18.0,
+     "curvature_h_1_per_mm": 0.00070919,
+     "curvature_v_1_per_mm": 0.00070876,
+     "inside_round_hold": true,
+     "p": 2.0,
+     "wall_h_deg": 2.0,
+     "wall_v_deg": 2.0,
+     "z_mm": 0.0
+    },
+    {
+     "a_mm": 18.1836,
+     "area_mm2": 1038.74,
+     "area_ratio_to_throat": 1.020498,
+     "aspect": 1.000004,
+     "aspect_gate": 6e-06,
+     "b_mm": 18.1835,
+     "curvature_h_1_per_mm": 0.00072606,
+     "curvature_v_1_per_mm": 0.0007076,
+     "inside_round_hold": false,
+     "p": 2.000008,
+     "wall_h_deg": 2.206,
+     "wall_v_deg": 2.2034,
+     "z_mm": 5.0
+    },
+    {
+     "a_mm": 18.3853,
+     "area_mm2": 1061.896,
+     "area_ratio_to_throat": 1.043247,
+     "aspect": 1.000034,
+     "aspect_gate": 5.1e-05,
+     "b_mm": 18.3847,
+     "curvature_h_1_per_mm": 0.00073205,
+     "curvature_v_1_per_mm": 0.00069374,
+     "inside_round_hold": false,
+     "p": 2.000064,
+     "wall_h_deg": 2.4152,
+     "wall_v_deg": 2.4045,
+     "z_mm": 10.0
+    },
+    {
+     "a_mm": 18.8438,
+     "area_mm2": 1115.346,
+     "area_ratio_to_throat": 1.095759,
+     "aspect": 1.000272,
+     "aspect_gate": 0.000414,
+     "b_mm": 18.8386,
+     "curvature_h_1_per_mm": 0.00072509,
+     "curvature_v_1_per_mm": 0.00064211,
+     "inside_round_hold": false,
+     "p": 2.000518,
+     "wall_h_deg": 2.8339,
+     "wall_v_deg": 2.7887,
+     "z_mm": 20.0
+    },
+    {
+     "a_mm": 19.978,
+     "area_mm2": 1252.096,
+     "area_ratio_to_throat": 1.230107,
+     "aspect": 1.002241,
+     "aspect_gate": 0.003404,
+     "b_mm": 19.9333,
+     "curvature_h_1_per_mm": 0.00071819,
+     "curvature_v_1_per_mm": 0.00052117,
+     "inside_round_hold": false,
+     "p": 2.004255,
+     "wall_h_deg": 3.6562,
+     "wall_v_deg": 3.4537,
+     "z_mm": 40.0
+    },
+    {
+     "a_mm": 21.4054,
+     "area_mm2": 1432.382,
+     "area_ratio_to_throat": 1.407227,
+     "aspect": 1.007772,
+     "aspect_gate": 0.011773,
+     "b_mm": 21.2404,
+     "curvature_h_1_per_mm": 0.00083106,
+     "curvature_v_1_per_mm": 0.0004782,
+     "inside_round_hold": false,
+     "p": 2.014716,
+     "wall_h_deg": 4.5299,
+     "wall_v_deg": 4.0159,
+     "z_mm": 60.0
+    },
+    {
+     "a_mm": 25.4184,
+     "area_mm2": 1981.358,
+     "area_ratio_to_throat": 1.946561,
+     "aspect": 1.037942,
+     "aspect_gate": 0.05663,
+     "b_mm": 24.4892,
+     "curvature_h_1_per_mm": 0.00169935,
+     "curvature_v_1_per_mm": 0.00084006,
+     "inside_round_hold": false,
+     "p": 2.070788,
+     "wall_h_deg": 7.2603,
+     "wall_v_deg": 5.4102,
+     "z_mm": 100.0
+    }
+   ],
+   "source_angle_deg_is_assumption": true,
+   "source_tangent_is_assumption": true,
+   "throat": {
+    "area_mm2": 1017.8760197630933,
+    "aspect": 1.0,
+    "exit_angle_deg": 2.0,
+    "p": 2.0,
+    "r0_mm": 18.0,
+    "tangent_h_deg": 1.999998,
+    "tangent_v_deg": 1.999999
+   },
+   "throat_smoothness": {
+    "aspect_at_10mm": 1.000033552,
+    "aspect_at_20mm": 1.000272354,
+    "aspect_at_5mm": 1.000004163,
+    "aspect_timing_u50": 0.6422313899,
+    "fixed_throat_round_hold_mm": 0.0,
+    "gate_at_u50": 0.5,
+    "hold_fraction": 0.0,
+    "max_abs_aspect_minus_1_over_first_20mm": 0.000272353609,
+    "max_abs_p_minus_2_over_first_20mm": 0.000517636649,
+    "p_at_10mm": 2.000063777,
+    "p_at_20mm": 2.000517637,
+    "p_at_5mm": 2.000007913,
+    "warp_q": 1.795102677
+   }
+  },
+  "knobs": {
+   "L_forward_mm": 325.2020323403,
+   "area_mid_bias": -0.1494963333,
+   "aspect_timing_u50": 0.6422313899,
+   "height_v_active_mm": 300.4953725861
+  },
+  "name": "crowe_hv_area_aspect_v1",
+  "recipe_meta": {
+   "mode": "freestanding",
+   "record_digest": {
+    "source": "not_recorded",
+    "value": null
+   },
+   "schema": "recipe_meta_v2",
+   "source_cap": {
+    "angle_deg": null,
+    "curvature": 0,
+    "radius_mm": null,
+    "radius_param": -1.0,
+    "shape": 1,
+    "source": "unresolved"
+   },
+   "termination": {
+    "kind": null,
+    "source": "not_recorded"
+   },
+   "wall_thickness_mm": {
+    "source": "recipe",
+    "value": 3.0
+   }
+  },
+  "spec": {
+   "n_anchors": 29,
+   "name": "crowe_hv_area_aspect_v1",
+   "p_mouth": 3.25,
+   "throat_round_hold_mm": 0.0,
+   "wall_thickness_mm": 3.0,
+   "width_h_active_mm": 580.0
+  }
+ },
+ "params": {
+  "crossSections": [
+   {
+    "shape": "circle",
+    "t": 0.0
+   },
+   {
+    "exponent": 2.0,
+    "shape": "superellipse",
+    "t": 0.001572
+   },
+   {
+    "exponent": 2.000002,
+    "shape": "superellipse",
+    "t": 0.00784
+   },
+   {
+    "exponent": 2.000026,
+    "shape": "superellipse",
+    "t": 0.020297
+   },
+   {
+    "exponent": 2.000159,
+    "shape": "superellipse",
+    "t": 0.038787
+   },
+   {
+    "exponent": 2.000639,
+    "shape": "superellipse",
+    "t": 0.063077
+   },
+   {
+    "exponent": 2.00198,
+    "shape": "superellipse",
+    "t": 0.092861
+   },
+   {
+    "exponent": 2.005101,
+    "shape": "superellipse",
+    "t": 0.127765
+   },
+   {
+    "exponent": 2.011453,
+    "shape": "superellipse",
+    "t": 0.167351
+   },
+   {
+    "exponent": 2.023098,
+    "shape": "superellipse",
+    "t": 0.21112
+   },
+   {
+    "exponent": 2.042705,
+    "shape": "superellipse",
+    "t": 0.258521
+   },
+   {
+    "exponent": 2.07342,
+    "shape": "superellipse",
+    "t": 0.308959
+   },
+   {
+    "exponent": 2.118564,
+    "shape": "superellipse",
+    "t": 0.3618
+   },
+   {
+    "exponent": 2.181137,
+    "shape": "superellipse",
+    "t": 0.416379
+   },
+   {
+    "exponent": 2.263155,
+    "shape": "superellipse",
+    "t": 0.472009
+   },
+   {
+    "exponent": 2.364886,
+    "shape": "superellipse",
+    "t": 0.527991
+   },
+   {
+    "exponent": 2.484156,
+    "shape": "superellipse",
+    "t": 0.583621
+   },
+   {
+    "exponent": 2.615945,
+    "shape": "superellipse",
+    "t": 0.6382
+   },
+   {
+    "exponent": 2.75254,
+    "shape": "superellipse",
+    "t": 0.691041
+   },
+   {
+    "exponent": 2.88444,
+    "shape": "superellipse",
+    "t": 0.741479
+   },
+   {
+    "exponent": 3.002007,
+    "shape": "superellipse",
+    "t": 0.78888
+   },
+   {
+    "exponent": 3.097536,
+    "shape": "superellipse",
+    "t": 0.832649
+   },
+   {
+    "exponent": 3.167114,
+    "shape": "superellipse",
+    "t": 0.872235
+   },
+   {
+    "exponent": 3.211491,
+    "shape": "superellipse",
+    "t": 0.907139
+   },
+   {
+    "exponent": 3.235461,
+    "shape": "superellipse",
+    "t": 0.936923
+   },
+   {
+    "exponent": 3.245882,
+    "shape": "superellipse",
+    "t": 0.961213
+   },
+   {
+    "exponent": 3.24924,
+    "shape": "superellipse",
+    "t": 0.979703
+   },
+   {
+    "exponent": 3.249932,
+    "shape": "superellipse",
+    "t": 0.99216
+   },
+   {
+    "exponent": 3.249999,
+    "shape": "superellipse",
+    "t": 0.998428
+   },
+   {
+    "exponent": 3.25,
+    "shape": "superellipse",
+    "t": 1.0
+   }
+  ],
+  "profileH": {
+   "mouthAngleDeg": 75.713561,
+   "points": [
+    [
+     0.0,
+     18.0,
+     1.999998
+    ],
+    [
+     1.022401,
+     18.036075,
+     2.041678
+    ],
+    [
+     4.076747,
+     18.148312,
+     2.167588
+    ],
+    [
+     9.124628,
+     18.348659,
+     2.37848
+    ],
+    [
+     16.102563,
+     18.656365,
+     2.671235
+    ],
+    [
+     24.922801,
+     19.096228,
+     3.037742
+    ],
+    [
+     35.474423,
+     19.696197,
+     3.470375
+    ],
+    [
+     47.624735,
+     20.486406,
+     3.975
+    ],
+    [
+     61.220941,
+     21.502792,
+     4.588678
+    ],
+    [
+     76.09206,
+     22.797756,
+     5.396268
+    ],
+    [
+     92.051079,
+     24.457839,
+     6.539747
+    ],
+    [
+     108.897305,
+     26.625252,
+     8.217005
+    ],
+    [
+     126.418886,
+     29.518464,
+     10.670713
+    ],
+    [
+     144.395479,
+     33.447727,
+     14.164599
+    ],
+    [
+     162.601016,
+     38.821982,
+     18.929944
+    ],
+    [
+     180.806554,
+     46.140871,
+     25.05447
+    ],
+    [
+     198.783146,
+     55.959802,
+     32.323832
+    ],
+    [
+     216.304727,
+     68.814055,
+     40.14252
+    ],
+    [
+     233.150953,
+     85.098859,
+     47.706529
+    ],
+    [
+     249.109972,
+     104.928505,
+     54.360217
+    ],
+    [
+     263.981092,
+     128.023806,
+     59.819569
+    ],
+    [
+     277.577297,
+     153.67703,
+     64.125781
+    ],
+    [
+     289.72761,
+     180.805001,
+     67.477294
+    ],
+    [
+     300.279231,
+     208.049519,
+     70.091187
+    ],
+    [
+     309.09947,
+     233.866709,
+     72.13224
+    ],
+    [
+     316.077405,
+     256.587127,
+     73.693967
+    ],
+    [
+     321.125285,
+     274.496906,
+     74.811495
+    ],
+    [
+     324.179631,
+     286.017824,
+     75.487184
+    ],
+    [
+     325.202032,
+     290.0,
+     75.713561
+    ]
+   ],
+   "throatAngleDeg": 1.999998
+  },
+  "profileV": {
+   "mouthAngleDeg": 63.825901,
+   "points": [
+    [
+     0.0,
+     18.0,
+     1.999999
+    ],
+    [
+     1.022401,
+     18.036074,
+     2.04157
+    ],
+    [
+     4.076747,
+     18.148271,
+     2.165856
+    ],
+    [
+     9.124628,
+     18.348192,
+     2.369595
+    ],
+    [
+     16.102563,
+     18.653728,
+     2.642557
+    ],
+    [
+     24.922801,
+     19.086098,
+     2.965675
+    ],
+    [
+     35.474423,
+     19.665648,
+     3.315307
+    ],
+    [
+     47.624735,
+     20.408404,
+     3.674654
+    ],
+    [
+     61.220941,
+     21.32643,
+     4.049484
+    ],
+    [
+     76.09206,
+     22.434397,
+     4.48193
+    ],
+    [
+     92.051079,
+     23.76195,
+     5.054688
+    ],
+    [
+     108.897305,
+     25.367686,
+     5.880948
+    ],
+    [
+     126.418886,
+     27.348255,
+     7.082577
+    ],
+    [
+     144.395479,
+     29.837425,
+     8.765191
+    ],
+    [
+     162.601016,
+     32.994077,
+     10.998685
+    ],
+    [
+     180.806554,
+     36.982384,
+     13.808408
+    ],
+    [
+     198.783146,
+     41.950254,
+     17.181187
+    ],
+    [
+     216.304727,
+     48.013815,
+     21.089728
+    ],
+    [
+     233.150953,
+     55.254286,
+     25.524436
+    ],
+    [
+     249.109972,
+     63.725217,
+     30.496912
+    ],
+    [
+     263.981092,
+     73.453311,
+     35.9764
+    ],
+    [
+     277.577297,
+     84.406416,
+     41.778712
+    ],
+    [
+     289.72761,
+     96.413521,
+     47.516336
+    ],
+    [
+     300.279231,
+     109.05739,
+     52.706122
+    ],
+    [
+     309.09947,
+     121.602665,
+     56.967885
+    ],
+    [
+     316.077405,
+     133.033636,
+     60.14095
+    ],
+    [
+     321.125285,
+     142.225606,
+     62.258172
+    ],
+    [
+     324.179631,
+     148.184711,
+     63.446085
+    ],
+    [
+     325.202032,
+     150.247686,
+     63.825901
+    ]
+   ],
+   "throatAngleDeg": 1.999999
+  },
+  "wall_thickness_mm": 3.0
+ }
+}

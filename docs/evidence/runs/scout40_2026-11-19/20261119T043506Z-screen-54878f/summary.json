@@ -1,0 +1,51 @@
+{
+  "run": "20261119T043506Z-screen-54878f",
+  "config_name": "scout40__crowe_v2a_c1",
+  "family": "FREEFORM",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+  "seed_params": {
+    "height_v_active_mm": 474.0,
+    "L_forward_mm": 300.0,
+    "area_mid_bias": 0.0,
+    "aspect_timing_u50": 0.5
+  },
+  "bounds": {
+    "height_v_active_mm": {
+      "lo": 300.0,
+      "hi": 474.0
+    },
+    "L_forward_mm": {
+      "lo": 220.0,
+      "hi": 340.0
+    },
+    "area_mid_bias": {
+      "lo": -0.15,
+      "hi": 0.15
+    },
+    "aspect_timing_u50": {
+      "lo": 0.35,
+      "hi": 0.65
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.2,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "graded",
+    "budget_counts": "valid",
+    "max_attempts": 300
+  },
+  "warm_start_config": null,
+  "warm_start_run": null,
+  "rows": 40,
+  "valid": 40,
+  "best_n": 39,
+  "best_J": 4.8787457418045195,
+  "best_design_hash": "febde0373489",
+  "best_json_hash": "febde0373489",
+  "missing": []
+}

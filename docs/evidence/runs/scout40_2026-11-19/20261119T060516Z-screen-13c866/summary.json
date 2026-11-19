@@ -1,0 +1,39 @@
+{
+  "run": "20261119T060516Z-screen-13c866",
+  "config_name": "hl__biradial_es_style_v7__vt_v1",
+  "family": "FREEFORM",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "seed_params": {
+    "g_vt_mm": 386.727504,
+    "g_vt_hold": 0.0
+  },
+  "bounds": {
+    "g_vt_mm": {
+      "lo": 320.0,
+      "hi": 465.0
+    },
+    "g_vt_hold": {
+      "lo": 0.0,
+      "hi": 0.5
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.2,
+    "seed": 9012,
+    "budget": 80,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "graded"
+  },
+  "warm_start_config": null,
+  "warm_start_run": null,
+  "rows": 40,
+  "valid": 40,
+  "best_n": 28,
+  "best_J": 6.32714095892227,
+  "best_design_hash": "0705e7b08d4f",
+  "best_json_hash": "0705e7b08d4f",
+  "missing": []
+}

@@ -22,6 +22,16 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - SCOUT40 complete; evidence bundle pushed; 8 tail requeues pending
+
+- DONE: night complete (24/24); full evidence bundle under docs/evidence/runs/scout40_2026-11-19/
+  (scores, seeds, geometry, best meshes/responses) + archive_run.py tool.
+- OPEN (follow-on night): fold_warm (az_fold_h widen), morph_v8 (morph_rate widen), tritonia v8/v9
+  (morph_width envelope pin_ignore), rosse (tmax kernel pin_ignore), petal/crowe_x osse/crowe_x square
+  (refusal storms -> resample_strict/lower sigma).
+- OPEN: morning v10 rescore + continuation_advice --window 30; B6 lane set (owner approval).
+- NOTE: GUI lane working-tree files remain uncommitted (not this lane).
+
 ## 2026-11-19 - Requeues all closed; b3_soft 2.800
 
 - DONE: five requeues + the b3 v2 continuation all finished; b3_soft chain 3.540 -> 2.841 -> 2.800

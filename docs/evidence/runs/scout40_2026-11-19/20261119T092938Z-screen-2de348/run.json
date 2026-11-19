@@ -1,0 +1,633 @@
+{
+ "backend": "beat_cuda",
+ "best": {
+  "design_hash": "8ba61395b295",
+  "eval_no": 24,
+  "objective": 19.721355561289517
+ },
+ "budget": 40,
+ "budget_counts": {
+  "attempts": 40,
+  "attempts_cap": 250,
+  "budget": 40,
+  "mode": "valid",
+  "refused_free": 0,
+  "valid": 40
+ },
+ "cma_covariance": {
+  "C": [
+   [
+    0.955716939848971,
+    -0.1329045696142676,
+    0.17525292744720955,
+    -0.07683630484837968,
+    -0.14111351781406956,
+    -0.01946518029920686
+   ],
+   [
+    -0.1329045696142676,
+    1.07900990103702,
+    -0.2818852204762101,
+    -0.005852545417219732,
+    0.16259008866865673,
+    0.04664455112138614
+   ],
+   [
+    0.17525292744720955,
+    -0.2818852204762101,
+    1.7036808249926108,
+    -0.075370028299237,
+    -0.4959765770356155,
+    -0.023677075263626238
+   ],
+   [
+    -0.07683630484837968,
+    -0.005852545417219732,
+    -0.075370028299237,
+    0.6722718465794877,
+    0.008155366849139783,
+    -0.09955450085316159
+   ],
+   [
+    -0.14111351781406956,
+    0.16259008866865673,
+    -0.4959765770356155,
+    0.008155366849139783,
+    1.062794801276069,
+    0.04444941090112455
+   ],
+   [
+    -0.01946518029920686,
+    0.04664455112138614,
+    -0.023677075263626238,
+    -0.09955450085316159,
+    0.04444941090112455,
+    0.8950650712247569
+   ]
+  ],
+  "condition_number": 3.5089956226697,
+  "coordinates": [
+   {
+    "C_ii": 1.7036808249926108,
+    "key": "g_decay",
+    "share": 0.21332748160855933,
+    "std_unit": 0.2890275690939278
+   },
+   {
+    "C_ii": 1.07900990103702,
+    "key": "g_axial_v_mm",
+    "share": 0.1697717414947561,
+    "std_unit": 0.230015905007071
+   },
+   {
+    "C_ii": 1.062794801276069,
+    "key": "g_depth_mm",
+    "share": 0.168491268293754,
+    "std_unit": 0.22828105090489464
+   },
+   {
+    "C_ii": 0.955716939848971,
+    "key": "g_axial_h_mm",
+    "share": 0.1597781287640885,
+    "std_unit": 0.21647601988663892
+   },
+   {
+    "C_ii": 0.8950650712247569,
+    "key": "g_rect_exponent",
+    "share": 0.15462510001277355,
+    "std_unit": 0.2094944188184907
+   },
+   {
+    "C_ii": 0.6722718465794877,
+    "key": "g_depth_h_ratio",
+    "share": 0.13400627982606853,
+    "std_unit": 0.18155893000470888
+   }
+  ],
+  "eigenpairs": [
+   {
+    "axis_length": 1.4628671789817183,
+    "eigenvalue": 2.13998038334193,
+    "fraction": 0.3360237338558496,
+    "rank": 1,
+    "top_loadings": [
+     {
+      "key": "g_decay",
+      "loading": -0.8076341538800742
+     },
+     {
+      "key": "g_depth_mm",
+      "loading": 0.4487763984528855
+     },
+     {
+      "key": "g_axial_v_mm",
+      "loading": 0.31147930075429275
+     },
+     {
+      "key": "g_axial_h_mm",
+      "loading": -0.21194941034845072
+     },
+     {
+      "key": "g_depth_h_ratio",
+      "loading": 0.05095240000074919
+     }
+    ]
+   },
+   {
+    "axis_length": 1.0096704593204702,
+    "eigenvalue": 1.0194344364244092,
+    "fraction": 0.16007350740926382,
+    "rank": 2,
+    "top_loadings": [
+     {
+      "key": "g_axial_v_mm",
+      "loading": 0.7492098423237992
+     },
+     {
+      "key": "g_axial_h_mm",
+      "loading": -0.3998015813816955
+     },
+     {
+      "key": "g_decay",
+      "loading": 0.38521874682782453
+     },
+     {
+      "key": "g_rect_exponent",
+      "loading": 0.3431053314740163
+     },
+     {
+      "key": "g_depth_h_ratio",
+      "loading": -0.10700663112577538
+     }
+    ]
+   },
+   {
+    "axis_length": 0.9701306015720699,
+    "eigenvalue": 0.9411533841065861,
+    "fraction": 0.14778166973880744,
+    "rank": 3,
+    "top_loadings": [
+     {
+      "key": "g_rect_exponent",
+      "loading": 0.7285150988216206
+     },
+     {
+      "key": "g_axial_h_mm",
+      "loading": 0.5375823603253468
+     },
+     {
+      "key": "g_depth_h_ratio",
+      "loading": -0.3952908059972202
+     },
+     {
+      "key": "g_depth_mm",
+      "loading": 0.11880848589913515
+     },
+     {
+      "key": "g_decay",
+      "loading": -0.08300871731026371
+     }
+    ]
+   }
+  ],
+  "keys": [
+   "g_axial_h_mm",
+   "g_axial_v_mm",
+   "g_decay",
+   "g_depth_h_ratio",
+   "g_depth_mm",
+   "g_rect_exponent"
+  ],
+  "n_dim": 6,
+  "note": "C is the CMA search-distribution covariance in the unit box; large C_ii / std_unit \u21d2 CMA still explores that knob; eigenvectors are coupled search directions for J, not acoustic Sobol indices.",
+  "sigma": 0.2214344319897816
+ },
+ "cma_seed": 1234,
+ "command": "hornlab-search search --config examples/typologies/scout40_2026-11-19/scout40__rf_rect_axial_cap225.yaml --budget 40 --mode screen",
+ "config": {
+  "bounds": {
+   "g_axial_h_mm": {
+    "hi": 5.0,
+    "lo": -5.0
+   },
+   "g_axial_v_mm": {
+    "hi": 5.0,
+    "lo": -5.0
+   },
+   "g_decay": {
+    "hi": 0.75,
+    "lo": 0.65
+   },
+   "g_depth_h_ratio": {
+    "hi": 1.05,
+    "lo": 0.68
+   },
+   "g_depth_mm": {
+    "hi": 246.0,
+    "lo": 230.0
+   },
+   "g_height_mm": {
+    "hi": 299.0,
+    "lo": 299.0,
+    "search": false
+   },
+   "g_inward_h_mm": {
+    "hi": 0.0,
+    "lo": 0.0,
+    "search": false
+   },
+   "g_inward_v_mm": {
+    "hi": 0.0,
+    "lo": 0.0,
+    "search": false
+   },
+   "g_rect_exponent": {
+    "hi": 14.0,
+    "lo": 10.0
+   },
+   "g_rect_turn_deg": {
+    "hi": 65.0,
+    "lo": 65.0,
+    "search": false
+   },
+   "g_relief_end_s": {
+    "hi": 0.96,
+    "lo": 0.96,
+    "search": false
+   },
+   "g_relief_peak_s": {
+    "hi": 0.8,
+    "lo": 0.8,
+    "search": false
+   },
+   "g_relief_start_s": {
+    "hi": 0.5,
+    "lo": 0.5,
+    "search": false
+   },
+   "g_terminal_deg": {
+    "hi": 225.0,
+    "lo": 225.0,
+    "search": false
+   },
+   "g_throat_turn_deg": {
+    "hi": 25.0,
+    "lo": 25.0,
+    "search": false
+   },
+   "g_width_mm": {
+    "hi": 542.0,
+    "lo": 542.0,
+    "search": false
+   }
+  },
+  "brief": {
+   "description": "(objective v7) HOME living-room horn, LANDSCAPE 80H x 50V, vertical half-weighted, no K-law mouth, pattern+loading from 700 Hz XO, HF1440 1.4-inch, 600W x 480H x 480D envelope, band 350-8000 Hz",
+   "driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "envelope": {
+    "max_depth_mm": 480.0,
+    "max_mouth_h_mm": 480.0,
+    "max_mouth_w_mm": 600.0
+   },
+   "grid": {
+    "screen_extra_hz": [
+     250,
+     315,
+     400,
+     2573,
+     3311,
+     4260
+    ],
+    "verify_points_per_octave": 6
+   },
+   "name": "room_landscape_80x50_700_hf1440_v7",
+   "objective": {
+    "bw8k_floor": 0.75,
+    "cov_below_f0": "mask",
+    "cov_narrow_ratio": 2.0,
+    "cov_v_weight": 0.5,
+    "flat_band": "scored",
+    "lfp_crossover_ratio": 1.6,
+    "lfp_re_z": 0.2,
+    "loaded_re_z": 0.5,
+    "tolerances": {
+     "cov": 3.0,
+     "di": 0.4,
+     "diag": 2.0,
+     "dislope": 9.0,
+     "distd": 2.0,
+     "flat": 1.5,
+     "flat_cv": 1.5,
+     "load": 0.3,
+     "rip": 1.0
+    },
+    "version": 7
+   },
+   "source": {
+    "cap": "auto"
+   },
+   "symmetry": "hv",
+   "target": {
+    "band_hi_hz": 8000.0,
+    "band_lo_hz": 350.0,
+    "coverage_h_deg": 80.0,
+    "coverage_v_deg": 50.0,
+    "di_slope_target": 0.0,
+    "di_target_db": null,
+    "f0_hz": 700.0,
+    "f0_v_hz": 700.0,
+    "freq_weights": {
+     "band_hz": [
+      [
+       2500.0,
+       5500.0,
+       2.0
+      ]
+     ]
+    },
+    "loaded_hi_hz": 5600.0,
+    "z_min": 0.5
+   },
+   "weights": {
+    "cov": 1.0,
+    "di": 0.3,
+    "diag": 1.0,
+    "dislope": 1.0,
+    "distd": 0.5,
+    "flat": 0.5,
+    "flat_cv": 1.0,
+    "load": 1.0,
+    "rip": 1.0
+   }
+  },
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "description": "SCOUT40 2026-11-19: rolled whole-shape axial, terminal 225 deg cap, horizontal depth ratio opened 0.68-1.05 (seed 1.0, no shoulder split); paired with the 270 control arm.",
+  "family": "FREEFORM",
+  "feasibility": {
+   "derivation": [
+    {
+     "knob": "-",
+     "note": "seed_policy explicit: derivation skipped"
+    }
+   ],
+   "envelope_mouth_h_mm": 480.0,
+   "envelope_mouth_w_mm": 600.0,
+   "f0_hz": 700.0,
+   "f0_v_hz": 700.0,
+   "feasible_v": false,
+   "feasible_w": true,
+   "held_coverage_v_deg": 75.5952380952381,
+   "held_coverage_w_deg": 60.476190476190474,
+   "required_mouth_h_mm": 725.7142857142857,
+   "required_mouth_w_mm": 453.57142857142856,
+   "rule": "d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)",
+   "screen_freqs_below_f0": 2,
+   "screen_freqs_total": 12,
+   "verify_freqs_below_f0": 7,
+   "verify_freqs_total": 25
+  },
+  "generator": {
+   "n_phi": 65,
+   "n_s": 128,
+   "name": "grid",
+   "rows": {
+    "mode": "axial",
+    "type": "rolled_family_rect_v1"
+   },
+   "seed_policy": "explicit",
+   "span": "quarter",
+   "wall_thickness_mm": 3.0
+  },
+  "grid": {
+   "screen_extra_hz": [
+    250,
+    315,
+    400,
+    2573,
+    3311,
+    4260
+   ],
+   "verify_points_per_octave": 6
+  },
+  "mesh": {
+   "dof_cap_final": 24000,
+   "dof_cap_screen": 6000,
+   "dof_cap_verify": 24000,
+   "dof_per_triangle": 0.51,
+   "epw": 6.0,
+   "quadrants": "1",
+   "rear_res_factor": 1.5
+  },
+  "name": "scout40__rf_rect_axial_cap225",
+  "objective": {
+   "bw8k_floor": 0.75,
+   "cov_below_f0": "mask",
+   "cov_narrow_ratio": 2.0,
+   "cov_v_weight": 0.5,
+   "flat_band": "scored",
+   "lfp_crossover_ratio": 1.6,
+   "lfp_re_z": 0.2,
+   "loaded_re_z": 0.5,
+   "tolerances": {
+    "cov": 3.0,
+    "di": 0.4,
+    "diag": 2.0,
+    "dislope": 9.0,
+    "distd": 2.0,
+    "flat": 1.5,
+    "flat_cv": 1.5,
+    "load": 0.3,
+    "rip": 1.0
+   },
+   "version": 7
+  },
+  "search": {
+   "algorithm": "cma",
+   "budget": 40,
+   "budget_counts": "valid",
+   "infeasible_penalty": "flat",
+   "max_attempts": 250,
+   "popsize": null,
+   "seed": 1234,
+   "sigma0": 0.15,
+   "tolfun": 0.001
+  },
+  "seed_params": {
+   "g_axial_h_mm": 3.0,
+   "g_axial_v_mm": 4.0,
+   "g_decay": 0.7,
+   "g_depth_h_ratio": 1.0,
+   "g_depth_mm": 238.0,
+   "g_height_mm": 299.0,
+   "g_inward_h_mm": 0.0,
+   "g_inward_v_mm": 0.0,
+   "g_rect_exponent": 12.0,
+   "g_rect_turn_deg": 65.0,
+   "g_relief_end_s": 0.96,
+   "g_relief_peak_s": 0.8,
+   "g_relief_start_s": 0.5,
+   "g_terminal_deg": 225.0,
+   "g_throat_turn_deg": 25.0,
+   "g_width_mm": 542.0
+  },
+  "solve": {
+   "angle_count": 73,
+   "backend": "beat_cuda",
+   "balloon": true,
+   "balloon_points_screen": 512,
+   "balloon_points_verify": 1024,
+   "cuda_fused": true,
+   "distance_m": 10.0,
+   "gmres_tol": 1e-05,
+   "timeout_s": 900
+  },
+  "target": {
+   "band_hi_hz": 8000.0,
+   "band_lo_hz": 350.0,
+   "coverage_h_deg": 80.0,
+   "coverage_v_deg": 50.0,
+   "di_slope_target": 0.0,
+   "di_target_db": null,
+   "f0_hz": 700.0,
+   "f0_v_hz": 700.0,
+   "freq_weights": {
+    "band_hz": [
+     [
+      2500.0,
+      5500.0,
+      2.0
+     ]
+    ]
+   },
+   "loaded_hi_hz": 5600.0,
+   "z_min": 0.5
+  },
+  "weights": {
+   "cov": 1.0,
+   "di": 0.3,
+   "diag": 1.0,
+   "dislope": 1.0,
+   "distd": 0.5,
+   "flat": 0.5,
+   "flat_cv": 1.0,
+   "load": 1.0,
+   "rip": 1.0
+  }
+ },
+ "config_name": "scout40__rf_rect_axial_cap225",
+ "config_path": "examples/typologies/scout40_2026-11-19/scout40__rf_rect_axial_cap225.yaml",
+ "config_sha": "2caade374a6c",
+ "created_utc": "2026-11-19T09:29:56Z",
+ "dataset_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\dataset",
+ "family": "FREEFORM",
+ "finished_utc": "2026-11-19T09:41:32Z",
+ "last_invocation": {
+  "cache_hits": 0,
+  "candidates_per_hour": 209.82537253640143,
+  "evaluations": 40,
+  "failures": 0,
+  "failures_by_reason": {},
+  "mean_seconds_per_candidate": 17.157124310004292,
+  "non_cached": 40,
+  "projected_hours": {
+   "1000": 4.765867863890081,
+   "10000": 47.65867863890081
+  },
+  "total_gpu_seconds": 595.9939056999283,
+  "total_mesh_seconds": 56.91966639913153
+ },
+ "lib_shas": {
+  "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+  "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+  "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+  "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+  "hornlab_search": "9541eb73999610fe4a9ad9c5e73a25201b04e912"
+ },
+ "mode": "screen",
+ "objective_version": 7,
+ "run_id": "20261119T092938Z-screen-2de348",
+ "runtime": {
+  "gpu": [
+   "NVIDIA GeForce RTX 4060 Laptop GPU, 610.62, 8188 MiB"
+  ],
+  "julia": "julia version 1.12.7",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "sources": [
+   {
+    "module": "hornlab_beat_bem",
+    "n_files": 111,
+    "sha256": "2fb5ad6c0f0900ef68c2a79761208474815a583d4b6c782bb8c08486561e5543"
+   },
+   {
+    "module": "hornlab_mesher",
+    "n_files": 66,
+    "sha256": "47d00e50f8d7cb8de813b3dcb41d1bcdf893d404424a7689d70f2ca5792949da"
+   },
+   {
+    "module": "hornlab_bempp_bem",
+    "n_files": 21,
+    "sha256": "08f71637ae90cc4900971b15b043320ef4e0a26a3fe884aaacecb35b5c8fc794"
+   }
+  ]
+ },
+ "seed": {
+  "design_hash": "eeca3bc36b1d",
+  "objective": 21.09664870670239,
+  "terms": {
+   "cov": 4.223103209642536,
+   "di": 3.8473753661527996,
+   "di_estimated": 0.0,
+   "diag": 5.585793634461388,
+   "dislope": 9.309458665999884,
+   "distd": 1.2953986234331374,
+   "f11_hz": 5600.0,
+   "flat": 0.09683351366608593,
+   "flat_cv": 0.11094123677524254,
+   "lfp20_hz": 429.8090389541668,
+   "lfp50_hz": 501.25112026001176,
+   "load": 0.0,
+   "loaded_hi_hz": 5600.0,
+   "n_in_band": 13,
+   "n_nan": 0,
+   "oa_excess_raw": 0.0,
+   "penalty": 0.0,
+   "rez_min_from_fx": 1.0055185959812076,
+   "rip": 0.0170232814278858,
+   "total": 21.09664870670239
+  }
+ },
+ "started_utc": "2026-11-19T09:29:56Z",
+ "stats": {
+  "cache_hits": 0,
+  "candidates_per_hour": 210.02042417989017,
+  "evaluations": 40,
+  "failures": 0,
+  "failures_by_reason": {},
+  "mean_seconds_per_candidate": 17.141190025006654,
+  "non_cached": 40,
+  "projected_hours": {
+   "1000": 4.76144167361296,
+   "10000": 47.6144167361296
+  },
+  "total_gpu_seconds": 595.9939056999283,
+  "total_mesh_seconds": 56.91966639913153
+ },
+ "status": "finished",
+ "stop_reason": "budget",
+ "toolchain": {
+  "beat_status": "`{'available': True, 'reason': 'NVIDIA GPU detected and Julia CUDA.functional() confirmed a usable device', 'state': 'ready', 'version': '0.2.0', 'backend': 'cuda'}`",
+  "cpu": "Intel(R) Core(TM) i7-14650HX, 16 cores / 24 threads",
+  "driver": "610.62; CUDA UMD version 13.3",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop, 8 GB (8188 MiB)",
+  "os": "Microsoft Windows 11 Pro 10.0.26200, build 26200",
+  "present": true,
+  "python": "`C:\\Users\\hunte\\Hrns\\hornlab-search\\.venv\\Scripts\\python.exe` 3.12.10",
+  "ram": "31.7 GB",
+  "sha256": "7e829ed0af8ece14"
+ },
+ "trace_fraction": 0.05
+}

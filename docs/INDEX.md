@@ -38,6 +38,8 @@ test sets, numbered owner decisions and the ordered local work list with exact c
 the replay gate fix, the two offline v9/v10 rescore briefs, and the exact PowerShell commands for
 per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 frequency floor. Not run.
 
+[SCOUT40 night evidence bundle (2026-11-19)](evidence/runs/scout40_2026-11-19/README.md): all 24 run dirs with per-eval score rows (`scores.csv`/`search.ndjson`: H/V beamwidth, DI, ripple, on-axis, throat impedance, all score terms), seeds/bounds (`config.yaml`, `summary.json`), and each best design's geometry + mesh + response.
+
 [B1 readiness + zero-dimension truth fix (2026-11-18, WP 2.2/D7)](evidence/b1_readiness_2026-11-18/README.md):
 B1/B1f lines checked (kind: command, safe), search/CLI/night dry-run now refuse a zero-free-dimension
 search, the feasibility table, the ext-throat exclusion finding and the queue-ready batches for GPU approval.

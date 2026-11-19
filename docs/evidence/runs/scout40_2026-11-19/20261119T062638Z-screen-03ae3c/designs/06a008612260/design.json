@@ -1,0 +1,67 @@
+{
+ "design_hash": "06a008612260",
+ "family": "FREEFORM",
+ "generator": {
+  "brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+  "brief_hash": "89e7b98566b5",
+  "derived": {},
+  "knobs": {
+   "g_T": 0.706139511,
+   "g_ar_m": 1.3971650718,
+   "g_ar_p": 1.1625238692,
+   "g_fc_hz": 448.7897560741,
+   "g_stop_deg": 106.2109539303
+  },
+  "name": "grid",
+  "recipe_meta": {
+   "mode": "freestanding",
+   "record_digest": {
+    "source": "not_recorded",
+    "value": null
+   },
+   "schema": "recipe_meta_v2",
+   "source_cap": {
+    "angle_deg": 2.0,
+    "curvature": 0,
+    "radius_mm": 515.7667502611888,
+    "radius_param": -1.0,
+    "shape": 1,
+    "source": "point_grid_resolved"
+   },
+   "termination": {
+    "kind": null,
+    "source": "not_recorded"
+   },
+   "wall_thickness_mm": {
+    "source": "recipe",
+    "value": 3.0
+   }
+  },
+  "spec": {
+   "n_phi": 15,
+   "n_s": 32,
+   "name": "grid",
+   "rows": {
+    "type": "iwata_ar"
+   },
+   "wall_thickness_mm": 3.0
+  }
+ },
+ "params": {
+  "grid": {
+   "knobs": {
+    "g_T": 0.706139511,
+    "g_ar_m": 1.3971650718,
+    "g_ar_p": 1.1625238692,
+    "g_fc_hz": 448.7897560741,
+    "g_stop_deg": 106.2109539303
+   },
+   "n_phi": 15,
+   "n_s": 32,
+   "rows": {
+    "type": "iwata_ar"
+   },
+   "wall_thickness_mm": 3.0
+  }
+ }
+}

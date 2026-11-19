@@ -1,0 +1,71 @@
+{
+  "run": "20261119T092938Z-screen-2de348",
+  "config_name": "scout40__rf_rect_axial_cap225",
+  "family": "FREEFORM",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "seed_params": {
+    "g_width_mm": 542.0,
+    "g_height_mm": 299.0,
+    "g_depth_mm": 238.0,
+    "g_depth_h_ratio": 1.0,
+    "g_decay": 0.7,
+    "g_rect_exponent": 12.0,
+    "g_rect_turn_deg": 65.0,
+    "g_throat_turn_deg": 25.0,
+    "g_terminal_deg": 225.0,
+    "g_inward_h_mm": 0.0,
+    "g_inward_v_mm": 0.0,
+    "g_axial_h_mm": 3.0,
+    "g_axial_v_mm": 4.0,
+    "g_relief_start_s": 0.5,
+    "g_relief_peak_s": 0.8,
+    "g_relief_end_s": 0.96
+  },
+  "bounds": {
+    "g_depth_mm": {
+      "lo": 230.0,
+      "hi": 246.0
+    },
+    "g_depth_h_ratio": {
+      "lo": 0.68,
+      "hi": 1.05
+    },
+    "g_decay": {
+      "lo": 0.65,
+      "hi": 0.75
+    },
+    "g_rect_exponent": {
+      "lo": 10.0,
+      "hi": 14.0
+    },
+    "g_axial_h_mm": {
+      "lo": -5.0,
+      "hi": 5.0
+    },
+    "g_axial_v_mm": {
+      "lo": -5.0,
+      "hi": 5.0
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.15,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "flat",
+    "budget_counts": "valid",
+    "max_attempts": 250
+  },
+  "warm_start_config": null,
+  "warm_start_run": null,
+  "rows": 40,
+  "valid": 40,
+  "best_n": 24,
+  "best_J": 19.721355561289517,
+  "best_design_hash": "8ba61395b295",
+  "best_json_hash": "8ba61395b295",
+  "missing": []
+}

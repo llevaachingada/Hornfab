@@ -1,0 +1,51 @@
+=== 2026-11-18T23:35:04 START s40__crowe_v2a_c1 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__crowe_v2a_c1.yaml --budget 40 --mode screen
+=== 2026-11-19T00:03:52 END s40__crowe_v2a_c1 exit 0
+=== 2026-11-19T00:03:53 START s40__lecleach_hv_smooth : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__lecleach_hv_smooth_v7.yaml --budget 40 --mode screen
+=== 2026-11-19T00:09:56 END s40__lecleach_hv_smooth exit 75
+=== 2026-11-19T00:09:56 START s40__iwata_ar_smooth : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__lecleach_iwata_ar_smooth_v7.yaml --budget 40 --mode screen
+=== 2026-11-19T00:16:28 END s40__iwata_ar_smooth exit 75
+=== 2026-11-19T00:16:28 START s40__klangfilm_b3_soft : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__klangfilm_b3_soft.yaml --budget 40 --mode screen
+=== 2026-11-19T00:18:31 END s40__klangfilm_b3_soft exit 75
+=== 2026-11-19T00:18:31 START s40__klangfilm_hvcore_c200mouth : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__klangfilm_hvcore_c200mouth.yaml --budget 40 --mode screen
+=== 2026-11-19T00:30:35 END s40__klangfilm_hvcore_c200mouth exit 75
+=== 2026-11-19T00:30:35 START s40__klangfilm_lame_hv_stage_a : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__klangfilm_lame_hv_stage_a.yaml --budget 40 --mode screen
+=== 2026-11-19T01:05:14 END s40__klangfilm_lame_hv_stage_a exit 75
+=== 2026-11-19T01:05:14 START s40__vt_v1 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/studies/u3_biradial_es_style_v7/vt_v1.yaml --budget 40 --mode screen
+=== 2026-11-19T01:18:54 END s40__vt_v1 exit 0
+=== 2026-11-19T01:18:54 RELOAD night file changed; order now: s40__crowe_v2a_c1, s40__lecleach_hv_smooth, s40__iwata_ar_smooth, s40__klangfilm_b3_soft, s40__klangfilm_hvcore_c200mouth, s40__klangfilm_lame_hv_stage_a, s40w__lecleach_hv_smooth, s40w__iwata_ar_smooth, s40w__klangfilm_b3_soft, s40w__klangfilm_hvcore_c200mouth, s40w__klangfilm_lame_hv_stage_a, s40__vt_v1, s40__fold_warm_v7, s40__ext_throat_v7, s40__morph_v8, s40__petal_hvlaw_v7, s40__tritonia_v8, s40__rosse_rect_cd_v7, s40__crowe_x_osse_cd_v7, s40__tritonia_v9, s40__crowe_x_square_v7, s40__rf_rect_cap225, s40__rf_rect_control270
+=== 2026-11-19T01:18:54 START s40w__lecleach_hv_smooth : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40w_2026-11-19/scout40w__lecleach_hv_smooth_v7.yaml --budget 40 --mode screen
+=== 2026-11-19T01:26:36 END s40w__lecleach_hv_smooth exit 0
+=== 2026-11-19T01:26:36 START s40w__iwata_ar_smooth : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40w_2026-11-19/scout40w__lecleach_iwata_ar_smooth_v7.yaml --budget 40 --mode screen
+=== 2026-11-19T01:32:17 END s40w__iwata_ar_smooth exit 0
+=== 2026-11-19T01:32:17 START s40w__klangfilm_b3_soft : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40w_2026-11-19/scout40w__klangfilm_b3_soft.yaml --budget 40 --mode screen
+=== 2026-11-19T01:41:51 END s40w__klangfilm_b3_soft exit 75
+=== 2026-11-19T01:41:51 START s40w__klangfilm_hvcore_c200mouth : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40w_2026-11-19/scout40w__klangfilm_hvcore_c200mouth.yaml --budget 40 --mode screen
+=== 2026-11-19T01:55:04 END s40w__klangfilm_hvcore_c200mouth exit 0
+=== 2026-11-19T01:55:04 RELOAD night file changed; order now: s40__crowe_v2a_c1, s40__lecleach_hv_smooth, s40__iwata_ar_smooth, s40__klangfilm_b3_soft, s40__klangfilm_hvcore_c200mouth, s40__klangfilm_lame_hv_stage_a, s40w__lecleach_hv_smooth, s40w__iwata_ar_smooth, s40w__klangfilm_b3_soft, s40w__klangfilm_hvcore_c200mouth, s40w__klangfilm_lame_hv_stage_a, s40w2__klangfilm_b3_soft, s40__vt_v1, s40__fold_warm_v7, s40__ext_throat_v7, s40__morph_v8, s40__petal_hvlaw_v7, s40__tritonia_v8, s40__rosse_rect_cd_v7, s40__crowe_x_osse_cd_v7, s40__tritonia_v9, s40__crowe_x_square_v7, s40__rf_rect_cap225, s40__rf_rect_control270
+=== 2026-11-19T01:55:04 START s40w__klangfilm_lame_hv_stage_a : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40w_2026-11-19/scout40w__klangfilm_lame_hv_stage_a.yaml --budget 40 --mode screen
+=== 2026-11-19T02:33:28 END s40w__klangfilm_lame_hv_stage_a exit 0
+=== 2026-11-19T02:33:28 START s40w2__klangfilm_b3_soft : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40w_2026-11-19/scout40w2__klangfilm_b3_soft.yaml --budget 40 --mode screen
+=== 2026-11-19T02:43:54 END s40w2__klangfilm_b3_soft exit 0
+=== 2026-11-19T02:43:54 START s40__fold_warm_v7 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__fold_warm_v7.yaml --budget 40 --mode screen
+=== 2026-11-19T02:56:28 END s40__fold_warm_v7 exit 75
+=== 2026-11-19T02:56:28 START s40__ext_throat_v7 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__ext_throat_hvlaw_v7.yaml --budget 40 --mode screen
+=== 2026-11-19T03:12:12 END s40__ext_throat_v7 exit 0
+=== 2026-11-19T03:12:12 START s40__morph_v8 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__morph_v8.yaml --budget 40 --mode screen
+=== 2026-11-19T03:26:16 END s40__morph_v8 exit 75
+=== 2026-11-19T03:26:16 START s40__petal_hvlaw_v7 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__ath_core_petal_hvlaw_v7.yaml --budget 40 --mode screen
+=== 2026-11-19T03:34:19 END s40__petal_hvlaw_v7 exit 75
+=== 2026-11-19T03:34:19 START s40__tritonia_v8 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__tritonia_v8.yaml --budget 40 --mode screen
+=== 2026-11-19T03:52:55 END s40__tritonia_v8 exit 75
+=== 2026-11-19T03:52:55 START s40__rosse_rect_cd_v7 : .venv/Scripts/python.exe tools/geometry/rosse_rect_cli.py search --config examples/typologies/scout40_2026-11-19/scout40__rosse_rect_cd_v7.yaml --mode screen --budget 40
+=== 2026-11-19T04:05:58 END s40__rosse_rect_cd_v7 exit 75
+=== 2026-11-19T04:05:58 START s40__crowe_x_osse_cd_v7 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__crowe_x_osse_cd_v7.yaml --budget 40 --mode screen
+=== 2026-11-19T04:08:00 END s40__crowe_x_osse_cd_v7 exit 75
+=== 2026-11-19T04:08:00 START s40__tritonia_v9 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__tritonia_v9.yaml --budget 40 --mode screen
+=== 2026-11-19T04:22:34 END s40__tritonia_v9 exit 75
+=== 2026-11-19T04:22:34 START s40__crowe_x_square_v7 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__crowe_x_square_v7.yaml --budget 40 --mode screen
+=== 2026-11-19T04:29:36 END s40__crowe_x_square_v7 exit 75
+=== 2026-11-19T04:29:36 START s40__rf_rect_cap225 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__rf_rect_axial_cap225.yaml --budget 40 --mode screen
+=== 2026-11-19T04:41:33 END s40__rf_rect_cap225 exit 0
+=== 2026-11-19T04:41:33 START s40__rf_rect_control270 : C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/scout40_2026-11-19/scout40__rf_rect_axial_control270.yaml --budget 40 --mode screen
+=== 2026-11-19T05:02:37 END s40__rf_rect_control270 exit 0
+=== 2026-11-19T05:02:37 QUEUE DONE

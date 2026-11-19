@@ -1,0 +1,53 @@
+{
+ "design_hash": "5381c9cea1ec",
+ "di_source": "balloon",
+ "eval_no": 40,
+ "family": "FREEFORM",
+ "mode": "screen",
+ "objective": 8.03711687018752,
+ "ok": true,
+ "params": {
+  "grid": {
+   "knobs": {
+    "g_T": 0.9985974719,
+    "g_fc_h_hz": 438.1097211196,
+    "g_fc_hz": 340.0,
+    "g_fc_v_hz": 453.2055060204,
+    "g_r_lip_mm": 0.0,
+    "g_stop_cos2k": [
+     0.0086410135
+    ],
+    "g_stop_deg": 206.9070419229
+   },
+   "n_phi": 15,
+   "n_s": 32,
+   "rows": {
+    "type": "lecleach"
+   },
+   "wall_thickness_mm": 3.0
+  }
+ },
+ "terms": {
+  "cov": 1.614493569952768,
+  "di": 0.0,
+  "di_estimated": 0.0,
+  "diag": 3.260528452764457,
+  "dislope": 1.6262919686017248,
+  "distd": 1.2496903402754387,
+  "f11_hz": 5600.0,
+  "flat": 0.07071244484214038,
+  "flat_cv": 0.06360211949239059,
+  "lfp20_hz": 452.2681271671516,
+  "lfp50_hz": 571.5610066085147,
+  "load": 0.15965103702989375,
+  "loaded_hi_hz": 5600.0,
+  "n_in_band": 13,
+  "n_nan": 0,
+  "oa_excess_raw": 0.0,
+  "penalty": 0.0,
+  "rez_min_from_fx": 0.7929468988893581,
+  "rip": 0.027503159649777342,
+  "total": 8.03711687018752
+ },
+ "written_utc": "2026-11-19T05:09:43Z"
+}

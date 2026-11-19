@@ -1,0 +1,87 @@
+{
+  "run": "20261119T065506Z-screen-dab24f",
+  "config_name": "scout40w__klangfilm_lame_hv_stage_a",
+  "family": "FREEFORM",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+  "seed_params": {
+    "g_fc_hz": 494.4393461867,
+    "g_aspect": 2.0759495982,
+    "g_lame_p": 5.0063549541,
+    "g_end_frac": 1.7953432921,
+    "g_rim_sweep_ratio": 0.004898754,
+    "g_morph_frac": 0.3,
+    "g_source_blend_ratio": 0.0,
+    "g_entry_half_angle_deg": 2.0,
+    "g_cd_core_blend": 1.0,
+    "g_theta_h0_deg": 10.0,
+    "g_theta_v0_deg": 5.0,
+    "g_h_mid_gain_mm": 6.0,
+    "g_v_mid_gain_mm": 3.0,
+    "g_core_join_fraction": 0.65
+  },
+  "bounds": {
+    "g_theta_h0_deg": {
+      "lo": 6.0,
+      "hi": 17.0
+    },
+    "g_theta_v0_deg": {
+      "lo": 3.0,
+      "hi": 13.0
+    },
+    "g_h_mid_gain_mm": {
+      "lo": 0.0,
+      "hi": 20.0
+    },
+    "g_v_mid_gain_mm": {
+      "lo": 0.0,
+      "hi": 3.75
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.25,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "graded",
+    "budget_counts": "valid",
+    "max_attempts": 150
+  },
+  "warm_start_config": {
+    "from_runs": [
+      "runs/20261119T053037Z-screen-394fb1"
+    ],
+    "top_k": 10,
+    "sigma_from_spread": false
+  },
+  "warm_start_run": {
+    "designs_clipped_to_box": 0,
+    "from_runs": [
+      "runs\\20261119T053037Z-screen-394fb1"
+    ],
+    "mean_design_hash": "f2054faaa9d4",
+    "mean_objective": 8.392965626781532,
+    "rows_seen": 30,
+    "sigma0": 0.25,
+    "sigma_from_spread": null,
+    "sources": [
+      {
+        "config_sha": "3e99ac9644a0",
+        "objective_version": 7,
+        "path": "runs\\20261119T053037Z-screen-394fb1",
+        "rows": 30,
+        "valid": 30
+      }
+    ],
+    "top_k": 10
+  },
+  "rows": 41,
+  "valid": 41,
+  "best_n": 25,
+  "best_J": 8.34952788464452,
+  "best_design_hash": "7be037ff53c5",
+  "best_json_hash": "7be037ff53c5",
+  "missing": []
+}
