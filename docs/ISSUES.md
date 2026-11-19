@@ -31,6 +31,13 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - W2: morph chain closed (tie + persistent storm)
+
+- CLOSED: morph_v8 3.402 -> 3.232 -> 3.757; storm 48% persisted despite resample_strict - no W4.
+- GOOD: tritonia v8 W3 at 4.917 (from 5.373 W2 / 5.325 control) - n widen works.
+- LIVE: the remaining W3s (tritonia v9, petal, square, rosse).
+- OPEN: archive the W2/W3 runs; morning v10 rescore + B6.
+
 ## 2026-11-19 - W2: fold chain closed (tie after 3 runs)
 
 - CLOSED: fold_warm 3.754 -> 3.682 -> 3.695 = tie; the W3 pinned on a different knob (az_a_cos_pow),

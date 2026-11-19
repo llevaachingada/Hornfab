@@ -60,6 +60,16 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40W2: morph chain closed; tritonia v8 W3 improving (local orchestrator)
+
+- **morph_v8: 3.402 -> 3.232 (W2) -> 3.757 (W3) = tie/no gain, and the refusal storm PERSISTED (48%)
+  even with `resample_strict` + `error_policy`.** The lane is storm-prone and not improving; per the
+  economy rule the chain is CLOSED (no W4). Recorded: morph_v8 does not move on this brief; a future
+  attempt needs a box narrowing, not another penalty/step change.
+- `s40x3__tritonia_v8` (n widened to 4..10): running, best **4.917** at 8 evals vs the W2 5.373 and the
+  SCOUT40 control 5.325 -> a real ~+0.41 gain and already above the 0.31 floor. This vindicates the n
+  widen. Remaining: tritonia v9, petal, square, rosse W3s.
+
 ## 2026-11-19 - SCOUT40W2: fold chain closed as a tie; morph W3 running (local orchestrator)
 
 - **fold_warm: 3.754 -> 3.682 (W2) -> 3.695 (W3) = tie, no gain after three runs.** The W3 (both fold
