@@ -84,9 +84,13 @@ def classify_design(payload: dict) -> tuple[str, str]:
     if not isinstance(gen, dict):
         # Legacy design.json schema (pre-generator era): {design_hash, family, params}. The
         # design hash and the geometry derive from family + params by construction, so the
-        # record rebuilds without any digest - classified rebuildable, schema flagged.
+        # record rebuilds without any digest - classified rebuildable, schema flagged. Senior
+        # verdict 2026-11-19: nothing checks that today's mesher still rebuilds the same surface, so
+        # the detail says "digest-unverified"; a sampled rebuild check (about 20 records) is required
+        # before any legacy record becomes a finalist or an anchor.
         if payload.get("family") and isinstance(payload.get("params"), dict):
-            return REBUILDABLE, "legacy schema (family+params, no generator block): rebuilds from params"
+            return REBUILDABLE, ("legacy schema, digest-unverified (family+params, no generator "
+                                 "block): rebuilds from params; sample-rebuild before finalist use")
         return UNVERIFIED, "no generator block and no (family, params) route"
     blocks = _rows_blocks(payload)
     kind = str(next((b.get("type") for b in blocks if b.get("type")),

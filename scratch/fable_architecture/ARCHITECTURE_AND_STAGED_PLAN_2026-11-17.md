@@ -541,8 +541,8 @@ the intended plane in one band, the other plane < half of it. Both planes tried 
 | Pair (what changes) | Band deltas ΔH / ΔV (°) 700-1100 · 1100-2500 · 2500-5500 | U3 authority | ΔJ (B − A) | vs 0.13 floor |
 |---|---|---|---|---|
 | **A** A_r15 → A_r20 (rho 1.5 → 2.0) | −0.41/+0.57 · +0.39/+0.37 · +1.28/+0.26 | **no** (max 1.28°) | +0.0435 | tie |
-| **A** v8 (rho 1.0) → A_r15 | whole-band means only: H +0.56, V +0.17 (no v8 per-frequency CSV) | **no** [inferred; per-band confirm: command below] | −0.0192 | **tie** |
-| **A** v8 → A_r20 | whole-band means: H +0.95, V +0.32 | **no** [inferred] | +0.0243 | tie |
+| **A** v8 (rho 1.0) → A_r15 | −0.58/+0.75 · +0.46/+0.50 · +1.84/+0.29 (per band, `authority_A_vs_v8.json`) | **no** [verified 2026-11-18; max 1.84°] | −0.0192 | **tie** |
+| **A** v8 → A_r20 | −0.99/+1.32 · +0.86/+0.87 · **+3.12** (SE 0.44, n 6)/+0.56 | **borderline** [verified; senior verdict 1, 2026-11-19]: clears 3° by < 1 SE, no mesh floor; rho-only swing r15→r20 = 1.28° → rho knob inert | +0.0243 | tie (both 0.13 and 0.31 floors) |
 | B_ctl → B_o00 (rho 1→1.5 and onset 0.10→0) | −1.14/+0.51 · +0.65/−0.15 · **+3.30**/+0.95 | yes, H, top band, barely | +0.4063 | real (worse) |
 | B_ctl → B_o25 | +0.86/+0.87 · −0.23/+0.53 · −1.29/−0.31 | no | −0.2169 | real (better) |
 | B_ctl → B_o50 | +2.89/+1.53 · **−3.99**/+1.10 · −5.49/−2.94 | yes, H, 1.1-2.5 kHz | −0.2510 | real (better) |

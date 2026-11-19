@@ -1,5 +1,24 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - WP 4.4 vt route built (owner bounds 275-465); D8 continuation tool; doc re-pins (cloud Fable senior)
+
+- **Owner decision (2026-11-19): vt bounds 275-465 mm.** Built as a searched route on the explicit
+  record body: `record_body` takes knobs `g_vt_mm` (V-axis mouth height) + `g_vt_hold` (early V-wall
+  hold, 0 = none). Seed (386.73, 0) reproduces the U3 control **exactly** (max diff 6e-14);
+  `validate_search_config` refuses bounds that exclude the host (old [440, 465] now refused).
+  Config `examples/studies/u3_biradial_es_style_v7/vt_v1.yaml` (budget 80; loads; GeneratedSpace builds).
+- **Corrections from the real host record:** best biradial V mouth = **386.7 mm** (350 was the seed).
+  Below ~350 the V axis drops faster than the shoulders: g_vt_mm 275 -> overall mouth 324 mm (pinched
+  lip). Top: 470 fits the 480 envelope incl. 3 mm wall, 475 fails; 465 keeps 9 mm.
+  The single-knob vt_460 edit (hold 0.5) cannot reproduce the control (33 mm RMS at h=350), hence 2 knobs.
+- **D8 / WP 7.2 advisory:** `tools/analysis/continuation_advice.py` (last-100 gain vs identity floor
+  v7 0.3105 / v10 0.4677 / slope5 0.4863; "no floor" otherwise). Tests 3/3.
+- **Docs:** v10 README floor note resolved to 0.31; plan §10.2 A_r15/A_r20 rows written (verified /
+  borderline); `classify_recipes` legacy detail now "digest-unverified".
+- Tests: `test_design_record_body_vt.py` 10/10, continuation 3/3; design/geometry/u3 suites: the only 3
+  failures are pre-existing container gaps (no `cma`, no `hornlab_mesher`), identical before/after.
+- **Needs the owner box:** `shape_check` + dof cap on vt_v1 (mesher), then the budget-80 probe.
+
 ## 2026-11-19 - Senior verdicts §2.3 + §2.4 complete; u3_authority gains SE + grade (cloud Fable senior)
 
 - **§2.3:** accept mixed_identity fix, B1 sd(dJ) (note: all 8 dJ negative, use RMS ~0.015 J for

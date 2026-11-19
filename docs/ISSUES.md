@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-19 - vt_v1 ready for shape_check; D8 advisory tool shipped
+
+- DONE: WP 4.4 vt search route + `vt_v1.yaml` (bounds 275-465 / hold 0-0.5, seed = control).
+- DONE: D8 continuation advisory (`tools/analysis/continuation_advice.py`).
+- OPEN (owner box): vt_v1 shape_check + dof cap, then budget-80 CMA probe; success > 0.3105 J.
+- OPEN (owner, note): g_vt_mm < ~350 gives a pinched lip (275 -> 324 mm overall); keep or raise the floor.
+- OPEN (local lane, not senior-owned): WP 0.7 pin_* exposure; WP 7.1 queue-edit refusal for protected lanes.
+
 ## 2026-11-19 - Senior review queue closed (§2.1-§2.4); owner actions open
 
 - DONE: §2.3 judgment calls and §2.4 steer planes reviewed; u3_authority SE + grade shipped.
