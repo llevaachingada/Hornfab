@@ -516,7 +516,12 @@ class App:
             return CMP.hw_compare_matrix(self.root, self.system_store, keys)
         if sub == "assets" and len(parts) == 1:
             from . import data_hw_new as NEW
-            return NEW.hw_assets(self.root, self.system_store)
+            raw = (q.get("limit") or ["40"])[0]
+            try:
+                limit = max(10, min(200, int(raw)))
+            except (TypeError, ValueError):
+                raise ValueError(f"limit must be an int, got {raw!r}") from None
+            return NEW.hw_assets(self.root, self.system_store, limit=limit)
         if sub == "drivers" and len(parts) == 1:
             from . import data_hw_new as NEW
             return NEW.hw_drivers(self.root, self.system_store)

@@ -62,6 +62,8 @@ _ASSET_ID = re.compile(r"^[0-9a-f]{16}$")
 #: First dotted name in a parser message, e.g. ``cabinet.external_width_mm_range``.
 _FIELD = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)*)")
 
+_ASSET_CACHE: dict[tuple, dict[str, Any]] = {}
+
 DEFAULT_SCAN_LIMIT = 300          # mirrors woofer_seed.main --scan-limit
 SCAN_LIMIT_MAX = 5000
 LIMIT_BOXES_MAX = 64
@@ -198,7 +200,16 @@ def hw_assets(root: str | Path, store: str | Path, *, limit: int = DEFAULT_SCAN_
     repo = _root(root)
     store_root = Path(store).resolve()
     runs_root = repo / "runs"
-    bounded = max(0, int(limit))
+    bounded = max(1, int(limit))
+    # Cache by the run tree's mtime + the store's system dir mtime: a new run or case invalidates
+    # it. The scan is ~3 s at limit 40, so an uncached per-request scan is not acceptable.
+    sys_dir = store_root / "system"
+    stamp = (str(repo), str(store_root), bounded,
+             runs_root.stat().st_mtime_ns if runs_root.is_dir() else 0,
+             sys_dir.stat().st_mtime_ns if sys_dir.is_dir() else 0)
+    cached = _ASSET_CACHE.get(stamp)
+    if cached is not None:
+        return cached
 
     notes: list[str] = []
     full_index = _full_domain_index(store_root)
@@ -234,7 +245,11 @@ def hw_assets(root: str | Path, store: str | Path, *, limit: int = DEFAULT_SCAN_
         notes.append("no ref_case/horn_full provenance in the system store; no full-domain chips")
     if result.skipped_dirs:
         notes.append(f"{result.skipped_dirs} design dir(s) had neither a response nor a mesh")
-    return {"assets": assets, "notes": notes}
+    out = {"assets": assets, "notes": notes}
+    if len(_ASSET_CACHE) >= 8:
+        _ASSET_CACHE.pop(next(iter(_ASSET_CACHE)))
+    _ASSET_CACHE[stamp] = out
+    return out
 
 
 # --------------------------------------------------------------------------- drivers
