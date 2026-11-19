@@ -22,6 +22,25 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - Correction: the SCOUT40 watchdog stops are BOX limits, not failures (local orchestrator)
+
+- **Exit 75 is `WATCHDOG_EXIT`** (`tools/run_campaign_night.py:118`), the runner's designed stop for a
+  search that is not going anywhere (owner rule 2026-11-16, rules at `:96-118`, verdict at
+  `:175-221`). Partial results stay in the run dir; status `watchdog`. Four finished jobs are all
+  **bound-pinned** (>=3 of the top 6 within 3% of a searched box limit), none stalled or refused:
+  - `s40__klangfilm_hvcore_c200mouth`: 6/6 of the top 6 at the HIGH limit of
+    `g_beak_h_setback_mm [0, 10]`. **CORRECTION to the previous entry:** the flat 10.156 is box-limited,
+    not a proven bad basin — the kernel's documented beak range is 0..60 mm, and we copied b3_soft's
+    0..10 box. Requeue with the beak box widened before judging the c200 mouth.
+  - `s40__klangfilm_b3_soft`: 3/6 at the LOW limit of `g_beak_v_projection_mm [0, 5]`; 0 is the
+    kernel's hard floor, so this is the `watchdog: pin_ignore` case, not a widen-the-box case.
+  - `s40__lecleach_hv_smooth`: 3/6 at the LOW limit of `g_fc_v_hz [450, 1000]` — widen the box.
+  - `s40__iwata_ar_smooth`: 3/6 at the LOW limit of `g_fc_hz [420, 900]` — widen the box.
+- `s40__crowe_v2a_c1` finished normally (exit 0, budget 40, best 4.879, 29 min, 42.3 s/candidate).
+- Night 5/18 by 01:00: 5 done, `stage_a` running, 12 pending. Actions for the morning pass: widen the
+  three boxes above, add `pin_ignore` for the hard-limit pin, requeue the affected lanes (new job ids),
+  then run the v10 rescore on the new rows.
+
 ## 2026-11-19 - SCOUT40 preflight result + first lanes (local orchestrator)
 
 - **Preflight `--samples 64` complete over the 20 scout40 + vt_v1 configs: 1 HARD, and it is the

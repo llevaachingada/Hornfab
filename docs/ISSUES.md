@@ -14,6 +14,14 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - SCOUT40 watchdog = bound-pinned (box limits), not failures
+
+- EXIT 75 = `WATCHDOG_EXIT` (`tools/run_campaign_night.py:118`); status `watchdog`; partial results kept.
+- OPEN (morning, before judging the lanes): widen `g_beak_h_setback_mm` for the c200-mouth core (kernel
+  0..60; we used 0..10), `g_fc_v_hz` for lecleach_hv_smooth, `g_fc_hz` for iwata_ar_smooth; add
+  `watchdog: {pin_ignore: [g_beak_v_projection_mm]}` for b3_soft (0 is the hard floor). Requeue.
+- CORRECTION: the c200-mouth core's 10.156 is box-limited, not a negative-basin verdict.
+
 ## 2026-11-19 - SCOUT40 preflight: expected HARD + small refusal warnings
 
 - DONE: preflight `--samples 64` over all configs; the only HARD is `rosse_rect_cd_v7` (bridge rows
