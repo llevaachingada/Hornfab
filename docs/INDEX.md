@@ -469,6 +469,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 - **[docs/research/typologies/TYPOLOGY_CORRECTNESS_REVIEW_2026-11-19.md](research/typologies/TYPOLOGY_CORRECTNESS_REVIEW_2026-11-19.md) — all 45 typologies graded A-D against published sources and acoustic practice; fixes and open gaps.**
 - **[docs/queue/fable_vt_b6_2026-11-19.yaml](queue/fable_vt_b6_2026-11-19.yaml) — night plan: vt_v1 probe + B6 matched v10 reruns (configs in `examples/typologies/b6_2026-11-19/`).**
 - **[docs/queue/fable_scout40_2026-11-19.yaml](queue/fable_scout40_2026-11-19.yaml) — SCOUT40 night: 18 lanes x 40 evals, warm from lane bests; configs in `examples/typologies/scout40_2026-11-19/`.**
+- **[docs/research/typologies/FABLE_V2_KLANGFILM_ROLLED_2026-11-19.md](research/typologies/FABLE_V2_KLANGFILM_ROLLED_2026-11-19.md) — Klangfilm-Lamé c200 + rolled h12 rebuilt (v10 corridor, V opening, V-lip beak); lanes in `examples/typologies/fable_v2_2026-11-19/`.**
 - [ST260 anchor source-check outcome + corrected-config rationale + STL](evidence/anchor_st260_2026-11-18/README.md) (+ `measured/ST260-19.stl`; D6 step 1 / R4)
 - [Throat A-vs-v8 per-band authority](evidence/throat_hv_2026-11-18/authority_A_vs_v8.json) and [Phase 3 vs B_o50](evidence/throat_hv_2026-11-18/authority_B_p3_vs_o50.json) (+ hv_beamwidth CSV sets; R9 follow-up / 2b)
 - [U3 biradial host study configs](../examples/studies/u3_biradial_es_style_v7/control.yaml) (R8 / 2f; control + 7 variants + manifest validity table)
