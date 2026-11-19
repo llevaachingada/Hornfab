@@ -1,5 +1,14 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Owner gates B/C answered; GUI polish in flight
+
+- DONE (owner): gate B = "Yes to both (Recommended)" - GUI may launch CPU screen jobs and write
+  user specs; gate C = "Yes (Recommended)" - GUI-launched CPU stage + validate allowed (no solve).
+- OPEN (this pass): P1/P2 UI polish from the second visual review (shortlist row height/radio,
+  screens list clipping, panel-fit verdict semantics, trade-off plot size, 375 px reflow).
+- OPEN (owner, gate D): decision 6 authorization record shape (Solve stays disabled until answered).
+- OPEN (owner, gate E): decision 3 calibration policy (system sum stays locked).
+
 ## 2026-11-19 - Horn + woofer GUI P3/P4 backend
 
 - DONE: mesh endpoint (decimation, containment) and A/B compare (mismatch tokens, recorded motor
@@ -21,6 +30,13 @@
 - LIVE: fable_scout40_2026-11-19 (18 jobs), controller pid 16596, first rows in 20261119T043506Z-screen-54878f.
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
+
+## 2026-11-19 - SCOUT40W2 launched (8 tail watchdog lanes)
+
+- DONE: the eight later exit-75 lanes requeued with measured fixes (2 widens, 3 hard-limit
+  pin_ignore, 3 resample_strict) + warm starts; shape_check + warm-start validation pass.
+- LIVE: fable_scout40w2_2026-11-19 (8 jobs, controller 41892). Watchdogs get the same rule.
+- OPEN: focused preflight for the three resample_strict lanes (running); morning v10 rescore + B6.
 
 ## 2026-11-19 - SCOUT40 complete; evidence bundle pushed; 8 tail requeues pending
 

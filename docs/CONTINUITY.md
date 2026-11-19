@@ -1,5 +1,25 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Owner gates B and C answered (horn + woofer GUI)
+
+- **Gate B** (before P5): asked "May the GUI launch CPU screen jobs, and may it write user specs to
+  examples/systems/user/?" Owner answer, exact: **"Yes to both (Recommended)"**. Build: the wizard
+  launches CPU screen jobs into `system_runs/screens/<study>/` and Save-as writes
+  `examples/systems/user/<name>.yaml` (explicit Replace confirm; parser-message refusals).
+- **Gate C** (plan question 3, before P6): asked "Is GUI-launched CPU stage + validate acceptable
+  (no solve)?" Owner answer, exact: **"Yes (Recommended)"**. Build: Stage + Validate are CPU jobs
+  through `JobManager` (one system job at a time, CPU lane lock respected); Solve stays disabled
+  until decision 6 (gate D).
+- Owner asked why system solves do not appear in "recent solves": answer recorded in the same
+  thread - the horn-side Runs/lanes views read `runs/` (horn searches), while the BL cases live in
+  the separate `system_runs/` store shown under Horn + woofer -> Cases; GUI-launched system jobs do
+  not exist until P5/P6. Screens was added to the nav (it was URL-only).
+- Owner UI feedback (twice) on the first P1 build: "looks like total shit / doesn't make sense" and
+  a second visual review. Fixed: 665 px ledger rows -> <=124 px with tokens on a full-width
+  sub-row; all groups open; reconciled solved-vs-staging band; readiness risk KPIs; 260/190 px
+  charts with connected phase and a wrapped/unwrapped toggle (`phase_unwrapped_deg` in Python);
+  matched polar panels + colour legend; enlarged annotated geometry; 375 px overflow fixes.
+
 ## 2026-11-19 - P3 mesh endpoint + P4 A/B compare layer (horn + woofer GUI)
 
 - `data_hw.py::hw_mesh` (additive): `GET /api/hw/mesh/<exp>/<case>?part=box|horn` -> flat mm
@@ -39,6 +59,31 @@
 - Owner feedback on the first P1 build: ledger rows were 665 px tall (verbatim token + gloss in an
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
+
+## 2026-11-19 - SCOUT40W2 follow-on night launched (8 tail watchdog lanes)
+
+- The eight remaining SCOUT40 lanes stopped by the watchdog are requeued as
+  `examples/typologies/scout40w2_2026-11-19/` + `docs/queue/fable_scout40w2_2026-11-19.yaml`, each with
+  the measured fix and a warm start from its stopped run (same brief/objective; originals are the
+  controls):
+  - `fold_warm_v7`: `az_fold_h_deg` -15..0 -> **-15..+10** (kernel allows +/-40; families.py:128).
+  - `morph_v8`: `morph_rate` 1..6 -> **0.5..6** (kernel >=0; Ath documents >=1).
+  - `tritonia_v8` / `tritonia_v9`: `morph_width_mm` pinned at 590 = the 600 mm brief envelope ->
+    **watchdog pin_ignore**, boxes unchanged.
+  - `petal_hvlaw_v7`, `crowe_x_osse_cd_v7`, `crowe_x_square_v7`: refusal storms 41/33/31% ->
+    **infeasible_penalty: resample_strict** + `error_policy: retry_same_then_stop` (the documented
+    remedy; a widen would add illegal territory).
+  - `rosse_rect_cd_v7`: `g_tmax` pinned at 1 = the bridge kernel max (tools/geometry/rosse_rect.py:68)
+    -> **pin_ignore** on the command job.
+- **Gates:** shape_check all eight pass (search configs 3085-5408/24000 dof; rosse 4737/24000 via the
+  bridge CLI). The production warm start reads all seven search configs OK (mean = the stopped run's
+  best, sigma = the config sigma0). The three resample_strict lanes get a focused preflight
+  (`scratch/preflight_scout40w2_2026-11-19.log`, running; they start later).
+- **Launched** `fable_scout40w2_2026-11-19` at 08:40Z / 05:40 local: controller pid 41892 (parent
+  WmiPrvSE), 8 jobs x 40 valid, 1 h timeout each, GPU lane. First job `s40x__fold_warm` in
+  `runs/20261119T134012Z-screen-50fbd8`. VRAM baseline 718 MiB, no stale host/lock before launch.
+- The SCOUT40 evidence bundle is pushed and verified on the remote (`c2803ab`: 281 files, 48
+  binaries incl. best-design meshes + responses).
 
 ## 2026-11-19 - SCOUT40 night complete; full evidence bundle pushed (local orchestrator)
 

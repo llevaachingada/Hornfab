@@ -1,0 +1,46 @@
+# SCOUT40W2 night (2026-11-19, local orchestrator, owner-directed).
+# The eight remaining SCOUT40 lanes that the runner's watchdog stopped (exit 75) are requeued with
+# the measured fix for each stop, the same brief/objective (so J stays comparable with the SCOUT40
+# controls), and a warm start from the stopped run where the production path can read it.
+#   fold_warm_v7       bound-pinned az_fold_h_deg high 0 [-15,0]  -> -15..+10  (kernel +/-40)
+#   morph_v8           bound-pinned morph_rate low 1 [1,6]       -> 0.5..6     (kernel >=0)
+#   tritonia_v8/v9     bound-pinned morph_width high 590         -> pin_ignore (600 mm brief envelope)
+#   petal_hvlaw_v7     refusal storm 41%                         -> resample_strict
+#   crowe_x_osse_cd_v7 refusal storm 33%                         -> resample_strict
+#   crowe_x_square_v7  refusal storm 31%                         -> resample_strict
+#   rosse_rect_cd_v7   bound-pinned g_tmax high 1 [0.85,1]       -> pin_ignore (kernel max 1)
+# 40 valid evals per job, 1 h timeout each, sequential on the GPU lane.
+night: fable_scout40w2_2026-11-19
+lane: gpu
+jobs:
+  - {id: s40x__fold_warm, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w2_2026-11-19/scout40w2__fold_warm_v7.yaml}
+  - {id: s40x__morph_v8, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w2_2026-11-19/scout40w2__morph_v8.yaml}
+  - id: s40x__tritonia_v8
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    config: examples/typologies/scout40w2_2026-11-19/scout40w2__tritonia_v8.yaml
+    watchdog: {pin_ignore: [morph_width_mm]}
+  - id: s40x__tritonia_v9
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    config: examples/typologies/scout40w2_2026-11-19/scout40w2__tritonia_v9.yaml
+    watchdog: {pin_ignore: [morph_width_mm]}
+  - {id: s40x__petal_hvlaw_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w2_2026-11-19/scout40w2__petal_hvlaw_v7.yaml}
+  - {id: s40x__crowe_x_osse_cd_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w2_2026-11-19/scout40w2__crowe_x_osse_cd_v7.yaml}
+  - {id: s40x__crowe_x_square_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w2_2026-11-19/scout40w2__crowe_x_square_v7.yaml}
+  - id: s40x__rosse_rect_cd_v7
+    kind: command
+    timeout_s: 3600
+    argv: [.venv/Scripts/python.exe, tools/geometry/rosse_rect_cli.py, search,
+           --config, examples/typologies/scout40w2_2026-11-19/scout40w2__rosse_rect_cd_v7.yaml,
+           --mode, screen, --budget, "40"]
+    watchdog: {pin_ignore: [g_tmax]}
