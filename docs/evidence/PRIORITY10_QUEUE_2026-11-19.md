@@ -394,6 +394,59 @@ queue status before acting. Measured now:
 The compact-horn candidate register itself is owned by the CPU sub-agent
 (`docs/research/compact_horn_system_2026-11-19/`), not by this document.
 
+## 11. FINAL manifest — the night is done (11/11 jobs, 2.18 h GPU total)
+
+Read from `runs/nights/fable_priority10_2026-11-19/summary.jsonl`. "New BEM time" = fresh solves; the
+control was 1 solve and #8 replayed 40 cache hits before its 2 new evals.
+
+| # | Job | Run | Status | Valid/rows | Seed (v10) | Best (v10) | Gain | New BEM? | Verdict |
+|---|---|---|---|---|---|---|---|---|---|
+| — | fv2 control | `…165650Z-f30e50` | ok, 45 s | 1/1 | — | 7.44663 (v7) | — | 1 solve | **gate passed** (parent 7.4458, Δ 0.0008) |
+| 1 | fv2 c200 vbeak | `…165732Z-3ebb94` | watchdog 723 s | 30/30 | 8.4198 | 8.3910 | 0.029 | yes | **fails** >0.4677; dislope-blind |
+| 2 | fv2 rolled record | `…170937Z-ba0f14` | watchdog 814 s | 30/30 | 15.547 | 15.320 | 0.227 | yes | **fails** >0.4677; dislope-blind |
+| 3 | fv2 rolled hybrid | `…172313Z-081506` | watchdog 723 s | 30/34 | 15.549 | **9.3054** | **6.24** | yes (4 mesh-cap refusals) | passes bar 13×; 7.9 J off leader |
+| 4 | b6 fold_warm s1 | `…173516Z-c6a93f` | watchdog 813 s | 45/45 | 1.8693 | **1.5433** | 0.326 | yes | tie with published 1.4214 (Δ 0.12) |
+| 5 | b6 ext_throat s1 | `…174850Z-2d9f2a` | watchdog 542 s | 31/39 | 2.8692 | **1.7919** | 1.077 | yes (8 env refusals) | tie with published 1.5710 (Δ 0.22) |
+| 6 | vt_v1 probe80 | (see summary) | watchdog 92 s | 42/42 | 6.3374 | 6.3221 | 0.015 | 2 new (40 cache hits) | **nothing**; load 3.49 dominates |
+| 7 | b6 twinray s1 | `…175926Z-8454e6` | watchdog 662 s | 31/31 | 3.5212 | 2.5748 | 0.946 | yes | 0.80 **worse** than published 1.7726 (seed mismatch, §9f) |
+| 8 | b6 morph s1 | `…181029Z-c3b6c6` | **ok**, 2136 s | **121/121** | 3.0570 | **1.5769** | 1.480 | yes, 0 refusals | tie with published 1.4305 (Δ 0.15); v7 storm did not recur |
+| 9 | klangfilm b3_soft v10 | `…184606Z-c6db2d` | watchdog 332 s | 30/31 | 3.7428 | 3.5988 | 0.144 | yes | **fails** own bar; load 0.0, dislope 2.10 |
+| 10 | crowe v2a v10 | `…185139Z-67e549` | **ok**, 982 s | **41/41** | 10.4104 | **6.7324** | **3.68** | yes | real gain, still 5.3 J off leader |
+
+VRAM: baseline 689–690 MiB, after 662–690 MiB, peak ~1.3 GiB in-job; no spill reported, no refusal
+storm anywhere except the 4 expected mesh-cap refusals on #3.
+
+### What the ten experiments actually established
+
+1. **The v10 family wall is specific, and it is not coverage.**
+   - Klangfilm c200 / rolled h12 / b3_soft: cost is **`dislope`** (75 %, 71 %, 56 % of total J) →
+     record-level V timing and the V-lip beak cannot move it (0.03–0.23 J in 30 evals).
+   - Bi-Radial vt_v1 and TwinRay: cost is **`load`** (52 % and 29 %) → the V-terminal radiation freedom
+     cannot move it (0.015 J).
+   - Ext-throat: fully inside corridor and DI slope (`load 0`, `dislope 0`), pays only **flatness**
+     (flat 0.64 + flat_cv 0.73).
+   - Fold-warm: no dominant term (flat 0.42, roughness 0.44, dislope 0.41).
+2. **Whole-family reshaping beats record edits by 27× on the same host**: 6.24 J vs 0.23 J. If a
+   Klangfilm/rolled rescue is wanted, it must search a DI-slope-relevant freedom, not a lip angle.
+3. **The B6 "matched rerun" was not matched** (§9f): all four s1 configs start at the lane seed, not at
+   the design that produced the published v10 best. A s2 continuation must warm-start at the published
+   design's run + hash to be a real comparison.
+4. **No promotion.** Nothing here beats the existing v10 leaders; the ranking evidence stays fold-warm
+   1.4214 ≈ morph 1.4305 ≈ ext-throat 1.5710 (floor 0.4677), and no lane has a `verify` pass.
+
+### Next best measured action
+
+1. **Do not queue another v10 search from these seeds.** The measured instruction is to warm-start any
+   s2 at the published best designs (`00826f071b24` fold, `436a4d221328` morph, `a23763f1c6fc`
+   ext-throat, `85c59331e4a3` twinray), not at the lane seeds.
+2. **Promote the folded-hybrid mechanism, not the record bands**, if a rolled-family v10 campaign is
+   opened — it is the only mechanism measured to move `dislope` (−3.79 J).
+3. **Compact-horn handoff:** the CPU v10 gate is now measured (A1 1.9858, A3 2.7734, A2 2.8813, C2
+   4.8193). A1 misses its own 0.4677 gate by 0.10 J, so **no GPU is authorised**; the next step is the
+   owner's call on whether a different-mechanism candidate 1.2 floors off the leader is worth a
+   23-minute screen, or whether the compact slate should start from the fold/morph mechanisms instead.
+
+
 
 
 
