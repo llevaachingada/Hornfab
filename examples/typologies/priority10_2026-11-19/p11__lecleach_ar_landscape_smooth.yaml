@@ -1,0 +1,93 @@
+﻿# NEW TYPOLOGY LANE (2026-11-19, local orchestrator): `lecleach_ar`, the area-preserving
+# aspect-ratio stretch of the verified Fourcade/Le Cleac'h march (grid.py:103, 1257-1271).
+#
+# WHY: `lecleach_ar` is one of three rows types in the shipped grid generator with NO config and NO
+# solve anywhere in the tree (the other two are `salmon_axisym`, an axisymmetric section that cannot
+# reach a landscape mouth, and `lecleach_mod`, a half-span harmonic law). Every Le Cleac'h run so far
+# is the `lecleach` H/V-pair construction (hl__lecleach_hv_landscape_smooth_v7, scout40 lecleach
+# lanes); the AR-stretch mechanism itself has never been scored.
+#
+# WHAT IT IS: one verified round march at g_fc_hz (no per-plane marches), then an area-preserving
+# section stretch AR(l) = 1 + (AR_m - 1)(l/L0)^p with the throat ratio pinned at 1. The stretch is
+# the ONLY H/V freedom, so it isolates "does a single-march Le Cleac'h with a controlled aspect
+# ratio hold the landscape corridor?" from the H/V-pair construction's per-plane expansions.
+#
+# A/B PAIR: run beside `hl__lecleach_hv_landscape_smooth_v7` (same brief, same family, never run).
+# Both are smooth-v7 so J is directly comparable between the two lanes; the v7 stored-grid floor
+# 0.3105 applies only to the home stored grid, so any tie claim here is provisional until a floor
+# exists for this grid - report the gain and read it against 0.3105 as an upper bound.
+#
+# Seed: fc_hz 340 / T 1.0 / stop 215 deg are the owner-picked option-12 Le Cleac'h numbers from the
+# existing landscape lane; AR_m 1.5 / p 1.0 is the new stretch (mouth W/H should land near 1.5).
+name: p11__lecleach_ar_landscape_smooth
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach_ar
+  n_phi: 15
+  n_s: 32
+  seed_policy: explicit
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 390.0
+  g_T: 1.0
+  g_stop_deg: 215.0
+  g_AR_m: 1.5
+  g_p: 1.0
+  g_r_lip_mm: 0.0
+bounds:
+  g_fc_hz:
+    lo: 300.0
+    hi: 750.0
+  g_T:
+    lo: 0.4
+    hi: 1.0
+  g_stop_deg:
+    lo: 165.0
+    hi: 230.0
+  g_AR_m:
+    lo: 1.0
+    hi: 2.2
+  g_p:
+    lo: 0.5
+    hi: 2.0
+  g_r_lip_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+description: 'NEW TYPOLOGY (2026-11-19): lecleach_ar = verified Fourcade march + area-preserving
+  aspect-ratio stretch AR(l)=1+(AR_m-1)(l/L0)^p, throat ratio pinned 1. Never solved before in this
+  tree. Smooth v7 landscape brief, 40 valid. A/B with hl__lecleach_hv_landscape_smooth_v7 (per-plane
+  pair). Seed = owner option-12 Le Cleac''h numbers + AR_m 1.5. Success = beats its own seed by more
+  than the v7 floor 0.3105 (upper bound; this grid has no measured floor yet).'
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 61921
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 250
+

@@ -1,0 +1,79 @@
+﻿# Q3 night (2026-11-19, local orchestrator): "more solves + typologies we have not really solved".
+# GPU lane was free at planning time; nothing else is queued.
+#
+# Built from two measured lists (evidence: docs/evidence/PRIORITY10_QUEUE_2026-11-19.md Â§11 and the
+# coverage scan of 408 configs / 702 runs):
+#
+#  A. CONTINUATIONS WITH MEASURED HEADROOM (best design arrived in the final evals; same config, larger
+#     budget -> the first N evals replay deterministically and are SOLVE-CACHE HITS, so only the new
+#     evals cost GPU; the pattern used for vt_v1 in PRIORITY10):
+#       fold_warm s1    best 1.5433 at n=40 of 45 valid   -> budget 200 (115 new)
+#       ext_throat s1   best 1.7919 at n=36 of 38         -> budget 160 ( 90 new)
+#       crowe v2a v10   best 6.7324 at n=38 of 41         -> budget  80 ( 40 new)
+#
+#  B. TYPOLOGIES WITH ZERO CURRENT-SHA RUNS (loadable today, landscape-capable, verified by shape_check):
+#       p11__lecleach_ar_landscape_smooth  NEW config, rows type `lecleach_ar` (area-preserving AR
+#         stretch of the verified Fourcade march) - no config and no solve existed for this rows type
+#       hl__lecleach_hv_landscape_smooth_v7  the per-plane H/V-pair Le Cleac'h, never run; A/B control
+#       hl__crowe_es_biradial_rr_v7  Crowe ES biradial (`typology` generator), never run
+#
+# NOT queued, with reasons (so nobody re-derives them):
+#   * `hl__klangfilm_ellipse_smooth_v7`, `hl__rolled_es_spiral_v7`, `hl__rosse_rect_cd_v7_r50_negb`:
+#     DEAD configs - their rows types (klangfilm_ellipse, rolled_rect_pucker, rosse_rect) no longer
+#     exist in the generator; they fail with "unknown rows type". Do not resurrect without a kernel.
+#   * the October sculpture families (quatrefoil, chanterelle, petal_os, ripple, cone_plughorn):
+#     loadable but PORTRAIT/SQUARE by construction (fc_h > fc_v, or symmetric a_h=a_v); on the
+#     landscape corridor they are geometrically punished, so a run would measure the brief mismatch,
+#     not the typology. They need their own square/tall brief identity + a measured floor first.
+#   * salmon_axisym / lecleach_mod: generator capabilities with no config; axisym cannot reach a
+#     landscape mouth, lecleach_mod forces a half span (2x dofs). Authoring them is a separate pass.
+#   * B6 s2 and the published-best warm starts: s2 needs warm starts at 00826f071b24 / 436a4d221328 /
+#     a23763f1c6fc / 85c59331e4a3 (see Â§9f), which is a separate, deliberate s2 night.
+night: q3_more_solves_2026-11-19
+lane: gpu
+jobs:
+  # ---- A. continuations: same config identity, larger budget; early evals are cache hits ----
+  - id: q3__fold_warm_v10_cont
+    kind: search
+    mode: screen
+    budget: 160
+    timeout_s: 7200
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/b6_2026-11-19/hl__osse_rrect_fold_warm_v7__b6_v10_s1.yaml
+  - id: q3__ext_throat_v10_cont
+    kind: search
+    mode: screen
+    budget: 160
+    timeout_s: 7200
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/b6_2026-11-19/hl__ext_throat_hvlaw_v7__b6_v10_s1.yaml
+  - id: q3__crowe_v2a_v10_cont
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/priority10_2026-11-19/hl__crowe_v2a_c1_v10__p10_s1.yaml
+  # ---- B. typologies with no current-sha run ----
+  - id: q3__lecleach_ar_landscape
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/priority10_2026-11-19/p11__lecleach_ar_landscape_smooth.yaml
+  - id: q3__lecleach_hv_landscape
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/home_landscape_2026-11-15/hl__lecleach_hv_landscape_smooth_v7.yaml
+  - id: q3__crowe_es_biradial
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/home_landscape_2026-11-15/hl__crowe_es_biradial_rr_v7.yaml
+

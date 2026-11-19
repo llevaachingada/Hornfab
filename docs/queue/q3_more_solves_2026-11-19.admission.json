@@ -1,0 +1,14 @@
+{
+  "night": "q3_more_solves_2026-11-19",
+  "allowed_job_ids": [
+    "q3__fold_warm_v10_cont",
+    "q3__ext_throat_v10_cont",
+    "q3__crowe_v2a_v10_cont",
+    "q3__lecleach_ar_landscape",
+    "q3__lecleach_hv_landscape",
+    "q3__crowe_es_biradial"
+  ],
+  "objective": "continuations stay on the v10 identity of their configs; the three typology lanes run their own v7 briefs (smooth for Le Cleac'h, home for Crowe ES) - never ranked across identities",
+  "dedupe": "continuations reuse the identical config_sha (cache replay of the first N evals); the typology lanes have zero sha-matched runs anywhere",
+  "planned_by": "local orchestrator, 2026-11-19"
+}
