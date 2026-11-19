@@ -4,7 +4,8 @@
 
 - DONE (local orchestrator): hl__klangfilm_lame_curved_v1 (f30bd2), _c200 (517217) and
   home_range_pilot_rolled_control_h12 (643de7) committed under `docs/evidence/runs/` with per-design
-  design.json + metrics.json, best-design mesh.msh and per-run scores.csv. No OPEN items.
+  design.json + metrics.json, per-run scores.csv (incl. freqs + H/V dispersion columns), and the
+  best-design mesh.msh for each run (force-added; `*.msh` gitignored). No OPEN items.
 
 ## 2026-11-19 - PR #74 merged into hornfab-all-2026-11-18; SCOUT40 prep next
 
