@@ -450,5 +450,8 @@ Keep this file current: a new doc gets a line here in the same commit.
 - [U3 biradial host study configs](../examples/studies/u3_biradial_es_style_v7/control.yaml) (R8 / 2f; control + 7 variants + manifest validity table)
 - [v10 rescore RESULTS: reused columns, shipped≡offline agreement (max |ΔJ|=0), floors incl. the v7 0.310-vs-0.13 tension, per-lane ties](evidence/v10_rescore_2026-11-18/results/README.md) (+ shipped_vs_offline_agreement.json, floor summaries, compare_all, sample selection + the three reuse/sample scripts; WP 1.4/1.5 owner-directed reuse pass). Night failure causes: [review §-causes section](evidence/night_cd_rrect_2026-11-17_REVIEW_2026-11-18.md).
 - [WP 0.9/D9 legacy-recipe classification counts](evidence/wp09_d9_provenance_2026-11-18/classify_summary.json) (48,471 rebuildable / 3 bridge / 0 refused / 0 unverified; tool `tools/analysis/classify_recipes.py`).
+- [B1 mesh-convergence results + combined noise-floor record (WP 2.2/2.3)](evidence/b1_mesh_2026-11-18/README.md) — 8/8 probes clean; mesh part sd 0.00768 J.
+- [WP 4.2 record-route equivalence PASS](evidence/wp42_u3_biradial/equivalence.json) (+ CSV sets; biradial host, max 0.76° of the 1° bound).
+- [WP 4.3 B2 authority table + WP 4.4 proposal](evidence/wp43_b2_authority/README.md) — vt_460 V-plane authority +32.32°; four freedoms inert; vt-knob proposal gated.
 
 

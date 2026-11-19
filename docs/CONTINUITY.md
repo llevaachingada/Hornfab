@@ -1,5 +1,22 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - WP 4.3 complete (5/5) -> B2 authority table; vt V-freedom has 3x-threshold authority; WP 4.4 proposal written (local orchestrator)
+
+- **WP 4.3: five tool-valid variants solved at verify tier in ~4 min** (night fable_wp43_2026-11-18,
+  5/5 exit 0, ~44 s per solve). **B2 authority table published**
+  (`docs/evidence/wp43_b2_authority/README.md` + authority.json + CSV sets): **vt_460 has REAL
+  V-plane authority — +32.32 deg in 1100-2500 Hz with H secondary (−5.1 deg < half)** at a cost of
+  +2.30 J at that fixed shape (authority ≠ a better design; the search would decide how to spend
+  it). term_topbottom / steer_early / steer_late / diag_pull are INERT in this envelope (max moves
+  1.55-2.66 deg < 3 deg). vt_480 and term_sides were excluded pre-solve by the u3_jobs validity
+  table (invalid reach) — an owner-approved dedicated probe could still measure them.
+- **WP 4.4 proposal recorded** (senior + owner gated): open the V terminal-width freedom as a
+  searched knob (`hl__biradial_es_style_v7__vt_v1`, bounds ~[440, 465], shape_check first, then a
+  budget-80 CMA probe on the v7 brief; success = beat the control by > the v7 combined floor
+  0.1302 J). NOT implemented — new config version per the never-retrofit rule.
+- Everything is on `hornfab-all-2026-11-18`/`main`; the cloud-alignment handoff is in the chat
+  transcript (2026-11-18 evening) and the pointers live in ACTIVE_STATE + HANDOFF.
+
 ## 2026-11-18 - B1 batch 1 + 2 COMPLETE; WP 2.3 floor record; WP 4.2 PASS; queue trimmed to Fable-only; WP 4.3 launched (local orchestrator)
 
 - **B1 complete: 8/8 probes exit 0** (5 fold-warm + 3 ext-throat), no Shared-Usage spill anywhere

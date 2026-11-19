@@ -1,5 +1,16 @@
 ﻿# ISSUES
 
+## 2026-11-18 - WP 4.3 done: vt V-freedom authoritative (+32 deg, +2.3 J cost), 4 freedoms inert; WP 4.4 proposal open
+
+- DONE: B2 authority table (verify tier, same identity): vt_460 authority YES via the intended V
+  plane (1100-2500, +32.32 deg, H −5.10 secondary); term_topbottom / steer_early / steer_late /
+  diag_pull inert (< 3 deg). `docs/evidence/wp43_b2_authority/README.md`.
+- OPEN (owner decision): WP 4.4 proposal — open the vt freedom as a searched knob on a NEW config
+  version (bounds ~[440, 465], shape_check gate, budget-80 CMA probe; success > 0.1302 J over the
+  control). NOT implemented (senior review + owner consent on bounds/slot first).
+- OPEN (minor): vt_480 / term_sides excluded pre-solve by the u3_jobs validity table (invalid
+  reach) — a dedicated owner probe could still measure them if wanted.
+
 ## 2026-11-18 - B1 + WP 2.3 done; 4.2 PASS -> 4.3 running; queue trimmed to Fable-only (owner directive)
 
 - DONE: B1 8/8 probes clean (batch 1 + 2, no spill); WP 2.3 combined-floor record published
