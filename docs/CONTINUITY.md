@@ -1,5 +1,36 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Compact slate: owner decisions executed (CPU only, no GPU)
+
+- **Owner decisions.** Next compact-horn move = author the crossover-aware identity first (no new
+  GPU); assembled-BL prerequisite = real 10-inch geometry + panel fit first. GPU and CPU lanes were
+  free and nothing was queued; **no GPU time was spent**.
+- **Three CPU lanes delivered and verified:**
+  1. **A5 re-emit** `examples/typologies/compact_2026-11-19/rf__rect_radial_wide_v8_currentgen.yaml`.
+     The archived 2026-11-15 recipe is refused by design (`rolled_family.py:97-99`); the re-emit
+     materialises 541.397 × 298.591 × 238.118 mm vs the archived saved-mesh 541.3 × 298.6 × 238.1 mm
+     — the drift is **provenance-only, not geometric**. `shape_check` PASS 5096/6000 dof;
+     `search_preflight` ok; `rows_grid_points` round-trip OK. No solve run.
+  2. **Crossover-aware identity** `examples/briefs/compact_2026-11-19/compact_xo900_1250_hf1440_v10xo.yaml`
+     (objective v10 scalar unchanged; F_X 850 Hz; H 65-100 / V 40-75 anchored 850-1250; band
+     350-8000 retained; never rankable vs v7/v10). **Floor 0.2783 J** (top-28-pair protocol, 257
+     pairs; same command reproduces v10's 0.4677 exactly). CPU replay of six solved designs:
+     **fold_warm 1.0624 < A3 1.6028 ≈ A1 1.6578 ≈ A2 1.7074 < C2 2.4680 < K1 3.4445**. Read: even
+     under the crossover-aware identity the petal/tritonia candidates do not beat fold_warm
+     (0.540 J, real); A1/A3/A2 tie inside the new floor.
+  3. **10-inch panel fit** `driver_10inch_fit.md`: **10PR300 is LEGAL on the recorded 371.2 mm BL
+     front only with the 45 cm² port** (required 157.095 vs available 175.105 mm, +18.0 mm);
+     12PR300 stays illegal (−32.0 mm); 170 cm² port fails even the 10-inch (−53.4 mm) — port area
+     is the binding lever. Correction: `frame_od_mm: 261` / `cutout_mm: 232` are `[measured]` in
+     `examples/systems/driver_geometry/faitalpro_10pr300.yaml`, so the register's "frame radius
+     NOT_YET_AVAILABLE" is superseded (radius 130.5 mm; spacing table was a lower bound). Still
+     missing: cone depth, surround, dust cap, mounting depth; BL still stages the demo cone.
+- **Registered.** `docs/CODE_MAP.md` and `docs/INDEX.md` rows added (same commit);
+  register amended (§5 parent amendment 2). Uncommitted GUI edits from the other lane remain
+  untouched and were excluded from staging.
+- **State.** GPU/CPU lanes free; nothing queued. Not done: no GPU solve, no BL staging, no PR #75
+  action (still OPEN/draft, superseded locally at 627b880), no push.
+
 ## 2026-11-19 - Last-24h horn sheets: score column added (renders)
 
 - Sheets re-rendered at 200 dpi with a scores column per design: J (total), the saved `best.json` terms

@@ -1,5 +1,29 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Compact slate: owner decisions executed (CPU only)
+
+- DONE (owner decision): crossover-aware identity authored —
+  `examples/briefs/compact_2026-11-19/compact_xo900_1250_hf1440_v10xo.yaml`; floor 0.2783 J (257
+  pairs) published in `docs/research/compact_horn_system_2026-11-19/compact_xo900_identity.md`.
+  CPU replay: fold_warm 1.0624 < A3 1.6028 ≈ A1 1.6578 ≈ A2 1.7074 < C2 2.4680 < K1 3.4445 —
+  the petal/tritonia candidates still do not beat fold_warm under the new identity.
+- DONE (CPU): A5 re-emit `examples/typologies/compact_2026-11-19/rf__rect_radial_wide_v8_currentgen.yaml`
+  (recipe drift was provenance-only; geometry identical to the archived saved mesh within 0.1 mm).
+  No solve run; config scoreable for a future authorised screen.
+- DONE (CPU): 10-inch panel fit `driver_10inch_fit.md` — 10PR300 legal on the 371.2 mm BL front
+  only with the 45 cm² port (+18.0 mm); 12PR300 illegal (−32.0 mm); 170 cm² port fails the 10-inch
+  too (−53.4 mm). Register's "frame radius NOT_YET_AVAILABLE" superseded: `frame_od_mm: 261`
+  measured (radius 130.5 mm).
+- OPEN (owner): first GPU under the new identity — a compact_xo900 search (e.g. warm-start from
+  fold_warm 00826f071b24, which now leads on BOTH v10 and the crossover identity) or another lane;
+  nothing queued and no GPU spent this pass.
+- OPEN (owner): PR #75 disposition (still OPEN/draft at d902a33; superseded locally at 627b880) and
+  whether to open a PR from `hornfab-all-2026-11-18` into `main`.
+- OPEN (owner, carried): gates D (GUI solve authorization) and E (calibration policy); B6 s2 must
+  warm-start at the published bests if ever run.
+- OPEN (staging): real 10-inch BL case still needs maker cone/surround/dust-cap dimensions; BL
+  stages its demo cone without them.
+
 ## 2026-11-19 - Last-24h horn sheets: score column added
 
 - DONE (render): score column on all 21 sheets; see `docs/renders/2026-11-19-last-day-horns/README.md`.

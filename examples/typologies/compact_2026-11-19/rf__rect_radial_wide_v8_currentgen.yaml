@@ -1,0 +1,142 @@
+# CURRENT-GENERATOR RE-EMIT (2026-11-19), candidate A5, from the unchanged
+# examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml.
+#
+# This file is NOT a reproduction of the archived 2026-11-15 A5 shape. The archived saved recipe
+# carries a pre-2026-11-16 schema/implementation_sha256 that rolled_family.py refuses BY DESIGN, so
+# the archived saved design cannot be rebuilt from its own rows. This config re-emits the same A5
+# knobs as a config the CURRENT rolled_family generator materialises and scores.
+#
+# Consequence: any A/B between this file and the archived v7 saved design is MECHANISM-LEVEL, not
+# geometry-identical. Under the current generator this seed materialises the same geometry the
+# unchanged v7 config does; the non-reproducible reference is the archived saved mesh.
+#
+# Only `name` differs from v7. `rows` deliberately carries no schema/implementation_sha256/driver:
+# rolled_family.design_params injects the current schema, the current implementation digest and the
+# driver from the brief. The driver is the shared HF1440 entry (exit_radius_mm 18.0,
+# exit_angle_deg 2.0) in
+# briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml, so no explicit driver
+# block is needed or invented here.
+#
+# Same mechanism as v7: canonical rolled_family RADIAL relief on the Crowe-ES spiral base.
+#   rho_new = rho - (H*cos^2(psi) + V*sin^2(psi)) * cos^2(2*psi) * window
+# Positive H/V pull the horizontal/vertical wall centres inward; the normalized diagonal is
+# unchanged (ATH-like diagonal ridge / triangular facet direction). Window 0.50/0.80/0.96 keeps
+# the source and the returned lip untouched.
+name: rf__rect_radial_wide_v8_currentgen
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows:
+    type: rolled_family_rect_v1
+    mode: radial
+  seed_policy: explicit
+  span: quarter
+  n_phi: 65
+  n_s: 128
+  wall_thickness_mm: 3.0
+seed_params:
+  g_width_mm: 542.0
+  g_height_mm: 299.0
+  g_depth_mm: 238.0
+  g_depth_h_ratio: 0.68
+  g_decay: 0.7
+  g_rect_exponent: 12.0
+  g_rect_turn_deg: 65.0
+  g_throat_turn_deg: 25.0
+  g_terminal_deg: 270.0
+  g_inward_h_mm: 12.0
+  g_inward_v_mm: 16.0
+  g_axial_h_mm: 0.0
+  g_axial_v_mm: 0.0
+  g_relief_start_s: 0.5
+  g_relief_peak_s: 0.8
+  g_relief_end_s: 0.96
+bounds:
+  g_width_mm:
+    lo: 542.0
+    hi: 542.0
+    search: false
+  g_height_mm:
+    lo: 299.0
+    hi: 299.0
+    search: false
+  g_depth_mm:
+    lo: 230.0
+    hi: 246.0
+  g_depth_h_ratio:
+    lo: 0.68
+    hi: 0.68
+    search: false
+  g_decay:
+    lo: 0.65
+    hi: 0.75
+  g_rect_exponent:
+    lo: 10.0
+    hi: 14.0
+  g_rect_turn_deg:
+    lo: 65.0
+    hi: 65.0
+    search: false
+  g_throat_turn_deg:
+    lo: 25.0
+    hi: 25.0
+    search: false
+  g_terminal_deg:
+    lo: 270.0
+    hi: 270.0
+    search: false
+  g_inward_h_mm:
+    lo: 0.0
+    hi: 30.0
+  g_inward_v_mm:
+    lo: 0.0
+    hi: 40.0
+  g_axial_h_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_axial_v_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_relief_start_s:
+    lo: 0.5
+    hi: 0.5
+    search: false
+  g_relief_peak_s:
+    lo: 0.8
+    hi: 0.8
+    search: false
+  g_relief_end_s:
+    lo: 0.96
+    hi: 0.96
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 6000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 48
+  popsize: 8
+  tolfun: 0.001
+  infeasible_penalty: flat
+description: 'Crowe-ES spiral base with wide inward radial relief: ATH-like diagonal ridges /
+  triangular facets, source and returned lip untouched; local radial approximation, not a per-direction a(phi) law'

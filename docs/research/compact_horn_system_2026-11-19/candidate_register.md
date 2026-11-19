@@ -298,3 +298,37 @@ overrides. For completeness, the v10 slate order is: fold 1.5433 (s1) / 1.4214 (
 4.8193 (10 valid) < C1 7.0685 < K2 8.3910 < R1 15.320.
 
 No GPU time was spent on any row for this amendment; it is CPU replay only.
+
+## 5. Parent amendment 2 (2026-11-19, local orchestrator, [measured])
+
+Three corrections/supersessions recorded after the owner-decision pass (owner chose "author the
+crossover-aware identity first" and "real 10-inch geometry + panel fit first"; no GPU was
+authorised or spent).
+
+1. **Frame radius is NO LONGER `NOT_YET_AVAILABLE`.** `frame_od_mm: 261` and `cutout_mm: 232` are
+   `[measured]` in `examples/systems/driver_geometry/faitalpro_10pr300.yaml`, so 10-inch frame
+   radius = **130.5 mm**. The spacing table above is therefore a conservative lower bound; with
+   frame + 10 mm clearance, centre spacing = 130.5 + H/2 + 10 mm (d/λ at 900/1100/1250 Hz in
+   `driver_10inch_fit.md`). **Verdict: the real 10PR300 is LEGAL on the recorded 371.2 mm BL front
+   only with the 45 cm² port** (required 157.095 mm vs available 175.105 mm, +18.0 mm); the real
+   12PR300 stays illegal (−32.0 mm) and the 170 cm² port fails even the 10-inch (−53.4 mm). Port
+   area, not driver choice, is the binding lever. Still missing: cone depth, surround width,
+   dust-cap diameter, mounting depth — all `NOT_YET_AVAILABLE`; BL still stages its demo cone
+   without a maker drawing. Details: `driver_10inch_fit.md`.
+2. **A5 re-emit (recipe-drift resolution).** The 2026-11-15 archived recipe is refused by design
+   (`rolled_family.py:97-99` schema/digest gate). Current-generator re-emit
+   `examples/typologies/compact_2026-11-19/rf__rect_radial_wide_v8_currentgen.yaml` (only `name`
+   changed) materialises **541.397 × 298.591 × 238.118 mm** vs the archived saved-mesh
+   **541.3 × 298.6 × 238.1 mm** — identical within 0.1 mm on every axis, so the drift is
+   **provenance-only, not geometric**. `shape_check` PASS (5096/6000 dof, fits, round driver
+   coupling); `search_preflight` ok, no WARN/HARD; `rows_grid_points` round-trip OK. The A5 cell
+   now has a scoreable config; still no solved run (`NOT_YET_AVAILABLE`).
+3. **The crossover-aware identity now exists and ranks the slate.** Brief
+   `examples/briefs/compact_2026-11-19/compact_xo900_1250_hf1440_v10xo.yaml` (objective v10 scalar
+   reused unchanged; F_X 850 Hz; H 65-100 / V 40-75 anchored 850-1250; band 350-8000 retained).
+   **Floor 0.2783 J** (top-28-pair protocol, 257 pairs; the same command reproduces v10's
+   0.4677 exactly). CPU replay ordering: **fold_warm 1.0624 < A3 1.6028 ≈ A1 1.6578 ≈ A2 1.7074 <
+   C2 2.4680 < K1 3.4445** (all `exact_complete`, `mixed_identity: false`, SCREEN_MAGNITUDE only,
+   no installed/exterior BEM). Read: even under the crossover-aware identity the compact petal/
+   tritonia candidates do **not** beat fold_warm (0.540 J, a real separation); A1/A3/A2 tie inside
+   the new floor. Full readout: `compact_xo900_identity.md`.

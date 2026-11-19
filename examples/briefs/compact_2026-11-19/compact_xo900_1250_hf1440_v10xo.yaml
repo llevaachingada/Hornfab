@@ -1,0 +1,143 @@
+# COMPACT CROSSOVER-AWARE BRIEF IDENTITY - 2026-11-19 (owner-approved, CPU-authoring only).
+#
+# WHAT THIS IS: a NEW brief identity, not a new objective. It reuses the shipped objective v10
+#   scalar and target/weight machinery UNCHANGED and encodes the new priority only in this brief's
+#   target block. The new priority is that the horn must be usable as the top of a ~900 Hz two-way,
+#   so the loading corner (F_X) and the V/H corridor requirement start inside the 850-1250 Hz
+#   crossover window instead of at v10's F_X 700 Hz / V target 1000 Hz.
+#
+# NEVER RANKABLE AGAINST v7 / v10 (or v10_slope5). Same objective source, DIFFERENT target set =>
+#   different J. Rank only inside this identity, and only after its own floor is published (below).
+#   The v10 floor 0.4677 J does not apply here; use the floor in
+#   docs/research/compact_horn_system_2026-11-19/compact_xo900_identity.md.
+#
+# DELIBERATELY UNTOUCHED stored objectives/briefs: examples/briefs/home_landscape_2026-11-15/*
+#   (v7), examples/briefs/home_landscape_2026-11-18_v10/* (v10 and v10_slope5) and every stored run
+#   J in runs/. Nothing here edits, replays or replaces them; they are only read as the separate
+#   historical readout below.
+#
+# WHY THIS IS JUSTIFIED (measured, not acoustic law):
+#   - docs/research/compact_horn_system_2026-11-19/candidate_register.md section 3: "No 900-1100 Hz
+#     scoring exists. Every lane was scored with the v7 or v10 target, whose V target starts at
+#     1 kHz and whose F_X is 700 Hz. Crossover feasibility above is a screen of stored metrics, not
+#     a design objective."
+#   - docs/research/compact_horn_system_2026-11-19/solver_proposal.md section 4: no non-reference
+#     compact row reaches the 40-60 deg V corridor below ~1.1 kHz, and v10 can call a horn "good"
+#     while it is unusable at a 900-1100 Hz crossover. A crossover-band requirement is a NEW
+#     acoustic priority => new identity, never cross-ranked.
+#   - Loading criterion reused from the register's crossover screen (slate-only, not a design law):
+#     zero loading penalty iff lfp20_hz <= XO/1.6 (objective/scalar_v7._load). F_X 850 Hz is exactly
+#     that boundary at the lowest crossover the register screened, lfp20 <= 531.25 Hz.
+#
+# WHAT IS NOT A LAW: the corridors below (H 65-100, V 40-75) are EXPLORATORY, owner-requested NEW
+#   scoring priorities for this identity. They are not CD targets, not Keele mouth rules, and not
+#   generalized from another family. The preferred angles are retained from v10 (80/50) so the
+#   v10 ripple window (ripple_region: preferred_edge) is not changed incidentally.
+#
+# HISTORICAL 80x50 HOME CORRIDOR - SEPARATE IDENTIFIED READOUT, NOT OVERWRITTEN:
+#   The v10 home identity (H 60-90 pref 80 from 700 Hz, V 40-60 pref 50 from 1000 Hz, F_X 700) is
+#   NOT this brief's target and is NOT restated below. Read it out separately, unchanged, via
+#   examples/briefs/home_landscape_2026-11-18_v10/room_landscape_80x50_700_hf1440_v10.yaml.
+#   The readout table in compact_xo900_identity.md carries both columns side by side and never pools
+#   their J.
+#
+# BAND: 350-8000 Hz is retained in full. A crossover floor MUST NOT delete the frequencies below the
+#   crossover: cov_below_f0 stays one_sided, so 350-850 Hz is still scored (a wide pattern there is
+#   free physics; a narrow one is charged) and rip/flat/load still see the whole band.
+#
+# Name: compact_xo900_1250_hf1440_v10xo
+# Owner-approved shape: same HF1440 driver block, same 600x480x480 envelope, same grid as v10.
+name: compact_xo900_1250_hf1440_v10xo
+description: '(objective v10 target-variant; NEW compact crossover identity) Crossover-aware
+  compact horn: F_X 850 Hz, corridor H 65-100 (pref 80) and V 40-75 (pref 50) from 850 Hz,
+  held from 1250 Hz; band 350-8000 Hz; HF1440, 600x480x480. NOT objective v11 and NEVER
+  rankable against v7/v10.'
+driver:
+  exit_angle_deg: 2.0
+  exit_radius_mm: 18.0
+envelope:
+  max_depth_mm: 480.0
+  max_mouth_h_mm: 480.0
+  max_mouth_w_mm: 600.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_profile:
+    h:
+    # NEW priority (exploratory, not a law): crossover-window H corridor.
+    - hz: 850
+      max_deg: 100
+      min_deg: 65
+      preferred_deg: 80
+    - hz: 1250
+      max_deg: 100
+      min_deg: 65
+      preferred_deg: 80
+    interpolation: log_frequency
+    mode: corridor
+    v:
+    # NEW priority (exploratory, not a law): crossover-window V corridor. Above 1250 Hz the last
+    # anchor is held (profile parser: no extrapolation), preserving a V 40-75 window to 8 kHz.
+    - hz: 850
+      max_deg: 75
+      min_deg: 40
+      preferred_deg: 50
+    - hz: 1250
+      max_deg: 75
+      min_deg: 40
+      preferred_deg: 50
+  coverage_v_deg: 50.0
+  coverage_v_down_deg: null
+  coverage_v_up_deg: null
+  di_slope_target: 0.0
+  di_target_db: null
+  driver_exit_radius_mm: null
+  # F_X (and the plane-1 onset) moved from 700 to 850 Hz: the lowest crossover the register screened.
+  f0_hz: 850.0
+  f0_v_hz: 850.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov_profile: 1.0
+  di_roughness: 1.0
+  dislope: 1.0
+  flat: 0.5
+  flat_cv: 1.0
+  load: 1.0
+  rip: 1.0
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+objective:
+  cov_below_f0: one_sided
+  cov_narrow_ratio: 2.0
+  cov_v_weight: 0.5
+  flat_band: scored
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  tolerances:
+    cov_profile: 3.0
+    di_roughness: 1.0
+    dislope: 9.0
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3
+    rip: 1.0
+  version: 10
+  ripple_region: preferred_edge
