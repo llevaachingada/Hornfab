@@ -1,0 +1,43 @@
+{
+ "design_hash": "e5194ec2f02c",
+ "family": "FREEFORM",
+ "generator": {
+  "brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+  "brief_hash": "89e7b98566b5",
+  "derived": {},
+  "knobs": {
+   "g_aspect": 1.6902555842,
+   "g_end_frac": 0.6884572828,
+   "g_entry_half_angle_deg": 2.0,
+   "g_fc_hz": 355.5815161874,
+   "g_lame_p": 4.4900371274,
+   "g_morph_frac": 0.6,
+   "g_rim_sweep_ratio": 0.1653928677,
+   "g_source_blend_ratio": 0.0
+  },
+  "name": "grid",
+  "spec": {
+   "n_phi": 19,
+   "n_s": 64,
+   "name": "grid",
+   "rows": {
+    "type": "klangfilm_lame"
+   },
+   "span": "quarter",
+   "wall_thickness_mm": 3.0
+  }
+ },
+ "params": {
+  "_generator_error": "GeneratorError: invalid_envelope: max_mouth_w_mm 671.691 exceeds 600.0",
+  "_knobs": {
+   "g_aspect": 1.6902555842,
+   "g_end_frac": 0.6884572828,
+   "g_entry_half_angle_deg": 2.0,
+   "g_fc_hz": 355.5815161874,
+   "g_lame_p": 4.4900371274,
+   "g_morph_frac": 0.6,
+   "g_rim_sweep_ratio": 0.1653928677,
+   "g_source_blend_ratio": 0.0
+  }
+ }
+}

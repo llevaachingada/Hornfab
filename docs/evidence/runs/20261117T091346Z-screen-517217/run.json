@@ -1,0 +1,532 @@
+{
+ "backend": "beat_cuda",
+ "best": {
+  "design_hash": "88973b1e44e9",
+  "eval_no": 199,
+  "objective": 7.44577979665419
+ },
+ "budget": 200,
+ "budget_counts": {
+  "attempts": 201,
+  "attempts_cap": 500,
+  "budget": 200,
+  "mode": "valid",
+  "refused_free": 1,
+  "valid": 200
+ },
+ "cma_seed": 41209,
+ "command": "hornlab-search search --config examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_c200.yaml --mode screen --budget 200 --cma-seed 41209",
+ "config": {
+  "bounds": {
+   "g_aspect": {
+    "hi": 2.3,
+    "lo": 1.15
+   },
+   "g_end_frac": {
+    "hi": 1.8,
+    "lo": 1.05
+   },
+   "g_entry_half_angle_deg": {
+    "hi": 2.0,
+    "lo": 2.0,
+    "search": false
+   },
+   "g_fc_hz": {
+    "hi": 800.0,
+    "lo": 480.0
+   },
+   "g_lame_p": {
+    "hi": 6.0,
+    "lo": 2.0
+   },
+   "g_morph_frac": {
+    "hi": 0.65,
+    "lo": 0.15
+   },
+   "g_rim_sweep_ratio": {
+    "hi": 0.3,
+    "lo": 0.0
+   },
+   "g_source_blend_ratio": {
+    "hi": 0.0,
+    "lo": 0.0,
+    "search": false
+   }
+  },
+  "brief": {
+   "description": "(objective v7) HOME living-room horn, LANDSCAPE 80H x 50V, vertical half-weighted, no K-law mouth, pattern+loading from 700 Hz XO, HF1440 1.4-inch, 600W x 480H x 480D envelope, band 350-8000 Hz",
+   "driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "envelope": {
+    "max_depth_mm": 480.0,
+    "max_mouth_h_mm": 480.0,
+    "max_mouth_w_mm": 600.0
+   },
+   "grid": {
+    "screen_extra_hz": [
+     250,
+     315,
+     400,
+     2573,
+     3311,
+     4260
+    ],
+    "verify_points_per_octave": 6
+   },
+   "name": "room_landscape_80x50_700_hf1440_v7_smooth",
+   "objective": {
+    "bw8k_floor": 0.75,
+    "cov_below_f0": "mask",
+    "cov_narrow_ratio": 1.0,
+    "cov_v_weight": 0.5,
+    "flat_band": "scored",
+    "lfp_crossover_ratio": 1.6,
+    "lfp_re_z": 0.2,
+    "loaded_re_z": 0.5,
+    "tolerances": {
+     "cov": 8.0,
+     "di": 0.4,
+     "diag": 2.0,
+     "dislope": 9.0,
+     "distd": 2.0,
+     "flat": 1.5,
+     "flat_cv": 1.5,
+     "load": 0.3,
+     "rip": 1.0
+    },
+    "version": 7
+   },
+   "source": {
+    "cap": "auto"
+   },
+   "symmetry": "hv",
+   "target": {
+    "band_hi_hz": 8000.0,
+    "band_lo_hz": 350.0,
+    "coverage_h_deg": 80.0,
+    "coverage_v_deg": 50.0,
+    "di_slope_target": 5.0,
+    "di_target_db": null,
+    "f0_hz": 700.0,
+    "f0_v_hz": 700.0,
+    "freq_weights": {
+     "band_hz": [
+      [
+       2500.0,
+       5500.0,
+       2.0
+      ]
+     ]
+    },
+    "loaded_hi_hz": 5600.0,
+    "z_min": 0.5
+   },
+   "weights": {
+    "cov": 1.0,
+    "di": 0.0,
+    "diag": 1.0,
+    "dislope": 1.0,
+    "distd": 1.0,
+    "flat": 0.5,
+    "flat_cv": 1.0,
+    "load": 1.0,
+    "rip": 1.0
+   }
+  },
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+  "description": "KLANGFILM smooth CMA-200 backlog leg: incumbent 8.439 genes as seed, 6 searched genes (morph_frac exposed for the first time), 200 valid evals to build a TuRBO/SCALAR cohort under this config name",
+  "family": "FREEFORM",
+  "feasibility": {
+   "derivation": [
+    {
+     "knob": "-",
+     "note": "seed_policy explicit: derivation skipped"
+    }
+   ],
+   "envelope_mouth_h_mm": 480.0,
+   "envelope_mouth_w_mm": 600.0,
+   "f0_hz": 700.0,
+   "f0_v_hz": 700.0,
+   "feasible_v": false,
+   "feasible_w": true,
+   "held_coverage_v_deg": 75.5952380952381,
+   "held_coverage_w_deg": 60.476190476190474,
+   "required_mouth_h_mm": 725.7142857142857,
+   "required_mouth_w_mm": 453.57142857142856,
+   "rule": "d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)",
+   "screen_freqs_below_f0": 2,
+   "screen_freqs_total": 12,
+   "verify_freqs_below_f0": 7,
+   "verify_freqs_total": 25
+  },
+  "generator": {
+   "n_phi": 19,
+   "n_s": 64,
+   "name": "grid",
+   "rows": {
+    "type": "klangfilm_lame_v1"
+   },
+   "seed_policy": "explicit",
+   "span": "quarter",
+   "wall_thickness_mm": 3.0
+  },
+  "grid": {
+   "screen_extra_hz": [
+    250,
+    315,
+    400,
+    2573,
+    3311,
+    4260
+   ],
+   "verify_points_per_octave": 6
+  },
+  "mesh": {
+   "dof_cap_final": 24000,
+   "dof_cap_screen": 24000,
+   "dof_cap_verify": 24000,
+   "dof_per_triangle": 0.51,
+   "epw": 6.0,
+   "quadrants": "1"
+  },
+  "name": "hl__klangfilm_lame_curved_v1_c200",
+  "objective": {
+   "bw8k_floor": 0.75,
+   "cov_below_f0": "mask",
+   "cov_narrow_ratio": 1.0,
+   "cov_v_weight": 0.5,
+   "flat_band": "scored",
+   "lfp_crossover_ratio": 1.6,
+   "lfp_re_z": 0.2,
+   "loaded_re_z": 0.5,
+   "tolerances": {
+    "cov": 8.0,
+    "di": 0.4,
+    "diag": 2.0,
+    "dislope": 9.0,
+    "distd": 2.0,
+    "flat": 1.5,
+    "flat_cv": 1.5,
+    "load": 0.3,
+    "rip": 1.0
+   },
+   "version": 7
+  },
+  "search": {
+   "algorithm": "cma",
+   "budget": 200,
+   "budget_counts": "valid",
+   "error_policy": "retry_same_then_stop",
+   "infeasible_penalty": "resample_strict",
+   "max_attempts": 500,
+   "popsize": null,
+   "seed": 41209,
+   "sigma0": 0.2,
+   "tolfun": 0.001
+  },
+  "seed_params": {
+   "g_aspect": 2.0759495982,
+   "g_end_frac": 1.7953432921,
+   "g_entry_half_angle_deg": 2.0,
+   "g_fc_hz": 494.4393461867,
+   "g_lame_p": 5.0063549541,
+   "g_morph_frac": 0.3,
+   "g_rim_sweep_ratio": 0.004898754,
+   "g_source_blend_ratio": 0.0
+  },
+  "solve": {
+   "angle_count": 73,
+   "backend": "beat_cuda",
+   "balloon": true,
+   "balloon_points_screen": 512,
+   "balloon_points_verify": 1024,
+   "cuda_fused": true,
+   "distance_m": 10.0,
+   "gmres_tol": 1e-05,
+   "timeout_s": 900
+  },
+  "target": {
+   "band_hi_hz": 8000.0,
+   "band_lo_hz": 350.0,
+   "coverage_h_deg": 80.0,
+   "coverage_v_deg": 50.0,
+   "di_slope_target": 5.0,
+   "di_target_db": null,
+   "f0_hz": 700.0,
+   "f0_v_hz": 700.0,
+   "freq_weights": {
+    "band_hz": [
+     [
+      2500.0,
+      5500.0,
+      2.0
+     ]
+    ]
+   },
+   "loaded_hi_hz": 5600.0,
+   "z_min": 0.5
+  },
+  "weights": {
+   "cov": 1.0,
+   "di": 0.0,
+   "diag": 1.0,
+   "dislope": 1.0,
+   "distd": 1.0,
+   "flat": 0.5,
+   "flat_cv": 1.0,
+   "load": 1.0,
+   "rip": 1.0
+  }
+ },
+ "config_name": "hl__klangfilm_lame_curved_v1_c200",
+ "config_path": "examples/typologies/home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_c200.yaml",
+ "config_sha": "6dfeaed7a470",
+ "created_utc": "2026-11-17T09:14:04Z",
+ "dataset_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\dataset",
+ "family": "FREEFORM",
+ "finished_utc": "2026-11-17T10:55:56Z",
+ "last_invocation": {
+  "cache_hits": 0,
+  "candidates_per_hour": 121.44825892084377,
+  "evaluations": 201,
+  "failures": 1,
+  "failures_by_reason": {
+   "invalid_geometry": 1
+  },
+  "mean_seconds_per_candidate": 29.642252857213613,
+  "non_cached": 201,
+  "projected_hours": {
+   "1000": 8.233959127003782,
+   "10000": 82.33959127003781
+  },
+  "total_gpu_seconds": 5461.246487699682,
+  "total_mesh_seconds": 263.8100137002766
+ },
+ "lib_shas": {
+  "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+  "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+  "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+  "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+  "hornlab_search": "a531edda088cf27b97dad61fe219c66042a75aef"
+ },
+ "mode": "screen",
+ "objective_version": 7,
+ "run_id": "20261117T091346Z-screen-517217",
+ "runtime": {
+  "gpu": [
+   "NVIDIA GeForce RTX 4060 Laptop GPU, 610.62, 8188 MiB"
+  ],
+  "julia": "julia version 1.12.7",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "sources": [
+   {
+    "module": "hornlab_beat_bem",
+    "n_files": 111,
+    "sha256": "2fb5ad6c0f0900ef68c2a79761208474815a583d4b6c782bb8c08486561e5543"
+   },
+   {
+    "module": "hornlab_mesher",
+    "n_files": 66,
+    "sha256": "47d00e50f8d7cb8de813b3dcb41d1bcdf893d404424a7689d70f2ca5792949da"
+   },
+   {
+    "module": "hornlab_bempp_bem",
+    "n_files": 21,
+    "sha256": "08f71637ae90cc4900971b15b043320ef4e0a26a3fe884aaacecb35b5c8fc794"
+   }
+  ]
+ },
+ "seed": {
+  "design_hash": "d7b425d257b1",
+  "objective": 8.438126867766101,
+  "terms": {
+   "cov": 1.124650069821143,
+   "di": 0.0,
+   "di_estimated": 0.0,
+   "diag": 4.14257717771219,
+   "dislope": 0.915093152773151,
+   "distd": 1.131575224661852,
+   "f11_hz": 5600.0,
+   "flat": 0.3933163945148721,
+   "flat_cv": 0.10290905881517308,
+   "lfp20_hz": 514.2646321933081,
+   "lfp50_hz": 571.8911939743226,
+   "load": 0.7774264029703546,
+   "loaded_hi_hz": 5600.0,
+   "n_in_band": 13,
+   "n_nan": 0,
+   "oa_excess_raw": 0.0,
+   "penalty": 0.0,
+   "rez_min_from_fx": 0.7620557964045518,
+   "rip": 0.047237583754800756,
+   "total": 8.438126867766101
+  }
+ },
+ "started_utc": "2026-11-17T09:14:04Z",
+ "stats": {
+  "cache_hits": 0,
+  "candidates_per_hour": 121.55639445340903,
+  "evaluations": 201,
+  "failures": 1,
+  "failures_by_reason": {
+   "invalid_geometry": 1
+  },
+  "mean_seconds_per_candidate": 29.615883361692113,
+  "non_cached": 201,
+  "projected_hours": {
+   "1000": 8.2266342671367,
+   "10000": 82.26634267136698
+  },
+  "total_gpu_seconds": 5461.246487699682,
+  "total_mesh_seconds": 263.8100137002766
+ },
+ "status": "finished",
+ "stop_reason": "budget",
+ "strict": {
+  "attempts": 201,
+  "backend_calls": 200,
+  "cached_refusals": 0,
+  "caps": {
+   "budget": 200,
+   "deadline_s": null,
+   "draws": 500,
+   "max_attempts": 500
+  },
+  "code": "hornlab_search.search.cma/strict/1",
+  "draws": 201,
+  "extensions": [],
+  "generation": 22,
+  "last_generation": {
+   "design_hashes": [
+    "43f1761d2514",
+    "7199d606bcba",
+    "65b5f914ae40",
+    "926730143cb3",
+    "adda7875ba75",
+    "4e6004688a5f",
+    "0dd8a6b11bec",
+    "df9810e1e9b4",
+    "88973b1e44e9"
+   ],
+   "generation": 21,
+   "originals": [
+    [
+     0.9964048425957174,
+     0.5793128332238683,
+     0.00097627062099422,
+     0.523746558106194,
+     0.4011459199624007,
+     0.006717286503431347
+    ],
+    [
+     0.9883746896208958,
+     0.6172015423717278,
+     0.0013672465866132295,
+     0.6034613506623714,
+     0.4036542377613127,
+     0.0002435484378211321
+    ],
+    [
+     0.9670257735839377,
+     0.5735708224230408,
+     0.0003905443174227829,
+     0.560420199296429,
+     0.3861703307315092,
+     0.0032468462046096307
+    ],
+    [
+     0.9896496756499066,
+     0.5719139413669022,
+     0.0003673524777090493,
+     0.47669382944555894,
+     0.3683549047424828,
+     0.002439590416811953
+    ],
+    [
+     0.9938587922033915,
+     0.596196309928776,
+     0.00031387009500365387,
+     0.5087559326648688,
+     0.4238907233069469,
+     0.0005707641534069923
+    ],
+    [
+     0.9968553138334035,
+     0.5646696203980558,
+     0.0003420700442306592,
+     0.506354199596402,
+     0.4304607269483748,
+     0.004627063554146543
+    ],
+    [
+     0.9913674697652781,
+     0.5768457032569899,
+     1.8105753668722873e-05,
+     0.5440428591982108,
+     0.40684102298628355,
+     0.0005312395746513245
+    ],
+    [
+     0.9888686489852503,
+     0.591299830379442,
+     0.007413544800630563,
+     0.6154793783587308,
+     0.4001490543482236,
+     0.0008677833268888173
+    ],
+    [
+     0.9950588300012466,
+     0.5467196616979726,
+     7.965675611188321e-05,
+     0.5783149069127705,
+     0.4166431295349786,
+     0.0015376832567783457
+    ]
+   ],
+   "replacements": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+   ]
+  },
+  "protocol": "strict-cma-v1",
+  "refusals": 1,
+  "replacements": 1,
+  "retries": 0,
+  "scored": 200,
+  "seed": {
+   "cached": false,
+   "category": "complete_score",
+   "design_hash": "d7b425d257b1",
+   "eligible": true,
+   "kind": "",
+   "objective": 8.438126867766101
+  },
+  "slot": 0,
+  "stop_reason": "budget",
+  "told": 198,
+  "unknown_attempts": 0,
+  "valid": 200
+ },
+ "toolchain": {
+  "beat_status": "`{'available': True, 'reason': 'NVIDIA GPU detected and Julia CUDA.functional() confirmed a usable device', 'state': 'ready', 'version': '0.2.0', 'backend': 'cuda'}`",
+  "cpu": "Intel(R) Core(TM) i7-14650HX, 16 cores / 24 threads",
+  "driver": "610.62; CUDA UMD version 13.3",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop, 8 GB (8188 MiB)",
+  "os": "Microsoft Windows 11 Pro 10.0.26200, build 26200",
+  "present": true,
+  "python": "`C:\\Users\\hunte\\Hrns\\hornlab-search\\.venv\\Scripts\\python.exe` 3.12.10",
+  "ram": "31.7 GB",
+  "sha256": "7e829ed0af8ece14"
+ },
+ "trace_fraction": 0.05
+}

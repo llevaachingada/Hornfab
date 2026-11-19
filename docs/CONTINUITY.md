@@ -1,5 +1,23 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - Run artifacts archived to docs/evidence/runs (owner request)
+
+- Owner asked that three run dirs be committed/pushed with geometry + scores. `runs/` is gitignored,
+  so per the established `docs/evidence/runs/<run-id>/` convention each run got: best.json, config.yaml,
+  run.json, search.ndjson, cma/*, per-design `designs/<hash>/design.json` (geometry params) and
+  `metrics.json` (scores), the **best design's mesh.msh**, and a new `scores.csv` (per-eval: params,
+  objective terms, dof/timing, plus the full per-frequency response columns — freqs_hz, bw_h_deg,
+  bw_v_deg, di_db, on_axis_db, ripple_h_db, ripple_v_db, z_throat_real, metric_* scalars; built
+  from search.ndjson):
+  - `20261117T085651Z-screen-f30bd2` hl__klangfilm_lame_curved_v1 — best b5f460f0313f J 8.4289
+    (104 evals; 75 with metrics; 29 mesh refusals).
+  - `20261117T091346Z-screen-517217` hl__klangfilm_lame_curved_v1_c200 — best 88973b1e44e9 J 7.4458
+    (201 evals, 200 metrics). This is the c200 best that SCOUT40 job 5 warm-starts from.
+  - `20261117T190640Z-screen-643de7` home_range_pilot_rolled_control_h12 — best 445dafb7e760
+    J 92.61 (15/15 evals; rolled_family_rect_v1 control pilot, brief home_range_v9_h12).
+- Not archived: per-design mesh.msh/response.npz except the best design's mesh (large generated
+  artifacts; every mesh is reproducible from its committed design.json).
+
 ## 2026-11-19 - PR #74 merged into hornfab-all-2026-11-18 (local orchestrator, R21)
 
 - Merged `claude/adoring-ramanujan-1m4b3g` @ 37da1ee into `hornfab-all-2026-11-18` (merge commit

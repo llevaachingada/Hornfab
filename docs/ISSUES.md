@@ -1,5 +1,11 @@
 ﻿# ISSUES
 
+## 2026-11-18 - Run artifacts archived to docs/evidence/runs
+
+- DONE (local orchestrator): hl__klangfilm_lame_curved_v1 (f30bd2), _c200 (517217) and
+  home_range_pilot_rolled_control_h12 (643de7) committed under `docs/evidence/runs/` with per-design
+  design.json + metrics.json, best-design mesh.msh and per-run scores.csv. No OPEN items.
+
 ## 2026-11-19 - PR #74 merged into hornfab-all-2026-11-18; SCOUT40 prep next
 
 - DONE (local orchestrator, R21): PR #74 head 37da1ee merged as 4e27afd; offline 72/72 + mesher-gated

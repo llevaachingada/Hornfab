@@ -1,0 +1,2 @@
+% # columns="iteration, evaluation, min 25%tile 75%tile max correlation, correlation matrix principal axes lengths  (sorted square roots of eigenvalues of correlation matrix)", seed=1234, Tue Nov 17 14:12:10 2026
+1 8 -0.06249691386891897 -0.0472438801764599 0.12448833327003483 0.16647937072640734 0.9070064510271725 0.9995113579583933 1.0855028065865429

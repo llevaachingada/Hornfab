@@ -1,0 +1,56 @@
+{
+ "design_hash": "a47b742cc35b",
+ "family": "FREEFORM",
+ "generator": {
+  "brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+  "brief_hash": "89e7b98566b5",
+  "derived": {},
+  "knobs": {
+   "g_aspect": 2.0711880945,
+   "g_end_frac": 0.6427853412,
+   "g_entry_half_angle_deg": 2.0,
+   "g_fc_hz": 488.1460089708,
+   "g_lame_p": 5.3179920901,
+   "g_morph_frac": 0.6,
+   "g_rim_sweep_ratio": 0.1505155223,
+   "g_source_blend_ratio": 0.0
+  },
+  "name": "grid",
+  "spec": {
+   "n_phi": 19,
+   "n_s": 64,
+   "name": "grid",
+   "rows": {
+    "type": "klangfilm_lame"
+   },
+   "span": "quarter",
+   "wall_thickness_mm": 3.0
+  }
+ },
+ "params": {
+  "grid": {
+   "knobs": {
+    "g_aspect": 2.0711880945,
+    "g_end_frac": 0.6427853412,
+    "g_entry_half_angle_deg": 2.0,
+    "g_fc_hz": 488.1460089708,
+    "g_lame_p": 5.3179920901,
+    "g_morph_frac": 0.6,
+    "g_rim_sweep_ratio": 0.1505155223,
+    "g_source_blend_ratio": 0.0
+   },
+   "n_phi": 19,
+   "n_s": 64,
+   "rows": {
+    "driver": {
+     "exit_angle_deg": 2.0,
+     "exit_radius_mm": 18.0
+    },
+    "implementation_sha256": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+    "schema": "klangfilm-lame-v1",
+    "type": "klangfilm_lame"
+   },
+   "wall_thickness_mm": 3.0
+  }
+ }
+}

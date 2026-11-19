@@ -1,0 +1,58 @@
+{
+ "design_hash": "b5f460f0313f",
+ "di_source": "balloon",
+ "eval_no": 102,
+ "family": "FREEFORM",
+ "mode": "screen",
+ "objective": 8.428931515671408,
+ "ok": true,
+ "params": {
+  "grid": {
+   "knobs": {
+    "g_aspect": 1.5191243431,
+    "g_end_frac": 0.6006687966,
+    "g_entry_half_angle_deg": 2.0,
+    "g_fc_hz": 383.955192689,
+    "g_lame_p": 5.2193275163,
+    "g_morph_frac": 0.6,
+    "g_rim_sweep_ratio": 0.1547654689,
+    "g_source_blend_ratio": 0.0
+   },
+   "n_phi": 19,
+   "n_s": 64,
+   "rows": {
+    "driver": {
+     "exit_angle_deg": 2.0,
+     "exit_radius_mm": 18.0
+    },
+    "implementation_sha256": "ea5026813d6aef0da87d844cb5b74bac97eaa10f146a1aaf874190b4f7ddc4a5",
+    "schema": "klangfilm-lame-v1",
+    "type": "klangfilm_lame"
+   },
+   "wall_thickness_mm": 3.0
+  }
+ },
+ "terms": {
+  "cov": 1.180488298938007,
+  "di": 0.0,
+  "di_estimated": 0.0,
+  "diag": 3.65969736330518,
+  "dislope": 1.9801787220304499,
+  "distd": 1.3146552680544517,
+  "f11_hz": 5600.0,
+  "flat": 0.18237111606815848,
+  "flat_cv": 0.1498234193925154,
+  "lfp20_hz": 420.0412535587821,
+  "lfp50_hz": 487.50970456892304,
+  "load": 0.0,
+  "loaded_hi_hz": 5600.0,
+  "n_in_band": 13,
+  "n_nan": 0,
+  "oa_excess_raw": 0.0,
+  "penalty": 0.0,
+  "rez_min_from_fx": 0.9189108816596112,
+  "rip": 0.05290288591672485,
+  "total": 8.428931515671408
+ },
+ "written_utc": "2026-11-17T09:13:29Z"
+}

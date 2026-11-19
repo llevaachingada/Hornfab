@@ -1,0 +1,311 @@
+name: home_range_pilot_rolled_control_h12
+family: FREEFORM
+brief_file: C:\Users\hunte\Hrns\hornlab-search\scratch\home_range_pilots_2026-11-17\home_range_v9_h12.yaml
+generator:
+  name: grid
+  rows:
+    type: rolled_family_rect_v1
+    mode: smooth
+  seed_policy: explicit
+  span: quarter
+  n_phi: 65
+  n_s: 128
+  wall_thickness_mm: 3.0
+seed_params:
+  g_width_mm: 542.0
+  g_height_mm: 299.0
+  g_depth_mm: 238.0
+  g_depth_h_ratio: 0.68
+  g_decay: 0.7
+  g_rect_exponent: 12.0
+  g_rect_turn_deg: 65.0
+  g_throat_turn_deg: 25.0
+  g_terminal_deg: 270.0
+  g_inward_h_mm: 0.0
+  g_inward_v_mm: 0.0
+  g_axial_h_mm: 0.0
+  g_axial_v_mm: 0.0
+  g_relief_start_s: 0.5
+  g_relief_peak_s: 0.8
+  g_relief_end_s: 0.96
+bounds:
+  g_width_mm:
+    lo: 542.0
+    hi: 542.0
+    search: false
+  g_height_mm:
+    lo: 299.0
+    hi: 299.0
+    search: false
+  g_depth_mm:
+    lo: 230.0
+    hi: 246.0
+  g_depth_h_ratio:
+    lo: 0.68
+    hi: 0.68
+    search: false
+  g_decay:
+    lo: 0.65
+    hi: 0.75
+  g_rect_exponent:
+    lo: 10.0
+    hi: 14.0
+  g_rect_turn_deg:
+    lo: 65.0
+    hi: 65.0
+    search: false
+  g_throat_turn_deg:
+    lo: 25.0
+    hi: 25.0
+    search: false
+  g_terminal_deg:
+    lo: 270.0
+    hi: 270.0
+    search: false
+  g_inward_h_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_inward_v_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_axial_h_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_axial_v_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_relief_start_s:
+    lo: 0.5
+    hi: 0.5
+    search: false
+  g_relief_peak_s:
+    lo: 0.8
+    hi: 0.8
+    search: false
+  g_relief_end_s:
+    lo: 0.96
+    hi: 0.96
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 6000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 15
+  popsize: 8
+  tolfun: 0.001
+  infeasible_penalty: flat
+description: Canonical rect rolled family, control; original hybrid, explicit radial
+  inward and signed axial semantics, all-optimizer native dispatch
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  coverage_profile:
+    mode: corridor
+    interpolation: log_frequency
+    h:
+    - hz: 700.0
+      preferred_deg: 80.0
+      min_deg: 60.0
+      max_deg: 90.0
+    - hz: 8000.0
+      preferred_deg: 80.0
+      min_deg: 60.0
+      max_deg: 90.0
+    v:
+    - hz: 700.0
+      preferred_deg: 50.0
+      min_deg: 40.0
+      max_deg: 60.0
+    - hz: 8000.0
+      preferred_deg: 50.0
+      min_deg: 40.0
+      max_deg: 60.0
+weights:
+  cov_profile: 1.0
+  rip: 1.0
+  flat: 0.5
+  load: 1.0
+  dislope: 1.0
+  di_roughness: 1.0
+  flat_cv: 1.0
+brief:
+  name: home_hifi_range_60_90x40_60_v9_h12_pilot
+  description: Experimental home range screen, variable constant coverage, ideal 36
+    mm source; 15-call pilot.
+  driver:
+    exit_radius_mm: 18.0
+    exit_angle_deg: 2.0
+  envelope:
+    max_mouth_w_mm: 600.0
+    max_mouth_h_mm: 480.0
+    max_depth_mm: 480.0
+  symmetry: hv
+  source:
+    cap: auto
+  target:
+    coverage_h_deg: 80.0
+    coverage_v_deg: 50.0
+    band_lo_hz: 350.0
+    band_hi_hz: 8000.0
+    di_target_db: null
+    di_slope_target: 0.0
+    z_min: 0.5
+    f0_hz: 700.0
+    f0_v_hz: 700.0
+    loaded_hi_hz: 5600.0
+    freq_weights:
+      band_hz:
+      - - 2500.0
+        - 5500.0
+        - 2.0
+    coverage_profile:
+      mode: corridor
+      interpolation: log_frequency
+      h:
+      - hz: 700.0
+        preferred_deg: 80.0
+        min_deg: 60.0
+        max_deg: 90.0
+      - hz: 8000.0
+        preferred_deg: 80.0
+        min_deg: 60.0
+        max_deg: 90.0
+      v:
+      - hz: 700.0
+        preferred_deg: 50.0
+        min_deg: 40.0
+        max_deg: 60.0
+      - hz: 8000.0
+        preferred_deg: 50.0
+        min_deg: 40.0
+        max_deg: 60.0
+  weights:
+    cov_profile: 1.0
+    rip: 1.0
+    flat: 0.5
+    load: 1.0
+    dislope: 1.0
+    di_roughness: 1.0
+    flat_cv: 1.0
+  grid:
+    verify_points_per_octave: 6
+    screen_extra_hz:
+    - 250
+    - 315
+    - 400
+    - 2573
+    - 3311
+    - 4260
+  objective:
+    version: 9
+    flat_band: scored
+    cov_v_weight: 0.5
+    cov_narrow_ratio: 2.0
+    cov_below_f0: mask
+    tolerances:
+      cov_profile: 3.0
+      rip: 1.0
+      flat: 1.5
+      load: 0.3
+      dislope: 9.0
+      di_roughness: 0.5
+      flat_cv: 1.5
+    constancy:
+      mode: strict
+      weight: 1.0
+      tolerance: 0.25
+    score_grid:
+      kind: dense_log
+      points: 116
+    ripple_window:
+      h_deg: 90.0
+      v_deg: 60.0
+    oa_excess_tol: 0.5
+objective:
+  version: 9
+  flat_band: scored
+  cov_v_weight: 0.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  tolerances:
+    cov_profile: 3.0
+    rip: 1.0
+    flat: 1.5
+    load: 0.3
+    dislope: 9.0
+    di_roughness: 0.5
+    flat_cv: 1.5
+  constancy:
+    mode: strict
+    weight: 1.0
+    tolerance: 0.25
+  score_grid:
+    kind: dense_log
+    points: 116
+  ripple_window:
+    h_deg: 90.0
+    v_deg: 60.0
+  oa_excess_tol: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+feasibility:
+  rule: d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)
+  f0_hz: 700.0
+  required_mouth_w_mm: 453.57142857142856
+  required_mouth_h_mm: 725.7142857142857
+  envelope_mouth_w_mm: 600.0
+  envelope_mouth_h_mm: 480.0
+  held_coverage_w_deg: 60.476190476190474
+  held_coverage_v_deg: 75.5952380952381
+  feasible_w: true
+  feasible_v: false
+  f0_v_hz: 700.0
+  screen_freqs_below_f0: 2
+  screen_freqs_total: 12
+  verify_freqs_below_f0: 7
+  verify_freqs_total: 25
+  derivation:
+  - knob: '-'
+    note: 'seed_policy explicit: derivation skipped'

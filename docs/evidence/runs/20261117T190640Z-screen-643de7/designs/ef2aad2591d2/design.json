@@ -1,0 +1,95 @@
+{
+ "design_hash": "ef2aad2591d2",
+ "family": "FREEFORM",
+ "generator": {
+  "brief": "home_hifi_range_60_90x40_60_v9_h12_pilot",
+  "brief_hash": "771d0f82e4fd",
+  "derived": {},
+  "knobs": {
+   "g_axial_h_mm": 0.0,
+   "g_axial_v_mm": 0.0,
+   "g_decay": 0.6915321996,
+   "g_depth_h_ratio": 0.68,
+   "g_depth_mm": 237.2600410177,
+   "g_height_mm": 299.0,
+   "g_inward_h_mm": 0.0,
+   "g_inward_v_mm": 0.0,
+   "g_rect_exponent": 12.7147722366,
+   "g_rect_turn_deg": 65.0,
+   "g_relief_end_s": 0.96,
+   "g_relief_peak_s": 0.8,
+   "g_relief_start_s": 0.5,
+   "g_terminal_deg": 270.0,
+   "g_throat_turn_deg": 25.0,
+   "g_width_mm": 542.0
+  },
+  "name": "grid",
+  "recipe_meta": {
+   "mode": "freestanding",
+   "schema": "recipe_meta_v2",
+   "source_cap": {
+    "angle_deg": 2.0,
+    "curvature": 0,
+    "radius_mm": 515.7667502611888,
+    "radius_param": -1.0,
+    "shape": 1,
+    "source": "point_grid_resolved"
+   },
+   "termination": {
+    "kind": null,
+    "source": "not_recorded"
+   },
+   "wall_thickness_mm": {
+    "source": "recipe",
+    "value": 3.0
+   }
+  },
+  "spec": {
+   "n_phi": 65,
+   "n_s": 128,
+   "name": "grid",
+   "rows": {
+    "mode": "smooth",
+    "type": "rolled_family_rect_v1"
+   },
+   "span": "quarter",
+   "wall_thickness_mm": 3.0
+  }
+ },
+ "params": {
+  "grid": {
+   "knobs": {
+    "g_axial_h_mm": 0.0,
+    "g_axial_v_mm": 0.0,
+    "g_decay": 0.6915321996,
+    "g_depth_h_ratio": 0.68,
+    "g_depth_mm": 237.2600410177,
+    "g_height_mm": 299.0,
+    "g_inward_h_mm": 0.0,
+    "g_inward_v_mm": 0.0,
+    "g_rect_exponent": 12.7147722366,
+    "g_rect_turn_deg": 65.0,
+    "g_relief_end_s": 0.96,
+    "g_relief_peak_s": 0.8,
+    "g_relief_start_s": 0.5,
+    "g_terminal_deg": 270.0,
+    "g_throat_turn_deg": 25.0,
+    "g_width_mm": 542.0
+   },
+   "n_phi": 65,
+   "n_s": 128,
+   "rows": {
+    "driver": {
+     "exit_angle_deg": 2.0,
+     "exit_radius_mm": 18.0
+    },
+    "implementation_sha256": "1879ad5acca2cb3d64753ddb96b5aa5ba9a2a30007997870b97ad0a052b95f7c",
+    "mode": "smooth",
+    "schema": "rolled-family-master-v1",
+    "type": "rolled_family_rect_v1"
+   },
+   "span": "quarter",
+   "wall_thickness_mm": 3.0
+  }
+ }
+}

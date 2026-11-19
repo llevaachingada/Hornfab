@@ -1,0 +1,110 @@
+{
+ "C": [
+  [
+   0.9336881801786235,
+   -0.0657796422115635,
+   0.1536886482269649
+  ],
+  [
+   -0.0657796422115635,
+   1.186489798641739,
+   -0.0015451629439593702
+  ],
+  [
+   0.1536886482269649,
+   -0.0015451629439593702,
+   0.9127689735225959
+  ]
+ ],
+ "condition_number": 1.5814937479928088,
+ "coordinates": [
+  {
+   "C_ii": 1.186489798641739,
+   "key": "g_depth_mm",
+   "share": 0.3617694800324516,
+   "std_unit": 0.2040462799125523
+  },
+  {
+   "C_ii": 0.9336881801786235,
+   "key": "g_decay",
+   "share": 0.32092300631667087,
+   "std_unit": 0.18100793237559792
+  },
+  {
+   "C_ii": 0.9127689735225959,
+   "key": "g_rect_exponent",
+   "share": 0.31730751365087756,
+   "std_unit": 0.17896871163082956
+  }
+ ],
+ "eigenpairs": [
+  {
+   "axis_length": 1.0996105046923557,
+   "eigenvalue": 1.209143262029777,
+   "fraction": 0.3986694396668268,
+   "rank": 1,
+   "top_loadings": [
+    {
+     "key": "g_depth_mm",
+     "loading": 0.9330508794557313
+    },
+    {
+     "key": "g_decay",
+     "loading": -0.31734800148699294
+    },
+    {
+     "key": "g_rect_exponent",
+     "loading": -0.1694293430876066
+    }
+   ]
+  },
+  {
+   "axis_length": 1.029196757348557,
+   "eigenvalue": 1.0592459653367845,
+   "fraction": 0.34924645303094226,
+   "rank": 2,
+   "top_loadings": [
+    {
+     "key": "g_rect_exponent",
+     "loading": -0.6779633937550125
+    },
+    {
+     "key": "g_decay",
+     "loading": -0.6496098319926396
+    },
+    {
+     "key": "g_depth_mm",
+     "loading": -0.3440533431121988
+    }
+   ]
+  },
+  {
+   "axis_length": 0.8743899158707155,
+   "eigenvalue": 0.7645577249763968,
+   "fraction": 0.252084107302231,
+   "rank": 3,
+   "top_loadings": [
+    {
+     "key": "g_rect_exponent",
+     "loading": -0.7153036658853972
+    },
+    {
+     "key": "g_decay",
+     "loading": 0.6908670726925016
+    },
+    {
+     "key": "g_depth_mm",
+     "loading": 0.105087360991729
+    }
+   ]
+  }
+ ],
+ "keys": [
+  "g_decay",
+  "g_depth_mm",
+  "g_rect_exponent"
+ ],
+ "n_dim": 3,
+ "note": "C is the CMA search-distribution covariance in the unit box; large C_ii / std_unit \u21d2 CMA still explores that knob; eigenvectors are coupled search directions for J, not acoustic Sobol indices.",
+ "sigma": 0.1873254036261362
+}
