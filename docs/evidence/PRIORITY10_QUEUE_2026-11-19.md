@@ -247,8 +247,28 @@ the basin, not the budget, was the limit.
 
 **Protocol consequence [measured]:** a night job's `budget` is a cap, not a guaranteed eval count. The
 no-gain watchdog ends a stalled lane at ~30 valid, so the B6 lanes' "120 valid" will often close near
-30–40. That is the expected behaviour and it is what saves the tail; read `valid_rows_window` in
+30–45. That is the expected behaviour and it is what saves the tail; read `valid_rows_window` in
 `summary.jsonl`, never the requested budget.
+
+### 9c. #4 OSSE rrect fold-warm, v10 matched rerun — reproduces the rank, does not improve it
+
+Run `20261119T173516Z-screen-c6a93f`, watchdog at **45 valid**:
+
+| | value |
+|---|---|
+| seed J (v10) | 1.8693 |
+| best J (n 40, `cfc32f70f7b8`) | **1.5433** |
+| gain | **0.326** — *below* the 0.4677 floor ⇒ noise-level |
+| published offline v10 rescore of the old fold-warm design | 1.4214 |
+| best design's free knobs | `az_fold_h_deg −0.048`, `az_fold_v_deg 1.470`, `az_fold_h_width 13.0`, `az_fold_v_width 8.35` |
+| best terms | cov 0.016, flat 0.418, load 0.101, dislope 0.413, di_roughness 0.443, flat_cv 0.152 |
+
+Readings [measured]: (a) the **known v7 pin did not recur** — the authored `az_fold_h_deg` box
+`[-15, 0]` was not the limiter under v10 (the optimum sits at −0.05); (b) the fresh search lands 0.12 J
+*worse* than the offline-rescored old design, i.e. **inside the floor = a tie**, so the matched rerun
+confirms the v10 rank but buys no verified improvement; (c) the family's remaining cost is flat 0.42 +
+di_roughness 0.44 + dislope 0.41 — no single dominant term, which is why further evals stalled.
+
 
 
 
