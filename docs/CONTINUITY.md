@@ -1,5 +1,16 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Geometry pass: meridian_sanity checker; S-curve / pinch / deep-rollback lanes fixed or dropped (cloud Fable senior)
+
+- New `tools/analysis/meridian_sanity.py` (+ tests 3/3): flags S-curves, throat pinch and over-deep rollback in the
+  H and V sections of any config seed (grid, record, FREEFORM profile; native mesher families on the owner box).
+- Fixed: Klangfilm lane -> Phase B monotone H/V core at c200 size (`hl__klangfilm_hv_core_c200form_v10_v1`, beak pinned:
+  any beak bent the lip back); rolled lane -> `hl__rolled_rect_clean_v10_v1` (depth_h_ratio 0.85-1.15, terminal
+  190-220, relief off; 96/96 box draws clean). Record-route vbeak lanes and the smooth control removed.
+- Dropped from SCOUT40 (now 16 jobs): Klangfilm c200w + stage_a (pinch/S/curl), rf_section_axial (242 deg roll),
+  vt_v1 (biradial throat-blend overshoot 13.5 -> 45.7 -> 36.3 deg in the first 25 mm; generator fix needed).
+- Tests: queue guard (geometry-gated), beak/record (host replay + lane sanity), vt, meridian: all pass offline.
+
 ## 2026-11-19 - Fable v2 renders (cloud Fable senior)
 
 - `docs/evidence/fable_v2_renders_2026-11-19/` (3D + H/V sections, host vs beak 35 vs V 400 + beak 25; script beside).

@@ -96,3 +96,26 @@ hybrid 45/48 (3 generator refusals; `resample_strict` handles them). Mesh/dof ch
 - Phase B core (`b3_soft`, J 2.82 on the smooth brief) is already the best Klangfilm-family result; it runs in
   SCOUT40 job `s40__klangfilm_b3_soft`. If the record lanes stall, the core + beak is the next construction to
   re-home on v10.
+
+## 6. Geometry pass (owner review of the renders, 2026-11-19) - SUPERSEDES the lane list in section 4
+
+Owner: "why is the throat wobbly, why is the rollback so deep, there should not be S-curves". New CPU check
+`tools/analysis/meridian_sanity.py` (S-curve = the wall turns back > 2 deg before the lip zone; throat pinch =
+wall angle drops > 2 deg below its throat value; deep rollback = > 230 deg of turn or the lip returning into the
+first 35 % of the depth; a <= 10 deg reversal in the last 10 % is lip treatment). Findings [measured geometry]:
+
+| Shape | Finding | Cause | Action |
+|---|---|---|---|
+| Klangfilm c200 / c200w (v1 parent) | V throat pinch -6 deg, S-curve, 200-218 deg curl back to 9 % of depth | area lock ties V to H; optimizer pushed end_frac to its bound | record lanes + c200w DROPPED; replaced by the Phase B core lane |
+| Klangfilm Phase A stage_a | S + pinch at the throat, 216-240 deg curl | forward-branch deformation | DROPPED |
+| Phase B beak (any start <= 0.92) | wall bends back: S or a 16-deg lip kink | short C2 gate on a monotone core | beak PINNED at 0 in the new lane |
+| Rolled h12 | H S-curve (-7 deg at mid-wall), 252-263 deg curl | depth_h_ratio 0.68; terminal 270 | depth_h_ratio 0.85-1.15, terminal 190-220, relief OFF (relief bumps are wiggles by design) |
+| Biradial vt_v1 host | throat-blend overshoot: H wall 13.5 -> 45.7 -> 36.3 deg in the first 25 mm (the "wobbly throat") | OS-to-bi-radial blend overshoots the cone angle | vt_v1 PULLED from tonight; generator fix is a separate task |
+| rf_section_axial | 242 deg H rollback | family default | DROPPED (it was the tail job) |
+| b3_soft, Le Cleac'h H/V, Iwata-AR, Crowe V2A | clean (b3: 2-4 deg lip beak only; JMLC 206 deg roll with lip at 78 % depth) | - | kept |
+| Native OSSE lanes (fold-warm, morph v8, ext-throat, petal, Tritonia, Crowe-X, R-OSSE) | not checkable offline (need hornlab_mesher) | - | owner box runs the check before launch |
+
+Lanes now queued first: `hl__klangfilm_hv_core_c200form_v10_v1` (Phase B monotone H/V core: mouth ~540 x 376,
+340 mm deep, 8 searched knobs; 46/64 box draws build, 0 geometry flags; the rest are box overflows the search
+resamples) and `hl__rolled_rect_clean_v10_v1` (9 knobs; 96/96 box draws pass). Renders:
+`docs/evidence/fable_v2_renders_2026-11-19/*_old_vs_clean.png`.

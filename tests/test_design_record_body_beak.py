@@ -97,23 +97,29 @@ def test_beak_bounds_must_contain_zero_and_start_needs_a_beak():
         RB.resolve_grid({**spec, "knobs": {"g_beak_start": 0.5}}, {})
 
 
-@pytest.mark.parametrize("name,host", [("hl__klangfilm_lame_c200_vbeak_v10_v1", "kl"),
-                                       ("hl__rolled_rect_record_vbeak_v10_v1", "rr")])
-def test_fable_v2_record_lanes_seed_exactly_on_their_hosts(name, host):
+def test_fable_v2_lanes_score_on_v10_and_pass_meridian_sanity():
+    import sys
+    sys.path.insert(0, str(ROOT / "tools/analysis"))
+    import meridian_sanity as M
+    from hornlab_search.config import load_config
+    for name in ("hl__klangfilm_hv_core_c200form_v10_v1", "hl__rolled_rect_clean_v10_v1"):
+        cfg = load_config(LANES / f"{name}.yaml")
+        assert cfg.objective_version == 10
+        assert M.check_grid(M.grid_for_config(LANES / f"{name}.yaml"))["ok"], name
+
+
+def test_rolled_clean_lane_box_is_free_of_s_curves_and_deep_rollback():
+    import sys
+    sys.path.insert(0, str(ROOT / "tools/analysis"))
+    import meridian_sanity as M
     from hornlab_search.config import load_config
     from hornlab_search.design.space import DesignSpace
-    cfg = load_config(LANES / f"{name}.yaml")
-    assert cfg.objective_version == 10
+    cfg = load_config(LANES / "hl__rolled_rect_clean_v10_v1.yaml")
     sp = DesignSpace.from_config(cfg)
-    seed = sp.design_from_knobs(dict(cfg.seed_params))
-    inner, _ = G.rows_grid_points(seed.params["grid"], seed.params["grid"]["knobs"], cfg.brief)
-    fam = _klangfilm_host() if host == "kl" else _rolled_host()
-    assert np.allclose(inner, fam["inner_points"], atol=1e-9)
-
-
-def test_rolled_hybrid_lane_seed_is_the_h12_best_and_scores_on_v10():
-    from hornlab_search.config import load_config
-    cfg = load_config(LANES / "hl__rolled_rect_hybrid_vbeak_v10_v1.yaml")
-    assert cfg.objective_version == 10 and cfg.generator["rows"]["mode"] == "hybrid"
-    best = json.loads((_run("643de7") / "designs/445dafb7e760/design.json").read_text())["params"]["grid"]["knobs"]
-    assert {k: float(v) for k, v in best.items()} == {k: float(v) for k, v in cfg.seed_params.items()}
+    for x in np.random.default_rng(5).random((24, len(sp.keys()))):
+        d = sp.denormalize(x)
+        if "grid" not in d.params:
+            continue
+        gb = d.params["grid"]
+        q, _ = G.rows_grid_points(gb, gb["knobs"], cfg.brief)
+        assert M.check_grid(q)["ok"]

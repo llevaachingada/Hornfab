@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Geometry pass done; biradial throat-blend overshoot open
+
+- OPEN (generator owner): biradial OS throat blend overshoots the cone angle by ~9 deg (H wall 13.5 -> 45.7 -> 36.3 deg
+  in the first 25 mm of hl__biradial_es_style_v7's best); vt_v1 waits for the fix.
+- OPEN (owner box, pre-launch gate): `tools/analysis/meridian_sanity.py` on every SCOUT40 config incl. native OSSE lanes;
+  drop any BAD lane rather than run it.
+- NOTE: the Phase B beak law makes an S/kink at any gate start <= 0.92 (measured); a smooth lip beak needs a new law.
+
 ## 2026-11-19 - Fable v2 renders: beak acts as "less V rollback" on rolled hosts
 
 - NOTE: read fv2 beak results as V-rollback reduction, not a forward beak (renders in docs/evidence/fable_v2_renders_2026-11-19/).
