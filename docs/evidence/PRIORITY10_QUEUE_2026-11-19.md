@@ -226,14 +226,29 @@ Consequences applied to the plan (no new GPU time spent to learn them):
 
 Remaining jobs at this entry: #3 running, then #4, #5, #8, #7, #6, #9, #10 (see §6 for order).
 
-### 9b. #3 rolling-rect whole-family hybrid — in flight, and it moves the dominant term
+### 9b. #3 rolling-rect whole-family hybrid — closed, big gain, still far from the leaders
 
-Run `20261119T172313Z-screen-081506`, read at 14 valid evals: **seed J 15.549 → best 9.305**
-(`−6.24 J` already, 17 rows, 3 refusals). The seed is the same h12 host as #2, so the comparison is
-exact: the record edits moved 0.227 J, the 13-knob family box moved 6.2 J in 14 evals. That is the
-predicted behaviour — mouth width/height, corner exponent, throat/rect turn and terminal angle are the
-freedoms that can move `dislope`, which is 71 % of this host's v10 cost. It is still 7.9 J behind the
-v10 leaders, so this lane buys **construction knowledge, not a leaderboard position**; verdict pending
-the 80-valid close and its own terms.
+Run `20261119T172313Z-screen-081506`, **closed by watchdog at 30 valid / 80 budget** (`no_gain_valid`,
+34 rows, 4 `mesh_too_large` refusals, 0 invalid geometry/envelope):
+
+| | seed (h12 host) | best (n 16) | Δ |
+|---|---|---|---|
+| total J (v10) | 15.549 | **9.305** | **−6.24** |
+| dislope | 11.114 | 7.322 | −3.79 |
+| cov_profile | 1.844 | 0.631 | −1.21 |
+| flat_cv | 0.834 | 0.410 | −0.42 |
+| load | 0.659 | 0.523 | −0.14 |
+
+Reading [measured]: the family box passes the predeclared bar by 13× (6.24 vs 0.4677 J), and it does so
+by moving exactly the terms the record lanes could not — `dislope` −3.79 and `cov_profile` −1.21. It
+still sits **7.88 J behind the v10 leader (fold_warm 1.4214)**, so it is a construction answer, not a
+leaderboard contender. The watchdog ended it early because the last 30 valid evals produced no gain —
+the basin, not the budget, was the limit.
+
+**Protocol consequence [measured]:** a night job's `budget` is a cap, not a guaranteed eval count. The
+no-gain watchdog ends a stalled lane at ~30 valid, so the B6 lanes' "120 valid" will often close near
+30–40. That is the expected behaviour and it is what saves the tail; read `valid_rows_window` in
+`summary.jsonl`, never the requested budget.
+
 
 
