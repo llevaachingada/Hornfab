@@ -1,5 +1,12 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Last-24h horn sheets: score column added (renders)
+
+- Sheets re-rendered at 200 dpi with a scores column per design: J (total), the saved `best.json` terms
+  (not additive to J), f11 and lfp20, and -6 dB coverage, DI and ripple at 1.07 and 2.27 kHz. Row labels
+  moved above each row so they are not clipped. Files and per-sheet design list:
+  `docs/renders/2026-11-19-last-day-horns/README.md`. Supersedes the score-less sheets in `6960f19`.
+
 ## 2026-11-19 - Last-24h solved horns: contact sheets (renders only, no solves)
 
 - **61 unique best designs** from runs dated 2026-11-18 14:00 local onward, each with a completed solve

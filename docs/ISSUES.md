@@ -1,5 +1,10 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Last-24h horn sheets: score column added
+
+- DONE (render): score column on all 21 sheets; see `docs/renders/2026-11-19-last-day-horns/README.md`.
+- OPEN: the sheet-1 stray letter next to the first V cut was not identified; not investigated further.
+
 ## 2026-11-19 - Last-24h solved horns rendered (contact sheets)
 
 - DONE (render): 61 unique designs, 21 sheets at 200 dpi, `docs/renders/2026-11-19-last-day-horns/`.

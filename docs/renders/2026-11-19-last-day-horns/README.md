@@ -1,7 +1,8 @@
 # Last-24h solved horns: contact sheets
 
 61 unique best designs from runs dated 2026-11-18 (after 14:00 local) through 2026-11-19, each with a completed solve (`ok: true`, balloon DI). Sheets are 200 dpi, three designs per sheet, sorted by brief then balloon J.
-Columns per row: isometric, top-skew (camera from +y), V cut (x=0), H cut (y=0), V dispersion, H dispersion.
+Columns per row: isometric, top-skew (camera from +y), V cut (x=0), H cut (y=0), V dispersion, H dispersion, scores.
+Scores column: J (total), the saved score terms from `best.json` (not additive to J), f11 and lfp20, and -6 dB coverage, DI and ripple at 1.07 kHz and 2.27 kHz from `metrics.json`.
 J is comparable only within a brief. Regenerate with `render_last_day.py` (viz env, pyvista) then `compose_last_day.py` (project venv).
 
 - **last_day_sheet_01.png**
