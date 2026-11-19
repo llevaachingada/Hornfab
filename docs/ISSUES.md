@@ -29,6 +29,13 @@
   Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
   raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
 
+## 2026-11-19 - compact morph win 1.2271; cont2 appended
+
+- WIN: c4x_01_morph_cont 1.4243 -> 1.2271 (0.197 J > the 0.1293 compact400 floor); cont2 (a0 widened to
+  0.25, 80 evals, warm 1.2271) appended as job 18.
+- LIVE: c4x_02 twinray (1.443 at 9 evals), then c4x_03, the w4 v7 lanes, c4x_04.
+- NOTE: p11_s2w queue_state is stale ("running" with a dead runner); display-only.
+
 ## 2026-11-19 - p11_s2w night superseded (GPU-lock refusal, no relaunch)
 
 - NOTE: p11_s2w exited 1 on `gpu-clean rc=3 GPU busy` while the compact400 night was live - correct

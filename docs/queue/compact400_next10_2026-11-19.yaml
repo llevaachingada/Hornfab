@@ -156,3 +156,12 @@ jobs:
     env: {HORNLAB_GPU_LOCK: refuse}
     config: examples/typologies/scout40w4_2026-11-19/scout40w4__klangfilm_b3_soft.yaml
     watchdog: {pin_ignore: [g_beak_v_projection_mm, g_theta_h1_deg, g_theta_v1_deg]}
+  # c4x_04: morph cont2 - 1.4243 -> 1.2271 (0.197 J, above the compact400 floor); a0_deg widened to 0.25.
+  - id: c4x_04_morph_cont2
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4x_04_morph_cont2.yaml
+    watchdog: {pin_ignore: [morph_width_mm, a0_deg]}

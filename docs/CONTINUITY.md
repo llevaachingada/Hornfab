@@ -22,6 +22,20 @@
 - **Registered:** CODE_MAP and INDEX rows in the same commit. The other lane's uncommitted GUI edits
   and its budget-driver INDEX row were left untouched and excluded from staging.
 
+## 2026-11-19 - c4x_01 morph: 1.4243 -> 1.2271 (real win); cont2 appended (local orchestrator)
+
+- **`c4x_01_morph_cont`: best 1.2271** (37 evals) from the compact400 run's 1.4243 -> **0.197 J, ABOVE
+  the compact400 floor 0.1293**. It is the strongest compact result so far (the stored bar was 1.7302).
+  It then pinned at the LOW limit of `a0_deg [1, 3]`; a0 is a wall half-angle with no hard spec range,
+  so `c4x_04_morph_cont2` widens the low side to 0.25 (positive, cylindrical-throat limit), keeps
+  budget 80, warm-starts from 1.2271 (mean 11870ed193af) and pin-ignores `morph_width_mm` + `a0_deg`.
+  Appended as job 18 (shape-check PASS 2809/24000).
+- `c4x_02_twinray_cont` running (9 evals, best 1.443 from 1.4568). Then c4x_03, the four w4 v7 lanes,
+  and c4x_04.
+- Housekeeping note: `runs/nights/p11_s2w_2026-11-19/queue_state.json` still shows its dead runner's
+  job as "running" (stale state from the GPU-busy exit); the p11 lane's STOP file is present and the
+  runner is gone, so it is a display-only artifact (not touched: another lane's bookkeeping).
+
 ## 2026-11-19 - p11_s2w night: superseded, not relaunched (local orchestrator)
 
 - The other lane's `p11_s2w_2026-11-19` night (v10 s2w fold/ext, 80 valid) was launched at 18:35
