@@ -22,6 +22,30 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40 preflight result + first lanes (local orchestrator)
+
+- **Preflight `--samples 64` complete over the 20 scout40 + vt_v1 configs: 1 HARD, and it is the
+  expected one.** `scout40__rosse_rect_cd_v7` (`DesignSpace.from_config` refuses the bridge rows type
+  `rosse_rect`); the night runs it as a `kind: command` job via `tools/geometry/rosse_rect_cli.py`,
+  whose shape-check passed (4737/24000 dof). No other hard faults.
+- **WARNs (small sampled refusal fractions, box upper bound):** lecleach_hv_smooth 5/64
+  invalid_geometry, iwata_ar_smooth 1/64, morph_v8 3/64 + `graded_inert`, tritonia_v8 2/64 +
+  `graded_inert`, rf_section_axial_home_v7 1/64 (that job is no longer queued). Predicted valid evals
+  38-39/40. `graded_inert`: the sampled refusals are post-mesh/geometry, so `infeasible_penalty:
+  graded` is inert (only pre-mesh estimates are graded) -- `resample_strict` + `budget_counts: valid`
+  would replace them; not changed mid-night.
+- **History checks not run:** `--from-runs` was not passed (the handoff command omitted it), so
+  seed-headroom/spread/expected-hits are informational only; warm starts come from the lane bests per
+  the night plan. A `--from-runs` pass remains a morning option.
+- **Finished lanes by 00:50 (v7 scores; not comparable across briefs):** crowe_v2a_c1 4.879 (29 min);
+  lecleach_hv_smooth 8.037; iwata_ar_smooth 6.763; klangfilm_b3_soft **3.540** (65 valid, 12 searched
+  keys); `klangfilm_hvcore_c200mouth` **seed 10.258 -> best 10.156** (30 evals, beak-only, flat).
+  The c200-mouth core seed is ~4 J worse than the b3 core seed on the same smooth brief; consistent
+  with the BEM finding that widening the mouth 472->595 mm did not widen H (the parent's H comes with
+  the rolled lip). Scout-grade comparison (30 vs 65 evals, 4 vs 12 keys), not a controlled A/B.
+- Night 5/17 at 00:50; Phase A `stage_a` running (19 evals). Preflight log:
+  `scratch/preflight_scout40_2026-11-19.log`.
+
 ## 2026-11-19 - resolve_warm_runs: study-layout fix (local orchestrator, CPU)
 
 - `tools/night_queue/resolve_warm_runs.py` now finds `runs/<study>/<screen|verify>/designs/<hash>` and

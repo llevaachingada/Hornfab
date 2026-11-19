@@ -14,6 +14,18 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - SCOUT40 preflight: expected HARD + small refusal warnings
+
+- DONE: preflight `--samples 64` over all configs; the only HARD is `rosse_rect_cd_v7` (bridge rows
+  type; runs as the CLI command job, shape-check passed).
+- OPEN (after the night): run the economy history checks with `--from-runs` for the warm-started lanes
+  (headroom/expected-hits were informational only in this pass).
+- NOTE: `morph_v8` and `tritonia_v8` use `infeasible_penalty: graded`, which is inert for their sampled
+  (post-mesh/geometry) refusals; `resample_strict` + `budget_counts: valid` is the documented remedy in
+  a future config revision (not mid-night).
+- NOTE (design): the c200-mouth Phase B core seed scores ~10.2 vs the b3 core's 3.54 on the smooth
+  brief (beak-only search, 30 evals); recorded as a negative basin, not a controlled A/B.
+
 ## 2026-11-19 - Owner construction fixes wired into SCOUT40; two decisions open
 
 - OPEN (owner): rolled rollback cap — implemented **225** + a 270 control arm (sources warn 160-200 deg
