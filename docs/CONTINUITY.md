@@ -60,6 +60,17 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40W2 progress: fold w3 appended; morph running (local orchestrator)
+
+- `s40x__fold_warm` (W2, az_fold_h widened): best **3.682** (31 evals) vs the SCOUT40 control 3.754
+  (+0.07, sub-floor) and then bound-pinned at the LOW limit of `az_fold_v_width_deg [8, 40]`. The
+  kernel allows 3..60 for both fold half-widths (families.py:127,129), so a W3 continuation widens
+  **both** fold widths to 3..40 in one step (not one knob at a time) and warm-starts from 3.682:
+  `examples/typologies/scout40w2_2026-11-19/scout40w3__fold_warm_v7.yaml`, appended to the live night
+  as `s40x3__fold_warm` (job 9). Shape-check pass; warm start mean b6430673c2e9 J 3.682.
+- Night `fable_scout40w2_2026-11-19` is on job 2: `s40x__morph_v8` (9 evals, best 3.733 so far vs
+  the control 3.402; the warm start is at 3.402 and the early samples are above it).
+
 ## 2026-11-19 - SCOUT40W2 preflight notes (local orchestrator)
 
 - Focused preflight of the three resample_strict lanes (`scratch/preflight_scout40w2_2026-11-19.log`,

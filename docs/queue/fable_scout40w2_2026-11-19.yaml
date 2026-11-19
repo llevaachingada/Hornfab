@@ -44,3 +44,7 @@ jobs:
            --config, examples/typologies/scout40w2_2026-11-19/scout40w2__rosse_rect_cd_v7.yaml,
            --mode, screen, --budget, "40"]
     watchdog: {pin_ignore: [g_tmax]}
+  # W3 continuation: the W2 fold_warm (3.682) pinned at az_fold_v_width_deg 8; both fold widths
+  # widened to the kernel floor 3 in one step, warm-started from 3.682.
+  - {id: s40x3__fold_warm, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w2_2026-11-19/scout40w3__fold_warm_v7.yaml}
