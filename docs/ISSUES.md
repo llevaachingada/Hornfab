@@ -1,5 +1,11 @@
 ﻿# ISSUES
 
+## 2026-11-19 - SCOUT40 night ready; B6 deferred behind it
+
+- OPEN (owner box): `resolve_warm_runs.py` (must print OK), shape_check + preflight, dry-run, launch with a 14 h cutoff.
+- OPEN (after the night): offline v10 rescore of the new rows; lanes gaining > 0.31 J (v7) in 40 evals -> B6.
+- NOTE: v10 rescore `lane_best` lost the run name for fold_warm and ext_throat v7 ("screen"); tool bug, low priority.
+
 ## 2026-11-19 - Night fable_vt_b6 ready for owner launch
 
 - OPEN (owner): B6 budget (120 valid per arm, 2 seeds proposed) and the lane set (3 leaders + twinray tail).

@@ -1,5 +1,21 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - SCOUT40 night written (owner: budget ~40, more typologies, <= 14 h); B6 deferred
+
+- **Night** `docs/queue/fable_scout40_2026-11-19.yaml` (18 jobs, dry-run clean, 1 h timeout each, est. 6-12 h):
+  vt_v1; 12 home-v7 lanes warm-started from each lane's own best (top 10, sigma from spread; run dirs from
+  the v10 rescore `lane_best`): fold_warm v7, morph v7/v8, ext_throat v7/v8, twinray380 v8, ATH CORE petal
+  (R19 sigma 0.05), Tritonia v8/v9, R-OSSE rect CD (bridge CLI command job), Crowe-X OSSE CD and Crowe-X
+  square (R19 no_headroom -> warm start); smooth-brief group from seed: Crowe V2A c1, Le Cleac'h H/V,
+  Iwata-AR smooth (R19), Klangfilm b3_soft; tail rf section-axial (R19).
+- Configs `examples/typologies/scout40_2026-11-19/` (17). Offline load check passed for 13; 4 need the owner box
+  (mesher / runs/). New `tools/night_queue/resolve_warm_runs.py` fills the 2 `@design:` warm starts
+  (fold_warm, ext_throat v7: the rescore lost their run names) and checks every warm-start dir; tests 2/2;
+  night guard test 1/1.
+- Found: `rosse_rect` is a bridge rows type (only via `tools/geometry/rosse_rect_cli.py`); plain `search`
+  refuses it ("unknown rows type"), so it runs as a command job.
+- B6 night (`fable_vt_b6_2026-11-19`) kept but deferred: SCOUT40 picks which lanes earn the 120-eval matched rerun.
+
 ## 2026-11-19 - Night plan for the new freedom + B6 written (not launched; cloud Fable senior)
 
 - **Night file** `docs/queue/fable_vt_b6_2026-11-19.yaml` (9 jobs, dry-run parses): 1) vt_v1 probe

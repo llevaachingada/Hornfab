@@ -1,0 +1,72 @@
+name: scout40__lecleach_hv_smooth_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach
+  n_phi: 15
+  n_s: 32
+  seed_policy: explicit
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 340.0
+  g_fc_h_hz: 340.0
+  g_fc_v_hz: 520.0
+  g_T: 1.0
+  g_stop_deg: 215.0
+  g_r_lip_mm: 0.0
+  g_stop_a2: 0.05
+bounds:
+  g_fc_h_hz:
+    lo: 300.0
+    hi: 750.0
+  g_fc_v_hz:
+    lo: 450.0
+    hi: 1000.0
+  g_T:
+    lo: 0.4
+    hi: 1.0
+  g_stop_deg:
+    lo: 165.0
+    hi: 230.0
+  g_r_lip_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_stop_a2:
+    lo: -0.1
+    hi: 0.15
+description: 'SCOUT40 2026-11-19 (cloud Fable senior): 40 valid evals, from the config
+  seed; source examples/typologies/home_landscape_2026-11-15/hl__lecleach_hv_landscape_smooth_v7.yaml;
+  smooth brief, from seed. Gains below the floor are ties. HOME LANDSCAPE Le Cleach
+  H/V pair (reconstruction of the published ellipsoidal-wavefront principle; owner-picked
+  seed 12 2026-11-16): H/V differ from the expansion itself, lip a smooth continuous
+  rollback. Smooth brief.'
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
