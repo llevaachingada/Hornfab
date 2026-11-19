@@ -51,6 +51,76 @@ def _box_point(**overrides) -> C.BoxPoint:
     return C.BoxPoint(**values)
 
 
+def _recorded_case_box(**overrides) -> C.BoxPoint:
+    """The parent's R4-class top cell (12PR300, 115 L, 371.2 x 371.2 x 1080.7 mm, 170 cm^2).
+
+    Values are the exact source the parent staged into BL (``port_length_m = 0.15488``); the
+    contract carries the derived effective length, so the neck is inverted with the fixed
+    bassbox ``N_END`` and ``2 * lip`` is added.  The refusal is recorded verbatim in
+    ``system_runs/system/bl_r4_tower_box/20261119T001041Z-ref_case-40216-b32bb5a2/manifest.json``.
+    """
+    r_eq = math.sqrt(170.0 * 1e-4 / math.pi)
+    neck_m = 0.15488  # BL source port_length_m in the recorded case
+    values = {
+        "kind": "vented",
+        "external_width_mm": 371.2,
+        "external_height_mm": 371.2,
+        "external_depth_mm": 1080.690776151898,
+        "net_volume_l": 115.0,
+        "wall_mm": 18.0,
+        "port_type": "round_flared",
+        "port_throat_area_cm2": 170.0,
+        "port_nfr": 0.0,
+        "requested_tuning_hz": 49.72,
+        "derived_effective_port_length_m": neck_m + 2.0 * 0.85 * r_eq,
+        "derived_tuning_hz": 49.72,
+        "fits": {},
+    }
+    values.update(overrides)
+    return C.BoxPoint(**values)
+
+
+def _bl_validate_reference(box: C.BoxPoint, **overrides) -> str | None:
+    """Independent literal transcription of BL ``parameters.py::validate`` lines 100-109.
+
+    Used only to compare verdicts with :func:`W.bl_panel_fit_feasible`; the in-module function
+    additionally refuses a panel whose separation budget is impossible at any ``y``.
+    """
+    o = {
+        "driver_moving_diameter_m": 0.200,
+        "driver_y_m": 0.100,
+        "port_y_m": -0.130,
+        "port_wall_m": 0.003,
+        "port_roundover_m": 0.008,
+        "cone_depth_m": 0.040,
+        "clearance_m": 0.003,
+    }
+    o.update(overrides)
+    w = box.external_width_mm * 1e-3
+    h = box.external_height_mm * 1e-3
+    d = box.external_depth_mm * 1e-3
+    t = box.wall_mm * 1e-3
+    driver = o["driver_moving_diameter_m"] / 2.0
+    throat = math.sqrt(box.port_throat_area_cm2 * 1e-4 / math.pi)
+    mouth = throat + o["port_roundover_m"]
+    port_outer = mouth + o["port_wall_m"]
+    length = W.bass_reference.port_neck_length_mm(box) * 1e-3 + 2.0 * o["port_roundover_m"]
+    c = o["clearance_m"]
+    if (driver + c >= w / 2 - t
+            or abs(o["driver_y_m"]) + driver + c >= h / 2 - t):
+        return W.BL_PANEL_FIT_DRIVER_WALL
+    if (port_outer + c >= w / 2 - t
+            or abs(o["port_y_m"]) + port_outer + c >= h / 2 - t):
+        return W.BL_PANEL_FIT_PORT_WALL
+    if abs(o["driver_y_m"] - o["port_y_m"]) <= driver + port_outer + c:
+        return W.BL_PANEL_FIT_DRIVER_PORT_SEPARATION
+    if length <= t + o["port_roundover_m"] + c or length + 2.0 * mouth >= d - t:
+        return W.BL_PANEL_FIT_PORT_REAR_WALL
+    if o["cone_depth_m"] + c >= d - t:
+        return W.BL_PANEL_FIT_CONE_REAR_WALL
+    return None
+
+
 def _asset(response_path: Path, freqs: tuple[float, ...]) -> C.HornAsset:
     return C.HornAsset(
         asset_id="synthetic0000000000",
@@ -152,6 +222,74 @@ def test_missing_driver_field_is_recorded_not_guessed() -> None:
     assert detail["note"].startswith("missing geometry fields are recorded")
 
 
+# --------------------------------------------------------------------------- BL panel fit
+
+
+def test_recorded_bl_refusal_case_is_rejected_by_panel_fit() -> None:
+    # The parent's top cell (12PR300, 115 L, 371.2 x 371.2 x 1080.7 mm, 170 cm^2) was refused
+    # verbatim by BL: "Driver must fit inside the enclosure walls with 3 mm clearance."
+    # (manifest .../20261119T001041Z-ref_case-40216-b32bb5a2).  BL checks the individual walls
+    # before the pair rule; this screen label identifies the binding root cause: the 371.2 mm
+    # front cannot separate a 200 mm demo driver from a 170 cm^2 port at any legal y.
+    ok, reason = W.bl_panel_fit_feasible(_recorded_case_box())
+    assert ok is False
+    assert reason == W.BL_PANEL_FIT_DRIVER_PORT_SEPARATION
+    # BL's own per-component check at the demo y offsets fails too, which is what it reported.
+    assert _bl_validate_reference(_recorded_case_box()) == W.BL_PANEL_FIT_DRIVER_WALL
+
+
+def test_reshaped_height_560mm_makes_the_recorded_case_buildable() -> None:
+    box = _recorded_case_box(external_height_mm=560.0)
+    assert W.bl_panel_fit_feasible(box) == (True, None)
+
+
+def test_shallow_depth_fires_only_the_port_rear_wall_rule() -> None:
+    box = _recorded_case_box(external_height_mm=560.0, external_depth_mm=300.0)
+    ok, reason = W.bl_panel_fit_feasible(box)
+    assert ok is False
+    assert reason == W.BL_PANEL_FIT_PORT_REAR_WALL
+    # The walls and separation pass; only BL's rear-mouth rule fires.
+    assert _bl_validate_reference(box) == W.BL_PANEL_FIT_PORT_REAR_WALL
+
+
+@pytest.mark.parametrize("driver_y_m", [0.0, 0.02, -0.02, 0.24])
+def test_driver_center_variant_matches_bl_formula(driver_y_m: float) -> None:
+    box = _recorded_case_box(external_height_mm=560.0)
+    expected = _bl_validate_reference(box, driver_y_m=driver_y_m)
+    ok, reason = W.bl_panel_fit_feasible(box, driver_y_m=driver_y_m)
+    assert (ok, reason) == (expected is None, expected)
+
+
+def test_bl_panel_fit_is_deterministic() -> None:
+    for box in (_recorded_case_box(), _recorded_case_box(external_height_mm=560.0)):
+        first = W.bl_panel_fit_feasible(box)
+        for _ in range(4):
+            assert W.bl_panel_fit_feasible(box) == first
+
+
+def test_screen_rejects_bl_panel_fit_into_the_visible_ledger(tmp_path: Path) -> None:
+    asset = _synthetic_asset(tmp_path)
+    catalog = W.load_driver_catalog(["faitalpro_12pr300"])
+    cabinet = C.VentedBoxRanges(
+        net_volume_l_range=(115.0, 115.0), tuning_hz_range=(49.0, 50.0),
+        port_throat_area_cm2_range=(170.0, 170.0), wall_mm=18.0)
+    assembly = C.AssemblyRanges(horn_layout="separate_above")
+    target = C.SystemTargets(
+        listening_angle_h_deg=(-30.0, 30.0), listening_angle_v_deg=(-15.0, 15.0),
+        low_freq_f3_hz_max=None)
+    result = W.run_seed_screen(
+        asset, catalog, cabinet=cabinet, assembly=assembly, target=target,
+        envelope=_envelope(), limit_boxes=2, dz_offsets_mm=(0.0,),
+        xo_range_hz=(600.0, 900.0), shortlist_size=3)
+    fit_rows = [r for r in result.rejected_ledger if r["stage"] == "bl_panel_fit"]
+    assert fit_rows, result.rejected_ledger
+    assert all(row["reasons"] == [W.BL_PANEL_FIT_DRIVER_PORT_SEPARATION]
+               for row in fit_rows)
+    assert result.counts["bl_panel_fit_rejected"] == len(fit_rows)
+    assert result.kept_rows == ()
+    assert result.study_id
+
+
 # --------------------------------------------------------------------------- end-to-end replay
 
 
@@ -161,7 +299,9 @@ def test_identical_inputs_produce_byte_identical_outputs(tmp_path: Path) -> None
         ["faitalpro_10pr300", "faitalpro_12pr320"])
     cabinet = C.VentedBoxRanges(
         net_volume_l_range=(60.0, 115.0), tuning_hz_range=(40.0, 55.0),
-        port_throat_area_cm2_range=(100.0, 170.0), wall_mm=18.0)
+        # 45 cm^2 is the largest port that survives the BL panel-fit gate on the 372 mm
+        # 12-inch front; 100-170 cm^2 is now correctly refused before scoring.
+        port_throat_area_cm2_range=(45.0, 45.0), wall_mm=18.0)
     assembly = C.AssemblyRanges(horn_layout="separate_above")
     target = C.SystemTargets(
         listening_angle_h_deg=(-30.0, 30.0), listening_angle_v_deg=(-15.0, 15.0),

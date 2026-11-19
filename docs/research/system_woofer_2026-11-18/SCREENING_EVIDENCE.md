@@ -285,3 +285,128 @@ deterministic, CPU-only funnel built from one real saved horn asset, sourced dri
 fixed lumped bass model, a labelled ideal-piston shape proxy and an explicit placement rule. It
 does not claim a coherent system response, absolute SPL, installed directivity, port turbulence,
 or a final crossover. BL validation is the next gate.
+
+## 11. BL-generator panel-fit pre-check (hardening, 2026-11-19)
+
+### 11.1 Recorded refusal
+
+The parent's R4-class staging of the previous top cell (`1bb2bdc73d3da750`: 12PR300, 115 L,
+371.2 x 371.2 x 1080.7 mm, 170 cm^2 port) was refused by Boundary Lab's own generator validator:
+
+- case: `system_runs/system/bl_r4_tower_box/20261119T001041Z-ref_case-40216-b32bb5a2/manifest.json`
+- verbatim `result.error`: `Driver must fit inside the enclosure walls with 3 mm clearance.`
+- traceback: `.../geometry_providers/vented_enclosure/enclosure/parameters.py`, line 103, in `validate`
+- BL provider (manifest): git head `15f9a89245a9adfec8c2f0006c164953ce381e58`, `parameters.py`
+  sha256 `51f8e82071ce9984ff651d1266a208d2ba51ff0e9df2fcb2edd22ff3cc0d78c5`
+- read-only source cited: `C:/Users/hunte/Github/boundary-lab/geometry_providers/
+  vented_enclosure/enclosure/parameters.py` - `validate()` lines 100-109, `port_profile()`
+  lines 46-73, demo defaults `FIELDS` lines 14-26 / `DEFAULTS` line 33.
+
+### 11.2 Rule and the recorded arithmetic
+
+BL's validator (lines 100-109) uses external width/height/depth `w/h/d`, wall `t`, driver
+(moving) radius `r`, port outer radius `r_p`, and front-panel vertical centres `driver_y`,
+`port_y`:
+
+- each component: `radius + 0.003 < w/2 - t` and `abs(y) + radius + 0.003 < h/2 - t` (line 102,
+  `>=` rejects);
+- `abs(driver_y - port_y) > r + r_p + 0.003` (line 104, strict `>`, `<=` rejects);
+- `length <= t + lip + 0.003` or `length + 2*mouth >= d - t` (line 106);
+- `cone_depth + 0.003 >= d - t` (line 108).
+
+For the recorded box, NFR=0: `throat = sqrt(0.017/pi) = 0.073561 m`,
+`mouth = throat + 0.008 = 0.081561 m`, `r_p = mouth + 0.003 = 0.084561 m`,
+`r = 0.200/2 = 0.100 m`, so the required strict separation is `0.187561 m`. On the 371.2 mm
+front, `h/2 - t = 0.1676 m`; the largest legal `|y|` values are `0.0646 m` (driver) and
+`0.0800 m` (port), giving a maximum achievable separation of `0.144639 m < 0.187561 m`.
+**No legal `y` pair exists on that panel.** BL's literal first failure at the supplied demo
+offsets (`driver_y=+0.100`, `port_y=-0.130`) is the driver wall check
+(`0.100 + 0.100 + 0.003 = 0.203 >= 0.1676`); the port wall check also fails
+(`0.130 + 0.084561 + 0.003 = 0.217561 >= 0.1676`). The new pre-check returns the
+separation token because that is the binding geometric cause; the verdict is still BL's
+verdict (refuse).
+
+### 11.3 Implementation and screen wiring
+
+`hornlab_search/system/woofer_seed.py` (owned) adds pure, deterministic
+`bl_panel_fit_feasible(box, *, driver_moving_diameter_m=0.200, driver_y_m=0.100,
+port_y_m=-0.130, port_wall_m=0.003, port_roundover_m=0.008, cone_depth_m=0.040,
+clearance_m=0.003) -> tuple[bool, str | None]`. Defaults are BL's demo plugin defaults
+(constants `BL_DEMO_*` / `BL_VALIDATE_CLEARANCE_M`, cited to the source above). It imports and
+invokes nothing from BL. Tokens: `BL_PANEL_FIT_DRIVER_WALL`, `BL_PANEL_FIT_PORT_WALL`,
+`BL_PANEL_FIT_DRIVER_PORT_SEPARATION`, `BL_PANEL_FIT_PORT_REAR_WALL`,
+`BL_PANEL_FIT_CONE_REAR_WALL`, plus contract-gap tokens.
+
+The screen calls it per box through `_bl_panel_fit_for_screen` (each component at its maximum
+legal `|y|`, then BL's exact check). Rejected boxes go to `rejected_ledger` with
+`stage: "bl_panel_fit"`, the token, the derived `driver_y_m`/`port_y_m` and the box dimensions;
+they are counted under `bl_panel_fit_rejected` and are never silently dropped. The gate parameters
+are part of `metric_spec`, so the study id changes (schema unchanged).
+
+### 11.4 Re-ranked shortlist
+
+Command (same fixed-horn asset/spec; new output dir):
+
+```
+.venv\Scripts\python.exe -m hornlab_search.system.woofer_seed --asset-id 0062fb59fbf63eae --out system_runs\woofer_seed_stage5_blfit --limit-boxes 8 --shortlist-size 6
+```
+
+New study id: **`27616eedee09009f`** (previous: `65f6db3e8c8e8f86`). Counts:
+
+```
+{"bl_panel_fit_rejected": 11, "boxes_considered": 32, "boxes_rejected": 29, "candidates_kept": 27,
+ "drivers_loaded": 4, "drivers_rejected": 0, "pareto_front_rows": 9, "placements_considered": 27,
+ "placements_rejected": 0, "shortlist_rows": 6, "xo_hypotheses": 9, "xo_rejected": 0}
+```
+
+The recorded cell is in the ledger verbatim as
+`faitalpro_12pr300, 115.0 L, [371.2, 371.2, 1080.690776151898] mm, 170.0 cm^2,
+BL_PANEL_FIT_DRIVER_PORT_SEPARATION, driver_y=+0.0646 m, port_y=-0.0800 m`. The 11 panel-fit
+rejections are all nine sampled 10-inch boxes (317 mm front) plus both 12-inch 115 L / 170 cm^2
+boxes (371.2/372 mm fronts). Only 45 cm^2 ports survive on the 12-inch fronts.
+
+Shortlist delta (6 rows before and after; 2 kept, 4 dropped, 4 new):
+
+| candidate | driver | Vb L | external WxHxD mm | port cm^2 | before | after | why |
+|---|---|---|---|---|---|---|---|
+| `01e7d07d2bf70364` | 12PR320 | 115.0 | 372.0 x 372.0 x 1073.3 | 45 | row 1 | row 1 | kept (panel budget feasible) |
+| `1bb2bdc73d3da750` | 12PR300 | 115.0 | 371.2 x 371.2 x 1080.7 | 170 | row 2 | - | dropped: BL panel fit (separation) |
+| `23d53b6edd132c63` | 10PR320 | 61.7 | 317.0 x 317.0 x 839.2 | 45 | row 3 | - | dropped: 317 mm front cannot separate |
+| `6d8fe6f8041a8aa7` | 10PR320 | 115.0 | 317.0 x 317.0 x 1508.2 | 45 | row 4 | - | dropped: 317 mm front cannot separate |
+| `86eead4bf0753ec6` | 10PR300 | 115.0 | 317.0 x 317.0 x 1511.5 | 170 | row 5 | - | dropped: 317 mm front cannot separate |
+| `9ba3c003cab82690` | 12PR320 | 88.3 | 372.0 x 372.0 x 838.7 | 45 | row 6 | row 4 | kept (panel budget feasible) |
+| `42d171062dcda386` | 12PR300 | 115.0 | 371.2 x 371.2 x 1078.8 | 45 | - | row 2 | new (same 115 L box, 45 cm^2 port) |
+| `627b9184c3a26662` | 12PR320 | 115.0 | 372.0 x 372.0 x 1073.3 | 45 | - | row 3 | new (dz = 25 mm variant) |
+| `ccedbe0146d6b922` | 12PR300 | 115.0 | 371.2 x 371.2 x 1078.8 | 45 | - | row 5 | new (dz = 25 mm variant) |
+| `d972180f3eb1e854` | 12PR320 | 115.0 | 372.0 x 372.0 x 1073.3 | 45 | - | row 6 | new (dz = 50 mm variant) |
+
+Top three after the re-rank (display only; still no winner):
+`01e7d07d2bf70364` (12PR320 115 L, 372 x 372 x 1073.3, 45 cm^2, dz 0),
+`42d171062dcda386` (12PR300 115 L, 371.2 x 371.2 x 1078.8, 45 cm^2, dz 50),
+`627b9184c3a26662` (12PR320 115 L, same box as row 1, dz 25).
+
+Consequence for the next gate: the square bassbox fronts are the blocker, not the LF alignment.
+The recorded 371.2 mm front cannot host BL's 200 mm demo driver plus a 170 cm^2 port at any legal
+`y`; a height-reshaped 560 mm front passes (unit-tested), and 45 cm^2 ports fit the 371-372 mm
+fronts. Any BL staging must use a reshaped/re-oriented cabinet or a smaller port, and the BL
+adapter's height/depth mapping is outside this lane (see `NOTES_FOR_SENIOR.md` if it needs a
+change).
+
+### 11.5 Tests (this pass)
+
+```
+.venv\Scripts\python.exe -m pytest tests/system/test_woofer_seed.py -q -p no:cacheprovider
+...............                                                          [100%]
+```
+
+```
+.venv\Scripts\python.exe -m pytest tests/system -q -p no:cacheprovider
+.................................................sss..........s......... [ 29%]
+........................................................................ [ 58%]
+........................................................................ [ 87%]
+.ss.............................                                         [100%]
+=========================== short test summary info ===========================
+SKIPPED [3] tests\system\test_bl_stage.py:179: real Boundary Lab staging gated off (set HORNLAB_BL_REAL_TESTS=1)
+SKIPPED [1] tests\system\test_boundarylab_geometry.py:217: real Boundary Lab generation gated off (set HORNLAB_BL_REAL_TESTS=1)
+SKIPPED [2] tests\system\test_reference_cli.py:474: real Boundary Lab workflow gated off (set HORNLAB_BL_REAL_TESTS=1)
+```

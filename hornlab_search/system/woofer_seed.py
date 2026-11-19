@@ -56,6 +56,7 @@ __all__ = [
     "CatalogResult",
     "load_driver_catalog",
     "evaluate_box",
+    "bl_panel_fit_feasible",
     "select_box_sample",
     "SeedResult",
     "run_seed_screen",
@@ -679,6 +680,161 @@ def evaluate_box(
     })
 
 
+# --------------------------------------------------------------------------- BL panel fit
+#
+# Read-only reference: Boundary Lab's vented-enclosure generator validator,
+# ``boundary-lab/geometry_providers/vented_enclosure/enclosure/parameters.py``
+# (``::validate``, lines 100-109; BL git head 15f9a89245a9adfec8c2f0006c164953ce381e58,
+# parameters.py sha256 51f8e82071ce9984ff651d1266a208d2ba51ff0e9df2fcb2edd22ff3cc0d78c5 as
+# recorded in
+# ``system_runs/system/bl_r4_tower_box/20261119T001041Z-ref_case-40216-b32bb5a2/manifest.json``).
+# Nothing here imports or calls BL.
+#
+# BL's defaults (``FIELDS`` lines 14-26 and ``DEFAULTS`` line 33) and the hard-coded 3 mm
+# ``clearance`` (line 100) are reproduced verbatim as recorded constants:
+BL_DEMO_DRIVER_MOVING_DIAMETER_M: float = 0.200   # driver_diameter_m
+BL_DEMO_DRIVER_Y_M: float = 0.100                 # driver_y_m
+BL_DEMO_PORT_Y_M: float = -0.130                  # port_y_m
+BL_DEMO_PORT_WALL_M: float = 0.003                # port_wall_m
+BL_DEMO_PORT_ROUNDOVER_M: float = 0.008           # port_roundover_m
+BL_DEMO_CONE_DEPTH_M: float = 0.040               # cone_depth_m
+BL_VALIDATE_CLEARANCE_M: float = 0.003            # local ``clearance`` in validate()
+
+BL_PANEL_FIT_DRIVER_WALL = "BL_PANEL_FIT_DRIVER_WALL"
+BL_PANEL_FIT_PORT_WALL = "BL_PANEL_FIT_PORT_WALL"
+BL_PANEL_FIT_DRIVER_PORT_SEPARATION = "BL_PANEL_FIT_DRIVER_PORT_SEPARATION"
+BL_PANEL_FIT_PORT_REAR_WALL = "BL_PANEL_FIT_PORT_REAR_WALL"
+BL_PANEL_FIT_CONE_REAR_WALL = "BL_PANEL_FIT_CONE_REAR_WALL"
+BL_PANEL_FIT_PORT_LENGTH_UNAVAILABLE = "BL_PANEL_FIT_PORT_LENGTH_UNAVAILABLE"
+BL_PANEL_FIT_PORT_AREA_INVALID = "BL_PANEL_FIT_PORT_AREA_INVALID"
+
+
+def bl_panel_fit_feasible(
+    box: C.BoxPoint,
+    *,
+    driver_moving_diameter_m: float = BL_DEMO_DRIVER_MOVING_DIAMETER_M,
+    driver_y_m: float = BL_DEMO_DRIVER_Y_M,
+    port_y_m: float = BL_DEMO_PORT_Y_M,
+    port_wall_m: float = BL_DEMO_PORT_WALL_M,
+    port_roundover_m: float = BL_DEMO_PORT_ROUNDOVER_M,
+    cone_depth_m: float = BL_DEMO_CONE_DEPTH_M,
+    clearance_m: float = BL_VALIDATE_CLEARANCE_M,
+) -> tuple[bool, str | None]:
+    """Mirror BL's vented-enclosure panel-fit validator on a resolved :class:`BoxPoint`.
+
+    This is the CPU, solver-free twin of ``parameters.py::validate`` (lines 100-109) for the
+    front-panel geometry BL compiles.  Along the panel, ``w`` is the external width, ``h`` the
+    external height and ``y`` the vertical coordinate (BL's ``driver_y_m``/``port_y_m``), with
+    ``t = box.wall_mm``:
+
+    * each component must satisfy ``radius + clearance < w/2 - t`` **and**
+      ``abs(y) + radius + clearance < h/2 - t`` (BL raises on ``>=``);
+    * ``abs(driver_y - port_y) > driver_radius + port_outer + clearance`` (strict ``>``);
+    * ``length <= t + lip + clearance`` or ``length + 2 * mouth >= d - t`` is the rear-wall
+      refusal, where ``length`` is the total port length including both lips and, for ``nfr = 0``
+      (the LF-tier convention), ``mouth = sqrt(port_area/pi) + lip``;
+    * ``cone_depth + clearance >= d - t`` is the cone/rear-wall refusal.
+
+    ``port_outer = mouth + port_wall_m``.  Defaults are BL's own plugin defaults, recorded above
+    from the same source; they are the values the parent's staging run fed to BL.
+
+    The returned string is one of the ``BL_PANEL_FIT_*`` tokens (or ``None`` on success).
+    A panel that cannot host the two components with the required strict separation at *any*
+    legal ``y`` is refused with :data:`BL_PANEL_FIT_DRIVER_PORT_SEPARATION`; that is the root
+    cause the parent's R4 staging hit (the recorded 371.2 mm panel), even when the supplied
+    demo ``y`` offsets trip BL's wall check first.  The function is pure and deterministic.
+    """
+    w = _finite(box.external_width_mm, "external_width_mm") * 1e-3
+    h = _finite(box.external_height_mm, "external_height_mm") * 1e-3
+    d = _finite(box.external_depth_mm, "external_depth_mm") * 1e-3
+    t = _finite(box.wall_mm, "wall_mm") * 1e-3
+    if not (w > 0.0 and h > 0.0 and d > 0.0):
+        raise ValueError("box external dimensions must be > 0")
+    if t < 0.0:
+        raise ValueError(f"wall_mm must be >= 0, got {box.wall_mm!r}")
+    driver_r = _finite(driver_moving_diameter_m, "driver_moving_diameter_m") / 2.0
+    dy = _finite(driver_y_m, "driver_y_m")
+    py = _finite(port_y_m, "port_y_m")
+    lip = _finite(port_roundover_m, "port_roundover_m")
+    wall = _finite(port_wall_m, "port_wall_m")
+    cone_depth = _finite(cone_depth_m, "cone_depth_m")
+    clearance = _finite(clearance_m, "clearance_m")
+    for name, value in (("driver_moving_diameter_m", driver_moving_diameter_m),
+                        ("port_wall_m", port_wall_m), ("port_roundover_m", port_roundover_m),
+                        ("cone_depth_m", cone_depth_m), ("clearance_m", clearance_m)):
+        if float(value) < 0.0:
+            raise ValueError(f"{name} must be >= 0, got {value!r}")
+    area_m2 = _finite(box.port_throat_area_cm2, "port_throat_area_cm2") * 1e-4
+    if not (area_m2 > 0.0):
+        return False, BL_PANEL_FIT_PORT_AREA_INVALID
+
+    # nfr = 0 (straight) port profile: mouth radius = throat radius + lip roundover.
+    throat = math.sqrt(area_m2 / math.pi)
+    mouth = throat + lip
+    port_outer = mouth + wall
+    try:
+        neck_m = bass_reference.port_neck_length_mm(box) * 1e-3
+    except ValueError:
+        return False, BL_PANEL_FIT_PORT_LENGTH_UNAVAILABLE
+    # BL's ``port_length_m`` is the total length incl. lips; the contract carries the derived
+    # effective length, whose fixed-bassbox inversion (port_neck_length_mm) gives the neck.
+    length_m = neck_m + 2.0 * lip
+
+    required_sep = driver_r + port_outer + clearance
+    half_w = w / 2.0 - t
+    half_h = h / 2.0 - t
+
+    # BL's rules, plus one screen-level consequence: if no y pair can satisfy the two fit
+    # checks and the strict separation on this panel, the panel itself is infeasible and the
+    # binding cause is the separation budget (the recorded refusal).  This never accepts a box
+    # BL would refuse; it only labels the reason.
+    driver_budget = half_h - driver_r - clearance
+    port_budget = half_h - port_outer - clearance
+    if driver_budget + port_budget <= required_sep:
+        return False, BL_PANEL_FIT_DRIVER_PORT_SEPARATION
+
+    if driver_r + clearance >= half_w or abs(dy) + driver_r + clearance >= half_h:
+        return False, BL_PANEL_FIT_DRIVER_WALL
+    if port_outer + clearance >= half_w or abs(py) + port_outer + clearance >= half_h:
+        return False, BL_PANEL_FIT_PORT_WALL
+    if abs(dy - py) <= required_sep:
+        return False, BL_PANEL_FIT_DRIVER_PORT_SEPARATION
+    if length_m <= t + lip + clearance or length_m + 2.0 * mouth >= d - t:
+        return False, BL_PANEL_FIT_PORT_REAR_WALL
+    if cone_depth + clearance >= d - t:
+        return False, BL_PANEL_FIT_CONE_REAR_WALL
+    return True, None
+
+
+def _bl_panel_fit_for_screen(point: C.BoxPoint) -> dict[str, Any]:
+    """Panel-fit check for the screen, using the widest legal ``y`` placement on the panel.
+
+    The screen does not carry BL's ``driver_y``/``port_y`` fields, so it asks the honest
+    feasibility question -- can this panel host the driver and port at all? -- by placing each
+    component at its own maximum legal ``|y|`` and then running the exact BL validator.  A box
+    that fails is refused with the returned token; the derived offsets are reported so the
+    refusal is inspectable.
+    """
+    h = float(point.external_height_mm) * 1e-3
+    t = float(point.wall_mm) * 1e-3
+    area_m2 = float(point.port_throat_area_cm2) * 1e-4
+    throat = math.sqrt(area_m2 / math.pi) if area_m2 > 0.0 else float("nan")
+    port_outer = throat + BL_DEMO_PORT_ROUNDOVER_M + BL_DEMO_PORT_WALL_M
+    half_h = h / 2.0 - t
+    eps = 1e-12  # stay strictly inside BL's ``>=`` wall refusal
+    driver_y = max(0.0, half_h - BL_DEMO_DRIVER_MOVING_DIAMETER_M / 2.0
+                   - BL_VALIDATE_CLEARANCE_M - eps)
+    port_y = -max(0.0, half_h - port_outer - BL_VALIDATE_CLEARANCE_M - eps)
+    ok, reason = bl_panel_fit_feasible(
+        point, driver_y_m=driver_y, port_y_m=port_y)
+    return {
+        "accepted": bool(ok),
+        "reason": reason,
+        "driver_y_m": float(driver_y),
+        "port_y_m": float(port_y),
+    }
+
+
 def select_box_sample(boxes: Sequence[C.BoxPoint], limit: int) -> tuple[C.BoxPoint, ...]:
     """Deterministic extreme+corners sample: smallest/largest volume at low/high tuning.
 
@@ -966,6 +1122,19 @@ def run_seed_screen(
         "horn_layout": assembly.horn_layout,
         "xo_range_hz": None if xo_range_hz is None else [float(xo_range_hz[0]),
                                                          float(xo_range_hz[1])],
+        "bl_panel_fit": {
+            "applied": True,
+            "driver_moving_diameter_m": BL_DEMO_DRIVER_MOVING_DIAMETER_M,
+            "driver_y_m": BL_DEMO_DRIVER_Y_M,
+            "port_y_m": BL_DEMO_PORT_Y_M,
+            "port_wall_m": BL_DEMO_PORT_WALL_M,
+            "port_roundover_m": BL_DEMO_PORT_ROUNDOVER_M,
+            "cone_depth_m": BL_DEMO_CONE_DEPTH_M,
+            "clearance_m": BL_VALIDATE_CLEARANCE_M,
+            "screen_placement": "each component at its maximum legal |y|, then BL's exact check",
+            "source": ("boundary-lab geometry_providers/vented_enclosure/enclosure/"
+                       "parameters.py::validate L100-109"),
+        },
     }
 
     xo_screens: dict[str, compatibility.XoScreen] = {}
@@ -981,6 +1150,7 @@ def run_seed_screen(
         "drivers_rejected": len(catalog_rejected),
         "boxes_considered": 0,
         "boxes_rejected": 0,
+        "bl_panel_fit_rejected": 0,
         "xo_hypotheses": 0,
         "xo_rejected": 0,
         "placements_considered": 0,
@@ -1017,6 +1187,29 @@ def run_seed_screen(
                                "tuning_hz": point.derived_tuning_hz,
                                "reasons": list(box_eval["reasons"]),
                                "skips": list(box_eval["skips"])})
+                continue
+
+            # Boundary Lab's own generator validator refuses a panel that cannot host the
+            # driver + port with its 3 mm clearance and strict separation.  Refuse such a box
+            # here instead of proposing a cabinet BL will reject at staging; the rejection stays
+            # visible in the report ledger.
+            panel_fit = _bl_panel_fit_for_screen(point)
+            if not panel_fit["accepted"]:
+                counts["boxes_rejected"] += 1
+                counts["bl_panel_fit_rejected"] += 1
+                ledger.append({
+                    "stage": "bl_panel_fit", "driver_id": entry.driver_id,
+                    "net_volume_l": point.net_volume_l,
+                    "tuning_hz": point.derived_tuning_hz,
+                    "external_mm": [point.external_width_mm, point.external_height_mm,
+                                    point.external_depth_mm],
+                    "port_throat_area_cm2": point.port_throat_area_cm2,
+                    "reasons": [panel_fit["reason"]],
+                    "driver_y_m": panel_fit["driver_y_m"],
+                    "port_y_m": panel_fit["port_y_m"],
+                    "source": ("boundary-lab geometry_providers/vented_enclosure/enclosure/"
+                               "parameters.py::validate L100-109"),
+                })
                 continue
 
             frame_radius = None
@@ -1124,6 +1317,7 @@ def run_seed_screen(
                             "driver_clearance": not box_eval["statuses"][
                                 "driver_and_brace"].startswith("FAIL"),
                             "f3_gate": bool(box_eval["f3_ok"]),
+                            "bl_panel_fit": True,
                             "placement_legal": True,
                             "xo_data": True,
                         },
