@@ -178,7 +178,18 @@ def main(argv=None) -> int:
     steps = {}
     for fn in (builders.freeze_snapshot, builders.build_training, builders.build_analysis,
                builders.build_proposal):
-        res = fn(service, sid, root=root)
+        try:
+            res = fn(service, sid, root=root)
+        except Exception:  # noqa: BLE001 - WP 0.7 hardening (2026-11-18): a builders step that
+            # dies inside the study service used to take the whole arm down with a bare exit 1
+            # and NO cause line in the unbuffered job log (t_klame_turbo100/_scalar100 burned
+            # ~40 GPU minutes this way). Surface the failing step + traceback, then exit 1.
+            import traceback
+            print(f"prepare_study: builders step {fn.__name__} FAILED for study {sid}; "
+                  f"traceback follows", file=sys.stderr, flush=True)
+            traceback.print_exc()
+            sys.stderr.flush()
+            return 1
         steps[fn.__name__] = res.get("status") if isinstance(res, dict) else "ok"
     deadline = (datetime.now(timezone.utc) + timedelta(hours=a.deadline_hours)).isoformat()
     package = prepare_run_package(service, sid, lane=a.lane, deadline=deadline,

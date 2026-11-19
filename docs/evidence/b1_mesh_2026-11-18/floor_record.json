@@ -1,0 +1,27 @@
+{
+ "check": "WP 2.3 combined noise floor",
+ "mesh_part": {
+  "n_probes": 8,
+  "mean_signed_dJ": -0.012563779662985386,
+  "sd_dJ": 0.007676441842658574,
+  "median_abs_dJ": 0.011725073659565766,
+  "max_abs_dJ": 0.025232684402107353,
+  "n_mesh_sensitive_gt_0.0057": 6,
+  "source": "runs/b1_mesh_2026-11-18/refine.json (8 probes: 5 fold-warm batch 1 + 3 ext-throat batch 2)",
+  "note": "mesh part is sd of the same-grid epw x2 J change across probes; consistent with the frequency floor construction (sd-based)"
+ },
+ "freq_part": {
+  "v7_published_D8": 0.13,
+  "v7_this_pass_protocol": 0.31038428576437704,
+  "v10_corridor_preferred_edge": 0.46767600053596237,
+  "v10_slope5": 0.486256
+ },
+ "combined_floor_J": {
+  "v7_published_D8": 0.13022644800256097,
+  "v7_this_pass_protocol": 0.3104791983512361,
+  "v10_corridor_preferred_edge": 0.46773899691673904,
+  "v10_slope5": 0.4863165895744908
+ },
+ "usage": "a J gap below the combined floor of ITS identity is a TIE (A7 invariant 7); the v7 0.310-vs-0.13 protocol tension is recorded in NOTES_FOR_SENIOR and both v7 rows are published",
+ "date": "2026-11-18"
+}

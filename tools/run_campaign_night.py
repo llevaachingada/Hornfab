@@ -440,9 +440,17 @@ def lane_env(lane: str, runs_root: Path | str) -> dict[str, str]:
 
 def build_job_env(job: Job, night_lane: str, runs_root: Path | str,
                   base: dict[str, str] | None = None) -> dict[str, str]:
-    """The exact child environment: process env, then lane overrides, then the job's own env."""
+    """The exact child environment: process env, then lane overrides, then the job's own env.
+
+    WP 0.7 (2026-11-18, after the cd_rrect night review): child stdout is block-buffered on a
+    pipe unless PYTHONUNBUFFERED is forced, so a dying search can leave the job log with NOTHING
+    after its banners (observed as silent exit=1 jobs that never printed the abort line:
+    cont_p80_athcore_corelaw_200 / cont_biradial_smooth_200). Setting PYTHONUNBUFFERED=1 makes
+    the abort line land in the log the runner can classify on. Job-level env may still override.
+    """
     env = dict(os.environ if base is None else base)
     env.update(lane_env(night_lane, runs_root))
+    env.setdefault("PYTHONUNBUFFERED", "1")
     env.update({str(k): str(v) for k, v in (job.env or {}).items()})
     return env
 

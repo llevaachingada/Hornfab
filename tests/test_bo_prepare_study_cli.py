@@ -101,6 +101,25 @@ def _patch_positive(monkeypatch, captured):
 # ------------------------------------------------------------------ explicit refusals
 
 
+def test_builders_step_failure_returns_one_and_names_the_step(tmp_path, cohort, monkeypatch, capsys):
+    """WP 0.7 hardening (2026-11-18): a builders-step death used to exit bare rc=1 with NO cause
+    line in the unbuffered job log (t_klame_turbo100/_scalar100 burned ~40 GPU minutes this way).
+    The guard must name the failed step and surface the traceback before exiting."""
+    import hornlab_search.studies.builders as builders
+    captured = {}
+    _patch_positive(monkeypatch, captured)
+
+    def boom(service, sid, *, root):
+        raise RuntimeError("cohort shard exploded")
+
+    monkeypatch.setattr(builders, "build_training", boom)
+    code = prepare_study.main(_base_args(tmp_path, cohort) + ["--config", str(CONFIG)])
+    assert code == 1
+    err = capsys.readouterr().err
+    assert "builders step boom FAILED for study sid" in err   # names the failed step (fn.__name__)
+    assert "cohort shard exploded" in err                     # and the traceback follows
+
+
 def test_refuses_task_and_config_together(tmp_path, cohort, capsys):
     code = prepare_study.main(_base_args(tmp_path, cohort) + [
         "--task", TASK_NAME, "--config", str(CONFIG)])

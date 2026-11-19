@@ -1,5 +1,25 @@
 ﻿# ISSUES
 
+## 2026-11-18 - B1 + WP 2.3 done; 4.2 PASS -> 4.3 running; queue trimmed to Fable-only (owner directive)
+
+- DONE: B1 8/8 probes clean (batch 1 + 2, no spill); WP 2.3 combined-floor record published
+  (mesh part sd 0.00768 J; frequency-dominated). `docs/evidence/b1_mesh_2026-11-18/`.
+- DONE (WP 4.2): record-route equivalence PASS on the biradial host (max 0.76 deg of the 1 deg
+  bound) — B2 is approved under the predeclared rule; `docs/evidence/wp42_u3_biradial/`.
+- RUNNING: WP 4.3 five valid variants at verify tier (night fable_wp43_2026-11-18); vt_480 and
+  term_sides excluded by the u3_jobs validity table (invalid reach) — recorded; owner may override
+  by a later dedicated probe.
+- CLOSED (owner directive, BoTorch-vs-CMA experiment): both atlas arms REMOVED from the queue
+  (paused, roots/cohort builders untouched on disk); BoTorch resumes only after a 100+ row CMA
+  cohort AND explicit owner approval. WP 6.1 stays parked.
+- CLOSED (WP 0.7 hardening): unbuffered child env, prepare_study builders guard, run_bo_arm child
+  tail, wrapper tests fixed at the real Popen surface (the 2 known order-dependent failures gone).
+- OPEN (owner/lane): w-lane continuations (rosse_rect r120/r50, lecleach_iwata_ar, control_v7,
+  klangfilm, ath_core14) removed from tonight's queue by the owner — re-queue whenever wanted;
+  their run dirs/rows are preserved.
+- Carry-over opens unchanged: rho20 senior verdict; v7 floor protocol reconciliation; anchor
+  fallback dossier; range15 brief migration; B6 budget; D6 step 2 blocked on the anchor.
+
 ## 2026-11-18 - B1 batch 1 complete; batch 2 + 4.2 queued; ext_throat partial resumes with cap 200
 
 - DONE: B1 batch 1 = 5/5 probes exit 0, no Shared-Usage spill (R5 gate met). Batch 2 (3 ext-throat

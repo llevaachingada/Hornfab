@@ -1,5 +1,40 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - B1 batch 1 + 2 COMPLETE; WP 2.3 floor record; WP 4.2 PASS; queue trimmed to Fable-only; WP 4.3 launched (local orchestrator)
+
+- **B1 complete: 8/8 probes exit 0** (5 fold-warm + 3 ext-throat), no Shared-Usage spill anywhere
+  (host shared 80 MiB constant; peaks ~2.6-3.0 GB dedicated). dJ range −0.003…−0.0252,
+  6/8 mesh-sensitive at the 0.0057 threshold. Published: `docs/evidence/b1_mesh_2026-11-18/`
+  (README + b1_probes_table.json + floor_record.json). **WP 2.3 combined floor: mesh part
+  sd(dJ) = 0.00768 J → combined = sqrt(freq²+mesh²): v7 0.1302 (published-D8 basis) / 0.3105
+  (protocol basis) / v10 0.4677 / v10_slope5 0.4863 — the floor stays frequency-dominated; the
+  v7 0.310-vs-0.13 tension stands unchanged.** The two leaders (3a1038/9fcd21) remain outside the
+  mesh floor (infeasible at epw 12) [recorded, unchanged].
+- **WP 4.2 PASS** [measured]: record-route control (verify solve of the U3 biradial control,
+  `20261118T235528Z-verify-72cdcc`, design `f07cbf168091`, J 6.4994) vs the stored normal-route
+  host (`37b115/9b05b8756526`): band deltas |dh| ≤ 0.19°, |dv| ≤ 0.76° — ALL within the predeclared
+  1° bound (`docs/evidence/wp42_u3_biradial/equivalence.json` + hv_beamwidth CSVs). The record
+  route is VALID on the biradial host (R8 condition); no silent host switch needed.
+- **Ext-throat w1 lane continuation finished** (resume2, exit 75 = budget end): best J 5.7239
+  (`104ea26b21ca`, 135 rows total). Rows/reports stay in the run dir for the lane owner.
+- **Owner directive executed (2026-11-18 ~19:00): the night queue was trimmed to Fable-plan work
+  only.** Removed pending blocks: 4 w-lane continuation searches (rosse_rect r120/r50-refine,
+  lecleach_iwata_ar, control_v7), both atlas BO arms (`t_atlas_*_turbo300` — BoTorch-vs-CMA
+  experiment PAUSED by the owner until a lane's CMA cohort + explicit approval; roots untouched),
+  and the 2 re-added `_r2` copies of the killed w_* jobs (klangfilm/ath_core14: nothing lost —
+  both had 0-1 evals). Backups: `cd_rrect_2026-11-17.yaml.bak-20261119-fable-trim`. The previous
+  night printed QUEUE DONE; its jobs: see the ledger. **WP 0.7 hardening shipped**:
+  `run_campaign_night.build_job_env` defaults `PYTHONUNBUFFERED=1` (silent-exit class),
+  `prepare_study` builders-loop guard names the failed step + traceback (klame class),
+  `run_bo_arm` echoes the child tail on nonzero rc; `test_night_bo_arm_wrapper` rewritten to mock
+  the real Popen streaming surface (the two order-dependent failures were tests mocking
+  call/run only — they passed when a sibling leaked a Popen stub); focused suites 55/55 green.
+  NOTE: the env fix applies from the NEXT runner start (the live runner had the old module loaded).
+- **WP 4.3 launched as its own night** (`fable_wp43_2026-11-18`, detached via queue.ps1, cutoff
+  23:59): the FIVE tool-valid variants at verify tier (`vt_460`, `term_topbottom`, `steer_early`,
+  `steer_late`, `diag_pull`) — `vt_480` and `term_sides` are EXCLUDED by the u3_jobs validity
+  table (invalid reach), recorded here; ~44 s per solve observed on the first two.
+
 ## 2026-11-18 - B1 batch 1 COMPLETE (5/5 exit 0, no spill); batch 2 + WP 4.2 queued (local orchestrator)
 
 - **B1 batch 1 ran clean after the backend-object fix**: all five fold-warm x2 probes exit 0,
