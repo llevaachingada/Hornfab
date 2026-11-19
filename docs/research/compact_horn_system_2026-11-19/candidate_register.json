@@ -1,0 +1,461 @@
+{
+  "_schema": "compact_horn_candidate_register_v1",
+  "_generated_utc": "2026-11-19",
+  "_provenance": {
+    "repo": "C:/Users/hunte/Hrns/hornlab-search",
+    "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+    "lib_hornlab_search_in_runs": "138d88a2163c324d45cef347b8667967d149c4a9",
+    "fable_v2_commit": "627b880 (local, unpushed)",
+    "upstream_main": "138d88a2163c - unchanged, so PR #75 is NOT merged",
+    "pr_75_status": "UNVERIFIED (gh could not resolve the repo from this session); not merged",
+    "config_sha_method": "hornlab_search.search.rundir.config_sha(load_config(path).raw)",
+    "measurement_rules": [
+      "inner mouth = widest inner aperture (2*max|inner x|, 2*max|inner y|) rebuilt from the SAVED BEST design, not the YAML seed",
+      "outer/build bbox = saved search.ndjson bbox_m, mirrored about the symmetry planes, x1000 (mm)",
+      "depth_incl_lip_mm = bbox_m z-span (includes the returned lip / negative z)",
+      "J is never ranked across objective identities; floors: v7 stored-grid 0.3105, v10 0.4677"
+    ],
+    "fidelity_labels": {
+      "SCREEN_MAGNITUDE": "single-mesh screen solve; magnitude/directivity metrics from the screen balloon",
+      "SCREEN_COMPLEX_APPROX": "screen mesh, complex response retained but approximate",
+      "INSTALLED_EXTERIOR_BEM": "an installed/exterior BL or beat case id exists (none does in this slate)",
+      "NOT_YET_AVAILABLE": "no valid measured number for this row/claim"
+    },
+    "crossover_heuristic": "predeclared slate-only screen (NOT a design law): feasible = measured V beamwidth at the XO <= 80 deg AND zero loading penalty (lfp20_hz <= XO/1.6, scalar_v7 _load term) AND centre spacing <= 1.0 lambda for a 10-inch driver; marginal = exactly one miss; not_feasible = 2+ misses or V > 100 deg; unknown = no measured metrics",
+    "driver_moving_diameter_note": "10-inch = 210.5 mm, derived from Faital 10PR300 Sd 348 cm2 (examples/drivers/faital_10pr300.yaml) with the motor_map convention d = 2*sqrt(Sd/pi); 12-inch = 260.5 mm is the 12PR300 Sd-derived value quoted in SENIOR_REVIEW_HANDOFF_2026-11-19 R2 (no 12PR300 YAML exists in examples/drivers). Frame radius is NOT_YET_AVAILABLE in both cases, so the spacing below is a MOVING-DIAMETER LOWER BOUND, not a frame-clearance verdict.",
+    "panel_fit": "hornlab_search.system.woofer_seed.bl_panel_fit_feasible needs a real C.BoxPoint; this slate defines no cabinet, so panel fit is NOT_YET_AVAILABLE for every row",
+    "lambda_mm": {"900": 381.1, "1200": 285.8}
+  },
+  "candidates": {
+    "A1": {
+      "source_config_path": "examples/typologies/scout40w2_2026-11-19/scout40w3__petal_hvlaw_v7.yaml",
+      "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+      "config_sha": "2e79402be1ec",
+      "family": "OSSE",
+      "route": "native OSSE profile (no typology generator); per-direction a(phi) wall law + superellipse mouth morph + petal creases",
+      "generator": "native; brief home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+      "source": {"driver": "FaitalPRO HF1440, 1.4-inch, exit radius 18.0 mm, exit angle 2.0 deg", "hf1440_modelled": true},
+      "geometry": {
+        "inner_mouth_w_mm": 567.9, "inner_mouth_h_mm": 379.3,
+        "outer_build_bbox_mm": {"w": 567.9, "h": 379.3, "d_incl_lip": 322.3},
+        "build_box_mm": {"w": 591.9, "h": 403.3, "d": 334.3},
+        "provenance": "[measured] saved best mesh row bbox_m (20261119T155454Z-screen-d1a61d) + inner aperture rebuilt from the saved best params",
+        "seed_only_check": "shape_check on the YAML seed reports 545 x 360 x 353 (3085/24000 dofs), i.e. the seed is NOT the best; the saved best is 22.9 mm wider"
+      },
+      "best_saved": {
+        "run_id": "20261119T155454Z-screen-d1a61d", "design_hash": "74d8eed97268",
+        "J": 4.161632688418152, "identity": "home-v7 (objective v7)", "valid": 40,
+        "attempts": 54, "run_status": "finished (budget)", "n_dof": 4702, "n_triangles": 9057,
+        "terms": {"total": 4.161632688418152, "load": 0.0, "dislope": 0.7289868807547699, "flat": 0.4931755727810745, "flat_cv": 0.18367548883733895, "diag": 0.5974840081162378, "lfp20_hz": 425.8801758968769, "f11_hz": 5600.0}
+      },
+      "runs_recent": [
+        {"run_id": "20261119T143027Z-screen-401992", "role": "W2 (warm source)", "J": 4.196013028240638, "valid": 30},
+        {"run_id": "20261119T155454Z-screen-d1a61d", "role": "W3 best", "J": 4.161632688418152, "valid": 40}
+      ],
+      "promotion_math": "W2 4.1960 -> W3 4.16163 = 0.0344 gain, below the v7 0.3105 floor = TIE",
+      "further_gpu_needed": {"value": false, "why": "the W3 result is a tie. The next cheap step is a CPU v10 rescore of the 41 stored rows (no GPU); a matched v10 continuation is only justified if that rescore lands within 0.4677 J of the v10 leader (1.4214)."},
+      "morphology_tags": ["per-direction-wall-law", "petal-crease", "superellipse-mouth", "landscape-wide"],
+      "crossover": {
+        "measured_bw_at": {"850": {"h": 65.8, "v": 88.8}, "950": {"h": 63.0, "v": 80.2}, "1100": {"h": 60.6, "v": 69.4}, "1250": {"h": 62.1, "v": 61.7}},
+        "loading": {"lfp20_hz": 425.9, "zero_penalty_limit_hz": {"850": 531.2, "950": 593.8, "1100": 687.5, "1250": 781.2}, "verdict": "loading penalty zero at all four XOs"},
+        "verdict": {"850": "marginal (V 88.8 ballooning, loading OK)", "950": "marginal (V 80.2, loading OK)", "1100": "feasible (V 69.4 / H 60.6, loading OK)", "1250": "feasible (V 61.7 / H 62.1, loading OK)"},
+        "unknown": "no woofer, no cabinet, no installed/exterior solve; V pattern knee is read from a 73-angle balloon at 10 m, not an installed polar"
+      },
+      "driver_fit": {
+        "10in": {"moving_dia_mm": 210.5, "min_center_spacing_mm": 297.9, "d_lambda_900": 0.78, "d_lambda_1200": 1.04},
+        "12in": {"moving_dia_mm": 260.5, "min_center_spacing_mm": 322.9, "d_lambda_900": 0.85, "d_lambda_1200": 1.13},
+        "panel_fit": "NOT_YET_AVAILABLE (no cabinet BoxPoint in this slate; frame radius unknown)"
+      }
+    },
+    "A2": {
+      "source_config_path": "examples/typologies/scout40w2_2026-11-19/scout40w3__tritonia_v9.yaml",
+      "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+      "config_sha": "1c07945ab727",
+      "family": "OSSE",
+      "route": "native OSSE profile; per-direction a(phi) law with az_fold_v (no crease)",
+      "generator": "native; brief home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+      "source": {"driver": "FaitalPRO HF1440, 1.4-inch, exit radius 18.0 mm, exit angle 2.0 deg", "hf1440_modelled": true},
+      "geometry": {
+        "inner_mouth_w_mm": 587.5, "inner_mouth_h_mm": 461.0,
+        "outer_build_bbox_mm": {"w": 590.0, "h": 464.4, "d_incl_lip": 346.9},
+        "build_box_mm": {"w": 614.0, "h": 488.4, "d": 358.9},
+        "provenance": "[measured] saved best mesh row bbox_m + inner aperture rebuilt from the saved best params"
+      },
+      "best_saved": {
+        "run_id": "20261119T153950Z-screen-5d766f", "design_hash": "3ea64988763d",
+        "J": 5.003223187167279, "identity": "home-v7 (objective v7)", "valid": 30,
+        "attempts": 36, "run_status": "watchdog (exit 75, no_gain_valid)", "n_dof": 5931, "n_triangles": 11545,
+        "terms": {"total": 5.003223187167279, "load": 1.1180516041296495, "dislope": 0.3365655043063669, "flat": 0.5300186682466868, "flat_cv": 0.6510946796549861, "diag": 0.510680492372787, "lfp20_hz": 552.0115670921158}
+      },
+      "runs_recent": [
+        {"run_id": "20261119T141723Z-screen-433f54", "role": "W2", "J": 4.878473401275163, "valid": 30},
+        {"run_id": "20261119T153950Z-screen-5d766f", "role": "W3 best (regression)", "J": 5.003223187167279, "valid": 30}
+      ],
+      "promotion_math": "W2 4.8785 -> W3 5.0032 = 0.1247 WORSE, below the 0.3105 floor",
+      "further_gpu_needed": {"value": false, "why": "the W3 continuation regressed. No further GPU run until a new DOF or box is proposed."},
+      "morphology_tags": ["per-direction-wall-law", "az-fold-V", "superellipse-mouth", "tall-mouth"],
+      "crossover": {
+        "measured_bw_at": {"850": {"h": 59.0, "v": 69.0}, "950": {"h": 60.6, "v": 62.8}, "1100": {"h": 63.7, "v": 56.3}, "1250": {"h": 69.7, "v": 55.8}},
+        "loading": {"lfp20_hz": 552.0, "verdict": "zero-penalty at 950+; a small loading penalty at 850 (552 > 531)"},
+        "verdict": {"850": "marginal (small loading penalty, V 69 OK)", "950": "feasible (V 62.8 / H 60.6)", "1100": "feasible (V 56.3 / H 63.7)", "1250": "feasible (V 55.8 / H 69.7)"},
+        "unknown": "no woofer/cabinet; tall 461 mm mouth is the least cabinet-friendly in the OSSE set"
+      },
+      "driver_fit": {
+        "10in": {"moving_dia_mm": 210.5, "min_center_spacing_mm": 340.4, "d_lambda_900": 0.89, "d_lambda_1200": 1.19},
+        "12in": {"moving_dia_mm": 260.5, "min_center_spacing_mm": 365.4, "d_lambda_900": 0.96, "d_lambda_1200": 1.28},
+        "panel_fit": "NOT_YET_AVAILABLE"
+      }
+    },
+    "A3": {
+      "source_config_path": "examples/typologies/scout40w2_2026-11-19/scout40w3__tritonia_v8.yaml",
+      "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+      "config_sha": "55a3166ff16b",
+      "family": "OSSE",
+      "route": "native OSSE profile; per-direction a(phi) law with az_fold_v; n widened to 4..10",
+      "generator": "native; brief home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+      "source": {"driver": "FaitalPRO HF1440, 1.4-inch, exit radius 18.0 mm, exit angle 2.0 deg", "hf1440_modelled": true},
+      "geometry": {
+        "inner_mouth_w_mm": 589.5, "inner_mouth_h_mm": 373.6,
+        "outer_build_bbox_mm": {"w": 592.0, "h": 377.8, "d_incl_lip": 305.3},
+        "build_box_mm": {"w": 616.0, "h": 401.8, "d": 317.3},
+        "provenance": "[measured] saved best mesh row bbox_m + inner aperture rebuilt from the saved best params"
+      },
+      "best_saved": {
+        "run_id": "20261119T152446Z-screen-d98c8d", "design_hash": "cded84a911d2",
+        "J": 4.891129482719315, "identity": "home-v7 (objective v7)", "valid": 30,
+        "attempts": 30, "run_status": "watchdog (exit 75, no_gain_valid)", "n_dof": 4874, "n_triangles": 9462,
+        "terms": {"total": 4.891129482719315, "load": 1.5932860217867082, "dislope": 0.583625655369671, "flat": 0.6061014889384442, "flat_cv": 0.6249836668039811, "diag": 0.2783311051248122, "lfp20_hz": 596.8662204990862}
+      },
+      "runs_recent": [
+        {"run_id": "20261119T140149Z-screen-f8fffb", "role": "W2", "J": 5.372771250487765, "valid": 30},
+        {"run_id": "20261119T152446Z-screen-d98c8d", "role": "W3 best (real gain)", "J": 4.891129482719315, "valid": 30}
+      ],
+      "promotion_math": "W2 5.3728 -> W3 4.8911 = 0.4817 gain, ABOVE the v7 0.3105 floor = REAL; but A2 (same mechanism) is within 0.11 J = a tie between v8 and v9",
+      "further_gpu_needed": {"value": false, "why": "real gain already banked; the remaining cost is load 1.59 + flat 0.61, and the same mechanism's v9 sibling ties it. Nothing in the current box is DI-slope/loading-relevant."},
+      "morphology_tags": ["per-direction-wall-law", "az-fold-V", "superellipse-mouth", "compact-depth"],
+      "crossover": {
+        "measured_bw_at": {"850": {"h": 60.7, "v": 83.1}, "950": {"h": 68.1, "v": 75.0}, "1100": {"h": 76.0, "v": 65.0}, "1250": {"h": 77.0, "v": 57.8}},
+        "loading": {"lfp20_hz": 596.9, "verdict": "zero-penalty at 1100+; technically over the 950 limit by 3 Hz"},
+        "verdict": {"850": "not_feasible (V 83.1 + loading penalty)", "950": "marginal (V 75.0, loading just over)", "1100": "marginal (H 76.0 ballooning, V 65.0)", "1250": "marginal (H 77.0 / V 57.8)"},
+        "unknown": "no woofer/cabinet; H ballooning at 1.1-1.25 kHz is the blocker, not loading"
+      },
+      "driver_fit": {
+        "10in": {"moving_dia_mm": 210.5, "min_center_spacing_mm": 297.1, "d_lambda_900": 0.78, "d_lambda_1200": 1.04},
+        "12in": {"moving_dia_mm": 260.5, "min_center_spacing_mm": 322.1, "d_lambda_900": 0.85, "d_lambda_1200": 1.13},
+        "panel_fit": "NOT_YET_AVAILABLE"
+      }
+    },
+    "A4": {
+      "source_config_path": "examples/typologies/ath_twinray_380.yaml",
+      "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+      "config_sha": "1673ccbc240c",
+      "reference_only": true,
+      "family": "FREEFORM",
+      "route": "typology generator (OSSE profile_h/profile_v, 16 anchors, superellipse mouth); published-dimension reconstruction, no returned lip",
+      "generator": "name: typology; brief ath_twinray_380_14in.yaml (objective v2)",
+      "source": {"driver": "1.4-inch generic: exit radius 17.78 mm, exit angle 5.0 deg (half of the published 10 deg total throat angle); path-pinned", "hf1440_modelled": false},
+      "geometry": {
+        "inner_mouth_w_mm": 380.0, "inner_mouth_h_mm": 303.3,
+        "outer_build_bbox_mm": {"w": 381.0, "h": 304.3, "d_incl_lip": 187.5},
+        "build_box_mm": {"w": 381.0, "h": 304.3, "d": 187.5},
+        "provenance": "[measured] geometry-only preview rebuild of the config seed (no saved run for this file in the tree); shape_check seed: 380 x 303 x 197 mm, 1987/5000 dofs"
+      },
+      "best_saved": {
+        "run_id": null, "design_hash": null,
+        "J": "NOT_YET_AVAILABLE", "identity": "n/a - no v7/v10 run exists for this config_sha",
+        "valid": null,
+        "note": "the only runs that reference this geometry are v3/v4 campaign copies (20261027T001227Z-screen-fb6598 J 13.0670 v3; 20261027T045503Z-screen-971583 J 9.6040 v4; 20261029T013620Z-verify-3f4992 J 11.3653 v4). None is comparable to the v7/v10 identities."
+      },
+      "derived_lane_context": {
+        "config": "examples/typologies/home_landscape_2026-11-15/hl__ath_twinray380_landscape_v8.yaml",
+        "config_sha": "3b51e02f2bd8",
+        "best_run": "20261117T001240Z-screen-7b664f", "design_hash": "85c59331e4a3",
+        "J_v10": 1.7726272172874422, "stored_J_v7": 7.125643354320201,
+        "n_dof": 5667,
+        "outer_build_bbox_mm": {"w": 537.0, "h": 442.4, "d_incl_lip": 411.8},
+        "measured_bw_at": {"850": {"h": 60.3, "v": 71.6}, "950": {"h": 56.4, "v": 64.6}, "1100": {"h": 52.0, "v": 56.5}, "1250": {"h": 51.1, "v": 53.4}},
+        "caveat": "this is a DIFFERENT config_sha and a different shape (L 311.6 mm, morph mouth 535x440) from the A4 reference file. The parent orchestrator quotes 1.7726 as the 'twinray lane best'; it is NOT a J for examples/typologies/ath_twinray_380.yaml.",
+        "priority10_reproduction": {"run": "20261119T175926Z-screen-8454e6", "design": "bff6107b01a1", "J": 2.5748150812659065, "valid": 31, "role": "reproduction from the lane seed, NOT a continuation"}
+      },
+      "runs_recent": [
+        {"run_id": "20261027T001227Z-screen-fb6598", "role": "v3 campaign copy (not this config_sha)", "J": 13.06703249695533, "identity": "objective v3"},
+        {"run_id": "20261027T045503Z-screen-971583", "role": "v4 campaign copy", "J": 9.603967694728075, "identity": "objective v4"},
+        {"run_id": "20261029T013620Z-verify-3f4992", "role": "v4 verify", "J": 11.365281927131791, "identity": "objective v4"},
+        {"run_id": "20261117T001240Z-screen-7b664f", "role": "DERIVED lane hl__ath_twinray380_landscape_v8 (different config) v10 best", "J": 1.7726272172874422, "identity": "v10", "design_hash": "85c59331e4a3"},
+        {"run_id": "20261119T175926Z-screen-8454e6", "role": "PRIORITY10 B6 s1 reproduction from the lane seed (not a continuation)", "J": 2.5748150812659065, "identity": "v10", "valid": 31}
+      ],
+      "promotion_math": "ATS TwinRay LF point 680 Hz (36-04-266) / 580 Hz (36-10-380) is a 20%-throat-resistance definition, NOT a safe crossover",
+      "further_gpu_needed": {"value": false, "why": "REFERENCE ONLY: the config's default 200-eval campaign is not authorized. Nothing here is a candidate for GPU time."},
+      "morphology_tags": ["published-dimension-reconstruction", "osse-linear", "superellipse-mouth", "no-returned-lip"],
+      "crossover": {
+        "measured_bw_at": null,
+        "loading": null,
+        "verdict": {"850": "unknown (no measured data for this config)", "950": "unknown", "1100": "unknown", "1250": "unknown"},
+        "unknown": "no measured polars for this config; the derivative lane suggests V 56-72 deg at 850-1250 but that is not this geometry"
+      },
+      "driver_fit": {
+        "10in": {"moving_dia_mm": 210.5, "min_center_spacing_mm": 260.4, "d_lambda_900": 0.68, "d_lambda_1200": 0.91},
+        "12in": {"moving_dia_mm": 260.5, "min_center_spacing_mm": 285.4, "d_lambda_900": 0.75, "d_lambda_1200": 1.00},
+        "panel_fit": "NOT_YET_AVAILABLE"
+      }
+    },
+    "A5": {
+      "source_config_path": "examples/typologies/rolled_family_2026-11-15/rf__rect_radial_wide_v7.yaml",
+      "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+      "config_sha": "e53a0c3ebe76",
+      "family": "FREEFORM",
+      "route": "grid rows: rolled_family_rect_v1, mode rad (inward radial relief: the diagonal stays put, the H/V wall centres pull inward => diagonal ridge); 3 mm wall",
+      "generator": "name: grid; brief home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+      "source": {"driver": "FaitalPRO HF1440, 1.4-inch, exit radius 18.0 mm, exit angle 2.0 deg", "hf1440_modelled": true},
+      "geometry": {
+        "inner_mouth_w_mm": 503.3, "inner_mouth_h_mm": 278.9,
+        "outer_build_bbox_mm": {"w": 535.7, "h": 294.7, "d_incl_lip": 235.1},
+        "build_box_mm": {"w": 535.7, "h": 294.7, "d": 235.1},
+        "provenance": "[from-yaml] geometry-only preview of the CONFIG SEED under the current implementation; the saved run's recipe does not replay (see best_saved.note)"
+      },
+      "best_saved": {
+        "run_id": "20261116T005943Z-screen-20db0d", "design_hash": "a4614c3dfdc4",
+        "J": 32.73792820123102, "identity": "home-v7 (objective v7)", "valid": 2,
+        "attempts": 2, "run_status": "aborted / status 'running' with no budget_counts (2 of 48)", "n_dof": 4992, "n_triangles": 9704,
+        "terms": {"total": 32.73792820123102, "load": 0.64993698573902, "dislope": 12.217067974816352, "flat": 0.8155719320267184, "flat_cv": 0.7936760390422729, "diag": 9.952556610994582, "lfp20_hz": 500.8102578781584},
+        "note": "the saved recipe no longer replays: rows_grid_points raises 'GeneratorError: rolled-family schema or implementation differs from saved recipe' (the 2026-11-15 implementation predates the current rolled_family). The saved mesh bbox is still readable: 541.3 x 298.6 x 238.1 mm."
+      },
+      "runs_recent": [
+        {"run_id": "20261116T005943Z-screen-20db0d", "role": "only run; aborted at 2 valid", "J": 32.73792820123102, "valid": 2}
+      ],
+      "promotion_math": "no promotion: 2 valid evals of 48, J 32.7 on home-v7",
+      "further_gpu_needed": {"value": false, "why": "this cell has never had a real campaign. Any GPU ask would be a first run, not a continuation, and the current implementation no longer replays the archived recipe. Fix the recipe (re-emit the rows from the current generator) before spending GPU time."},
+      "morphology_tags": ["radial-inward-relief", "diagonal-ridge", "spiral-base", "non-CD-narrowing"],
+      "crossover": {
+        "measured_bw_at": {"850": {"h": 111.7, "v": 154.9}, "950": {"h": 121.1, "v": 145.9}, "1100": {"h": 131.6, "v": 134.2}, "1250": {"h": 135.3, "v": 124.9}},
+        "loading": {"lfp20_hz": 500.8, "verdict": "zero-penalty at 850+"},
+        "verdict": {"850": "not_feasible (V 154.9)", "950": "not_feasible (V 145.9)", "1100": "not_feasible (V 134.2)", "1250": "not_feasible (V 124.9)"},
+        "unknown": "numbers are the 2-eval aborted run's best, i.e. essentially the seed; not a converged design"
+      },
+      "driver_fit": {
+        "10in": {"moving_dia_mm": 210.5, "min_center_spacing_mm": 257.6, "d_lambda_900": 0.68, "d_lambda_1200": 0.90},
+        "12in": {"moving_dia_mm": 260.5, "min_center_spacing_mm": 282.6, "d_lambda_900": 0.74, "d_lambda_1200": 0.99},
+        "panel_fit": "NOT_YET_AVAILABLE"
+      }
+    },
+    "C1": {
+      "source_config_path": "examples/typologies/scout40_2026-11-19/scout40__crowe_v2a_c1.yaml",
+      "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+      "config_sha": "806e6474b008",
+      "family": "FREEFORM",
+      "route": "generator crowe_hv_area_aspect_v1 (forward area/aspect superellipse; four DOF; no returned lip, no X-crease)",
+      "generator": "name: crowe_hv_area_aspect_v1; brief home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "source": {"driver": "FaitalPRO HF1440, 1.4-inch, exit radius 18.0 mm, exit angle 2.0 deg", "hf1440_modelled": true},
+      "geometry": {
+        "inner_mouth_w_mm": 580.0, "inner_mouth_h_mm": 300.5, "inner_depth_mm": 325.2,
+        "outer_build_bbox_mm": {"w": 580.0, "h": 301.1, "d_incl_lip": 328.2},
+        "build_box_mm": {"w": 592.0, "h": 313.1, "d": 334.2},
+        "provenance": "[measured] design.json generator.derived.forward.mouth_w_mm/mouth_h_mm/L_mm + saved mesh row bbox_m"
+      },
+      "best_saved": {
+        "run_id": "20261119T043506Z-screen-54878f", "design_hash": "febde0373489",
+        "J": 4.8787457418045195, "identity": "smooth-v7 (objective v7)", "valid": 40,
+        "v10_rescore": {"J": 7.068547250549901, "identity": "v10", "run": "runs/analysis/v10_priority10_2026-11-19/crowe_v2a_c1", "score_id": "c4af7b6be31efe3bfb3c1e73c4be668068911a92ba68af1bd4d2c67212f868fc", "mixed_identity": false, "seed_design": "1c206df9912f", "seed_J_v10": 10.4104},
+        "attempts": 40, "run_status": "finished (budget)", "n_dof": 3331, "n_triangles": 6362,
+        "terms_v7": {"total": 4.8787457418045195, "load": 0.0, "dislope": 0.4348570609091505, "flat": 0.41995417141699315, "flat_cv": 0.22498952461645796, "diag": 1.7225671011450159, "lfp20_hz": 362.03331442387565}
+      },
+      "runs_recent": [
+        {"run_id": "20261119T043506Z-screen-54878f", "role": "only search run", "J": 4.8787457418045195, "valid": 40},
+        {"run_id": "runs/analysis/v10_priority10_2026-11-19/crowe_v2a_c1", "role": "CPU v10 offline rescore (40/40 exact_complete)", "J": 7.068547250549901, "valid": 40}
+      ],
+      "promotion_math": "v10 rescore best 7.0685 vs the v10 leader 1.4214 = 5.65 J behind, far outside the 0.4677 floor",
+      "further_gpu_needed": {"value": false, "why": "the CPU v10 rescore already ranks it 5.65 J behind; a GPU search cannot close that with the four current DOF."},
+      "morphology_tags": ["area-aspect-superellipse", "no-returned-lip", "flat-panel-crowe", "H-dominant-mouth"],
+      "crossover": {
+        "measured_bw_at": {"850": {"h": 74.2, "v": 103.7}, "950": {"h": 87.9, "v": 93.3}, "1100": {"h": 100.4, "v": 80.1}, "1250": {"h": 93.6, "v": 70.3}},
+        "loading": {"lfp20_hz": 362.0, "verdict": "zero-penalty at all four XOs"},
+        "verdict": {"850": "not_feasible (V 103.7)", "950": "marginal (V 93.3)", "1100": "marginal (V 80.1 but H 100.4 ballooning)", "1250": "marginal (V 70.3 / H 93.6)"},
+        "unknown": "no woofer/cabinet; the H flare balloons between 0.9 and 1.1 kHz, the opposite of what a 1 kHz XO wants"
+      },
+      "driver_fit": {
+        "10in": {"moving_dia_mm": 210.5, "min_center_spacing_mm": 258.8, "d_lambda_900": 0.68, "d_lambda_1200": 0.91},
+        "12in": {"moving_dia_mm": 260.5, "min_center_spacing_mm": 283.8, "d_lambda_900": 0.74, "d_lambda_1200": 0.99},
+        "panel_fit": "NOT_YET_AVAILABLE"
+      }
+    },
+    "C2": {
+      "source_config_path": "examples/typologies/scout40w2_2026-11-19/scout40w3__crowe_x_square_v7.yaml",
+      "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+      "config_sha": "37b03559e9db",
+      "family": "FREEFORM",
+      "route": "grid rows: osse_rollback, square 461 x 460 mouth (H/V symmetric)",
+      "generator": "name: grid; brief home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+      "source": {"driver": "FaitalPRO HF1440, 1.4-inch, exit radius 18.0 mm, exit angle 2.0 deg", "hf1440_modelled": true},
+      "geometry": {
+        "inner_mouth_w_mm": 461.1, "inner_mouth_h_mm": 460.0,
+        "outer_build_bbox_mm": {"w": 461.4, "h": 460.5, "d_incl_lip": 231.4},
+        "build_box_mm": {"w": 473.4, "h": 472.5, "d": 237.4},
+        "provenance": "[measured] saved best mesh row bbox_m + inner aperture rebuilt from the saved best grid rows"
+      },
+      "best_saved": {
+        "run_id": "20261119T161820Z-screen-9fda2a", "design_hash": "be9ab290d3cf",
+        "J": 7.598245619219523, "identity": "home-v7 (objective v7)", "valid": 10,
+        "attempts": 26, "run_status": "watchdog (exit 75, no_gain_valid)", "n_dof": 3829, "n_triangles": 7418,
+        "terms": {"total": 7.598245619219523, "load": 2.974901556148882, "dislope": 0.14217065829509, "flat": 1.1088527985231404, "flat_cv": 0.5984969125892201, "diag": 0.4261465251744271, "lfp20_hz": 708.446793076006}
+      },
+      "runs_recent": [
+        {"run_id": "20261119T144903Z-screen-0ec862", "role": "W2", "J": 7.618312117278556, "valid": 16},
+        {"run_id": "20261119T161820Z-screen-9fda2a", "role": "W3 best", "J": 7.598245619219523, "valid": 10}
+      ],
+      "promotion_math": "W2 7.6183 -> W3 7.5982 = 0.0201 gain, far below the 0.3105 floor = TIE; 16 invalid_envelope refusals in 26 rows",
+      "further_gpu_needed": {"value": false, "why": "tie, and the cost is load 2.97 (39% of J) with a square mouth. The box's own envelope refusals (16/26) say the search is box-limited."},
+      "morphology_tags": ["square-mouth", "H-V-symmetric", "osse-rollback", "no-crease"],
+      "crossover": {
+        "measured_bw_at": {"850": {"h": 77.8, "v": 78.3}, "950": {"h": 72.3, "v": 72.7}, "1100": {"h": 67.9, "v": 68.1}, "1250": {"h": 72.9, "v": 72.9}},
+        "loading": {"lfp20_hz": 708.4, "verdict": "zero-penalty only at 1250; loading penalty at 850-1100"},
+        "verdict": {"850": "not_feasible (loading penalty + V 78.3)", "950": "marginal (loading penalty, V 72.7)", "1100": "marginal (loading penalty 708>688, V 68.1)", "1250": "feasible (loading just passes, V/H 72.9 is above the 40-60 corridor)"},
+        "unknown": "no woofer/cabinet; square mouth gives the most uniform H/V of the ten but sits above the corridor"
+      },
+      "driver_fit": {
+        "10in": {"moving_dia_mm": 210.5, "min_center_spacing_mm": 338.5, "d_lambda_900": 0.89, "d_lambda_1200": 1.18},
+        "12in": {"moving_dia_mm": 260.5, "min_center_spacing_mm": 363.5, "d_lambda_900": 0.95, "d_lambda_1200": 1.27},
+        "panel_fit": "NOT_YET_AVAILABLE"
+      }
+    },
+    "K1": {
+      "source_config_path": "examples/typologies/scout40w_2026-11-19/scout40w2__klangfilm_b3_soft.yaml",
+      "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+      "config_sha": "7fb61f64dcc8",
+      "family": "FREEFORM",
+      "route": "grid rows: klangfilm_lame_hv_core (frozen Klangfilm Lame core kernel: one area law, H/V held aspect, beak)",
+      "generator": "name: grid; brief home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+      "source": {"driver": "FaitalPRO HF1440, 1.4-inch, exit radius 18.0 mm, exit angle 2.0 deg", "hf1440_modelled": true},
+      "geometry": {
+        "v7_best": {"inner_mouth_w_mm": 523.5, "inner_mouth_h_mm": 311.0, "outer_build_bbox_mm": {"w": 523.5, "h": 311.0, "d_incl_lip": 307.4}, "design_hash": "ee85bcd2ad67", "n_dof": 3375},
+        "v10_best": {"inner_mouth_w_mm": 486.8, "inner_mouth_h_mm": 287.2, "outer_build_bbox_mm": {"w": 486.85, "h": 287.17, "d_incl_lip": 285.4}, "design_hash": "3545b3e078ac", "n_dof": 2960},
+        "provenance": "[measured] saved best mesh rows bbox_m + inner aperture rebuilt from the saved best grid rows (both designs)"
+      },
+      "best_saved": {
+        "run_id": "20261119T073330Z-screen-723756",
+        "design_hash": "3545b3e078ac",
+        "J": 3.742832424084881, "identity": "v10 (CPU offline rescore)", "valid": 40,
+        "v7_best_in_same_run": {"design_hash": "ee85bcd2ad67", "J": 2.800217399969265, "identity": "smooth-v7"},
+        "v10_rescore": {"J": 3.742832424084881, "identity": "v10", "run": "runs/analysis/v10_priority10_2026-11-19/klangfilm_b3_soft", "score_id": "bf1a9c8158ea8976a87844714e4547538732b8e1fa25726beeff09f3c4bd64eb", "mixed_identity": false, "scored": 41},
+        "attempts": 40, "run_status": "finished (budget)", "n_dof": 2960, "n_triangles": 6476,
+        "terms_v10_best": {"total": 2.9699810885723146, "load": 0.0, "dislope": 0.03713051302923944, "flat": 0.4279726216831518, "flat_cv": 0.25769231837484996, "lfp20_hz": 434.816486537076, "note": "terms are the STORED v7 terms of design 3545b3e078ac; the v10 J (3.7428) is the rescore"}
+      },
+      "runs_recent": [
+        {"run_id": "20261119T051630Z-screen-ce7a3f", "role": "s40__ first pass", "J": 3.5400116512193747, "valid": 65},
+        {"run_id": "20261119T063219Z-screen-8deb7b", "role": "s40w__ warm", "J": 2.84115842822621, "valid": 32},
+        {"run_id": "20261119T073330Z-screen-723756", "role": "s40w2__ best (v7) + source of the v10 rescore", "J": 2.800217399969265, "valid": 40},
+        {"run_id": "runs/analysis/v10_priority10_2026-11-19/klangfilm_b3_soft", "role": "CPU v10 offline rescore (41/41)", "J": 3.742832424084881, "valid": 41}
+      ],
+      "promotion_math": "v10 rescore best 3.7428 vs the v10 leader 1.4214 = 2.32 J behind, outside the 0.4677 floor. The v7 best (2.8002) cannot be compared to v10.",
+      "further_gpu_needed": {"value": false, "why": "the CPU rescore already gives the v10 rank; the lane is 2.3 J off and the frozen kernel's one-area-law caps V control (K2 measured the same wall)."},
+      "morphology_tags": ["klangfilm-lame-hump", "hv-core-area-law", "returned-lip-beak", "frozen-family-kernel"],
+      "crossover": {
+        "measured_bw_at": {"850": {"h": 71.8, "v": 104.9}, "950": {"h": 67.2, "v": 95.3}, "1100": {"h": 65.8, "v": 82.5}, "1250": {"h": 79.1, "v": 70.9}},
+        "loading": {"lfp20_hz": 434.8, "verdict": "zero-penalty at all four XOs"},
+        "verdict": {"850": "not_feasible (V 104.9)", "950": "not_feasible (V 95.3)", "1100": "marginal (V 82.5)", "1250": "marginal (V 70.9 / H 79.1)"},
+        "unknown": "no woofer/cabinet; the V knee is the known Klangfilm limit and the frozen kernel cannot raise the V mouth without narrowing H"
+      },
+      "driver_fit": {
+        "10in": {"moving_dia_mm": 210.5, "min_center_spacing_mm": 246.6, "d_lambda_900": 0.65, "d_lambda_1200": 0.86, "basis": "v10-best H 287.2 mm"},
+        "12in": {"moving_dia_mm": 260.5, "min_center_spacing_mm": 271.6, "d_lambda_900": 0.71, "d_lambda_1200": 0.95, "basis": "v10-best H 287.2 mm"},
+        "panel_fit": "NOT_YET_AVAILABLE"
+      }
+    },
+    "K2": {
+      "source_config_path": "examples/typologies/fable_v2_2026-11-19/hl__klangfilm_lame_c200_vbeak_v10_v1.yaml",
+      "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+      "config_sha": "d4421ce593df",
+      "family": "FREEFORM",
+      "route": "grid rows: canonical_record_v2 on the c200 host; record-level edits vertical_timing + vertical_beak (V lips move forward, side walls fixed)",
+      "generator": "name: grid; brief home_landscape_2026-11-18_v10/room_landscape_80x50_700_hf1440_v10.yaml",
+      "source": {"driver": "FaitalPRO HF1440, 1.4-inch, exit radius 18.0 mm, exit angle 2.0 deg", "hf1440_modelled": true},
+      "control": "hl__klangfilm_lame_c200_record_control_smooth.yaml (config_sha e4a84ddb505e) replays the parent: run 20261119T165650Z-screen-f30e50, design 3c4aa3350077, J 7.446632238976636 v7 vs parent 7.4458",
+      "geometry": {
+        "inner_mouth_w_mm": 585.1, "inner_mouth_h_mm": 249.7,
+        "outer_build_bbox_mm": {"w": 585.1, "h": 249.7, "d_incl_lip": 195.8},
+        "build_box_mm": {"w": 597.1, "h": 261.7, "d": 201.8},
+        "provenance": "[measured] saved best mesh row bbox_m + inner aperture rebuilt from the saved best grid rows (widest inner point sits at the returned lip)"
+      },
+      "best_saved": {
+        "run_id": "20261119T165732Z-screen-3ebb94", "design_hash": "2edf3ea06d10",
+        "J": 8.391004491167408, "identity": "v10", "valid": 30,
+        "attempts": 30, "run_status": "watchdog (exit 75, no_gain_valid)", "n_dof": 4808, "n_triangles": 9324,
+        "seed_J_v10": 8.4198,
+        "terms": {"total": 8.391004491167408, "load": 0.7167069569021094, "dislope": 6.334054335602194, "flat": 0.3377691675984624, "flat_cv": 0.17960387224785898, "diag": 7.408589017268589, "lfp20_hz": 507.8122170362038}
+      },
+      "runs_recent": [
+        {"run_id": "20261119T165650Z-screen-f30e50", "role": "record control (gate)", "J": 7.446632238976636, "identity": "v7", "valid": 1},
+        {"run_id": "20261119T165732Z-screen-3ebb94", "role": "vbeak screen", "J": 8.391004491167408, "identity": "v10", "valid": 30}
+      ],
+      "promotion_math": "seed 8.4198 -> 8.3910 = 0.029 gain, far below the v10 0.4677 floor = no gain. dislope+diag = 16.4 of 8.39 J (the v10 DI-slope wall).",
+      "further_gpu_needed": {"value": false, "why": "measured construction/score mismatch: the two record freedoms move the V plane, not the DI slope that carries 75% of J. A rescue needs a DI-slope-relevant freedom (mouth area law / H-wall turn), i.e. a new construction and a senior decision."},
+      "morphology_tags": ["record-level-V-timing", "V-lip-beak", "single-area-law", "klangfilm-c200-record"],
+      "crossover": {
+        "measured_bw_at": {"850": {"h": 96.0, "v": 163.9}, "950": {"h": 92.0, "v": 144.9}, "1100": {"h": 87.3, "v": 123.9}, "1250": {"h": 84.7, "v": 118.1}},
+        "loading": {"lfp20_hz": 507.8, "verdict": "zero-penalty at all four XOs"},
+        "verdict": {"850": "not_feasible (V 163.9)", "950": "not_feasible (V 144.9)", "1100": "not_feasible (V 123.9)", "1250": "not_feasible (V 118.1)"},
+        "unknown": "no woofer/cabinet; V control is unproven above 1.25 kHz on this construction"
+      },
+      "driver_fit": {
+        "10in": {"moving_dia_mm": 210.5, "min_center_spacing_mm": 233.1, "d_lambda_900": 0.61, "d_lambda_1200": 0.82},
+        "12in": {"moving_dia_mm": 260.5, "min_center_spacing_mm": 258.1, "d_lambda_900": 0.68, "d_lambda_1200": 0.90},
+        "panel_fit": "NOT_YET_AVAILABLE"
+      }
+    },
+    "R1": {
+      "source_config_path": "examples/typologies/fable_v2_2026-11-19/hl__rolled_rect_record_vbeak_v10_v1.yaml",
+      "repo_head": "277fa9386e2e4e27a6500ace6e8116657553b991",
+      "config_sha": "8e86f248fb42",
+      "family": "FREEFORM",
+      "route": "grid rows: canonical_record_v2 on the rolled-rect h12 host; record-level vertical_timing + vertical_beak",
+      "generator": "name: grid; brief home_landscape_2026-11-18_v10/room_landscape_80x50_700_hf1440_v10.yaml",
+      "source": {"driver": "FaitalPRO HF1440, 1.4-inch, exit radius 18.0 mm, exit angle 2.0 deg", "hf1440_modelled": true},
+      "optional_whole_family": {
+        "config": "examples/typologies/fable_v2_2026-11-19/hl__rolled_rect_hybrid_vbeak_v10_v1.yaml",
+        "config_sha": "18d3919e93bc",
+        "run_id": "20261119T172313Z-screen-081506", "design_hash": "96790c88352e",
+        "J": 9.305393254014847, "identity": "v10", "valid": 30,
+        "seed_J_v10": 15.549, "gain": 6.24,
+        "terms": {"dislope": 7.321551146628939, "cov_profile": 0.6306493770582794, "flat_cv": 0.41044906567378553, "load": 0.5227500357822962},
+        "geometry": {"inner_mouth_w_mm": 575.6, "inner_mouth_h_mm": 344.0, "outer_build_bbox_mm": {"w": 575.7, "h": 344.0, "d_incl_lip": 242.3}}
+      },
+      "geometry": {
+        "inner_mouth_w_mm": 542.0, "inner_mouth_h_mm": 297.4,
+        "outer_build_bbox_mm": {"w": 542.0, "h": 297.4, "d_incl_lip": 238.2},
+        "build_box_mm": {"w": 554.0, "h": 309.4, "d": 244.2},
+        "provenance": "[measured] saved best mesh row bbox_m + inner aperture rebuilt from the saved best grid rows"
+      },
+      "best_saved": {
+        "run_id": "20261119T170937Z-screen-ba0f14", "design_hash": "d16ae26ca974",
+        "J": 15.319650131463584, "identity": "v10", "valid": 30,
+        "seed_J_v10": 15.547,
+        "attempts": 30, "run_status": "watchdog (exit 75, no_gain_valid)", "n_dof": 4906, "n_triangles": 9534,
+        "terms": {"total": 15.319650131463584, "load": 0.6540761881670727, "dislope": 10.922332627835821, "flat": 0.85259027008451, "flat_cv": 0.8427539272279737, "diag": 17.305515193769406, "lfp20_hz": 501.24150232399506}
+      },
+      "comparison_same_family_other_identity": [
+        {"config": "examples/typologies/scout40_2026-11-19/scout40__rf_rect_axial_cap225.yaml", "config_sha": "2caade374a6c", "run_id": "20261119T092938Z-screen-2de348", "J": 19.7214, "identity": "home-v7", "valid": 40},
+        {"config": "examples/typologies/scout40_2026-11-19/scout40__rf_rect_axial_control270.yaml", "config_sha": "7b53a3f95cb6", "run_id": "20261119T094135Z-screen-382cb5", "J": 19.7063, "identity": "home-v7", "valid": 40}
+      ],
+      "promotion_math": "record lane: seed 15.547 -> 15.320 = 0.227 gain, below the v10 0.4677 floor. The whole-family hybrid (R1b) gained 6.24 but still sits 7.88 J behind the v10 leader. The two home-v7 axial cells (19.72/19.71) are a DIFFERENT identity and are NOT ranked against either v10 number.",
+      "runs_recent": [
+        {"run_id": "20261119T170937Z-screen-ba0f14", "role": "record vbeak screen", "J": 15.319650131463584, "identity": "v10", "valid": 30},
+        {"run_id": "20261119T172313Z-screen-081506", "role": "whole-family hybrid vbeak (R1b), different config_sha 18d3919e93bc", "J": 9.305393254014847, "identity": "v10", "valid": 30},
+        {"run_id": "20261119T092938Z-screen-2de348", "role": "axial cap225 comparison (home-v7, never ranked vs v10)", "J": 19.7214, "identity": "home-v7", "valid": 40},
+        {"run_id": "20261119T094135Z-screen-382cb5", "role": "axial control270 comparison (home-v7, never ranked vs v10)", "J": 19.7063, "identity": "home-v7", "valid": 40}
+      ],
+      "further_gpu_needed": {"value": false, "why": "both record-lane mechanisms are measured to be DI-slope-blind; the family hybrid already moved dislope and is still 7.9 J off."},
+      "morphology_tags": ["record-level-V-timing", "V-lip-beak", "rolled-rect-host", "returned-lip-fold"],
+      "crossover": {
+        "measured_bw_at": {"850": {"h": 110.7, "v": 142.9}, "950": {"h": 121.5, "v": 135.1}, "1100": {"h": 133.1, "v": 124.9}, "1250": {"h": 134.6, "v": 116.1}},
+        "measured_bw_at_hybrid": {"850": {"h": 113.3, "v": 128.4}, "950": {"h": 113.1, "v": 121.7}, "1100": {"h": 112.6, "v": 112.1}, "1250": {"h": 111.4, "v": 101.3}},
+        "loading": {"lfp20_hz": 501.2, "verdict": "zero-penalty at all four XOs"},
+        "verdict": {"850": "not_feasible (V 142.9 / hybrid 128.4)", "950": "not_feasible (V 135.1 / hybrid 121.7)", "1100": "not_feasible (V 124.9 / hybrid 112.1)", "1250": "not_feasible (V 116.1 / hybrid 101.3)"},
+        "unknown": "no woofer/cabinet; hybrid V is still >100 deg at 1.25 kHz"
+      },
+      "driver_fit": {
+        "10in": {"moving_dia_mm": 210.5, "min_center_spacing_mm": 256.9, "d_lambda_900": 0.67, "d_lambda_1200": 0.90},
+        "12in": {"moving_dia_mm": 260.5, "min_center_spacing_mm": 281.9, "d_lambda_900": 0.74, "d_lambda_1200": 0.99},
+        "panel_fit": "NOT_YET_AVAILABLE"
+      }
+    }
+  }
+}
