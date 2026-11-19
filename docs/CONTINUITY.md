@@ -17,6 +17,8 @@
     J 92.61 (15/15 evals; rolled_family_rect_v1 control pilot, brief home_range_v9_h12).
 - Not archived: per-design mesh.msh/response.npz except the best design's mesh (large generated
   artifacts; every mesh is reproducible from its committed design.json).
+- Follow-up: `*.msh` is globally gitignored, so the three best-design meshes were force-added
+  (`git add -f`) in a second commit; per-design response.npz stays local-only.
 
 ## 2026-11-19 - PR #74 merged into hornfab-all-2026-11-18 (local orchestrator, R21)
 
