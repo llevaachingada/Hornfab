@@ -267,6 +267,50 @@ def test_bl_panel_fit_is_deterministic() -> None:
             assert W.bl_panel_fit_feasible(box) == first
 
 
+def test_separation_helper_agrees_with_the_boolean_gate() -> None:
+    """The GUI numbers and the gate verdict come from one arithmetic (never disagree)."""
+    heights = (300.0, 371.2, 420.0, 560.0, 700.0)
+    areas = (20.0, 45.0, 100.0, 170.0)
+    for height in heights:
+        base = W.bl_panel_fit_separation(
+            _recorded_case_box(external_height_mm=height, port_throat_area_cm2=20.0))
+        for area in areas:
+            box = _recorded_case_box(external_height_mm=height, port_throat_area_cm2=area)
+            sep = W.bl_panel_fit_separation(box)
+            assert W.bl_panel_fit_separation(box) == sep                     # deterministic
+            # Same placement as the gate's defaults -> the same verdict, always.
+            demo_y = W.bl_panel_fit_separation(
+                box, driver_y_m=W.BL_DEMO_DRIVER_Y_M, port_y_m=W.BL_DEMO_PORT_Y_M)
+            assert 0.0 <= demo_y["driver_y_m"] and demo_y["port_y_m"] <= 0.0
+            assert (demo_y["feasible"], demo_y["reason"]) == W.bl_panel_fit_feasible(box)
+            # The screen wrapper (max legal y) reports the same offsets and verdict.
+            screen = W._bl_panel_fit_for_screen(box)
+            assert (screen["driver_y_m"], screen["port_y_m"]) == \
+                (sep["driver_y_m"], sep["port_y_m"])
+            assert (screen["accepted"], screen["reason"]) == (sep["feasible"], sep["reason"])
+            assert sep["required_m"] > 0.0 and sep["available_m"] > 0.0
+            if area > 20.0:
+                # A larger port needs strictly more separation and leaves strictly less room.
+                assert sep["required_m"] > base["required_m"]
+                assert sep["available_m"] < base["available_m"]
+
+
+def test_separation_helper_reports_the_recorded_real_driver_numbers() -> None:
+    # Sd-derived 12PR300 moving diameter on the recorded 371.2 mm, 18 mm wall, 45 cm^2 cell.
+    sep = W.bl_panel_fit_separation(_recorded_case_box(port_throat_area_cm2=45.0),
+                                    driver_moving_diameter_m=0.2605)
+    assert sep["required_m"] == pytest.approx(0.1821, abs=5e-5)
+    assert sep["available_m"] == pytest.approx(0.1501, abs=5e-5)
+    assert sep["feasible"] is False
+    assert sep["reason"] == W.BL_PANEL_FIT_DRIVER_PORT_SEPARATION
+    # With a supplied y pair the helper checks exactly that pair, not the max-legal one.
+    fixed = W.bl_panel_fit_separation(_recorded_case_box(external_height_mm=560.0),
+                                      driver_y_m=0.0, port_y_m=-0.13)
+    assert (fixed["driver_y_m"], fixed["port_y_m"]) == (0.0, -0.13)
+    assert (fixed["feasible"], fixed["reason"]) == W.bl_panel_fit_feasible(
+        _recorded_case_box(external_height_mm=560.0), driver_y_m=0.0, port_y_m=-0.13)
+
+
 def test_screen_rejects_bl_panel_fit_into_the_visible_ledger(tmp_path: Path) -> None:
     asset = _synthetic_asset(tmp_path)
     catalog = W.load_driver_catalog(["faitalpro_12pr300"])

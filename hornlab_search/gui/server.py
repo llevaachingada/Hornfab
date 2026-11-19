@@ -496,6 +496,12 @@ class App:
         if sub == "basis" and len(parts) == 3:
             domain = (q.get("domain") or [""])[0]
             return HW.hw_basis(self.root, self.system_store, f"{parts[1]}/{parts[2]}", domain)
+        if sub == "screens" and len(parts) == 1:
+            from . import data_hw_screen as SW
+            return SW.hw_screens(self.root, self.system_store)
+        if sub == "screen" and len(parts) == 2:
+            from . import data_hw_screen as SW
+            return SW.hw_screen(self.root, self.system_store, parts[1])
         raise FileNotFoundError("/".join(["hw", *parts]))
 
     def _budget_hint(self, q: dict) -> dict:
@@ -564,6 +570,12 @@ class App:
     def post(self, path: str, body: dict) -> object:
         parts = [unquote(p) for p in path.strip("/").split("/")][1:]
         head = parts[0] if parts else ""
+        if head == "hw":
+            # Horn + woofer pure recompute endpoints (no solver, no Boundary Lab, no writes).
+            from . import data_hw_screen as SW
+            if len(parts) == 2 and parts[1] == "panel-fit":
+                return SW.panel_fit(body or {})
+            raise FileNotFoundError(path)
         if head == "studies":
             from hornlab_search.studies.schema import StudyError
             root_id = body.pop("root", None) if isinstance(body, dict) else None

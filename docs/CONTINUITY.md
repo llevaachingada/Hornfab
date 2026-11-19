@@ -1,5 +1,27 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - P2 screen data layer + panel-fit recompute (horn + woofer GUI)
+
+- New `gui/data_hw_screen.py`: allow-listed screen-study reads (`system_runs/woofer_seed*`,
+  `system_runs/screens/*`), grouped by 16-hex `study_id` (replay count + byte-identical flag),
+  verbatim shortlist/kept rows, rejection ledger grouped by stage, and `pareto_ids` recomputed in
+  Python via `system.score.dominates` (9 == the recorded Pareto count). `panel_fit()` is the pure
+  `POST /api/hw/panel-fit` recompute; it refuses unknown/out-of-range fields by name.
+- `system/woofer_seed.py` additive: the panel-fit arithmetic is one private chain; new
+  `bl_panel_fit_separation()` reports `required_m`/`available_m`; `bl_panel_fit_feasible()` keeps
+  its exact signature and tuple return. Verified: real 12PR300 on 371.2 mm -> 0.182097 required vs
+  0.150103 available (`BL_PANEL_FIT_DRIVER_PORT_SEPARATION`); the recorded 170 cm2 demo cell ->
+  0.187561 vs 0.144639, refused.
+- `server.py` wiring: `GET /api/hw/screens`, `GET /api/hw/screen/<study>`, `POST /api/hw/panel-fit`
+  (dispatch test added in `tests/system/test_gui_hw.py`). New tests:
+  `tests/system/test_gui_hw_screen.py` (31) + 2 appended in `test_woofer_seed.py`.
+- P1 backend: ledger `counts` now always carries solved/staged/stage_failed/solve_failed/recorded/empty.
+- Tooling: `tools/gui/browser_check.py` (Playwright §8.6 checklist: console errors, page scroll,
+  chart width/aria, no `<h1>` on hw pages, keyboard reach, reload-restores-hash, screenshots).
+- Owner feedback on the first P1 build: ledger rows were 665 px tall (verbatim token + gloss in an
+  89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
+  "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
+
 ## 2026-11-19 - resolve_warm_runs: study-layout fix (local orchestrator, CPU)
 
 - `tools/night_queue/resolve_warm_runs.py` now finds `runs/<study>/<screen|verify>/designs/<hash>` and

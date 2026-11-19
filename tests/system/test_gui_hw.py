@@ -122,7 +122,9 @@ def test_ledger_states_tokens_and_declarations(env) -> None:
     assert tampered["integrity"].startswith("failed") and "MANIFEST_INTEGRITY_FAILED" in tampered["tokens"]
 
     assert [m["key"] for m in data["declared_missing"]] == ["bl_gone/20261101T000000Z-x-9-ffff"]
-    assert data["counts"] == {"solved": 1, "staged": 2, "stage_failed": 1}
+    # P1: the ledger KPI strip also counts recorded and empty cases (hidden rows still counted).
+    assert data["counts"] == {"solved": 1, "staged": 2, "stage_failed": 1,
+                              "solve_failed": 0, "recorded": 0, "empty": 0}
     assert "ref_case/horn_full" in rows and rows["ref_case/horn_full"]["family"] == "other"
 
 
@@ -219,6 +221,18 @@ def test_server_dispatch(env) -> None:
                 {"domain": ["observation:probe:on_axis"]})
     assert len(b["excitations"]) == 2
     assert app.get("/api/hw/readiness", {})["decisions"]
+    # P2: screens list/detail and the pure panel-fit recompute are wired.
+    screens = app.get("/api/hw/screens", {})
+    assert screens["studies"] == [] and "store" in screens          # fixture store has no studies
+    with pytest.raises(FileNotFoundError):
+        app.get("/api/hw/screen/0123456789abcdef", {})
+    fit = app.post("/api/hw/panel-fit", {"height_mm": 371.2, "port_throat_area_cm2": 170.0,
+                                         "net_volume_l": 115.0, "wall_mm": 18.0})
+    assert fit["feasible"] is False and fit["reason"].startswith("BL_PANEL_FIT_")
+    assert fit["required_m"] > fit["available_m"]
+    with pytest.raises(ValueError):
+        app.post("/api/hw/panel-fit", {"height_mm": 9999, "port_throat_area_cm2": 170.0,
+                                       "net_volume_l": 115.0, "wall_mm": 18.0})
     with pytest.raises(FileNotFoundError):
         app.get("/api/hw/nope", {})
 

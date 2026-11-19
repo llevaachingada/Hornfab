@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Horn + woofer GUI P1/P2 progress
+
+- DONE (P2 backend): screen study reader + panel-fit recompute + endpoints; 33 new tests green;
+  acceptance numbers reproduce the recorded 0.1821/0.1501 and 170 cm2 refusals.
+- OPEN (this pass): P1 UI revision (ledger row height, default-expanded groups, solved-vs-staging
+  reconciliation, readiness KPIs, chart/polar/geometry legibility) and the P2 screens UI module.
+- OPEN (senior, carried): decision 6 authorization record shape; decision 3 calibration policy (R1).
+
 ## 2026-11-19 23:35 - SCOUT40 night live
 
 - LIVE: fable_scout40_2026-11-19 (18 jobs), controller pid 16596, first rows in 20261119T043506Z-screen-54878f.

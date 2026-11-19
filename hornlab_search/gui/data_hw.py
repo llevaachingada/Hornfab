@@ -342,6 +342,9 @@ def hw_cases(root: Path, store: Path) -> dict:
     for r in rows:
         if r["family"] == "bl_case":
             counts[r["state"]] = counts.get(r["state"], 0) + 1
+    # P1: the ledger KPI strip shows recorded and empty too (hidden rows still counted).
+    for k in ("solved", "staged", "stage_failed", "solve_failed", "recorded", "empty"):
+        counts.setdefault(k, 0)
     return {"store": str(base), "registry": REGISTRY_REL.as_posix(),
             "registry_error": registry.get("error"), "fidelity_note": registry.get("fidelity_note"),
             "cases": rows, "declared_missing": missing, "counts": counts}
