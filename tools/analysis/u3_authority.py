@@ -7,7 +7,8 @@ within it). Otherwise B2 stops.
 
 WP 4.3 (U3 authority, unchanged from VALIDATION_EXPERIMENTS.md U3): a freedom has authority if it
 moves the INTENDED plane's mean beamwidth by >= 3 deg in at least one band while the other plane
-moves by less than half as much. Section steering and the diagonal pull have no single intended
+moves by less than half as much. Each passing band also gets a grade: 'authority' when the move
+clears 3 deg by at least one standard error of its per-frequency deltas, else 'borderline'. Section steering and the diagonal pull have no single intended
 plane: each plane is tried as the intended one and both outcomes are reported.
 
 Inputs are per-arm ``(freqs_hz, bw_h_deg, bw_v_deg)``; ``load_arm`` reads them from a run's
@@ -72,16 +73,39 @@ def equivalence(host, control, *, dj: float | None = None, floor: float | None =
 def authority(control, variant, name: str) -> dict:
     c, v = _common_grid(control, variant)
     bc, bv = band_means(*c), band_means(*v)
-    res = {"bands": {}, "authority": False, "via": []}
-    for k in bc:
+    res = {"bands": {}, "authority": False, "via": [], "grade": "none"}
+    f = np.asarray(c[0], float)
+    for (lo, hi), k in zip(BANDS_HZ, bc):
         dh, dv = bv[k]["h"] - bc[k]["h"], bv[k]["v"] - bc[k]["v"]
-        res["bands"][k] = {"dh": dh, "dv": dv}
+        m = (f >= lo) & (f <= hi)
+        se = {"h": _se(np.asarray(v[1], float)[m] - np.asarray(c[1], float)[m]),
+              "v": _se(np.asarray(v[2], float)[m] - np.asarray(c[2], float)[m])}
+        res["bands"][k] = {"dh": dh, "dv": dv, "se_h": se["h"], "se_v": se["v"], "n": int(m.sum())}
         for plane in INTENDED.get(name, ("h", "v")):
             mine, other = (dh, dv) if plane == "h" else (dv, dh)
             if abs(mine) >= AUTHORITY_DEG and abs(other) < 0.5 * abs(mine):
-                res["authority"] = True
-                res["via"].append({"band": k, "plane": plane, "delta_deg": mine})
+                res["authority"] = True  # the predeclared U3 rule, unchanged
+                grade = _grade(mine, se[plane])
+                res["via"].append({"band": k, "plane": plane, "delta_deg": mine,
+                                   "se_deg": se[plane], "grade": grade})
+                if grade == "authority" or res["grade"] == "none":
+                    res["grade"] = grade
     return res
+
+
+def _se(d) -> float:
+    """Standard error of the band-mean move from its per-frequency deltas (nan if < 2 points)."""
+    d = np.asarray(d, float)
+    d = d[np.isfinite(d)]
+    return float(d.std(ddof=1) / np.sqrt(len(d))) if len(d) > 1 else float("nan")
+
+
+def _grade(move: float, se: float) -> str:
+    """Senior verdict 2026-11-19 (SENIOR_VERDICTS_2026-11-19.md): the 3 deg threshold stays; a move
+    that clears it by less than one SE is 'borderline' and changes no decision on its own."""
+    if not np.isfinite(se):
+        return "borderline"
+    return "authority" if abs(move) - AUTHORITY_DEG >= se else "borderline"
 
 
 def load_arm(design_dir: Path, cfg):

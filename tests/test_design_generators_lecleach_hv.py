@@ -1,4 +1,4 @@
-# Offline tests for the lecleach H/V pair construction (published ellipsoidal wavefronts),
+# Offline tests for the lecleach H/V pair construction (a reconstruction of the published ellipsoidal-wavefront principle),
 # 2026-11-16, item 13 of docs/queue/HOME_18H_PLAN_2026-11-16.md.
 #
 # Grounding: docs/research/typologies/LECLEACH_HV_ELLIPSOID_2026-11-16.md (sections cited per

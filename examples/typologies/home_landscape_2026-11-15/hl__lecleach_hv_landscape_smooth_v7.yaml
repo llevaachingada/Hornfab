@@ -74,7 +74,7 @@ bounds:
 # march"; each plane is a JMLC march [published], the H/V pairing and onset ramp are a LABELED HYBRID
 # [reconstruction] (docs/knowledge/contracts/lecleach_iwata_hv.md). The description text is left as is so
 # this lane's config_sha and history stay one identity; any new version must use the corrected wording.
-description: 'HOME LANDSCAPE Le Cleach H/V pair (published ellipsoidal-wavefront construction; owner-picked seed 12 2026-11-16): H/V differ from the expansion itself, lip a smooth continuous rollback. Smooth brief.'
+description: 'HOME LANDSCAPE Le Cleach H/V pair (reconstruction of the published ellipsoidal-wavefront principle; owner-picked seed 12 2026-11-16): H/V differ from the expansion itself, lip a smooth continuous rollback. Smooth brief.'
 mesh:
   epw: 6.0
   quadrants: '1'

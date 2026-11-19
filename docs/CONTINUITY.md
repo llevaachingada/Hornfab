@@ -1,5 +1,118 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - PR #74 merged into hornfab-all-2026-11-18 (local orchestrator, R21)
+
+- Merged `claude/adoring-ramanujan-1m4b3g` @ 37da1ee into `hornfab-all-2026-11-18` (merge commit
+  `4e27afd`, clean, strict descendant of bc22d6c). Contents: senior verdicts (rho20 borderline park
+  stands; v7 stored-J tie floor re-pinned 0.31 / combined 0.3105; steer planes confirmed), u3_authority
+  se_deg+grade, WP 4.4 record_body g_vt_mm + g_vt_hold (seed = host, host V mouth 386.7 mm, bounds
+  320-465 / 0-0.5), continuation_advice.py, night_queue/resolve_warm_runs.py, Le Cleac'h H/V
+  "published" -> "reconstruction" relabel, SCOUT40 night (18 jobs) + configs, B6 night DEFERRED.
+- Tests local (cloud container lacked cma/hornlab_mesher): offline batch 72/72 pass
+  (test_queue_fable_scout40, test_queue_fable_vt_b6, test_night_queue_resolve_warm_runs,
+  test_design_record_body_vt, test_tools_analysis_continuation_advice, test_tools_analysis_u3_authority,
+  test_design_generators_lecleach_hv, test_design_generators_lecleach, test_wp09_d9_provenance);
+  mesher-gated batch pass exit 0 (test_design_generated, test_geometry_record, test_geometry_edits,
+  test_tools_analysis_u3_jobs, all 8 test_design_generators_grid*).
+- Next: SCOUT40 preflight (resolve_warm_runs, shape_check, search_preflight, dry-run) then GPU launch
+  with a 14 h cutoff; B6 stays deferred until SCOUT40 results.
+
+## 2026-11-19 - SCOUT40 owner edits: smooth group first, +2 Klangfilm-Lame, morph v7 / twinray v8 out (cloud Fable senior)
+
+- Night `docs/queue/fable_scout40_2026-11-19.yaml` now 18 jobs: 1-6 SMOOTH brief (Crowe V2A c1, Le Cleac'h H/V,
+  Iwata-AR smooth, Klangfilm b3_soft, **Klangfilm-Lame parent c200w** (seed = c200 best J 7.446),
+  **Klangfilm-Lame H/V Phase A stage_a_search** (4 knobs)); 7 vt_v1; 8-17 home v7 warm-started lanes; 18 tail.
+  Removed: osse_rrect_morph_v7, ath_twinray380_v8 (owner).
+- Rejected as Lame candidates: Phase B b2_wide / b4_wide_h (0 searched dims: geometry diagnostics; the runner
+  refuses them); hl__klangfilm_lame_curved_v1 base (legacy bridge rows type `klangfilm_lame`).
+- Tests: night guard + all session suites pass offline (see PR #74).
+
+## 2026-11-19 - SCOUT40 night written (owner: budget ~40, more typologies, <= 14 h); B6 deferred
+
+- **Night** `docs/queue/fable_scout40_2026-11-19.yaml` (18 jobs, dry-run clean, 1 h timeout each, est. 6-12 h):
+  vt_v1; 12 home-v7 lanes warm-started from each lane's own best (top 10, sigma from spread; run dirs from
+  the v10 rescore `lane_best`): fold_warm v7, morph v7/v8, ext_throat v7/v8, twinray380 v8, ATH CORE petal
+  (R19 sigma 0.05), Tritonia v8/v9, R-OSSE rect CD (bridge CLI command job), Crowe-X OSSE CD and Crowe-X
+  square (R19 no_headroom -> warm start); smooth-brief group from seed: Crowe V2A c1, Le Cleac'h H/V,
+  Iwata-AR smooth (R19), Klangfilm b3_soft; tail rf section-axial (R19).
+- Configs `examples/typologies/scout40_2026-11-19/` (17). Offline load check passed for 13; 4 need the owner box
+  (mesher / runs/). New `tools/night_queue/resolve_warm_runs.py` fills the 2 `@design:` warm starts
+  (fold_warm, ext_throat v7: the rescore lost their run names) and checks every warm-start dir; tests 2/2;
+  night guard test 1/1.
+- Found: `rosse_rect` is a bridge rows type (only via `tools/geometry/rosse_rect_cli.py`); plain `search`
+  refuses it ("unknown rows type"), so it runs as a command job.
+- B6 night (`fable_vt_b6_2026-11-19`) kept but deferred: SCOUT40 picks which lanes earn the 120-eval matched rerun.
+
+## 2026-11-19 - Night plan for the new freedom + B6 written (not launched; cloud Fable senior)
+
+- **Night file** `docs/queue/fable_vt_b6_2026-11-19.yaml` (9 jobs, dry-run parses): 1) vt_v1 probe
+  (80 evals, v7, from the exact host); 2-7) **B6 / WP 6.2** matched reruns of the three v10 leaders
+  that tie inside one floor (ext_throat_hvlaw_v7, osse_rrect_fold_warm_v7, osse_rrect_morph_v7):
+  120 VALID evals, v10 brief, seeds 61901/61902, s1 for all before any s2; 8-9) twinray380 v8 tail.
+- **Configs** `examples/typologies/b6_2026-11-19/` (8): R19 `__space_v1` applied for ext_throat
+  (sigma0 0.10) and fold_warm (a0 fix); R20b `record_gate: shadow` on ext_throat; v10 brief replaces
+  target/weights (all load as objective 10). Guard test `tests/test_queue_fable_vt_b6.py`.
+- Estimate [inferred, skill table: 10-30 s/eval for 2-7k dof quarter models]: vt ~0.5-1 h; each B6 arm
+  ~0.5-1.5 h incl. refusals -> 6-10 h for jobs 1-7. Owner box: shape_check + search_preflight, then launch.
+
+## 2026-11-19 - vt floor 320 (owner); typology correctness review (cloud Fable senior)
+
+- **Owner: vt bounds now 320-465 mm** (floor raised from 275 to limit the pinched lip). `vt_v1.yaml` +
+  test updated; 10/10 pass.
+- **Typology review** (`docs/research/typologies/TYPOLOGY_CORRECTNESS_REVIEW_2026-11-19.md`, 45 entries):
+  no wrong published formula in code; every research correction is coded and test-pinned. Grade A
+  (published numeric test): JMLC march, Keele BR sizing, ATH CORE, Tritonia, twin-ray, JMLC350,
+  R-OSSE (ST260 STL refit 0.08 mm). Fixed: Le Cleac'h H/V pair mislabelled "published" ->
+  "reconstruction" (metadata only; seed hash 7fb9d2951deb unchanged); lecleach card + WP9 dossier
+  half-angle notes. Keele rule and CD scoring: not imposed across typologies [code-verified].
+- Open (owner/other lanes): close lecleach R9 gate (Fourcade test passes); Klangfilm workbook
+  fixture; ICW/FREEFORM cards; dead `lecleach_mod`/`lecleach_ar` kinds.
+
+## 2026-11-19 - WP 4.4 vt route built (owner bounds 275-465); D8 continuation tool; doc re-pins (cloud Fable senior)
+
+- **Owner decision (2026-11-19): vt bounds 275-465 mm.** Built as a searched route on the explicit
+  record body: `record_body` takes knobs `g_vt_mm` (V-axis mouth height) + `g_vt_hold` (early V-wall
+  hold, 0 = none). Seed (386.73, 0) reproduces the U3 control **exactly** (max diff 6e-14);
+  `validate_search_config` refuses bounds that exclude the host (old [440, 465] now refused).
+  Config `examples/studies/u3_biradial_es_style_v7/vt_v1.yaml` (budget 80; loads; GeneratedSpace builds).
+- **Corrections from the real host record:** best biradial V mouth = **386.7 mm** (350 was the seed).
+  Below ~350 the V axis drops faster than the shoulders: g_vt_mm 275 -> overall mouth 324 mm (pinched
+  lip). Top: 470 fits the 480 envelope incl. 3 mm wall, 475 fails; 465 keeps 9 mm.
+  The single-knob vt_460 edit (hold 0.5) cannot reproduce the control (33 mm RMS at h=350), hence 2 knobs.
+- **D8 / WP 7.2 advisory:** `tools/analysis/continuation_advice.py` (last-100 gain vs identity floor
+  v7 0.3105 / v10 0.4677 / slope5 0.4863; "no floor" otherwise). Tests 3/3.
+- **Docs:** v10 README floor note resolved to 0.31; plan §10.2 A_r15/A_r20 rows written (verified /
+  borderline); `classify_recipes` legacy detail now "digest-unverified".
+- Tests: `test_design_record_body_vt.py` 10/10, continuation 3/3; design/geometry/u3 suites: the only 3
+  failures are pre-existing container gaps (no `cma`, no `hornlab_mesher`), identical before/after.
+- **Needs the owner box:** `shape_check` + dof cap on vt_v1 (mesher), then the budget-80 probe.
+
+## 2026-11-19 - Senior verdicts §2.3 + §2.4 complete; u3_authority gains SE + grade (cloud Fable senior)
+
+- **§2.3:** accept mixed_identity fix, B1 sd(dJ) (note: all 8 dJ negative, use RMS ~0.015 J for
+  absolute J), 0.0057 threshold, 166-sample (needs one brief-YAML diff on the owner box), ST260
+  STL basis. **Amend** legacy `rebuildable` (digest-unverified; 20-record rebuild sample before any
+  legacy finalist). **Overrule** vt bounds: [350, 465] (the control is 350 mm; [440, 465] boxes
+  the search around the +2.30 J point).
+- **§2.4:** steer_early/late = ("h","v") confirmed; inert only at this 1.3-1.5 mm edit on this host.
+- **Code:** `tools/analysis/u3_authority.py` adds `se_deg` + `grade` (authority/borderline); the
+  predeclared `authority` flag is unchanged. Tests 5/5 (`tests/test_tools_analysis_u3_authority.py`).
+- All four senior items of HANDBACK_LOCAL_2026-11-18 §2 are now answered in
+  `scratch/fable_architecture/SENIOR_VERDICTS_2026-11-19.md`.
+
+## 2026-11-19 - Senior verdicts on handback §2.1 (rho20) and §2.2 (v7 floor) (cloud Fable senior)
+
+- **Verdict file:** `scratch/fable_architecture/SENIOR_VERDICTS_2026-11-19.md` (CPU, committed data only).
+- **§2.1 rho20: park stands.** v8 -> A_r20 meets the U3 3 deg rule by 0.12 deg (H 2.5-5.5 kHz +3.12,
+  SE 0.44 over 6 freqs, no mesh floor, dJ +0.024 tie). rho's own swing r15 -> r20 is 1.28 deg H:
+  the rho knob is inert. §10.2 rows to write: A_r15 no authority; A_r20 *borderline*. U3 keeps 3 deg
+  and adds a grade: authority needs (move - 3) >= 1 SE, else borderline (changes no decision alone).
+- **§2.2 v7 floor: re-pin to 0.31 J (combined 0.3105) for stored-J tie calls.** 0.13 is A4's
+  dense-232-J sampling residual (no grid-weighting shift); every critical-path J is stored-grid J.
+  Effects: fold_warm v7 (dJ 0.20-0.25) becomes a tie with the throat cluster (already in B6);
+  WP 4.4 vt success test becomes > 0.3105 J; D8 continuation rule uses 0.31 for v7.
+- Not reviewed yet: handback §2.3 judgment calls, §2.4 steer_early/late planes.
+
 ## 2026-11-18 - WP 4.3 complete (5/5) -> B2 authority table; vt V-freedom has 3x-threshold authority; WP 4.4 proposal written (local orchestrator)
 
 - **WP 4.3: five tool-valid variants solved at verify tier in ~4 min** (night fable_wp43_2026-11-18,

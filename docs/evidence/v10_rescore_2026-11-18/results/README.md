@@ -56,6 +56,10 @@ floor (0.13 J). Both numbers are recorded in `results/floor_v7_summary.json` and
 until the senior pass reconciles the protocols, ties keep using the PUBLISHED 0.13 (README
 acceptance #3 wording preserved) — but see NOTES_FOR_SENIOR 2026-11-18.
 
+**Resolved 2026-11-19 (senior verdict 2, `scratch/fable_architecture/SENIOR_VERDICTS_2026-11-19.md`):**
+tie calls on stored-grid v7 J use **0.31 J** (combined 0.3105). 0.13 J is A4's dense-232-J residual
+and applies only to dense-scored J. Effect: fold_warm v7 ties the throat cluster.
+
 ## Per-lane bests and ties (floor-aware) — the top of the compare
 
 - **v7:** ext_throat_hvlaw_v7 2.4976 → A_r15 3.0836 → (v8 3.1028, A_r20 3.1271 within 0.13 J = tie

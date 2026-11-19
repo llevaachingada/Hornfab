@@ -1,0 +1,65 @@
+name: scout40__lecleach_iwata_ar_smooth_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: iwata_ar
+  n_phi: 15
+  n_s: 32
+  seed_policy: explicit
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 459.5
+  g_T: 0.597
+  g_stop_deg: 110.8
+  g_ar_m: 1.167
+  g_ar_p: 1.016
+bounds:
+  g_fc_hz:
+    lo: 420.0
+    hi: 900.0
+  g_T:
+    lo: 0.4
+    hi: 0.9
+  g_stop_deg:
+    lo: 88.0
+    hi: 200.0
+  g_ar_m:
+    lo: 1.0
+    hi: 2.4
+  g_ar_p:
+    lo: 0.5
+    hi: 2.0
+description: 'SCOUT40 2026-11-19 (cloud Fable senior): 40 valid evals, from the config
+  seed; source scratch/fable_architecture/space_cards/proposals/hl__lecleach_iwata_ar_landscape_smooth_v7/hl__lecleach_iwata_ar_landscape_smooth_v7__space_v1.yaml;
+  R19 space_v1; smooth brief, from seed. Gains below the floor are ties. HOME LANDSCAPE
+  80Hx50V: Le Cleach march + area-preserving landscape aspect ratio from a round 1.4in
+  throat, no K-law | SMOOTH brief (narrowing family)'
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.1
+  seed: 1234
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid

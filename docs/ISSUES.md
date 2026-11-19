@@ -1,5 +1,62 @@
 ﻿# ISSUES
 
+## 2026-11-19 - PR #74 merged into hornfab-all-2026-11-18; SCOUT40 prep next
+
+- DONE (local orchestrator, R21): PR #74 head 37da1ee merged as 4e27afd; offline 72/72 + mesher-gated
+  batches pass locally.
+- OPEN (local orchestrator): SCOUT40 preflight (resolve_warm_runs OK, shape_check, search_preflight,
+  dry-run) -> GPU launch with 14 h cutoff.
+- OPEN (after the night): B6 lane set from SCOUT40 winners (owner approves); offline v10 rescore of
+  new rows before the B6 call.
+
+## 2026-11-19 - SCOUT40 reordered per owner (smooth first, +2 Lame); ready for local launch
+
+- OPEN (local orchestrator): merge PR #74 -> hornfab-all-2026-11-18 -> main (R21), then the launch steps in the PR/handoff.
+
+## 2026-11-19 - SCOUT40 night ready; B6 deferred behind it
+
+- OPEN (owner box): `resolve_warm_runs.py` (must print OK), shape_check + preflight, dry-run, launch with a 14 h cutoff.
+- OPEN (after the night): offline v10 rescore of the new rows; lanes gaining > 0.31 J (v7) in 40 evals -> B6.
+- NOTE: v10 rescore `lane_best` lost the run name for fold_warm and ext_throat v7 ("screen"); tool bug, low priority.
+
+## 2026-11-19 - Night fable_vt_b6 ready for owner launch
+
+- OPEN (owner): B6 budget (120 valid per arm, 2 seeds proposed) and the lane set (3 leaders + twinray tail).
+- OPEN (owner box): shape_check all 9 configs, search_preflight (`--from-runs` per lane), copy to
+  runs/nights/, dry-run, launch detached with a cutoff.
+
+## 2026-11-19 - Typology review done; vt floor 320
+
+- DONE: typology correctness review; H/V pair label fixed; vt bounds 320-465.
+- OPEN (owner): close the plain-JMLC R9 gate as passed; spherical_salmon rename gate (neutral name stands).
+- OPEN (owner box): Klangfilm workbook reference rows as a test fixture; OS-SE profile table test (mesher).
+- OPEN (knowledge track): ICW/FREEFORM one-line cards; KH-001 "author-verified" wording.
+- OPEN (local): retire or document unconfigured `lecleach_mod` / `lecleach_ar` rows kinds.
+
+## 2026-11-19 - vt_v1 ready for shape_check; D8 advisory tool shipped
+
+- DONE: WP 4.4 vt search route + `vt_v1.yaml` (bounds 275-465 / hold 0-0.5, seed = control).
+- DONE: D8 continuation advisory (`tools/analysis/continuation_advice.py`).
+- OPEN (owner box): vt_v1 shape_check + dof cap, then budget-80 CMA probe; success > 0.3105 J.
+- OPEN (owner, note): g_vt_mm < ~350 gives a pinched lip (275 -> 324 mm overall); keep or raise the floor.
+- OPEN (local lane, not senior-owned): WP 0.7 pin_* exposure; WP 7.1 queue-edit refusal for protected lanes.
+
+## 2026-11-19 - Senior review queue closed (§2.1-§2.4); owner actions open
+
+- DONE: §2.3 judgment calls and §2.4 steer planes reviewed; u3_authority SE + grade shipped.
+- OPEN (owner): vt bounds [350, 465] + success > 0.3105 J consent.
+- OPEN (owner box): diff shipped vs offline v10 brief YAMLs (expect name-only).
+- OPEN (local): §10.2 rows; legacy class relabel + 20-record rebuild sample; B6 readout fold_warm = tie.
+
+## 2026-11-19 - Senior verdicts: rho20 park stands (borderline); v7 floor re-pinned to 0.31 J
+
+- DONE (senior §2.1): rho20 = borderline authority, rho knob inert, G5 park stands; §10.2 rows to
+  be written by the plan owner as stated in `scratch/fable_architecture/SENIOR_VERDICTS_2026-11-19.md`.
+- DONE (senior §2.2): v7 stored-J floor = 0.31 (combined 0.3105); 0.13 only for dense-scored J.
+- OPEN (local/owner): add `se_deg` + `grade` (authority/borderline) to `tools/analysis/u3_authority.py`.
+- OPEN (local): update WP 4.4 success test (> 0.3105 J) and the B6 readout (fold_warm = tie).
+- OPEN (senior): handback §2.3 judgment-call checks and §2.4 steer plane mapping.
+
 ## 2026-11-18 - WP 4.3 done: vt V-freedom authoritative (+32 deg, +2.3 J cost), 4 freedoms inert; WP 4.4 proposal open
 
 - DONE: B2 authority table (verify tier, same identity): vt_460 authority YES via the intended V

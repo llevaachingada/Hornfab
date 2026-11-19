@@ -1,0 +1,30 @@
+# Fable critical-path night (cloud senior plan, 2026-11-19). NOT launched from the cloud.
+# Owner box: copy to runs\nights\fable_vt_b6_2026-11-19.yaml, then follow the hornlab-night-queue skill
+# (shape_check + search_preflight first, dry-run, launch detached via queue.ps1 with a cutoff).
+# Order = priority; the cutoff drops the tail (twinray pair first, then s2 seeds).
+#  1   vt_v1: WP 4.4 vt freedom, v7 brief, 80 evals from the exact host (success: beat the control
+#      by > 0.3105 J). The only NEW construction freedom with proven authority (+32 deg V).
+#  2-7 B6 (WP 6.2): the three v10 leaders that tie inside one floor (fold_warm 1.4214, morph 1.4305,
+#      ext_throat 1.5710; floor 0.4677), 120 VALID evals each, same v10 identity, 2 seeds,
+#      s1 for all three before any s2, so a short night still gives one fair seed per lane.
+#  8-9 twinray380 v8 (v10 1.7726, also within the floor of the leader): tail, drops first.
+night: fable_vt_b6_2026-11-19
+jobs:
+  - {id: vt_v1__probe80, kind: search, mode: screen, budget: 80,
+     config: examples/studies/u3_biradial_es_style_v7/vt_v1.yaml}
+  - {id: b6__ext_throat__s1, kind: search, mode: screen, budget: 120,
+     config: examples/typologies/b6_2026-11-19/hl__ext_throat_hvlaw_v7__b6_v10_s1.yaml}
+  - {id: b6__fold_warm__s1, kind: search, mode: screen, budget: 120,
+     config: examples/typologies/b6_2026-11-19/hl__osse_rrect_fold_warm_v7__b6_v10_s1.yaml}
+  - {id: b6__morph__s1, kind: search, mode: screen, budget: 120,
+     config: examples/typologies/b6_2026-11-19/hl__osse_rrect_morph_v7__b6_v10_s1.yaml}
+  - {id: b6__ext_throat__s2, kind: search, mode: screen, budget: 120,
+     config: examples/typologies/b6_2026-11-19/hl__ext_throat_hvlaw_v7__b6_v10_s2.yaml}
+  - {id: b6__fold_warm__s2, kind: search, mode: screen, budget: 120,
+     config: examples/typologies/b6_2026-11-19/hl__osse_rrect_fold_warm_v7__b6_v10_s2.yaml}
+  - {id: b6__morph__s2, kind: search, mode: screen, budget: 120,
+     config: examples/typologies/b6_2026-11-19/hl__osse_rrect_morph_v7__b6_v10_s2.yaml}
+  - {id: b6__twinray380__s1, kind: search, mode: screen, budget: 120,
+     config: examples/typologies/b6_2026-11-19/hl__ath_twinray380_landscape_v8__b6_v10_s1.yaml}
+  - {id: b6__twinray380__s2, kind: search, mode: screen, budget: 120,
+     config: examples/typologies/b6_2026-11-19/hl__ath_twinray380_landscape_v8__b6_v10_s2.yaml}

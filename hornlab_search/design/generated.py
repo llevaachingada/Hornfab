@@ -149,9 +149,9 @@ class GeneratedSpace:
         self.brief = dict(brief)
         self.bounds = dict(bounds)
         from .generators import (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family,
-                                lecleach_swept_hv, crowe_hv_area_aspect_v1)
+                                lecleach_swept_hv, crowe_hv_area_aspect_v1, record_body)
         for family in (rolled_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family,
-                       lecleach_swept_hv, crowe_hv_area_aspect_v1):
+                       lecleach_swept_hv, crowe_hv_area_aspect_v1, record_body):
             if family.is_family_spec(self.gen):
                 family.validate_search_config(self.gen, seed_knobs, self.bounds, self.brief)
                 break
