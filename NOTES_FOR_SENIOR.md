@@ -1154,3 +1154,13 @@ unverifiable-without-a-real-run field is recorded as `BLOCKED_BY_BL_RESULT_FORMA
 `axes` labels BEAT writes for `exterior_pressure` are not defined in BL's Python source (they are
 copied verbatim from the engine result at `src/blab/headless.py:469`); the reader prefers the JSON
 labels and falls back to the documented `(excitation, observation)` shape order.
+
+## 2026-11-19 resolution: lane C's `import_results` hook APPLIED (append-only)
+
+The hook recorded below (2026-11-18, lane C) has been applied by the parent integrator in
+commit `c18410c`: `detect_result_artifact` now classifies a BL headless result *directory*
+as `kind="bl_headless_result"` before the file-suffix checks (unknown-but-existing
+directories classify as `unknown`, never crash), and `read_headless_result()` delegates to
+`bl_results.read_bl_headless_result` with no duplicated payload parsing. Pinned by
+`tests/system/test_import_results_hook.py` (4 tests). The `BLOCKED_BY_BL_RESULT_FORMAT`
+disclosure remains open (it needs a real solved run to close); the hook itself is DONE.

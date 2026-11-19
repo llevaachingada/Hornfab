@@ -104,6 +104,16 @@
   },
 
   "blockers_live": [],
+  "solved_case_registry": [
+    {"gate": "W3 smoke", "case": "system_runs/system/bl_smoke/20261118T225108Z-smoke-42536-01d15001/", "project": "bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8", "freqs": [250.0, 700.0, 1100.0], "status": "complete 3/3"},
+    {"gate": "G4 wide basis", "case": "system_runs/system/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/", "project": "bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8", "freqs": "25 log-spaced 200-2500 Hz", "status": "complete 25/25"},
+    {"gate": "G6 geometry challenge", "case": "system_runs/system/bl_g6_offset30/20261118T235110Z-assembly-21668-c17f7cf6/", "project": "staged, translation_mm (0,0,30), assembly id 06ff56a5a1938ec9", "freqs": "same 25", "status": "complete 25/25; paired delta recorded"}
+  ],
+  "screen_installed_calibration_status": {
+    "geometry_axis_installed": "2 varied references (offset20/offset30) complete; 10 mm offset changes all basis blocks 21-58% (mutual scattering quantified)",
+    "box_axis": "first tower-box staging attempt (screen top cell, 12PR300 115 L / 170 cm2 port, 371.2x371.2x1080.7) REFUSED by BL's own validator: 'Driver must fit inside the enclosure walls with 3 mm clearance.' - BL's panel-fit rule: demo driver (200 mm moving dia, driver_y +100 mm) + 170 cm2 port cannot coexist on a 371x371 panel with 18 mm walls. Refusal recorded immutably in system_runs/system/bl_r4_tower_box/20261119T001041Z-ref_case-40216-b32bb5a2/. The screen's BL-buildability pre-check is being added per BL's parameters.py fit rules (driver/port radius + 3 mm vs (w/2 - t), separation > driver_r + port_outer + 3 mm).",
+    "motor_axis": "open - no real-driver motor installed yet; all solves use BL's demo motor (mmd 35 g etc.); next task: stage real T/S into the BL electrodynamic component parameters via the staging overrides"
+  },
   "resolved_blockers": [
     "BLOCKED_BY_FULL_DOMAIN_HORN_MESH — resolved (lane A closed full-domain mesh)",
     "BLOCKED_BY_BL_HOST_ASSEMBLY_ASSIGNMENTS — resolved (lane B staged vented-only R0 and horn assembly R2 through BL's own host; real blab project validate rc 0 / valid true for both)"
