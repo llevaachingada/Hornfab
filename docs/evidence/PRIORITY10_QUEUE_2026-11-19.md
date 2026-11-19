@@ -226,3 +226,14 @@ Consequences applied to the plan (no new GPU time spent to learn them):
 
 Remaining jobs at this entry: #3 running, then #4, #5, #8, #7, #6, #9, #10 (see §6 for order).
 
+### 9b. #3 rolling-rect whole-family hybrid — in flight, and it moves the dominant term
+
+Run `20261119T172313Z-screen-081506`, read at 14 valid evals: **seed J 15.549 → best 9.305**
+(`−6.24 J` already, 17 rows, 3 refusals). The seed is the same h12 host as #2, so the comparison is
+exact: the record edits moved 0.227 J, the 13-knob family box moved 6.2 J in 14 evals. That is the
+predicted behaviour — mouth width/height, corner exponent, throat/rect turn and terminal angle are the
+freedoms that can move `dislope`, which is 71 % of this host's v10 cost. It is still 7.9 J behind the
+v10 leaders, so this lane buys **construction knowledge, not a leaderboard position**; verdict pending
+the 80-valid close and its own terms.
+
+
