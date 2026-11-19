@@ -1,5 +1,26 @@
 ﻿# ISSUES
 
+## 2026-11-19 - PRIORITY10 night complete; compact-horn register delivered
+
+- DONE (GPU): `fable_priority10_2026-11-19`, 11/11 jobs, 2.18 h. No promotion and no verify: fold_warm
+  1.5433 / morph 1.5769 / ext-throat 1.7919 are ties with their published v10 bests inside the 0.4677
+  floor; twinray 2.5748 is 0.80 J worse. Record lanes (+0.029, +0.227) and vt_v1 (+0.015) are
+  `dislope`/`load`-blind; the rolled hybrid is the only real mover (+6.24 J). Evidence:
+  `docs/evidence/PRIORITY10_QUEUE_2026-11-19.md` §11.
+- DONE (local): Fable v2 integrated by reviewed diff (`627b880`), excluding its SCOUT40 queue prepend.
+  Upstream `main` is still `138d88a`, so PR #75 is unmerged; `gh` cannot resolve the repo here.
+- DONE (CPU): compact-horn register, mesh preflight and bounded proposal under
+  `docs/research/compact_horn_system_2026-11-19/` (10 rows, measured geometry/config_sha). CPU v10 gate:
+  A1 1.9858, A3 2.7734, A2 2.8813, C2 4.8193.
+- OPEN (local, next pass): B6 s2, if ever run, must warm-start at the published best designs
+  (`00826f071b24`, `436a4d221328`, `a23763f1c6fc`, `85c59331e4a3`), not at the lane seeds — the s1
+  configs were mis-seeded and cannot reproduce the published v10 ranks.
+- OPEN (owner): compact-horn GPU ask. The proposed A1 petal v10 screen misses its own 0.4677 gate by
+  0.10 J; decide between (a) authorising it anyway as a different-mechanism test, (b) starting the
+  compact slate from the fold/morph mechanism v10 actually rewards, or (c) no new GPU.
+- OPEN (owner): whether to open a PR from `hornfab-all-2026-11-18` into `main` (this push does not).
+- NOTE: unrelated uncommitted GUI edits from another lane remain in the tree and were not committed.
+
 ## 2026-11-19 - Fable senior: score-term audit + Gate A (XO loading)
 
 - DONE: audit of the shipped v10 home brief; parity |dJ| = 0.0 on 271 designs.

@@ -1,5 +1,32 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - PRIORITY10 night complete (11/11, 2.18 h) + compact-horn register (push)
+
+- **Night `fable_priority10_2026-11-19` is DONE**, 11/11 jobs, 7,865 s GPU (2.18 h) — the no-gain
+  watchdog ended stalled lanes, so the feared 7-9 h never materialised. Chained behind the W2/W3 night
+  with `queue.ps1 -WaitPid`; no overlap, no duplicate job. Manifest + per-job evidence:
+  `docs/evidence/PRIORITY10_QUEUE_2026-11-19.md` §11.
+- **Result: no promotion, no verify.** Recording checks: fold_warm 1.5433 (published 1.4214) and morph
+  1.5769 (1.4305) tie inside the v10 floor 0.4677; ext-throat 1.7919 (1.5710) ties; twinray 2.5748 is
+  0.80 J worse than its published 1.7726. Failures worth keeping: c200 vbeak +0.029 and rolled record
+  +0.227 J because `dislope` is 71-75 % of those hosts' v10 cost; vt_v1 +0.015 J because `load` is 52 %;
+  b3_soft +0.144 J with `load 0.0` but `dislope 2.10`. The rolled whole-family hybrid is the one real
+  mover: 15.549 -> 9.3054 (+6.24 J) at 30 valid.
+- **B6 seeding defect (measured).** All four B6 s1 configs start at the lane seed, not at the design that
+  produced the published v10 best (twinray 13/27 knobs differ, morph 14/31). Any s2 must warm-start at
+  `00826f071b24` / `436a4d221328` / `a23763f1c6fc` / `85c59331e4a3`.
+- **Fable v2** landed earlier today by reviewed diff (627b880): record-edit knobs + 4 configs + beak
+  tests, 29/7 tests green, shape/preflight gates recorded. Upstream `main` is still 138d88a, so PR #75 is
+  unmerged; `gh` could not resolve the repo from this session (UNVERIFIED, refs confirmed by ls-remote).
+- **Compact-horn / woofer handoff.** Reconciled state, dispatched one CPU-only agent (C-SCOUT), verified
+  its artifacts. Register (10 rows, measured config_sha + inner/outer bbox from saved bests), mesh
+  preflight and a bounded solver proposal are in `docs/research/compact_horn_system_2026-11-19/`.
+  Parent filled the named blocker with CPU v10 rescores: A1 petal 1.9858, A3 2.7734, A2 2.8813, C2
+  4.8193. A1 misses its own 0.4677 gate by 0.10 J, so **no GPU was authorised**; the ask was 0
+  unconditional anyway. Every assembled-horn claim stays `NOT_YET_AVAILABLE` (no BL case).
+- **State.** GPU and CPU lanes free; nothing queued. `docs/ACTIVE_STATE.md` updated. Not done here: no
+  verify pass, no s2, no new brief identity, no push of `main`.
+
 ## 2026-11-19 - Fable senior: score-term audit + Gate A crossover-loading diagnosis (CPU only, committed)
 
 - **Verdict.** The "650-900 Hz loading hump" reported earlier today was unit-acceleration referencing, not acoustics.
@@ -26,7 +53,7 @@
 - **Provenance.** 205 hashes have more than one design dir. 9 of them are on different meshes (up to 0.21 dB), so the same hash is not the same field.
 - **Not done (owner-gated).** Optional dense re-solve: 3 designs, 1/24 oct, 450-1800 Hz, `HORNLAB_GPU_LOCK=refuse`. No GPU, queue, default or score identity was touched. Unrelated uncommitted GUI edits in the tree were left alone.
 
-## 2026-11-19 - Fable v2 integrated + PRIORITY10 ten-horn queue staged
+## 2026-11-19 - Fable v2 integrated + PRIORITY10 ten-horn queue staged (superseded by the completion entry above)
 
 - **Fable v2 landed by explicit reviewed diff** (branch `claude/adoring-ramanujan-1m4b3g`, commits
   `a93ac18`+`d902a33`, 2 commits on a stale base): `geometry/edits.vertical_beak` +
