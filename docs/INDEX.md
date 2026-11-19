@@ -152,6 +152,8 @@ mode, and the new shape-only `rf__rect_radial_wide_v7` cell; [six-view compariso
 [relief range sheet](renders/2026-11-15-pucker/relief_versions.png), [three-view card](renders/2026-11-15-pucker/rf__rect_radial_wide_v7_card.png).
 Verification: legacy `sp__strong_v7` is the canonical section family at axial 7/9 mm (max point diff 9.6e-7); the pucker is a parameter, not a typology. **Parameter correction:** the fixed 417x203 `rf__section_axial_strong_v7` is only the visual reference; the optimization cell is `rf__section_axial_home_v7` (width/height/depth/H-V depth split/crown/junction + axial pucker, 8 active keys; the latest home-panel best sat at width 579.7, height 292.9, depth 262.1, h_depth_scale 1.098, crown 39.7). `hl__crowe_x_square_v7` remains the separate square-X look. All three are visible in the GUI (group `home`); legacy `sp__*` entries removed. No GPU solves; owner hold preserved.
 
+[Last-24h solved horns, 61 designs in 21 contact sheets at 200 dpi](renders/2026-11-19-last-day-horns/README.md): isometric, top-skew, V/H cut sections, V/H dispersion per design; scripts alongside.
+
 [25x2 pilot: section home pucker vs square X](renders/2026-11-15-25x2/README.md): four 25-eval screen runs, seeds 1234/5678.
 Square X best J **8.20–8.82** vs section home **17.397–17.398**; the square X wants a gentler X (`sf_amt` 0.42–0.47 vs
 the 0.60 seed) and the section pucker's vertical strength collapses to 0.37–3.35 mm. Best-design sheet

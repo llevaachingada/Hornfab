@@ -1,5 +1,16 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Last-24h solved horns: contact sheets (renders only, no solves)
+
+- **61 unique best designs** from runs dated 2026-11-18 14:00 local onward, each with a completed solve
+  (`ok: true`, balloon DI). Rendered as 21 contact sheets at 200 dpi (3 designs/sheet): isometric,
+  top-skew (camera from +y, added in `render_last_day.py`, not in `tools/render/render_views.py`), V cut
+  (x=0), H cut (y=0), V and H dispersion. Durable copies + per-sheet design list:
+  `docs/renders/2026-11-19-last-day-horns/README.md`.
+- Caveats: J is comparable only within a brief; two design hashes repeated across runs and were kept once;
+  a small `x10^4` frequency offset remains on some heatmaps (cosmetic). No GPU or CPU solve was started.
+- Uncommitted GUI edits from another lane remain in the tree and were not included.
+
 ## 2026-11-19 - PRIORITY10 night complete (11/11, 2.18 h) + compact-horn register (push)
 
 - **Night `fable_priority10_2026-11-19` is DONE**, 11/11 jobs, 7,865 s GPU (2.18 h) — the no-gain

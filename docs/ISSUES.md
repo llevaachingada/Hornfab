@@ -1,5 +1,11 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Last-24h solved horns rendered (contact sheets)
+
+- DONE (render): 61 unique designs, 21 sheets at 200 dpi, `docs/renders/2026-11-19-last-day-horns/`.
+- OPEN (owner): decide whether top-skew view and cut sections belong in `tools/render/render_views.py`
+  (currently only in the scratch-side script copy).
+
 ## 2026-11-19 - PRIORITY10 night complete; compact-horn register delivered
 
 - DONE (GPU): `fable_priority10_2026-11-19`, 11/11 jobs, 2.18 h. No promotion and no verify: fold_warm
