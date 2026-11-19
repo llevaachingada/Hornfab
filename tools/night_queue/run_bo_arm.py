@@ -60,6 +60,16 @@ def main():
     proc.stdout.close()
     proc.wait()
     if proc.returncode:
+        # WP 0.7 hardening (2026-11-18): the wrapper used to return the child rc with no
+        # context, so the job log ended right after the last streamed line (t_klame arms).
+        # Echo the tail of the child's output + the failing command so the night ledger can
+        # classify the failure without guesswork.
+        tail = [ln.rstrip() for ln in lines if ln.strip()][-12:]
+        print(f"run_bo_arm: child failed rc={proc.returncode}: {' '.join(prep)}",
+              file=sys.stderr, flush=True)
+        for ln in tail:
+            print(f"  child| {ln}", file=sys.stderr, flush=True)
+        sys.stderr.flush()
         return proc.returncode
     json_lines = [ln.strip() for ln in lines if ln.strip().startswith("{")]
     try:

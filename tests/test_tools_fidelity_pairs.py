@@ -117,6 +117,8 @@ def test_run_pairs_evaluates_both_tiers_per_design(tmp_path, monkeypatch):
         return SimpleNamespace(error="", objective=1.0, design_hash=design.hash(), metrics=None)
 
     monkeypatch.setattr(module, "_write_mode_meta", lambda *a, **k: None)
+    monkeypatch.setattr(module, "_backend_obj",
+                        lambda cfg: SimpleNamespace(name=str(cfg.solve.backend), warm=lambda: None))
     module.run_pairs(
         [(str(run), "h1"), (str(run), "h2")], out,
         config_for_run=lambda p: _cfg(), evaluate_fn=fake_evaluate,
@@ -125,7 +127,8 @@ def test_run_pairs_evaluates_both_tiers_per_design(tmp_path, monkeypatch):
 
     h1, h2 = module._design_for(ROWS[0]).hash(), module._design_for(ROWS[2]).hash()
     assert calls == [(h1, "verify"), (h1, "finalist"), (h2, "verify"), (h2, "finalist")]
-    assert warm == ["beat_cuda", "beat_cuda"]
+    assert [b.name for b in warm] == ["beat_cuda", "beat_cuda"]
+    assert all(not isinstance(b, str) for b in warm)   # regression pin: warm must get the object
     assert {p.name for p in out.iterdir()} >= {"run__verify", "run__finalist", "pairs.json"}
     pairs = json.loads((out / "pairs.json").read_text(encoding="utf-8"))
     assert pairs["check"] == module.PAIR_CHECK
@@ -144,6 +147,8 @@ def test_run_pairs_resumes_an_already_ok_tier(tmp_path, monkeypatch):
         return SimpleNamespace(error="", objective=1.0, design_hash=design.hash(), metrics=None)
 
     monkeypatch.setattr(module, "_write_mode_meta", lambda *a, **k: None)
+    monkeypatch.setattr(module, "_backend_obj",
+                        lambda cfg: SimpleNamespace(name=str(cfg.solve.backend), warm=lambda: None))
     h1 = "h1"                                  # the stored row's hash is what the resume keys on
     d = out / "run__verify"
     d.mkdir(parents=True)
@@ -213,6 +218,8 @@ def test_run_pairs_keeps_one_context_per_source_run(tmp_path, monkeypatch):
         return SimpleNamespace(error="", objective=1.0, design_hash=design.hash(), metrics=None)
 
     monkeypatch.setattr(module, "_write_mode_meta", lambda *a, **k: None)
+    monkeypatch.setattr(module, "_backend_obj",
+                        lambda cfg: SimpleNamespace(name=str(cfg.solve.backend), warm=lambda: None))
     module.run_pairs(
         [(str(run_a), "h1"), (str(run_b), "h2")], out,
         config_for_run=lambda p: by_path[str(p)], evaluate_fn=fake_evaluate,
@@ -321,6 +328,10 @@ def _run_refine(tmp_path, monkeypatch, *, evaluate_fn, factor=2.0, teardown=True
     warm, teardown_calls = [], []
 
     monkeypatch.setattr(module, "_write_mode_meta", lambda *a, **k: None)
+    # The 2026-11-18 fix: warm_fn and evaluate_fn must receive the backend OBJECT, never the
+    # cfg string (the five B1 probes crashed on 'str' has no attribute name). Inject a stand-in.
+    monkeypatch.setattr(module, "_backend_obj",
+                        lambda cfg: SimpleNamespace(name=str(cfg.solve.backend), warm=lambda: None))
     results = module.run_refine(
         [(str(run), "h1")], out, config_for_run=lambda p: cfg, evaluate_fn=evaluate_fn,
         make_ctx_fn=lambda cfg, store, **k: SimpleNamespace(),
@@ -351,7 +362,8 @@ def test_run_refine_uses_the_stored_row_and_same_grid(tmp_path, monkeypatch):
     assert seen["mode"] == "screen"
     assert seen["solve_hash"] == solve_spec("screen", cfg).hash()      # same grid identity
     assert seen["cap"] == cfg.mesh.dof_cap("screen")                   # cap untouched
-    assert warm == ["beat_cuda"] and teardown_calls == [{"verify": True}]
+    assert [b.name for b in warm] == ["beat_cuda"] and teardown_calls == [{"verify": True}]
+    assert all(not isinstance(b, str) for b in warm)   # regression pin: warm must get the object
     r = results[0]
     assert r["reference"]["J"] == pytest.approx(4.0)
     assert r["delta"]["J"] == pytest.approx(1.0)
@@ -370,6 +382,8 @@ def test_run_refine_merges_per_design_records(tmp_path, monkeypatch):
     run_b = _run_dir(tmp_path, rows=[_ref_row(cfg, h="h2")], name="runB")
     out = tmp_path / "out"
     monkeypatch.setattr(module, "_write_mode_meta", lambda *a, **k: None)
+    monkeypatch.setattr(module, "_backend_obj",
+                        lambda cfg: SimpleNamespace(name=str(cfg.solve.backend), warm=lambda: None))
 
     def fake(design, space, cfg_v, mode, run_dir, store, backend, *, ctx=None):
         return SimpleNamespace(error="", objective=5.0, terms={}, metrics=object(),
@@ -410,6 +424,8 @@ def test_run_refine_marks_a_spilled_measurement(tmp_path, monkeypatch):
     cfg = _real_cfg(tmp_path)
     run = _run_dir(tmp_path, rows=[_ref_row(cfg)])
     monkeypatch.setattr(module, "_write_mode_meta", lambda *a, **k: None)
+    monkeypatch.setattr(module, "_backend_obj",
+                        lambda cfg: SimpleNamespace(name=str(cfg.solve.backend), warm=lambda: None))
     results = module.run_refine(
         [(str(run), "h1")], tmp_path / "out", config_for_run=lambda p: cfg,
         evaluate_fn=lambda *a, **k: SimpleNamespace(

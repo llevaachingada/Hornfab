@@ -101,6 +101,17 @@ def test_build_job_env_does_not_mutate_the_base(tmp_path):
     assert base == {"PATH": "p"}
 
 
+def test_build_job_env_defaults_to_unbuffered_child_output_and_job_env_wins(tmp_path):
+    """WP 0.7 (2026-11-18): a dying search must leave its abort line in the job log, not lose it
+    to block-buffered stdout (cont_p80/cont_biradial silent exit=1). The job env can override."""
+    job = night.Job(id="j", kind="search", argv=("x",), timeout_s=1.0, env={"PYTHONUNBUFFERED": "0"})
+    env = night.build_job_env(job, "cpu", tmp_path, base={"PATH": "p"})
+    assert env["PYTHONUNBUFFERED"] == "0"
+    plain = night.build_job_env(night.Job(id="j2", kind="search", argv=("x",), timeout_s=1.0),
+                                "cpu", tmp_path, base={"PATH": "p"})
+    assert plain["PYTHONUNBUFFERED"] == "1"
+
+
 # ------------------------------------------------------------------ argv building
 
 

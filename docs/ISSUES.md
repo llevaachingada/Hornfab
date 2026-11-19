@@ -1,5 +1,60 @@
 ﻿# ISSUES
 
+## 2026-11-18 - WP 4.3 done: vt V-freedom authoritative (+32 deg, +2.3 J cost), 4 freedoms inert; WP 4.4 proposal open
+
+- DONE: B2 authority table (verify tier, same identity): vt_460 authority YES via the intended V
+  plane (1100-2500, +32.32 deg, H −5.10 secondary); term_topbottom / steer_early / steer_late /
+  diag_pull inert (< 3 deg). `docs/evidence/wp43_b2_authority/README.md`.
+- OPEN (owner decision): WP 4.4 proposal — open the vt freedom as a searched knob on a NEW config
+  version (bounds ~[440, 465], shape_check gate, budget-80 CMA probe; success > 0.1302 J over the
+  control). NOT implemented (senior review + owner consent on bounds/slot first).
+- OPEN (minor): vt_480 / term_sides excluded pre-solve by the u3_jobs validity table (invalid
+  reach) — a dedicated owner probe could still measure them if wanted.
+
+## 2026-11-18 - B1 + WP 2.3 done; 4.2 PASS -> 4.3 running; queue trimmed to Fable-only (owner directive)
+
+- DONE: B1 8/8 probes clean (batch 1 + 2, no spill); WP 2.3 combined-floor record published
+  (mesh part sd 0.00768 J; frequency-dominated). `docs/evidence/b1_mesh_2026-11-18/`.
+- DONE (WP 4.2): record-route equivalence PASS on the biradial host (max 0.76 deg of the 1 deg
+  bound) — B2 is approved under the predeclared rule; `docs/evidence/wp42_u3_biradial/`.
+- RUNNING: WP 4.3 five valid variants at verify tier (night fable_wp43_2026-11-18); vt_480 and
+  term_sides excluded by the u3_jobs validity table (invalid reach) — recorded; owner may override
+  by a later dedicated probe.
+- CLOSED (owner directive, BoTorch-vs-CMA experiment): both atlas arms REMOVED from the queue
+  (paused, roots/cohort builders untouched on disk); BoTorch resumes only after a 100+ row CMA
+  cohort AND explicit owner approval. WP 6.1 stays parked.
+- CLOSED (WP 0.7 hardening): unbuffered child env, prepare_study builders guard, run_bo_arm child
+  tail, wrapper tests fixed at the real Popen surface (the 2 known order-dependent failures gone).
+- OPEN (owner/lane): w-lane continuations (rosse_rect r120/r50, lecleach_iwata_ar, control_v7,
+  klangfilm, ath_core14) removed from tonight's queue by the owner — re-queue whenever wanted;
+  their run dirs/rows are preserved.
+- Carry-over opens unchanged: rho20 senior verdict; v7 floor protocol reconciliation; anchor
+  fallback dossier; range15 brief migration; B6 budget; D6 step 2 blocked on the anchor.
+
+## 2026-11-18 - B1 batch 1 complete; batch 2 + 4.2 queued; ext_throat partial resumes with cap 200
+
+- DONE: B1 batch 1 = 5/5 probes exit 0, no Shared-Usage spill (R5 gate met). Batch 2 (3 ext-throat
+  probes) + the WP 4.2 biradial-control verify solve are queued behind the live resume2.
+  Evidence accumulation: runs/b1_mesh_2026-11-18/ (+ per-probe memwatch JSONs). B1 evidence doc +
+  combined floor record (WP 2.3) after batch 2 lands.
+- DONE: ext_throat 200-eval screen resumed (resume2) with the corrected cumulative cap; 92 rows
+  preserved. BO `_r2` arms stay deferred per R15 (B1 not fully landed + anchor absent).
+
+## 2026-11-18 - B1 probes burned once on a tool fault, re-queued (_rc2); strict-resume semantics recorded
+
+- CLOSED (WP 2.2/D7, commit `8eca641`): fidelity_pairs backend-string fault — the five
+  `b1_mesh_*_20261118` probe ids are burned (ledger keeps them); re-queued as
+  `b1_mesh_*_20261118_rc2` at the FRONT of the live night (owner-directed queue jump). First _rc2
+  probe verified past the crash point (GPU 2538 MiB / 100 %).
+- CLOSED (night-queue resume semantics): `--budget` on a strict resume is the ORIGINAL cumulative
+  cap, not the missing-eval count — the skill line is corrected; ext_throat resume2 queued with
+  `budget: 200` (92/200 rows preserved in runs/20261118T212720Z-screen-c017db).
+- OPEN (queue owner): w_klangfilm + w_ath_core14 were killed at ~0 evals (nothing lost) and
+  re-queued as `_r2` ids after the atlas arms; w_lecleach_* and the remaining w_* backlog continue
+  in order. No cutoff configured.
+- Carry-over opens unchanged from earlier entries (rho20 senior item, v7 floor reconciliation,
+  anchor fallback dossier, range15 brief orphans, B6 budget).
+
 ## 2026-11-18 - rescore reuse published + floors; WP 0.9/D9 merged; v7 floor discrepancy open
 
 - CLOSED (WP 1.4/1.5, owner-directed reuse pass): full-fleet v7/v9/v10 columns reused untouched;

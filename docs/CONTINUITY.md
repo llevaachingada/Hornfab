@@ -1,5 +1,95 @@
 ﻿# CONTINUITY
 
+## 2026-11-18 - WP 4.3 complete (5/5) -> B2 authority table; vt V-freedom has 3x-threshold authority; WP 4.4 proposal written (local orchestrator)
+
+- **WP 4.3: five tool-valid variants solved at verify tier in ~4 min** (night fable_wp43_2026-11-18,
+  5/5 exit 0, ~44 s per solve). **B2 authority table published**
+  (`docs/evidence/wp43_b2_authority/README.md` + authority.json + CSV sets): **vt_460 has REAL
+  V-plane authority — +32.32 deg in 1100-2500 Hz with H secondary (−5.1 deg < half)** at a cost of
+  +2.30 J at that fixed shape (authority ≠ a better design; the search would decide how to spend
+  it). term_topbottom / steer_early / steer_late / diag_pull are INERT in this envelope (max moves
+  1.55-2.66 deg < 3 deg). vt_480 and term_sides were excluded pre-solve by the u3_jobs validity
+  table (invalid reach) — an owner-approved dedicated probe could still measure them.
+- **WP 4.4 proposal recorded** (senior + owner gated): open the V terminal-width freedom as a
+  searched knob (`hl__biradial_es_style_v7__vt_v1`, bounds ~[440, 465], shape_check first, then a
+  budget-80 CMA probe on the v7 brief; success = beat the control by > the v7 combined floor
+  0.1302 J). NOT implemented — new config version per the never-retrofit rule.
+- Everything is on `hornfab-all-2026-11-18`/`main`; the cloud-alignment handoff is in the chat
+  transcript (2026-11-18 evening) and the pointers live in ACTIVE_STATE + HANDOFF.
+
+## 2026-11-18 - B1 batch 1 + 2 COMPLETE; WP 2.3 floor record; WP 4.2 PASS; queue trimmed to Fable-only; WP 4.3 launched (local orchestrator)
+
+- **B1 complete: 8/8 probes exit 0** (5 fold-warm + 3 ext-throat), no Shared-Usage spill anywhere
+  (host shared 80 MiB constant; peaks ~2.6-3.0 GB dedicated). dJ range −0.003…−0.0252,
+  6/8 mesh-sensitive at the 0.0057 threshold. Published: `docs/evidence/b1_mesh_2026-11-18/`
+  (README + b1_probes_table.json + floor_record.json). **WP 2.3 combined floor: mesh part
+  sd(dJ) = 0.00768 J → combined = sqrt(freq²+mesh²): v7 0.1302 (published-D8 basis) / 0.3105
+  (protocol basis) / v10 0.4677 / v10_slope5 0.4863 — the floor stays frequency-dominated; the
+  v7 0.310-vs-0.13 tension stands unchanged.** The two leaders (3a1038/9fcd21) remain outside the
+  mesh floor (infeasible at epw 12) [recorded, unchanged].
+- **WP 4.2 PASS** [measured]: record-route control (verify solve of the U3 biradial control,
+  `20261118T235528Z-verify-72cdcc`, design `f07cbf168091`, J 6.4994) vs the stored normal-route
+  host (`37b115/9b05b8756526`): band deltas |dh| ≤ 0.19°, |dv| ≤ 0.76° — ALL within the predeclared
+  1° bound (`docs/evidence/wp42_u3_biradial/equivalence.json` + hv_beamwidth CSVs). The record
+  route is VALID on the biradial host (R8 condition); no silent host switch needed.
+- **Ext-throat w1 lane continuation finished** (resume2, exit 75 = budget end): best J 5.7239
+  (`104ea26b21ca`, 135 rows total). Rows/reports stay in the run dir for the lane owner.
+- **Owner directive executed (2026-11-18 ~19:00): the night queue was trimmed to Fable-plan work
+  only.** Removed pending blocks: 4 w-lane continuation searches (rosse_rect r120/r50-refine,
+  lecleach_iwata_ar, control_v7), both atlas BO arms (`t_atlas_*_turbo300` — BoTorch-vs-CMA
+  experiment PAUSED by the owner until a lane's CMA cohort + explicit approval; roots untouched),
+  and the 2 re-added `_r2` copies of the killed w_* jobs (klangfilm/ath_core14: nothing lost —
+  both had 0-1 evals). Backups: `cd_rrect_2026-11-17.yaml.bak-20261119-fable-trim`. The previous
+  night printed QUEUE DONE; its jobs: see the ledger. **WP 0.7 hardening shipped**:
+  `run_campaign_night.build_job_env` defaults `PYTHONUNBUFFERED=1` (silent-exit class),
+  `prepare_study` builders-loop guard names the failed step + traceback (klame class),
+  `run_bo_arm` echoes the child tail on nonzero rc; `test_night_bo_arm_wrapper` rewritten to mock
+  the real Popen streaming surface (the two order-dependent failures were tests mocking
+  call/run only — they passed when a sibling leaked a Popen stub); focused suites 55/55 green.
+  NOTE: the env fix applies from the NEXT runner start (the live runner had the old module loaded).
+- **WP 4.3 launched as its own night** (`fable_wp43_2026-11-18`, detached via queue.ps1, cutoff
+  23:59): the FIVE tool-valid variants at verify tier (`vt_460`, `term_topbottom`, `steer_early`,
+  `steer_late`, `diag_pull`) — `vt_480` and `term_sides` are EXCLUDED by the u3_jobs validity
+  table (invalid reach), recorded here; ~44 s per solve observed on the first two.
+
+## 2026-11-18 - B1 batch 1 COMPLETE (5/5 exit 0, no spill); batch 2 + WP 4.2 queued (local orchestrator)
+
+- **B1 batch 1 ran clean after the backend-object fix**: all five fold-warm x2 probes exit 0,
+  ~3.5-4 min each (refined solve + memwatch + verified teardown), GPU peaks ~2.6 GB dedicated,
+  **no Shared-Usage spill on any probe** → the R5 batch-2 gate is MET. First datum:
+  `2f7307c06023` ref J 4.14130 → refined J 4.12597 (dJ −0.01533 > the 0.0057 threshold →
+  **mesh-sensitive**), 28,489 tri / 14,519 dof. Full per-design records accumulate in
+  `runs/b1_mesh_2026-11-18/` (+ memwatch JSONs per probe under runs/nights/b1_mesh_2026-11-18/).
+  B1 evidence document + combined floor record (WP 2.3): next commit batch once batch 2 lands.
+- **Queued behind the probes** (gate-satisfied per R5/R6, dry-run exit 0):
+  3 × ext-throat x2 probes (`b1_mesh_*_20261118_batch2`, from the cloud-verified insert file) and
+  the **WP 4.2 biradial-control verify solve** (`wp42_biradial_control_verify_20261118`,
+  `--mode verify` on the U3 control — kind: command per the single-design rule).
+- Live now: `w_ext_throat_hvlaw_cov_v7_200w1_resume2` with `budget: 200`
+  (strict-resume cumulative cap — accepted; 92 rows preserved, ~108 new evals to run).
+
+## 2026-11-18 - owner-directed queue jump: B1 probes to the front; two tool faults fixed on the way (local orchestrator)
+
+- **Owner asked for B1 at the front of the live night.** Executed with the runner's own mechanics:
+  PAUSE -> reorder night file -> stop the in-flight search(es) -> corrections -> unpause. Backups:
+  `cd_rrect_2026-11-17.yaml.bak-20261118-b1front`, `.bak-20261118-b1rc2`. Stopped: w_ext_throat
+  partial at **92/200 rows** (kept; resume2 queued with `budget: 200` — strict resume treats
+  `--budget` as the CUMULATIVE cap and refused 109, matching the recorded c_rrect_100w_rc2 cause);
+  w_klangfilm fresh run killed at **0 evals** (nothing lost); w_ath_core14 at ~23 s (~1 row).
+  Both killed w_* jobs re-queued under `_r2` ids after the atlas arms. PAUSED/RESUMED logged by
+  the runner; every stop recorded in the queue log.
+- **Fault 1 (committed `8eca641`):** `fidelity_pairs` passed the backend STRING to
+  `worker.warm`/`evaluate` (both need the object) — the first five probes
+  (`b1_mesh_*_20261118`) each burned in ~6 s. Fixed via `cli._backend`-mirroring
+  `_backend_obj` at all four call sites + regression tests.
+- **Fault 2 (no code, doc fix):** the night-queue skill's resume rule said "budget = the missing
+  new evals" — wrong; fixed to "budget = the ORIGINAL cumulative cap" (strict resume refuses a
+  shrink). The empirical rule now matches the c_rrect_100w_rc3 precedent (budget 110 → ok).
+- **Now solving:** `b1_mesh_2f7307c06023_20261118_rc2` — first probe went past the previous crash
+  point in ~3 min, GPU 2538 MiB / 100 % (refined fold-warm solve with memwatch + VRAM record).
+  Queue order now: 5 × b1_rc2 → w_ext resume2 (budget 200) → w_* backlog → atlas BO arms →
+  re-added w_klangfilm/w_ath_core14 `_r2` → (burned old b1 ids skipped).
+
 ## 2026-11-18 - integration carried to main; cloud-resume pointer set (local orchestrator)
 
 - The `classify_recipes` close-out (`e13a1ad`) landed on `hornfab-all-2026-11-18` AFTER PR #70

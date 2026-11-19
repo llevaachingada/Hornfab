@@ -38,7 +38,10 @@ Tools (all in the repo): `tools/run_campaign_night.py` (one night file, strictly
 
 1. Write `runs/nights/<night>.yaml` (format: the module docstring of `tools/run_campaign_night.py`; `kind: search`
    with `config`, `budget`, `mode`, `timeout_s`, optional `resume: runs\<run_dir>`; `kind: command` with `argv`).
-   Resume a killed search in its own run dir with `budget` = the missing new evals.
+   Resume a killed search in its own run dir with `budget` = the run's ORIGINAL cumulative cap
+   (strict resume refuses a cap shrink: `cumulative budget cap would shrink (200 -> 109)`; the
+   rows already in the run dir count toward the cap, so you get cap-minus-rows NEW evals - hit for
+   real 2026-11-18 on the ext_throat resume and c_rrect_100w_rc2 before it).
 2. `--dry-run` each night file (prints jobs, runs no hygiene - safe any time).
 3. Mesh-check every new config with `tools/shape_check.py` (dofs <= cap, envelope, round coupling).
 4. Economy-check every search job with `tools/search_preflight.py` (skill: `hornlab-search-economy`): pass the
