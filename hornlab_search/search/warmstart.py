@@ -128,5 +128,19 @@ def mean_and_sigma(cfg, space) -> tuple[object | None, dict | None]:
 
 
 def _param_get(space, params: dict, key: str) -> object:
+    """Read a searched knob from a stored row.
+
+    Generated rows (``generator: grid``) nest the adapter knobs at
+    ``params["grid"]["knobs"]``, which ``families.resolve_path`` does not walk; the warm start
+    must read them or every warm-started generated lane refuses (2026-11-19, SCOUT40). The
+    fallback is only tried when the normal path raises, so native/flat rows are unchanged.
+    """
     from ..design import families
-    return families.param_get(space.family, params, key)
+    try:
+        return families.param_get(space.family, params, key)
+    except KeyError:
+        grid = params.get("grid") if isinstance(params, dict) else None
+        knobs = grid.get("knobs") if isinstance(grid, dict) else None
+        if isinstance(knobs, dict) and key in knobs:
+            return knobs[key]
+        raise

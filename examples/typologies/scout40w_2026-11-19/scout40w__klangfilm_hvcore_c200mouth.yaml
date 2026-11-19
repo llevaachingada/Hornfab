@@ -1,9 +1,10 @@
-# SCOUT40W 2026-11-19 requeue (local orchestrator, owner-directed): the SCOUT40 run of this lane was
+﻿# SCOUT40W 2026-11-19 requeue (local orchestrator, owner-directed): the SCOUT40 run of this lane was
 # stopped by the runner's bound-pinned watchdog (exit 75): 6/6 of the top designs sat at the HIGH limit
 # of g_beak_h_setback_mm [0, 10]. The kernel's documented beak range is 0..60 mm H setback,
 # 0..45 V projection, -20..20 diagonal, 0.50..0.99 start (_klangfilm_lame_hv_core_v1.py:79), so the
-# 0..10 box was our copy of b3_soft's narrow box, not a physical limit. Widen all four beak boxes to the
-# kernel ranges. Same family/brief/objective (smooth v7), same 585 x 255 mm c200-mouth seed, same
+# 0..10 box was our copy of b3_soft's narrow box, not a physical limit. Widen ONLY the binding H setback
+# (0..30); the other three boxes stay at the seed's (widening all four sampled 20/64 illegal designs).
+# Same family/brief/objective (smooth v7), same 585 x 255 mm c200-mouth seed, same
 # beak-only search -> J comparable with the original four; the original run is the control.
 # Warm start = this lane's box-limited best; sigma_from_spread false so the widened region is sampled.
 name: scout40w__klangfilm_hvcore_c200mouth
@@ -42,10 +43,10 @@ seed_params:
   g_theta_v1_deg: 24.1725588357
 bounds:
   g_aspect: {lo: 2.0759495982, hi: 2.0759495982, search: false}
-  g_beak_diagonal_mm: {lo: -20.0, hi: 20.0, search: true}
-  g_beak_h_setback_mm: {lo: 0.0, hi: 60.0, search: true}
-  g_beak_start_frac: {lo: 0.5, hi: 0.99, search: true}
-  g_beak_v_projection_mm: {lo: 0.0, hi: 45.0, search: true}
+  g_beak_diagonal_mm: {lo: -5.0, hi: 5.0, search: true}
+  g_beak_h_setback_mm: {lo: 0.0, hi: 30.0, search: true}
+  g_beak_start_frac: {lo: 0.85, hi: 0.99, search: true}
+  g_beak_v_projection_mm: {lo: 0.0, hi: 5.0, search: true}
   g_cd_core_blend: {lo: 1.0, hi: 1.0, search: false}
   g_core_length_mm: {lo: 400.0, hi: 400.0, search: false}
   g_end_frac: {lo: 1.7953432921, hi: 1.7953432921, search: false}
@@ -98,3 +99,4 @@ search:
     - runs/20261119T051833Z-screen-64eea7
     top_k: 10
     sigma_from_spread: false
+

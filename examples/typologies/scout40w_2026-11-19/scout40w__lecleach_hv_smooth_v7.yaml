@@ -1,4 +1,4 @@
-# SCOUT40W 2026-11-19 requeue (local orchestrator, owner-directed): the SCOUT40 run of this lane was
+﻿# SCOUT40W 2026-11-19 requeue (local orchestrator, owner-directed): the SCOUT40 run of this lane was
 # stopped by the runner's bound-pinned watchdog (exit 75) at the LOW limit of g_fc_v_hz [450, 1000].
 # Widen, do not change the physics:
 #   * same family (lecleach H/V pair, reconstruction), same brief (v7 smooth) and objective -> the J
@@ -6,9 +6,8 @@
 #   * g_fc_v_hz floor 450 -> 400. Basis: the family's own H box already allows 300, and a shape-check
 #     sweep (scratch/sweep_widen_2026-11-19) shows 400 Hz gives V mouth 471 mm (fits the 480 envelope),
 #     while 380 Hz gives 495 mm (OVER). 400 is the last feasible step.
-#   * warm start = this lane's best design from the box-limited run (does not re-learn the basin);
-#     sigma_from_spread false so the widened region is sampled at the config sigma0, not the (pinned)
-#     prior spread. The original run is the control for this widening treatment.
+#   * NO warm start: the prior run's rows store g_stop_cos2k but not the searched g_stop_a2, so the
+#     runtime warm_start would refuse the row ("lacks knob"); the seed below is the same start point.
 name: scout40w__lecleach_hv_smooth_v7
 family: FREEFORM
 brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
@@ -79,8 +78,4 @@ search:
   infeasible_penalty: graded
   budget_counts: valid
   max_attempts: 250
-  warm_start:
-    from_runs:
-    - runs/20261119T050354Z-screen-7ebf9c
-    top_k: 10
-    sigma_from_spread: false
+

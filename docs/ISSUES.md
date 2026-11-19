@@ -22,6 +22,16 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - Warm-start fix + requeue corrections
+
+- DONE: `warmstart._param_get` now reads `params.grid.knobs`; test added, focused suite 8/8.
+- DONE: night warm-start audit (`scratch/warmstart_audit_2026-11-19.log`); fold_warm/ext_throat warm
+  starts removed (study dirs have no config snapshot; seeds are the lane bests).
+- DONE: b3_soft beak boxes reverted (pin_ignore is the fix); c200mouth widened only the binding H
+  setback (0-30); lecleach requeue runs from its seed (no warm start).
+- OPEN: focused preflight of the two narrowed Klangfilm configs running; check before reading results.
+- OPEN: continue exit-75 watch on the live night (same widen-or-pin_ignore rule).
+
 ## 2026-11-19 - Five bound-pinned requeues queued (s40w__* positions 7-11)
 
 - DONE: widened + requeued the five bound-pinned lanes; shape_check all pass; same v7-smooth briefs so

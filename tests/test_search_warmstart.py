@@ -1,4 +1,4 @@
-"""B.1 (day 2026-11-12): ``search.warm_start`` — the CMA mean starts at the best valid design
+﻿"""B.1 (day 2026-11-12): ``search.warm_start`` â€” the CMA mean starts at the best valid design
 (and sigma0 from the top-k median per-knob spread, clamped to [0.05, sigma0]) among the source
 runs; a version/family/knob mismatch is refused unless allow_cross_brief; run.json records the
 warm-start sources. Absent key = (None, None) = today's behaviour.
@@ -166,3 +166,16 @@ def test_bad_source_paths_and_types_are_configerrors(tmp_path, smoke_cfg_path):
         _warm_cfg_raw(tmp_path, smoke_cfg_path, {"from_runs": ["runs/definitely_missing"]})
     with pytest.raises(ConfigError, match="non-empty"):
         _warm_cfg_raw(tmp_path, smoke_cfg_path, {"from_runs": []})
+
+def test_generated_grid_rows_are_readable_by_the_warm_start():
+    """2026-11-19 SCOUT40: generated rows store the adapter knobs at ``params.grid.knobs``;
+    the production warm start must read them (it refused "row 0 lacks knob" before)."""
+    class _Space:
+        family = "FREEFORM"
+
+    params = {"grid": {"knobs": {"g_beak_diagonal_mm": 1.5}, "n_phi": 19}}
+    assert warmstart._param_get(_Space(), params, "g_beak_diagonal_mm") == 1.5
+    # flat/native rows are unchanged
+    assert warmstart._param_get(_Space(), {"g_x": 2.0}, "g_x") == 2.0
+    with pytest.raises(KeyError):
+        warmstart._param_get(_Space(), params, "g_missing")

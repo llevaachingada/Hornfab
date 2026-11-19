@@ -147,11 +147,9 @@ search:
   tolfun: 0.001
   budget_counts: valid
   max_attempts: 200
-  warm_start:
-    from_runs:
-    - runs/study-0c9805ad97208a2e/screen
-    top_k: 10
-    sigma_from_spread: true
+  # warm_start removed 2026-11-19: the study dir has no run.json config snapshot, so the
+  # production warm start refuses it (objective/brief mismatch then no searched knobs). The
+  # seed_params below ARE the lane best, so the only loss is the prior top-10 spread.
 seed_params:
   L_mm: 255.830467
   a0_deg: 2.302789

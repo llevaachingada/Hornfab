@@ -211,11 +211,9 @@ search:
   infeasible_penalty: graded
   budget_counts: valid
   record_gate: shadow
-  warm_start:
-    from_runs:
-    - runs/study-4e1a6a9cd4bb5201/verify
-    top_k: 10
-    sigma_from_spread: true
+  # warm_start removed 2026-11-19: the study dir has no run.json config snapshot, so the
+  # production warm start refuses it (objective/brief mismatch then no searched knobs). The
+  # seed_params below ARE the lane best, so the only loss is the prior top-10 spread.
 description: 'SCOUT40 2026-11-19 (cloud Fable senior): 40 valid evals, warm from the
   lane best (top 10); source scratch/fable_architecture/space_cards/proposals/hl__ext_throat_hvlaw_v7__space_v1.yaml;
   R19 space_v1; R20b record_gate shadow. Gains below the floor (v7 0.31 J) are ties.

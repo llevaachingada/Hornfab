@@ -40,6 +40,35 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - Warm-start fix + requeue corrections (local orchestrator, owner-directed)
+
+- **Production warm start could not read generated rows.** `families.resolve_path` only walks
+  top-level keys / dotted paths, but grid rows store the adapter knobs at `params.grid.knobs`, so
+  `mean_and_sigma` raised (refused) on every warm-started generated lane. Fixed in
+  `hornlab_search/search/warmstart.py::_param_get` with a fallback that is only tried when the normal
+  path raises (native/flat rows unchanged); test
+  `test_generated_grid_rows_are_readable_by_the_warm_start`, focused suite 8/8.
+- **Audit of every night config with the production path** (`scratch/warmstart_audit_2026-11-19.log`):
+  now OK for iwata, b3_soft, c200mouth, stage_a, morph_v8, petal, tritonia v8/v9, crowe_x osse/square.
+  Two still unreadable and fixed in the configs: **fold_warm_v7 and ext_throat_v7** point at
+  `runs/study-*/{screen,verify}` whose `run.json` has NO config snapshot (study-level record), so the
+  warm start refuses the objective/brief and then the searched knobs. Their `warm_start` blocks are
+  removed; the seed_params are the lane bests (only the prior top-10 spread is lost).
+- **Requeue corrections after the economy preflight** (the first pass was too aggressive):
+  - `s40w__klangfilm_b3_soft`: beak boxes REVERTED to the b3 seed's box (H 0-10, V 0-5, diag -5..5,
+    start 0.85-0.99). Widening all four to the kernel ranges sampled 31/64 illegal designs; the stop
+    was the hard-floor pin, so the night job's `pin_ignore` is the whole fix.
+  - `s40w__klangfilm_hvcore_c200mouth`: widen ONLY the binding H setback (0-10 -> 0-30); the other three
+    boxes stay at the seed's (all-four widening sampled 20/64 illegal designs). 6/6 of its first run's
+    top designs sat at 10, so this is the attributable treatment.
+  - `s40w__lecleach_hv_smooth`: NO warm start (the prior rows lack the searched `g_stop_a2`; they store
+    `g_stop_cos2k` instead), seed start; the V-floor widening to 400 stays.
+  - `s40w__iwata_ar_smooth`, `s40w__klangfilm_lame_hv_stage_a`: warm starts kept (now readable);
+    stage_a is pin_ignore-only (hard floor at 0).
+- All five requeues re-shape-checked: pass (same mouths/dofs as reported). A focused preflight of the
+  two narrowed Klangfilm configs runs detached (`scratch/preflight_scout40w_klangfilm_2026-11-19.log`).
+- Night is live on `s40__vt_v1`; the requeues start at the next job boundary (positions 7-11).
+
 ## 2026-11-19 - Five bound-pinned lanes requeued with widened boxes (local orchestrator, owner-directed)
 
 - **Exit 75 = `WATCHDOG_EXIT`**, not a crash: the runner stops a search whose box is the limiter and
