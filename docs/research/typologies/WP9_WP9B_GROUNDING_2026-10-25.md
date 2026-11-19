@@ -108,7 +108,7 @@ Checkable properties (ship bar):
 ## 3. Numerical reference case (skill §6 "one numerical reference case or cross-check")
 
 **Published reference case of the family (Fourcade 2015 fig. 7 — quoted verbatim from Report 4 §9b.2's
-validation table; scope label): fc 400 Hz, T 0.8, throat Ø25.4 mm, exit half-angle 8°, dl 1 mm, c 344 m/s,
+validation table; scope label): fc 400 Hz, T 0.8, throat Ø25.4 mm, exit angle 8° [correction 2026-11-19: this is the INCLUDED angle, half-angle 4.0°; JMLC_LECLEACH_RESEARCH C1], dl 1 mm, c 344 m/s,
 stop 360°.**
 
 | quantity | published | senior-pass reference implementation (2026-10-24) |

@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Typology review done; vt floor 320
+
+- DONE: typology correctness review; H/V pair label fixed; vt bounds 320-465.
+- OPEN (owner): close the plain-JMLC R9 gate as passed; spherical_salmon rename gate (neutral name stands).
+- OPEN (owner box): Klangfilm workbook reference rows as a test fixture; OS-SE profile table test (mesher).
+- OPEN (knowledge track): ICW/FREEFORM one-line cards; KH-001 "author-verified" wording.
+- OPEN (local): retire or document unconfigured `lecleach_mod` / `lecleach_ar` rows kinds.
+
 ## 2026-11-19 - vt_v1 ready for shape_check; D8 advisory tool shipped
 
 - DONE: WP 4.4 vt search route + `vt_v1.yaml` (bounds 275-465 / hold 0-0.5, seed = control).

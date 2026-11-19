@@ -1,5 +1,18 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - vt floor 320 (owner); typology correctness review (cloud Fable senior)
+
+- **Owner: vt bounds now 320-465 mm** (floor raised from 275 to limit the pinched lip). `vt_v1.yaml` +
+  test updated; 10/10 pass.
+- **Typology review** (`docs/research/typologies/TYPOLOGY_CORRECTNESS_REVIEW_2026-11-19.md`, 45 entries):
+  no wrong published formula in code; every research correction is coded and test-pinned. Grade A
+  (published numeric test): JMLC march, Keele BR sizing, ATH CORE, Tritonia, twin-ray, JMLC350,
+  R-OSSE (ST260 STL refit 0.08 mm). Fixed: Le Cleac'h H/V pair mislabelled "published" ->
+  "reconstruction" (metadata only; seed hash 7fb9d2951deb unchanged); lecleach card + WP9 dossier
+  half-angle notes. Keele rule and CD scoring: not imposed across typologies [code-verified].
+- Open (owner/other lanes): close lecleach R9 gate (Fourcade test passes); Klangfilm workbook
+  fixture; ICW/FREEFORM cards; dead `lecleach_mod`/`lecleach_ar` kinds.
+
 ## 2026-11-19 - WP 4.4 vt route built (owner bounds 275-465); D8 continuation tool; doc re-pins (cloud Fable senior)
 
 - **Owner decision (2026-11-19): vt bounds 275-465 mm.** Built as a searched route on the explicit

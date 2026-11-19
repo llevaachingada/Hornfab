@@ -233,8 +233,12 @@ ROWS_LECLEACH_CONSTRUCTION_LABEL = (
 #: (geometric-mean core, closed-form lambda instead of the article's Newton step, the
 #: per-plane rollback from the cos(2k phi) stop law) are ours:
 #: docs/research/typologies/LECLEACH_HV_ELLIPSOID_2026-11-16.md.
+#: Senior review 2026-11-18 / typology review 2026-11-19: the H and V meridians are NOT the
+#: verified Fourcade marches (their axial coordinate is the core's) and the article's wavefront
+#: transform is not used, so this is a [reconstruction] of a published principle, not the
+#: published construction. Metadata label only (not part of any design hash).
 ROWS_HV_SECTION_LABEL = (
-    "published ellipsoidal-wavefront H/V construction (round core + per-plane expansions; "
+    "reconstruction of the published ellipsoidal-wavefront H/V principle (round core + per-plane expansions; "
     "realized as ellipse sections between the plane meridian axes, area-corrected); "
     "docs/research/typologies/LECLEACH_HV_ELLIPSOID_2026-11-16.md")
 #: The per-azimuth INDEPENDENT-march reading of the fc pair ("one complete march per phi")
@@ -1330,7 +1334,7 @@ def rows_fc_law(phi, fc_h_hz: float, fc_v_hz: float | None):
 
 def _rows_lecleach_hv_marches(lk: dict, harm: dict, phis: np.ndarray, r0: float,
                               a0: float, n_s: int, lo: float, hi: float) -> list[dict]:
-    """Per-azimuth rows for the ``lecleach`` fc/stop pair (published ellipsoidal construction).
+    """Per-azimuth rows for the ``lecleach`` fc/stop pair (reconstruction of the published ellipsoidal principle).
 
     The 2026-11-16 rejected bodies (run ``20261116T040651Z-screen-e53ae9``) came from the
     old reading of the pair: one COMPLETE Fourcade march per azimuth at ``fc(phi)`` /
@@ -2283,7 +2287,7 @@ def _rows_marches(spec: dict, knobs: dict, brief: dict, prefix: str = "g") -> li
         harm = rows_task_harmonics(knob_map, prefix, half=harm_half)
         lo, hi = ROWS_LECLEACH_STOP_RANGE
         if lk["fc_v_hz"] is not None:
-            # 2026-11-16 (item 13): the published ellipsoidal-wavefront pair construction.
+            # 2026-11-16 (item 13): the ellipsoidal-wavefront pair (a reconstruction of the published principle; senior review 2026-11-18).
             # A complete independent march per azimuth lofts differently-shaped horns
             # point by point (the rejected lobed bodies) and is not built.
             return _rows_lecleach_hv_marches(

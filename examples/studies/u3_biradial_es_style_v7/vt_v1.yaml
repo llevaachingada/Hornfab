@@ -6,7 +6,7 @@ seed_params:
   g_vt_hold: 0.0
 bounds:
   g_vt_mm:
-    lo: 275.0
+    lo: 320.0
     hi: 465.0
   g_vt_hold:
     lo: 0.0
@@ -39,11 +39,12 @@ search:
   infeasible_penalty: graded
 description: 'WP 4.4 vt freedom as a searched knob (owner 2026-11-19). Host = U3 control
   record (best hl__biradial_es_style_v7, V mouth 386.7 mm). g_vt_mm = V-axis mouth
-  height, owner bounds 275-465; g_vt_hold = early V-wall hold (0 = none). Seed (386.73,
-  0) reproduces the host exactly. Below ~350 mm the V-axis drops faster than the shoulders
-  (275 -> overall height 324 mm): a pinched lip. Top 465 keeps 9 mm to the 480 mm
-  envelope incl. 3 mm wall (475 fails). Success: beat the control by > 0.3105 J (v7
-  stored-J floor). shape_check + dof cap on the owner box before any GPU.'
+  height, owner bounds 320-465 (floor raised from 275 on 2026-11-19 to limit the pinched
+  lip); g_vt_hold = early V-wall hold (0 = none). Seed (386.73, 0) reproduces the
+  host exactly. Below ~350 mm the V-axis drops faster than the shoulders (275 -> overall
+  height 324 mm): a pinched lip. Top 465 keeps 9 mm to the 480 mm envelope incl. 3
+  mm wall (475 fails). Success: beat the control by > 0.3105 J (v7 stored-J floor).
+  shape_check + dof cap on the owner box before any GPU.'
 target:
   coverage_h_deg: 80.0
   coverage_v_deg: 50.0

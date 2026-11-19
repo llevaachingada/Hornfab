@@ -11,7 +11,7 @@ key_claims: [KH-001]
 **This is an example of layout, not a verified complete family card.**
 
 - **Physical emphasis:** loading, relatively smooth flare and off-axis narrowing; family-specific directivity curve rather than universal flat H/V.
-- **Exact geometry source:** Fourcade JMLC construction and reference values. Verify included vs half-angle before reproducing.
+- **Exact geometry source:** Fourcade JMLC construction and reference values. Fourcade fig. 7's 8 deg is the INCLUDED angle (phi0 = 4.0 deg half-angle; JMLC_LECLEACH_RESEARCH C1), pinned by `tests/test_design_generators_lecleach.py::test_r9j_fourcade_fig7_validation_table` (resolved 2026-11-19).
 - **Derived variant:** `lecleach_swept_hv` is a new H/V 3D morph, not the exact Fourcade axisymmetric solution.
 - **Model boundary:** a round ideal velocity source does not establish a real HF1440 exit/phase plug. Baffle/mounting changes radiation.
 - **Scoring:** inspect v6 loading-smooth against v7 CD terms; never compare raw J scores across objective versions without physical normalization. Report actual current YAML rather than assuming this family is actively on v6.

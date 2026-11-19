@@ -69,7 +69,7 @@ def test_refusals():
 def test_search_config_requires_the_control_inside_the_bounds():
     _, spec = _spec()
     seed = {"g_vt_mm": 350.0, "g_vt_hold": 0.0}
-    RB.validate_search_config(spec, seed, {"g_vt_mm": _B(275.0, 465.0), "g_vt_hold": _B(0.0, 0.5)}, {})
+    RB.validate_search_config(spec, seed, {"g_vt_mm": _B(320.0, 465.0), "g_vt_hold": _B(0.0, 0.5)}, {})
     with pytest.raises(GeneratorError, match="exclude the host"):
         RB.validate_search_config(spec, {"g_vt_mm": 450.0, "g_vt_hold": 0.0},
                                   {"g_vt_mm": _B(440.0, 465.0), "g_vt_hold": _B(0.0, 0.5)}, {})
@@ -85,7 +85,7 @@ def test_shipped_vt_v1_config_seeds_the_control_and_spans_the_owner_bounds():
     cfg = load_config(here / "vt_v1.yaml")
     sp = DesignSpace.from_config(cfg)
     assert sorted(sp.keys()) == ["g_vt_hold", "g_vt_mm"]
-    assert (cfg.bounds_raw["g_vt_mm"]["lo"], cfg.bounds_raw["g_vt_mm"]["hi"]) == (275.0, 465.0)
+    assert (cfg.bounds_raw["g_vt_mm"]["lo"], cfg.bounds_raw["g_vt_mm"]["hi"]) == (320.0, 465.0)
     ctl = np.array(yaml.safe_load((here / "control.yaml").read_text())["seed_params"]["grid"]["rows"]["points"])
     seed = sp.design_from_knobs({"g_vt_mm": 386.727504, "g_vt_hold": 0.0})
     inner, _ = G.rows_grid_points(seed.params["grid"], seed.params["grid"]["knobs"], cfg.brief)
