@@ -51,3 +51,6 @@ jobs:
   # W3 morph continuation: refusal storm 44% -> resample_strict + error_policy, warm from 3.232.
   - {id: s40x3__morph_v8, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40w2_2026-11-19/scout40w3__morph_v8.yaml}
+  # W3 tritonia v8: pinned at n 7.5 -> n 4..10, warm from 5.373.
+  - {id: s40x3__tritonia_v8, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w2_2026-11-19/scout40w3__tritonia_v8.yaml}

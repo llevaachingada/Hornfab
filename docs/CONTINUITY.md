@@ -60,6 +60,16 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40W2: tritonia v8 w3 appended; v9 running (local orchestrator)
+
+- `s40x__tritonia_v8` (W2, morph_width pin_ignore): best **5.373** (33 evals) vs the control 5.325
+  (slightly worse; the morph_width pin did not buy a gain), then bound-pinned at the HIGH limit of
+  `n [4, 7.5]`. The OSSE profile exponent is documented 2..16, so W3 widens `n` to 4..10 in one step
+  (`examples/typologies/scout40w2_2026-11-19/scout40w3__tritonia_v8.yaml`), warm-started from 5.373
+  (mean 3f90557b9b31); appended as `s40x3__tritonia_v8` (job 11). Shape-check pass.
+- Night `fable_scout40w2_2026-11-19` is on job 4: `s40x__tritonia_v9` (3 evals, best 5.030 vs the
+  5.289 control; morph_width pin_ignore active).
+
 ## 2026-11-19 - SCOUT40W2: morph W3 appended; tritonia v8 running (local orchestrator)
 
 - `s40x__morph_v8` (W2, morph_rate widened): best **3.232** (25 evals) vs the control 3.402 (+0.17,
