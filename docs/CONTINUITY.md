@@ -1,5 +1,42 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Owner-directed construction fixes for the SCOUT40 night (local orchestrator)
+
+- **Klangfilm: the parent/record lane is out, the Phase B H/V core is in.** New
+  `scout40__klangfilm_hvcore_c200mouth` (`klangfilm_lame_hv_core`, blend 1) seeded to the c200 record
+  mouth **585.000 x 255.000 mm INNER** (theta_h1 54.4980605893 / theta_v1 24.1725588357 solved
+  against the frozen kernel from the b4 seed), with the four beak keys searched. Offline check
+  (`scratch/verify_construction_2026-11-19.py`): theta_h 7.000->54.498, theta_v 6.000->24.173,
+  **0 angle inflections on both axes**, radii strictly increasing, axial 400 mm. This is the
+  construction that cannot pinch or S-curve (monotone Q law, `_klangfilm_lame_hv_core_v1.py:120-125`).
+  shape_check: ok, 3907/24000 dof, mouth 585 x 255, depth 408, envelope fits.
+- **Rolled: section lane replaced by a whole-shape rect PAIR.** The section kind has no
+  `terminal_deg` (`_crowe_section_v2.py:16`); the rect kind does (gate 180 < t <= 280,
+  `_rolled_rect_v1.py:50-51`). New `scout40__rf_rect_axial_cap225` (terminal 225, depth_h_ratio
+  opened 0.68-1.05, seed 1.0) + `scout40__rf_rect_axial_control270` (same, terminal 270) so the cap
+  is attributable. Offline: at the old fixed 0.68 the H wall has **2 inflections**; at 1.0 it has
+  **0** (the shoulder is the depth split, and it disappears). Effective wall turn 222.6 vs 267.9 deg;
+  lip return 33.6% vs 35.8% of depth. shape_check: both ok (3554 and 5142 / 6000 dof).
+- **Research basis (reused; no new dossier needed for a bounds/seed tweak):** the owner's "no gain
+  past 180 deg" is NOT in the repo sources. The sources warn 160-200 deg traps a lambda/4 cavity
+  (~4.3 kHz) and favour 220-280 deg / 270 (BIRADIAL_CROWE_SOURCES_2026-11-15:150-157, :218;
+  HORN_WHITEPAPERS_2026-11-15:136; imported KB :453 [X] measured-superior 270, optimum not
+  established). The implemented cap is therefore **225** (top of the owner's 200-225 band, outside
+  the warned band) with the 270 control; literal 180-200 is flagged, not implemented.
+- **No rolled "record-beak" variant exists** (verified: no record/beak keys in the rolled family);
+  the S-curve-inheriting lane dropped is the rolled **section** lane (replaced by the rect pair).
+  The Klangfilm record lane is the c200w parent (swapped, per the prior owner message).
+- **ext_throat_v8 dropped** (shape_check refusal: throat 42.1 x 42.1 vs 36.0 mm exit mismatch);
+  bounds not widened. `ext_throat_v7`/`fold_warm_v7` `from_runs` resolved by hand to
+  `runs/study-4e1a6a9cd4bb5201/verify` and `runs/study-0c9805ad97208a2e/screen` (the resolver's
+  one-level glob does not see `runs/study-*/{screen,verify}/designs`; `2.82`-family evidence:
+  b3_soft run `20261117T071329Z-screen-e4f90d` J 2.8192 vs parent c200 run `20261117T091346Z-screen-517217`
+  J 7.4458, same v7-smooth brief but NOT a same-mouth controlled A/B).
+- Night now 18 jobs (dry-run exit 0, all listed); preflight `--samples 64` running detached.
+- **Open construction decision:** KL-HV-B still has **no returning/curled lip** (contract
+  `klangfilm_lame_hv.md:118,123`; BEM: B3 DI win but 65.2 deg H coverage vs >=70, and widening the
+  mouth did not widen H). A returning-lip module (section-normal spine) is the contract's recommended
+  next step and is owner-gated (digest change); NOT implemented in this pass.
 ## 2026-11-19 - feat/woofer-system-v0 integrated into hornfab-all-2026-11-18 (horn + woofer GUI, P0)
 
 - Merged `feat/woofer-system-v0` (worktree `C:/Users/hunte/Hrns/hornlab-woofer-system-wt`, tip `d7453a1`)
@@ -8508,3 +8545,4 @@ PASS  round-trip        reserved for task 04
 - **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CADâ†’STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned â€” the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) â€” 2â€“4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.
 - **Open owner decisions:** v2 objective as brief DEFAULT (today opt-in); bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`); mesher bump (post-beta); surrogate OSSE top-up; GUI contrast owner click-path check remains; **P6a/P6b + W7 + the brief-design consultation + resume-or-park the deferred WP14 multicell physics (all owner-gated â€” see Next). RESOLVED 2026-10-25: fork hosting + pin (hosted fork; `760a1ec` pinned; installed == pinned â€” tripwire green); WP13 = OWNER-DEFERRED.**
 - **Blockers:** none (owner gate on the pin hosting only).
+

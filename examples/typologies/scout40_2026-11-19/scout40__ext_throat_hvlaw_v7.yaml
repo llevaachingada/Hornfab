@@ -213,7 +213,7 @@ search:
   record_gate: shadow
   warm_start:
     from_runs:
-    - runs/@design:a23763f1c6fc
+    - runs/study-4e1a6a9cd4bb5201/verify
     top_k: 10
     sigma_from_spread: true
 description: 'SCOUT40 2026-11-19 (cloud Fable senior): 40 valid evals, warm from the

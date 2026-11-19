@@ -11,6 +11,16 @@
 # Two briefs: jobs 1-6 the SMOOTH brief (non-CD constructions, owner: run first); jobs 7-18 home v7 (CD intent) ; J is NOT comparable between the two groups.
 # Order = priority; timeout 1 h per job; the cutoff drops the tail. Estimate [inferred]: 15-45 min per job,
 # 18 jobs ~6-12 h. Owner edit 2026-11-19: smooth group first, +2 Klangfilm-Lame versions, morph v7 / twinray v8 removed.
+# LOCAL INTEGRATOR EDITS 2026-11-19 evening (owner-directed geometry fixes; CPU-verified):
+#   - ext_throat_v8 DROPPED: shape_check refusal (throat 42.1 x 42.1 vs 36.0 mm exit mismatch).
+#   - Klangfilm record lane (c200w, klangfilm_lame_v1) -> Phase B H/V core seeded to the c200 mouth
+#     585 x 255 mm INNER, searching the 4 beak keys. Verified offline: 0 angle inflections both axes,
+#     strictly increasing radii, mouth 585.000 x 255.000 (scratch/verify_construction_2026-11-19.py).
+#     Keeps b3_soft (the 2.819 smooth-brief core lane) and the Phase A stage_a lane.
+#   - Rolled section lane -> whole-shape rect PAIR: terminal 225 cap vs 270 control, same seed/bounds
+#     (depth_h_ratio opened 0.68-1.05, seed 1.0). Verified offline: H-wall inflections 2 -> 0 when the
+#     fixed 0.68 depth split is removed. The 225 cap is the source-defensible top of the owner's band
+#     (the sources warn 160-200 deg cavity; 270 is the documented 240-275 family range).
 night: fable_scout40_2026-11-19
 lane: gpu
 jobs:
@@ -23,8 +33,8 @@ jobs:
      config: examples/typologies/scout40_2026-11-19/scout40__lecleach_iwata_ar_smooth_v7.yaml}
   - {id: s40__klangfilm_b3_soft, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_b3_soft.yaml}
-  - {id: s40__klangfilm_lame_c200w, kind: search, mode: screen, budget: 40, timeout_s: 3600,
-     config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_lame_c200w.yaml}
+  - {id: s40__klangfilm_hvcore_c200mouth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_hvcore_c200mouth.yaml}
   - {id: s40__klangfilm_lame_hv_stage_a, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_lame_hv_stage_a.yaml}
   # ---- home v7 brief (CD intent) ----
@@ -34,8 +44,8 @@ jobs:
      config: examples/typologies/scout40_2026-11-19/scout40__fold_warm_v7.yaml}
   - {id: s40__ext_throat_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__ext_throat_hvlaw_v7.yaml}
-  - {id: s40__ext_throat_v8, kind: search, mode: screen, budget: 40, timeout_s: 3600,
-     config: examples/typologies/scout40_2026-11-19/scout40__ext_throat_hvlaw_v8.yaml}
+  # s40__ext_throat_v8 DROPPED 2026-11-19 (local integrator): shape_check refusal — throat 42.1 x 42.1 mm
+  # vs 36.0 mm exit mismatch. Not fixed (bounds not widened per handoff).
   - {id: s40__morph_v8, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__morph_v8.yaml}
   - {id: s40__petal_hvlaw_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
@@ -54,5 +64,9 @@ jobs:
   - {id: s40__crowe_x_square_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__crowe_x_square_v7.yaml}
   # ---- tail ----
-  - {id: s40__rf_section_axial_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
-     config: examples/typologies/scout40_2026-11-19/scout40__rf_section_axial_home_v7.yaml}
+  # Owner edit 2026-11-19 evening: rolled section lane -> rolled WHOLE-SHAPE pair (terminal 225 cap vs
+  # 270 control; horizontal depth ratio opened). The section kind has no terminal_deg knob.
+  - {id: s40__rf_rect_cap225, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__rf_rect_axial_cap225.yaml}
+  - {id: s40__rf_rect_control270, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40_2026-11-19/scout40__rf_rect_axial_control270.yaml}

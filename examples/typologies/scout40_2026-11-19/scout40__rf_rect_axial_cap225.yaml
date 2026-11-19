@@ -1,0 +1,87 @@
+# SCOUT40 2026-11-19 lane (local integrator, owner-directed 2026-11-19 evening).
+# Rolled WHOLE-SHAPE lane (rolled_family_rect_v1, axial), from the canonical rf__rect_axial_v7 seed.
+# Owner fixes for the observed shoulder: (a) horizontal depth ratio OPENED (0.68 fixed before; the
+# documented cause of the eye-shaped/waisted H wall, ROLLED_RECT_FAMILY_RESEARCH_2026-11-15 s101,
+# s133-134); (b) rollback CAPPED at 225 deg via g_terminal_deg (kernel gate is 180 < t <= 280,
+# _rolled_rect_v1.py:50-51). 225 is the top of the owner's 200-225 band and outside the
+# [inferred] 160-200 deg lambda/4 cavity warning (BIRADIAL_CROWE_SOURCES_2026-11-15:150-157, :218);
+# the 270 control is the documented 240-275 family range and the measured-superior [X] claim.
+# Paired arm: scout40__rf_rect_axial_control270 (same seed/bounds, terminal 270) so the cap is an
+# attributable A/B, not a one-arm guess.
+name: scout40__rf_rect_axial_cap225
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows:
+    type: rolled_family_rect_v1
+    mode: axial
+  seed_policy: explicit
+  span: quarter
+  n_phi: 65
+  n_s: 128
+  wall_thickness_mm: 3.0
+seed_params:
+  g_width_mm: 542.0
+  g_height_mm: 299.0
+  g_depth_mm: 238.0
+  g_depth_h_ratio: 1.0
+  g_decay: 0.7
+  g_rect_exponent: 12.0
+  g_rect_turn_deg: 65.0
+  g_throat_turn_deg: 25.0
+  g_terminal_deg: 225.0
+  g_inward_h_mm: 0.0
+  g_inward_v_mm: 0.0
+  g_axial_h_mm: 3.0
+  g_axial_v_mm: 4.0
+  g_relief_start_s: 0.5
+  g_relief_peak_s: 0.8
+  g_relief_end_s: 0.96
+bounds:
+  g_width_mm: {lo: 542.0, hi: 542.0, search: false}
+  g_height_mm: {lo: 299.0, hi: 299.0, search: false}
+  g_depth_mm: {lo: 230.0, hi: 246.0}
+  g_depth_h_ratio: {lo: 0.68, hi: 1.05}
+  g_decay: {lo: 0.65, hi: 0.75}
+  g_rect_exponent: {lo: 10.0, hi: 14.0}
+  g_rect_turn_deg: {lo: 65.0, hi: 65.0, search: false}
+  g_throat_turn_deg: {lo: 25.0, hi: 25.0, search: false}
+  g_terminal_deg: {lo: 225.0, hi: 225.0, search: false}
+  g_inward_h_mm: {lo: 0.0, hi: 0.0, search: false}
+  g_inward_v_mm: {lo: 0.0, hi: 0.0, search: false}
+  g_axial_h_mm: {lo: -5.0, hi: 5.0}
+  g_axial_v_mm: {lo: -5.0, hi: 5.0}
+  g_relief_start_s: {lo: 0.5, hi: 0.5, search: false}
+  g_relief_peak_s: {lo: 0.8, hi: 0.8, search: false}
+  g_relief_end_s: {lo: 0.96, hi: 0.96, search: false}
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 6000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.15
+  seed: 1234
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: flat
+  budget_counts: valid
+  max_attempts: 250
+description: 'SCOUT40 2026-11-19: rolled whole-shape axial, terminal 225 deg cap, horizontal
+  depth ratio opened 0.68-1.05 (seed 1.0, no shoulder split); paired with the 270 control arm.'

@@ -149,7 +149,7 @@ search:
   max_attempts: 200
   warm_start:
     from_runs:
-    - runs/@design:00826f071b24
+    - runs/study-0c9805ad97208a2e/screen
     top_k: 10
     sigma_from_spread: true
 seed_params:

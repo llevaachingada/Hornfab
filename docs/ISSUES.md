@@ -1,5 +1,18 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Owner construction fixes wired into SCOUT40; two decisions open
+
+- OPEN (owner): rolled rollback cap — implemented **225** + a 270 control arm (sources warn 160-200 deg
+  cavity; 270 is the documented range and has a measured-superior [X] claim). Literal 180-200 is not
+  implemented; say the word and the cap arm moves.
+- OPEN (owner): Klangfilm returning/curled lip — KL-HV-B has none (BEM: H coverage 65.2 vs >=70;
+  widening the mouth did not help). The contract recommends a section-normal-spine returning lip;
+  that is a gated construction change (digest + tests + shape_check), not in this pass.
+- DONE: Klangfilm record lane (c200w parent) -> Phase B core at the c200 mouth 585 x 255 inner, beak
+  searched; rolled section lane -> whole-shape rect pair (225 cap / 270 control, depth ratio opened).
+- DONE: ext_throat_v8 dropped by shape_check refusal; warm-start `from_runs` resolved by hand.
+- OPEN (local): the night-queue resolver's glob misses `runs/study-*/{screen,verify}/designs` (same
+  family as the "screen" run-name loss); configs resolved by hand this time.
 ## 2026-11-19 - horn + woofer system merged; GUI completion P0-P9 in progress
 
 - DONE (local orchestrator): `feat/woofer-system-v0` merged into `hornfab-all-2026-11-18`; pre-merge
@@ -3581,6 +3594,7 @@ Local-only, added 2026-11-13 (**bo-study-v1.1 pushed; cloud completion kickoff i
 - Open: B8 full adversarial loop (fake evaluator through service/CLI/API/GUI, crash/idempotency matrix).
 - Open: pyproject optional `bayes` extra registration (isolated `bayes-venv` remains the sanctioned engine env).
 - Data note: 3 native shard-57 rows (276-278) uncatalogued at the S0 snapshot; refused at join (`catalog_row_missing`), recoverable by a fresh catalog export.
+
 
 
 
