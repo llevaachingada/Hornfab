@@ -1,5 +1,9 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Fable v2 renders: beak acts as "less V rollback" on rolled hosts
+
+- NOTE: read fv2 beak results as V-rollback reduction, not a forward beak (renders in docs/evidence/fable_v2_renders_2026-11-19/).
+
 ## 2026-11-19 - Fable v2 lanes queued (Klangfilm vbeak, rolled vbeak + hybrid)
 
 - OPEN (owner box): shape_check/dof the 4 `fable_v2_2026-11-19` configs; job 1 (record control) must reproduce

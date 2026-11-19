@@ -1,5 +1,13 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Fable v2 renders (cloud Fable senior)
+
+- `docs/evidence/fable_v2_renders_2026-11-19/` (3D + H/V sections, host vs beak 35 vs V 400 + beak 25; script beside).
+- Reading [measured geometry]: on these ROLLED lips the beak moves the curl tip forward, i.e. it shortens the V
+  rollback (Klangfilm lip end z 18 -> ~55 mm; rolled 160 -> ~190 mm) rather than adding a projecting beak; the
+  late V opening stretches the V curl into a wide flange (Klangfilm V lip to +-200 mm). Both remain valid search
+  freedoms; label results accordingly.
+
 ## 2026-11-19 - Fable v2: Klangfilm-Lame c200 + rolled h12 rebuilt on v10 with V opening + V-lip beak; queued first (cloud Fable senior)
 
 - Diagnosis from the archived runs (`docs/evidence/runs/`): both lose most J to the v7 `diag` term (round 65-deg
