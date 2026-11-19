@@ -31,6 +31,13 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - W2: fold chain closed (tie after 3 runs)
+
+- CLOSED: fold_warm 3.754 -> 3.682 -> 3.695 = tie; the W3 pinned on a different knob (az_a_cos_pow),
+  so the box is not the limiter - no W4 (economy rule).
+- LIVE: morph W3 (3.757 at 7 evals); then tritonia v8/v9, petal, square, rosse W3s.
+- OPEN: archive the W2/W3 runs when done; morning v10 rescore + B6.
+
 ## 2026-11-19 - W2: square & rosse W3s appended
 
 - DONE: crowe_x square W3 (sigma 0.12 step fix) and rosse W3 (g_b to the kernel's -0.10 floor) appended.

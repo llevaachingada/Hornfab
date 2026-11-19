@@ -60,6 +60,16 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40W2: fold chain closed as a tie; morph W3 running (local orchestrator)
+
+- **fold_warm: 3.754 -> 3.682 (W2) -> 3.695 (W3) = tie, no gain after three runs.** The W3 (both fold
+  widths widened to the kernel floor) did not improve and pinned on a DIFFERENT, peripheral knob
+  (`az_a_cos_pow` low 1.23779), i.e. the lane is at its local optimum and the box is no longer the
+  story. Per the economy rule (stop the arm rather than chase pins), the fold chain is CLOSED as a
+  tie; no W4. Recorded for the B6/readout: fold_warm does not move on this brief.
+- `s40x3__morph_v8` running (7 evals, best 3.757 vs the W2 3.232 - the warm mean is at 3.232 and the
+  early samples are above it). Remaining W3s: tritonia v8/v9, petal, square, rosse.
+
 ## 2026-11-19 - SCOUT40W2: square (+0.29) & rosse W3s appended (local orchestrator)
 
 - `s40x__crowe_x_square_v7` (W2, resample_strict): best **7.618** vs the control 7.911 -> +0.29 J (just
