@@ -203,3 +203,33 @@ exactly the review's G6 hazard, now quantified rather than asserted.
   via `read_text(encoding='utf-16')` for the two Tee logs; the validate fields were re-read from
   `blab_validate.json` and re-checked as the fields listed). The `.utf8.txt` copies are decode
   artifacts, not the originals.
+
+## Addendum 2026-11-19: motor-axis A/B (real 12PR300 T/S vs BL demo motor, identical geometry)
+
+Two vented-only coupled solves, same staged source geometry (115 L seed box 371.2x371.2x1078.79 mm,
+45 cm2 port, wall 18 mm, BL demo transducer shape), both complete 25/25 on beat_cpu:
+
+- real motor: system_runs/system/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/
+  (component l_motor12pr/driver: re 5.4 ohm, bl 14.1 N/A, mmd 0.0295 kg dry, cms 2.3e-4 m/N,
+  le 4.2e-4 H, rms 1.4 Ns/m; staged through BL's sanctioned component_parameters configuration
+  patch; blab project validate rc 0 / valid true);
+- demo twin: system_runs/system/bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9/
+  (BL DRIVER_DEFAULTS: re 5.8, bl 8.0, mmd 0.035, cms 4e-4, le 5e-4, rms 1.5; validate rc 0).
+
+Paired deltas (motor_axis_ab.json, verbatim): on-axis max rel delta 1.198 at 338.5 Hz
+(LF 200-500 Hz 1.198; XO 600-1200 Hz 1.436); up30 max 1.307 at 1196.8 Hz; down30 max 1.198 at
+338.5 Hz. Mechanics: diaphragm velocity max rel delta 1.024; voice-coil current max rel delta
+0.551; at 200 Hz the real driver draws 0.366 A vs 0.477 A (both bases per 2.83 V).
+
+[measured] The demo motor was not a harmless placeholder: substituting the real T/S changes the
+installed woofer pressure basis by 120-144 % per 2.83 V across the measured band. All earlier
+demo-motor solves remain pipeline/provenance evidence only; no sensitivity comparison across
+motor implementations is valid.
+
+Limits (unchanged honesty): the transducer acoustic SHAPE is still BL's provider default
+(MOTOR_GEOMETRY_INCOMPLETE: the committed geometry YAML lacks cone depth / surround width /
+dust-cap diameter / driver_y; the real Sd-derived moving diameter 0.2605 m also violates BLs
+panel-fit separation on the 371.2 mm front: 0.1821 m required vs 0.1501 m available). Real-shape
+staging needs maker CAD/measurement plus a taller-front-panel re-screen. No nonlinear,
+thermal or port-turbulence claim is made.
+
