@@ -1,5 +1,18 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Senior verdicts on handback §2.1 (rho20) and §2.2 (v7 floor) (cloud Fable senior)
+
+- **Verdict file:** `scratch/fable_architecture/SENIOR_VERDICTS_2026-11-19.md` (CPU, committed data only).
+- **§2.1 rho20: park stands.** v8 -> A_r20 meets the U3 3 deg rule by 0.12 deg (H 2.5-5.5 kHz +3.12,
+  SE 0.44 over 6 freqs, no mesh floor, dJ +0.024 tie). rho's own swing r15 -> r20 is 1.28 deg H:
+  the rho knob is inert. §10.2 rows to write: A_r15 no authority; A_r20 *borderline*. U3 keeps 3 deg
+  and adds a grade: authority needs (move - 3) >= 1 SE, else borderline (changes no decision alone).
+- **§2.2 v7 floor: re-pin to 0.31 J (combined 0.3105) for stored-J tie calls.** 0.13 is A4's
+  dense-232-J sampling residual (no grid-weighting shift); every critical-path J is stored-grid J.
+  Effects: fold_warm v7 (dJ 0.20-0.25) becomes a tie with the throat cluster (already in B6);
+  WP 4.4 vt success test becomes > 0.3105 J; D8 continuation rule uses 0.31 for v7.
+- Not reviewed yet: handback §2.3 judgment calls, §2.4 steer_early/late planes.
+
 ## 2026-11-18 - WP 4.3 complete (5/5) -> B2 authority table; vt V-freedom has 3x-threshold authority; WP 4.4 proposal written (local orchestrator)
 
 - **WP 4.3: five tool-valid variants solved at verify tier in ~4 min** (night fable_wp43_2026-11-18,

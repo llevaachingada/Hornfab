@@ -1,5 +1,14 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Senior verdicts: rho20 park stands (borderline); v7 floor re-pinned to 0.31 J
+
+- DONE (senior §2.1): rho20 = borderline authority, rho knob inert, G5 park stands; §10.2 rows to
+  be written by the plan owner as stated in `scratch/fable_architecture/SENIOR_VERDICTS_2026-11-19.md`.
+- DONE (senior §2.2): v7 stored-J floor = 0.31 (combined 0.3105); 0.13 only for dense-scored J.
+- OPEN (local/owner): add `se_deg` + `grade` (authority/borderline) to `tools/analysis/u3_authority.py`.
+- OPEN (local): update WP 4.4 success test (> 0.3105 J) and the B6 readout (fold_warm = tie).
+- OPEN (senior): handback §2.3 judgment-call checks and §2.4 steer plane mapping.
+
 ## 2026-11-18 - WP 4.3 done: vt V-freedom authoritative (+32 deg, +2.3 J cost), 4 freedoms inert; WP 4.4 proposal open
 
 - DONE: B2 authority table (verify tier, same identity): vt_460 authority YES via the intended V

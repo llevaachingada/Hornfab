@@ -446,6 +446,7 @@ Keep this file current: a new doc gets a line here in the same commit.
 ## Fable integration evidence (2026-11-18, local orchestrator)
 
 - **[HANDBACK_LOCAL_2026-11-18.md](../HANDBACK_LOCAL_2026-11-18.md) — the committed senior handoff: what landed, evidence index, senior-review queue, owner questions, what stays owner-box-only.**
+- **[scratch/fable_architecture/SENIOR_VERDICTS_2026-11-19.md](../scratch/fable_architecture/SENIOR_VERDICTS_2026-11-19.md) — cloud senior verdicts on handback §2.1 (rho20 borderline, park stands) and §2.2 (v7 floor re-pinned to 0.31 J for stored-J ties).**
 - [ST260 anchor source-check outcome + corrected-config rationale + STL](evidence/anchor_st260_2026-11-18/README.md) (+ `measured/ST260-19.stl`; D6 step 1 / R4)
 - [Throat A-vs-v8 per-band authority](evidence/throat_hv_2026-11-18/authority_A_vs_v8.json) and [Phase 3 vs B_o50](evidence/throat_hv_2026-11-18/authority_B_p3_vs_o50.json) (+ hv_beamwidth CSV sets; R9 follow-up / 2b)
 - [U3 biradial host study configs](../examples/studies/u3_biradial_es_style_v7/control.yaml) (R8 / 2f; control + 7 variants + manifest validity table)
