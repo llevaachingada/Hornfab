@@ -189,3 +189,40 @@ canonical-record route replays the c200 parent acoustically, so lane #1 was allo
 
 Post-run, this table is completed with run ids, valid/refused counts, and the next best measured
 action; nothing is promoted without `verify` (complete polars, same source/mesh/grid).
+
+## 9. Rolling results (measured; night still running at the time of this entry)
+
+Read-out command: `.venv\Scripts\python.exe tools\night_status.py --since-hours 12`, plus
+`runs/nights/fable_priority10_2026-11-19/summary.jsonl`. Job ids in `queue_state.json` are never re-run.
+
+| Job | Run | Valid/rows | Seed J (v10) | Best J | Gain | Verdict |
+|---|---|---|---|---|---|---|
+| p10__fv2_kl_record_control | `20261119T165650Z-screen-f30e50` | 1/1 | — | 7.44663 (v7) | | **gate passed** (parent 7.4458, \|Δ\| 0.0008) |
+| p10__fv2_klangfilm_vbeak (#1) | `20261119T165732Z-screen-3ebb94` | 30/30, 0 refusals | **8.4198** | **8.3910** (n 13, `2edf3ea06d10`) | **+0.029** | **fails** the >0.4677 bar; watchdog `no_gain_valid` |
+| p10__fv2_rolled_record_vbeak (#2) | `20261119T170937Z-screen-ba0f14` | 30/30, 0 refusals | **15.547** | **15.320** (n 27, `d16ae26ca974`) | **+0.227** | **fails** the >0.4677 bar; watchdog `no_gain_valid` |
+
+**Why both record lanes stalled (measured term split, seed → best).**
+
+- c200 (#1): `cov_profile 0.703 → ~0.70`, `rip 0.043`, `flat 0.343 → 0.338`, `load 0.717`,
+  **`dislope 6.347 → 6.334`**, `flat_cv 0.176 → 0.180`, `di_roughness 0.262`. Total 8.42 → 8.39.
+- rolled (#2): `cov_profile 1.844 → 1.810`, `flat 0.849 → 0.853`, `load 0.659 → 0.654`,
+  **`dislope 11.114 → 10.922`**, `di_roughness 0.627 → 0.620`, `flat_cv 0.834 → 0.843`. Total 15.55 → 15.32.
+
+Both hosts' v10 cost is **dominated by `dislope`** (75 % and 71 % of total J respectively). The two
+searched freedoms — record-level V timing and the V-lip beak — move the V plane, not the DI-vs-frequency
+slope, so they cannot pay on this score at this budget. This is a **construction/score mismatch finding,
+not a mesh or solver problem** [measured]: 0 refusals, 30/30 valid, 5-6 GHz-cap-free solves, VRAM
+689 → 690 MiB, and the control replayed the parent exactly.
+
+Consequences applied to the plan (no new GPU time spent to learn them):
+1. #1/#2 are not continued. Their s2 slot stays empty; a c200/rolled rescue would have to search a
+   *DI-slope-relevant* freedom (mouth area law / H-wall turn), i.e. a new construction, not more of these
+   knobs — that is a senior-plan decision, not a silent retune.
+2. #3 (rolled hybrid, 80 valid) is now the lane that matters for this family: its 13 knobs include mouth
+   width/height, corner exponent, throat/rect turn and terminal angle, which are the terms that can move
+   `dislope`.
+3. The v10 leader comparison is unchanged: fold_warm 1.4214 / morph 1.4305 / ext_throat 1.5710 remain the
+   only lanes inside one floor of each other.
+
+Remaining jobs at this entry: #3 running, then #4, #5, #8, #7, #6, #9, #10 (see §6 for order).
+
