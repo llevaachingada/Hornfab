@@ -22,6 +22,15 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - Five bound-pinned requeues queued (s40w__* positions 7-11)
+
+- DONE: widened + requeued the five bound-pinned lanes; shape_check all pass; same v7-smooth briefs so
+  J is comparable with the originals (controls); warm-started from each lane's box-limited best.
+- OPEN: economy preflight (`--from-runs --samples 64`) running for the four widened configs; check
+  before reading the requeue results. stage_a is pin_ignore-only (no new region).
+- OPEN: keep watching the live night; any further exit-75 gets the same widen-or-pin_ignore requeue.
+- NOTE: c200-mouth core remains a test of the seed, not a basin verdict (its first run was box-limited).
+
 ## 2026-11-19 - SCOUT40 watchdog = bound-pinned (box limits), not failures
 
 - EXIT 75 = `WATCHDOG_EXIT` (`tools/run_campaign_night.py:118`); status `watchdog`; partial results kept.

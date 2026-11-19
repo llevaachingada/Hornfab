@@ -1,0 +1,86 @@
+# SCOUT40W 2026-11-19 requeue (local orchestrator, owner-directed): the SCOUT40 run of this lane was
+# stopped by the runner's bound-pinned watchdog (exit 75) at the LOW limit of g_fc_v_hz [450, 1000].
+# Widen, do not change the physics:
+#   * same family (lecleach H/V pair, reconstruction), same brief (v7 smooth) and objective -> the J
+#     stays directly comparable with the original four and the other smooth lanes;
+#   * g_fc_v_hz floor 450 -> 400. Basis: the family's own H box already allows 300, and a shape-check
+#     sweep (scratch/sweep_widen_2026-11-19) shows 400 Hz gives V mouth 471 mm (fits the 480 envelope),
+#     while 380 Hz gives 495 mm (OVER). 400 is the last feasible step.
+#   * warm start = this lane's best design from the box-limited run (does not re-learn the basin);
+#     sigma_from_spread false so the widened region is sampled at the config sigma0, not the (pinned)
+#     prior spread. The original run is the control for this widening treatment.
+name: scout40w__lecleach_hv_smooth_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: lecleach
+  n_phi: 15
+  n_s: 32
+  seed_policy: explicit
+  wall_thickness_mm: 3.0
+seed_params:
+  g_fc_hz: 340.0
+  g_fc_h_hz: 340.0
+  g_fc_v_hz: 520.0
+  g_T: 1.0
+  g_stop_deg: 215.0
+  g_r_lip_mm: 0.0
+  g_stop_a2: 0.05
+bounds:
+  g_fc_h_hz:
+    lo: 300.0
+    hi: 750.0
+  g_fc_v_hz:
+    lo: 400.0
+    hi: 1000.0
+  g_T:
+    lo: 0.4
+    hi: 1.0
+  g_stop_deg:
+    lo: 165.0
+    hi: 230.0
+  g_r_lip_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_stop_a2:
+    lo: -0.1
+    hi: 0.15
+description: 'SCOUT40W 2026-11-19: requeue of scout40__lecleach_hv_smooth_v7 after the bound-pinned watchdog
+  at g_fc_v_hz 450; floor lowered to 400 (shape-check feasible edge, V mouth 471<=480), warm-started from
+  the box-limited best; same smooth v7 brief so J stays comparable with the original four.'
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 250
+  warm_start:
+    from_runs:
+    - runs/20261119T050354Z-screen-7ebf9c
+    top_k: 10
+    sigma_from_spread: false

@@ -1,0 +1,100 @@
+# SCOUT40W 2026-11-19 requeue (local orchestrator, owner-directed): the SCOUT40 run of this lane was
+# stopped by the runner's bound-pinned watchdog (exit 75): 3/6 of the top designs sat at the LOW limit
+# of g_beak_v_projection_mm [0, 5]. 0 is the KERNEL's hard floor (beak_v_projection_mm 0..45,
+# _klangfilm_lame_hv_core_v1.py:79), so this knob gets watchdog pin_ignore in the night job instead of
+# an illegal negative box. The other beak boxes were also narrow copies of the b3 seed and are widened
+# to the kernel's documented ranges (0..60 H setback, -20..20 diagonal, 0.50..0.99 start).
+# Same family/brief/objective (smooth v7) -> J comparable with the original four.
+# Warm start = this lane's box-limited best; sigma_from_spread false so the widened beak region is
+# sampled. The original run is the control for this widening treatment.
+name: scout40w__klangfilm_b3_soft
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+generator:
+  name: grid
+  rows:
+    type: klangfilm_lame_hv_core
+  n_phi: 19
+  n_s: 64
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_aspect: 2.0759495982
+  g_beak_diagonal_mm: 0.0
+  g_beak_h_setback_mm: 2.0
+  g_beak_start_frac: 0.95
+  g_beak_v_projection_mm: 1.0
+  g_cd_core_blend: 1.0
+  g_core_length_mm: 340.0
+  g_end_frac: 1.7953432921
+  g_entry_half_angle_deg: 2.0
+  g_fc_hz: 494.4393461867
+  g_lame_end_frac: 0.95
+  g_lame_p: 5.0063549541
+  g_lame_p_mouth: 3.0
+  g_lame_start_frac: 0.2
+  g_morph_frac: 0.3
+  g_rim_sweep_ratio: 0.004898754
+  g_source_blend_ratio: 0.0
+  g_theta_h0_deg: 7.0
+  g_theta_h1_deg: 52.1
+  g_theta_v0_deg: 6.0
+  g_theta_v1_deg: 30.4
+bounds:
+  g_aspect: {lo: 2.0759495982, hi: 2.0759495982, search: false}
+  g_beak_diagonal_mm: {lo: -20.0, hi: 20.0, search: true}
+  g_beak_h_setback_mm: {lo: 0.0, hi: 60.0, search: true}
+  g_beak_start_frac: {lo: 0.5, hi: 0.99, search: true}
+  g_beak_v_projection_mm: {lo: 0.0, hi: 45.0, search: true}
+  g_cd_core_blend: {lo: 1.0, hi: 1.0, search: false}
+  g_core_length_mm: {lo: 238.0, hi: 442.0, search: true}
+  g_end_frac: {lo: 1.7953432921, hi: 1.7953432921, search: false}
+  g_entry_half_angle_deg: {lo: 2.0, hi: 2.0, search: false}
+  g_fc_hz: {lo: 494.4393461867, hi: 494.4393461867, search: false}
+  g_lame_end_frac: {lo: 0.665, hi: 0.99, search: true}
+  g_lame_p: {lo: 5.0063549541, hi: 5.0063549541, search: false}
+  g_lame_p_mouth: {lo: 2.1, hi: 3.9, search: true}
+  g_lame_start_frac: {lo: 0.14, hi: 0.26, search: true}
+  g_morph_frac: {lo: 0.3, hi: 0.3, search: false}
+  g_rim_sweep_ratio: {lo: 0.004898754, hi: 0.004898754, search: false}
+  g_source_blend_ratio: {lo: 0.0, hi: 0.0, search: false}
+  g_theta_h0_deg: {lo: 4.9, hi: 9.1, search: true}
+  g_theta_h1_deg: {lo: 36.5, hi: 60.0, search: true}
+  g_theta_v0_deg: {lo: 4.2, hi: 7.8, search: true}
+  g_theta_v1_deg: {lo: 21.3, hi: 39.5, search: true}
+description: 'SCOUT40W 2026-11-19: requeue of scout40__klangfilm_b3_soft after the bound-pinned watchdog
+  (hard floor at g_beak_v_projection_mm 0); beak boxes widened to the kernel ranges, pin_ignore set in the
+  night job, warm-started from the box-limited best; same smooth v7 brief so J stays comparable.'
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.1
+  seed: 1234
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 250
+  warm_start:
+    from_runs:
+    - runs/20261119T051630Z-screen-ce7a3f
+    top_k: 10
+    sigma_from_spread: false

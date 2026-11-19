@@ -40,6 +40,42 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - Five bound-pinned lanes requeued with widened boxes (local orchestrator, owner-directed)
+
+- **Exit 75 = `WATCHDOG_EXIT`**, not a crash: the runner stops a search whose box is the limiter and
+  keeps the partial results. Five SCOUT40 lanes were **bound-pinned** (the sixth, crowe_v2a, exited 0 at
+  its budget). The five are requeued as `s40w__*`, inserted at night positions 7-11 in the LIVE file
+  (`runs/nights/fable_scout40_2026-11-19.yaml`) and the tracked copy (`docs/queue/...`), 23 jobs total,
+  dry-run clean. Same brief/objective (v7 smooth) as the originals so J stays comparable; the originals
+  are the controls; every requeue warm-starts from its lane's box-limited best (top 10,
+  `sigma_from_spread: false` so the widened region is sampled at the config sigma0).
+- **Widening basis (measured, not guessed):**
+  - `s40w__lecleach_hv_smooth`: `g_fc_v_hz` 450 -> **400**. Shape-check sweep
+    (`scratch/sweep_widen_2026-11-19/shape_check.log`): 400 Hz -> V mouth 471 mm (fits the 480
+    envelope), 380 Hz -> 495 mm (OVER). 400 is the last feasible step; the family's H box already
+    allows 300.
+  - `s40w__iwata_ar_smooth`: `g_fc_hz` 420 -> **340**. Sweep: 340 Hz -> 524 x 449 mm (31 mm margin),
+    320 Hz -> 476 mm (mesh edge), 300 Hz -> 507 mm OVER. The R19 space card had raised 300 -> 420
+    because the edge was mostly refused, so 340 keeps headroom rather than re-opening that slice.
+  - `s40w__klangfilm_b3_soft`: beak boxes widened to the kernel ranges (H setback 0-60, V projection
+    0-45, diagonal -20..20, start 0.50-0.99; `_klangfilm_lame_hv_core_v1.py:79`) + night-job
+    `watchdog: {pin_ignore: [g_beak_v_projection_mm]}` because 0 is the hard floor (the watchdog's
+    "widen the box" cannot apply below a legal minimum).
+  - `s40w__klangfilm_hvcore_c200mouth`: the 0-10 mm beak-setback box was our copy of b3_soft's box,
+    not a physical limit (6/6 of its top designs sat at 10). All four beak boxes widened to the kernel
+    ranges; the 585 x 255 mm c200-mouth seed and the beak-only search are unchanged.
+  - `s40w__klangfilm_lame_hv_stage_a`: bound-pinned at the hard floor `g_h_mid_gain_mm` 0 (negative
+    mid-gain is refused; contract s5 "lawful box positive-only"). Night-job
+    `watchdog: {pin_ignore: [g_h_mid_gain_mm, g_v_mid_gain_mm]}`; theta boxes unchanged.
+- **Gates:** shape_check all five pass (lecleach 2553/24000 dof, 553x364x242; iwata 1746/24000,
+  390x334x239; b3_soft 3102/24000, 473x266x344; c200mouth 3907/24000, 585x255x408; stage_a
+  7453/24000, 541x261x234). Economy preflight (`--from-runs <lane run> --samples 64`) runs detached
+  for the four widened configs (`scratch/preflight_scout40w_2026-11-19.log`); stage_a has no new region
+  (pin-only change), so its check is the shape check + the prior run.
+- `s40__vt_v1` started at 01:05:14 (before the insert), so the requeues begin at the next job boundary.
+- Standing rule: any further exit-75 in this night gets the same treatment (widen within the documented
+  range, or pin_ignore at a hard limit) and a new job id.
+
 ## 2026-11-19 - Correction: the SCOUT40 watchdog stops are BOX limits, not failures (local orchestrator)
 
 - **Exit 75 is `WATCHDOG_EXIT`** (`tools/run_campaign_night.py:118`), the runner's designed stop for a

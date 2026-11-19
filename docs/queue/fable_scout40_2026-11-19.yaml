@@ -38,6 +38,29 @@ jobs:
   - {id: s40__klangfilm_lame_hv_stage_a, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/typologies/scout40_2026-11-19/scout40__klangfilm_lame_hv_stage_a.yaml}
   # ---- home v7 brief (CD intent) ----
+  # ---- OWNER REQUEUES 2026-11-19 (bound-pinned watchdog exits; same briefs/objective so J is
+  # comparable with the four originals; widened per shape-check + kernel/dossier ranges; warm-started
+  # from each lane's box-limited best; the originals are the controls) ----
+  - {id: s40w__lecleach_hv_smooth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w_2026-11-19/scout40w__lecleach_hv_smooth_v7.yaml}
+  - {id: s40w__iwata_ar_smooth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w_2026-11-19/scout40w__lecleach_iwata_ar_smooth_v7.yaml}
+  - id: s40w__klangfilm_b3_soft
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    config: examples/typologies/scout40w_2026-11-19/scout40w__klangfilm_b3_soft.yaml
+    watchdog: {pin_ignore: [g_beak_v_projection_mm]}
+  - {id: s40w__klangfilm_hvcore_c200mouth, kind: search, mode: screen, budget: 40, timeout_s: 3600,
+     config: examples/typologies/scout40w_2026-11-19/scout40w__klangfilm_hvcore_c200mouth.yaml}
+  - id: s40w__klangfilm_lame_hv_stage_a
+    kind: search
+    mode: screen
+    budget: 40
+    timeout_s: 3600
+    config: examples/typologies/scout40w_2026-11-19/scout40w__klangfilm_lame_hv_stage_a.yaml
+    watchdog: {pin_ignore: [g_h_mid_gain_mm, g_v_mid_gain_mm]}
   - {id: s40__vt_v1, kind: search, mode: screen, budget: 40, timeout_s: 3600,
      config: examples/studies/u3_biradial_es_style_v7/vt_v1.yaml}
   - {id: s40__fold_warm_v7, kind: search, mode: screen, budget: 40, timeout_s: 3600,
