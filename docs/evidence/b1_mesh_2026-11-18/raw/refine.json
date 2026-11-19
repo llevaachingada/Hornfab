@@ -1,0 +1,1067 @@
+{
+  "check": "B1-mesh-convergence",
+  "factor": 2.0,
+  "note": "reference = stored screen row (no re-solve); refined = same screen grid, only mesh.epw changed. delta.J > j_gain_threshold marks the design mesh-sensitive.",
+  "j_gain_threshold": 0.0057,
+  "noise_floor_db": 0.039,
+  "discretization_floor_db": 0.028,
+  "designs": [
+    {
+      "run": "runs/20261115T143219Z-screen-d3a1bb",
+      "design_hash": "508f907726d3",
+      "factor": 2.0,
+      "epw_from": 6.0,
+      "epw_to": 12.0,
+      "check": "B1-mesh-convergence",
+      "grid": {
+        "solve_hash": "ca3243f60c10",
+        "n_freqs": 18,
+        "mode": "screen",
+        "same_grid": true
+      },
+      "reference": {
+        "source": "stored screen row (search.ndjson)",
+        "J": 3.3051498327540285,
+        "terms": {
+          "cov": 0.8355379657608432,
+          "rip": 0.24026056835164447,
+          "di": 1.8287734133051738,
+          "dislope": 0.17109981808896366,
+          "flat": 0.5897816775577686,
+          "load": 0.0,
+          "distd": 0.3030221129591735,
+          "diag": 0.40709596719102803,
+          "flat_cv": 0.6561215941115263,
+          "penalty": 0.0,
+          "total": 3.3051498327540285,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 374.0929252653381,
+          "lfp50_hz": 503.0834784250946,
+          "rez_min_from_fx": 0.578892378885158,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0
+        },
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 76.85609908335918,
+          "bw_v_deg": 70.64551955085773,
+          "di_db": 11.402088352852603,
+          "ripple_h_db": 2.3476453660038024,
+          "ripple_v_db": 1.4127202889660708
+        },
+        "terms_stored": true,
+        "metrics_stored": true,
+        "n_triangles": 7685,
+        "n_dof": 3999,
+        "peak_vram_mb": 189.0,
+        "solve_hash": "ca3243f60c10"
+      },
+      "vram": {
+        "vram_baseline_mib": 1034,
+        "peak_vram_mib": 3238,
+        "host_dedicated_peak_mib": 2058,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      },
+      "wall_s": 223.83,
+      "teardown_forced_pids": [],
+      "teardown_verified": true,
+      "refined": {
+        "ok": true,
+        "error": null,
+        "J": 3.3022461575761186,
+        "terms": {
+          "cov": 0.8340897988916955,
+          "rip": 0.23949692741533146,
+          "di": 1.824464298048644,
+          "dislope": 0.1710723454345848,
+          "flat": 0.5923253648723078,
+          "load": 0.0,
+          "distd": 0.30277210427354556,
+          "diag": 0.40580295011583634,
+          "flat_cv": 0.6568961117311505,
+          "penalty": 0.0,
+          "total": 3.3022461575761186,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 373.69129036334937,
+          "lfp50_hz": 502.9357172375476,
+          "rez_min_from_fx": 0.579352171367251,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0,
+          "oa_excess_raw": 0.0
+        },
+        "n_triangles": 30164,
+        "n_dof": 15388,
+        "cap": 24000,
+        "mesh_hash": "55b293e12d36",
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 76.84179116514136,
+          "bw_v_deg": 70.63107259612033,
+          "di_db": 11.403217675773963,
+          "ripple_h_db": 2.347272029818382,
+          "ripple_v_db": 1.4127792783012076
+        }
+      },
+      "delta": {
+        "J": -0.0029036751779099035,
+        "terms": {
+          "cov": -0.0014481668691476157,
+          "rip": -0.0007636409363130092,
+          "di": -0.004309115256529772,
+          "dislope": -2.7472654378857264e-05,
+          "flat": 0.0025436873145392447,
+          "load": 0.0,
+          "distd": -0.00025000868562791156,
+          "diag": -0.0012930170751916936,
+          "flat_cv": 0.0007745176196242154,
+          "penalty": 0.0
+        },
+        "metrics": {
+          "bw_h_deg": -0.014307918217824067,
+          "bw_v_deg": -0.014446954737394435,
+          "di_db": 0.001129322921359588,
+          "ripple_h_db": -0.0003733361854205697,
+          "ripple_v_db": 5.898933513681648e-05
+        }
+      },
+      "flags": {
+        "mesh_sensitive": false,
+        "cap_bound": false,
+        "spilled": false,
+        "grid_mismatch": false
+      }
+    },
+    {
+      "run": "runs/20261115T143219Z-screen-d3a1bb",
+      "design_hash": "766c9b1ba8a9",
+      "factor": 2.0,
+      "epw_from": 6.0,
+      "epw_to": 12.0,
+      "check": "B1-mesh-convergence",
+      "grid": {
+        "solve_hash": "ca3243f60c10",
+        "n_freqs": 18,
+        "mode": "screen",
+        "same_grid": true
+      },
+      "reference": {
+        "source": "stored screen row (search.ndjson)",
+        "J": 3.2994798299416743,
+        "terms": {
+          "cov": 0.7291297271185168,
+          "rip": 0.23994106342439805,
+          "di": 2.0383957825161927,
+          "dislope": 0.23189559039431928,
+          "flat": 0.6027548452334438,
+          "load": 0.0,
+          "distd": 0.3162471674792869,
+          "diag": 0.2945248784009712,
+          "flat_cv": 0.7329688294922461,
+          "penalty": 0.0,
+          "total": 3.2994798299416743,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 391.2768289493945,
+          "lfp50_hz": 512.858051563892,
+          "rez_min_from_fx": 0.5804562522022269,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0
+        },
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 78.7889845443259,
+          "bw_v_deg": 72.0905335871362,
+          "di_db": 11.2237537896277,
+          "ripple_h_db": 2.2313393375567827,
+          "ripple_v_db": 1.3960874095128453
+        },
+        "terms_stored": true,
+        "metrics_stored": true,
+        "n_triangles": 7149,
+        "n_dof": 3725,
+        "peak_vram_mb": 250.0,
+        "solve_hash": "ca3243f60c10"
+      },
+      "vram": {
+        "vram_baseline_mib": 1034,
+        "peak_vram_mib": 2698,
+        "host_dedicated_peak_mib": 1802,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      },
+      "wall_s": 189.92,
+      "teardown_forced_pids": [],
+      "teardown_verified": true,
+      "refined": {
+        "ok": true,
+        "error": null,
+        "J": 3.2913585322706753,
+        "terms": {
+          "cov": 0.7267641474656289,
+          "rip": 0.2385817172960976,
+          "di": 2.0339610574311275,
+          "dislope": 0.22953283151359238,
+          "flat": 0.6039972965267855,
+          "load": 0.0,
+          "distd": 0.3151741911916394,
+          "diag": 0.2927527455644782,
+          "flat_cv": 0.7339530293423276,
+          "penalty": 0.0,
+          "total": 3.2913585322706753,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 390.6987260456228,
+          "lfp50_hz": 512.5563349586245,
+          "rez_min_from_fx": 0.5806796577881993,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0,
+          "oa_excess_raw": 0.0
+        },
+        "n_triangles": 27953,
+        "n_dof": 14270,
+        "cap": 24000,
+        "mesh_hash": "55b293e12d36",
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 78.78180769542536,
+          "bw_v_deg": 72.06194685191892,
+          "di_db": 11.223741552974847,
+          "ripple_h_db": 2.2302437337396857,
+          "ripple_v_db": 1.3954748962597314
+        }
+      },
+      "delta": {
+        "J": -0.008121297670999006,
+        "terms": {
+          "cov": -0.0023655796528878614,
+          "rip": -0.0013593461283004649,
+          "di": -0.00443472508506515,
+          "dislope": -0.0023627588807269007,
+          "flat": 0.001242451293341662,
+          "load": 0.0,
+          "distd": -0.0010729762876474647,
+          "diag": -0.0017721328364929678,
+          "flat_cv": 0.0009841998500815796,
+          "penalty": 0.0
+        },
+        "metrics": {
+          "bw_h_deg": -0.007176848900542154,
+          "bw_v_deg": -0.028586735217288606,
+          "di_db": -1.2236652853658825e-05,
+          "ripple_h_db": -0.0010956038170970572,
+          "ripple_v_db": -0.0006125132531138444
+        }
+      },
+      "flags": {
+        "mesh_sensitive": true,
+        "cap_bound": false,
+        "spilled": false,
+        "grid_mismatch": false
+      }
+    },
+    {
+      "run": "runs/20261115T143219Z-screen-d3a1bb",
+      "design_hash": "b996da551021",
+      "factor": 2.0,
+      "epw_from": 6.0,
+      "epw_to": 12.0,
+      "check": "B1-mesh-convergence",
+      "grid": {
+        "solve_hash": "ca3243f60c10",
+        "n_freqs": 18,
+        "mode": "screen",
+        "same_grid": true
+      },
+      "reference": {
+        "source": "stored screen row (search.ndjson)",
+        "J": 3.5742756197945944,
+        "terms": {
+          "cov": 0.9613305417632464,
+          "rip": 0.34086067188929264,
+          "di": 2.0472856525311824,
+          "dislope": 0.00381214317615783,
+          "flat": 0.6160471620392193,
+          "load": 0.0,
+          "distd": 0.3964048920483,
+          "diag": 0.4688629495252363,
+          "flat_cv": 0.6789975906375468,
+          "penalty": 0.0,
+          "total": 3.5742756197945944,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 426.08332505562726,
+          "lfp50_hz": 542.8485624904761,
+          "rez_min_from_fx": 0.6283820854953822,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0
+        },
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 77.73466112765578,
+          "bw_v_deg": 72.07577298836637,
+          "di_db": 11.192930785070331,
+          "ripple_h_db": 2.328568141017818,
+          "ripple_v_db": 1.3673624816177823
+        },
+        "terms_stored": true,
+        "metrics_stored": true,
+        "n_triangles": 7714,
+        "n_dof": 4009,
+        "peak_vram_mb": 168.0,
+        "solve_hash": "ca3243f60c10"
+      },
+      "vram": {
+        "vram_baseline_mib": 1208,
+        "peak_vram_mib": 3104,
+        "host_dedicated_peak_mib": 2058,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      },
+      "wall_s": 233.31,
+      "teardown_forced_pids": [],
+      "teardown_verified": true,
+      "refined": {
+        "ok": true,
+        "error": null,
+        "J": 3.566574092897125,
+        "terms": {
+          "cov": 0.9589884529888603,
+          "rip": 0.33975301231260246,
+          "di": 2.0443497866367935,
+          "dislope": 0.004283238480236972,
+          "flat": 0.6148576665917694,
+          "load": 0.0,
+          "distd": 0.3953048286651777,
+          "diag": 0.46539977249089975,
+          "flat_cv": 0.6797634330050136,
+          "penalty": 0.0,
+          "total": 3.566574092897125,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 423.58830988861547,
+          "lfp50_hz": 542.2451082486359,
+          "rez_min_from_fx": 0.6287679394031439,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0,
+          "oa_excess_raw": 0.0
+        },
+        "n_triangles": 30081,
+        "n_dof": 15336,
+        "cap": 24000,
+        "mesh_hash": "55b293e12d36",
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 77.73791509020154,
+          "bw_v_deg": 72.07264243241261,
+          "di_db": 11.19183741129752,
+          "ripple_h_db": 2.3267833547282373,
+          "ripple_v_db": 1.3662565261683823
+        }
+      },
+      "delta": {
+        "J": -0.007701526897469613,
+        "terms": {
+          "cov": -0.0023420887743861307,
+          "rip": -0.0011076595766901787,
+          "di": -0.0029358658943889893,
+          "dislope": 0.0004710953040791416,
+          "flat": -0.0011894954474498398,
+          "load": 0.0,
+          "distd": -0.0011000633831222961,
+          "diag": -0.003463177034336573,
+          "flat_cv": 0.0007658423674667958,
+          "penalty": 0.0
+        },
+        "metrics": {
+          "bw_h_deg": 0.0032539625457559396,
+          "bw_v_deg": -0.0031305559537599947,
+          "di_db": -0.001093373772810935,
+          "ripple_h_db": -0.0017847862895807864,
+          "ripple_v_db": -0.0011059554493999535
+        }
+      },
+      "flags": {
+        "mesh_sensitive": true,
+        "cap_bound": false,
+        "spilled": false,
+        "grid_mismatch": false
+      }
+    },
+    {
+      "run": "runs/20261116T130335Z-screen-ab4fb9",
+      "design_hash": "2f7307c06023",
+      "factor": 2.0,
+      "epw_from": 6.0,
+      "epw_to": 12.0,
+      "check": "B1-mesh-convergence",
+      "grid": {
+        "solve_hash": "94eb7eb4369d",
+        "n_freqs": 18,
+        "mode": "screen",
+        "same_grid": true
+      },
+      "reference": {
+        "source": "stored screen row (search.ndjson)",
+        "J": 4.141300154806476,
+        "terms": {
+          "cov": 1.8125287941142283,
+          "rip": 0.21391787479863053,
+          "di": 1.4764387894475262,
+          "dislope": 0.5314688675556059,
+          "flat": 0.33695820639108653,
+          "load": 0.0,
+          "distd": 0.35478954623766074,
+          "diag": 0.5915008173090704,
+          "flat_cv": 0.2030782878803096,
+          "penalty": 0.0,
+          "total": 4.141300154806476,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 423.0328180808653,
+          "lfp50_hz": 522.5569754750893,
+          "rez_min_from_fx": 1.0052989337772396,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0,
+          "oa_excess_raw": 0.0
+        },
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 71.30203449798273,
+          "bw_v_deg": 67.18753758132515,
+          "di_db": 11.900568158416732,
+          "ripple_h_db": 2.7317822016469493,
+          "ripple_v_db": 1.5383241020615719
+        },
+        "terms_stored": true,
+        "metrics_stored": true,
+        "n_triangles": 7220,
+        "n_dof": 3751,
+        "peak_vram_mb": 172.0,
+        "solve_hash": "94eb7eb4369d"
+      },
+      "vram": {
+        "vram_baseline_mib": 888,
+        "peak_vram_mib": 2616,
+        "host_dedicated_peak_mib": 1852,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      },
+      "wall_s": 196.64,
+      "teardown_forced_pids": [],
+      "teardown_verified": true,
+      "refined": {
+        "ok": true,
+        "error": null,
+        "J": 4.125971305158344,
+        "terms": {
+          "cov": 1.8044134746363911,
+          "rip": 0.2132064797056571,
+          "di": 1.474808349447088,
+          "dislope": 0.530163747945857,
+          "flat": 0.33276214175806534,
+          "load": 0.0,
+          "distd": 0.3541234834699437,
+          "diag": 0.5890064121476278,
+          "flat_cv": 0.20329587327467968,
+          "penalty": 0.0,
+          "total": 4.125971305158344,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 422.0793009194123,
+          "lfp50_hz": 522.2502466704244,
+          "rez_min_from_fx": 1.0070717561093314,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0,
+          "oa_excess_raw": 0.0
+        },
+        "n_triangles": 28489,
+        "n_dof": 14519,
+        "cap": 24000,
+        "mesh_hash": "55b293e12d36",
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 71.30641844509006,
+          "bw_v_deg": 67.18265114446189,
+          "di_db": 11.900519429180482,
+          "ripple_h_db": 2.7297425164502007,
+          "ripple_v_db": 1.538126614417434
+        }
+      },
+      "delta": {
+        "J": -0.015328849648132525,
+        "terms": {
+          "cov": -0.008115319477837168,
+          "rip": -0.0007113950929734381,
+          "di": -0.0016304400004381048,
+          "dislope": -0.0013051196097488837,
+          "flat": -0.00419606463302119,
+          "load": 0.0,
+          "distd": -0.0006660627677170239,
+          "diag": -0.0024944051614426144,
+          "flat_cv": 0.0002175853943700845,
+          "penalty": 0.0
+        },
+        "metrics": {
+          "bw_h_deg": 0.0043839471073283676,
+          "bw_v_deg": -0.004886436863259291,
+          "di_db": -4.872923624965608e-05,
+          "ripple_h_db": -0.002039685196748575,
+          "ripple_v_db": -0.00019748764413796138
+        }
+      },
+      "flags": {
+        "mesh_sensitive": true,
+        "cap_bound": false,
+        "spilled": false,
+        "grid_mismatch": false
+      }
+    },
+    {
+      "run": "runs/20261116T130335Z-screen-ab4fb9",
+      "design_hash": "507e7257c091",
+      "factor": 2.0,
+      "epw_from": 6.0,
+      "epw_to": 12.0,
+      "check": "B1-mesh-convergence",
+      "grid": {
+        "solve_hash": "94eb7eb4369d",
+        "n_freqs": 18,
+        "mode": "screen",
+        "same_grid": true
+      },
+      "reference": {
+        "source": "stored screen row (search.ndjson)",
+        "J": 3.948517629630978,
+        "terms": {
+          "cov": 1.894848287900354,
+          "rip": 0.20661279671292154,
+          "di": 1.4538750658882789,
+          "dislope": 0.47776689661787447,
+          "flat": 0.32390997087048556,
+          "load": 0.02200436806569122,
+          "distd": 0.3446233173076652,
+          "diag": 0.34196860936845797,
+          "flat_cv": 0.23488750711011955,
+          "penalty": 0.0,
+          "total": 3.948517629630978,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 439.5064467993507,
+          "lfp50_hz": 529.2558785966393,
+          "rez_min_from_fx": 1.006428035206394,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0
+        },
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 71.57853268748352,
+          "bw_v_deg": 67.30703375391101,
+          "di_db": 11.812627196104462,
+          "ripple_h_db": 2.675063087471261,
+          "ripple_v_db": 1.5108941951595445
+        },
+        "terms_stored": true,
+        "metrics_stored": true,
+        "n_triangles": 7304,
+        "n_dof": 3791,
+        "peak_vram_mb": 167.0,
+        "solve_hash": "94eb7eb4369d"
+      },
+      "vram": {
+        "vram_baseline_mib": 888,
+        "peak_vram_mib": 2616,
+        "host_dedicated_peak_mib": 1866,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      },
+      "wall_s": 199.79,
+      "teardown_forced_pids": [],
+      "teardown_verified": true,
+      "refined": {
+        "ok": true,
+        "error": null,
+        "J": 3.9232849452288705,
+        "terms": {
+          "cov": 1.8903211619997193,
+          "rip": 0.20645516370294256,
+          "di": 1.4524491838456337,
+          "dislope": 0.47527660802536087,
+          "flat": 0.3227355389706467,
+          "load": 0.009336173637065579,
+          "distd": 0.3439134439622685,
+          "diag": 0.3381312610326226,
+          "flat_cv": 0.23470533021101206,
+          "penalty": 0.0,
+          "total": 3.9232849452288705,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 438.3501887067346,
+          "lfp50_hz": 528.883536649184,
+          "rez_min_from_fx": 1.007100771063232,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0,
+          "oa_excess_raw": 0.0
+        },
+        "n_triangles": 28547,
+        "n_dof": 14545,
+        "cap": 24000,
+        "mesh_hash": "55b293e12d36",
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 71.58506360635853,
+          "bw_v_deg": 67.30558341097154,
+          "di_db": 11.811700642269603,
+          "ripple_h_db": 2.6738879584720854,
+          "ripple_v_db": 1.5105140175030145
+        }
+      },
+      "delta": {
+        "J": -0.025232684402107353,
+        "terms": {
+          "cov": -0.004527125900634754,
+          "rip": -0.00015763300997898022,
+          "di": -0.0014258820426451546,
+          "dislope": -0.002490288592513601,
+          "flat": -0.0011744318998388459,
+          "load": -0.01266819442862564,
+          "distd": -0.0007098733453967387,
+          "diag": -0.0038373483358353777,
+          "flat_cv": -0.00018217689910748902,
+          "penalty": 0.0
+        },
+        "metrics": {
+          "bw_h_deg": 0.0065309188750148905,
+          "bw_v_deg": -0.0014503429394778777,
+          "di_db": -0.0009265538348586233,
+          "ripple_h_db": -0.001175128999175712,
+          "ripple_v_db": -0.0003801776565299786
+        }
+      },
+      "flags": {
+        "mesh_sensitive": true,
+        "cap_bound": false,
+        "spilled": false,
+        "grid_mismatch": false
+      }
+    },
+    {
+      "run": "runs/20261116T130335Z-screen-ab4fb9",
+      "design_hash": "688ffe811b6a",
+      "factor": 2.0,
+      "epw_from": 6.0,
+      "epw_to": 12.0,
+      "check": "B1-mesh-convergence",
+      "grid": {
+        "solve_hash": "94eb7eb4369d",
+        "n_freqs": 18,
+        "mode": "screen",
+        "same_grid": true
+      },
+      "reference": {
+        "source": "stored screen row (search.ndjson)",
+        "J": 3.8923038305210476,
+        "terms": {
+          "cov": 1.8326118714106687,
+          "rip": 0.20645784625968142,
+          "di": 1.4494140401079563,
+          "dislope": 0.3091609220134847,
+          "flat": 0.2781535975325015,
+          "load": 0.22284076545524414,
+          "distd": 0.31857143197446824,
+          "diag": 0.44432701097649757,
+          "flat_cv": 0.14371868761959916,
+          "penalty": 0.0,
+          "total": 3.8923038305210476,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 458.25011619598877,
+          "lfp50_hz": 536.8890715195937,
+          "rez_min_from_fx": 1.007509971555092,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0
+        },
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 71.29648334200292,
+          "bw_v_deg": 67.0584522638087,
+          "di_db": 11.837864831979417,
+          "ripple_h_db": 2.72032272294,
+          "ripple_v_db": 1.5201441002103375
+        },
+        "terms_stored": true,
+        "metrics_stored": true,
+        "n_triangles": 7313,
+        "n_dof": 3796,
+        "peak_vram_mb": 174.0,
+        "solve_hash": "94eb7eb4369d"
+      },
+      "vram": {
+        "vram_baseline_mib": 985,
+        "peak_vram_mib": 2777,
+        "host_dedicated_peak_mib": 1930,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      },
+      "wall_s": 211.78,
+      "teardown_forced_pids": [],
+      "teardown_verified": true,
+      "refined": {
+        "ok": true,
+        "error": null,
+        "J": 3.8731008744539013,
+        "terms": {
+          "cov": 1.8297424447160129,
+          "rip": 0.20578858534341535,
+          "di": 1.4482740822670852,
+          "dislope": 0.30972224083165384,
+          "flat": 0.2783073606043546,
+          "load": 0.20727492096164857,
+          "distd": 0.31872634675404493,
+          "diag": 0.4434328768557914,
+          "flat_cv": 0.14414072738605369,
+          "penalty": 0.0,
+          "total": 3.8731008744539013,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 456.7692381027094,
+          "lfp50_hz": 536.4574454057037,
+          "rez_min_from_fx": 1.0081447114258342,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0,
+          "oa_excess_raw": 0.0
+        },
+        "n_triangles": 29221,
+        "n_dof": 14881,
+        "cap": 24000,
+        "mesh_hash": "55b293e12d36",
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 71.29453920603711,
+          "bw_v_deg": 67.05935000031363,
+          "di_db": 11.838088805226768,
+          "ripple_h_db": 2.719142515513056,
+          "ripple_v_db": 1.519547439029337
+        }
+      },
+      "delta": {
+        "J": -0.019202956067146282,
+        "terms": {
+          "cov": -0.002869426694655841,
+          "rip": -0.0006692609162660679,
+          "di": -0.0011399578408710642,
+          "dislope": 0.0005613188181691209,
+          "flat": 0.000153763071853108,
+          "load": -0.015565844493595576,
+          "distd": 0.00015491477957668698,
+          "diag": -0.0008941341207061582,
+          "flat_cv": 0.0004220397664545239,
+          "penalty": 0.0
+        },
+        "metrics": {
+          "bw_h_deg": -0.001944135965800342,
+          "bw_v_deg": 0.000897736504924751,
+          "di_db": 0.00022397324735123902,
+          "ripple_h_db": -0.0011802074269442464,
+          "ripple_v_db": -0.0005966611810004352
+        }
+      },
+      "flags": {
+        "mesh_sensitive": true,
+        "cap_bound": false,
+        "spilled": false,
+        "grid_mismatch": false
+      }
+    },
+    {
+      "run": "runs/20261116T130335Z-screen-ab4fb9",
+      "design_hash": "78f599e8a1d2",
+      "factor": 2.0,
+      "epw_from": 6.0,
+      "epw_to": 12.0,
+      "check": "B1-mesh-convergence",
+      "grid": {
+        "solve_hash": "94eb7eb4369d",
+        "n_freqs": 18,
+        "mode": "screen",
+        "same_grid": true
+      },
+      "reference": {
+        "source": "stored screen row (search.ndjson)",
+        "J": 4.031742939832851,
+        "terms": {
+          "cov": 1.8371897857874646,
+          "rip": 0.21127182561304209,
+          "di": 1.443208998670397,
+          "dislope": 0.4640352647520929,
+          "flat": 0.39430501270292845,
+          "load": 0.0,
+          "distd": 0.35625135293304494,
+          "diag": 0.5121273584019198,
+          "flat_cv": 0.19887782285922603,
+          "penalty": 0.0,
+          "total": 4.031742939832851,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 425.05289152238385,
+          "lfp50_hz": 520.9992817537119,
+          "rez_min_from_fx": 1.004640631086944,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0
+        },
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 71.43161161780762,
+          "bw_v_deg": 67.5553561088127,
+          "di_db": 11.856102825250078,
+          "ripple_h_db": 2.7052610243914152,
+          "ripple_v_db": 1.476792188097939
+        },
+        "terms_stored": true,
+        "metrics_stored": true,
+        "n_triangles": 7391,
+        "n_dof": 3837,
+        "peak_vram_mb": 174.0,
+        "solve_hash": "94eb7eb4369d"
+      },
+      "vram": {
+        "vram_baseline_mib": 883,
+        "peak_vram_mib": 2689,
+        "host_dedicated_peak_mib": 1898,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      },
+      "wall_s": 202.44,
+      "teardown_forced_pids": [],
+      "teardown_verified": true,
+      "refined": {
+        "ok": true,
+        "error": null,
+        "J": 4.028403749086723,
+        "terms": {
+          "cov": 1.838356246013597,
+          "rip": 0.2107126180280454,
+          "di": 1.4420231587653194,
+          "dislope": 0.4636723357861147,
+          "flat": 0.39172632657803325,
+          "load": 0.0,
+          "distd": 0.35612112225162457,
+          "diag": 0.5096094403622464,
+          "flat_cv": 0.19952243685229554,
+          "penalty": 0.0,
+          "total": 4.028403749086723,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 424.1609073344858,
+          "lfp50_hz": 520.7067159019217,
+          "rez_min_from_fx": 1.0063577397279229,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0,
+          "oa_excess_raw": 0.0
+        },
+        "n_triangles": 28859,
+        "n_dof": 14705,
+        "cap": 24000,
+        "mesh_hash": "55b293e12d36",
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 71.42923375156657,
+          "bw_v_deg": 67.55455553517936,
+          "di_db": 11.856088390099663,
+          "ripple_h_db": 2.704330156199,
+          "ripple_v_db": 1.4764306049949407
+        }
+      },
+      "delta": {
+        "J": -0.0033391907461277626,
+        "terms": {
+          "cov": 0.0011664602261323154,
+          "rip": -0.000559207584996696,
+          "di": -0.0011858399050777013,
+          "dislope": -0.0003629289659781709,
+          "flat": -0.002578686124895202,
+          "load": 0.0,
+          "distd": -0.00013023068142037353,
+          "diag": -0.0025179180396733836,
+          "flat_cv": 0.0006446139930695038,
+          "penalty": 0.0
+        },
+        "metrics": {
+          "bw_h_deg": -0.0023778662410478546,
+          "bw_v_deg": -0.000800573633341628,
+          "di_db": -1.4435150415437192e-05,
+          "ripple_h_db": -0.0009308681924151685,
+          "ripple_v_db": -0.00036158310299838625
+        }
+      },
+      "flags": {
+        "mesh_sensitive": false,
+        "cap_bound": false,
+        "spilled": false,
+        "grid_mismatch": false
+      }
+    },
+    {
+      "run": "runs/20261116T130335Z-screen-ab4fb9",
+      "design_hash": "ced63c6a01a1",
+      "factor": 2.0,
+      "epw_from": 6.0,
+      "epw_to": 12.0,
+      "check": "B1-mesh-convergence",
+      "grid": {
+        "solve_hash": "94eb7eb4369d",
+        "n_freqs": 18,
+        "mode": "screen",
+        "same_grid": true
+      },
+      "reference": {
+        "source": "stored screen row (search.ndjson)",
+        "J": 3.8251103358873593,
+        "terms": {
+          "cov": 1.5970808284666296,
+          "rip": 0.207150708103758,
+          "di": 1.4403579468730476,
+          "dislope": 0.5342381319706213,
+          "flat": 0.38193083666102484,
+          "load": 0.110268720017891,
+          "distd": 0.34701436001663244,
+          "diag": 0.39425807747359404,
+          "flat_cv": 0.18553388745412225,
+          "penalty": 0.0,
+          "total": 3.8251103358873593,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 447.64765630448295,
+          "lfp50_hz": 531.9989635122436,
+          "rez_min_from_fx": 1.0069932541533093,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0
+        },
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 72.12205897394105,
+          "bw_v_deg": 67.60670511853772,
+          "di_db": 11.80236710681439,
+          "ripple_h_db": 2.6442040772630313,
+          "ripple_v_db": 1.4985808558285691
+        },
+        "terms_stored": true,
+        "metrics_stored": true,
+        "n_triangles": 7408,
+        "n_dof": 3844,
+        "peak_vram_mb": 174.0,
+        "solve_hash": "94eb7eb4369d"
+      },
+      "vram": {
+        "vram_baseline_mib": 888,
+        "peak_vram_mib": 2745,
+        "host_dedicated_peak_mib": 1898,
+        "host_shared_peak_mib": 80,
+        "spilled": false
+      },
+      "wall_s": 204.39,
+      "teardown_forced_pids": [],
+      "teardown_verified": true,
+      "refined": {
+        "ok": true,
+        "error": null,
+        "J": 3.8064302791933686,
+        "terms": {
+          "cov": 1.5978423372812394,
+          "rip": 0.2064447720449025,
+          "di": 1.4388383316198943,
+          "dislope": 0.5334669795329177,
+          "flat": 0.3797040152552467,
+          "load": 0.096935558157706,
+          "distd": 0.3463964099485284,
+          "diag": 0.3910686226636358,
+          "flat_cv": 0.18597029742511162,
+          "penalty": 0.0,
+          "total": 3.8064302791933686,
+          "n_nan": 0,
+          "n_in_band": 13,
+          "di_estimated": 0.0,
+          "lfp20_hz": 446.4082483788473,
+          "lfp50_hz": 531.6264021552937,
+          "rez_min_from_fx": 1.0079394300673399,
+          "f11_hz": 5600.0,
+          "loaded_hi_hz": 5600.0,
+          "oa_excess_raw": 0.0
+        },
+        "n_triangles": 28979,
+        "n_dof": 14762,
+        "cap": 24000,
+        "mesh_hash": "55b293e12d36",
+        "metrics": {
+          "present": true,
+          "n_in_band": 16,
+          "bw_h_deg": 72.11617302331275,
+          "bw_v_deg": 67.60823589033254,
+          "di_db": 11.802301071416267,
+          "ripple_h_db": 2.6437214867948597,
+          "ripple_v_db": 1.4979822636366456
+        }
+      },
+      "delta": {
+        "J": -0.018680056693990643,
+        "terms": {
+          "cov": 0.0007615088146097904,
+          "rip": -0.0007059360588554942,
+          "di": -0.0015196152531533613,
+          "dislope": -0.0007711524377036483,
+          "flat": -0.0022268214057781233,
+          "load": -0.013333161860184989,
+          "distd": -0.0006179500681040562,
+          "diag": -0.0031894548099582476,
+          "flat_cv": 0.00043640997098937095,
+          "penalty": 0.0
+        },
+        "metrics": {
+          "bw_h_deg": -0.00588595062829711,
+          "bw_v_deg": 0.0015307717948189747,
+          "di_db": -6.603539812388703e-05,
+          "ripple_h_db": -0.00048259046817156204,
+          "ripple_v_db": -0.000598592191923597
+        }
+      },
+      "flags": {
+        "mesh_sensitive": true,
+        "cap_bound": false,
+        "spilled": false,
+        "grid_mismatch": false
+      }
+    }
+  ]
+}

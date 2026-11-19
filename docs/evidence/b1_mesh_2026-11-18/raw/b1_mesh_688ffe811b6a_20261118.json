@@ -1,0 +1,30 @@
+{
+  "child_cmd": [
+    ".venv/Scripts/python.exe",
+    "tools/night_queue/fidelity_pairs.py",
+    "--design",
+    "runs/20261116T130335Z-screen-ab4fb9:688ffe811b6a",
+    "--refine-epw-factor",
+    "2",
+    "--teardown-per-design",
+    "--record-vram",
+    "--gain-threshold",
+    "0.0057",
+    "--out",
+    "runs/b1_mesh_2026-11-18"
+  ],
+  "exit_code": 1,
+  "wall_s": 1.171,
+  "dedicated_peak_mib": 0,
+  "shared_peak_mib": 0,
+  "spill_mib": 0,
+  "spilled": false,
+  "pids_sampled": [
+    18404,
+    58444
+  ],
+  "off_windows": false,
+  "samples_at": [
+    "2026-11-18T22:33:30+00:00"
+  ]
+}
