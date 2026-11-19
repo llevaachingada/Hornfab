@@ -29,6 +29,14 @@
   Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
   raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
 
+## 2026-11-19 - p11_s2w night superseded (GPU-lock refusal, no relaunch)
+
+- NOTE: p11_s2w exited 1 on `gpu-clean rc=3 GPU busy` while the compact400 night was live - correct
+  lock behaviour, no solve interrupted. Its v10 s2w work is already covered by c4n__09 (1.3738, tie)
+  and c4n__10 (1.5710, tie); do not relaunch.
+- LIVE: compact400 night with the 7 appended 80-eval continuations (c4x_01 running).
+- OPEN: read the appended results; v10 rescore of the v7 rows; B6 set; archive.
+
 ## 2026-11-19 - 7 x 80-eval continuations appended to the live compact400 queue
 
 - DONE: polled the live queue (compact400 night, job 9/10, GPU locked), checked overlap, appended 7

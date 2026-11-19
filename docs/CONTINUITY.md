@@ -22,6 +22,20 @@
 - **Registered:** CODE_MAP and INDEX rows in the same commit. The other lane's uncommitted GUI edits
   and its budget-driver INDEX row were left untouched and excluded from staging.
 
+## 2026-11-19 - p11_s2w night: superseded, not relaunched (local orchestrator)
+
+- The other lane's `p11_s2w_2026-11-19` night (v10 s2w fold/ext, 80 valid) was launched at 18:35
+  **while the compact400 night was mid-job**. Its pre-hygiene got `gpu-clean --lane gpu rc=3`
+  (**GPU busy** on the compact400 solve) and it exited 1 with no solve - i.e. the GPU lock prevented a
+  concurrent solve exactly as designed; nothing was interrupted. A STOP file is present in its night
+  dir (its lane's own stop).
+- **No relaunch needed: the same v10 s2w work already ran in the compact400 night** as
+  `c4n__09_fold_warm_v10_s2w` (best **1.3738** vs the published 1.4214 -> 0.048 better, inside the v10
+  0.4677 floor = tie) and `c4n__10_ext_throat_v10_s2w` (best **1.5710** = the published leader -> tie).
+  Re-running `p11_s2w` would duplicate a tie.
+- My appended continuations are running behind them (`c4x_01_morph_cont` at 15 rows, GPU lock held by
+  it). No GPU conflict remains: one live runner (compact400), one lock holder.
+
 ## 2026-11-19 - Appended 7 x 80-eval continuations to the LIVE compact400 queue (local orchestrator)
 
 - **Live queue polled first:** `compact400_next10_2026-11-19` is running (controller pid 23752,
