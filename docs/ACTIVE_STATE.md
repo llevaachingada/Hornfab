@@ -31,9 +31,11 @@ git log --oneline -5; git status --porcelain
 
 ## State, at write time
 
-- **GPU lane:** FREE. `fable_priority10_2026-11-19` finished 11/11 jobs (2.18 h GPU, all controls and
-  reproduction checks; no promotion, no verify). Manifest: `docs/evidence/PRIORITY10_QUEUE_2026-11-19.md`
-  §11. Nothing is queued; do not launch a v10 search from the B6 lane seeds (see §11 next action).
+- **GPU lane:** FREE. `q3_more_solves_2026-11-19` finished 6/6 (~45 min): the v10 leaders are
+  **box-limited** (fold L_mm high, ext-throat az_a_cos_pow low), crowe v2a closed at 6.4779 (tie),
+  first-ever solves of Le Cleach H/V 7.8865 and Crowe ES biradial 9.2355, new rows type `lecleach_ar`
+  storm-limited. Evidence: `docs/evidence/Q3_MORE_SOLVES_2026-11-19.md`. Next GPU move (if authorised):
+  v10 s2 with widened L_mm / az_a_cos_pow + warm starts at the published best designs.
 - **CPU lane:** free. Compact-horn candidate register (10 rows, measured geometry/config_sha) is in
   `docs/research/compact_horn_system_2026-11-19/`; its one conditional GPU ask FAILED its own gate
   (A1 v10 1.9858 vs 1.4214+0.4677), so no GPU was authorised.

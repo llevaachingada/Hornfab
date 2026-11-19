@@ -1,5 +1,24 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Q3 night: continuations + never-run typologies
+
+- DONE (GPU): `q3_more_solves_2026-11-19`, 6/6 jobs, ~45 min. Continuations proved the point cheaply:
+  fold_warm and ext_throat are **bound-pinned** (L_mm high / az_a_cos_pow low) with unchanged bests;
+  crowe v2a improved 6.7324 -> 6.4779 then stalled (tie by floor). First-ever solves: Le Cleach H/V
+  pair 7.8865, Crowe ES biradial 9.2355. New rows type `lecleach_ar` storm-limited (44 %) at 15 valid.
+  Evidence: `docs/evidence/Q3_MORE_SOLVES_2026-11-19.md`.
+- OPEN (local, next GPU): v10 s2 = widen `L_mm` (fold) and `az_a_cos_pow` (ext-throat) AND warm-start at
+  the published best designs (00826f071b24 / 436a4d221328 / a23763f1c6fc / 85c59331e4a3). Without both,
+  the current boxes cannot beat the published v10 leaders.
+- OPEN (local): fix the `lecleach_ar` box (AR_m <= 1.8, stop <= 215 suggested), re-preflight, rerun 40
+  valid; the uniform-box preflight under-predicted the 44 % storm.
+- OPEN (owner): the October portrait/square sculpture families (quatrefoil, chanterelle, petal_os,
+  ripple, cone_plughorn) need their own square/tall brief identity with a measured frequency floor
+  before a fair test on this tree; a landscape-corridor run would measure the brief mismatch.
+- NOTE (dead configs): `hl__klangfilm_ellipse_smooth_v7`, `hl__rolled_es_spiral_v7`,
+  `hl__rosse_rect_cd_v7_r50_negb` reference rows types removed from the generator ("unknown rows
+  type"); do not queue without a kernel decision.
+
 ## 2026-11-19 - Compact slate: owner decisions executed (CPU only)
 
 - DONE (owner decision): crossover-aware identity authored —

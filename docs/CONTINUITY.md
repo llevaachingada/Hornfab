@@ -49,6 +49,32 @@
   a small `x10^4` frequency offset remains on some heatmaps (cosmetic). No GPU or CPU solve was started.
 - Uncommitted GUI edits from another lane remain in the tree and were not included.
 
+## 2026-11-19 - Q3 night: more solves + never-run typologies (complete, ~45 min GPU)
+
+- **Night `q3_more_solves_2026-11-19` DONE, 6/6 jobs, ~45 min GPU** (the three continuations were
+  nearly free: the CMA trajectory replays deterministically and the identical design/mesh/solve triples
+  are solve-cache hits - two of them closed in 61 s). Evidence: `docs/evidence/Q3_MORE_SOLVES_2026-11-19.md`.
+- **The two v10 leaders are box-limited, not budget-limited** [measured]: the fold_warm continuation
+  pinned `L_mm` at its HIGH limit (3/6 of the top 6) and ext_throat pinned `az_a_cos_pow` at its LOW
+  limit (5/6) - both stopped by the bound-pin watchdog in ~61 s with unchanged bests. A v10 s2 must
+  widen those two knobs AND warm-start at the published best designs; more evals at the current boxes
+  are provably wasted.
+- **Crowe v2a v10 closed**: continuation improved 6.7324 -> 6.4779 in 117 evals then stalled
+  (<0.5 % / 40 valid). The gain is below the v10 floor 0.4677 = a tie; no further continuation.
+- **First-ever solves of never-run constructions**: Le Cleach H/V per-plane pair 7.8865 (66 valid, ok;
+  beats the family's previous 8.037 on the same smooth-v7 identity - likely a tie by the 0.3105 floor);
+  Crowe ES biradial 9.2355 (37 valid, ok; only solved instance of that generator).
+- **New rows type `lecleach_ar` configured and storm-limited** [measured]: a NEW config for the
+  area-preserving AR stretch (a rows type with no prior config anywhere) reached 8.0791 at only 15
+  valid before a 44 % refusal storm. Seed is meshable (588x397x271, 2953 dofs); the box corners
+  (AR_m up to 2.2 x stop 230) are not. Next: narrow the box, re-preflight, rerun.
+- **Coverage map published**: of 48 home_landscape configs, 28 never ran and 3 of those are DEAD (rows
+  types removed from the generator: klangfilm_ellipse, rolled_rect_pucker, rosse_rect); rows types
+  salmon_axisym / lecleach_mod have no config anywhere; the October sculpture families are portrait/
+  square by construction and need their own brief identity + measured floor before a fair test.
+- Queue provenance: `docs/queue/q3_more_solves_2026-11-19.yaml` (+ admission); not-queueable list with
+  reasons is in the night file header. GPU lane free at the end; nothing queued.
+
 ## 2026-11-19 - PRIORITY10 night complete (11/11, 2.18 h) + compact-horn register (push)
 
 - **Night `fable_priority10_2026-11-19` is DONE**, 11/11 jobs, 7,865 s GPU (2.18 h) — the no-gain
