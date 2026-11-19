@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "kind": "first_reference_case",
+  "written_utc": "2026-11-18",
+  "written_by": "orchestrator, worktree feat/woofer-system-v0 @ 51179b9",
+  "fidelity_policy": "This case targets installed_ideal_horn_reference / installed_coupled_woofer fidelity. No claim of calibrated compression-driver absolute SPL is permitted until the complex voltage-to-throat-velocity transfer exists (handoff \u00a7W3 normalization note).",
+  "engine_baseline": {
+    "hornlab_worktree": "C:/Users/hunte/Hrns/hornlab-woofer-system-wt",
+    "feature_head": "51179b9",
+    "tests_system": "149 passed, 1 skipped (env-gated real-BL test), command: .venv\\Scripts\\python.exe -m pytest tests/system -p no:cacheprovider --timeout=300",
+    "boundary_lab": {
+      "root": "C:\\Users\\hunte\\Github\\boundary-lab",
+      "version": "0.5.0",
+      "git_head": "15f9a89245a9adfec8c2f0006c164953ce381e58",
+      "python": "C:\\Users\\hunte\\Github\\boundary-lab\\.venv\\Scripts\\python.exe",
+      "cli": "C:\\Users\\hunte\\Github\\boundary-lab\\.venv\\Scripts\\blab.exe",
+      "file_sha_pins": "docs/research/system_woofer_2026-11-18/BL_PARITY.md section 1"
+    },
+    "planned_backends": [
+      "beat_cpu (BL headless CLI, first smoke run only)"
+    ]
+  },
+  "horn": {
+    "asset_id": "0062fb59fbf63eae",
+    "design_hash": "9e02db06ecc3",
+    "source_run": "C:/Users/hunte/Hrns/hornlab-search/runs/20261118T200653Z-screen-31495a",
+    "family": "FREEFORM",
+    "brief": "lecleach_rollback_1in_v6",
+    "throat": "1 inch",
+    "stored_fields": [
+      "p_h",
+      "p_v",
+      "p_balloon"
+    ],
+    "stored_convention": "unit normal acceleration, exp(-iwt) as stored -> SCREEN_COMPLEX_APPROX after compare.hornfab_side.accel_to_canonical (exp(+jwt), per normal velocity); no phase imputation",
+    "quarter_mesh_qa": "162 free edges, 81 on x=0 + 81 on y=0, zero elsewhere; oriented; 1892 triangles / 1028 points; groups SD1G0/SD1D1001",
+    "quarter_provenance_gate": "pass \u2014 rebuild of the original quarter mesh from design.json params: bbox delta 0.0 m, area rel delta 0.0, mesher pin 55da4f46\u2026 matches run pin (REF-02)",
+    "full_domain_status": "RESOLVED (W1) \u2014 closed full-domain mesh via the existing build path: recipe span quarter->full, n_phi 15->32, knobs/n_s/rows/wall byte-identical; new design_hash f04827bc5973, params sha256 89b5d9800d74b41392c74498ef971890d52c2e8578a22b31f159e7196783719e",
+    "full_domain_mesh": "system_runs/system/ref_case/horn_full/lecleach_rollback_1in_v6_9e02db06ecc3/mesh.msh (381105 B; 5950 triangles / 2977 points; closed, oriented, 0 free edges, 0 duplicate points; bbox x,y = \u00b10.1166728 m (exact mirror of the quarter), z = \u22120.003\u20260.1398739 m (69 nm delta vs quarter); groups SD1G0 (5848 tris, wall) + SD1D1001 (102 tris, source cap); metres bboxes)",
+    "full_domain_qa": "system_runs/system/ref_case/horn_full/lecleach_rollback_1in_v6_9e02db06ecc3/full_mesh_qa.json",
+    "full_domain_provenance": "system_runs/system/ref_case/horn_full/lecleach_rollback_1in_v6_9e02db06ecc3/provenance.json",
+    "full_domain_module": "hornlab_search/system/horn_full_domain.py + tests/system/test_horn_full_domain.py (17 tests green incl. test_assemble.py)"
+  },
+  "woofer": {
+    "driver_id": "faitalpro_12pr300",
+    "cone_name": "FaitalPRO 12PR300 8ohm",
+    "ts_and_geometry_source": "https://faitalpro.com/en/products/LF_Loudspeakers/product_details/index.php?id=101050110",
+    "machine_verified": "BASELINE.md driver section (vendor page matched every proposed field; bolt circle 298.5 mm; flange+gasket 12.1 mm; displaced air volume 1.9 dm3; Xdamage 14 mm)",
+    "ts_data_dir": "examples/systems/driver_ts/faitalpro_12pr300.yaml",
+    "geometry_dir": "examples/systems/driver_geometry/faitalpro_12pr300.yaml"
+  },
+  "box_r0_control": {
+    "kind": "bl_provider_defaults_vented",
+    "external_m": [
+      0.32,
+      0.5,
+      0.36
+    ],
+    "already_generated": "system_runs/system/bl_vented_gen/20261118T205213Z-vented-31104-bd49dc6b (interior 3176 nodes/13257 tets/3954 tris; exterior 1007/2010 tris; air 0.04216945 m3; port mouth d 0.087486 m)",
+    "role": "diagnostic control (woofers-only BL reference), not a design contest"
+  },
+  "box_r2_assembly_candidate": {
+    "kind": "vented",
+    "external_mm": [
+      371.2,
+      371.2,
+      1080.7
+    ],
+    "wall_mm": 18,
+    "net_volume_l": 115.0,
+    "derived_tuning_hz": 53.3,
+    "port_throat_area_cm2": 170.0,
+    "provenance": "12PR300 pilot study 783043edcbecf2fe, manifest system_runs/system/two_way_80x50_700_pilot/20261118T210933Z-pilot-56904-8602be33/manifest.json; row PASS on lf_headroom + feasible_construction",
+    "status": "provisional \u2014 BL's own vented-parameter validation is the geometry authority; depth >1 m tower may be rejected or reshaped by BL's driver/port fit rules before any use"
+  },
+  "assembly": {
+    "topology": "separate closed bodies: full-domain horn above, vented cabinet below, no interpenetration, shared orientation",
+    "horn_mount_offset_z_mm": 0.0,
+    "symmetry": "off (BL assembly host contract, generators/application.py line 131)",
+    "sources": {
+      "horn": "independent ideal normal-velocity source through its source cap (ExcitationPort), no invented CD electromechanical coupling",
+      "woofer": "the vented generator's electrodynamic component (single voltage excitation); the port is a FEM/BEM interface, never a second electrical port"
+    }
+  },
+  "first_smoke_run": {
+    "status": "COMPLETE (2026-11-18) \u2014 rc 0, 3/3 frequencies, manifest complete; evidence: FIRST_BEM_EVIDENCE.md (same directory); immutable case + sha-pinned manifest: system_runs/system/bl_smoke/20261118T225108Z-smoke-42536-01d15001/",
+    "project_used": "system_runs/system/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8/case.blab.json (rc-0 blab project validate --json, valid true)",
+    "frequencies_hz": [
+      250.0,
+      700.0,
+      1100.0
+    ],
+    "backend": "beat_cpu",
+    "probes": "5 point probes at 2 m (on-axis, +-30 deg vertical, +-30 deg horizontal) + project default H/V polars (37 pts each), include_project_observations true",
+    "fidelity_reported": "installed_ideal_horn_reference \u2014 woofer basis per 2.83 V, horn ideal source per 1 m/s; NOT comparable sensitivity references; no calibrated CD SPL claim",
+    "checks_recorded": "polarity-flip / recomposition residuals 0.00e+00; 0.1 ms delay rotation exactly -wt (-9.00/-25.20/-39.60 deg at 250/700/1100 Hz); woofer basis vertical baffle-step asymmetry visible at 700 Hz (up30 -6.02 dB / down30 +1.49 dB)",
+    "note": "three frequencies from handoff W3; adjust if mesh/woofer demands; modest existing H/V probes only, no dense balloon",
+    "gate_preceding_solve": "blab project validate --json success + graph assertions (one unbounded exterior region + one bounded cabinet region, 1 interface, 2 excitation ids, no orphan surface)",
+    "sanity_checks_after": [
+      "horn-drive only vs woofer-drive only vs combined complex sum at observations (CPU, same solved bases)",
+      "zero-drive and polarity-swap per source; small delay phase delta test",
+      "no fabricated completion: a partial/failed solve is recorded from the manifest"
+    ]
+  },
+  "identity": {
+    "study_ids_known": {
+      "12pr300_pilot": "783043edcbecf2fe",
+      "12pr320_pilot": "0352ca1af0532aba",
+      "portfolio_screen": "1a509f87c01fd6fd"
+    },
+    "case_ids": "assigned at case creation by hornlab_search.system.provenance (immutable, sha-self-checked manifests); assembly/physics/analysis/score/study ids computed per contracts.py v1 domain separation"
+  },
+  "blockers_live": [],
+  "solved_case_registry": [
+    {
+      "gate": "W3 smoke",
+      "case": "system_runs/system/bl_smoke/20261118T225108Z-smoke-42536-01d15001/",
+      "project": "bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "freqs": [
+        250.0,
+        700.0,
+        1100.0
+      ],
+      "status": "complete 3/3"
+    },
+    {
+      "gate": "G4 wide basis",
+      "case": "system_runs/system/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/",
+      "project": "bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "freqs": "25 log-spaced 200-2500 Hz",
+      "status": "complete 25/25"
+    },
+    {
+      "gate": "G6 geometry challenge",
+      "case": "system_runs/system/bl_g6_offset30/20261118T235110Z-assembly-21668-c17f7cf6/",
+      "project": "staged, translation_mm (0,0,30), assembly id 06ff56a5a1938ec9",
+      "freqs": "same 25",
+      "status": "complete 25/25; paired delta recorded"
+    }
+  ],
+  "screen_installed_calibration_status": {
+    "geometry_axis_installed": "2 varied references (offset20/offset30) complete; 10 mm offset changes all basis blocks 21-58% (mutual scattering quantified)",
+    "box_axis": "first tower-box staging attempt (screen top cell, 12PR300 115 L / 170 cm2 port, 371.2x371.2x1080.7) REFUSED by BL's own validator: 'Driver must fit inside the enclosure walls with 3 mm clearance.' - BL's panel-fit rule: demo driver (200 mm moving dia, driver_y +100 mm) + 170 cm2 port cannot coexist on a 371x371 panel with 18 mm walls. Refusal recorded immutably in system_runs/system/bl_r4_tower_box/20261119T001041Z-ref_case-40216-b32bb5a2/. The screen's BL-buildability pre-check is being added per BL's parameters.py fit rules (driver/port radius + 3 mm vs (w/2 - t), separation > driver_r + port_outer + 3 mm).",
+    "motor_axis": "REAL-MOTOR REFERENCE NOW EXISTS (lanes a1ea320): FaitalPRO 12PR300 T/S staged through BL component_parameters patch (re 5.4, bl 14.1, mmd_kg 0.0295 dry, cms 2.3e-4, le 4.2e-4, rms 1.4; Fs/Vas/Mms cross-checks 0.41/0.05/0.67%); validated rc 0 (bl_motor12pr/20261119T010548Z) and solved complete 25/25. Paired A/B vs identical-geometry demo-motor twin (bl_motor12pr_demo_twin/20261119T013209Z, rc 0, 25/25): pressure-basis deltas 120-144% per 2.83 V across probes (LF 200-500 Hz 120%; XO 600-1200 Hz 140-149%), voice-coil current at 200 Hz 0.367 A real vs 0.477 A demo, diaphragm velocity differs 102%. Honesty: transducer acoustic SHAPE remains BL provider default (committed geometry YAML lacks cone depth/surround/cap; recorded MOTOR_GEOMETRY_INCOMPLETE); real-shape staging needs maker CAD/measurement + a taller-front-panel re-screen (real Sd-derived moving diameter 0.2605 m needs 0.1821 m separation vs 0.1501 m available on the 371.2 panel).",
+    "bl_channel_dsp_crosscheck": "open (review checklist G5 item) - BL applies channel routing + DSP (gain/polarity/delay/ideal crossover filters) application-side to the stored complex basis (BL docs/Physical System Model.md section 454; component_channel_by_id + channel_config_by_name in src/blab/project/model.py); a headless cross-check of BL's own synthesis vs our CPU combine on one probe domain is feasible and is the recorded next verification"
+  },
+  "resolved_blockers": [
+    "BLOCKED_BY_FULL_DOMAIN_HORN_MESH \u2014 resolved (lane A closed full-domain mesh)",
+    "BLOCKED_BY_BL_HOST_ASSEMBLY_ASSIGNMENTS \u2014 resolved (lane B staged vented-only R0 and horn assembly R2 through BL's own host; real blab project validate rc 0 / valid true for both)"
+  ]
+}

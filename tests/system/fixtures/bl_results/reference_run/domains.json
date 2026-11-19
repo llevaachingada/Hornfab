@@ -1,0 +1,49 @@
+{
+  "domains": [
+    {
+      "coordinates": {
+        "angle_deg": "d0000_c_0001",
+        "points_m": "d0000_c_0000"
+      },
+      "dimensions": [
+        "observation"
+      ],
+      "id": "observation:horizontal-polar",
+      "kind": "polar_observation",
+      "metadata": {
+        "plane": "horizontal"
+      },
+      "topology": {}
+    },
+    {
+      "coordinates": {
+        "angle_deg": "d0001_c_0001",
+        "points_m": "d0001_c_0000"
+      },
+      "dimensions": [
+        "observation"
+      ],
+      "id": "observation:vertical-polar",
+      "kind": "polar_observation",
+      "metadata": {
+        "plane": "vertical"
+      },
+      "topology": {}
+    },
+    {
+      "coordinates": {
+        "points_m": "d0002_c_0000"
+      },
+      "dimensions": [
+        "observation"
+      ],
+      "id": "observation:probe:on_axis",
+      "kind": "point_probe",
+      "metadata": {
+        "coordinate_frame": "project",
+        "probe_id": "on_axis"
+      },
+      "topology": {}
+    }
+  ]
+}

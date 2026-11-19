@@ -1,5 +1,14 @@
 ﻿# ISSUES
 
+## 2026-11-19 - horn + woofer system merged; GUI completion P0-P9 in progress
+
+- DONE (local orchestrator): `feat/woofer-system-v0` merged into `hornfab-all-2026-11-18`; pre-merge
+  baseline recorded (574 GUI tests, 1 pre-existing failure).
+- OPEN (this pass): GUI completion P0-P9 per `docs/research/system_woofer_2026-11-18/GUI_COMPLETION_HANDOFF_2026-11-19.md`;
+  owner gates B-E (screen-launch approval, GUI stage+validate, decision 6 authorization record,
+  decision 3 calibration policy) are open questions to the owner.
+- OPEN (senior, carried): decision 6 authorization record shape; decision 3 calibration policy (R1).
+
 ## 2026-11-18 - Run artifacts archived to docs/evidence/runs
 
 - DONE (local orchestrator): hl__klangfilm_lame_curved_v1 (f30bd2), _c200 (517217) and

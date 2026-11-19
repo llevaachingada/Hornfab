@@ -1,0 +1,77 @@
+{
+  "assumptions": [
+    {
+      "statement": "fixture only",
+      "status": "assumed"
+    }
+  ],
+  "boundaries": [],
+  "components": [
+    {
+      "boundary_ids": [
+        "boundary:woofer"
+      ],
+      "id": "component:woofer",
+      "kind": "ideal_velocity_source",
+      "name": "Woofer",
+      "parameters": {}
+    },
+    {
+      "boundary_ids": [
+        "boundary:horn"
+      ],
+      "id": "component:horn",
+      "kind": "ideal_velocity_source",
+      "name": "Horn",
+      "parameters": {}
+    }
+  ],
+  "contract_version": 1,
+  "excitation_ports": [
+    {
+      "component_id": "component:woofer",
+      "id": "excitation:woofer",
+      "kind": "normal_velocity",
+      "name": "Woofer unit normal velocity"
+    },
+    {
+      "component_id": "component:horn",
+      "id": "excitation:horn",
+      "kind": "normal_velocity",
+      "name": "Horn unit normal velocity"
+    }
+  ],
+  "id": "system:fixture-two-way",
+  "interfaces": [],
+  "meshes": [
+    {
+      "file": "assembly.msh",
+      "id": "mesh:assembly",
+      "name": "assembly",
+      "purpose": "boundary",
+      "scale_to_m": 1.0,
+      "translation_m": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "metadata": {},
+  "name": "fixture-two-way",
+  "regions": [
+    {
+      "density_kg_per_m3": 1.204,
+      "id": "region:air",
+      "kind": "unbounded_air",
+      "loss_model": {},
+      "mesh_ids": [
+        "mesh:assembly"
+      ],
+      "name": "Air",
+      "sound_speed_m_per_s": 343.0,
+      "volume_groups": []
+    }
+  ],
+  "source_model_version": 1
+}

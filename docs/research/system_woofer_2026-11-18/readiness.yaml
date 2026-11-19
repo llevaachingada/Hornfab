@@ -1,0 +1,107 @@
+# Horn + woofer readiness registry — read by the GUI (#/hw/*), never edited by it.
+#
+# `cases` DECLARES what the run files cannot say about themselves: the fidelity label (the BL
+# result reader refuses to guess it — bl_results.to_system_response), which motor/transducer
+# shape a case used, and which gate it answers. Status facts (staged/validated/solved/refused,
+# box dims, horn offset, clearance) are always read from the case dirs, never from here.
+# Source for every entry: SENIOR_REVIEW_HANDOFF_2026-11-19.md §3/§4 + FIRST_REFERENCE_CASE.json.
+schema: hw_readiness_v1
+updated: 2026-11-19
+handoff: docs/research/system_woofer_2026-11-18/SENIOR_REVIEW_HANDOFF_2026-11-19.md
+
+fidelity_note: >-
+  Coupled cases are declared COUPLED_VENTED_FEM_BEM_LEM with the FIRST_REFERENCE_CASE fidelity
+  policy attached: the horn channel is an ideal normal-velocity source (no compression-driver
+  absolute SPL), and every case uses BL's provider-default transducer SHAPE.
+
+cases:
+  - key: bl_smoke/20261118T225108Z-smoke-42536-01d15001
+    ref: "#1"
+    gate: W3 smoke (3 freqs)
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+  - key: bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a
+    ref: "#2"
+    gate: G4 wide basis (25 freqs, 200-2500 Hz)
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+  - key: bl_g6_offset30/20261118T235110Z-assembly-21668-c17f7cf6
+    ref: "#3"
+    gate: G6 geometry challenge (horn +10 mm)
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    pair_with: bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a
+  - key: bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e
+    ref: "#4"
+    gate: motor axis, real 12PR300 T/S, seed box
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+    pair_with: bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9
+  - key: bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9
+    ref: "#5"
+    gate: motor axis, demo motor twin, seed box
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    pair_with: bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e
+  - key: bl_motor12pr/20261119T010537Z-real_driver-48792-9d89b3df
+    ref: "#6"
+    gate: real motor, default box (WP2 column)
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+  - key: bl_ref_case/20261118T223335Z-ref_case-61644-32976a2a
+    ref: "R0"
+    gate: vented-only R0, demo motor, default box (WP2 column)
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+  - key: bl_r4_tower_box/20261119T001041Z-ref_case-40216-b32bb5a2
+    ref: "R4"
+    gate: screen top cell (115 L, 170 cm2 port)
+    motor: demo
+    transducer_shape: demo
+    note: Refused by BL's panel-fit rule; recorded, not a bug.
+  - key: bl_ref_case/20261118T231100Z-assembly-62864-f62bf799
+    ref: "-"
+    gate: 0 mm horn offset staging (never solved)
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    note: >-
+      Horn rear 3 mm inside the enclosure front plane (vertex min 0.7 mm); BL validated it.
+      Found by the R16 clearance gate on 2026-11-19. Do not solve.
+
+risks:
+  - {id: R1, level: CRITICAL, status: open, wp: WP4, title: "Mixed per-input references; no channel-calibration policy", evidence: "FIRST_BEM_EVIDENCE.md G5; combine.py::_require_compatible", blocked_by: "owner decision 3"}
+  - {id: R2, level: CRITICAL, status: open, wp: WP7, title: "Every BL-buildable box assumes the demo 200 mm transducer", evidence: "woofer_seed.py::bl_panel_fit_feasible; 12PR300 needs 0.1821 m vs 0.1501 m on 371.2 mm", blocked_by: "owner decisions 1-2 (maker CAD)"}
+  - {id: R3, level: CRITICAL, status: open, wp: WP1, title: "LF band (< 200 Hz) never solved; box tuning invisible", evidence: "all grids start at 200 Hz"}
+  - {id: R4, level: HIGH, status: open, wp: "WP2, WP3", title: "Motor x box matrix incomplete; no real-motor assembled case", evidence: "cases #4/#5 solved, #6 and R0 staged only"}
+  - {id: R5, level: HIGH, status: open, wp: "-", title: "2 m is not far field at 200 Hz; cuts only, no DI/power", evidence: "BL project defaults", blocked_by: "owner decision 5"}
+  - {id: R6, level: HIGH, status: open, wp: WP5, title: "No convergence check (single mesh, 25 freqs)", evidence: "every case"}
+  - {id: R7, level: MEDIUM, status: open, wp: WP6, title: "Screen metric (E_shape) uncalibrated on box/driver axes", evidence: "SCREENING_EVIDENCE.md"}
+  - {id: R8, level: MEDIUM, status: open, wp: "-", title: "DSP is analog-prototype only; excursion not a joint constraint", evidence: "dsp.py", blocked_by: "owner decision 4"}
+  - {id: R9, level: MEDIUM, status: open, wp: WP5, title: "float32 solves; null depths may be precision-limited", evidence: "engine provenance"}
+  - {id: R10, level: MEDIUM, status: open, wp: "-", title: "BL/BEAT upstream drift (policy: record, don't upgrade mid-study)", evidence: "BL_PARITY.md §2"}
+  - {id: R11, level: MEDIUM, status: open, wp: WP8, title: "No scheduled real-BL test lane", evidence: "two real solve bugs caught only by real runs"}
+  - {id: R12, level: MEDIUM, status: open, wp: WP8, title: "Evidence quote byte-checks are manual", evidence: "FIRST_BEM_EVIDENCE.md byte-check note"}
+  - {id: R13, level: LOW, status: open, wp: WP4, title: "Duplicate reference guards (combine vs bl_results)", evidence: "combine._require_compatible; bl_results.assert_shared_sensitivity_reference", blocked_by: "R1"}
+  - {id: R14, level: LOW, status: open, wp: WP8, title: "authorized_by is a free string", evidence: "reference.py solve", blocked_by: "owner decision 6"}
+  - {id: R15, level: LOW, status: open, wp: WP7, title: "10-inch catalog YAML fields not re-verified against vendor pages", evidence: "examples/systems drivers"}
+  - {id: R16, level: LOW, status: in_progress, wp: WP8, title: "Horn/enclosure clearance not asserted", evidence: "boundarylab/clearance.py + stage._stage gate (2026-11-19, uncommitted); found the 0 mm case violating"}
+  - {id: R17, level: LOW, status: open, wp: WP1, title: "BL meshed port vs bassbox end-correction are different models", evidence: "assemble._box_to_vented_source"}
+
+decisions:
+  - {id: 1, question: "Accept demo transducer shape for v0, or procure maker CAD now?", recommendation: "Procure 12PR300 drawings; it gates all real box-axis work.", status: open}
+  - {id: 2, question: "Allow taller fronts (e.g. 560 mm) and re-screen, or keep 371 mm and pick drivers that fit?", recommendation: "Both need real geometry first (decision 1).", status: open}
+  - {id: 3, question: "Channel-calibration policy: explicit-calibration API vs velocity-driven re-solves vs electrodynamic conversion?", recommendation: "Explicit per-channel calibration records (option a).", status: open}
+  - {id: 4, question: "Keep analog DSP prototypes this round, or add digital biquad realization now?", recommendation: "Analog for research; biquads later.", status: open}
+  - {id: 5, question: "Far-field/observation standard for declared curves (distance, angular grid, seat window)?", recommendation: "Declare one before any listening-window curve.", status: open}
+  - {id: 6, question: "BL solve authorization: per-case token registry or free-form token?", recommendation: "Typed record (who/why/scope) written into the case manifest.", status: open}

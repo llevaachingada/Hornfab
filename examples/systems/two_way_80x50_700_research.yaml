@@ -1,0 +1,56 @@
+# Illustrative system spec, schema_version 1 (hornlab_search.system.contracts).
+# This is a NEW experimental schema written alongside contracts.py — it is NOT a HornFab
+# brief and is not accepted by any existing CLI. Unknown keys/units are hard errors.
+#
+# Every numeric range below is a provisional exploration bound, not a claimed optimal box.
+# asset_id/driver_id must be resolved from the real saved-horn inventory and real, sourced
+# driver data before any run (no fabricated design hashes).
+#
+# screen_only fidelity: outputs from this spec are screening claims; no coherent phase or
+# delay claim is permitted for a magnitude-only horn asset (contracts PhaseUnavailable).
+schema_version: 1
+experiment_id: two_way_80x50_700_pilot
+mode: fixed_horn
+
+horn:
+  asset_id: SELECT_FROM_REAL_INVENTORY        # resolve via tools/system/audit_saved_horns.py
+  driver_profile_id: HF1440_PROFILE_FROM_REPO # only if the repo actually holds that profile
+
+woofer:
+  driver_id: SELECT_REAL_10_OR_12_INCH_DRIVER
+  geometry_file: examples/systems/driver_geometry/SELECT_REAL_DRIVER.yaml
+
+cabinet:
+  kind: vented
+  external_width_mm_range: [340, 510]
+  external_height_mm_range: [470, 850]
+  external_depth_mm_range: [260, 570]
+  net_volume_l_range: [35, 115]
+  tuning_hz_range: [30, 65]
+  wall_mm: 18
+  port_type: round_flared
+  port_throat_area_cm2_range: [45, 170]
+  port_nfr_range: [0.0, 0.2]
+
+assembly:
+  horn_layout: separate_above
+  woofer_center_y_mm_range: [90, 400]
+  horn_mounting_offset_z_mm_range: [-80, 80]
+
+dsp:
+  active: true
+  xo_hz_range: [700, 1300]
+  crossover_types: [LR4]     # research branches can widen to LR2/LR8 later
+  gain_db_range: [-12, 0]
+  relative_delay_ms_range: [-1.5, 1.5]
+  peq_max_bands: 2
+  peq_max_boost_db: 3
+
+target:
+  beamwidth_h_deg: [80, 80]
+  beamwidth_v_deg: [50, 50]
+  listening_angle_h_deg: [-30, 30]
+  listening_angle_v_deg: [-15, 15]
+  low_freq_f3_hz_max: 55
+
+fidelity: screen_only

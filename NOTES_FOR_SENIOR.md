@@ -1171,3 +1171,42 @@ worktree).
    acceptance #3 wording preserved), but every "A beats B by < floor" call on the critical path
    should cite WHICH floor it used. Possible causes: different top-N, different pairing, stored-vs-
    replayed metric differences; not resolved here (owner directive: no scope creep).
+
+## 2026-11-18 — lane C: BL headless result reader + `import_results` hook (append-only)
+
+Lane C (worktree `hornlab-woofer-system-wt`, branch `feat/woofer-system-v0`) added two NEW owned
+files: `hornlab_search/system/boundarylab/bl_results.py` and `tests/system/test_bl_results.py`
+(+ fixture `tests/system/fixtures/bl_results/reference_run/`). No existing file was edited.
+
+HOOK NEEDED in `hornlab_search/system/boundarylab/import_results.py` (recorded here, not applied —
+that file is outside this lane's ownership). `detect_result_artifact()` (lines 32-53) classifies only
+`.blabsp` ZIPs and `.blab.json` projects. Add a directory branch before the suffix checks:
+
+    if p.is_dir():
+        from hornlab_search.system.boundarylab.bl_results import is_bl_headless_result_dir
+        if is_bl_headless_result_dir(p):
+            return ResultArtifact(kind="bl_headless_result", path=str(p), manifest=None,
+                                  notes=("BL headless result directory; read per-excitation "
+                                         "complex bases with bl_results.read_bl_headless_result",))
+
+and either extend `read_blabsp_manifest()` or add a sibling `read_headless_result()` that delegates
+to `bl_results.read_bl_headless_result(p)`. Do not duplicate payload parsing: `BL_HEADLESS_SCHEMA`,
+`is_bl_headless_result_dir` and the typed reader already live in `bl_results.py`. The `kind` string
+is the only naming decision left.
+
+No BL solve was run. Schema pinned to installed BL 0.5.0 HEAD
+`15f9a89245a9adfec8c2f0006c164953ce381e58` (file SHA-256s in `bl_results.BL_SOURCE_PINS`). The one
+unverifiable-without-a-real-run field is recorded as `BLOCKED_BY_BL_RESULT_FORMAT`: the literal
+`axes` labels BEAT writes for `exterior_pressure` are not defined in BL's Python source (they are
+copied verbatim from the engine result at `src/blab/headless.py:469`); the reader prefers the JSON
+labels and falls back to the documented `(excitation, observation)` shape order.
+
+## 2026-11-19 resolution: lane C's `import_results` hook APPLIED (append-only)
+
+The hook recorded below (2026-11-18, lane C) has been applied by the parent integrator in
+commit `c18410c`: `detect_result_artifact` now classifies a BL headless result *directory*
+as `kind="bl_headless_result"` before the file-suffix checks (unknown-but-existing
+directories classify as `unknown`, never crash), and `read_headless_result()` delegates to
+`bl_results.read_bl_headless_result` with no duplicated payload parsing. Pinned by
+`tests/system/test_import_results_hook.py` (4 tests). The `BLOCKED_BY_BL_RESULT_FORMAT`
+disclosure remains open (it needs a real solved run to close); the hook itself is DONE.

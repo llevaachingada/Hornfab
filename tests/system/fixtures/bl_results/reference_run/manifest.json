@@ -1,0 +1,61 @@
+{
+  "backend_id": "beat_cpu",
+  "compiled_system_file": "compiled-system.json",
+  "completion_mask": [
+    true,
+    true
+  ],
+  "domains_file": "domains.npz",
+  "domains_metadata_file": "domains.json",
+  "engine_runs": [
+    {
+      "backend": "beat_cpu",
+      "precision": "float32"
+    }
+  ],
+  "excitation_port_ids": [
+    "excitation:woofer",
+    "excitation:horn"
+  ],
+  "finished_at_utc": "2026-11-18T00:00:10+00:00",
+  "frequencies_hz": [
+    100.0,
+    200.0
+  ],
+  "meshes": [
+    {
+      "file": "assembly.msh",
+      "id": "mesh:assembly",
+      "name": "assembly",
+      "purpose": "boundary",
+      "sha256": "6e8ed172f26244800b5ccec880124ac5d397ffe534c16e5e4fabfd79277355ab",
+      "size_bytes": 1234
+    }
+  ],
+  "phasor_convention": "exp(+i omega t)",
+  "project_file": "project.snapshot.blab.json",
+  "project_sha256": "25e6bc51c585b2e9076592555967e96ed50248900015a9ea5d839b8498f3d47d",
+  "request_file": "request.json",
+  "results": [
+    {
+      "arrays_file": "frequencies/000000.npz",
+      "freq_hz": 100.0,
+      "metadata_file": "frequencies/000000.json"
+    },
+    {
+      "arrays_file": "frequencies/000001.npz",
+      "freq_hz": 200.0,
+      "metadata_file": "frequencies/000001.json"
+    }
+  ],
+  "schema": "boundary-lab-headless-result",
+  "schema_version": 2,
+  "solve_kind": "exterior_bem",
+  "solver_options": {
+    "quadrature_order": 4,
+    "singular_order": 4,
+    "symmetry": "off"
+  },
+  "started_at_utc": "2026-11-18T00:00:00+00:00",
+  "status": "complete"
+}

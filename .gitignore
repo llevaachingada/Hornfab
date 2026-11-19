@@ -36,3 +36,11 @@ tools/cloud/*.secret
 
 # Keep shared OpenCode skill grants reproducible.
 !.opencode/oh-my-opencode-slim.json
+
+# feat/woofer-system-v0: isolated system store + local setup logs (never tracked)
+system_runs/
+setup_pip.log
+setup_pip.err.log
+
+# system example driver geometry drafts (lane B, added only after provenance review)
+

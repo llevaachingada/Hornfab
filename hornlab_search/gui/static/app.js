@@ -17,6 +17,7 @@ import { mountStudy, mountStudyList } from "./studies.js";
 import { mountStudyResults } from "./study_results.js";
 import { drawStudyCharts } from "./study_charts.js";
 import { mountCompareMethods } from "./compare_methods.js";
+import { viewHwCases, viewHwCase, viewHwReadiness } from "./hw.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -249,6 +250,10 @@ const ROUTES = [
   { re: /^#\/typologies$/,              fn: () => viewTypologies() },
   { re: /^#\/typology\/([^\/?#]+)$/,    fn: m => viewTypologySandbox(ROOT, m[1]) },
   { re: /^#\/glossary$/,                fn: () => viewGlossary() },
+  // Horn + woofer system (read-only G0 views; hw.js)
+  { re: /^#\/hw\/cases(?:\?(.*))?$/,     query: true, fn: m => viewHwCases(ROOT, m[1] || "") },
+  { re: /^#\/hw\/case\/([^\/?#]+)\/([^\/?#]+)$/, fn: m => viewHwCase(ROOT, decodeURIComponent(m[1]) + "/" + decodeURIComponent(m[2])) },
+  { re: /^#\/hw\/readiness$/,          fn: () => viewHwReadiness(ROOT) },
 ];
 
 function route() {
@@ -317,6 +322,8 @@ function updateNav(hash) {
       (h === "#/compose" && hash.split("?")[0] === "#/launch") ||   // one "New run" item covers both modes
       (h === "#/launch" && hash === "#/launch") ||
       (h === "#/typologies" && (hash === "#/typologies" || hash.startsWith("#/typology/"))) ||
+      (h === "#/hw/cases" && (hash === "#/hw/cases" || hash.startsWith("#/hw/case/"))) ||
+      (h === "#/hw/readiness" && hash === "#/hw/readiness") ||
       (h === "#/glossary" && hash === "#/glossary");
     a.classList.toggle("active", isActive);
   });

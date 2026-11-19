@@ -1,5 +1,23 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - feat/woofer-system-v0 integrated into hornfab-all-2026-11-18 (horn + woofer GUI, P0)
+
+- Merged `feat/woofer-system-v0` (worktree `C:/Users/hunte/Hrns/hornlab-woofer-system-wt`, tip `d7453a1`)
+  into `hornfab-all-2026-11-18` (base `3a3a4ee`): the whole `hornlab_search/system/` package (contracts,
+  provenance, screen, DSP, combine, BL adapters), `tools/system/*`, driver YAMLs, 30 system test files,
+  the R16 clearance gate, and GUI G0 (`gui/data_hw.py`, `gui/static/hw.js`, `hw` dispatch in
+  `gui/server.py`, `readiness.yaml`) plus the system_woofer research docs. Conflicts resolved additively:
+  `server.py` (keep `_inflight` single-flight GETs from `143ff08` AND `system_store`/`--system-store`),
+  `NOTES_FOR_SENIOR.md` (both append-only blocks kept). Owner gate A: the foreign GUI edits had been
+  committed by the other lane as `143ff08` ("Should be good now").
+- Pre-merge baseline on hornfab-all (tests/test_gui*.py + test_b8_lanes_bounded_gui.py): 574 tests,
+  1 failure (`test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_or_process_kill_paths`,
+  PRE-EXISTING), 0 errors, 0 skips (junit `hw_base_canonical_premerge.xml`).
+- INDEX/CODE_MAP: 13 research rows for `docs/research/system_woofer_2026-11-18/`, 3 CODE_MAP rows
+  (`system/`, `system/boundarylab/`, `gui/data_hw.py`+`hw.js`).
+- GUI runs from the canonical checkout with `--system-store C:/Users/hunte/Hrns/hornlab-woofer-system-wt/system_runs`
+  (the store is gitignored and holds absolute worktree paths; never copy or move it).
+
 ## 2026-11-18 - Run artifacts archived to docs/evidence/runs (owner request)
 
 - Owner asked that three run dirs be committed/pushed with geometry + scores. `runs/` is gitignored,

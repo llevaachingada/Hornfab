@@ -12,6 +12,7 @@ import argparse
 import json
 import logging
 import mimetypes
+import os
 import threading
 import traceback
 import webbrowser
@@ -70,10 +71,14 @@ def _q_bool(q: dict, key: str, default: bool | None = None):
 class App:
     def __init__(self, root: Path, runs: Path | None = None, analysis_dir: Path | None = None,
                  study_service=None, study_jobs=None, study_runs=None, study_launcher=None,
-                 study_roots=()):
+                 study_roots=(), system_store: Path | None = None):
         self._inflight: dict = {}                       # single-flight GETs (see get())
         self._inflight_lock = threading.Lock()
         self.root = root.resolve()
+        # Horn + woofer system store (read-only #/hw views); the system package's isolated
+        # store lives beside the repo's runs/, never inside it.
+        self.system_store = (Path(system_store) if system_store is not None
+                             else self.root / "system_runs").resolve()
         self.runs = (runs or self.root / "runs").resolve()
         self.analysis_dir = (Path(analysis_dir) if analysis_dir is not None
                              else self.runs / "analysis").resolve()
@@ -474,7 +479,24 @@ class App:
         if head == "design" and len(parts) == 3:
             tier = (q.get("tier") or ["screen"])[0]
             return DV.design_payload(self.runs, parts[1], parts[2], tier)
+        if head == "hw":
+            return self._hw(parts[1:], q)
         raise FileNotFoundError(path)
+
+    def _hw(self, parts: list[str], q: dict) -> object:
+        """Horn + woofer system views (G0): read-only, no solver, no Boundary Lab import."""
+        from . import data_hw as HW
+        sub = parts[0] if parts else ""
+        if sub == "cases" and len(parts) == 1:
+            return HW.hw_cases(self.root, self.system_store)
+        if sub == "readiness" and len(parts) == 1:
+            return HW.hw_readiness(self.root, self.system_store)
+        if sub == "case" and len(parts) == 3:
+            return HW.hw_case(self.root, self.system_store, f"{parts[1]}/{parts[2]}")
+        if sub == "basis" and len(parts) == 3:
+            domain = (q.get("domain") or [""])[0]
+            return HW.hw_basis(self.root, self.system_store, f"{parts[1]}/{parts[2]}", domain)
+        raise FileNotFoundError("/".join(["hw", *parts]))
 
     def _budget_hint(self, q: dict) -> dict:
         """Hansen-grounded budget suggestion for Launch / Compose (``search/budget_heuristic``).
@@ -842,8 +864,8 @@ def warm_in_background(app: App, delay_s: float = 1.0) -> threading.Timer:
 
 
 def serve(root: Path, port: int = DEFAULT_PORT, open_browser: bool = True, runs: Path | None = None,
-          analysis_dir: Path | None = None, study_roots=()) -> int:
-    app = App(root, runs, analysis_dir, study_roots=study_roots)
+          analysis_dir: Path | None = None, study_roots=(), system_store: Path | None = None) -> int:
+    app = App(root, runs, analysis_dir, study_roots=study_roots, system_store=system_store)
     httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(app, port))
     url = f"http://127.0.0.1:{port}/"
     print(f"hornlab-search gui: {url}  (Ctrl-C to stop; local only)")
@@ -876,8 +898,13 @@ def main(argv: list[str] | None = None) -> int:
                     help="extra study registry root (repeatable; e.g. a scratch pilot)")
     ap.add_argument("--analysis-dir", default=None,
                     help="folder the analysis reports render from (default: runs/analysis)")
+    ap.add_argument("--system-store", default=None,
+                    help="horn+woofer system store (default: $HORNLAB_SYSTEM_STORE, else <root>/system_runs)")
     a = ap.parse_args(argv)
+    system_store = (Path(a.system_store) if a.system_store
+                    else (os.environ.get("HORNLAB_SYSTEM_STORE") or None))
     return serve(Path(a.root), a.port, not a.no_browser,
                  runs=Path(a.runs) if a.runs else None,
                  analysis_dir=Path(a.analysis_dir) if a.analysis_dir else None,
-                 study_roots=a.study_roots)
+                 study_roots=a.study_roots,
+                 system_store=Path(system_store) if system_store else None)
