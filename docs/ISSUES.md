@@ -31,6 +31,13 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - W2: square & rosse W3s appended
+
+- DONE: crowe_x square W3 (sigma 0.12 step fix) and rosse W3 (g_b to the kernel's -0.10 floor) appended.
+- NOTE: crowe_x osse = no-headroom negative (not requeued); tritonia v9 +0.41 and petal +0.70 are the
+  W2 wins so far.
+- LIVE: W3 fold_warm at 5 evals (3.762); 7 jobs remain queued.
+
 ## 2026-11-19 - W2: petal +0.70 (win) -> w3; crowe_x osse no-headroom
 
 - WIN: petal 4.892 -> 4.196 (+0.70, above floor); W3 with pin_ignore q (OSSE cap 1), warm from 4.196,

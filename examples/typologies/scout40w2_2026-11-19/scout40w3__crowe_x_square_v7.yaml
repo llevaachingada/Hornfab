@@ -1,0 +1,123 @@
+# SCOUT40W3 2026-11-19 requeue (local orchestrator, owner-directed). Lane: crowe_x_square_v7.
+# Why: the W2 requeue (7.618, +0.29 vs 7.911) was stopped by a REFUSAL STORM 38% despite resample_strict.
+#   Per the economy ordering (step -> budget -> box), halve the step: sigma0 0.20 -> 0.12, keep
+#   resample_strict + error_policy. Warm start = the W2 best 7.618; same brief/objective.
+# Source: examples/typologies/scout40w2_2026-11-19/scout40w2__crowe_x_square_v7.yaml
+name: scout40w3__crowe_x_square_v7
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 33
+  n_s: 56
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_a_h_deg: 34.0
+  g_a_v_deg: 34.0
+  g_k: 1.0
+  g_L_mm: 220.0
+  g_s: 0.32
+  g_n: 2.0
+  g_q: 0.996
+  g_r_lip_mm: 24.0
+  g_wrap_deg: 120.0
+  g_sf_m: 4
+  g_sf_n1: 1.5
+  g_sf_n2: 6.0
+  g_sf_ab: 1.0
+  g_sf_amt: 0.6
+  g_sf_start: 0.12
+bounds:
+  g_a_h_deg:
+    lo: 32.0
+    hi: 36.0
+  g_a_v_deg:
+    lo: 32.0
+    hi: 36.0
+  g_k:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  g_L_mm:
+    lo: 210.0
+    hi: 240.0
+  g_s:
+    lo: 0.25
+    hi: 0.4
+  g_n:
+    lo: 1.8
+    hi: 2.4
+  g_q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  g_r_lip_mm:
+    lo: 18.0
+    hi: 30.0
+  g_wrap_deg:
+    lo: 90.0
+    hi: 150.0
+  g_sf_m:
+    lo: 4
+    hi: 4
+    search: false
+  g_sf_n1:
+    lo: 1.5
+    hi: 1.5
+    search: false
+  g_sf_n2:
+    lo: 6.0
+    hi: 6.0
+    search: false
+  g_sf_ab:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  g_sf_amt:
+    lo: 0.4
+    hi: 0.8
+  g_sf_start:
+    lo: 0.12
+    hi: 0.12
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.12
+  seed: 1234
+  budget: 40
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  error_policy: retry_same_then_stop
+  budget_counts: valid
+  warm_start:
+    from_runs:
+    - runs/20261119T144903Z-screen-0ec862
+    top_k: 10
+    sigma_from_spread: false
+description: 'SCOUT40 2026-11-19 (cloud Fable senior): 40 valid evals, warm from the
+  lane best (top 10); source examples/typologies/home_landscape_2026-11-15/hl__crowe_x_square_v7.yaml;
+  R19 no_headroom -> warm start instead of space card. Gains below the floor are ties.
+  Near-square Crowe-X-inspired probe: four concave panels, diagonal ridge, 479x479
+  mouth; look-first, not Crowe geometry'

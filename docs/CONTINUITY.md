@@ -60,6 +60,20 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40W2: square (+0.29) & rosse W3s appended (local orchestrator)
+
+- `s40x__crowe_x_square_v7` (W2, resample_strict): best **7.618** vs the control 7.911 -> +0.29 J (just
+  under the 0.31 floor), then a **refusal storm 38%** persisted. Per the economy ordering
+  (step -> budget -> box), the W3 halves the step: `sigma0 0.20 -> 0.12`, resample_strict kept,
+  warm-started from 7.618 (mean b35c19653487) - appended as `s40x3__crowe_x_square_v7`.
+- `s40x__rosse_rect_cd_v7` (W2, tmax pin_ignore): best 4.560 (= the control; no gain), pinned at the
+  LOW limit of `g_b [0, 0.4]`. The R-OSSE kernel documents and tested b < 0 down to **-0.10** (still
+  inside the 480 mm envelope, tools/geometry/rosse_rect.py:62-68) - a real widen, not a hard floor.
+  W3 `scout40w3__rosse_rect_cd_v7` has `g_b -0.10..0.4` with `pin_ignore: [g_tmax, g_b]` on the
+  command job. Shape-check pass (4737/24000).
+- Night at 8/15: W3 `s40x3__fold_warm` running (5 evals, 3.762). Queued after: morph W3, tritonia v8/v9
+  W3s, petal W3, square W3, rosse W3.
+
 ## 2026-11-19 - SCOUT40W2: petal WIN (+0.70) -> w3; crowe_x osse no-headroom (local orchestrator)
 
 - **`s40x__petal_hvlaw_v7`: best 4.196 vs the control 4.892 -> +0.70 J, ABOVE the floor.** The
