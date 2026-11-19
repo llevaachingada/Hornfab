@@ -224,8 +224,11 @@ def test_real_bl_stage_horn_project(tmp_path: Path) -> None:
         horn = write_closed_box_double(tmp_path / "horn" / "mesh.msh")
         source_group, mesh_role = "horn_throat", "test_double"
         expected_groups = ["horn_throat", "horn_wall"]
+    # The 0.2 m test-double cube is centred on its origin, so it needs 120 mm to clear the
+    # enclosure front face (z = 0) by the R16 1 mm minimum; the full-domain horn clears at 20 mm.
+    offset_z = 20.0 if mesh_role == "full_domain" else 120.0
     result = S.stage_horn_project(
-        root, horn, source_group=source_group, translation_mm=(0.0, 0.0, 20.0),
+        root, horn, source_group=source_group, translation_mm=(0.0, 0.0, offset_z),
         mesh_role=mesh_role, store_root=tmp_path, timeout_s=900.0,
     )
     assert result.ok is True, "\n".join(result.captured_log_tail[-20:])
@@ -238,6 +241,8 @@ def test_real_bl_stage_horn_project(tmp_path: Path) -> None:
     assert horn_decision["moving_group"] == source_group
     assert horn_decision["rigid_groups"] == [g for g in expected_groups if g != source_group]
     assert horn_decision["excitation_port"]["kind"] == "normal_velocity"
+    assert payload["clearance"]["status"] == "PASS"
+    assert payload["clearance"]["aabb_gap_m"] >= 1.0e-3
     checks = payload["result"]["verification"]["checks"]
     assert checks["excitation_port_count"]["actual"] == 2
     assert checks["reopened_solve_kind"]["actual"] == "coupled_bem_fem"

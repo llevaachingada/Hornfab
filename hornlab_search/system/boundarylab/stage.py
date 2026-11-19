@@ -33,6 +33,7 @@ from typing import Any, Mapping
 
 from hornlab_search.system import provenance
 from hornlab_search.system.boundarylab import run as bl_run
+from hornlab_search.system.boundarylab.clearance import DEFAULT_MIN_GAP_M, body_clearance
 from hornlab_search.system.boundarylab.generate import (
     _MAX_LOG_LINES,
     _build_source,
@@ -213,6 +214,7 @@ def _stage(
     cancel_path: Path | None,
     run_now: bool,
     kind: str,
+    min_clearance_m: float = DEFAULT_MIN_GAP_M,
 ) -> StagedProject:
     resolved_case_dir = Path(case_dir) if case_dir is not None else provenance.new_case_dir(
         experiment_id, store_root=store_root, tag=tag)
@@ -254,6 +256,32 @@ def _stage(
                     f"{validation.returncode} parsed={json.dumps(parsed, sort_keys=True)}"
                 )
 
+    # R16: BL accepts intersecting separate bodies, so the horn-to-enclosure gap is checked
+    # here and recorded in the manifest; a staged two-body project without a proven gap is
+    # not "ok", whatever BL's validate said.
+    clearance: dict[str, Any] | None = None
+    horn_spec = spec.get("horn")
+    if staged and horn_spec:
+        surfaces = [m["path"] for m in meshes if m.get("purpose") == "bem_surface" and m.get("path")]
+        try:
+            report = body_clearance(
+                horn_spec["mesh_path"], surfaces,
+                translation_mm=horn_spec.get("translation_mm", (0.0, 0.0, 0.0)),
+                scale_factor=float(horn_spec.get("scale_factor", 1.0)),
+                min_gap_m=min_clearance_m,
+            )
+            clearance = report.to_dict()
+        except (FileNotFoundError, ValueError) as exc:
+            clearance = {"kind": "body_clearance_v1", "status": "BODY_CLEARANCE_UNCHECKED",
+                         "min_gap_m": min_clearance_m, "error": f"{type(exc).__name__}: {exc}"}
+        if clearance["status"] != "PASS":
+            staged = False
+            log_lines.append(
+                f"[adapter] {clearance['status']}: horn-to-enclosure clearance not proven >= "
+                f"{min_clearance_m} m (aabb_gap_m={clearance.get('aabb_gap_m')}, "
+                f"vertex_min_distance_m={clearance.get('vertex_min_distance_m')})"
+            )
+
     detail = {
         "argv": argv,
         "spec_sha256": provenance.file_sha256(spec_path),
@@ -270,6 +298,9 @@ def _stage(
         "result": None if final is None else final,
         "validate": _validate_dict(validation),
     }
+    if clearance is not None:
+        manifest_payload["clearance"] = clearance
+        detail["clearance_status"] = clearance["status"]
     if staged and project_path is not None:
         manifest_payload["project_sha256"] = provenance.file_sha256(project_path)
     manifest_path = provenance.write_manifest(resolved_case_dir, manifest_payload)
@@ -328,6 +359,7 @@ def stage_horn_project(
     timeout_s: float = 1800.0,
     cancel_path: Path | None = None,
     run_now: bool = True,
+    min_clearance_m: float = DEFAULT_MIN_GAP_M,
 ) -> StagedProject:
     """Stage the two-body project: seeded vented system + one imported closed horn BEM mesh.
 
@@ -335,6 +367,10 @@ def stage_horn_project(
     ``moving`` boundary driven by an independent ``ideal_velocity_source`` with a single
     ``normal_velocity`` port (the horn's own excitation, never an electrical port). Every other
     horn group is assigned ``rigid``. The exact groups used are recorded in the case manifest.
+
+    After BL validates, the placed horn's gap to the generated enclosure surface must be proven
+    ``>= min_clearance_m`` (see :mod:`.clearance`); otherwise the result is not ``ok`` and the
+    manifest records ``BODY_CLEARANCE_VIOLATION`` / ``BODY_CLEARANCE_UNPROVEN``.
     """
     _require_verified(root)
     horn_path = Path(horn_mesh)
@@ -357,7 +393,7 @@ def stage_horn_project(
     return _stage(root, spec, store_root=store_root, case_dir=case_dir,
                   experiment_id=experiment_id, tag="assembly", timeout_s=timeout_s,
                   cancel_path=cancel_path, run_now=run_now,
-                  kind="bl_stage_horn_project")
+                  kind="bl_stage_horn_project", min_clearance_m=min_clearance_m)
 
 
 def resolve_full_domain_horn_mesh(
