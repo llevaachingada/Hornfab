@@ -16,7 +16,7 @@
   response arrays. Snapshot 2026-11-19T23:40:55Z, repo HEAD `ddfba68`; the live compact400 night was
   still appending runs, so regenerate after it finishes to capture new solves.
 - **Data:** `docs/top_designs/` — README (schema/grouping/caveats/queries), `top_designs.csv`
-  (632 KB, 160 flat columns), `top_designs.json` (6.4 MB; shared score configs/runs + nested designs
+  (632 KB, 161 flat columns), `top_designs.json` (6.4 MB; shared score configs/runs + nested designs
   with metric arrays), `top_designs_acoustics.npz` (13.8 MB; H/V cuts, full balloon SPL+directions,
   complex throat impedance). Raw complex pressure is not copied (local `response.npz` is the source).
 - **Registered:** CODE_MAP and INDEX rows in the same commit. The other lane's uncommitted GUI edits

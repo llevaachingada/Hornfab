@@ -21,7 +21,7 @@
 ## 2026-11-19 - Top-designs export for cloud agents
 
 - DONE (CPU, no GPU): `tools/data/top_designs.py` + `docs/top_designs/` bundle (52 typology×score
-  groups, 437 designs, full acoustic NPZ) + README + CODE_MAP/INDEX rows; tests
+  groups, 437 designs, 161-column CSV, full acoustic NPZ) + README + CODE_MAP/INDEX rows; tests
   `tests/test_tools_data_top_designs.py` 11 passed. Snapshot 2026-11-19T23:40:55Z (HEAD `ddfba68`).
 - OPEN (owner/cloud): consume the bundle for cross-typology analysis; if the live compact400 night
   adds winners, regenerate with `tools/data/top_designs.py` and commit the refreshed files.
