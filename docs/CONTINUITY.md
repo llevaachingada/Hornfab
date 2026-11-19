@@ -1,5 +1,19 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 23:35 - SCOUT40 night LAUNCHED (local orchestrator)
+
+- Launched detached able_scout40_2026-11-19 (18 jobs) at 23:35 local / 04:35Z: controller pid **16596**
+  (parent WmiPrvSE), log uns/nights/queue_scout40.log, GPU lock held.
+- **GPU hygiene:** gpu-clean before launch: no project Julia/BEAT processes; VRAM baseline **1328 MiB**;
+  no live \uns/.gpu.lock\. First job \s40__crowe_v2a_c1\ running in \uns/20261119T043506Z-screen-54878f\
+  (3 valid rows by +2.5 min, J 8.602, VRAM 1286 MiB).
+- **Cutoff limitation (recorded):** \queue.ps1 -Cutoff\ is HH:mm **today** and only gates STARTING later
+  nights; it cannot express tomorrow 13:33, and the runner has only per-job timeouts (1 h), no wall-clock cap.
+  The 18-job night therefore runs to its job list (estimate 6-12 h; stop cleanly with a \STOP\ file in
+  \uns/nights/fable_scout40_2026-11-19/\ if needed). The \-Cutoff 23:59\ arg is a no-op for a single night.
+- Preflight \--samples 64\ runs detached (CPU lane) and is advisory; results recorded when it finishes.
+- First launch attempt with \-Cutoff 13:33\ refused (parse = today, already past) — recorded so the next
+  cross-midnight launch does not repeat it.
 ## 2026-11-19 - Owner-directed construction fixes for the SCOUT40 night (local orchestrator)
 
 - **Klangfilm: the parent/record lane is out, the Phase B H/V core is in.** New
@@ -8545,4 +8559,5 @@ PASS  round-trip        reserved for task 04
 - **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CADâ†’STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned â€” the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) â€” 2â€“4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.
 - **Open owner decisions:** v2 objective as brief DEFAULT (today opt-in); bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`); mesher bump (post-beta); surrogate OSSE top-up; GUI contrast owner click-path check remains; **P6a/P6b + W7 + the brief-design consultation + resume-or-park the deferred WP14 multicell physics (all owner-gated â€” see Next). RESOLVED 2026-10-25: fork hosting + pin (hosted fork; `760a1ec` pinned; installed == pinned â€” tripwire green); WP13 = OWNER-DEFERRED.**
 - **Blockers:** none (owner gate on the pin hosting only).
+
 

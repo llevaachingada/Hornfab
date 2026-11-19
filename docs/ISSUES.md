@@ -1,5 +1,11 @@
 ﻿# ISSUES
 
+## 2026-11-19 23:35 - SCOUT40 night live
+
+- LIVE: fable_scout40_2026-11-19 (18 jobs), controller pid 16596, first rows in 20261119T043506Z-screen-54878f.
+- OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
+  the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
+
 ## 2026-11-19 - Owner construction fixes wired into SCOUT40; two decisions open
 
 - OPEN (owner): rolled rollback cap — implemented **225** + a 270 control arm (sources warn 160-200 deg
@@ -3594,6 +3600,7 @@ Local-only, added 2026-11-13 (**bo-study-v1.1 pushed; cloud completion kickoff i
 - Open: B8 full adversarial loop (fake evaluator through service/CLI/API/GUI, crash/idempotency matrix).
 - Open: pyproject optional `bayes` extra registration (isolated `bayes-venv` remains the sanctioned engine env).
 - Data note: 3 native shard-57 rows (276-278) uncatalogued at the S0 snapshot; refused at join (`catalog_row_missing`), recoverable by a fresh catalog export.
+
 
 
 
