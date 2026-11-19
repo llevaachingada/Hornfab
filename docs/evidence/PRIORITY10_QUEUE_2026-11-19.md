@@ -269,6 +269,42 @@ Readings [measured]: (a) the **known v7 pin did not recur** — the authored `az
 confirms the v10 rank but buys no verified improvement; (c) the family's remaining cost is flat 0.42 +
 di_roughness 0.44 + dislope 0.41 — no single dominant term, which is why further evals stalled.
 
+### 9d. #5 ext-throat H/V law, v10 — real gain from its seed, still a tie with the old best
+
+Run `20261119T174850Z-screen-2d9f2a`, watchdog at **31 valid / 39 rows** (8 `invalid_envelope`):
+
+| | value |
+|---|---|
+| seed J (v10) | 2.8692 |
+| best J (n 36, `925868ab64d9`) | **1.7919** |
+| gain | **1.077** — above the floor (real), but… |
+| published offline v10 rescore of the v7 archive leader | 1.5710 |
+| delta to that | +0.22 ⇒ **inside the floor = tie** |
+| best terms | cov 0.010, **flat 0.636**, load 0.000, dislope 0.000, **di_roughness 0.510**, **flat_cv 0.726** |
+
+Reading [measured]: the ext-throat lane is now fully inside the corridor and the DI-slope terms
+(`load 0`, `dislope 0`), and pays only for spectral flatness/roughness. It **does not** beat the old
+design on the same score — the matched rerun reproduces the family's position (tie), it does not advance
+it.
+
+### 9e. #8 Bi-Radial searched V-terminal — the freedom cannot pay, and the reason is loading
+
+Run (same config as the 40-valid `13c866`, budget 80), watchdog at **42 valid / 42 rows, 0 refusals**:
+
+| | value |
+|---|---|
+| seed J (v10) | 6.3374 |
+| best J (n 40, `ed00e69fb0a6`) | **6.3221** |
+| gain over 40 extra evals | **0.015** ⇒ nothing |
+| best terms | **load 3.487**, flat 0.645, flat_cv 0.384, dislope 0.269 |
+
+Reading [measured]: 52 % of this host's v10 cost is **throat loading** (`load 3.487`). The searched
+V-terminal width/hold changes the radiation plane, not the throat impedance, so the freedom that showed
++32° of V authority at a fixed V=460 mm buys **0.015 J** on a complete horn. This is the handoff's
+"beamwidth movement is not a horn improvement" concern, confirmed at the score level: the first 40 evals
+replayed as cache hits and the 40 new ones found nothing.
+
+
 
 
 
