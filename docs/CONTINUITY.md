@@ -40,6 +40,20 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - c200mouth requeue closed; continuous-read notes (local orchestrator)
+
+- **`s40w__klangfilm_hvcore_c200mouth`: best J 10.02** (43 evals, exit 0) vs 10.156 before -> +0.14 J,
+  **below the 0.31 floor (tie)**. Widening only the binding H setback 0->30 removed the pin (no
+  watchdog stop) but did not make the c200 mouth competitive. The core's own b3 seed (2.841 in this
+  night) remains far better; the c200-mouth seeding is answered: not the lever.
+- **Warm-start read note (prevents a false alarm):** a warm-started run's `n=0` row is the CONFIG SEED
+  baseline (e.g. b3_soft n=0 hash 5819e3b98420 J 6.401), not the warm mean; the CMA mean starts at the
+  prior best and the first samples are near it (b3_soft n=1 3.961 -> best 2.841). The warm record is
+  written to run.json at the end. So judge a warm start by the early samples and the run.json record,
+  not by n=0.
+- `s40w__klangfilm_lame_hv_stage_a` running (11 evals at the time of writing, best 8.473; seed
+  baseline 9.825, CMA mean = the prior 8.393). `s40w2__klangfilm_b3_soft` queued next after it.
+
 ## 2026-11-19 - Requeue results 1-3; b3_soft v2 continuation queued (local orchestrator)
 
 - **`s40w__klangfilm_b3_soft`: best J 2.841** (34 evals) from the SCOUT40 control 3.540 -> a

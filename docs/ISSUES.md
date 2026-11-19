@@ -22,6 +22,14 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - c200mouth requeue = tie; stage_a running
+
+- NOTE: s40w__klangfilm_hvcore_c200mouth 10.02 vs 10.156 (tie, below floor); the H-setback widening
+  removed the pin but the c200 mouth is not competitive (b3 seed 2.841 dominates).
+- NOTE: warm-started runs evaluate the config seed at n=0 (baseline); the CMA mean is the prior best
+  and the early samples sit near it. Do not read n=0 as the warm mean.
+- OPEN: stage_a requeue + b3_soft v2 in the live night; watch for further watchdog stops.
+
 ## 2026-11-19 - Requeue results 1-3; b3_soft v2 queued
 
 - DONE: s40w__klangfilm_b3_soft 2.841 (from 3.540; above floor) -> v2 continuation queued after its
