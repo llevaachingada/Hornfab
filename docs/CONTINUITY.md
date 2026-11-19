@@ -60,6 +60,18 @@
   89 px cell) and only one experiment group was expanded, plus a "solved 25/25" case showing a
   "Staging failed" banner without reconciliation. A UI revision is in flight (P1 rev).
 
+## 2026-11-19 - SCOUT40W2: tritonia v9 WIN (+0.41) -> w3; petal running (local orchestrator)
+
+- **`s40x__tritonia_v9`: best 4.878 vs the SCOUT40 control 5.289 -> +0.41 J, ABOVE the v7 0.31 floor.**
+  This is the first W2 lane with a real gain (the morph_width pin_ignore let it continue past the
+  envelope). It then bound-pinned at the HIGH limit of `az_fold_v_deg [-31, -27.5]`; the kernel allows
+  +/-40 (families.py:126), so W3 widens the high side to -10
+  (`examples/typologies/scout40w2_2026-11-19/scout40w3__tritonia_v9.yaml`, warm from 4.878, mean
+  5f689f0f4865) and is appended as `s40x3__tritonia_v9` (job 12). Shape-check pass.
+- `s40x__petal_hvlaw_v7` running (16 evals, best 4.561 vs the 4.892 control, i.e. improving; the
+  resample_strict fix is holding).
+- Night at 4/12 done; the two W3 fold/morph continuations and the rest remain queued.
+
 ## 2026-11-19 - SCOUT40W2: tritonia v8 w3 appended; v9 running (local orchestrator)
 
 - `s40x__tritonia_v8` (W2, morph_width pin_ignore): best **5.373** (33 evals) vs the control 5.325

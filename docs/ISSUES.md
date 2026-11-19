@@ -31,6 +31,13 @@
 - OPEN (local): queue.ps1 cutoff cannot express a cross-midnight stop (HH:mm today, gates later nights only);
   the night runs to its job list (per-job 1 h). Stop = STOP file if needed.
 
+## 2026-11-19 - W2: tritonia v9 +0.41 (above floor) -> w3 appended
+
+- WIN: tritonia v9 5.289 -> 4.878 (+0.41, above the 0.31 floor); W3 (az_fold_v_deg high -10, warm
+  from 4.878) appended.
+- LIVE: petal at 16 evals, 4.561 vs 4.892 control (improving; resample_strict holding).
+- OPEN: archive the W2 runs when done; morning v10 rescore + B6.
+
 ## 2026-11-19 - W2: tritonia v8 w3 appended
 
 - DONE: tritonia v8 W3 (n 4..10, warm from 5.373) appended; fold/morph W3 also queued.
