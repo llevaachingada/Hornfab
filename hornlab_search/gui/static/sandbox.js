@@ -26,7 +26,7 @@
 // sentence are never invented here, and a missing catalog degrades to the raw key site-wide.
 
 import { css, niceTicks, el, fmt, measuredWidth, wallSection, mirrorRing } from "./charts.js";
-import { mirrorMesh, loadThree, normalizeRenderPrefs } from "./view3d.js";
+import { mirrorMesh, loadThree, normalizeRenderPrefs, buildSmoothGeometry } from "./view3d.js";
 import { loadParamCatalog, formatParamTitle, formatSearchRange, docFor } from "./paramtips.js";
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => (
@@ -875,10 +875,7 @@ export async function initSandbox3d(container, first, opts = {}) {
   /** Hot-swap: mirror the quarter payload, build fresh geometry, dispose the old. */
   function applyMesh(verts, tris, quadrants) {
     const m = mirrorMesh(verts, tris, quadrants ?? "1");
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(Float32Array.from(m.verts), 3));
-    geo.setIndex(new THREE.BufferAttribute(Uint32Array.from(m.tris), 1));
-    geo.computeVertexNormals();
+    const geo = buildSmoothGeometry(THREE, m.verts, m.tris);   // welded + crease-aware normals
     geo.scale(0.001, 0.001, 0.001);                    // payload is mm; the stage is metres
     geo.computeBoundingBox();
     const center = new THREE.Vector3();

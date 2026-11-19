@@ -105,6 +105,35 @@
   })();
 </script>
 
+<script>
+  // Boot watchdog (plain script, runs even if the app module graph fails to load). The placeholder
+  // "Loading…" is replaced by the first view; if that has not happened after 8 s, say WHY instead
+  // of sitting silent: a captured script error, or the server still warming its run index.
+  (function () {
+    const root = document.getElementById("view-root");
+    const first = root && root.firstElementChild;     // the untouched placeholder <p>
+    const errs = [];
+    const note = e => {
+      const m = (e && (e.reason && (e.reason.stack || e.reason.message || e.reason))) ||
+                (e && (e.message || (e.error && e.error.message))) || String(e);
+      errs.push(String(m).slice(0, 400));
+    };
+    window.addEventListener("error", note);
+    window.addEventListener("unhandledrejection", note);
+    setTimeout(function () {
+      if (!root || root.firstElementChild !== first) return;   // app mounted: nothing to say
+      const box = document.createElement("div");
+      box.className = "muted";
+      box.style.cssText = "margin-top:12px;font-size:0.85rem;max-width:60ch";
+      box.innerHTML = errs.length
+        ? "<b>The page failed to start.</b> Press Ctrl+Shift+R (hard reload). If it persists, this is the error:<pre style='white-space:pre-wrap'></pre>"
+        : "Still loading — right after a restart the server is warming its run index (first load can take ~10-30 s). " +
+          "Do not keep reloading; each reload restarts the wait. If nothing appears within a minute, press Ctrl+Shift+R.";
+      if (errs.length) box.querySelector("pre").textContent = errs.join("\n");
+      first.after(box);
+    }, 8000);
+  })();
+</script>
 <script type="module" src="app.js"></script>
 
 </body>

@@ -2,7 +2,7 @@
 
 The warm-up exists only to move ``data.list_runs`` (which parses every ``search.ndjson`` and
 memoizes each summary) off the owner's first Home load. These tests pin its contract: called
-once with the app's runs path, daemon thread, and every failure swallowed.
+first with the app's runs path, daemon thread, and every failure swallowed.
 """
 from __future__ import annotations
 
@@ -31,7 +31,9 @@ def test_warm_calls_list_runs_once_with_runs_path(tmp_path, monkeypatch):
     t.join(timeout=5)
 
     assert not t.is_alive()
-    assert calls == [app.runs]
+    # the run index is warmed FIRST; the Home endpoints (campaigns, leaders) warm after it and
+    # may re-enter the memoized list_runs, so pin the first call, not the total.
+    assert calls and calls[0] == app.runs
 
 
 def test_warm_swallows_list_runs_exception(tmp_path, monkeypatch):
@@ -58,7 +60,7 @@ def test_warm_swallows_list_runs_exception(tmp_path, monkeypatch):
         threading.excepthook = original_hook
 
     assert not t.is_alive()
-    assert seen == [app.runs], "the warm-up must actually have run"
+    assert seen and seen[0] == app.runs, "the warm-up must actually have run"
     assert raised == [], f"warm-up thread leaked an exception: {raised!r}"
 
 
@@ -69,3 +71,37 @@ def test_warm_timer_is_daemon(tmp_path):
         assert t.daemon is True
     finally:
         t.cancel()
+
+
+def test_identical_concurrent_gets_share_one_computation(tmp_path, monkeypatch):
+    """Single-flight: N simultaneous identical GETs (browser reloads, several tabs) run the
+    expensive handler once, and a failure is shared rather than retried N times."""
+    import time
+    app = _app(tmp_path)
+    calls = []
+
+    def slow(path, q):
+        calls.append(path)
+        time.sleep(0.4)
+        return {"ok": path}
+
+    monkeypatch.setattr(app, "_get_uncoalesced", slow)
+    out = []
+    threads = [threading.Thread(target=lambda: out.append(app.get("/api/runs", {}))) for _ in range(5)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=10)
+    assert len(calls) == 1 and len(out) == 5 and all(o == {"ok": "/api/runs"} for o in out)
+    assert app._inflight == {}, "the in-flight slot must be released"
+
+    def boom(path, q):
+        calls.append("boom")
+        raise ValueError("nope")
+
+    monkeypatch.setattr(app, "_get_uncoalesced", boom)
+    try:
+        app.get("/api/runs", {})
+    except ValueError:
+        pass
+    assert app._inflight == {}

@@ -71,7 +71,7 @@ export function mirrorMesh(verts, tris, quadrants) {
 // Defaults are exactly the pre-settings look (owner captures/tests pin it): satin material,
 // near-white ridgelines at 0.28, key/fill/rim at 1.15/0.35/0.85.
 const RENDER_PREF_KEY = "hl-v3d-render";
-const RENDER_SURFACES = ["satin", "matte", "metallic", "studio"];
+const RENDER_SURFACES = ["satin", "matte", "metallic", "studio", "relief"];
 const RENDER_RIDGES = ["on", "off", "thin"];
 
 // Existing colour constants, kept in one place so no preset invents a new hex.
@@ -92,7 +92,158 @@ const RENDER_PRESETS = {
               light: { hemi: 0.45, key: 1.15, fill: 0.35, rim: 0.85 } },
   studio:   { colorScale: 1.0,  roughness: 0.45, metalness: 0.05, wireOpacity: 0.28,
               light: { hemi: 0.55, key: 1.55, fill: 0.70, rim: 1.15 } },
+  // Gentle-form reader: little ambient, one strong raking key, matte so highlights never wash the
+  // slow curvature out. Pair it with the "light angle" slider and the depth contours.
+  relief:   { colorScale: 0.92, roughness: 0.9,  metalness: 0.0,  wireOpacity: 0.18,
+              light: { hemi: 0.16, key: 1.9, fill: 0.12, rim: 0.45 } },
 };
+
+// ── Look extras (contours + light angle) ─────────────────────────────────────
+// Kept in their OWN storage key so the three-field render prefs above stay byte-identical for
+// every existing capture/test. contours: "off"|"on" (iso-depth lines, readable slope for gentle
+// changes); angle: 0..345 deg, spins the key/fill/rim rig about the horn axis (raking light).
+const LOOK_EXTRA_KEY = "hl-v3d-look";
+const KEY_BASE = [1.6, 2.2, 1.8], FILL_BASE = [-1.8, 0.6, 1.2], RIM_BASE = [-1.2, -1.0, -2.2];
+
+export function normalizeLookExtras(raw) {
+  let o = raw;
+  if (typeof o === "string") { try { o = JSON.parse(o); } catch (e) { o = null; } }
+  if (!o || typeof o !== "object" || Array.isArray(o)) o = {};
+  const contours = o.contours === "on" ? "on" : "off";
+  let angle = typeof o.angle === "number" ? o.angle : Number(o.angle);
+  if (!isFinite(angle)) angle = 0;
+  angle = ((Math.round(angle / 15) * 15) % 360 + 360) % 360;
+  return { contours, angle };
+}
+function loadLookExtras() {
+  try { return normalizeLookExtras(localStorage.getItem(LOOK_EXTRA_KEY)); }
+  catch (e) { return normalizeLookExtras(null); }
+}
+function saveLookExtras(x) {
+  const p = normalizeLookExtras(x);
+  try { localStorage.setItem(LOOK_EXTRA_KEY, JSON.stringify(p)); } catch (e) { /* private mode */ }
+  return p;
+}
+
+/** 1/2/5 x 10^n contour spacing (metres) giving roughly 12-16 lines over the depth range. */
+export function niceContourStep(rangeM) {
+  const raw = Math.max(1e-6, rangeM) / 14;
+  const pow = Math.pow(10, Math.floor(Math.log10(raw)));
+  const f = raw / pow;
+  return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * pow;
+}
+
+/** Iso-depth contour lines drawn in the fragment shader (object-space z, metres). Returns the
+ *  uniform; value 0 = off. Lines fade where they would alias (grazing / far away). */
+function installContours(mat) {
+  const u = { value: 0 };
+  mat.onBeforeCompile = shader => {
+    shader.uniforms.uContour = u;
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying float vContourZ;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvContourZ = position.z;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nvarying float vContourZ;\nuniform float uContour;")
+      .replace("#include <dithering_fragment>",
+        "#include <dithering_fragment>\n" +
+        "if (uContour > 0.0) {\n" +
+        "  float d = vContourZ / uContour; float w = fwidth(d);\n" +
+        "  float g = abs(fract(d - 0.5) - 0.5) / max(w, 1e-5);\n" +
+        "  float ln = (1.0 - smoothstep(0.5, 1.5, g)) * (1.0 - smoothstep(0.35, 0.6, w));\n" +
+        "  gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.04, 0.10, 0.14), ln * 0.6);\n" +
+        "}");
+  };
+  mat.customProgramCacheKey = () => "hl-contour-v1";
+  return u;
+}
+
+/**
+ * Welded, crease-aware smooth geometry (positions in the input unit). The mirrored quarter/half
+ * mesh duplicates every vertex on the symmetry planes, and the mesher's own seams do the same, so
+ * plain computeVertexNormals() shades a hard dark line down each plane and every triangle edge
+ * reads as a facet. Here coincident vertices (0.01 mm) are merged, then each welded vertex gets one
+ * area/angle-weighted normal per group of incident faces within `creaseDeg` of each other: smooth
+ * where the wall is smooth, still sharp at a real rim or fold. Indexed output, winding preserved.
+ */
+export function buildSmoothGeometry(T, verts, tris, creaseDeg = 45) {
+  const nV = Math.floor(verts.length / 3);
+  const keyToUid = new Map();
+  const wx = [], wy = [], wz = [];
+  const weld = new Int32Array(nV);
+  for (let i = 0; i < nV; i++) {
+    const x = verts[i * 3], y = verts[i * 3 + 1], z = verts[i * 3 + 2];
+    const key = `${Math.round(x * 100)},${Math.round(y * 100)},${Math.round(z * 100)}`;
+    let uid = keyToUid.get(key);
+    if (uid === undefined) { uid = wx.length; keyToUid.set(key, uid); wx.push(x); wy.push(y); wz.push(z); }
+    weld[i] = uid;
+  }
+  const U = wx.length;
+  const nT = Math.floor(tris.length / 3);
+  const fc = new Int32Array(nT * 3);
+  const fn = new Float32Array(nT * 3);
+  let nF = 0;
+  for (let t = 0; t < nT; t++) {
+    const a = weld[tris[t * 3]], b = weld[tris[t * 3 + 1]], c = weld[tris[t * 3 + 2]];
+    if (a === b || b === c || c === a) continue;
+    const ux = wx[b] - wx[a], uy = wy[b] - wy[a], uz = wz[b] - wz[a];
+    const vx = wx[c] - wx[a], vy = wy[c] - wy[a], vz = wz[c] - wz[a];
+    let nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const len = Math.sqrt(nx * nx + ny * ny + nz * nz);
+    if (!(len > 0)) continue;
+    fc[nF * 3] = a; fc[nF * 3 + 1] = b; fc[nF * 3 + 2] = c;
+    fn[nF * 3] = nx / len; fn[nF * 3 + 1] = ny / len; fn[nF * 3 + 2] = nz / len;
+    nF++;
+  }
+  // vertex -> corner list (CSR); a corner id is faceIndex*3 + cornerSlot
+  const start = new Int32Array(U + 1);
+  for (let k = 0; k < nF * 3; k++) start[fc[k] + 1]++;
+  for (let v = 0; v < U; v++) start[v + 1] += start[v];
+  const fill = start.slice(0, U);
+  const corners = new Int32Array(nF * 3);
+  for (let k = 0; k < nF * 3; k++) corners[fill[fc[k]]++] = k;
+
+  const cosC = Math.cos(creaseDeg * Math.PI / 180);
+  const px = [], py = [], pz = [], qx = [], qy = [], qz = [];
+  const idx = new Uint32Array(nF * 3);
+  for (let v = 0; v < U; v++) {
+    const g0 = px.length;                      // this vertex's groups live at [g0, px.length)
+    const gSeed = [];                          // seed face normal per group
+    for (let s = start[v]; s < start[v + 1]; s++) {
+      const k = corners[s], f = (k / 3) | 0, j = k % 3;
+      const fx = fn[f * 3], fy = fn[f * 3 + 1], fz = fn[f * 3 + 2];
+      let g = -1;
+      for (let q = 0; q < gSeed.length; q++) {
+        const sd = gSeed[q];
+        if (sd[0] * fx + sd[1] * fy + sd[2] * fz >= cosC) { g = q; break; }
+      }
+      if (g < 0) {
+        g = gSeed.length; gSeed.push([fx, fy, fz]);
+        px.push(wx[v]); py.push(wy[v]); pz.push(wz[v]); qx.push(0); qy.push(0); qz.push(0);
+      }
+      // corner angle weight
+      const b = fc[f * 3 + (j + 1) % 3], c = fc[f * 3 + (j + 2) % 3];
+      const e1x = wx[b] - wx[v], e1y = wy[b] - wy[v], e1z = wz[b] - wz[v];
+      const e2x = wx[c] - wx[v], e2y = wy[c] - wy[v], e2z = wz[c] - wz[v];
+      const l1 = Math.sqrt(e1x * e1x + e1y * e1y + e1z * e1z), l2 = Math.sqrt(e2x * e2x + e2y * e2y + e2z * e2z);
+      const cs = (l1 > 0 && l2 > 0) ? (e1x * e2x + e1y * e2y + e1z * e2z) / (l1 * l2) : 0;
+      const wgt = Math.acos(Math.max(-1, Math.min(1, cs)));
+      qx[g0 + g] += fx * wgt; qy[g0 + g] += fy * wgt; qz[g0 + g] += fz * wgt;
+      idx[k] = g0 + g;
+    }
+  }
+  const nOut = px.length;
+  const pos = new Float32Array(nOut * 3), nrm = new Float32Array(nOut * 3);
+  for (let i = 0; i < nOut; i++) {
+    pos[i * 3] = px[i]; pos[i * 3 + 1] = py[i]; pos[i * 3 + 2] = pz[i];
+    const l = Math.sqrt(qx[i] * qx[i] + qy[i] * qy[i] + qz[i] * qz[i]) || 1;
+    nrm[i * 3] = qx[i] / l; nrm[i * 3 + 1] = qy[i] / l; nrm[i * 3 + 2] = qz[i] / l;
+  }
+  const geo = new T.BufferGeometry();
+  geo.setAttribute("position", new T.BufferAttribute(pos, 3));
+  geo.setAttribute("normal", new T.BufferAttribute(nrm, 3));
+  geo.setIndex(new T.BufferAttribute(idx, 1));
+  return geo;
+}
 
 // ── Ridge overlay geometry ───────────────────────────────────────────────────
 // A per-triangle WireframeGeometry paints a translucent veil over the shaded horn once the mesh
@@ -105,7 +256,8 @@ const RENDER_PRESETS = {
 // The cap is per geometry, not per triangle: on a 30k-triangle shell ~1.6k creases is ~3.5% of
 // the 45k half-edges, dense enough to read the form and sparse enough to leave the shading visible.
 // Whole angle tie-groups are kept or dropped together, so a crease never stops halfway.
-const RIDGE_SEG_CAP = 1600;             // target line budget for one horn
+const RIDGE_MIN_DEG = 40;               // dihedral below this is shading, not a ridge
+const RIDGE_SEG_CAP = 1600;            // target line budget for one horn
 const RIDGE_TIE_OVERFLOW = 1.5;         // include a tie-group up to 1.5x the budget, never half of it
 const RIDGE_BOUNDARY_FRACTION = 0.35;   // above this, unmatched edges are soup artefacts, not a rim
 const RIDGE_OPACITY_GAIN = 2.0;         // 0.28 -> ~0.56: sparse creases need more ink than a full net
@@ -211,9 +363,11 @@ function buildRidgeGeometry(geo) {
         edgeFace.set(key, t);
       } else if (hit >= 0) {
         const dot = nx[hit] * fx + ny[hit] * fy + nz[hit] * fz;
-        angle.push(Math.acos(Math.min(1, Math.abs(dot))) * 180 / Math.PI);
-        edgeA.push(p); edgeB.push(q);
-        edgeFace.set(key, -1);                     // a third face on a non-manifold edge is ignored
+        // Only REAL folds (rim, throat lip, wall break) become ridges. Tessellation noise on a
+        // smooth wall sits well under RIDGE_MIN_DEG and used to scribble the surface white.
+        const ang = Math.acos(Math.min(1, Math.abs(dot))) * 180 / Math.PI;
+        if (ang >= RIDGE_MIN_DEG) { angle.push(ang); edgeA.push(p); edgeB.push(q); }
+        edgeFace.set(key, -1);                    // a third face on a non-manifold edge is ignored
       }
     }
   }
@@ -266,8 +420,7 @@ function buildRidgeGeometry(geo) {
 function applyRenderLook(ctx, prefs) {
   const p = normalizeRenderPrefs(prefs);
   const preset = RENDER_PRESETS[p.surface] || RENDER_PRESETS.satin;
-  const { mat, wire, wireMat, scene, lights } = ctx;
-  mat.color.setHex(HORN_BASE_COLOR).multiplyScalar(preset.colorScale);
+  const { mat, wire, wireMat, scene, lights } = ctx;  mat.color.setHex(HORN_BASE_COLOR).multiplyScalar(preset.colorScale);
   mat.roughness = preset.roughness;
   mat.metalness = preset.metalness;
   const ridgeOpacity = p.ridges === "thin" ? 0.12 : preset.wireOpacity;
@@ -278,6 +431,18 @@ function applyRenderLook(ctx, prefs) {
   lights.fill.intensity = preset.light.fill * p.light;
   lights.rim.intensity = preset.light.rim * p.light;
   lights.hemi.intensity = preset.light.hemi;   // ambient-relative, not part of the multiplier
+
+  // Look extras: light angle (rig spun about the horn's z axis) and iso-depth contours.
+  const x = normalizeLookExtras(prefs);
+  if (ctx.center && ctx.maxDim) {
+    const a = x.angle * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+    const put = (L, b) => L.position.set(
+      ctx.center.x + (b[0] * c - b[1] * s) * ctx.maxDim,
+      ctx.center.y + (b[0] * s + b[1] * c) * ctx.maxDim,
+      ctx.center.z + b[2] * ctx.maxDim);
+    put(lights.key, KEY_BASE); put(lights.fill, FILL_BASE); put(lights.rim, RIM_BASE);
+  }
+  if (ctx.contourU) ctx.contourU.value = x.contours === "on" ? (ctx.contourStep || 0) : 0;
 }
 
 /** Minimal HTML escaper for the control labels (same contract as app.js::esc). */
@@ -294,7 +459,7 @@ function esc(v) {
  * container.innerHTML = "" before re-calling init3d, so this chip is re-added on every re-init.
  */
 function applyRenderControls(container, onChange) {
-  const prefs = loadRenderPrefs();
+  const prefs = Object.assign(loadRenderPrefs(), loadLookExtras());
   if (getComputedStyle(container).position === "static") container.style.position = "relative";
   const chip = document.createElement("div");
   chip.style.cssText = "position:absolute;top:8px;right:8px;z-index:2;display:flex;" +
@@ -314,29 +479,44 @@ function applyRenderControls(container, onChange) {
     `<label style="${lblStyle}">ridges<select data-v3d-pref="ridges" style="${selStyle}">` +
       RENDER_RIDGES.map(s => opt(s, prefs.ridges, s === "on" ? "on (default)" : s)).join("") +
     `</select></label>` +
+    `<label style="${lblStyle}" title="iso-depth lines: make slow curvature and slope readable">depth lines<select data-v3d-pref="contours" style="${selStyle}">` +
+      opt("off", prefs.contours, "off") + opt("on", prefs.contours, "on") +
+    `</select></label>` +
     `<label style="${lblStyle}">light` +
       `<input type="range" data-v3d-pref="light" min="0.5" max="2" step="0.1" ` +
         `value="${esc(prefs.light)}" aria-label="light intensity multiplier" ` +
         `style="width:72px;accent-color:var(--accent,#0d6e7a)">` +
-      `<span data-v3d-light-val>${esc(prefs.light)}×</span></label>`;
+      `<span data-v3d-light-val>${esc(prefs.light)}×</span></label>` +
+    `<label style="${lblStyle}" title="spin the light around the horn axis: a low raking angle shows gentle changes">angle` +
+      `<input type="range" data-v3d-pref="angle" min="0" max="345" step="15" ` +
+        `value="${esc(prefs.angle)}" aria-label="light direction, degrees about the horn axis" ` +
+        `style="width:72px;accent-color:var(--accent,#0d6e7a)">` +
+      `<span data-v3d-angle-val>${esc(prefs.angle)}°</span></label>`;
   container.appendChild(chip);
 
   const surfaceSel = chip.querySelector('[data-v3d-pref="surface"]');
   const ridgeSel = chip.querySelector('[data-v3d-pref="ridges"]');
   const lightRange = chip.querySelector('[data-v3d-pref="light"]');
   const lightVal = chip.querySelector("[data-v3d-light-val]");
+  const contourSel = chip.querySelector('[data-v3d-pref="contours"]');
+  const angleRange = chip.querySelector('[data-v3d-pref="angle"]');
+  const angleVal = chip.querySelector("[data-v3d-angle-val]");
   const commit = () => {
     const next = saveRenderPrefs({
       surface: surfaceSel.value,
       ridges: ridgeSel.value,
       light: Number(lightRange.value),
     });
+    const extra = saveLookExtras({ contours: contourSel.value, angle: Number(angleRange.value) });
     lightVal.textContent = `${next.light}×`;
-    onChange(next);
+    angleVal.textContent = `${extra.angle}°`;
+    onChange(Object.assign(next, extra));
   };
   surfaceSel.addEventListener("change", commit);
   ridgeSel.addEventListener("change", commit);
+  contourSel.addEventListener("change", commit);
   lightRange.addEventListener("input", commit);
+  angleRange.addEventListener("input", commit);
   return chip;
 }
 
@@ -464,17 +644,15 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   const { verts, tris } = mirrorMesh(rawVerts, rawTris, quadrants);
 
   const cs = getComputedStyle(document.documentElement);
-  const renderPrefs = loadRenderPrefs();
+  const renderPrefs = Object.assign(loadRenderPrefs(), loadLookExtras());
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(
     cs.getPropertyValue("--viz-canvas").trim() || cs.getPropertyValue("--surface").trim() || "#ffffff"
   );
 
-  // Geometry
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.BufferAttribute(verts, 3));
-  geo.setIndex(new THREE.BufferAttribute(tris, 1));
-  geo.computeVertexNormals();
+  // Geometry: welded across the mirror seams, crease-aware smooth normals (no dark seam lines,
+  // no per-triangle facets on the gentle wall).
+  const geo = buildSmoothGeometry(THREE, verts, tris);
 
   // Scale: verts are in mm — scale to metres for display
   geo.scale(0.001, 0.001, 0.001);
@@ -520,6 +698,7 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
     transparent: false,
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
   });
+  const contourU = installContours(mat);
   const mesh = new THREE.Mesh(geo, mat);
   mesh.castShadow = mesh.receiveShadow = shadows;
   scene.add(mesh);
@@ -548,7 +727,9 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
 
   // Apply the persisted preset in place (satin + on + 1.0x reproduces the pre-settings look).
   const lights = { hemi, key, fill: fillL, rim };
-  applyRenderLook({ mat, wire, wireMat, scene, lights }, renderPrefs);
+  const lookCtx = { mat, wire, wireMat, scene, lights, center, maxDim, contourU,
+                    contourStep: niceContourStep(size.z) };
+  applyRenderLook(lookCtx, renderPrefs);
 
   // Shadow rig (optional, toggled): the thin double-sided wall needs a normalBias
   let ground = null, groundGeo = null, groundMat = null;
@@ -598,7 +779,7 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   }
 
   // Render-settings chip (surface / ridges / light) — additive overlay, clickable.
-  applyRenderControls(container, p => applyRenderLook({ mat, wire, wireMat, scene, lights }, p));
+  applyRenderControls(container, p => applyRenderLook(lookCtx, p));
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(center);
@@ -720,7 +901,7 @@ export async function init3dFrames(container, frames, opts = {}) {
   const shadows = opts.shadows !== false;
 
   const cs = getComputedStyle(document.documentElement);
-  const renderPrefs = loadRenderPrefs();
+  const renderPrefs = Object.assign(loadRenderPrefs(), loadLookExtras());
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(
     cs.getPropertyValue("--viz-canvas").trim() || cs.getPropertyValue("--surface").trim() || "#ffffff");
@@ -730,6 +911,7 @@ export async function init3dFrames(container, frames, opts = {}) {
     side: THREE.DoubleSide, transparent: false,
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
   });
+  const contourU = installContours(mat);
   const wireMat = new THREE.LineBasicMaterial({
     color: WIRE_COLOR, transparent: true, opacity: 0.28,
     depthWrite: false,   // overlay only; never occlude the shaded surface or its own creases
@@ -751,7 +933,9 @@ export async function init3dFrames(container, frames, opts = {}) {
 
   // Same persisted preset as the single-mesh viewer (satin default keeps the pre-settings look).
   const lights = { hemi, key, fill: fillL, rim };
-  applyRenderLook({ mat, wire, wireMat, scene, lights }, renderPrefs);
+  const lookCtx = { mat, wire, wireMat, scene, lights, center, maxDim, contourU,
+                    contourStep: niceContourStep((u.z1 - u.z0) * CENTRE_SCALE) };
+  applyRenderLook(lookCtx, renderPrefs);
 
   let groundGeo = null, groundMat = null;
   if (shadows) {
@@ -792,7 +976,7 @@ export async function init3dFrames(container, frames, opts = {}) {
   container.appendChild(frameNote);
 
   // Render-settings chip shared with init3d; mutates the one material/rig in place.
-  applyRenderControls(container, p => applyRenderLook({ mat, wire, wireMat, scene, lights }, p));
+  applyRenderControls(container, p => applyRenderLook(lookCtx, p));
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(center);
@@ -816,10 +1000,7 @@ export async function init3dFrames(container, frames, opts = {}) {
   function buildGeo(i) {
     if (cache.has(i)) return cache.get(i);
     const p = prepared[i];
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(Float32Array.from(p.verts), 3));
-    geo.setIndex(new THREE.BufferAttribute(Uint32Array.from(p.tris), 1));
-    geo.computeVertexNormals();
+    const geo = buildSmoothGeometry(THREE, p.verts, p.tris);
     geo.scale(0.001, 0.001, 0.001);                    // verts are mm; the stage is metres
     const wireGeo = buildRidgeGeometry(geo);
     const built = { geo, wireGeo };

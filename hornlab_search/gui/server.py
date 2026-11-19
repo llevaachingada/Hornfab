@@ -71,6 +71,8 @@ class App:
     def __init__(self, root: Path, runs: Path | None = None, analysis_dir: Path | None = None,
                  study_service=None, study_jobs=None, study_runs=None, study_launcher=None,
                  study_roots=()):
+        self._inflight: dict = {}                       # single-flight GETs (see get())
+        self._inflight_lock = threading.Lock()
         self.root = root.resolve()
         self.runs = (runs or self.root / "runs").resolve()
         self.analysis_dir = (Path(analysis_dir) if analysis_dir is not None
@@ -245,6 +247,37 @@ class App:
 
     # GET routes return (status, json-able) ; raise FileNotFoundError / ValueError for 404 / 400
     def get(self, path: str, q: dict) -> object:
+        """Single-flight wrapper: identical concurrent GETs share ONE computation.
+
+        Measured 2026-11-18: a cold start with the browser reloading (or several tabs) ran the
+        same multi-second run/campaign/leader scans once PER request, all fighting over the GIL
+        -- ~53 s per call instead of ~9 s, and the page sat on "Loading…". Followers now wait for
+        the leader's result (or its exception) instead of recomputing."""
+        key = (path, tuple(sorted((k, tuple(v)) for k, v in (q or {}).items())))
+        with self._inflight_lock:
+            slot = self._inflight.get(key)
+            leader = slot is None
+            if leader:
+                slot = self._inflight[key] = {"ev": threading.Event(), "res": None, "err": None}
+        if not leader:
+            slot["ev"].wait(300)
+            if slot["err"] is not None:
+                raise slot["err"]
+            if slot["ev"].is_set():
+                return slot["res"]
+        try:
+            slot["res"] = self._get_uncoalesced(path, q)
+            return slot["res"]
+        except BaseException as exc:  # noqa: BLE001 - re-raised to the leader, shared with followers
+            slot["err"] = exc
+            raise
+        finally:
+            slot["ev"].set()
+            with self._inflight_lock:
+                if self._inflight.get(key) is slot:
+                    del self._inflight[key]
+
+    def _get_uncoalesced(self, path: str, q: dict) -> object:
         parts = [unquote(p) for p in path.strip("/").split("/")[1:]]      # drop "api"
         head = parts[0] if parts else ""
         if head == "status":
@@ -599,13 +632,18 @@ def make_handler(app: App, port: int):
             pass
 
         def _send(self, code: int, body: bytes, ctype: str, cache: bool = False) -> None:
-            self.send_response(code)
-            self.send_header("Content-Type", ctype)
-            self.send_header("Content-Length", str(len(body)))
-            self.send_header("Cache-Control", "max-age=60" if cache else "no-store")
-            self.send_header("X-Content-Type-Options", "nosniff")
-            self.end_headers()
-            self.wfile.write(body)
+            try:
+                self.send_response(code)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "max-age=60" if cache else "no-store")
+                self.send_header("X-Content-Type-Options", "nosniff")
+                self.end_headers()
+                self.wfile.write(body)
+            except (ConnectionError, TimeoutError):
+                # The browser closed the connection mid-response (tab reload / navigation / a
+                # cancelled fetch): nothing left to answer, and not worth a traceback.
+                self.close_connection = True
 
         def _json(self, code: int, obj) -> None:
             self._send(code, json.dumps(D.clean(obj), allow_nan=False).encode(), "application/json")
@@ -786,13 +824,19 @@ def warm_in_background(app: App, delay_s: float = 1.0) -> threading.Timer:
     materializes every geometry and costs tens of seconds of CPU.
     """
     def _warm() -> None:
-        try:
-            D.list_runs(app.runs)
-        except Exception:  # noqa: BLE001 - a warm-up must never crash the process
-            _LOG.debug("run-index warm-up failed", exc_info=True)
+        # Everything Home asks for on first paint, one after another through the single-flight
+        # get() so a browser that arrives mid-warm-up joins this work instead of repeating it.
+        for path in ("/api/runs", "/api/campaigns", "/api/leaders"):
+            try:
+                app.get(path, {})
+            except Exception:  # noqa: BLE001 - a warm-up must never crash the process
+                _LOG.debug("warm-up of %s failed", path, exc_info=True)
+        done.set()
 
+    done = threading.Event()
     t = threading.Timer(delay_s, _warm)
     t.daemon = True
+    t.warm_done = done          # serve() waits on this (bounded) before opening the browser
     t.start()
     return t
 
@@ -803,9 +847,15 @@ def serve(root: Path, port: int = DEFAULT_PORT, open_browser: bool = True, runs:
     httpd = ThreadingHTTPServer(("127.0.0.1", port), make_handler(app, port))
     url = f"http://127.0.0.1:{port}/"
     print(f"hornlab-search gui: {url}  (Ctrl-C to stop; local only)")
-    warm_in_background(app)
+    warm = warm_in_background(app)
     if open_browser:
-        threading.Timer(0.8, lambda: webbrowser.open(url)).start()
+        def _open() -> None:
+            # Open the tab once the run index is warm (bounded: never hold the browser back more
+            # than 30 s), so the first page load is not a long blank "Loading…".
+            print("warming the run index (first start takes a few seconds)...", flush=True)
+            warm.warm_done.wait(30)
+            webbrowser.open(url)
+        threading.Thread(target=_open, daemon=True).start()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

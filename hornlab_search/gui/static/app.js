@@ -6192,7 +6192,7 @@ async function viewRunDetail(id) {
       <!-- Wall profile -->
       <div class="fig">
         <h3>Wall cross-section</h3>
-        <div class="cap">Section through the solved mesh, true scale in mm: horizontal plane to the right, vertical plane mirrored to the left, throat at the bottom. Includes the outer shell and rear. Band = horn wall, interior = sound bore; dashed amber = starting design; dot = throat.</div>
+        <div class="cap">Full horizontal and vertical cuts through the solved mesh, same mm scale, throat at the bottom. Includes the outer shell and rear. Band = horn wall, interior = sound bore; dashed amber = starting design; dot = throat.</div>
         <div class="legend">
           <span><i style="color:var(--best)"></i>best (filled)</span>
           <span><i style="color:var(--seed)" class="dash"></i>start</span>
@@ -6205,7 +6205,7 @@ async function viewRunDetail(id) {
         <div class="fig-head"><h3>Best design in 3D</h3>
           <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="inline3d-shadows"> wall shadows</label></div>
         <div class="cap">The solved mesh of the best design, loaded in place after the page settles (no tab click needed). Drag to orbit · scroll to zoom · right-drag to pan. Full-screen version on the <a href="#/run/${esc(id)}/3d">3D view</a>.</div>
-        <div id="inline-3d" data-v3d style="position:relative;height:300px;border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--viz-canvas,#e9edf0)">
+        <div id="inline-3d" data-v3d style="position:relative;height:clamp(460px,72vh,780px);border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--viz-canvas,#e9edf0)">
           <div class="view3d-fallback">Loading 3D…</div>
         </div>
         <div class="hint" id="inline3d-note" role="status"></div>
@@ -6768,7 +6768,7 @@ async function viewRunDetail(id) {
   wallSection(document.getElementById("c-prof"), [
     ...(S.profile ? [{ profile: S.profile, color: css("--seed"), dash: true }] : []),
     ...(B.profile ? [{ profile: B.profile, color: css("--best"), filled: true }] : []),
-  ], { H: 320 });
+  ], { H: 230, split: true });
 
   // Inline 3D for the best design (no tab click needed). Lazy by design: the page has rendered,
   // only now does the mesh fetch start — and if the user navigated away in the meantime the build

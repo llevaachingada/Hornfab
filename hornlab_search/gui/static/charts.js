@@ -686,7 +686,89 @@ export function mirrorRing(pts) {
     .concat(rev(p).map(([x, y]) => [x, -y]));
 }
 
-export function wallSection(svg, designs, { H = 300, compact = false, extent = null } = {}) {
+/**
+ * Two full cuts side by side: the horizontal-plane section (left) and the vertical-plane section
+ * (right), each mirrored about its own axis so the whole slice through the horn shows, instead of
+ * H on the right and V mirrored on the left of ONE drawing. Same data and scale as wallSection
+ * (shared mm/px, so the two cuts compare directly); designs/extent as there.
+ */
+function wallSectionSplit(svg, designs, { H = 230, extent = null } = {}) {
+  svg.innerHTML = "";
+  const W = measuredWidth(svg, 460);
+  const ml = 38, mr = 8, mt = 20, mb = 24, gap = 16;
+  let rmax = 1, z0 = Infinity, z1 = -Infinity;
+  for (const d of designs) for (const k of ["h", "v"]) for (const [z, r] of (d.profile?.[k] || [])) {
+    rmax = Math.max(rmax, Math.abs(r)); z0 = Math.min(z0, z); z1 = Math.max(z1, z);
+  }
+  if (extent) ({ rmax, z0, z1 } = extent);
+  if (!isFinite(z0)) { svg.setAttribute("viewBox", `0 0 ${W} ${H}`); return; }
+  const pw = Math.max(60, (W - 2 * (ml + mr) - gap) / 2), ph = H - mt - mb;
+  const sc = Math.min(pw / (2 * rmax * 1.02), ph / ((z1 - z0) * 1.02));        // equal mm per pixel
+  const by = mt + ph - (ph - (z1 - z0) * sc) / 2;
+  const Y = z => by - (z - z0) * sc;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("width", W); svg.setAttribute("height", H);
+  svg.dataset.chart = "1";
+  const noDash = pw < 160;
+  const outline = (d, k, sgn, X) => {
+    const pts = (d.profile || {})[k] || [];
+    if (pts.length < 3) return null;
+    return pts.map(([z, r], i) => (i ? "L" : "M") + X(sgn * r).toFixed(1) + "," + Y(z).toFixed(1)).join("") + "Z";
+  };
+  [["h", "horizontal cut"], ["v", "vertical cut"]].forEach(([k, title], pi) => {
+    const px0 = ml + pi * (pw + mr + ml + gap);
+    const cx = px0 + pw / 2;
+    const X = r => cx + r * sc;
+    const g = el("g", { class: "grid" }, svg);
+    for (const t of niceTicks(-rmax, rmax, 4)) {
+      el("line", { x1: X(t), x2: X(t), y1: mt, y2: mt + ph }, g);
+      const tt = el("text", { x: X(t), y: mt + ph + 14, "text-anchor": "middle" }, svg); tt.textContent = Math.abs(t);
+    }
+    for (const t of niceTicks(z0, z1, 3)) {
+      el("line", { x1: px0, x2: px0 + pw, y1: Y(t), y2: Y(t) }, g);
+      const tt = el("text", { x: px0 - 5, y: Y(t) + 3, "text-anchor": "end" }, svg); tt.textContent = t;
+    }
+    const ttl = el("text", { x: cx, y: 12, "text-anchor": "middle", "font-weight": 600 }, svg); ttl.textContent = title;
+    if (pi === 0) { const dz = el("text", { x: 2, y: 12 }, svg); dz.textContent = "z (mm)"; }
+    el("line", { x1: cx, x2: cx, y1: mt, y2: mt + ph, stroke: css("--label"),
+                 "stroke-dasharray": "3 3", "stroke-opacity": 0.6, "stroke-width": 1 }, svg);
+    for (const d of designs) {                         // all fills beneath every stroke
+      if (!d.filled || (d.profile || {}).kind !== "section") continue;
+      for (const sgn of [1, -1]) {
+        const path = outline(d, k, sgn, X);
+        if (path) el("path", { d: path, fill: d.color, "fill-rule": "evenodd", "fill-opacity": 0.30, stroke: "none" }, svg);
+      }
+    }
+    const stroke = d => {
+      const p = d.profile || {};
+      const pts = p[k] || [];
+      if (!pts.length) return;
+      for (const sgn of [1, -1]) {
+        if (p.kind === "section") {
+          const path = outline(d, k, sgn, X);
+          if (path) el("path", { d: path, fill: "none", stroke: d.color, "stroke-width": 2.1,
+                                 "stroke-dasharray": (!noDash && d.dash) ? "6 4" : "none",
+                                 "stroke-linejoin": "round" }, svg);
+        } else {
+          for (const [z, r] of pts) el("circle", { cx: X(sgn * r), cy: Y(z), r: 1.4, fill: d.color, opacity: 0.7 }, svg);
+        }
+      }
+    };
+    for (const d of designs.filter(d => !d.dash)) stroke(d);
+    for (const d of designs.filter(d => d.dash)) stroke(d);
+    for (const d of designs) {                         // throat landmark, both sides of the cut
+      const pts = ((d.profile || {})[k]) || [];
+      if (!pts.length) continue;
+      const withR = pts.filter(pt => pt[1] != null && Math.abs(pt[1]) > 1e-9);
+      const pool = withR.length ? withR : pts;
+      let tz = pool[0][0], tr = pool[0][1];
+      for (const [z, r] of pool) if (z < tz) { tz = z; tr = r; }
+      for (const sgn of [1, -1]) el("circle", { cx: X(sgn * Math.abs(tr)), cy: Y(tz), r: 2.5, fill: d.color, stroke: "none" }, svg);
+    }
+  });
+}
+
+export function wallSection(svg, designs, { H = 300, compact = false, extent = null, split = false } = {}) {
+  if (split && !compact) return wallSectionSplit(svg, designs, { H, extent });
   svg.innerHTML = "";
   const W = measuredWidth(svg, compact ? 150 : 460);
   const m = compact ? { l: 4, r: 4, t: 4, b: 4 } : { l: 46, r: 10, t: 10, b: 34 };
