@@ -334,6 +334,29 @@ lane at the **published best design's run + design hash**, not at the lane seed.
 published v10 lane bests (fold 1.4214, morph 1.4305, ext 1.5710, twinray 1.7726) remain the ranking
 evidence and the PRIORITY10 s1 numbers are reproduction checks only.
 
+### 9g. #6 OSSE rrect morph, v10 — full budget ran, no refusal storm, ties its own published best
+
+Run `20261119T181029Z-screen-c3b6c6`, status **ok** at the full **121 valid / 120 budget, 0 refusals**:
+
+| | value |
+|---|---|
+| seed J (v10) | 3.0570 |
+| best J | **1.5769** |
+| gain | 1.480 (real) |
+| published offline v10 best | 1.4305 (`20261115T154322Z-screen-07bea2`, `436a4d221328`) |
+| delta to it | +0.146 ⇒ **inside the floor = tie** |
+
+Reading [measured]: two things the v7 history did not predict. (a) The **48 % refusal storm did not
+recur** — 121/121 valid, zero refusals — because the v10 objective drives a different search path and
+the box sampling was 45/48. (b) Given its full budget it **reproduces** the published morph rank
+(1.43 → 1.58, a tie) rather than falling short like twinray; the earlier 2.06 reading at 29 valid was
+just an unfinished run, which is why interim numbers are never verdicts.
+
+The four B6 s1 lanes now read: fold 1.5433, morph 1.5769, ext_throat 1.7919, twinray 2.5748 — i.e. a
+reproduction ranking of 1 < 2 < 5 < 7 that matches the published order for fold/morph/ext and shows the
+twinray seed mismatch (§9f).
+
+
 ## 10. Reconciliation for the compact-horn / woofer-crossover handoff (2026-11-19, later same day)
 
 The owner's second handoff (compact sculptural horns + woofer crossover) says to reconcile commit and
