@@ -1,5 +1,25 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 - System v1 architecture + implementation plan (cloud, docs only, no GPU)
+
+- **Owner ask:** senior review of the 2026-11-19 handbook + system export, turned into an architecture
+  and a pass-by-pass plan that lower-effort parallel agents can execute; handoffs per pass.
+- **New:** `docs/system_v1/` - `README.md` (verdict, target architecture L0-L4, pass map, lane and
+  integrator protocol, owner-decision table, v1 definition of done), `01_CONTRACTS.md` (frozen for
+  the effort: path helper, `SystemCase` + `read_case`, `CalibrationRecord`, `AuthorizationRecord`,
+  `ObservationStandard`, `JobSpec`, funnel ledger, `CaseReadModel`), and handoffs
+  `PASS_0_LOCAL`, `PASS_A_CLOUD` (6 lanes), `PASS_B_CLOUD` (5), `PASS_C_GUI` (C0 + 6),
+  `PASS_D_LOCAL_MEASURE`, `PASS_E_GATED`.
+- **New finding N1 [measured]:** `tools/data/system_cases.py` derives `horn_mesh` with `Path()`, so a
+  Windows path is not split on Linux; `tests/test_tools_data_system_cases.py` = 15 passed / 1 failed on
+  Linux (Python 3.13). Fix assigned to lanes A1 (helper) + B1 (export). Not fixed in this commit.
+- **Other findings:** N2 calibration method must cap fidelity (horn velocity-per-volt is load
+  dependent); N3 Pass 0 (commit the local GUI trio) blocks all cloud GUI edits; N4 lanes write
+  lane reports, only the pass integrator edits the four shared docs.
+- **Next:** Pass 0 (local) and Pass A (cloud) can start in parallel. No code changed; no GPU.
+- Merged `origin/hornfab-all-2026-11-18` (`1caca6c`) into the working branch first.
+
+
 ## 2026-11-19 - Senior handbook + system solve-data export (CPU only, no GPU)
 
 - **Owner ask:** one consolidated cloud-ready handoff for the horn + woofer system and GUI, package the

@@ -1,5 +1,15 @@
 ﻿# ISSUES
 
+## 2026-11-20 - System v1 plan (docs only)
+
+- DONE: `docs/system_v1/` architecture, frozen contracts, and pass handoffs 0/A/B/C/D/E.
+- OPEN (N1, new): `tools/data/system_cases.py:539` `horn_mesh` not portable (Windows path on Linux);
+  export test 15/16 on Linux. Owner: Pass A lane A1 + Pass B lane B1.
+- OPEN (N3): cloud GUI work blocked until Pass 0 commits `hw3d.js`/`hw_screen.js`/`data_hw_stage.py`.
+- OPEN (owner): confirm calibration/authorization/observation record shapes (Pass 0 step 0.6);
+  values for decisions 1-6 remain open (Pass E).
+
+
 ## 2026-11-19 - Senior handbook + system solve-data export (DONE)
 
 - DONE: `docs/HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md`, `tools/data/system_cases.py`,
