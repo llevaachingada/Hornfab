@@ -63,6 +63,13 @@
   Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
   raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
 
+## 2026-11-19 - compact400 queue DONE; continuation bundle published
+
+- DONE: bundle docs/evidence/runs/compact400_cont_2026-11-19/ (9 runs, ~9.9 MB) + README chains.
+- RESULTS: compact fold 1.2071, morph 1.2258, twinray 1.4351 (bar 1.7302); v7 petal 4.1202, tri v8
+  4.7503, tri v9 4.878 (the continuation regressed), b3 2.800.
+- OPEN: v10 rescore of the v7 rows; compact floor re-measure; xo_loading_report on the winners; B6.
+
 ## 2026-11-19 - W2/W3 evidence bundle published
 
 - DONE: docs/evidence/runs/scout40w2_2026-11-19/ (15 runs, 18.5 MB, full scores + geometry + best

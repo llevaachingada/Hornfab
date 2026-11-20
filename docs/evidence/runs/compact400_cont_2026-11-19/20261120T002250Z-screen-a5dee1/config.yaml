@@ -1,0 +1,325 @@
+bounds:
+  L_mm:
+    lo: 140.0
+    hi: 400.0
+  a0_deg:
+    lo: 5.0
+    hi: 11.0
+  a_deg:
+    lo: 44.0
+    hi: 56.0
+  aspect_ratio:
+    hi: 1.0
+    lo: 1.0
+    search: false
+  exponent:
+    hi: 2.0
+    lo: 2.0
+    search: false
+  k:
+    lo: 0.9
+    hi: 1.3
+  az_a_cos_amp:
+    lo: -22.0
+    hi: -13.5
+  az_a_cos_pow:
+    hi: 2.0
+    lo: 2.0
+    search: false
+  az_fold_v_deg:
+    lo: -31.0
+    hi: -10.0
+    search: true
+  az_fold_v_width_deg:
+    lo: 21.5
+    hi: 25.5
+  az_fold_h_deg:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_fold_h_width_deg:
+    hi: 20.0
+    lo: 20.0
+    search: false
+  az_a_cos2p_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_a_cos2p_pow:
+    hi: 5.0
+    lo: 5.0
+    search: false
+  az_s_cos2_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_n_cos2_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  morph_allow_shrinkage:
+    hi: 1
+    lo: 1
+    search: false
+  morph_corner_mm:
+    lo: 10.0
+    hi: 30.0
+  morph_exponent:
+    hi: 4.0
+    lo: 4.0
+    search: false
+  morph_fixed:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  morph_height_mm:
+    lo: 250.0
+    hi: 480.0
+  morph_rate:
+    lo: 0.6
+    hi: 2.1
+  morph_target:
+    hi: 1
+    lo: 1
+    search: false
+  morph_width_mm:
+    lo: 330.0
+    hi: 590.0
+  n:
+    lo: 4.0
+    hi: 10.0
+    search: true
+  q:
+    lo: 0.97
+    hi: 0.995
+  r0_mm:
+    hi: 18.0
+    lo: 18.0
+    search: false
+  s:
+    lo: 0.92
+    hi: 1.04
+  s1:
+    hi: 1.0
+    lo: 1.0
+    search: false
+  s2:
+    hi: 0.015
+    lo: 0.015
+    search: false
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+description: 'SCOUT40 2026-11-19 (cloud Fable senior): 40 valid evals, warm from the
+  lane best (top 10); source examples/typologies/home_landscape_2026-11-15/hl__ath_tritonia_landscape_v8.yaml;
+  . Gains below the floor (v7 0.31 J) are ties. HOME LANDSCAPE 80Hx50V ATH OSSE, Tritonia
+  kit-era law anchored (49.5128 - 14.8405cos^2 - 29.2180sin^8; H/V/diag 34.7/20.3/40.3
+  deg), morph rate ~1.6 corner ~18; seed = kit reference at 1.4in-exit scale (r0 18,
+  L 280, W/H 430/372). Supersede'
+family: OSSE
+mesh:
+  dof_cap_final: 24000
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_per_triangle: 0.51
+  epw: 6.0
+  quadrants: '1'
+name: scout40w4__tritonia_v8
+search:
+  algorithm: cma
+  budget: 80
+  infeasible_penalty: graded
+  popsize: null
+  seed: 1234
+  sigma0: 0.2
+  tolfun: 0.001
+  budget_counts: valid
+  max_attempts: 260
+  warm_start:
+    from_runs:
+    - runs/20261119T152446Z-screen-d98c8d
+    top_k: 10
+    sigma_from_spread: false
+seed_params:
+  L_mm: 218.088262
+  a0_deg: 9.663561
+  a_deg: 48.887334
+  aspect_ratio: 1.0
+  exponent: 2.0
+  k: 1.177418
+  az_a_cos_amp: -14.645733
+  az_a_cos_pow: 2.0
+  az_fold_v_deg: -28.789806
+  az_fold_v_width_deg: 22.997014
+  az_fold_h_deg: 0.0
+  az_fold_h_width_deg: 20.0
+  az_a_cos2p_amp: 0.0
+  az_a_cos2p_pow: 5.0
+  az_s_cos2_amp: 0.0
+  az_n_cos2_amp: 0.0
+  morph_allow_shrinkage: 1
+  morph_corner_mm: 24.485256
+  morph_exponent: 4.0
+  morph_fixed: 0.0
+  morph_height_mm: 471.476891
+  morph_rate: 1.380681
+  morph_target: 1
+  morph_width_mm: 584.425399
+  n: 6.057854
+  q: 0.974736
+  r0_mm: 18.0
+  s: 0.955564
+  s1: 1.0
+  s2: 0.015
+solve:
+  angle_count: 73
+  backend: beat_cuda
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  cuda_fused: true
+  distance_m: 10.0
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 1.0
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 1.0
+  flat_cv: 1.0
+brief:
+  name: room_landscape_80x50_700_hf1440_v7
+  description: (objective v7) HOME living-room horn, LANDSCAPE 80H x 50V, vertical
+    half-weighted, no K-law mouth, pattern+loading from 700 Hz XO, HF1440 1.4-inch,
+    600W x 480H x 480D envelope, band 350-8000 Hz
+  driver:
+    exit_radius_mm: 18.0
+    exit_angle_deg: 2.0
+  envelope:
+    max_mouth_w_mm: 600.0
+    max_mouth_h_mm: 480.0
+    max_depth_mm: 480.0
+  symmetry: hv
+  source:
+    cap: auto
+  target:
+    coverage_h_deg: 80.0
+    coverage_v_deg: 50.0
+    band_lo_hz: 350.0
+    band_hi_hz: 8000.0
+    di_target_db: null
+    di_slope_target: 0.0
+    z_min: 0.5
+    f0_hz: 700.0
+    f0_v_hz: 700.0
+    loaded_hi_hz: 5600.0
+    freq_weights:
+      band_hz:
+      - - 2500.0
+        - 5500.0
+        - 2.0
+  weights:
+    cov: 1.0
+    rip: 1.0
+    di: 0.3
+    dislope: 1.0
+    flat: 0.5
+    load: 1.0
+    distd: 0.5
+    diag: 1.0
+    flat_cv: 1.0
+  grid:
+    verify_points_per_octave: 6
+    screen_extra_hz:
+    - 250
+    - 315
+    - 400
+    - 2573
+    - 3311
+    - 4260
+  objective:
+    version: 7
+    flat_band: scored
+    cov_v_weight: 0.5
+    tolerances:
+      cov: 3.0
+      rip: 1.0
+      di: 0.4
+      dislope: 9.0
+      flat: 1.5
+      load: 0.3
+      distd: 2.0
+      diag: 2.0
+      flat_cv: 1.5
+    cov_narrow_ratio: 2.0
+    cov_below_f0: mask
+    loaded_re_z: 0.5
+    lfp_re_z: 0.2
+    lfp_crossover_ratio: 1.6
+    bw8k_floor: 0.75
+objective:
+  version: 7
+  flat_band: scored
+  cov_v_weight: 0.5
+  tolerances:
+    cov: 3.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+feasibility:
+  rule: d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)
+  f0_hz: 700.0
+  required_mouth_w_mm: 453.57142857142856
+  required_mouth_h_mm: 725.7142857142857
+  envelope_mouth_w_mm: 600.0
+  envelope_mouth_h_mm: 480.0
+  held_coverage_w_deg: 60.476190476190474
+  held_coverage_v_deg: 75.5952380952381
+  feasible_w: true
+  feasible_v: false
+  f0_v_hz: 700.0
+  screen_freqs_below_f0: 2
+  screen_freqs_total: 12
+  verify_freqs_below_f0: 7
+  verify_freqs_total: 25
+  derivation:
+  - knob: '-'
+    note: no generator block in this config

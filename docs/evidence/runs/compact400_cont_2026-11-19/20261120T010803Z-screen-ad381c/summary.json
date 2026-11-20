@@ -1,0 +1,127 @@
+{
+  "run": "20261120T010803Z-screen-ad381c",
+  "config_name": "c4x_04_morph_cont2",
+  "family": "OSSE",
+  "objective_version": 10,
+  "brief_file": "../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml",
+  "seed_params": {
+    "r0_mm": 18.0,
+    "a0_deg": 1.5938279056,
+    "L_mm": 260.0,
+    "a_deg": 33.6880049343,
+    "n": 8.2083799551,
+    "s": 0.9080062156,
+    "q": 0.9808989787,
+    "k": 1.844848471,
+    "exponent": 2.0,
+    "aspect_ratio": 1.0,
+    "s1": 1.1799,
+    "s2": 0.0286,
+    "morph_target": 1,
+    "morph_width_mm": 380.0,
+    "morph_height_mm": 330.0,
+    "morph_corner_mm": 33.3066939209,
+    "morph_exponent": 4.0,
+    "morph_rate": 3.6689236193,
+    "morph_fixed": 0.0,
+    "morph_allow_shrinkage": 1,
+    "az_sf_m": 4.0,
+    "az_sf_n1": 7.4958,
+    "az_sf_n2": 12.4449,
+    "az_sf_n3": 13.4442,
+    "az_sf_a": 1.0,
+    "az_sf_b": 0.8569,
+    "az_a_cos_pow": 1.3300409625,
+    "az_n_cos2_amp": 0.0,
+    "az_a_sf_amp": 0.0,
+    "az_a_cos_amp": 8.6762414339,
+    "az_s_cos2_amp": 0.140503182
+  },
+  "bounds": {
+    "a0_deg": {
+      "lo": 0.25,
+      "hi": 3.0,
+      "search": true
+    },
+    "L_mm": {
+      "lo": 150.0,
+      "hi": 300.0
+    },
+    "a_deg": {
+      "lo": 20.0,
+      "hi": 40.0
+    },
+    "n": {
+      "lo": 2.0,
+      "hi": 10.0
+    },
+    "s": {
+      "lo": 0.2,
+      "hi": 1.2
+    },
+    "q": {
+      "lo": 0.9,
+      "hi": 1.0
+    },
+    "k": {
+      "lo": 0.3,
+      "hi": 3.0
+    },
+    "morph_width_mm": {
+      "lo": 300.0,
+      "hi": 400.0,
+      "search": true
+    },
+    "morph_height_mm": {
+      "lo": 240.0,
+      "hi": 392.0
+    },
+    "morph_corner_mm": {
+      "lo": 8.0,
+      "hi": 46.0
+    },
+    "morph_rate": {
+      "lo": 1.0,
+      "hi": 6.0
+    },
+    "az_a_cos_pow": {
+      "lo": 1.0,
+      "hi": 6.0
+    },
+    "az_a_cos_amp": {
+      "lo": 0.0,
+      "hi": 15.0
+    },
+    "az_s_cos2_amp": {
+      "lo": -0.25,
+      "hi": 0.5
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.2,
+    "seed": 40002,
+    "budget": 80,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "resample_strict",
+    "budget_counts": "valid",
+    "max_attempts": 108,
+    "error_policy": "retry_same_then_stop"
+  },
+  "warm_start_config": {
+    "from_runs": [
+      "runs/20261119T234133Z-screen-622538"
+    ],
+    "top_k": 10,
+    "sigma_from_spread": false
+  },
+  "warm_start_run": null,
+  "rows": 70,
+  "valid": 56,
+  "best_n": 17,
+  "best_J": 1.2258229403484977,
+  "best_design_hash": "d1f152db276f",
+  "best_json_hash": "d1f152db276f",
+  "missing": []
+}

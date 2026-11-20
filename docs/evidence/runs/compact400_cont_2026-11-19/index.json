@@ -1,0 +1,1137 @@
+[
+  {
+    "run": "20261119T234133Z-screen-622538",
+    "config_name": "c4x_01_morph_cont",
+    "family": "OSSE",
+    "objective_version": 10,
+    "brief_file": "../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml",
+    "seed_params": {
+      "r0_mm": 18.0,
+      "a0_deg": 1.5938279056,
+      "L_mm": 260.0,
+      "a_deg": 33.6880049343,
+      "n": 8.2083799551,
+      "s": 0.9080062156,
+      "q": 0.9808989787,
+      "k": 1.844848471,
+      "exponent": 2.0,
+      "aspect_ratio": 1.0,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "morph_target": 1,
+      "morph_width_mm": 380.0,
+      "morph_height_mm": 330.0,
+      "morph_corner_mm": 33.3066939209,
+      "morph_exponent": 4.0,
+      "morph_rate": 3.6689236193,
+      "morph_fixed": 0.0,
+      "morph_allow_shrinkage": 1,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_a_cos_pow": 1.3300409625,
+      "az_n_cos2_amp": 0.0,
+      "az_a_sf_amp": 0.0,
+      "az_a_cos_amp": 8.6762414339,
+      "az_s_cos2_amp": 0.140503182
+    },
+    "bounds": {
+      "a0_deg": {
+        "lo": 1.0,
+        "hi": 3.0
+      },
+      "L_mm": {
+        "lo": 150.0,
+        "hi": 300.0
+      },
+      "a_deg": {
+        "lo": 20.0,
+        "hi": 40.0
+      },
+      "n": {
+        "lo": 2.0,
+        "hi": 10.0
+      },
+      "s": {
+        "lo": 0.2,
+        "hi": 1.2
+      },
+      "q": {
+        "lo": 0.9,
+        "hi": 1.0
+      },
+      "k": {
+        "lo": 0.3,
+        "hi": 3.0
+      },
+      "morph_width_mm": {
+        "lo": 300.0,
+        "hi": 400.0,
+        "search": true
+      },
+      "morph_height_mm": {
+        "lo": 240.0,
+        "hi": 392.0
+      },
+      "morph_corner_mm": {
+        "lo": 8.0,
+        "hi": 46.0
+      },
+      "morph_rate": {
+        "lo": 1.0,
+        "hi": 6.0
+      },
+      "az_a_cos_pow": {
+        "lo": 1.0,
+        "hi": 6.0
+      },
+      "az_a_cos_amp": {
+        "lo": 0.0,
+        "hi": 15.0
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.25,
+        "hi": 0.5
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.2,
+      "seed": 40002,
+      "budget": 80,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "resample_strict",
+      "budget_counts": "valid",
+      "max_attempts": 108,
+      "error_policy": "retry_same_then_stop"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T223105Z-screen-1c37cc"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 37,
+    "valid": 31,
+    "best_n": 20,
+    "best_J": 1.2270927999919121,
+    "best_design_hash": "11870ed193af",
+    "best_json_hash": "11870ed193af",
+    "missing": []
+  },
+  {
+    "run": "20261119T235108Z-screen-21e6c3",
+    "config_name": "c4x_02_twinray_cont",
+    "family": "OSSE",
+    "objective_version": 10,
+    "brief_file": "../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml",
+    "seed_params": {
+      "L_mm": 162.2924982406,
+      "a0_deg": 1.0043392643,
+      "a_deg": 49.8299449213,
+      "aspect_ratio": 1.0,
+      "exponent": 2.0,
+      "k": 1.2483494835,
+      "az_fold_v_deg": -6.522833029,
+      "az_fold_v_width_deg": 23.8515938098,
+      "az_fold_h_deg": 0.0,
+      "az_fold_h_width_deg": 20.0,
+      "az_a_cos2p_amp": 0.0,
+      "az_a_cos2p_pow": 1.0,
+      "az_s_cos2_amp": 0.0,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 13.1670952763,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 376.9570521011,
+      "morph_rate": 2.0619107391,
+      "morph_target": 1,
+      "morph_width_mm": 366.3441707535,
+      "n": 7.9695115337,
+      "q": 0.9955771976,
+      "r0_mm": 18.0,
+      "s": 0.6349478125,
+      "s1": 1.14,
+      "s2": 0.025
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 150.0,
+        "hi": 300.0
+      },
+      "a0_deg": {
+        "lo": 1.0,
+        "hi": 5.0
+      },
+      "a_deg": {
+        "lo": 38.0,
+        "hi": 52.0
+      },
+      "k": {
+        "lo": 0.6,
+        "hi": 2.5,
+        "search": true
+      },
+      "az_fold_v_deg": {
+        "lo": -11.0,
+        "hi": -6.0
+      },
+      "az_fold_v_width_deg": {
+        "lo": 18.0,
+        "hi": 24.0
+      },
+      "morph_corner_mm": {
+        "lo": 8.0,
+        "hi": 46.0
+      },
+      "morph_height_mm": {
+        "lo": 240.0,
+        "hi": 392.0
+      },
+      "morph_rate": {
+        "lo": 1.2,
+        "hi": 3.5
+      },
+      "morph_width_mm": {
+        "lo": 300.0,
+        "hi": 392.0
+      },
+      "n": {
+        "lo": 5.0,
+        "hi": 9.0
+      },
+      "q": {
+        "lo": 0.98,
+        "hi": 1.0
+      },
+      "s": {
+        "lo": 0.35,
+        "hi": 1.0
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 80,
+      "infeasible_penalty": "resample_strict",
+      "popsize": null,
+      "seed": 40006,
+      "sigma0": 0.2,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 108,
+      "error_policy": "retry_same_then_stop"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T224511Z-screen-38efad"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 31,
+    "valid": 30,
+    "best_n": 26,
+    "best_J": 1.4351413942544358,
+    "best_design_hash": "d0743978d68d",
+    "best_json_hash": "d0743978d68d",
+    "missing": []
+  },
+  {
+    "run": "20261120T000243Z-screen-4c9343",
+    "config_name": "c4x_03_fold_cont",
+    "family": "OSSE",
+    "objective_version": 10,
+    "brief_file": "../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml",
+    "seed_params": {
+      "L_mm": 260.0,
+      "a0_deg": 2.0066,
+      "a_deg": 39.3836351902,
+      "aspect_ratio": 1.0,
+      "az_a_cos_amp": 8.3841356673,
+      "az_a_cos_pow": 1.9315476444,
+      "az_a_sf_amp": 0.0,
+      "az_n_cos2_amp": 0.0,
+      "az_s_cos2_amp": -0.174143732,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "exponent": 2.0,
+      "k": 2.8096679426,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 39.4914986248,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 330.0,
+      "morph_rate": 3.8881970245,
+      "morph_target": 1,
+      "morph_width_mm": 380.0,
+      "n": 4.8530018524,
+      "q": 0.9748993774,
+      "r0_mm": 18.0,
+      "s": 0.9978802741,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "az_fold_v_deg": -2.5163609994,
+      "az_fold_v_width_deg": 19.2852338159,
+      "az_fold_h_deg": -0.4228900082,
+      "az_fold_h_width_deg": 28.7941015593
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 150.0,
+        "hi": 300.0
+      },
+      "a_deg": {
+        "lo": 36.3038,
+        "hi": 40.0
+      },
+      "az_a_cos_amp": {
+        "lo": 8.13355,
+        "hi": 11.73355
+      },
+      "az_a_cos_pow": {
+        "lo": 1.23779,
+        "hi": 2.43779
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.25,
+        "hi": -0.122676
+      },
+      "k": {
+        "lo": 2.16454,
+        "hi": 2.81254
+      },
+      "morph_corner_mm": {
+        "lo": 8.0,
+        "hi": 46.0
+      },
+      "morph_height_mm": {
+        "lo": 240.0,
+        "hi": 392.0
+      },
+      "morph_rate": {
+        "lo": 3.14408,
+        "hi": 4.34408
+      },
+      "morph_width_mm": {
+        "lo": 300.0,
+        "hi": 392.0
+      },
+      "n": {
+        "lo": 4.64958,
+        "hi": 6.56958
+      },
+      "q": {
+        "lo": 0.950949,
+        "hi": 1.0,
+        "search": true
+      },
+      "s": {
+        "lo": 0.769626,
+        "hi": 1.009626
+      },
+      "az_fold_v_deg": {
+        "lo": -25.0,
+        "hi": 10.0
+      },
+      "az_fold_v_width_deg": {
+        "lo": 8.0,
+        "hi": 40.0
+      },
+      "az_fold_h_deg": {
+        "lo": -15.0,
+        "hi": 0.0
+      },
+      "az_fold_h_width_deg": {
+        "lo": 8.0,
+        "hi": 40.0
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 80,
+      "infeasible_penalty": "resample_strict",
+      "popsize": null,
+      "seed": 40001,
+      "sigma0": 0.2,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 108,
+      "error_policy": "retry_same_then_stop"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T222400Z-screen-0eeb61"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 30,
+    "valid": 30,
+    "best_n": 24,
+    "best_J": 1.3147367015008107,
+    "best_design_hash": "d805f33c65b2",
+    "best_json_hash": "d805f33c65b2",
+    "missing": []
+  },
+  {
+    "run": "20261120T001246Z-screen-393829",
+    "config_name": "scout40w4__petal_hvlaw_v7",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "r0_mm": 18.0,
+      "a0_deg": 1.9863,
+      "L_mm": 250.0,
+      "a_deg": 24.0,
+      "n": 6.9046,
+      "s": 0.7503,
+      "q": 0.9869,
+      "k": 1.2163,
+      "exponent": 2.0,
+      "aspect_ratio": 1.0,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "morph_target": 0,
+      "morph_width_mm": 540.0,
+      "morph_height_mm": 400.0,
+      "morph_corner_mm": 15.0,
+      "morph_exponent": 4.5,
+      "morph_rate": 3.46,
+      "morph_fixed": 0.0,
+      "morph_allow_shrinkage": 0,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_a_cos_pow": 2.0,
+      "az_n_cos2_amp": 0.0,
+      "az_a_sf_amp": 3.0,
+      "az_a_cos_amp": 14.0,
+      "az_s_cos2_amp": 0.0
+    },
+    "bounds": {
+      "a0_deg": {
+        "lo": 1.0,
+        "hi": 3.0
+      },
+      "L_mm": {
+        "lo": 160.0,
+        "hi": 340.0
+      },
+      "a_deg": {
+        "lo": 12.0,
+        "hi": 36.0
+      },
+      "n": {
+        "lo": 2.0,
+        "hi": 10.0
+      },
+      "s": {
+        "lo": 0.2,
+        "hi": 1.2
+      },
+      "q": {
+        "lo": 0.9,
+        "hi": 1.0
+      },
+      "k": {
+        "lo": 0.3,
+        "hi": 3.0
+      },
+      "az_a_cos_pow": {
+        "lo": 1.0,
+        "hi": 6.0
+      },
+      "az_a_sf_amp": {
+        "lo": 0.0,
+        "hi": 8.0
+      },
+      "az_a_cos_amp": {
+        "lo": 0.0,
+        "hi": 25.0
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.25,
+        "hi": 0.5
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.05,
+      "seed": 1234,
+      "budget": 80,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "resample_strict",
+      "error_policy": "retry_same_then_stop",
+      "budget_counts": "valid"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T155454Z-screen-d1a61d"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 25,
+    "valid": 14,
+    "best_n": 7,
+    "best_J": 4.120241010962961,
+    "best_design_hash": "3eb0103a511e",
+    "best_json_hash": "3eb0103a511e",
+    "missing": []
+  },
+  {
+    "run": "20261120T002250Z-screen-a5dee1",
+    "config_name": "scout40w4__tritonia_v8",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "L_mm": 218.088262,
+      "a0_deg": 9.663561,
+      "a_deg": 48.887334,
+      "aspect_ratio": 1.0,
+      "exponent": 2.0,
+      "k": 1.177418,
+      "az_a_cos_amp": -14.645733,
+      "az_a_cos_pow": 2.0,
+      "az_fold_v_deg": -28.789806,
+      "az_fold_v_width_deg": 22.997014,
+      "az_fold_h_deg": 0.0,
+      "az_fold_h_width_deg": 20.0,
+      "az_a_cos2p_amp": 0.0,
+      "az_a_cos2p_pow": 5.0,
+      "az_s_cos2_amp": 0.0,
+      "az_n_cos2_amp": 0.0,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 24.485256,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 471.476891,
+      "morph_rate": 1.380681,
+      "morph_target": 1,
+      "morph_width_mm": 584.425399,
+      "n": 6.057854,
+      "q": 0.974736,
+      "r0_mm": 18.0,
+      "s": 0.955564,
+      "s1": 1.0,
+      "s2": 0.015
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 140.0,
+        "hi": 400.0
+      },
+      "a0_deg": {
+        "lo": 5.0,
+        "hi": 11.0
+      },
+      "a_deg": {
+        "lo": 44.0,
+        "hi": 56.0
+      },
+      "k": {
+        "lo": 0.9,
+        "hi": 1.3
+      },
+      "az_a_cos_amp": {
+        "lo": -22.0,
+        "hi": -13.5
+      },
+      "az_fold_v_deg": {
+        "lo": -31.0,
+        "hi": -10.0,
+        "search": true
+      },
+      "az_fold_v_width_deg": {
+        "lo": 21.5,
+        "hi": 25.5
+      },
+      "morph_corner_mm": {
+        "lo": 10.0,
+        "hi": 30.0
+      },
+      "morph_height_mm": {
+        "lo": 250.0,
+        "hi": 480.0
+      },
+      "morph_rate": {
+        "lo": 0.6,
+        "hi": 2.1
+      },
+      "morph_width_mm": {
+        "lo": 330.0,
+        "hi": 590.0
+      },
+      "n": {
+        "lo": 4.0,
+        "hi": 10.0,
+        "search": true
+      },
+      "q": {
+        "lo": 0.97,
+        "hi": 0.995
+      },
+      "s": {
+        "lo": 0.92,
+        "hi": 1.04
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 80,
+      "infeasible_penalty": "graded",
+      "popsize": null,
+      "seed": 1234,
+      "sigma0": 0.2,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 260
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T152446Z-screen-d98c8d"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 30,
+    "valid": 30,
+    "best_n": 29,
+    "best_J": 4.750275630136238,
+    "best_design_hash": "aa89ee2bd72f",
+    "best_json_hash": "aa89ee2bd72f",
+    "missing": []
+  },
+  {
+    "run": "20261120T003824Z-screen-054989",
+    "config_name": "scout40w4__tritonia_v9",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "L_mm": 218.088262,
+      "a0_deg": 9.663561,
+      "a_deg": 48.887334,
+      "aspect_ratio": 1.0,
+      "exponent": 2.0,
+      "k": 1.177418,
+      "az_a_cos_amp": -14.645733,
+      "az_a_cos_pow": 2.0,
+      "az_fold_v_deg": -28.789806,
+      "az_fold_v_width_deg": 22.997014,
+      "az_fold_h_deg": 0.0,
+      "az_fold_h_width_deg": 20.0,
+      "az_a_cos2p_amp": 0.0,
+      "az_a_cos2p_pow": 5.0,
+      "az_s_cos2_amp": 0.0,
+      "az_n_cos2_amp": 0.0,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 24.485256,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 471.476891,
+      "morph_rate": 1.380681,
+      "morph_target": 1,
+      "morph_width_mm": 584.425399,
+      "n": 6.057854,
+      "q": 0.974736,
+      "r0_mm": 18.0,
+      "s": 0.955564,
+      "s1": 1.0,
+      "s2": 0.015
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 140.0,
+        "hi": 400.0
+      },
+      "a0_deg": {
+        "lo": 5.0,
+        "hi": 11.0
+      },
+      "a_deg": {
+        "lo": 44.0,
+        "hi": 56.0
+      },
+      "k": {
+        "lo": 0.9,
+        "hi": 1.3
+      },
+      "az_a_cos_amp": {
+        "lo": -18.0,
+        "hi": -13.5
+      },
+      "az_fold_v_deg": {
+        "lo": -31.0,
+        "hi": -27.5
+      },
+      "az_fold_v_width_deg": {
+        "lo": 3.0,
+        "hi": 40.0,
+        "search": true
+      },
+      "morph_corner_mm": {
+        "lo": 10.0,
+        "hi": 30.0
+      },
+      "morph_height_mm": {
+        "lo": 250.0,
+        "hi": 480.0
+      },
+      "morph_rate": {
+        "lo": 1.0,
+        "hi": 2.1
+      },
+      "morph_width_mm": {
+        "lo": 330.0,
+        "hi": 590.0
+      },
+      "n": {
+        "lo": 4.0,
+        "hi": 7.5
+      },
+      "q": {
+        "lo": 0.97,
+        "hi": 0.995
+      },
+      "s": {
+        "lo": 0.92,
+        "hi": 1.04
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 80,
+      "infeasible_penalty": "graded",
+      "popsize": null,
+      "seed": 1234,
+      "sigma0": 0.18,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 260
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T141723Z-screen-433f54"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 32,
+    "valid": 30,
+    "best_n": 3,
+    "best_J": 5.566027531192951,
+    "best_design_hash": "9ad78de9a02c",
+    "best_json_hash": "9ad78de9a02c",
+    "missing": []
+  },
+  {
+    "run": "20261120T005830Z-screen-4036c0",
+    "config_name": "scout40w4__klangfilm_b3_soft",
+    "family": "FREEFORM",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+    "seed_params": {
+      "g_aspect": 2.0759495982,
+      "g_beak_diagonal_mm": 0.0,
+      "g_beak_h_setback_mm": 2.0,
+      "g_beak_start_frac": 0.95,
+      "g_beak_v_projection_mm": 1.0,
+      "g_cd_core_blend": 1.0,
+      "g_core_length_mm": 340.0,
+      "g_end_frac": 1.7953432921,
+      "g_entry_half_angle_deg": 2.0,
+      "g_fc_hz": 494.4393461867,
+      "g_lame_end_frac": 0.95,
+      "g_lame_p": 5.0063549541,
+      "g_lame_p_mouth": 3.0,
+      "g_lame_start_frac": 0.2,
+      "g_morph_frac": 0.3,
+      "g_rim_sweep_ratio": 0.004898754,
+      "g_source_blend_ratio": 0.0,
+      "g_theta_h0_deg": 7.0,
+      "g_theta_h1_deg": 52.1,
+      "g_theta_v0_deg": 6.0,
+      "g_theta_v1_deg": 30.4
+    },
+    "bounds": {
+      "g_beak_diagonal_mm": {
+        "lo": -5.0,
+        "hi": 5.0,
+        "search": true
+      },
+      "g_beak_h_setback_mm": {
+        "lo": 0.0,
+        "hi": 10.0,
+        "search": true
+      },
+      "g_beak_start_frac": {
+        "lo": 0.85,
+        "hi": 0.99,
+        "search": true
+      },
+      "g_beak_v_projection_mm": {
+        "lo": 0.0,
+        "hi": 5.0,
+        "search": true
+      },
+      "g_core_length_mm": {
+        "lo": 238.0,
+        "hi": 442.0,
+        "search": true
+      },
+      "g_lame_end_frac": {
+        "lo": 0.665,
+        "hi": 0.99,
+        "search": true
+      },
+      "g_lame_p_mouth": {
+        "lo": 2.1,
+        "hi": 3.9,
+        "search": true
+      },
+      "g_lame_start_frac": {
+        "lo": 0.14,
+        "hi": 0.26,
+        "search": true
+      },
+      "g_theta_h0_deg": {
+        "lo": 4.9,
+        "hi": 9.1,
+        "search": true
+      },
+      "g_theta_h1_deg": {
+        "lo": 36.5,
+        "hi": 60.0,
+        "search": true
+      },
+      "g_theta_v0_deg": {
+        "lo": 4.2,
+        "hi": 7.8,
+        "search": true
+      },
+      "g_theta_v1_deg": {
+        "lo": 21.3,
+        "hi": 39.5,
+        "search": true
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.1,
+      "seed": 1234,
+      "budget": 80,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "graded",
+      "budget_counts": "valid",
+      "max_attempts": 250
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T073330Z-screen-723756"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 33,
+    "valid": 31,
+    "best_n": 8,
+    "best_J": 2.8186604617471627,
+    "best_design_hash": "19a846460219",
+    "best_json_hash": "19a846460219",
+    "missing": []
+  },
+  {
+    "run": "20261120T010803Z-screen-ad381c",
+    "config_name": "c4x_04_morph_cont2",
+    "family": "OSSE",
+    "objective_version": 10,
+    "brief_file": "../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml",
+    "seed_params": {
+      "r0_mm": 18.0,
+      "a0_deg": 1.5938279056,
+      "L_mm": 260.0,
+      "a_deg": 33.6880049343,
+      "n": 8.2083799551,
+      "s": 0.9080062156,
+      "q": 0.9808989787,
+      "k": 1.844848471,
+      "exponent": 2.0,
+      "aspect_ratio": 1.0,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "morph_target": 1,
+      "morph_width_mm": 380.0,
+      "morph_height_mm": 330.0,
+      "morph_corner_mm": 33.3066939209,
+      "morph_exponent": 4.0,
+      "morph_rate": 3.6689236193,
+      "morph_fixed": 0.0,
+      "morph_allow_shrinkage": 1,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_a_cos_pow": 1.3300409625,
+      "az_n_cos2_amp": 0.0,
+      "az_a_sf_amp": 0.0,
+      "az_a_cos_amp": 8.6762414339,
+      "az_s_cos2_amp": 0.140503182
+    },
+    "bounds": {
+      "a0_deg": {
+        "lo": 0.25,
+        "hi": 3.0,
+        "search": true
+      },
+      "L_mm": {
+        "lo": 150.0,
+        "hi": 300.0
+      },
+      "a_deg": {
+        "lo": 20.0,
+        "hi": 40.0
+      },
+      "n": {
+        "lo": 2.0,
+        "hi": 10.0
+      },
+      "s": {
+        "lo": 0.2,
+        "hi": 1.2
+      },
+      "q": {
+        "lo": 0.9,
+        "hi": 1.0
+      },
+      "k": {
+        "lo": 0.3,
+        "hi": 3.0
+      },
+      "morph_width_mm": {
+        "lo": 300.0,
+        "hi": 400.0,
+        "search": true
+      },
+      "morph_height_mm": {
+        "lo": 240.0,
+        "hi": 392.0
+      },
+      "morph_corner_mm": {
+        "lo": 8.0,
+        "hi": 46.0
+      },
+      "morph_rate": {
+        "lo": 1.0,
+        "hi": 6.0
+      },
+      "az_a_cos_pow": {
+        "lo": 1.0,
+        "hi": 6.0
+      },
+      "az_a_cos_amp": {
+        "lo": 0.0,
+        "hi": 15.0
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.25,
+        "hi": 0.5
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.2,
+      "seed": 40002,
+      "budget": 80,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "resample_strict",
+      "budget_counts": "valid",
+      "max_attempts": 108,
+      "error_policy": "retry_same_then_stop"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T234133Z-screen-622538"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 70,
+    "valid": 56,
+    "best_n": 17,
+    "best_J": 1.2258229403484977,
+    "best_design_hash": "d1f152db276f",
+    "best_json_hash": "d1f152db276f",
+    "missing": []
+  },
+  {
+    "run": "20261120T012508Z-screen-61f226",
+    "config_name": "c4x_05_fold_cont2",
+    "family": "OSSE",
+    "objective_version": 10,
+    "brief_file": "../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml",
+    "seed_params": {
+      "L_mm": 260.0,
+      "a0_deg": 2.0066,
+      "a_deg": 39.3836351902,
+      "aspect_ratio": 1.0,
+      "az_a_cos_amp": 8.3841356673,
+      "az_a_cos_pow": 1.9315476444,
+      "az_a_sf_amp": 0.0,
+      "az_n_cos2_amp": 0.0,
+      "az_s_cos2_amp": -0.174143732,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "exponent": 2.0,
+      "k": 2.8096679426,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 39.4914986248,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 330.0,
+      "morph_rate": 3.8881970245,
+      "morph_target": 1,
+      "morph_width_mm": 380.0,
+      "n": 4.8530018524,
+      "q": 0.9748993774,
+      "r0_mm": 18.0,
+      "s": 0.9978802741,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "az_fold_v_deg": -2.5163609994,
+      "az_fold_v_width_deg": 19.2852338159,
+      "az_fold_h_deg": -0.4228900082,
+      "az_fold_h_width_deg": 28.7941015593
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 150.0,
+        "hi": 300.0
+      },
+      "a_deg": {
+        "lo": 36.3038,
+        "hi": 40.0
+      },
+      "az_a_cos_amp": {
+        "lo": 0.0,
+        "hi": 11.73355,
+        "search": true
+      },
+      "az_a_cos_pow": {
+        "lo": 1.23779,
+        "hi": 2.43779
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.25,
+        "hi": -0.122676
+      },
+      "k": {
+        "lo": 2.16454,
+        "hi": 2.81254
+      },
+      "morph_corner_mm": {
+        "lo": 8.0,
+        "hi": 46.0
+      },
+      "morph_height_mm": {
+        "lo": 240.0,
+        "hi": 392.0
+      },
+      "morph_rate": {
+        "lo": 3.14408,
+        "hi": 4.34408
+      },
+      "morph_width_mm": {
+        "lo": 300.0,
+        "hi": 392.0
+      },
+      "n": {
+        "lo": 4.64958,
+        "hi": 6.56958
+      },
+      "q": {
+        "lo": 0.950949,
+        "hi": 1.0,
+        "search": true
+      },
+      "s": {
+        "lo": 0.769626,
+        "hi": 1.009626
+      },
+      "az_fold_v_deg": {
+        "lo": -25.0,
+        "hi": 10.0
+      },
+      "az_fold_v_width_deg": {
+        "lo": 8.0,
+        "hi": 40.0
+      },
+      "az_fold_h_deg": {
+        "lo": -15.0,
+        "hi": 0.0
+      },
+      "az_fold_h_width_deg": {
+        "lo": 8.0,
+        "hi": 40.0
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 80,
+      "infeasible_penalty": "resample_strict",
+      "popsize": null,
+      "seed": 40001,
+      "sigma0": 0.2,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 108,
+      "error_policy": "retry_same_then_stop"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261120T000243Z-screen-4c9343"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 46,
+    "valid": 46,
+    "best_n": 41,
+    "best_J": 1.207055665420645,
+    "best_design_hash": "220e2c562d45",
+    "best_json_hash": "220e2c562d45",
+    "missing": []
+  }
+]

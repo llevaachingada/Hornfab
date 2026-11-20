@@ -1,0 +1,4 @@
+﻿2026-11-19T17:23:58 queue start (pid 23752): compact400_next10_2026-11-19; cutoff ; wait pid 0
+2026-11-19T17:23:58 starting compact400_next10_2026-11-19
+2026-11-19T20:36:41 finished compact400_next10_2026-11-19 (exit 1)
+2026-11-19T20:36:41 queue done; keep-awake released

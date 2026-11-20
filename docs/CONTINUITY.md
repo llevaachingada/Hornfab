@@ -86,6 +86,24 @@
 - **Registered:** CODE_MAP and INDEX rows in the same commit. The other lane's uncommitted GUI edits
   and its budget-driver INDEX row were left untouched and excluded from staging.
 
+## 2026-11-19 - compact400 queue DONE; continuation bundle + final chains (local orchestrator)
+
+- The live `compact400_next10` night finished (`QUEUE DONE` 20:36:41, controller exit 1 = watchdog
+  stops, partial results kept). All 19 jobs ran; my appended 9 produced:
+  - **compact400 fold: 1.4677 -> 1.3147 -> 1.2071** (0.52 under the stored bar 1.7302; the cont2 gain
+    alone is 0.108, just inside the 0.1293 floor, but the chain is real).
+  - **compact400 morph: 1.4243 -> 1.2271 -> 1.2258** (converged; 0.50 under the bar).
+  - compact400 twinray: 1.4568 -> 1.4351 (tie; pinned at the 400 mm envelope).
+  - v7 petal 4.162 -> 4.1202 (+0.042, sub-floor tie); v7 tritonia_v8 4.891 -> 4.7503 (+0.141, sub-floor
+    tie); v7 tritonia_v9 4.878 -> 5.566 (regression in the evaluated set; the 4.878 W2 best stands);
+    v7 smooth b3_soft 2.800 -> 2.8187 (no gain; 2.800 stands).
+- **Evidence bundle `docs/evidence/runs/compact400_cont_2026-11-19/`** (9 runs, ~9.9 MB): configs/seeds,
+  run.json, search.ndjson + scores.csv (all terms + H/V beamwidth/DI/ripple/on-axis/impedance), best
+  designs with meshes + responses; README has the chains. `mesh.msh`/`response.npz` force-added.
+- The W2/W3 bundle is `docs/evidence/runs/scout40w2_2026-11-19/` (15 runs, 18.5 MB).
+- Next measured actions: v10 rescore of the v7 rows; compact400 floor re-measure on its own pairs;
+  `xo_loading_report --fx 1000` on the compact fold/morph winners; then the B6 lane set.
+
 ## 2026-11-19 - SCOUT40W2/W3 evidence bundle published (local orchestrator)
 
 - `docs/evidence/runs/scout40w2_2026-11-19/`: all **15** W2/W3 runs (18.5 MB) with the same schema as

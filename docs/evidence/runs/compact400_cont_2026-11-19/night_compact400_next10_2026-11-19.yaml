@@ -1,0 +1,176 @@
+# compact400 + next-10 night (2026-11-19, Fable senior; STAGED, NOT LAUNCHED - GPU budget is the owner's).
+#
+# Owner ask 2026-11-19: "make sure everything is ready for 10x next items to add to the queue ...
+#   focus on best opportunities for improvement and new horns under a 400 mm cubed bounding box".
+#
+# A. EIGHT NEW 400 mm-CUBE LANES (identity compact400_xo1000_1400_hf1440_v10xo; never ranked against
+#    v7/v10/compact_xo900; floor in docs/research/compact400_2026-11-19/README.md).
+#    Why these: a CPU scan of every stored run found 16,270 solved designs inside 400^3, but the ones
+#    that hold this corridor at 1 kHz are almost all 2-inch (r0 25.4) ATH core-law horns. At the
+#    HF1440 1.4-inch exit only TWO designs in the archive meet it. The 1.4-inch 400-cube horn is the
+#    least-explored, most product-relevant cell, so each lane re-throws a current leader family into
+#    the cube: size knobs re-bounded, the mouth morph switched on, every other knob inherited.
+#    Order = expected value (v10 leaders first, then the compact register, then new-to-size).
+#    Every seed: shape_check PASS (fits, round coupling, 1.7-3.5k dofs); search_preflight run with
+#    --samples 32 (runs/analysis/compact400_preflight_2026-11-19/).
+#
+# B. TWO HOME v10 CONTINUATIONS (the open ISSUES item from the Q3 night): the leaders are
+#    BOUND-PINNED, not budget-limited, so each widens the pinned knob AND warm-starts at the PUBLISHED
+#    best (00826f071b24 / a23763f1c6fc), not the lane seed. v10 home identity unchanged; floor 0.4677.
+#
+# Generator (re-run to regenerate the configs): scratch/fable_architecture/compact400_2026-11-19/make_configs.py
+# Expected GPU: compact lanes ~2-3.5k dofs (~10-20 s/eval) -> ~15-25 min each; home lanes ~4k dofs,
+# 80 valid -> ~30-40 min each. Total ~4-5 h; the no-gain watchdog usually ends stalled lanes early.
+night: compact400_next10_2026-11-19
+lane: gpu
+jobs:
+  # ---- A. 400 mm cube, HF1440, F_X 1 kHz ----
+  - id: c4n__01_fold_warm
+    kind: search
+    mode: screen
+    budget: 60
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4_01_fold_warm__hl__osse_rrect_fold_warm_v7__b6_v10_s1.yaml
+  - id: c4n__02_morph
+    kind: search
+    mode: screen
+    budget: 60
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4_02_morph__hl__osse_rrect_morph_v7__b6_v10_s1.yaml
+  - id: c4n__03_ext_throat
+    kind: search
+    mode: screen
+    budget: 60
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4_03_ext_throat__hl__ext_throat_hvlaw_v7__b6_v10_s1.yaml
+  - id: c4n__06_twinray
+    kind: search
+    mode: screen
+    budget: 60
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4_06_twinray__hl__ath_twinray380_landscape_v8__b6_v10_s1.yaml
+  - id: c4n__04_petal_hvlaw
+    kind: search
+    mode: screen
+    budget: 60
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4_04_petal_hvlaw__scout40w3__petal_hvlaw_v7.yaml
+  - id: c4n__05_tritonia_v8
+    kind: search
+    mode: screen
+    budget: 60
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4_05_tritonia_v8__scout40w3__tritonia_v8.yaml
+  - id: c4n__07_ath_core_14in
+    kind: search
+    mode: screen
+    budget: 60
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4_07_ath_core_14in__atlas__ath_core.yaml
+  - id: c4n__08_lecleach_iwata_ar
+    kind: search
+    mode: screen
+    budget: 60
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4_08_lecleach_iwata_ar__scout40__lecleach_iwata_ar_smooth_v7.yaml
+  # ---- B. home v10: widened pinned knob + warm start at the published best ----
+  - id: c4n__09_fold_warm_v10_s2w
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/h_09_fold_warm_v10_s2w__hl__osse_rrect_fold_warm_v7__b6_v10_s2.yaml
+  - id: c4n__10_ext_throat_v10_s2w
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/h_10_ext_throat_v10_s2w__hl__ext_throat_hvlaw_v7__b6_v10_s2.yaml
+  # ---- APPENDED 2026-11-19 (local orchestrator, owner-directed): 80-eval continuations from the
+  # SCOUT40W2/W3 findings and the compact400 winners. Mixed briefs: c4x_* = compact400 (v10xo),
+  # scout40w4__* = v7 home (petal/tritonia) and v7 smooth (klangfilm b3) -> J is NOT comparable
+  # across groups. Every lane warm-starts at its finished best; the measured pins ride pin_ignore.
+  - id: c4x_01_morph_cont
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4x_01_morph_cont.yaml
+    watchdog: {pin_ignore: [morph_width_mm]}
+  - id: c4x_02_twinray_cont
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4x_02_twinray_cont.yaml
+    watchdog: {pin_ignore: [k]}
+  - id: c4x_03_fold_cont
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4x_03_fold_cont.yaml
+    watchdog: {pin_ignore: [q]}
+  - id: w4__petal_hvlaw_v7
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/scout40w4_2026-11-19/scout40w4__petal_hvlaw_v7.yaml
+    watchdog: {pin_ignore: [q]}
+  - id: w4__tritonia_v8
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/scout40w4_2026-11-19/scout40w4__tritonia_v8.yaml
+    watchdog: {pin_ignore: [az_fold_v_deg, az_fold_v_width_deg, morph_width_mm]}
+  - id: w4__tritonia_v9
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/scout40w4_2026-11-19/scout40w4__tritonia_v9.yaml
+    watchdog: {pin_ignore: [az_fold_v_deg, az_fold_v_width_deg, morph_width_mm]}
+  - id: w4__klangfilm_b3_soft
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/scout40w4_2026-11-19/scout40w4__klangfilm_b3_soft.yaml
+    watchdog: {pin_ignore: [g_beak_v_projection_mm, g_theta_h1_deg, g_theta_v1_deg]}
+  # c4x_04: morph cont2 - 1.4243 -> 1.2271 (0.197 J, above the compact400 floor); a0_deg widened to 0.25.
+  - id: c4x_04_morph_cont2
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4x_04_morph_cont2.yaml
+    watchdog: {pin_ignore: [morph_width_mm, a0_deg]}
+  # c4x_05: fold cont2 - 1.4677 -> 1.3147 (0.153 J, above the compact400 floor); az_a_cos_amp to 0.
+  - id: c4x_05_fold_cont2
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4x_05_fold_cont2.yaml
+    watchdog: {pin_ignore: [q, az_a_cos_amp]}

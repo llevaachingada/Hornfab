@@ -1,0 +1,118 @@
+{
+  "run": "20261120T005830Z-screen-4036c0",
+  "config_name": "scout40w4__klangfilm_b3_soft",
+  "family": "FREEFORM",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml",
+  "seed_params": {
+    "g_aspect": 2.0759495982,
+    "g_beak_diagonal_mm": 0.0,
+    "g_beak_h_setback_mm": 2.0,
+    "g_beak_start_frac": 0.95,
+    "g_beak_v_projection_mm": 1.0,
+    "g_cd_core_blend": 1.0,
+    "g_core_length_mm": 340.0,
+    "g_end_frac": 1.7953432921,
+    "g_entry_half_angle_deg": 2.0,
+    "g_fc_hz": 494.4393461867,
+    "g_lame_end_frac": 0.95,
+    "g_lame_p": 5.0063549541,
+    "g_lame_p_mouth": 3.0,
+    "g_lame_start_frac": 0.2,
+    "g_morph_frac": 0.3,
+    "g_rim_sweep_ratio": 0.004898754,
+    "g_source_blend_ratio": 0.0,
+    "g_theta_h0_deg": 7.0,
+    "g_theta_h1_deg": 52.1,
+    "g_theta_v0_deg": 6.0,
+    "g_theta_v1_deg": 30.4
+  },
+  "bounds": {
+    "g_beak_diagonal_mm": {
+      "lo": -5.0,
+      "hi": 5.0,
+      "search": true
+    },
+    "g_beak_h_setback_mm": {
+      "lo": 0.0,
+      "hi": 10.0,
+      "search": true
+    },
+    "g_beak_start_frac": {
+      "lo": 0.85,
+      "hi": 0.99,
+      "search": true
+    },
+    "g_beak_v_projection_mm": {
+      "lo": 0.0,
+      "hi": 5.0,
+      "search": true
+    },
+    "g_core_length_mm": {
+      "lo": 238.0,
+      "hi": 442.0,
+      "search": true
+    },
+    "g_lame_end_frac": {
+      "lo": 0.665,
+      "hi": 0.99,
+      "search": true
+    },
+    "g_lame_p_mouth": {
+      "lo": 2.1,
+      "hi": 3.9,
+      "search": true
+    },
+    "g_lame_start_frac": {
+      "lo": 0.14,
+      "hi": 0.26,
+      "search": true
+    },
+    "g_theta_h0_deg": {
+      "lo": 4.9,
+      "hi": 9.1,
+      "search": true
+    },
+    "g_theta_h1_deg": {
+      "lo": 36.5,
+      "hi": 60.0,
+      "search": true
+    },
+    "g_theta_v0_deg": {
+      "lo": 4.2,
+      "hi": 7.8,
+      "search": true
+    },
+    "g_theta_v1_deg": {
+      "lo": 21.3,
+      "hi": 39.5,
+      "search": true
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.1,
+    "seed": 1234,
+    "budget": 80,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "graded",
+    "budget_counts": "valid",
+    "max_attempts": 250
+  },
+  "warm_start_config": {
+    "from_runs": [
+      "runs/20261119T073330Z-screen-723756"
+    ],
+    "top_k": 10,
+    "sigma_from_spread": false
+  },
+  "warm_start_run": null,
+  "rows": 33,
+  "valid": 31,
+  "best_n": 8,
+  "best_J": 2.8186604617471627,
+  "best_design_hash": "19a846460219",
+  "best_json_hash": "19a846460219",
+  "missing": []
+}
