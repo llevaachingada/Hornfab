@@ -54,6 +54,59 @@ def _args(**over) -> dict:
     return args
 
 
+def _live_store() -> Path:
+    candidates = [Path(os.environ["HORNLAB_SYSTEM_STORE"])] if os.environ.get("HORNLAB_SYSTEM_STORE") else []
+    candidates += [REPO / "system_runs", REPO.parent / "hornlab-woofer-system-wt" / "system_runs"]
+    for store in candidates:
+        if (store / "screens" / "system_evidence_2026-11-19" / "woofer_seed.json").is_file():
+            return store
+    pytest.skip("the recorded 27616eedee09009f study is not on this machine")
+
+
+def test_committed_example_asset_and_drivers_reproduce_study_27616eed() -> None:
+    """The P5 acceptance: the committed spec + asset 0062fb59 + its 4 drivers are the study."""
+    store = _live_store()
+    study = json.loads((store / "screens" / "system_evidence_2026-11-19" /
+                        "woofer_seed.json").read_text(encoding="utf-8"))
+    assert study["study_id"] == "27616eedee09009f"
+    assert study["asset"]["asset_id"] == "0062fb59fbf63eae"
+    drivers = sorted(study["input_sha256"]["drivers"])
+    assert drivers == ["faitalpro_10pr300", "faitalpro_10pr320",
+                       "faitalpro_12pr300", "faitalpro_12pr320"]
+    spec = C.parse_system_spec_dict(yaml.safe_load(
+        COMMITTED_SPEC.read_text(encoding="utf-8")) or {})
+    canonical = {
+        "schema": study["schema"],
+        "asset_id": study["asset"]["asset_id"],
+        "design_hash": study["asset"]["design_hash"],
+        "driver_ids": drivers,
+        "input_sha256": study["input_sha256"],
+        "metric_spec": study["metric_spec"],
+        "cabinet": {
+            "kind": spec.cabinet.kind,
+            "grid": [float(spec.cabinet.net_volume_l_range[0]),
+                     float(spec.cabinet.net_volume_l_range[1]),
+                     float(spec.cabinet.tuning_hz_range[0]),
+                     float(spec.cabinet.tuning_hz_range[1]),
+                     float(spec.cabinet.port_throat_area_cm2_range[0]),
+                     float(spec.cabinet.port_throat_area_cm2_range[1])],
+            "wall_mm": float(spec.cabinet.wall_mm),
+        },
+        "assembly": {"layout": spec.assembly.horn_layout},
+        "target": {"f3_max_hz": spec.target.low_freq_f3_hz_max,
+                   "listen_h": list(spec.target.listening_angle_h_deg),
+                   "listen_v": list(spec.target.listening_angle_v_deg)},
+        "limit_boxes": int(H.DEFAULT_LIMIT_BOXES),
+        "shortlist_size": int(H.DEFAULT_SHORTLIST_SIZE),
+        "seed": "deterministic-no-rng",
+    }
+    assert C.system_study_id(canonical) == study["study_id"]
+    argv = H.screen_argv(REPO, {"spec": SPEC_REL, "asset_id": study["asset"]["asset_id"],
+                                "drivers": drivers})
+    assert argv[argv.index("--asset-id") + 1] == "0062fb59fbf63eae"
+    assert all(driver in argv for driver in drivers)
+
+
 # --------------------------------------------------------------------------- real tree
 
 
@@ -202,7 +255,7 @@ def test_hw_screen_defaults_come_from_the_spec_and_the_cli() -> None:
                                 "drivers": ["faitalpro_12pr300"]})
     assert argv[argv.index("--out") + 1] == "system_runs/screens/two_way_80x50_700_pilot"
     assert argv[argv.index("--scan-limit") + 1] == "300"
-    assert argv[argv.index("--limit-boxes") + 1] == "4"
+    assert argv[argv.index("--limit-boxes") + 1] == str(H.DEFAULT_LIMIT_BOXES) == "8"
     assert argv[argv.index("--shortlist-size") + 1] == str(H.DEFAULT_SHORTLIST_SIZE)
 
 
