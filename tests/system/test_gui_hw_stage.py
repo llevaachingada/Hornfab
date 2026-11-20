@@ -113,6 +113,13 @@ def test_stage_argv_forwards_concrete_overrides_only(tmp_path: Path) -> None:
     assert payload == {"width_m": 0.3712, "wall_m": 0.018}
 
 
+def test_stage_argv_rejects_a_clearance_choice(tmp_path: Path) -> None:
+    # F5: the R16 minimum is a fixed gate, not a dialog knob that silently does nothing.
+    root = _mini_repo(tmp_path)
+    with pytest.raises(J.JobError, match="clearance: fixed at the R16 1 mm minimum"):
+        _jm(root).build_argv("hw-stage", _stage_args(clearance_m=0.002))
+
+
 def test_stage_argv_accepts_an_absolute_allow_listed_mesh(tmp_path: Path) -> None:
     root = _mini_repo(tmp_path)
     absolute = (root / "system_runs" / MESH_REL).resolve()
@@ -251,7 +258,8 @@ def test_stage_options_reads_the_allow_listed_meshes_and_groups() -> None:
         assert mesh["triangles"] and mesh["triangles"] > 0
     assert any("SD1D1001" in m["groups"] for m in options["horn_meshes"])
     assert options["default_experiment_id"].startswith("bl_gui_")
-    assert options["clearance_m"] == pytest.approx(HWS.DEFAULT_MIN_GAP_M)
+    assert "clearance_m" not in options
+    assert "1 mm" in options["clearance_note"]
     assert options["defaults"]["source"] == HWS.DEFAULT_SPEC_REL.as_posix()
     assert options["defaults"]["box"]["wall_mm"] == 18.0
 

@@ -74,9 +74,8 @@ READINESS_REL = Path("docs/research/system_woofer_2026-11-18/readiness.yaml")
 #: Exposed translation range for the horn's z offset (x/y stay fixed at 0).
 TRANSLATION_Z_MIN = -100.0
 TRANSLATION_Z_MAX = 200.0
-#: A clearance value is a UI hint today; the CLI stage path enforces the R16 default (1 mm).
-CLEARANCE_MIN_M = 0.0
-CLEARANCE_MAX_M = 0.05
+#: A clearance value is not a stage choice: the CLI stage path enforces the R16 1 mm minimum.
+#: Kept in stage_options as a note only (senior review 2026-11-20 F5).
 #: Allowed solve presets (the GUI shows exactly these; no free-form grid).
 SOLVE_PRESETS = ("smoke3", "wide25", "lowband12")
 
@@ -321,7 +320,9 @@ def stage_options(root: str | Path, store: str | Path) -> dict[str, Any]:
         "horn_meshes": meshes,
         "default_experiment_id": _default_experiment_id(),
         "defaults": _spec_defaults(repo),
-        "clearance_m": DEFAULT_MIN_GAP_M,
+        "clearance_note": (
+            f"Horn/box clearance is fixed at the R16 {DEFAULT_MIN_GAP_M * 1000:g} mm minimum; "
+            "it is not a stage choice."),
         "notes": notes,
     }
 
@@ -370,8 +371,8 @@ def stage_argv(root: str | Path, store: str | Path, payload: Mapping[str, Any]) 
     ``horn_mesh`` is required and allow-listed; ``source_group`` must be one of that mesh's own 2D
     physical groups; ``translation_z_mm`` is bounded and x/y stay 0; ``experiment_id`` is a safe
     label defaulting to ``bl_gui_<YYYYMMDD>``.  ``backend`` is accepted only as ``beat_cpu`` (and is
-    not forwarded: staging is CPU work).  An optional ``clearance_m`` is validated for the dialog;
-    the CLI stage path enforces the R16 default (1 mm) today.
+    not forwarded: staging is CPU work).  A ``clearance_m`` field is REFUSED: the R16 minimum is a
+    fixed 1 mm gate, not a stage argument (senior review 2026-11-20 F5).
     """
     if not isinstance(payload, Mapping):
         raise StageArgError(f"payload must be a mapping, got {type(payload).__name__}")
@@ -404,7 +405,8 @@ def stage_argv(root: str | Path, store: str | Path, payload: Mapping[str, Any]) 
     experiment = _key_arg(payload.get("experiment_id"), "experiment_id", _default_experiment_id())
 
     if payload.get("clearance_m") not in (None, ""):
-        _float_arg(payload.get("clearance_m"), CLEARANCE_MIN_M, CLEARANCE_MAX_M, "clearance_m")
+        raise StageArgError(
+            "clearance: fixed at the R16 1 mm minimum; not a stage argument")
 
     argv = ["stage"]
     if overrides:
