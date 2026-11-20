@@ -1,0 +1,127 @@
+# Room-targeted v11 CD brief (2026-11-20, owner: 20 x 16 x 9 ft room, wide sweet spot).
+# Copied from examples/briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd.yaml; changed ONLY name, description, coverage_profile H/V corridors + coverage_h/v_deg, f0_hz/f0_v_hz,
+# objective.cd.band_hz start, envelope. Rationale: docs/research/favorites_2026-11-20/ROOM_TARGETS.md. Own J identity.
+name: room_w90x50_700_hf1440_v11cd
+description: '(objective v11) ROOM identity room_w90x50_700_hf1440_v11cd: H 90 (75-105) from 700 Hz, V
+  50 (40-60) from 1000 Hz, F_X 700, envelope 600x480x480. Wide-sweet-spot target (Geddes-style toe-in
+  crossfire). Own identity.'
+driver:
+  exit_angle_deg: 2.0
+  exit_radius_mm: 18.0
+envelope:
+  max_depth_mm: 480
+  max_mouth_h_mm: 480
+  max_mouth_w_mm: 600
+symmetry: hv
+source:
+  cap: auto
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 90.0
+  coverage_profile:
+    h:
+    - hz: 700
+      min_deg: 75
+      max_deg: 105
+      preferred_deg: 90
+    - hz: 8000
+      min_deg: 75
+      max_deg: 105
+      preferred_deg: 90
+    interpolation: log_frequency
+    mode: corridor
+    v:
+    - hz: 1000
+      min_deg: 40
+      max_deg: 60
+      preferred_deg: 50
+    - hz: 8000
+      min_deg: 40
+      max_deg: 60
+      preferred_deg: 50
+  coverage_v_deg: 50.0
+  coverage_v_down_deg: null
+  coverage_v_up_deg: null
+  di_slope_target: 0.0
+  di_target_db: null
+  driver_exit_radius_mm: null
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov_profile: 1.0
+  di_roughness: 0.5
+  dislope: 0.5
+  flat: 0.5
+  flat_cv: 0.5
+  load: 1.0
+  rip: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+objective:
+  cov_below_f0: one_sided
+  cov_narrow_ratio: 2.0
+  cov_v_weight: 0.5
+  flat_band: scored
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  tolerances:
+    cov_profile: 3.0
+    di_roughness: 1.0
+    dislope: 9.0
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3
+    rip: 1.0
+  version: 11
+  ripple_region: preferred_edge
+  cd:
+    band_hz:
+    - 700.0
+    - 8000.0
+    window_h_deg: 30.0
+    window_v_deg: 10.0
+    lw:
+      weight: 1.5
+      tolerance_db: 1.5
+    di_std:
+      weight: 0.75
+      tolerance_db: 1.0
+    nacc:
+      weight: 0.75
+      tolerance: 0.02
+    offaxis:
+      weight: 1.0
+      tolerance_db: 1.0
+      reference: band_mean
+      band_hz:
+      - 2500.0
+      - 8000.0
+      angles_h_deg:
+      - -40
+      - -30
+      - 30
+      - 40
+      angles_v_deg:
+      - -25
+      - -10
+      - 10
+      - 25
+    report:
+      omega: true
+      contour: false

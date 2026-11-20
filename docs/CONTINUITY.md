@@ -1,5 +1,12 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 ~18:45 - Room-targeted coverage lanes (20x16x9 ft, speakers on the 20 ft wall, wide sweet spot)
+
+- Owner questioned 80x50 for the room. Derived: floor bounce ~35 deg below / ceiling ~48 deg above axis at ~3 m, so V 50-60
+  fits; wide sweet spot -> H ~90 with toe-in crossfire. Note: `docs/research/favorites_2026-11-20/ROOM_TARGETS.md`.
+- New briefs `examples/briefs/room_2026-11-20/` (w90x50/w90x60 home 700 Hz; compact 400 cube 1 kHz in w90x50, w90x60, 80x50;
+  own identities). Five P1 lanes `examples/typologies/room_2026-11-20/` + verify queued after `favA9_verify_top3` in the live fav8.
+
 ## 2026-11-20 ~18:30 - 9-deg driver exit-angle brief + lanes queued
 
 - Owner: try the 9-deg throat angle (some drivers exit at ~9 deg). Brief `examples/briefs/a9_2026-11-20/` (only

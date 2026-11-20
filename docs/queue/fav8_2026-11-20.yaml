@@ -11,6 +11,7 @@
 # P1 keeps k_H exactly 1) and their verify jobs; one favP1_verify_top3 covers 2in_home, split x3, 2in_c500 and k1_cd_polish.
 # 2026-11-20 ~18:27 (owner: SplitCore fixture variant): favSCs single + favSC__core_fav/_polish + verify after favP1_verify_top3.
 # 2026-11-20 ~18:30 (owner: try the 9-deg throat/exit angle): favA9s x3 singles + favA9__core_fav + verify after favSC_verify_top3.
+# 2026-11-20 ~18:45 (owner: room 20x16x9 ft, speakers on the 20 ft wall, wide sweet spot; 400 cube at 1 kHz): 5 room__ lanes + verify after favA9_verify_top3.
 night: fav8_2026-11-20
 lane: gpu
 watchdog: false
@@ -210,6 +211,55 @@ jobs:
   - '3'
   - --jobs
   - favA9__core_fav
+- id: room__w90x50_home
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 5400
+  env: &id005
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/room_2026-11-20/room__w90x50_home.yaml
+- id: room__c400_w90x50
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 5400
+  env: *id005
+  config: examples/typologies/room_2026-11-20/room__c400_w90x50.yaml
+- id: room__w90x60_home
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 5400
+  env: *id005
+  config: examples/typologies/room_2026-11-20/room__w90x60_home.yaml
+- id: room__c400_80x50
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 5400
+  env: *id005
+  config: examples/typologies/room_2026-11-20/room__c400_80x50.yaml
+- id: room__c400_w90x60
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 5400
+  env: *id005
+  config: examples/typologies/room_2026-11-20/room__c400_w90x60.yaml
+- id: room_verify_top3
+  kind: command
+  timeout_s: 5400
+  env: *id005
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/night_queue/verify_night_jobs.py
+  - --night
+  - fav8_2026-11-20
+  - --top
+  - '3'
+  - --jobs
+  - room__w90x50_home,room__c400_w90x50,room__w90x60_home,room__c400_80x50,room__c400_w90x60
 - id: fav8__x900_k1
   kind: search
   mode: screen
