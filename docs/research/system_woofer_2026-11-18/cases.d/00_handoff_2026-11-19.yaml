@@ -23,6 +23,10 @@ cases:
     motor: demo
     transducer_shape: demo
     horn_source: ideal_velocity
+    controls:
+      lf: ev_lf_assembled_demo/20261120T051458Z-lf_20_200-35104-5973f4ef
+      dense: ev_dense_g4_49/20261120T052433Z-dense_49-50100-30d7ef04
+      farfield: ev_farfield_g4_10m/20261120T051941Z-farfield_10m-10828-d72876e6
     status: approved
     approved_by: senior review 2026-11-19
   - key: bl_g6_offset30/20261118T235110Z-assembly-21668-c17f7cf6
@@ -44,6 +48,8 @@ cases:
     motor: real
     transducer_shape: demo
     pair_with: bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9
+    controls:
+      lf: ev_lf_motor_real/20261120T053351Z-lf_20_200-30640-c2cf0f62
     status: approved
     approved_by: senior review 2026-11-19
   - key: bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9
@@ -54,6 +60,8 @@ cases:
     motor: demo
     transducer_shape: demo
     pair_with: bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e
+    controls:
+      lf: ev_lf_demo_twin/20261120T051258Z-lf_20_200-23196-0a6370e7
     status: approved
     approved_by: senior review 2026-11-19
   - key: bl_motor12pr/20261119T010537Z-real_driver-48792-9d89b3df
@@ -63,6 +71,9 @@ cases:
     fidelity: COUPLED_VENTED_FEM_BEM_LEM
     motor: real
     transducer_shape: demo
+    controls:
+      lf: ev_lf_default_real/20261120T051351Z-lf_20_200-45416-03efa73a
+      wide: ev_wide_default_real/20261120T051740Z-wide_200_2500-46632-3de4e1d9
     status: approved
     approved_by: senior review 2026-11-19
   - key: bl_ref_case/20261118T223335Z-ref_case-61644-32976a2a
@@ -72,6 +83,9 @@ cases:
     fidelity: COUPLED_VENTED_FEM_BEM_LEM
     motor: demo
     transducer_shape: demo
+    controls:
+      lf: ev_lf_default_demo/20261120T051425Z-lf_20_200-01448-88659fb9
+      wide: ev_wide_default_demo/20261120T051840Z-wide_200_2500-36092-b530b722
     status: approved
     approved_by: senior review 2026-11-19
   - key: bl_r4_tower_box/20261119T001041Z-ref_case-40216-b32bb5a2

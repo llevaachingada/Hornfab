@@ -136,6 +136,8 @@ cases:
     motor: real
     transducer_shape: demo
     horn_source: ideal_velocity
+    controls:
+      lf: ev_assembled_motor_real_lf/20261120T151127Z-lf_20_200-32036-ca8f9305
     status: proposed
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
     note: >-
@@ -166,6 +168,8 @@ cases:
     motor: demo
     transducer_shape: demo
     horn_source: ideal_velocity
+    controls:
+      dense: ev_mesh_refine_dense/20261120T151300Z-dense_49-40968-168d31ad
     status: proposed
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
     note: Its own staging by definition (mesh sizes differ); convergence readout pending (R6).

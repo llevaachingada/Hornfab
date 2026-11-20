@@ -129,6 +129,21 @@ export const TERMS = {
   // SENIOR_REVIEW_HANDOFF §5 R6.
   convergence: { label: "Convergence", unit: "", short: "One mesh only; refinement not checked",
               long: "Each case was solved on a single mesh, with no refinement delta or frequency-densification control, so how much the answer moves with a finer mesh is unknown." },
+  // Senior review 2026-11-20 §3.1/§3.2 (declared, server-validated control links).
+  control_link: { label: "Control link", unit: "", short: "A declared second solve of the same project",
+              long: "A case may declare another case as a control: low band, wide band, denser frequency grid, far-field distance or a mesh refinement. The declaration is written in the case registry; the server only checks that it is physically consistent (solved, same project hash, or the same staging except mesh size). A failed check is shown as CONTROL_LINK_INVALID with the reason and the link is ignored." },
+  // Senior review 2026-11-20 §3.2/§3.3 (two separate solves, never one curve).
+  lf_solved_separately: { label: "Low band solved separately", unit: "Hz", short: "An LF control covers below the wide grid",
+              long: "The wide solve starts at 200 Hz. A declared LF control is a separate solve of the same project over 20-200 Hz. The Response tab draws both on one frequency axis as two separate series with a visible gap at the seam; they are never concatenated and never summed." },
+  // system_evidence_2026-11-19/README.md §Frequency sampling: 25 vs 49.
+  frequency_sampling: { label: "Frequency sampling", unit: "dB", short: "Dense-grid control at shared points",
+              long: "A denser frequency grid on the same mesh. At the shared or nearest frequencies the 25- and 49-point curves agree to a small number of dB (recorded max 0.03 dB on the #2 project), but the denser grid can expose nulls the coarse grid steps over. Agreement at shared points is a sampling control, not a convergence proof." },
+  // Senior review 2026-11-20 §3.2 (mesh_refine rule), README §Frequency sampling (R6).
+  mesh_refinement: { label: "Mesh refinement", unit: "", short: "Same staging at a different mesh size",
+              long: "A re-staged copy of the project with only mesh_size_m/detail_size_m changed. A declared refinement control must have the same source parameters and the same horn block as the case it links to. It is a separate solve, so its readout (complex-pressure delta per probe) is a convergence check, not a claim that the coarse grid is converged." },
+  // Senior review 2026-11-20 §3.2 wide control (staged-only case).
+  wide_solve_declared: { label: "Wide solve declared", unit: "", short: "A staged case's wide solve is on disk",
+              long: "The case itself was only staged. A declared wide control is the solved wide-band case for the same project, so the Response tab can show that solve while the case page still says the case has no run of its own." },
   // GUI_COMPLETION_HANDOFF §5.7 (stage + validate as CPU jobs), readiness.yaml R16.
   stage_validate: { label: "Stage + validate", unit: "", short: "Build the Boundary Lab project and check it",
               long: "Staging builds the Boundary Lab project from the box parameters, the horn mesh and the offset; validate runs Boundary Lab's own check on it. A case that fails clearance or the panel-fit rule never reaches a solve. Both are CPU jobs of seconds to minutes." },

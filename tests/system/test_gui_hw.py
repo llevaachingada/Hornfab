@@ -161,7 +161,12 @@ def test_case_detail_placeholders_geometry_and_run(env) -> None:
     s = HW.hw_case(root, store, "bl_motor/20261119T000000Z-solved-1-aaaa")
     tokens = [p["token"] for p in s["placeholders"]]
     assert "DEMO_MOTOR" not in tokens                       # declared real
-    assert "LF_NOT_SOLVED" in tokens and "CONVERGENCE_UNCHECKED" in tokens
+    assert "LF_NOT_SOLVED" in tokens
+    # R6 splits in two (senior review §3.2): a sampling control and a mesh-refinement line.
+    assert "CONVERGENCE_SAMPLING" in tokens and "CONVERGENCE_MESH" in tokens
+    assert "CONVERGENCE_UNCHECKED" not in tokens
+    assert next(p["text"] for p in s["placeholders"]
+                if p["token"] == "CONVERGENCE_MESH") == "Mesh refinement: not run."
     assert [e["id"] for e in s["run"]["excitations"]] == ["excitation:woofer", "excitation:horn"]
     assert s["highlights"]["motor_mapping"]["driver_id"] == "X"
     assert "not a far-field claim" in s["observation_caption"]

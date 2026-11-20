@@ -237,6 +237,224 @@ def _run_manifest(case: Path) -> dict | None:
         return {"status": "unreadable"}
 
 
+# --------------------------------------------------------------------------- control links
+#
+# A case may DECLARE controls for another solve of the same project (senior review §3.2):
+#   lf | wide | dense | farfield | mesh_refine: <experiment>/<case>
+# The declaration is human/tool-authored; the server only checks that it is physically consistent.
+# A failed check produces CONTROL_LINK_INVALID[<reason>] and the link is ignored.
+
+CONTROL_KINDS = ("lf", "wide", "dense", "farfield", "mesh_refine")
+_MESH_FIELDS = ("mesh_size_m", "detail_size_m")
+
+
+def _mesh_refine_match(source_spec, linked_spec) -> tuple[bool, str | None]:
+    """The linked project is the source re-staged at a different mesh density only."""
+    if not isinstance(source_spec, dict) or not isinstance(linked_spec, dict):
+        return False, "spec missing on the source or linked case"
+    a = source_spec.get("source")
+    b = linked_spec.get("source")
+    if not isinstance(a, dict) or not isinstance(b, dict):
+        return False, "spec.source missing on the source or linked case"
+    a = {k: v for k, v in a.items() if k not in _MESH_FIELDS}
+    b = {k: v for k, v in b.items() if k not in _MESH_FIELDS}
+    if a != b:
+        return False, "spec.source differs beyond mesh_size_m/detail_size_m"
+    if source_spec.get("horn") != linked_spec.get("horn"):
+        return False, "spec.horn differs"
+    return True, None
+
+
+def _control_link_view(store: Path, row: dict) -> dict:
+    """Validate every declared control; return {declared, valid, invalid} (invalid is ignored)."""
+    declared = {str(k): str(v) for k, v in (row.get("controls") or {}).items() if v}
+    out: dict[str, Any] = {"declared": declared, "valid": {}, "invalid": []}
+    if not declared:
+        return out
+    try:
+        source_case = _resolve_case(store, row["key"])
+    except (FileNotFoundError, ValueError):
+        for kind, link in declared.items():
+            out["invalid"].append({"kind": kind, "key": link, "reason": "source case not found"})
+        return out
+    source_run = _run_manifest(source_case)
+    source_payload, _ = _load_manifest(source_case)
+    source_spec = source_payload.get("spec") if isinstance(source_payload.get("spec"), dict) else None
+    for kind in CONTROL_KINDS:
+        link = declared.get(kind)
+        if not link:
+            continue
+        reason: str | None = None
+        try:
+            linked = _resolve_case(store, link)
+        except (FileNotFoundError, ValueError):
+            out["invalid"].append({"kind": kind, "key": link, "reason": "linked case not found"})
+            continue
+        linked_run = _run_manifest(linked)
+        if linked_run is None:
+            reason = "linked case not solved (no run manifest)"
+        elif str(linked_run.get("status")) != "complete":
+            reason = f"linked case not solved (run status {linked_run.get('status')!r})"
+        elif not linked_run.get("project_sha256"):
+            reason = "linked run manifest has no project_sha256"
+        if reason is None and kind in ("lf", "dense", "farfield"):
+            # A solved source compares run manifests; a staged source compares its staged project
+            # hash (the same project identity the linked solve records). This is what makes an LF
+            # or wide control usable on a staged-only case (#6, R0).
+            source_hash = ((source_run or {}).get("project_sha256")
+                           or source_payload.get("project_sha256"))
+            if not source_hash:
+                reason = "source project hash unavailable"
+            elif source_hash != linked_run.get("project_sha256"):
+                reason = "different project_sha256"
+        if reason is None and kind == "wide":
+            source_hash = ((source_run or {}).get("project_sha256")
+                           or source_payload.get("project_sha256"))
+            if not source_hash:
+                reason = "source project hash unavailable"
+            elif source_hash != linked_run.get("project_sha256"):
+                reason = "different project_sha256"
+        if reason is None and kind == "mesh_refine":
+            linked_payload, _ = _load_manifest(linked)
+            ok, why = _mesh_refine_match(
+                source_spec,
+                linked_payload.get("spec") if isinstance(linked_payload.get("spec"), dict) else None)
+            if not ok:
+                reason = why
+        if reason is not None:
+            out["invalid"].append({"kind": kind, "key": link, "reason": reason})
+        else:
+            out["valid"][kind] = {"kind": kind, "key": link, "case": linked, "run": linked_run}
+    return out
+
+
+def _control_public(controls: dict) -> dict:
+    """The JSON-safe part of a validated control set (Paths stay server-side)."""
+    return {
+        "declared": dict(controls.get("declared") or {}),
+        "valid": {k: {"key": v["key"]} for k, v in (controls.get("valid") or {}).items()},
+        "invalid": list(controls.get("invalid") or []),
+    }
+
+
+def _basis_payload(case: Path, domain: str) -> dict:
+    """One observation domain of one solved case, per excitation, never summed."""
+    run_dir = case / "run"
+    if not (run_dir / "manifest.json").is_file():
+        raise FileNotFoundError(f"{case.parent.name}/{case.name} has no solved run")
+    from hornlab_search.system.boundarylab import bl_results as R
+
+    res = _cached(("res",) + _stamp(run_dir / "manifest.json"),
+                  lambda: R.read_bl_headless_result(run_dir))
+    if domain not in res.observation_sets:
+        raise ValueError(f"unknown domain {domain!r}; available: {sorted(res.observation_sets)}")
+    obs = res.observation_sets[domain]
+    bases = res.per_excitation_bases(domain)
+    conv = {c.excitation_id: c for c in res.conversion}
+    out: dict[str, Any] = {"case": f"{case.parent.name}/{case.name}",
+                           "domain": domain, "kind": obs.kind,
+                           "frequencies_hz": [float(f) for f in res.frequencies_hz],
+                           "distance_m": obs.distance_m, "excitations": []}
+    angles = None if obs.angles_deg is None else [float(a) for a in obs.angles_deg]
+    out["angles_deg"] = angles
+    for ex, p in bases.items():
+        c = conv.get(ex)
+        item = {"id": ex, "per_input": None if c is None else c.to_per_input,
+                "reference": None if c is None else c.from_per_input}
+        mag = np.abs(p)
+        if angles is None:
+            # Point probes: one curve per observation point (real cases have one point each).
+            item["spl_db"] = [_db(v) for v in mag[:, 0]]
+            item["phase_deg"] = [float(np.degrees(np.angle(v))) for v in p[:, 0]]
+            # Unwrapped in Python (never in JS): continuous phase for the wrapped/unwrapped toggle.
+            item["phase_unwrapped_deg"] = [float(v) for v in
+                                           np.degrees(np.unwrap(np.angle(p[:, 0])))]
+            if obs.count > 1:
+                item["spl_db_points"] = [[_db(v) for v in row] for row in mag]
+                item["phase_deg_points"] = [[float(np.degrees(np.angle(v))) for v in row] for row in p]
+        else:
+            i0 = int(np.argmin(np.abs(np.asarray(angles))))
+            ref = mag[:, i0:i0 + 1]
+            with np.errstate(divide="ignore", invalid="ignore"):
+                rel = 20.0 * np.log10(np.where(ref > 0, mag / ref, np.nan))
+            item["rel_db"] = [[None if not math.isfinite(v) else round(float(v), 3) for v in row]
+                              for row in rel]
+            item["on_axis_spl_db"] = [_db(v) for v in ref[:, 0]]
+            item["normalised_to_deg"] = angles[i0]
+        out["excitations"].append(item)
+    return out
+
+
+def _probe_domain(case: Path) -> str:
+    """The first point-probe domain of the case's run."""
+    run_dir = case / "run"
+    from hornlab_search.system.boundarylab import bl_results as R
+
+    def read():
+        return R.read_bl_headless_result(run_dir)
+    res = _cached(("res",) + _stamp(run_dir / "manifest.json"), read)
+    for d in res.domain_ids():
+        if res.observation_sets[d].kind == "point_probe":
+            return d
+    raise ValueError("the run records no point probe")
+
+
+def _dense_delta(base: dict, dense: dict, link_key: str) -> dict:
+    """Max |dB| at the shared point-probe frequencies (the R6 sampling number)."""
+    best: dict | None = None
+    fb = np.asarray(dense["frequencies_hz"], dtype=float)
+    for ex_a in base["excitations"]:
+        ex_b = next((e for e in dense["excitations"] if e["id"] == ex_a["id"]
+                     and e.get("per_input") == ex_a.get("per_input")
+                     and e.get("reference") == ex_a.get("reference")), None)
+        if ex_b is None:
+            continue
+        ya = np.asarray([np.nan if v is None else v for v in ex_a.get("spl_db") or []], dtype=float)
+        yb = np.asarray([np.nan if v is None else v for v in ex_b.get("spl_db") or []], dtype=float)
+        if not len(ya) or not len(fb) or len(yb) != len(fb):
+            continue
+        deltas = []
+        for f, va in zip(base["frequencies_hz"], ya):
+            j = int(np.argmin(np.abs(fb - f)))
+            if abs(fb[j] - f) > max(1e-6, 0.002 * f):
+                continue
+            if np.isfinite(va) and np.isfinite(yb[j]):
+                deltas.append(abs(float(va - yb[j])))
+        if deltas and (best is None or len(deltas) > best["shared_count"]):
+            best = {"key": link_key, "excitation_id": ex_a["id"],
+                    "max_abs_db": round(max(deltas), 3), "shared_count": len(deltas)}
+    if best is None:
+        return {"key": link_key, "error": "no shared point-probe frequencies"}
+    return best
+
+
+def _control_summary(store: Path, case: Path, controls: dict) -> dict:
+    """The numbers behind the placeholders; computed in Python, never in JS."""
+    valid = controls.get("valid") or {}
+    out: dict[str, Any] = {"valid": {k: v["key"] for k, v in valid.items()},
+                           "invalid": controls.get("invalid") or [], "dense": None}
+    dense = valid.get("dense")
+    if dense:
+        main_case = case if _run_manifest(case) else (valid.get("wide") or {}).get("case")
+        if main_case is None:
+            out["dense"] = {"key": dense["key"], "error": "no solved run to compare"}
+        else:
+            try:
+                base = _basis_payload(main_case, _probe_domain(main_case))
+                link = _basis_payload(dense["case"], _probe_domain(dense["case"]))
+                out["dense"] = _dense_delta(base, link, dense["key"])
+            except Exception as exc:  # noqa: BLE001 - shown as unavailable, never hidden
+                out["dense"] = {"key": dense["key"], "error": f"{type(exc).__name__}: {exc}"}
+    return out
+
+
+def hw_control_summary(root: Path, store: Path, key: str) -> dict:
+    """Control links + the recorded sampling number for one case (Python-only summary)."""
+    case = _resolve_case(store, key)
+    row = _row(store, case, _declared(load_registry(root)))
+    return _control_summary(store, case, _control_link_view(store, row))
+
+
 def _parent_key(store: Path, payload: dict) -> str | None:
     """Solve-only manifests (smoke/wide) name the staged project they solved."""
     proj = payload.get("project")
@@ -405,6 +623,7 @@ def _row(store: Path, case: Path, declared: dict[str, dict]) -> dict:
         "transducer_shape": decl.get("transducer_shape") or "UNDECLARED",
         "horn_source": decl.get("horn_source"),
         "pair_with": decl.get("pair_with"),
+        "controls": dict(decl.get("controls") or {}),
         "created_utc": name[:16] if re.match(r"^\d{8}T\d{6}Z", name) else None,
     }
 
@@ -437,7 +656,8 @@ def hw_cases(root: Path, store: Path) -> dict:
             "cases": rows, "declared_missing": missing, "counts": counts}
 
 
-def _placeholders(row: dict, run_fmin: float | None) -> list[dict]:
+def _placeholders(row: dict, run_fmin: float | None,
+                  controls: dict | None = None, summary: dict | None = None) -> list[dict]:
     out = []
     if row["motor"] == "demo":
         out.append({"token": "DEMO_MOTOR", "text": "BL provider-default motor, not a real driver's T/S."})
@@ -447,12 +667,38 @@ def _placeholders(row: dict, run_fmin: float | None) -> list[dict]:
     if row.get("horn") is not None:
         out.append({"token": "IDEAL_HORN_SOURCE",
                     "text": "Horn throat driven as an ideal 1 m/s normal-velocity source, not a compression driver."})
+    valid = (controls or {}).get("valid") or {}
+    lf = valid.get("lf")
     if run_fmin is not None and run_fmin > 20.0:
-        out.append({"token": "LF_NOT_SOLVED",
-                    "text": f"Nothing solved below {run_fmin:g} Hz; box tuning is not visible in this data."})
+        if lf:
+            out.append({"token": "LF_SOLVED_SEPARATELY",
+                        "text": f"Low band solved separately: {lf['key']}."})
+        else:
+            out.append({"token": "LF_NOT_SOLVED",
+                        "text": f"Nothing solved below {run_fmin:g} Hz; box tuning is not visible in this data."})
     if row["state"] == "solved":
-        out.append({"token": "CONVERGENCE_UNCHECKED",
-                    "text": "Single mesh; no refinement or frequency-densification record (R6)."})
+        dense = valid.get("dense")
+        if dense:
+            number = (summary or {}).get("dense") or {}
+            if number.get("max_abs_db") is not None:
+                text = (f"Frequency sampling: control {dense['key']} "
+                        f"(max {number['max_abs_db']:.2f} dB at {number['shared_count']} shared points).")
+            else:
+                text = f"Frequency sampling: control {dense['key']} (difference unavailable)."
+            out.append({"token": "CONVERGENCE_SAMPLING", "text": text})
+        else:
+            out.append({"token": "CONVERGENCE_SAMPLING",
+                        "text": "Frequency sampling: dense control not run."})
+        refine = valid.get("mesh_refine")
+        out.append({"token": "CONVERGENCE_MESH",
+                    "text": f"Mesh refinement: {refine['key']}." if refine
+                    else "Mesh refinement: not run."})
+    if row["state"] != "solved" and valid.get("wide"):
+        out.append({"token": "WIDE_SOLVE_DECLARED",
+                    "text": f"Wide solve declared: {valid['wide']['key']} (this case is staged-only)."})
+    for bad in (controls or {}).get("invalid") or []:
+        out.append({"token": f"CONTROL_LINK_INVALID[{bad['reason']}]",
+                    "text": f"Declared {bad['kind']} control {bad['key']} is ignored: {bad['reason']}."})
     return out
 
 
@@ -713,6 +959,11 @@ def hw_case(root: Path, store: Path, key: str) -> dict:
     _, horn, _ = _source_params(store, payload)
     run = _run_view(case)
     fmin = min(run["frequencies_hz"]) if run and run.get("frequencies_hz") else None
+    controls = _control_link_view(store, row)
+    summary = _control_summary(store, case, controls)
+    control_run = None
+    if run is None and controls["valid"].get("wide"):
+        control_run = _run_view(controls["valid"]["wide"]["case"])
     result = payload.get("result") if isinstance(payload.get("result"), dict) else {}
     highlights = {k: payload.get(k) for k in (
         "authorized_by", "gate", "motor_role", "experiment_id", "project_sha256",
@@ -728,7 +979,10 @@ def hw_case(root: Path, store: Path, key: str) -> dict:
     validate = payload.get("validate")
     return {
         "row": row,
-        "placeholders": _placeholders(row, fmin),
+        "placeholders": _placeholders(row, fmin, controls, summary),
+        "controls": _control_public(controls),
+        "control_summary": summary,
+        "control_run": control_run,
         "highlights": highlights,
         "validate": validate if isinstance(validate, dict) else None,
         "refusal": {k: result.get(k) for k in ("error_type", "error")} if result.get("ok") is False else None,
@@ -736,7 +990,7 @@ def hw_case(root: Path, store: Path, key: str) -> dict:
         "files": sorted(p.name + ("/" if p.is_dir() else "") for p in case.iterdir()),
         "run": run,
         "geometry": _geometry(store, case, row, horn),
-        "observation_caption": _observation_caption(run),
+        "observation_caption": _observation_caption(run) or _observation_caption(control_run),
     }
 
 
@@ -753,53 +1007,61 @@ def _observation_caption(run: dict | None) -> str | None:
 
 
 def hw_basis(root: Path, store: Path, key: str, domain: str) -> dict:
-    """One observation domain of a solved case, per excitation, never summed.
+    """One observation domain of a case, per excitation, never summed.
 
-    Probe domains: |p| in dB SPL per declared input + wrapped phase (deg). Polar domains:
-    dB normalised per frequency to that excitation's own 0-degree sample (heatmap rows).
+    Probe domains: |p| in dB SPL per declared input + wrapped/unwrapped phase (deg). Polar
+    domains: dB normalised per frequency to that excitation's own 0-degree sample.
+
+    Control links (senior review §3.2/§3.3): an ``lf`` control adds a SECOND, separate point-probe
+    series under ``overlays`` (never concatenated with the main grid). A staged-only case with a
+    ``wide`` control serves that solve as the base series and says so in ``source_control``.
     """
     case = _resolve_case(store, key)
-    run_dir = case / "run"
-    if not (run_dir / "manifest.json").is_file():
-        raise FileNotFoundError(f"{key} has no solved run")
-    from hornlab_search.system.boundarylab import bl_results as R
-
-    res = _cached(("res",) + _stamp(run_dir / "manifest.json"), lambda: R.read_bl_headless_result(run_dir))
-    if domain not in res.observation_sets:
-        raise ValueError(f"unknown domain {domain!r}; available: {sorted(res.observation_sets)}")
-    obs = res.observation_sets[domain]
-    bases = res.per_excitation_bases(domain)
-    conv = {c.excitation_id: c for c in res.conversion}
-    out: dict[str, Any] = {"key": key, "domain": domain, "kind": obs.kind,
-                           "frequencies_hz": [float(f) for f in res.frequencies_hz],
-                           "distance_m": obs.distance_m, "excitations": []}
-    angles = None if obs.angles_deg is None else [float(a) for a in obs.angles_deg]
-    out["angles_deg"] = angles
-    for ex, p in bases.items():
-        c = conv.get(ex)
-        item = {"id": ex, "per_input": None if c is None else c.to_per_input,
-                "reference": None if c is None else c.from_per_input}
-        mag = np.abs(p)
-        if angles is None:
-            # Point probes: one curve per observation point (real cases have one point each).
-            item["spl_db"] = [_db(v) for v in mag[:, 0]]
-            item["phase_deg"] = [float(np.degrees(np.angle(v))) for v in p[:, 0]]
-            # Unwrapped in Python (never in JS): continuous phase for the wrapped/unwrapped toggle.
-            item["phase_unwrapped_deg"] = [float(v) for v in
-                                           np.degrees(np.unwrap(np.angle(p[:, 0])))]
-            if obs.count > 1:
-                item["spl_db_points"] = [[_db(v) for v in row] for row in mag]
-                item["phase_deg_points"] = [[float(np.degrees(np.angle(v))) for v in row] for row in p]
-        else:
-            i0 = int(np.argmin(np.abs(np.asarray(angles))))
-            ref = mag[:, i0:i0 + 1]
-            with np.errstate(divide="ignore", invalid="ignore"):
-                rel = 20.0 * np.log10(np.where(ref > 0, mag / ref, np.nan))
-            item["rel_db"] = [[None if not math.isfinite(v) else round(float(v), 3) for v in row]
-                              for row in rel]
-            item["on_axis_spl_db"] = [_db(v) for v in ref[:, 0]]
-            item["normalised_to_deg"] = angles[i0]
-        out["excitations"].append(item)
+    row = _row(store, case, _declared(load_registry(root)))
+    controls = _control_link_view(store, row)
+    run_case = case
+    source_control = None
+    if not (case / "run" / "manifest.json").is_file():
+        wide = controls["valid"].get("wide")
+        if wide is None:
+            raise FileNotFoundError(f"{key} has no solved run")
+        run_case = wide["case"]
+        source_control = {"kind": "wide", "key": wide["key"]}
+    base = _basis_payload(run_case, domain)
+    out: dict[str, Any] = {"key": key, **base,
+                           "source_control": source_control, "overlays": []}
+    if base["angles_deg"] is None:
+        for kind in ("lf",):
+            link = controls["valid"].get(kind)
+            if link is None:
+                continue
+            label = "LF solve"
+            try:
+                other = _basis_payload(link["case"], domain)
+            except Exception as exc:  # noqa: BLE001 - refusal shown, never hidden
+                out["overlays"].append({"kind": kind, "key": link["key"], "label": label,
+                                        "frequencies_hz": None, "excitations": [],
+                                        "refused": f"{type(exc).__name__}: {exc}"})
+                continue
+            if other["angles_deg"] is not None:
+                out["overlays"].append({
+                    "kind": kind, "key": link["key"], "label": label,
+                    "frequencies_hz": other["frequencies_hz"], "excitations": [],
+                    "refused": "CONTROL_OVERLAY_REFUSED[control run is not a point probe]"})
+                continue
+            matched = []
+            for ea in base["excitations"]:
+                eb = next((e for e in other["excitations"]
+                           if e["id"] == ea["id"]
+                           and e.get("per_input") == ea.get("per_input")
+                           and e.get("reference") == ea.get("reference")), None)
+                if eb is not None:
+                    matched.append(eb)
+            out["overlays"].append({
+                "kind": kind, "key": link["key"], "label": label,
+                "frequencies_hz": other["frequencies_hz"], "excitations": matched,
+                "refused": None if matched else
+                "CONTROL_OVERLAY_REFUSED[no same-channel, same-reference, same-probe series]"})
     return out
 
 

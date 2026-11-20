@@ -76,7 +76,12 @@ const TOKEN_TERM = {
   DEMO_TRANSDUCER_SHAPE: "demo_shape",
   IDEAL_HORN_SOURCE: "ideal_horn_source",
   LF_NOT_SOLVED: "lf_not_solved",
+  LF_SOLVED_SEPARATELY: "lf_solved_separately",
   CONVERGENCE_UNCHECKED: "convergence",
+  CONVERGENCE_SAMPLING: "frequency_sampling",
+  CONVERGENCE_MESH: "mesh_refinement",
+  WIDE_SOLVE_DECLARED: "wide_solve_declared",
+  CONTROL_LINK_INVALID: "control_link",
   BODY_CLEARANCE_VIOLATION: "clearance",
   BODY_CLEARANCE_UNPROVEN: "clearance",
 };
@@ -573,11 +578,18 @@ export async function viewHwCase(root, key) {
     });
     wireScrollHints(root);
   } else if (tab === "response") {
+    const runResponse = run || d.control_run;
     body.innerHTML = `<section class="card" id="hw-bases"><h3>${tip("per_input_ref", "Per-channel response")}</h3></section>`;
-    if (!run) {
+    if (!runResponse) {
       body.querySelector("#hw-bases").insertAdjacentHTML("beforeend", notSolvedHtml(r, d));
     } else {
-      await drawBases(body.querySelector("#hw-bases"), key, run, d.observation_caption, probe, phaseMode,
+      if (!run && d.control_run) {
+        const wide = (d.controls && d.controls.valid && d.controls.valid.wide) || {};
+        body.querySelector("#hw-bases").insertAdjacentHTML("beforeend",
+          `<p class="alert info" role="note">Staged-only case: plotting its declared wide solve
+            <code>${esc(wide.key || "")}</code>. The case itself has no run.</p>`);
+      }
+      await drawBases(body.querySelector("#hw-bases"), key, runResponse, d.observation_caption, probe, phaseMode,
         id => { probeMode = id; syncTabHrefs(); syncResponseUrl(); },
         mode => { phaseMode = mode; syncTabHrefs(); syncResponseUrl(); });
     }
@@ -907,23 +919,51 @@ async function drawBases(host, key, run, caption, initialProbe, initialPhase, on
         <p class="muted" style="margin:0 0 4px;font-size:0.78rem">${esc(ex.reference || "")} · <code>${esc(ex.id)}</code></p>`;
       const mag = document.createElementNS(NS, "svg"), ph = document.createElementNS(NS, "svg");
       cell.append(mag, ph); box.appendChild(cell);
+      // Control overlays are separate series, never one concatenated grid (senior review §3.3):
+      // the LF solve covers 20-200 Hz and the wide solve 200-2500 Hz, with a real gap at the seam.
+      const overlays = [];
+      for (const o of (b.overlays || [])) {
+        if (o.refused) continue;
+        const oe = (o.excitations || []).find(x => x.id === ex.id
+          && x.per_input === ex.per_input && x.reference === ex.reference);
+        if (oe) overlays.push({ label: o.label || o.kind, key: o.key, ex: oe, freqs: o.frequencies_hz || [] });
+      }
+      const allFreqs = [...b.frequencies_hz, ...overlays.flatMap(o => o.freqs)];
+      const fLo = Math.min(...allFreqs), fHi = Math.max(...allFreqs);
+      const xlim2 = overlays.length ? [Math.min(20, fLo), Math.max(fHi * 1.25, 25)] : xlim;
+      const xticks2 = overlays.length
+        ? logTicks(xlim2[0], xlim2[1]).filter(t => t <= fHi + 0.5) : xticks;
+      const band2 = overlays.length
+        ? (fLo > xlim2[0] + 0.5 ? [xlim2[0], fLo] : undefined) : bandOpt;
       const pts = b.frequencies_hz.map((f, k) => [f, ex.spl_db[k]]);
-      const ys = pts.map(p => p[1]).filter(v => v != null);
+      const overlayPts = overlays.flatMap(o => o.freqs.map((f, k) => [f, o.ex.spl_db[k]]));
+      const ys = [...pts, ...overlayPts].map(p => p[1]).filter(v => v != null);
       const ylo = Math.floor((Math.min(...ys) - 3) / 5) * 5, yhi = Math.ceil((Math.max(...ys) + 3) / 5) * 5;
       const color = i ? css("--best") : css("--accent");
-      chart(mag, { W: 420, H: 260, xlog: true, xlim, ylim: [ylo, yhi], yticks: niceTicks(ylo, yhi, 5),
-        xticks, xlabel: "Frequency (Hz)", ylabel: `SPL (${unitLabel(ex)})`,
-        series: [{ pts, color, w: 2 }, { pts, color, dots: true, r: 2.2 }], band: bandOpt,
-        ariaLabel: `${channelName(ex)} level at ${sel.value}` });
-      // Phase is one connected line. Wrapped mode breaks the stroke at ±180°; no dots are drawn at
-      // those breaks. Unwrapped mode uses the Python-computed continuous series and its own y range.
+      const lfColor = css("--seed");
+      const magSeries = [{ pts, color, w: 2 }, { pts, color, dots: true, r: 2.2 }];
+      for (const o of overlays) {
+        const op = o.freqs.map((f, k) => [f, o.ex.spl_db[k]]);
+        magSeries.push({ pts: op, color: lfColor, w: 2 }, { pts: op, color: lfColor, dots: true, r: 2.2 });
+      }
+      chart(mag, { W: 420, H: 260, xlog: true, xlim: xlim2, ylim: [ylo, yhi], yticks: niceTicks(ylo, yhi, 5),
+        xticks: xticks2, xlabel: "Frequency (Hz)", ylabel: `SPL (${unitLabel(ex)})`,
+        series: magSeries, band: band2,
+        ariaLabel: `${channelName(ex)} level at ${sel.value}${overlays.length ? ", with the declared LF solve as a separate series" : ""}` });
+      // Phase is one connected line per solve. Wrapped mode breaks the stroke at ±180°; no dots are
+      // drawn at those breaks. Unwrapped mode uses the Python-computed continuous series.
       const wrapped = b.frequencies_hz.map((f, k) => [f, ex.phase_deg[k]]);
       const unwrapped = Array.isArray(ex.phase_unwrapped_deg)
         ? b.frequencies_hz.map((f, k) => [f, ex.phase_unwrapped_deg[k]]) : null;
+      const ovWrapped = overlays.map(o => ({ color: lfColor,
+        pts: o.freqs.map((f, k) => [f, o.ex.phase_deg[k]]) }));
+      const ovUnwrapped = overlays.map(o => Array.isArray(o.ex.phase_unwrapped_deg)
+        ? ({ color: lfColor, pts: o.freqs.map((f, k) => [f, o.ex.phase_unwrapped_deg[k]]) }) : null);
       const useUnwrapped = phaseMode === "unwrapped" && !!unwrapped;
-      let series, ylim, yticks;
+      let phaseSeries, ylim, yticks;
       if (useUnwrapped) {
-        const vals = unwrapped.map(p => p[1]).filter(v => v != null && isFinite(v));
+        const vals = [...unwrapped, ...ovUnwrapped.filter(Boolean).flatMap(o => o.pts)]
+          .map(p => p[1]).filter(v => v != null && isFinite(v));
         let lo = Math.min(...vals), hi = Math.max(...vals);
         const span = hi - lo;
         const step = span <= 540 ? 90 : span <= 1080 ? 180 : 270;
@@ -931,15 +971,28 @@ async function drawBases(host, key, run, caption, initialProbe, initialPhase, on
         if (!isFinite(p0) || !isFinite(p1) || p1 - p0 < 180) { p0 = Math.min(p0, -180); p1 = Math.max(p1, 180); }
         ylim = [p0, p1]; yticks = [];
         for (let v = p0; v <= p1 + 1e-9; v += step) yticks.push(v);
-        series = [{ pts: unwrapped, color, w: 2 }];
+        phaseSeries = [{ pts: unwrapped, color, w: 2 },
+          ...ovUnwrapped.filter(Boolean).map(o => ({ pts: o.pts, color: o.color, w: 2 }))];
       } else {
         ylim = [-180, 180]; yticks = [-180, -90, 0, 90, 180];
-        series = breakWrapped(wrapped).map(s => ({ pts: s, color, w: 2 }));
+        phaseSeries = breakWrapped(wrapped).map(s => ({ pts: s, color, w: 2 }));
+        for (const o of ovWrapped)
+          phaseSeries.push(...breakWrapped(o.pts).map(s => ({ pts: s, color: o.color, w: 2 })));
       }
-      chart(ph, { W: 420, H: 190, xlog: true, xlim, ylim, yticks,
-        xticks, xlabel: "Frequency (Hz)", ylabel: "Phase (°)",
-        series, band: bandOpt,
-        ariaLabel: `${channelName(ex)} phase, ${phaseMode}, at ${sel.value}` });
+      chart(ph, { W: 420, H: 190, xlog: true, xlim: xlim2, ylim, yticks,
+        xticks: xticks2, xlabel: "Frequency (Hz)", ylabel: "Phase (°)",
+        series: phaseSeries, band: band2,
+        ariaLabel: `${channelName(ex)} phase, ${phaseMode}, at ${sel.value}${overlays.length ? ", with the LF solve" : ""}` });
+      if (overlays.length) {
+        const lo = Math.min(...overlays[0].freqs), hi = Math.max(...overlays[0].freqs);
+        cell.insertAdjacentHTML("beforeend", `<p class="legend hw-chart-legend">
+          <span class="hw-swatch" style="background:${color}"></span>${esc(b.source_control ? "wide solve" : "solve")}
+          <span class="hw-swatch" style="background:${lfColor}"></span>${esc(overlays[0].label)}</p>
+          <p class="cap" style="font-size:0.78rem">Two separate solves of the same project on one axis:
+          the ${esc(overlays[0].label)} covers ${fmtHz(lo)}-${fmtHz(hi)} and the
+          ${b.source_control ? "declared wide solve" : "wide solve"} starts at ${fmtHz(Math.min(...b.frequencies_hz))}.
+          They are never concatenated or summed.</p>`);
+      }
       if (phaseMode === "unwrapped" && !unwrapped) {
         cell.insertAdjacentHTML("beforeend",
           `<p class="muted" style="font-size:0.78rem">unwrapped phase is not in this run; showing wrapped.</p>`);
