@@ -48,6 +48,7 @@ the wire-in note at the bottom of this module.
 """
 from __future__ import annotations
 
+import math
 import time
 from pathlib import Path
 
@@ -121,6 +122,43 @@ def _resolve_grid(grid: dict, *, enclosure: dict | None = None
     return inner, outer, t, meta, closed
 
 
+def source_cap_radius_mm(cfg) -> float | None:
+    """The brief's explicit ``source.cap`` radius in mm, or ``None`` for ``auto``/absent.
+
+    ``examples/briefs`` validate ``source.cap`` as ``"auto"`` or a positive radius in mm
+    (``config.load_brief``); anything else here is treated as auto rather than invented.
+    ``None`` is also the "pass no ``source_radius_mm``" sentinel, which leaves the mesher's
+    documented auto-angle branch exactly as it always was.
+    """
+    brief = getattr(cfg, "brief", None)
+    if not isinstance(brief, dict):
+        return None
+    cap = (brief.get("source") or {}).get("cap", "auto")
+    if isinstance(cap, bool) or not isinstance(cap, (int, float)):
+        return None
+    radius = float(cap)
+    return radius if radius > 0.0 and math.isfinite(radius) else None
+
+
+def source_cap_provenance(cfg, angle_deg: float) -> dict:
+    """What the cap actually used for this build was, for the grid meta/provenance.
+
+    Mirrors the shape of ``design.recipe_meta.recipe_metadata``'s ``source_cap`` so a reader
+    can tell an explicit brief radius (``source: "brief"``) from the mesher's auto angle.
+    The auto case resolves to ``radius_mm: None`` here because the mesher, not this adapter,
+    computes throat_radius / sin(angle); the same number is already recorded by
+    ``recipe_meta`` as ``point_grid_resolved``.
+    """
+    radius = source_cap_radius_mm(cfg)
+    raw = ((getattr(cfg, "brief", None) or {}).get("source") or {}).get("cap", "auto")
+    return {
+        "cap": "auto" if radius is None else radius,
+        "radius_mm": radius,
+        "radius_source": "brief" if radius is not None else "auto_angle",
+        "auto_angle_deg": float(angle_deg),
+    }
+
+
 def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None,
                     mounting: dict | None = None) -> MeshResult:
     """GRID geometry + ``MeshSpec`` -> ``out_path`` (.msh, metres) and a ``MeshResult``.
@@ -172,6 +210,24 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None,
         raise ValueError(
             f"source_auto_angle_deg must be nonzero (got {angle!r}); 0 removes the source cap")
 
+    # The brief's ``source.cap`` reaches the mesher here. ``"auto"``/absent -> no
+    # ``source_radius_mm`` keyword, so ``PointGridHornGeometry`` keeps its -1.0 default and the
+    # auto-angle branch runs exactly as before (byte-identical meshes/hashes).
+    #
+    # PRECEDENCE, asserted against the installed mesher
+    # (``hornlab_mesher/builders/point_grid_sources.py`` ``_source_cap_radius``, lines 465-478):
+    #   if geometry.source_radius_mm and geometry.source_radius_mm > 0.0:  -> explicit radius
+    #   elif geometry.source_auto_angle_deg is not None:                    -> throat/sin(angle)
+    # so an explicit radius wins while the angle stays set as provenance/fallback in BOTH cases.
+    # The mesher's own guards still run: a radius <= the throat radius is clamped by its call
+    # sites (max(radius, throat*1.001)) and a collapsing cap height falls back to the planar
+    # fill; any ConfigError/ValueError/MesherError it does raise is wrapped below, unchanged.
+    source_radius_mm = source_cap_radius_mm(cfg)
+    meta["source_cap"] = source_cap_provenance(cfg, angle)
+    source_args: dict[str, float | int] = {"source_shape": 1, "source_auto_angle_deg": angle}
+    if source_radius_mm is not None:
+        source_args["source_radius_mm"] = source_radius_mm
+
     res = res_mm_for_spec(mesh, cfg)
     # KEYWORDS ONLY: positional arg 4 of MeshDensity is aperture_res_scale, not max_triangles.
     density = MeshDensity(
@@ -182,21 +238,19 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None,
         max_triangles=int(mesh.max_triangles),
         allow_large_mesh=False,
     )
-    geometry = PointGridHornGeometry(
-        inner_points=inner,
-        closed=full,                           # the full ring is the mesher's native closed mode
-        outer_points=outer,                    # None in enclosure mode (structural guard)
-        wall_thickness_mm=float(t) if enclosure is None else 0.0,
-        source_shape=1,
-        source_auto_angle_deg=angle,
-        symmetry_planes=_GRID_SYMMETRY_AXES[mesh.quadrants],
-        enclosure=enclosure,
-    )
-
     out_path.parent.mkdir(parents=True, exist_ok=True)
     # The mesher writes ``out_path`` directly; never let it write through a hardlink.
     out_path.unlink(missing_ok=True)
     try:
+        geometry = PointGridHornGeometry(
+            inner_points=inner,
+            closed=full,                       # the full ring is the mesher's native closed mode
+            outer_points=outer,                # None in enclosure mode (structural guard)
+            wall_thickness_mm=float(t) if enclosure is None else 0.0,
+            symmetry_planes=_GRID_SYMMETRY_AXES[mesh.quadrants],
+            enclosure=enclosure,
+            **source_args,
+        )
         _path, info = build_mesh_with_info(geometry, density, output_path=out_path,
                                            scale_to_metres=True)
     except TriangleBudgetExceeded as exc:

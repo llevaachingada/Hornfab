@@ -75,6 +75,8 @@
   3.49921 for the same B3 design). The corpus tool prints `J` for context only and never ranks it across
   identities.
 
+- **FIXED (2026-11-20):** `source.cap` now reaches the mesher for grid families AND the mesh identity (`MeshSpec.source_cap_mm`, hash-neutral when 0). Stored hashes unchanged; cap 150/60 produce distinct meshes. Re-run night `docs/queue/source_sensitivity2_2026-11-20.yaml`. Two caveats stay open: (a) `design/recipe_meta.py` still records the auto radius in `design.json` provenance for explicit-cap runs, and (b) the pre-fix runs under `runs/source_sensitivity/` must not be read as a source-sensitivity result (they are a record of the bug).
+
 ## 2026-11-20 - Ripple audit grid test RUN (PASS) + OPEN: bridge cells cannot be verified from the plain CLI
 
 - DONE: `ripple_audit_2026-11-20` launched (detached, 08:34 local) and finished 08:48 **exit 0**;

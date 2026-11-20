@@ -103,6 +103,9 @@
 - **Evidence:** `docs/evidence/ripple_program_2026-11-20/README.md` (all three experiments, the
   pre-declared readings and the "what we now know we need" section).
 
+- **source.cap FIXED (2026-11-20 ~17:00):** two halves were needed. `mesh/grid_build.py` now passes the brief's cap as `source_radius_mm` (and records `meta["source_cap"]`), and `MeshSpec` gained `source_cap_mm` which enters `MeshSpec.hash()` only when non-zero - without the second half the geometry would be right while the mesh/solve caches still keyed on the auto mesh. Verified: stored 8 kHz run keeps `8e789cd0deef`, 12 kHz auto keeps `7abdb667298f`, cap 150/60 give `bcf9a8cec98b` / `c42751b96235`. 8 tests in `tests/test_mesh_source_cap.py`, 118 in the mesh/config gate. Re-run night `docs/queue/source_sensitivity2_2026-11-20.yaml` launched (new output dirs; the pre-fix runs under `runs/source_sensitivity/` stay as evidence of the bug).
+- **KNOWN GAP (not fixed):** `design/recipe_meta.py` still resolves the AUTO radius into `design.json["generator"]["recipe_meta"]["source_cap"]` for explicit-cap runs, so the design provenance disagrees with the mesh that was built. The grid meta (`meta["source_cap"]`) is correct; the record-side one-liner belongs to that file's owner.
+
 ## 2026-11-20 - Ripple audit grid test RUN: PASS (rho 0.964) + DENSE verdict: the B3 feature is broad, not a resonance
 
 - **Launched (owner: "Launch"):** `ripple_audit_2026-11-20`, detached pid 2900 at 08:34 local,

@@ -1807,7 +1807,23 @@ def mesh_spec(mode: Mode, cfg: Config) -> MeshSpec:
         max_triangles=max_tri,
         allow_large_mesh=False,
         curvature_npts=float(getattr(cfg.mesh, "curvature_npts", 0.0) or 0.0),
+        source_cap_mm=_brief_source_cap_mm(cfg),
     )
+
+
+def _brief_source_cap_mm(cfg) -> float:
+    """The brief's explicit ``source.cap`` radius in mm, or 0.0 for ``auto``/absent.
+
+    ``load_brief`` validates ``source.cap`` as ``"auto"`` or a positive radius in mm. 0.0 is the
+    "auto" sentinel and leaves ``MeshSpec.hash()`` byte-identical to every stored mesh; a positive
+    value enters the hash, so the mesh and the solve cache cannot hand back the auto response.
+    """
+    brief = getattr(cfg, "brief", None)
+    cap = ((brief or {}).get("source") or {}).get("cap", "auto") if isinstance(brief, dict) else "auto"
+    if cap is None or isinstance(cap, bool) or not isinstance(cap, (int, float)):
+        return 0.0
+    radius = float(cap)
+    return radius if radius > 0.0 and np.isfinite(radius) else 0.0
 
 
 def solve_spec(mode: Mode, cfg: Config) -> SolveSpec:

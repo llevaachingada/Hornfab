@@ -57,11 +57,17 @@ class MeshSpec:
     max_triangles: int
     allow_large_mesh: bool = False
     curvature_npts: float = 0.0   # WP4 (throughput): 0 = off = today; non-zero changes the hash
+    # 2026-11-20: the brief's explicit `source.cap` radius in mm (0 = "auto"/absent = today).
+    # Without this the cap never entered the mesh identity, so a cap change reused the auto mesh
+    # and its cached response (measured: three cap variants, one mesh hash, two cache hits).
+    source_cap_mm: float = 0.0
 
     def hash(self) -> str:
         d = asdict(self)
         if not d.get("curvature_npts"):
             d.pop("curvature_npts", None)    # default: the hash input is byte-identical to before
+        if not d.get("source_cap_mm"):
+            d.pop("source_cap_mm", None)     # default: every stored mesh hash is unchanged
         return _hash(_canon(d))
 
 

@@ -1,0 +1,86 @@
+# RE-RUN after the source.cap fix (2026-11-20 ~16:40). Same six jobs, NEW output dirs, so the
+# pre-fix runs under runs/source_sensitivity/ stay as evidence of the inert-key bug.
+# SOURCE SENSITIVITY at 8-12 kHz (2026-11-20). Ripple mandate item 5, cheap form.
+#
+# QUESTION: above the 35.8 mm throat's first transverse-mode cut-on (5.61 kHz) the solver assumes a
+# uniform-velocity spherical cap. How much of the 8-12 kHz answer is the HORN and how much is that
+# assumption? If it moves materially, every HF comparison (including the handoff's Crowe X OSSE
+# 74x54 deg at 8 kHz) has to be read as "this source", not "this horn" - and mandate item 4 must not
+# be run until that is known.
+#
+# HOW: two anchors, re-solved at verify fidelity under three source wavefront curvatures. Same
+# geometry, same mesh policy, same target - only `source.cap` changes:
+#   cap auto -> r0/sin(exit_angle) = ~513 mm curvature = 0.31 mm dome (effectively a flat piston)
+#   cap 150  -> 1.07 mm dome
+#   cap 60   -> 2.73 mm dome
+# Briefs (verify_only, band_hi 12 kHz): examples/briefs/source_sensitivity_2026-11-20/*.yaml, each a
+# copy of the HOME 80x50 v7 smooth brief with only the band and the cap changed.
+#
+# PRE-DECLARED READING (write it into the evidence doc before looking at numbers):
+#   * REPORT: beamwidth H/V at 8, 10, 12 kHz and the +25/+35 V level (re 0 deg) at 8, 10, 12 kHz for
+#     each (anchor, cap).
+#   * A cap change of <=0.3 deg beamwidth and <=0.3 dB off-axis level at 8-12 kHz = the source
+#     assumption does not decide the HF comparison; item 4 can proceed as planned.
+#   * A change >=1 deg or >=1 dB = the HF numbers are source-conditional; item 4 must be run with
+#     the source held fixed at one cap, and mandate item 5 is escalated to real-driver measurement.
+#
+# Cost: 6 verify solves at 12 kHz (33 frequencies, mesh rebuilt for the higher band), ~5-10 min each.
+# J is not comparable with the 8 kHz briefs (different band and grid) - this night is about the
+# RESPONSE, not J.
+night: source_sensitivity2_2026-11-20
+lane: gpu
+jobs:
+- id: ss_crowex_auto
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T090559Z-screen-9b8767,
+         --designs, 9b5428e6dec8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_auto.yaml,
+         --verify-dir, runs/source_sensitivity2/ss_crowex_auto]
+- id: ss_crowex_cap150
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T090559Z-screen-9b8767,
+         --designs, 9b5428e6dec8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_cap150.yaml,
+         --verify-dir, runs/source_sensitivity2/ss_crowex_cap150]
+- id: ss_crowex_cap60
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T090559Z-screen-9b8767,
+         --designs, 9b5428e6dec8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_cap60.yaml,
+         --verify-dir, runs/source_sensitivity2/ss_crowex_cap60]
+- id: ss_morph_auto
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T081214Z-screen-8470bd,
+         --designs, cf716e738ef8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_auto.yaml,
+         --verify-dir, runs/source_sensitivity2/ss_morph_auto]
+- id: ss_morph_cap150
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T081214Z-screen-8470bd,
+         --designs, cf716e738ef8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_cap150.yaml,
+         --verify-dir, runs/source_sensitivity2/ss_morph_cap150]
+- id: ss_morph_cap60
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T081214Z-screen-8470bd,
+         --designs, cf716e738ef8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_cap60.yaml,
+         --verify-dir, runs/source_sensitivity2/ss_morph_cap60]
