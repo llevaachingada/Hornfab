@@ -1,7 +1,7 @@
 # x_r3_b3_dense_epw9 - ripple item 3 dense-frequency B3 re-solve at epw 9.0.
 name: x_r3_b3_dense_epw9
 family: FREEFORM
-brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth.yaml
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7_smooth_dense.yaml
 generator:
   name: grid
   rows:
@@ -147,78 +147,3 @@ search:
   infeasible_penalty: graded
   budget_counts: valid
   max_attempts: 250
-grid:
-  screen_extra_hz:
-  - 1800
-  - 1825
-  - 1850
-  - 1875
-  - 1900
-  - 1925
-  - 1950
-  - 1975
-  - 2000
-  - 2025
-  - 2050
-  - 2075
-  - 2100
-  - 2125
-  - 2150
-  - 2175
-  - 2200
-  - 2225
-  - 2250
-  - 2275
-  - 2300
-  - 2325
-  - 2350
-  - 2375
-  - 2400
-  - 2425
-  - 2450
-  - 2475
-  - 2500
-  - 2525
-  - 2550
-  - 2575
-  - 2600
-  - 2625
-  - 2650
-  - 2675
-  - 2700
-  - 2725
-  - 2750
-  - 2775
-  - 2800
-  - 2825
-  - 2850
-  - 2875
-  - 2900
-  - 2925
-  - 2950
-  - 2975
-  - 3000
-  - 3025
-  - 3050
-  - 3075
-  - 3100
-  - 3125
-  - 3150
-  - 3175
-  - 3200
-  - 3225
-  - 3250
-  - 3275
-  - 3300
-  - 3325
-  - 3350
-  - 3375
-  - 3400
-  - 3425
-  - 3450
-  - 3475
-  - 3500
-  - 3525
-  - 3550
-  - 3575
-  - 3600

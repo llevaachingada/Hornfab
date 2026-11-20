@@ -170,3 +170,28 @@ jobs:
   - examples/typologies/expand_2026-11-19/x_r3_b3_dense_epw9.yaml
   - --mode
   - screen
+
+- id: x_r3_b3_dense2_epw6
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/expand_2026-11-19/x_r3_b3_dense_epw6.yaml
+  - --mode
+  - screen
+- id: x_r3_b3_dense2_epw9
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/expand_2026-11-19/x_r3_b3_dense_epw9.yaml
+  - --mode
+  - screen
