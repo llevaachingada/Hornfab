@@ -1,5 +1,9 @@
 ﻿# ISSUES
 
+## 2026-11-20 - System v1 handoffs self-contained (DONE)
+
+- DONE: `docs/system_v1/HANDOFFS.md`. No change to open items from the previous entry.
+
 ## 2026-11-20 - System v1 plan (docs only)
 
 - DONE: `docs/system_v1/` architecture, frozen contracts, and pass handoffs 0/A/B/C/D/E.

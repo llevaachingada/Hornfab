@@ -1,5 +1,12 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 - System v1 handoffs made self-contained (docs only)
+
+- **Owner ask:** handoffs must carry branch names, file locations and rules.
+- **New:** `docs/system_v1/HANDOFFS.md`: locations table, 10 rules every session follows, and full
+  paste-ready briefs for Pass 0, A, B, C, D (repo, branch to cut, plan-branch fallback while PR #76 is
+  open, owned files per lane, commands, stop conditions, done-when, report). README points to it.
+
 ## 2026-11-20 - System v1 architecture + implementation plan (cloud, docs only, no GPU)
 
 - **Owner ask:** senior review of the 2026-11-19 handbook + system export, turned into an architecture

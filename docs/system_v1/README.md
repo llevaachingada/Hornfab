@@ -4,6 +4,9 @@
 `docs/system_data/` export. **Purpose:** turn the handbook's findings into a plan that lower-effort
 agents can execute in parallel lanes, pass by pass, without re-deriving the design.
 
+**Start a session with [`HANDOFFS.md`](HANDOFFS.md)** (self-contained briefs: repo, branches, file
+locations, rules).
+
 **Binding docs for this effort:** this file, [`01_CONTRACTS.md`](01_CONTRACTS.md) (frozen for the
 effort), and the one pass handoff you were given. Repo rules (CLAUDE.md, AGENTS.md, CONTRIBUTING.md)
 still win where they conflict.
