@@ -287,7 +287,22 @@ def _run_summary(run_dir: Path) -> dict:
         "session_n": len(srows),
         "session_best_j": min((r["objective"] for r in ok_s), default=None),
         "has_verify": (run_dir / "verify" / "search.ndjson").exists(),
+        # which optimizer proposed the designs (2026-11-19): BO/TuRBO study solves are mirrored into
+        # ordinary run folders by tools/night_queue/mirror_bo_studies.py, which writes run.json
+        # ``algorithm`` (turbo / scalar / pareto / bo) and ``source_study``; CMA runs fall back to the
+        # config's search.algorithm (cma, cma_me, ...).
+        "algorithm": _run_algorithm(rj_sum, cfg),
+        "source_study": rj_sum.get("source_study"),
     })
+
+
+def _run_algorithm(rj: dict, cfg: dict) -> str:
+    algo = rj.get("algorithm")
+    if isinstance(algo, str) and algo:
+        return algo
+    search = cfg.get("search") if isinstance(cfg.get("search"), dict) else {}
+    algo = search.get("algorithm")
+    return algo if isinstance(algo, str) and algo else "cma"
 
 
 def list_runs(runs: Path, limit: int | None = None) -> list[dict]:

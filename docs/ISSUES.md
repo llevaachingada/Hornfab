@@ -1,5 +1,15 @@
 ﻿# ISSUES
 
+## 2026-11-19 - BO/TuRBO runs invisible in the GUI (fixed)
+
+- DONE: study solves mirrored as ordinary run folders (`tools/night_queue/mirror_bo_studies.py`, hard
+  links, auto-run by `run_bo_arm.py`); GUI optimizer filter/badge/header; CMA vs TuRBO matched render set
+  `docs/renders/2026-11-19-turbo-vs-cma/` (TuRBO wins 6/6 on screen J; warm-started, not independent).
+- OPEN (pre-existing): `test_b8_lanes_bounded_gui::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  fails on `hornlab_search/gui/study_jobs.py` `subprocess.Popen` (commit 6791bfa) - owner of that lane to fix
+  or whitelist.
+- NOTE: mirror runs are read-only views; "resume"/"continue" buttons on them do not apply (they are not CMA runs).
+
 ## 2026-11-19 - P11 s2w attempted; superseded by the compact-slate night (no GPU spent)
 
 - RESOLVED (coordination): the p11_s2w night (box-widened v10 s2 seeded at the published bests, 80

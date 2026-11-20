@@ -180,6 +180,7 @@ tbody tr.row-not-sep td:first-child { border-left:3px solid var(--warn); }
 .pill { display:inline-block; font-family:var(--f-mono); font-size:0.7rem;
   padding:2px 8px; border-radius:99px; border:1px solid currentColor; }
 .pill.good { color:var(--good); } .pill.warn { color:var(--warn); } .pill.bad { color:var(--bad); }
+.pill.algo-bo { color:var(--accent); border-color:var(--accent); } .pill.algo-cma { color:var(--muted); }
 .pill-row { display:flex; flex-wrap:wrap; gap:4px; }
 
 /* ── Buttons ────────────────────────────────────────────────────── */

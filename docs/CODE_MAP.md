@@ -304,6 +304,7 @@ bempp_cpu) â†’ `metrics` (beamwidth, ripple, DI, impedance) â†’ `objec
 
 ## Reviewed night continuation (2026-11-16)
 
-- `tools/night_queue/run_bo_arm.py`: strict cohort/preparation checks and sequential study execution, runtime deadlines.
+- `tools/night_queue/run_bo_arm.py`: strict cohort/preparation checks and sequential study execution, runtime deadlines; mirrors the study afterwards (below).
+- `tools/night_queue/mirror_bo_studies.py` (2026-11-19): hard-links each `runs/study-<id>/{screen,verify}` into an ordinary run folder `runs/<start>-<policy>-<id6>/` (+ own `run.json` with `algorithm`/`bo_seed`/`source_study`, `best.json`, `bo_mirror.json`) so the GUI and render tools show BO/TuRBO runs exactly like CMA runs; idempotent, `--prune`. GUI: `data._run_summary` `algorithm`/`source_study`, Runs optimizer filter + badge. Tests: `tests/test_night_mirror_bo_studies.py`.
 - `tools/night_queue/refine_study_cma.py`: bounded local CMA from measured BO screen results, immutable input config.
 - `hornlab_search/studies/package.py`: additive `comparison-80x2` budget.

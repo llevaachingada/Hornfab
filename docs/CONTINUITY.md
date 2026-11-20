@@ -1,5 +1,26 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - TuRBO/BO study runs now viewable like CMA runs; CMA vs TuRBO render set (CPU only)
+
+- **Owner ask:** make TuRBO results as viewable as CMA (GUI, graphics, runs), apples to apples.
+- **Cause:** BO studies write solves to `runs/study-<id>/{screen,verify}` (same files as a CMA run, one
+  folder deeper), so the GUI run list (RUN_ID pattern), run page, Compare, leaders and render tools never saw them.
+- **Fix:** `tools/night_queue/mirror_bo_studies.py` hard-links each study into `runs/<start>-<policy>-<id6>/`
+  (no copied data; own run.json with `algorithm`/`bo_seed`/`source_study`, best.json, bo_mirror.json;
+  idempotent, `--prune`). `run_bo_arm.py` runs it after every arm. 22 studies mirrored (8 TuRBO, 11 BO
+  scalar, 1 Pareto, 2 early BO). GUI: summary `algorithm`/`source_study`, Runs optimizer filter + badge,
+  run header names optimizer/study, BO note instead of the empty CMA covariance panel, Compare labels.
+  BoTorch training reads dataset shards, not run folders, so mirrors cannot double-count rows.
+- **Measured (screen J, same config/brief/v7):** TuRBO beats the best CMA run in all 6 pairs: ext-throat
+  hvlaw 2.498 vs 3.103, fold warm 3.330 vs 3.621, TwinRay v8 4.091 vs 4.914, Tritonia v9 4.546 vs 5.015,
+  Tritonia v8 4.628 vs 5.692, p80x60 ATH core 4.691 vs 4.978 (TuRBO is cohort-warm-started from CMA data).
+  BO scalar wins 3/6. Renders + pairs.json: `docs/renders/2026-11-19-turbo-vs-cma/`.
+- **Tests:** `tests/test_night_mirror_bo_studies.py` 4 passed; GUI suites pass except the pre-existing
+  `test_b8_lanes_bounded_gui::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  (`gui/study_jobs.py` Popen, from 6791bfa; untouched). Browser-checked on a private 8811 instance.
+- **Owner action:** restart the 8765 GUI to load the new summary fields. The other lane's uncommitted hw
+  GUI edits (app.js/app.css/INDEX) were excluded from staging.
+
 ## 2026-11-19 - Top-designs export for cloud agents (CPU only, no GPU)
 
 - **Owner ask:** export the top-10 highest-scored designs for every typology and score set from GPU

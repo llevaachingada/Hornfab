@@ -2079,6 +2079,11 @@ function renderRunsList(allRuns, status = null, studies = null) {
           <option value="verify">Verify runs</option>
           <option value="has_verify">Runs with verified designs</option>
         </select>
+        <select id="run-filter-algo" aria-label="filter by optimizer">
+          <option value="">All optimizers</option>
+          ${[...new Set(allRuns.map(r => r.algorithm || "cma"))].sort().map(a => `<option value="${esc(a)}">${esc(optimizerLabel(a))} (${allRuns.filter(r => (r.algorithm || "cma") === a).length})</option>`).join("")}
+          <option value="bo">Any BO / TuRBO</option>
+        </select>
         <select id="run-filter-version" aria-label="filter by objective version">
           <option value="">All versions</option>
           ${objectiveVersions(allRuns).map(v => `<option value="${v}">J v${v} (${allRuns.filter(r => objectiveVersionOf(r) === v).length})</option>`).join("")}
@@ -2110,8 +2115,10 @@ function renderRunsList(allRuns, status = null, studies = null) {
     const vf = document.getElementById("run-filter-version").value;
     const sort = document.getElementById("run-sort").value;
     const mf = document.getElementById("run-filter-mode").value;
+    const af = document.getElementById("run-filter-algo").value;
     let filtered = allRuns.filter(r =>
       runModeMatches(r, mf) &&
+      optimizerMatches(r, af) &&
       (!bf || r.brief === bf) &&
       (!ff || r.family === ff) &&
       (!vf || objectiveVersionOf(r) === Number(vf)) &&
@@ -2161,6 +2168,7 @@ function renderRunsList(allRuns, status = null, studies = null) {
   document.getElementById("run-filter-version").addEventListener("change", render);
   document.getElementById("run-sort").addEventListener("change", render);
   document.getElementById("run-filter-mode").addEventListener("change", render);
+  document.getElementById("run-filter-algo").addEventListener("change", render);
 }
 
 /** Pure: <option>s for the Compare pickers, filtered by free text (name/family/brief/id) and
@@ -2169,8 +2177,8 @@ function compareOptionsHtml(runs, q, brief, keep = "") {
   const needle = String(q || "").trim().toLowerCase();
   return (runs || []).filter(r => r.id === keep || (
       (!brief || r.brief === brief) &&
-      (!needle || [r.name, r.family, r.brief, r.id].some(v => String(v || "").toLowerCase().includes(needle)))))
-    .map(r => `<option value="${esc(r.id)}">${esc(r.name)} · ${esc(r.brief || "no brief")} · ${esc(jVersionLabel(r))} best ${fmt(r.best_j)}${r.mode === "verify" ? " · verify" : ""} — ${esc(r.id)}</option>`)
+      (!needle || [r.name, r.family, r.brief, r.id, optimizerLabel(r.algorithm)].some(v => String(v || "").toLowerCase().includes(needle)))))
+    .map(r => `<option value="${esc(r.id)}">${esc(r.name)} · ${esc(optimizerLabel(r.algorithm))} · ${esc(r.brief || "no brief")} · ${esc(jVersionLabel(r))} best ${fmt(r.best_j)}${r.mode === "verify" ? " · verify" : ""} — ${esc(r.id)}</option>`)
     .join("");
 }
 
@@ -2192,9 +2200,23 @@ function runModeMatches(r, mode) {
 }
 
 /** Pills after a run's name: running · verify · verified designs (pure). */
+/** Optimizer labels (2026-11-19). BO/TuRBO study solves appear as ordinary runs through the
+ *  mirror folders written by tools/night_queue/mirror_bo_studies.py (run.json ``algorithm``). */
+const OPTIMIZER_LABELS = { cma: "CMA-ES", cma_me: "CMA-ME", turbo: "TuRBO", scalar: "BO scalar",
+                           pareto: "BO Pareto", bo: "BO" };
+const BO_ALGOS = new Set(["turbo", "scalar", "pareto", "bo"]);
+function optimizerLabel(a) { return OPTIMIZER_LABELS[a || "cma"] || String(a); }
+function isBoRun(r) { return BO_ALGOS.has(r && r.algorithm); }
+function optimizerMatches(r, f) {
+  if (!f) return true;
+  if (f === "bo") return isBoRun(r);
+  return (r.algorithm || "cma") === f;
+}
+
 function runModeBadgesHtml(r, live) {
   const out = [];
   if (live) out.push(pill("running", "good"));
+  out.push(`<span class="pill algo-${esc(isBoRun(r) ? "bo" : "cma")}" title="optimizer that proposed these designs">${esc(optimizerLabel(r.algorithm))}</span>`);
   if (r.mode === "verify") out.push(pill("verify", "warn"));
   else if (r.has_inline_verify || r.has_verify_runs) out.push(pill("verified designs", "good"));
   return out.join(" ");
@@ -6077,7 +6099,7 @@ async function viewRunDetail(id) {
   ROOT.innerHTML = `
     <div class="stack" style="gap:24px">
       <div>
-        <div class="eyebrow">Run · ${esc(sum.generator ? "typology generator" : "mesher family")} · ${esc(sum.family || "")} mesh · ${esc(sum.mode || "")} fidelity${sum.brief ? " · brief " + esc(sum.brief) : ""}${sum.cma_seed != null ? " · random seed " + esc(sum.cma_seed) : ""}</div>
+        <div class="eyebrow">Run · ${esc(sum.generator ? "typology generator" : "mesher family")} · ${esc(sum.family || "")} mesh · ${esc(sum.mode || "")} fidelity${sum.brief ? " · brief " + esc(sum.brief) : ""} · optimizer ${esc(optimizerLabel(sum.algorithm))}${sum.cma_seed != null ? " · random seed " + esc(sum.cma_seed) : ""}${sum.source_study ? ` · study <span class="mono">${esc(sum.source_study)}</span>` : ""}</div>
         <h2>${esc(sum.name || id)}</h2>
         <p class="mono muted" style="font-size:0.78rem">${esc(id)}</p>
         ${provStripHtml}
@@ -6267,6 +6289,7 @@ async function viewRunDetail(id) {
         <div class="tbl-wrap"><table id="sens-table"></table></div>
       </div>
 
+      ${!isVerify && isBoRun(sum) ? `<div class="cap muted">No CMA covariance or pin plan: this run's designs were proposed by ${esc(optimizerLabel(sum.algorithm))} (BoTorch study <span class="mono">${esc(sum.source_study || "")}</span>), not CMA-ES. Its model diagnostics are on Bayes → Studies.</div>` : ""}
       ${isVerify ? "" : `<!-- CMA covariance (search distribution; absent on older runs) -->
       <div class="fig" id="cma-cov-block" style="display:none">
         <h3>${tip("cma_cov", "CMA covariance")}</h3>

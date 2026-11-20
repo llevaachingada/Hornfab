@@ -81,8 +81,16 @@ def main():
         return 3
     if args.prepare_only:
         return 0
-    return subprocess.call([sys.executable, "-m", "hornlab_search.studies.cli", "run", "--root", args.root,
-                            "--package", "package.json", "--execute", "--project-root", str(REPO)], cwd=REPO)
+    rc = subprocess.call([sys.executable, "-m", "hornlab_search.studies.cli", "run", "--root", args.root,
+                          "--package", "package.json", "--execute", "--project-root", str(REPO)], cwd=REPO)
+    # 2026-11-19: mirror the study's solves into an ordinary run folder (hard links) so the GUI's
+    # Runs / leaders / run page / compare and the render tools show BO arms exactly like CMA runs.
+    # Best effort: a mirror failure never changes the arm's exit code.
+    try:
+        subprocess.call([sys.executable, "tools/night_queue/mirror_bo_studies.py"], cwd=REPO, timeout=600)
+    except (OSError, subprocess.SubprocessError) as exc:
+        print(f"run_bo_arm: study mirror skipped: {exc}", file=sys.stderr, flush=True)
+    return rc
 
 
 if __name__ == "__main__":
