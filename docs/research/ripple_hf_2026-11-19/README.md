@@ -32,6 +32,10 @@ the 24 SCOUT40 bests the gap is real but **partial** — the fixed-angle residua
 with `rip` (ρ = 0.885), and the result flips depending on which reference (IEC band-mean vs
 exploratory trend) is used (ρ = −0.018). Nothing here justifies a new weighted term yet.
 
+Grid stability was then tested on hardware (2026-11-20): ten designs re-solved at verify fidelity
+give **ρ = 0.964** against their screen values, max Δ 0.467 dB — the ranking survives the grid
+change, absolute values do not. [`VERIFY_GRID_TEST.md`](../../evidence/spectral_ripple_audit_2026-11-19/VERIFY_GRID_TEST.md).
+
 ## Boundaries that bind this bundle
 
 - **Report-only.** No new objective term, no change to any stored `J`, no re-scoring of history.

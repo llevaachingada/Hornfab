@@ -68,8 +68,19 @@ Detail, tables and provenance: [`evidence/spectral_ripple_audit_2026-11-19`](../
   moving more than 0.5 dB, and the B3 notch still present once 25 frequencies sample it. A failure is
   the useful outcome: it would mean the 10-sample number is grid-limited and must never be quoted as
   a design property — and item 6 stays closed.
-  Not launched: it is `lane: gpu`, and its per-job `gpu-clean --lane gpu` must not run beside another
-  GPU night. Chain it behind the live runner (`-WaitPid`), never beside it.
+  **Result (2026-11-20 08:48, exit 0): PASS** — ρ = **0.964** (p = 7.3 × 10⁻⁶), max |Δ| = **0.467 dB**
+  (mean 0.143), and the B3 dip reproduces at new sample positions (−6.77 dB at 1,776 Hz, −5.80 at
+  2,037, −6.47 at 2,335). Verdict: the *ranking* survives a frequency-grid change; an *absolute*
+  threshold does not, exactly as the detrend-order spread already said. Two side findings — one
+  design (R-OSSE rectangular) can only be re-solved through its bridge entry point, and verify `J` is
+  a different score identity from screen `J`. Detail:
+  [`evidence/spectral_ripple_audit_2026-11-19/VERIFY_GRID_TEST.md`](../../evidence/spectral_ripple_audit_2026-11-19/VERIFY_GRID_TEST.md).
+  It was launched the same morning on the freed GPU lane (detached, exit 0). A second, denser readout
+  of the item-3 solves exists at
+  [`evidence/runs/expand_2026-11-19`](../../evidence/runs/expand_2026-11-19/README.md): that one is
+  **on-axis, 1 kHz-referenced** (a ~2.1 dB dip with its minimum at 2.8 kHz); ours is **+25° vertical
+  relative to on-axis**. Same feature seen two ways — the on-axis dip at 2.8 kHz is exactly what makes
+  the off-axis ratio hump there — and both say physical, not a grid artifact. Do not mix the axes.
 
 **Item 3 — dense-frequency validation of the B3 vertical feature.** Re-solve one design
 (`ee85bcd2ad67`, Klangfilm B3 current, `docs/evidence/runs/scout40_2026-11-19/20261119T073330Z-screen-723756/`)

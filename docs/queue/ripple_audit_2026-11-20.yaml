@@ -119,3 +119,28 @@ jobs:
          runs/ripple_audit/ra_crowe_x, runs/ripple_audit/ra_tritonia_v8, runs/ripple_audit/ra_lame,
          runs/ripple_audit/ra_lecleach,
          --out, runs/ripple_audit/report_verify_2026-11-20]
+# --- ADDED AFTER THE FIRST RUN (2026-11-20 08:44). The first run finished 9/10 solves + audit exit 1:
+# --- `runs/20261119T085256Z-screen-c2203f` (R-OSSE rectangular, the handoff's 64.4/46.8 anchor) stores
+# --- `generator.rows.type: rosse_rect`, a BRIDGE cell the plain CLI catalog does not know, so
+# --- `hornlab-search verify` refuses with GeometryInvalidError. It must go through its own
+# --- process-local entry point, tools/geometry/rosse_rect_cli.py (same `verify` subcommand).
+# --- `ra_audit_verify` therefore refused its input list; v2 supersedes it with all ten dirs.
+- id: ra_rosse_rect_bridge
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/python.exe, tools/geometry/rosse_rect_cli.py, verify,
+         --run, runs/20261119T085256Z-screen-c2203f, --designs, efe4a8959d85,
+         --verify-dir, runs/ripple_audit/ra_rosse_rect]
+- id: ra_audit_verify_v2
+  kind: command
+  timeout_s: 600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/python.exe, tools/analysis/spectral_ripple_audit.py,
+         runs/ripple_audit/ra_b3_current, runs/ripple_audit/ra_b3_previous, runs/ripple_audit/ra_c200,
+         runs/ripple_audit/ra_morph, runs/ripple_audit/ra_ext_throat, runs/ripple_audit/ra_rosse_rect,
+         runs/ripple_audit/ra_crowe_x, runs/ripple_audit/ra_tritonia_v8, runs/ripple_audit/ra_lame,
+         runs/ripple_audit/ra_lecleach,
+         --out, runs/ripple_audit/report_verify_v2]

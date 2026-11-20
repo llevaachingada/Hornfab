@@ -47,6 +47,32 @@
   tie. Then the promotion gate (real-driver gaps: 12PR300 geometry, calibration, panel fit) before any
   assembled BL test.
 
+## 2026-11-20 - Ripple audit grid test RUN (PASS) + OPEN: bridge cells cannot be verified from the plain CLI
+
+- DONE: `ripple_audit_2026-11-20` launched (detached, 08:34 local) and finished 08:48 **exit 0**;
+  ten designs re-solved at verify fidelity. Criterion passed: Spearman(V+35 screen, verify) = 0.964,
+  max |delta| 0.467 dB, B3 dip reproduced at new sample positions. Evidence:
+  `docs/evidence/spectral_ripple_audit_2026-11-19/VERIFY_GRID_TEST.md`.
+- **OPEN (dev, needs a fix or a documented rule):** runs whose `generator.rows.type` is an opt-in
+  **bridge cell** (`rosse_rect`, `n`, `rolled_rect`, `crowe_panel`) cannot be verified or resumed
+  through `hornlab-search verify`; it refuses with `GeometryInvalidError: unknown rows type`. The
+  bridge entry points (`tools/geometry/<cell>_cli.py`) work, but nothing in the run dir records which
+  entry point a run needs, so a lane has to know it from the config. Options: record the required
+  entry point in `run.json` at solve time, or make `verify` detect a bridge rows type and refuse with
+  the exact command to use. Affected so far: `runs/20261119T085256Z-screen-c2203f` (and the
+  `x_di_*`/`cd11__*` bests that came from the same cells).
+- OPEN (owner, item 3): **DONE and read out 2026-11-20.** The *first* dense pair
+  (`x_r3_b3_dense_epw6/epw9`, runs `20261120T053929Z`/`T053950Z`) is VOID - it ran 00:39 with the old
+  brief (18 frequencies, `cached: true`) and its configs were corrected at 00:46, after the jobs. The
+  *second* pair (`x_r3_b3_dense2_epw6/epw9`, `20261120T065945Z` 69.8 s / `T070119Z` 251.9 s) is the
+  real thing: 91 frequencies, `cached: false`, epw 6.0 and 9.0. Verdict: the B3 +25 deg feature is a
+  **broad, smooth ~600 Hz double-dip** (-6.7 dB shelf to 2.3 kHz, -2.8 dB at 2.75 kHz, -4.9 dB at
+  3.2 kHz), identical on both meshes to <=0.1 dB - **not a narrow resonance**, so the handoff's
+  resonance hypothesis is answered in the negative for this design. Readout + the 3-grid comparison:
+  `docs/evidence/spectral_ripple_audit_2026-11-19/VERIFY_GRID_TEST.md`.
+- NOTE: verify `J` != screen `J` (frequency grid enters J). Never pool the tiers or read the delta as
+  an improvement.
+
 ## 2026-11-20 - Ripple audit test night staged (11 jobs; NOT launched)
 
 - STAGED: `docs/queue/ripple_audit_2026-11-20.yaml` (launch-ready copy in `runs/nights/`, dry-run

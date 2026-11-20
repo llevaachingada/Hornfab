@@ -63,7 +63,40 @@
   chained behind `compact400_next10_2026-11-19` with `-WaitPid` (that night was never touched).
   Evidence: `docs/evidence/P12_VERIFY_2026-11-19.md`; queue `docs/queue/p12_verify_2026-11-19.yaml`.
 
-## 2026-11-20 - Ripple audit test night staged (11 jobs, ~15-20 min GPU; NOT launched)
+## 2026-11-20 - Ripple audit grid test RUN: PASS (rho 0.964) + DENSE verdict: the B3 feature is broad, not a resonance
+
+- **Launched (owner: "Launch"):** `ripple_audit_2026-11-20`, detached pid 2900 at 08:34 local,
+  finished 08:48 **exit 0** in two passes (11 jobs, then 2 retry jobs); GPU baseline 474-491 MiB,
+  per-job peaks 473-1,118 MiB, `gpu-clean` before/after every job, no concurrent solve.
+- **Result - predeclared criterion:** ten SCOUT40 bests re-solved at verify fidelity (25 log freqs +
+  balloon 1024 vs 18/512, same mesh) give **Spearman(V+35 screen, verify) = 0.964** (p = 7.3e-6),
+  **max |delta| = 0.467 dB**, mean 0.143 dB. The *ranking* survives a frequency-grid change.
+- **Dense readout (item 3, answered):** the first dense pair in `fable_expand` is VOID - it ran 00:39
+  with the old brief (18 freqs, `cached: true`) and its configs were corrected at 00:46. The second
+  pair (`x_r3_b3_dense2_epw6/epw9`, 06:59/07:01, 91 freqs, `cached: false`, 69.8 s / 251.9 s) is
+  valid. At 25 Hz through 1.8-3.4 kHz, B3 +25 deg is a **broad smooth double-dip** (-6.7 dB shelf to
+  2.3 kHz, -2.8 dB at 2.75 kHz, -4.9 dB at 3.2 kHz), **identical on epw 6.0 and 9.0 to <=0.1 dB** -
+  mesh-converged, and **not a narrow resonance**, which answers the handoff's open hypothesis in the
+  negative for this design.
+- **Metric consequence (revised, honest):** the three grids read B3 V+35 = 1.441 (screen, 10 samples),
+  1.908 (verify, 11) and **1.313 (dense, 80)**. Agreement is not accuracy - quote the metric
+  comparatively only, prefer the screen grid, and never set an absolute threshold.
+- **FOUND (needs owner/owner-lane action):** `runs/20261119T085256Z-screen-c2203f` (R-OSSE
+  rectangular) **cannot be verified or resumed from the plain CLI**: `generator.rows.type: rosse_rect`
+  is an opt-in bridge cell, so `hornlab-search verify` refuses with `GeometryInvalidError: unknown rows
+  type 'rosse_rect'`. It re-solved only through `tools/geometry/rosse_rect_cli.py verify ...`. Any
+  bridge-cell best (`n`, `rolled_rect`, `crowe_panel`, `rosse_rect`) needs its own entry point.
+- **Also confirmed:** verify `J` != screen `J` (B3 2.80022 -> 3.49921; R-OSSE rect 4.55960 -> 5.08620);
+  the frequency grid enters J, so never pool the tiers.
+- **Evidence:** `docs/evidence/spectral_ripple_audit_2026-11-19/VERIFY_GRID_TEST.md` +
+  `verify_v2/` (ten verify rows) + `dense_91/` (the 91-frequency audit).
+- **Queue file edited in place while live** (same night): `ra_rosse_rect_bridge` + `ra_audit_verify_v2`
+  added after the first pass; the failed `ra_rosse_rect` / `ra_audit_verify` ids stay in
+  `queue_state.json` as history (a finished id never re-runs). A throwaway dense re-run night was
+  created, proved to be cache hits only (0.0 s solve, 91 freqs already present from `dense2`), and
+  deleted rather than committed.
+
+## 2026-11-20 - Ripple audit test night staged (11 jobs) - launched and read out the same morning
 
 - **Owner ask:** add queue items that test the fixed-angle spectral audit. Staged, nothing launched.
 - **New night `docs/queue/ripple_audit_2026-11-20.yaml`** (+ launch-ready copy in `runs/nights/`,
@@ -1056,14 +1089,18 @@
 ## 2026-11-19 23:35 - SCOUT40 night LAUNCHED (local orchestrator)
 
 - Launched detached able_scout40_2026-11-19 (18 jobs) at 23:35 local / 04:35Z: controller pid **16596**
-  (parent WmiPrvSE), log uns/nights/queue_scout40.log, GPU lock held.
+  (parent WmiPrvSE), log 
+uns/nights/queue_scout40.log, GPU lock held.
 - **GPU hygiene:** gpu-clean before launch: no project Julia/BEAT processes; VRAM baseline **1328 MiB**;
-  no live \uns/.gpu.lock\. First job \s40__crowe_v2a_c1\ running in \uns/20261119T043506Z-screen-54878f\
+  no live \
+uns/.gpu.lock\. First job \s40__crowe_v2a_c1\ running in \
+uns/20261119T043506Z-screen-54878f\
   (3 valid rows by +2.5 min, J 8.602, VRAM 1286 MiB).
 - **Cutoff limitation (recorded):** \queue.ps1 -Cutoff\ is HH:mm **today** and only gates STARTING later
   nights; it cannot express tomorrow 13:33, and the runner has only per-job timeouts (1 h), no wall-clock cap.
   The 18-job night therefore runs to its job list (estimate 6-12 h; stop cleanly with a \STOP\ file in
-  \uns/nights/fable_scout40_2026-11-19/\ if needed). The \-Cutoff 23:59\ arg is a no-op for a single night.
+  \
+uns/nights/fable_scout40_2026-11-19/\ if needed). The \-Cutoff 23:59\ arg is a no-op for a single night.
 - Preflight \--samples 64\ runs detached (CPU lane) and is advisory; results recorded when it finishes.
 - First launch attempt with \-Cutoff 13:33\ refused (parse = today, already past) — recorded so the next
   cross-midnight launch does not repeat it.
