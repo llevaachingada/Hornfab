@@ -182,6 +182,14 @@ the 0.60 seed) and the section pucker's vertical strength collapses to 0.37–3.
 [matched short-run queue plan](queue/ROLLED_RECT_PLAN_2026-11-15.md), and
 [five-angle seed gallery](renders/2026-11-15-rolled-rect/index.html).
 
+[Rolled-body CD wall-angle dossier 2026-11-20](research/typologies/ROLLED_CD_WALL_ANGLE_RESEARCH_2026-11-20.md):
+sourced mechanism comparison (OSSE a(z)/a(phi), R-OSSE, tractrix, explicit H/V schedule), the chosen
+labeled-hypothesis flare-timing law, a numerical reference case, knob ranges and the V0-V7 validation
+ladder; kernel `_rolled_rect_cd_v1.py` + adapter `rolled_cd_family.py`.
+
+[Senior handoff: rolled H terminal/rollback 2026-11-20](HANDOFF_ROLLED_TERMINAL_2026-11-20.md):
+why the width-500 C is not accepted (max-width z 174.8 vs parent 159.0), the H/V blend and
+outer-shell issues, and the senior review/validation task.
 
 [Klangfilm-Lame handoff v3 2026-11-16](research/typologies/klangfilm_lame_handoff_2026-11-16/00_START_HERE.md): Lame/rollback research dossier + HF1440 throat-coupling addendum (no published exit angle); implemented by `tools/geometry/klangfilm_lame.py`.
 

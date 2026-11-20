@@ -1,0 +1,181 @@
+name: candidate
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-18_v10/room_landscape_80x50_700_hf1440_v10.yaml
+generator:
+  name: grid
+  rows:
+    type: rolled_family_rect_term_v1
+    mode: hybrid
+  seed_policy: explicit
+  span: quarter
+  n_phi: 65
+  n_s: 128
+  wall_thickness_mm: 3.0
+mesh:
+  epw: 5.9
+  quadrants: '1'
+  dof_cap_screen: 6000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 61912
+  budget: 80
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 400
+  error_policy: retry_same_then_stop
+seed_params:
+  g_axial_h_mm: -7.4143407244
+  g_axial_v_mm: 11.6690240964
+  g_decay: 0.7972577947
+  g_depth_h_ratio: 0.8827671829
+  g_depth_mm: 228.243341783
+  g_height_mm: 344.0611842134
+  g_inward_h_mm: 0.1577265798
+  g_inward_v_mm: 1.1748023054
+  g_rect_exponent: 8.8735203601
+  g_rect_turn_deg: 60.9824548459
+  g_relief_end_s: 0.96
+  g_relief_peak_s: 0.8
+  g_relief_start_s: 0.5
+  g_terminal_deg: 266.8263192844
+  g_throat_turn_deg: 15.7549337687
+  g_width_mm: 500.0
+  g_cd_h_deg: 0.0
+  g_cd_v_deg: 0.0
+  g_cd_start_s: 0.3
+  g_cd_peak_s: 0.6
+  g_cd_end_s: 0.88
+  g_tm_roll_frac: 0.88
+  g_tm_lip_frac: 0.76
+  g_tm_max_drop_mm: 20.0
+  g_tm_roll_drop_mm: 35.0
+  g_tm_lip_drop_mm: 70.0
+  g_tm_lip_angle_deg: 180.0
+bounds:
+  g_axial_h_mm:
+    lo: -7.4143407244
+    hi: -7.4143407244
+    search: false
+  g_axial_v_mm:
+    lo: 11.6690240964
+    hi: 11.6690240964
+    search: false
+  g_decay:
+    lo: 0.7972577947
+    hi: 0.7972577947
+    search: false
+  g_depth_h_ratio:
+    lo: 0.8827671829
+    hi: 0.8827671829
+    search: false
+  g_depth_mm:
+    lo: 228.243341783
+    hi: 228.243341783
+    search: false
+  g_height_mm:
+    lo: 344.0611842134
+    hi: 344.0611842134
+    search: false
+  g_inward_h_mm:
+    lo: 0.1577265798
+    hi: 0.1577265798
+    search: false
+  g_inward_v_mm:
+    lo: 1.1748023054
+    hi: 1.1748023054
+    search: false
+  g_rect_exponent:
+    lo: 8.8735203601
+    hi: 8.8735203601
+    search: false
+  g_rect_turn_deg:
+    lo: 60.9824548459
+    hi: 60.9824548459
+    search: false
+  g_relief_end_s:
+    lo: 0.96
+    hi: 0.96
+    search: false
+  g_relief_peak_s:
+    lo: 0.8
+    hi: 0.8
+    search: false
+  g_relief_start_s:
+    lo: 0.5
+    hi: 0.5
+    search: false
+  g_terminal_deg:
+    lo: 266.8263192844
+    hi: 266.8263192844
+    search: false
+  g_throat_turn_deg:
+    lo: 15.7549337687
+    hi: 15.7549337687
+    search: false
+  g_width_mm:
+    lo: 500.0
+    hi: 500.0
+    search: false
+  g_cd_h_deg:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_cd_v_deg:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_cd_start_s:
+    lo: 0.3
+    hi: 0.3
+    search: false
+  g_cd_peak_s:
+    lo: 0.6
+    hi: 0.6
+    search: false
+  g_cd_end_s:
+    lo: 0.88
+    hi: 0.88
+    search: false
+  g_tm_roll_frac:
+    lo: 0.88
+    hi: 0.88
+    search: false
+  g_tm_lip_frac:
+    lo: 0.76
+    hi: 0.76
+    search: false
+  g_tm_max_drop_mm:
+    lo: 20.0
+    hi: 20.0
+    search: false
+  g_tm_roll_drop_mm:
+    lo: 35.0
+    hi: 35.0
+    search: false
+  g_tm_lip_drop_mm:
+    lo: 70.0
+    hi: 70.0
+    search: false
+  g_tm_lip_angle_deg:
+    lo: 180.0
+    hi: 180.0
+    search: false
+description: 'H-only terminal C candidate: width 500; roll start 0.88 (220 mm), lip
+  0.76 (190 mm), z 159.8 -> 124.8; V untouched'

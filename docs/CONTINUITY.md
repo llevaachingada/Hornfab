@@ -1,5 +1,27 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 - Rolled H terminal/rollback: width-500 size win, C look not accepted (senior handoff)
+
+- **Owner ask:** width ~500 mm; start the H rollback at the yellow mark (x≈220/z≈160, lip x≈190/z≈125),
+  keep the throat/V/depth, trim the horizontal face. Mid-pass: "a bunch of these do not look right and
+  don't really get to what I was asking" → senior handoff.
+- **Measured:** width-500 neutral `20261120T165651Z-screen-6a36c3` J 9.0033 (H 111.0/90.5/67.2/49.2,
+  V 111.8/70.6/56.9/42.9, 500x344x242; 4036 dofs). Width 520 J 9.055; original 576 J 9.305. Sharp C
+  `20261120T165805Z-screen-01eebe` J 9.6015, rip 0.1593; soft lip C `20261120T182453Z-screen-63c7f7`
+  J 9.5780, rip 0.1576; soft bend mesh fail 0.932 mm. Both C variants match the yellow 220/190 x/z but
+  the max-width point is z 174.8 vs the parent 159.0 (forward bulge); H 8k stays 48.8-49.0.
+- **Front-load CD** `20261120T162808Z-screen-accb39` J 8.3264, V 8k 47.8, H 8k 50.8; score seed, not the
+  HF answer. **HF reference:** ext-throat `925868ab64d9` verify `20261120T161054Z-verify-bf45ad` J 1.9693,
+  H 70.8/V 61.2 at 8k, DI slope 0.14.
+- **Handoff (new):** `docs/HANDOFF_ROLLED_TERMINAL_2026-11-20.md` — lead issue the C max-width z 174.8
+  vs parent 159.0; H/V 40° blend; outer shell 0.95 mm/6.0 fail; Hermite/lip; width-only vs local trim;
+  5.9/6.0; open questions. 59 geometry tests pass; no search queued.
+- **New code:** `_rolled_rect_cd_v1.py`, `rolled_cd_family.py`, `_rolled_rect_terminal_v1.py`,
+  `rolled_terminal_family.py`; additive dispatch `grid.py`, `generated.py`, `mesh/build.py`; dossier
+  `docs/research/typologies/ROLLED_CD_WALL_ANGLE_RESEARCH_2026-11-20.md`.
+- **Not done:** no full suite; no corrected-C render; the C is look-only until the senior re-anchors it.
+  Other lane's cd_v11/favorites/GUI work left uncommitted and untouched.
+
 ## 2026-11-20 - FAV-001 favorite: Crowe-X on OS-SE CD research pass + favorites registry + night queued
 
 - **Owner ask:** the v11 completion best `4140768780f0` (`runs/20261120T084006Z-screen-fc4e18`) has "some

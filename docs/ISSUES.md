@@ -1,5 +1,18 @@
 ﻿# ISSUES
 
+## 2026-11-20 - Rolled H terminal/rollback: width-500 size win, C look not accepted
+
+- DONE (size): width-500 neutral `20261120T165651Z-screen-6a36c3` J 9.0033, H 111.0/90.5/67.2/49.2,
+  V 111.8/70.6/56.9/42.9, 500x344x242; width 520 J 9.055; original 576 J 9.305. The 500 is the size/score answer.
+- OPEN (geometry): sharp C `20261120T165805Z-screen-01eebe` J 9.6015, rip 0.159; soft lip C
+  `20261120T182453Z-screen-63c7f7` J 9.5780, rip 0.158; both match the yellow 220/190 x/z but the
+  max-width point is z 174.8 vs the parent 159.0 (forward bulge) and H 8k stays 48.8-49.0. User says
+  the shape does not look right. Handoff: `docs/HANDOFF_ROLLED_TERMINAL_2026-11-20.md`.
+- OPEN (next): re-anchor the C to the parent max-z, review H/V blend + outer shell (0.95 mm/6.0 fail),
+  render, one single solve; no 60-search. Front-load CD `20261120T162808Z-screen-accb39` J 8.326 is the
+  score seed; ext-throat `925868ab64d9` verify J 1.9693, H 70.8/V 61.2 at 8k is the HF reference.
+- DONE: new kernels/adapters + 27 focused tests; 59 geometry tests pass; no search queued.
+
 ## 2026-11-20 - FAV-001 favorite + objective/GUI findings
 
 - DONE: favorites registry `docs/favorites/FAVORITES.yaml` (FAV-001 Crowe-X `4140768780f0`); research

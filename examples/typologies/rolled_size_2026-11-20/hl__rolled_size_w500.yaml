@@ -1,0 +1,115 @@
+name: hl__rolled_size_w500
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-18_v10/room_landscape_80x50_700_hf1440_v10.yaml
+generator:
+  name: grid
+  rows:
+    type: rolled_family_rect_v1
+    mode: hybrid
+  seed_policy: explicit
+  span: quarter
+  n_phi: 65
+  n_s: 128
+  wall_thickness_mm: 3.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 6000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+  rear_res_factor: 1.5
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 61912
+  budget: 80
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 400
+  error_policy: retry_same_then_stop
+seed_params:
+  g_axial_h_mm: -7.4143407244
+  g_axial_v_mm: 11.6690240964
+  g_decay: 0.7972577947
+  g_depth_h_ratio: 0.8827671829
+  g_depth_mm: 228.243341783
+  g_height_mm: 344.0611842134
+  g_inward_h_mm: 0.1577265798
+  g_inward_v_mm: 1.1748023054
+  g_rect_exponent: 8.8735203601
+  g_rect_turn_deg: 60.9824548459
+  g_relief_end_s: 0.96
+  g_relief_peak_s: 0.8
+  g_relief_start_s: 0.5
+  g_terminal_deg: 266.8263192844
+  g_throat_turn_deg: 15.7549337687
+  g_width_mm: 500.0
+bounds:
+  g_axial_h_mm:
+    lo: -20.0
+    hi: 20.0
+  g_axial_v_mm:
+    lo: -20.0
+    hi: 20.0
+  g_decay:
+    lo: 0.6
+    hi: 0.8
+  g_depth_h_ratio:
+    lo: 0.55
+    hi: 1.0
+  g_depth_mm:
+    lo: 200.0
+    hi: 300.0
+  g_height_mm:
+    lo: 280.0
+    hi: 440.0
+  g_inward_h_mm:
+    lo: 0.0
+    hi: 40.0
+  g_inward_v_mm:
+    lo: 0.0
+    hi: 40.0
+  g_rect_exponent:
+    lo: 4.0
+    hi: 12.0
+  g_rect_turn_deg:
+    lo: 50.0
+    hi: 80.0
+  g_relief_end_s:
+    lo: 0.96
+    hi: 0.96
+    search: false
+  g_relief_peak_s:
+    lo: 0.8
+    hi: 0.8
+    search: false
+  g_relief_start_s:
+    lo: 0.5
+    hi: 0.5
+    search: false
+  g_terminal_deg:
+    lo: 225.0
+    hi: 280.0
+  g_throat_turn_deg:
+    lo: 12.0
+    hi: 40.0
+  g_width_mm:
+    lo: 500.0
+    hi: 590.0
+description: Width-only 500 mm size variant of the rolled best 96790c88352e. The H
+  mouth width is reduced 13.2% (576 -> 500); height 344, depth 228, depth_h_ratio
+  0.883, terminal 266.8, throat and V cut unchanged. One single screen solve; v10
+  brief.
