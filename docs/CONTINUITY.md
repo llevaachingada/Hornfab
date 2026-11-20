@@ -228,6 +228,26 @@
 - **Registered:** CODE_MAP and INDEX rows in the same commit. The other lane's uncommitted GUI edits
   and its budget-driver INDEX row were left untouched and excluded from staging.
 
+## 2026-11-19 - Expansion night STAGED (3-4 h): DI tie-breakers + new-identity data (local orchestrator)
+
+- **`fable_expand_2026-11-19` staged (16 jobs, all shape-check PASS, dry-run clean)**, to be appended
+  at the END of whatever queue the other agent adds (owner: wait for it, do not interrupt):
+  - **A. Full-polar/balloon DI tie-breakers (6 solves, verify mode, 181 angles / 2048 points):** the
+    compact400 trio (morph/fold/twinray) - the ISSUES' only step that separates their 0.09-0.19 gaps -
+    plus the three v7 leaders (petal, tritonia v9/v8) for the ranker's evidence.
+  - **B. Compact400 new-identity data expansion:** seedB (CMA 2027, 80 evals) on morph/fold/twinray/
+    petal/ext + seedC (CMA 2028, 60 evals) on morph/fold/twinray - 8 independent explorations.
+  - **C. Ripple mandate item 3:** the B3 design ee85bcd2ad67 re-solved on 1.8-3.6 kHz at 25 Hz steps
+    (73 extra frequencies) at epw 6 and epw 9; success criterion predeclared in the configs
+    (the 2.27-3.31 kHz deviation must persist with stable amplitude at both densities).
+- Files: configs `examples/typologies/expand_2026-11-19/` (16), night
+  `docs/queue/fable_expand_2026-11-19.yaml` + `runs/nights/`. Mixed briefs by design (compact400 v10xo,
+  v7 home for the v7 DI, v7 smooth for B3); J is not comparable across groups.
+- Estimated GPU: DI solves ~2-4 min each (6), seedB ~8-10 min each (5), seedC ~6-8 min each (3), B3
+  dense ~10-20 min each (2) -> ~2.5-3.5 h.
+- **State:** GPU idle, p12 done, the stale `.gpu.lock` holder (pid 54748) is dead (next runner takes
+  it over). Waiting for the other agent's queue; on appearance the 16 jobs are appended at its end.
+
 ## 2026-11-19 - v10 rescore of the W4 v7 bests + compact XO loading (local orchestrator)
 
 - **v10 rescore** (`docs/evidence/v10_rescore_scout40w4_2026-11-19/`, the shipped v10 scalar on the

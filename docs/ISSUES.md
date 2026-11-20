@@ -155,6 +155,13 @@
   Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
   raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
 
+## 2026-11-19 - Expansion night staged (16 jobs, 3-4 h), waiting for the other queue
+
+- STAGED: fable_expand_2026-11-19 (configs examples/typologies/expand_2026-11-19/) - full-polar DI on
+  the compact trio + v7 leaders, compact seedB/seedC data expansion, ripple item 3 B3 dense grid.
+  All shape-check; dry-run clean. Append at the end of the other agent's live queue (do not interrupt).
+- NOTE: stale .gpu.lock holder 54748 is dead (auto-takeover by the next runner).
+
 ## 2026-11-19 - v10 rescore + compact XO loading done
 
 - DONE: v10 rescore of the W4 v7 bests (petal 1.9591, tri v9 3.0658, tri v8 3.6076 - all behind the

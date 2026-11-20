@@ -1,0 +1,172 @@
+# FABLE EXPAND night (2026-11-19, local orchestrator, owner-directed 3-4 h compute).
+# Based on the ISSUES report: (A) the compact400 trio tie is only separable by full polars/balloon
+# DI (181 angles, 2048 points) - 3 solves; (B) the v7 leaders get the same full-polar DI for the
+# ranker (3 solves); (C) compact400 data expansion for the new identity: seedB (CMA 2027, 80 evals)
+# x5 lanes and seedC (CMA 2028, 60 evals) x3 lanes; (D) ripple mandate item 3: the B3 design
+# ee85bcd2ad67 on a 1.8-3.6 kHz grid at 25 Hz steps, epw 6 and epw 9 (report-only; success
+# criterion predeclared in the configs).
+# Mixed briefs by design: x_di_* / x_s2* are compact400 (v10xo) except x_di_petal/tri_* (v7 home);
+# x_r3_* is the v7 smooth Klangfilm brief. J is not comparable across groups.
+night: fable_expand_2026-11-19
+lane: gpu
+jobs:
+- id: x_di_morph
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/expand_2026-11-19/x_di_morph.yaml
+  - --mode
+  - verify
+- id: x_di_fold
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/expand_2026-11-19/x_di_fold.yaml
+  - --mode
+  - verify
+- id: x_di_twinray
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/expand_2026-11-19/x_di_twinray.yaml
+  - --mode
+  - verify
+- id: x_di_petal
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/expand_2026-11-19/x_di_petal.yaml
+  - --mode
+  - verify
+- id: x_di_tri_v9
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/expand_2026-11-19/x_di_tri_v9.yaml
+  - --mode
+  - verify
+- id: x_di_tri_v8
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/expand_2026-11-19/x_di_tri_v8.yaml
+  - --mode
+  - verify
+- id: x_s2b_morph
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/expand_2026-11-19/x_s2b_morph.yaml
+- id: x_s2b_fold
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/expand_2026-11-19/x_s2b_fold.yaml
+- id: x_s2b_twinray
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/expand_2026-11-19/x_s2b_twinray.yaml
+- id: x_s2b_petal
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/expand_2026-11-19/x_s2b_petal.yaml
+- id: x_s2b_ext
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/expand_2026-11-19/x_s2b_ext.yaml
+- id: x_s2c_morph
+  kind: search
+  mode: screen
+  budget: 60
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/expand_2026-11-19/x_s2c_morph.yaml
+- id: x_s2c_fold
+  kind: search
+  mode: screen
+  budget: 60
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/expand_2026-11-19/x_s2c_fold.yaml
+- id: x_s2c_twinray
+  kind: search
+  mode: screen
+  budget: 60
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/expand_2026-11-19/x_s2c_twinray.yaml
+- id: x_r3_b3_dense_epw6
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/expand_2026-11-19/x_r3_b3_dense_epw6.yaml
+  - --mode
+  - screen
+- id: x_r3_b3_dense_epw9
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/expand_2026-11-19/x_r3_b3_dense_epw9.yaml
+  - --mode
+  - screen
