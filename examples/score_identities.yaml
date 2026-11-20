@@ -1,0 +1,83 @@
+# Score identities: which (brief, objective version) pairs form ONE rankable score, and its tie floor.
+#
+# Read by the GUI Overview (hornlab_search/gui/data_overview.py). J is only ever ranked inside one
+# identity: never across briefs, objective versions or target variants. `floor_j` is the published
+# score-consistency floor for that identity (two designs closer than it are a tie); null = not yet
+# published, so the Overview shows no tie band. Every number here is copied from the cited source;
+# update the source first, then this file.
+#
+# status:
+#   current     - in active use; shown on the Overview by default
+#   diagnostic  - pilot / probe identity; shown, labelled diagnostic
+#   legacy      - superseded; hidden unless "show legacy" is on
+# A (brief, version) pair NOT listed here is "unregistered" when version >= 7, "legacy" below that.
+schema: score_identities_v1
+updated: 2026-11-19
+defaults:
+  min_valid_for_leader: 10      # runs with fewer valid evaluations are probes, not leaderboard rows
+  legacy_below_version: 7
+identities:
+  - id: home_landscape_v10
+    label: "Home landscape 80x50 · v10 (opt-in)"
+    brief: room_landscape_80x50_700_hf1440_v10
+    objective_version: 10
+    floor_j: 0.4677
+    status: current
+    source: docs/ACTIVE_STATE.md ; docs/evidence/PRIORITY10_QUEUE_2026-11-19.md
+  - id: compact400_v10xo
+    label: "Compact 400 mm cube · v10xo"
+    brief: compact400_xo1000_1400_hf1440_v10xo
+    objective_version: 10
+    floor_j: 0.1293
+    bar_j: 1.7302
+    status: current
+    source: docs/research/compact400_2026-11-19/README.md
+  - id: home_landscape_v7
+    label: "Home landscape 80x50 · v7 (nights default)"
+    brief: room_landscape_80x50_700_hf1440_v7
+    objective_version: 7
+    floor_j: null
+    status: current
+    source: docs/ACTIVE_STATE.md (R1 - v7 is the nights' default)
+  - id: home_landscape_v7_smooth
+    label: "Home landscape 80x50 · v7 smooth"
+    brief: room_landscape_80x50_700_hf1440_v7_smooth
+    objective_version: 7
+    floor_j: null
+    status: current
+    source: examples/briefs/home_landscape_2026-11-15
+  - id: home_landscape_rosse_rect_v7
+    label: "Home landscape 80x50 · R-OSSE rect v7"
+    brief: room_landscape_80x50_700_hf1440_rosse_rect_v7
+    objective_version: 7
+    floor_j: null
+    status: current
+    source: examples/briefs/home_landscape_2026-11-15
+  - id: room_80x60_v7
+    label: "Room 80x60 · v7"
+    brief: room_80x60_700_hf1440_v7
+    objective_version: 7
+    floor_j: null
+    status: current
+    source: examples/briefs/print_80x60_2026-11-13
+  - id: room_80x60_v7_cov
+    label: "Room 80x60 · v7 coverage"
+    brief: room_80x60_700_hf1440_v7_cov
+    objective_version: 7
+    floor_j: null
+    status: current
+    source: examples/briefs/print_80x60_2026-11-13
+  - id: lecleach_rollback_1in_v6
+    label: "Le Cleac'h rollback 1in · v6"
+    brief: lecleach_rollback_1in_v6
+    objective_version: 6
+    floor_j: null
+    status: current
+    source: examples/briefs/lecleach_rollback_1in_v6.yaml
+  - id: home_hifi_v9_pilot
+    label: "Home hi-fi range · v9 pilot"
+    brief: home_hifi_range_60_90x40_60_v9_h12_pilot
+    objective_version: 9
+    floor_j: null
+    status: diagnostic
+    source: 15-evaluation pilots (2026-11-17)

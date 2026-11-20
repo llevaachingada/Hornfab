@@ -289,6 +289,13 @@ class App:
             return self._annotate_night_studies(D.status(self.root, self.runs))
         if head == "lanes":
             return D.lane_status(self.runs)
+        if head == "overview" and len(parts) == 1:
+            from . import data_overview as OV
+            days = _q_int(q, "days", 14)
+            if not 1 <= days <= 365:
+                raise ValueError("days must be between 1 and 365")
+            return OV.overview(self.root, self.runs, days=days,
+                               show_legacy=bool(_q_bool(q, "legacy", False)))
         if head == "studies":
             from .data_studies import build_study_view, study_summaries
             index = self._study_index()

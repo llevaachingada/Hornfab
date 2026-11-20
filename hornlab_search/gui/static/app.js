@@ -18,6 +18,7 @@ import { mountStudyResults } from "./study_results.js";
 import { drawStudyCharts } from "./study_charts.js";
 import { mountCompareMethods } from "./compare_methods.js";
 import { viewHwCases, viewHwCase, viewHwReadiness } from "./hw.js";
+import { viewOverview } from "./overview.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -240,6 +241,7 @@ const ROUTES = [
   { re: /^#\/bayes\/study\/([^\/?#]+)\/(results|horns|explore)(?:\?(.*))?$/, query: true, fn: m => { const query = m[3] || ""; const root = new URLSearchParams(query).get("root"); disposeStudy = mountStudyResults(ROOT, {studyId:decodeURIComponent(m[1]), tab:m[2], query, api:studyApi, rootId:root, onError:error => console.error("study results", error)}); } },
   { re: /^#\/bayes\/study\/([^\/?#]+)\/(live|overview|data|explain|propose|execute|decide)(?:\?(.*))?$/, query: true, fn: m => { const root = new URLSearchParams(m[3] || "").get("root"); const phase = m[2]; disposeStudy = mountStudy(ROOT, {studyId:decodeURIComponent(m[1]), phase, api:studyApi, rootId:root, drawCharts:drawStudyCharts, pollMs: phase === "live" ? 10000 : 5000, onError:error => console.error("study panel", error)}); } },
   { re: /^#\/bayes\/board$/,         fn: () => { disposeStudy = mountCompareMethods(ROOT, {api:comparisonApi}); } },
+  { re: /^#\/overview(?:\?(.*))?$/,     query: true, fn: m => viewOverview(ROOT, m[1] || "") },
   { re: /^#\/analysis$/,                fn: () => viewAnalysis() },
   { re: /^#\/analysis\/([^\/?#]+)$/,    fn: m => viewAnalysis(m[1]) },
   { re: /^#\/elites$/,                  fn: () => viewElites() },

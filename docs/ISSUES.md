@@ -1,5 +1,15 @@
 ﻿# ISSUES
 
+## 2026-11-19 - GUI Overview phase 1 (DONE) + phases 2-4 planned
+
+- DONE: `#/overview` live briefing, score identity registry, typology resolver, GPU lane log fix;
+  24 tests passed.
+- OPEN (owner): decisions O1-O6 in `docs/overview/OVERVIEW_IMPLEMENTATION_PLAN_2026-11-19.md` §5
+  (Overview as landing page, night-end snapshots, GUI-written finding state, v7 floors).
+- OPEN (dev): phases 2-4 (findings engine, index cache, registry, snapshots) per the plan.
+- KNOWN: `tests/test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  fails on `subprocess.Popen` in `gui/study_jobs.py` (pre-existing, not this change).
+
 ## 2026-11-19 - Senior handbook + system solve-data export (DONE)
 
 - DONE: `docs/HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md`, `tools/data/system_cases.py`,

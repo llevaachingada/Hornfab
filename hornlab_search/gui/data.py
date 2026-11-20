@@ -4268,11 +4268,19 @@ def _lane_lock(runs: Path, lane: str) -> dict | None:
 
 def _lane_queue_log(runs: Path, lane: str) -> Path | None:
     """The newest START/END-formatted queue log naming this lane (``runs/overnight`` first,
-    then ``runs/nights``). Logs without a parseable step line are skipped."""
+    then ``runs/nights``). Logs without a parseable step line are skipped.
+
+    The GPU lane is the default lane: night queue logs are usually named after the night
+    (``queue_compact400_next10_<date>.log``), not the lane, so every log that does not name the
+    CPU lane is a GPU candidate. Matching only ``*gpu*`` showed a days-old ``gpu`` log's
+    never-ENDed step as the running job (2026-11-19)."""
     for base in (runs / "overnight", runs / "nights"):
         best = None
         try:
-            cands = [p for p in base.glob(f"queue_*{lane}*.log") if p.is_file()]
+            if lane == "gpu":
+                cands = [p for p in base.glob("queue_*.log") if p.is_file() and "cpu" not in p.name.lower()]
+            else:
+                cands = [p for p in base.glob(f"queue_*{lane}*.log") if p.is_file()]
         except OSError:
             continue
         for log in sorted(cands, key=lambda p: (_mt(p), p.name), reverse=True):

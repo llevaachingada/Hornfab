@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gui-verify-8766",
+      "runtimeExecutable": "C:\\Users\\hunte\\Hrns\\hornlab-search\\.venv\\Scripts\\python.exe",
+      "runtimeArgs": ["-m", "hornlab_search.gui", "--port", "8766", "--no-browser"],
+      "port": 8766
+    }
+  ]
+}

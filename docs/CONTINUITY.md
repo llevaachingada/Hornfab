@@ -1,5 +1,26 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - GUI Overview phase 1 + implementation plan (CPU only, no GPU)
+
+- **Owner ask:** review the three-week analysis report as an entry point, propose a better structure,
+  then build phase 1 and write a sub-agent-parallel plan for the rest. **No GPU; `runs/` read-only.**
+- **Review (measured):** the report is 199 convergence sections only (no walls/sensitivity/term
+  balance), its 78 "Do first" items are one budget rule, it counts run folders (10 `_backup` copies,
+  15 study dirs), never resolves continued lines (>= 11), cannot group by typology (`family` is only
+  OSSE/FREEFORM) and treats v10xo as v10. Since the snapshot: 110 runs, 6,669 evals.
+- **Built:** `#/overview` (Briefing / Leaders / Typologies) from `gui/data_overview.py` +
+  `gui/static/overview.js` + `GET /api/overview?days=&legacy=`; `examples/score_identities.yaml`
+  (9 identities, floors 0.4677 home v10 / 0.1293 compact400); typology = knowledge-hub family card
+  + construction; lines of work = identity x construction; probes (< 10 valid) never lead; ties =
+  within floor. 14-day window: 302 runs, 13.2 s cold / 0.4-0.7 s warm.
+- **Fixed:** GPU lane card read a stale `queue_*gpu*.log` (showed a Nov-15 job); the GPU lane now
+  reads every non-`cpu` queue log, newest first.
+- **Tests:** `tests/test_gui_overview.py` + lane tests **24 passed**. Wider `-k gui` run: one
+  pre-existing failure (`test_b8_lanes_bounded_gui::test_study_modules_have_no_host_cleanup...`,
+  `study_jobs.py` untouched).
+- **Plan:** `docs/overview/OVERVIEW_IMPLEMENTATION_PLAN_2026-11-19.md` (P2-P4, 11 WPs in 4 waves,
+  owner decisions O1-O6). Other lanes' uncommitted GUI edits were left unstaged.
+
 ## 2026-11-19 - Senior handbook + system solve-data export (CPU only, no GPU)
 
 - **Owner ask:** one consolidated cloud-ready handoff for the horn + woofer system and GUI, package the
