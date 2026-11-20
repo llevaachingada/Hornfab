@@ -18,7 +18,8 @@ cases:
     motor: real
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
     note: >-
       Failed, retained: wrong project port (vented/voltage; this project uses
@@ -31,7 +32,8 @@ cases:
     motor: real
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
     note: >-
       Failed, retained: second attempt on the same wrong project port (vented/voltage);
@@ -44,7 +46,8 @@ cases:
     motor: real
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
   - key: ev_lf_demo_twin/20261120T051258Z-lf_20_200-23196-0a6370e7
     ref: "EV-LF-5"
@@ -54,7 +57,8 @@ cases:
     motor: demo
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
   - key: ev_lf_default_real/20261120T051351Z-lf_20_200-45416-03efa73a
     ref: "EV-LF-6"
@@ -64,7 +68,8 @@ cases:
     motor: real
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
   - key: ev_lf_default_demo/20261120T051425Z-lf_20_200-01448-88659fb9
     ref: "EV-LF-R0"
@@ -74,7 +79,8 @@ cases:
     motor: demo
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
   - key: ev_lf_assembled_demo/20261120T051458Z-lf_20_200-35104-5973f4ef
     ref: "EV-LF-2"
@@ -84,7 +90,8 @@ cases:
     motor: demo
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
   - key: ev_wide_default_real/20261120T051740Z-wide_200_2500-46632-3de4e1d9
     ref: "EV-WIDE-6"
@@ -94,7 +101,8 @@ cases:
     motor: real
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
   - key: ev_wide_default_demo/20261120T051840Z-wide_200_2500-36092-b530b722
     ref: "EV-WIDE-R0"
@@ -104,7 +112,8 @@ cases:
     motor: demo
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
   - key: ev_farfield_g4_10m/20261120T051941Z-farfield_10m-10828-d72876e6
     ref: "EV-FAR-10M"
@@ -114,7 +123,8 @@ cases:
     motor: demo
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
   - key: ev_dense_g4_49/20261120T052433Z-dense_49-50100-30d7ef04
     ref: "EV-SAMP-49"
@@ -124,7 +134,8 @@ cases:
     motor: demo
     transducer_shape: demo
     horn_source: ideal_velocity
-    status: proposed
+    status: approved
+    approved_by: owner 2026-11-20
     proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
   - key: ev_assembled_motor_real/20261120T150709Z-wide_assembled-01612-383da940
     ref: "EV-WP3-WIDE"
