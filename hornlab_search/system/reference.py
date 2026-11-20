@@ -43,6 +43,7 @@ import json
 import os
 import subprocess
 import tempfile
+import warnings
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -51,8 +52,15 @@ import numpy as np
 
 from hornlab_search.system import combine as sys_combine
 from hornlab_search.system import contracts as C
+from hornlab_search.system import drivers as sys_drivers
 from hornlab_search.system import dsp as sys_dsp
 from hornlab_search.system import provenance
+from hornlab_search.system.authorization import (
+    AuthorizationError,
+    AuthorizationRecord,
+    check as check_authorization,
+    from_legacy_string,
+)
 from hornlab_search.system.boundarylab import bl_results as R
 from hornlab_search.system.boundarylab import run as bl_run
 from hornlab_search.system.boundarylab import stage as S
@@ -81,6 +89,7 @@ __all__ = [
     "dsp_preset_columns",
     "graph_summary",
     "load_request",
+    "new_case_for_retry",
     "prepare",
     "recompose_preset",
     "report",
@@ -122,6 +131,11 @@ REFERENCE_TOKENS: tuple[str, ...] = (
     "GRAPH_MESH_SCALE",
     "GRAPH_SOLVE_KIND",
     "REFERENCE_REPORT_DOMAIN",
+    # AuthorizationRecord refusals translated by ``solve`` (contract section 4).
+    "AUTH_MISSING",
+    "AUTH_EXPIRED",
+    "AUTH_SCOPE_MISMATCH",
+    "AUTH_ACTION_NOT_GRANTED",
 )
 
 _PREPARE_RECORD = "reference_prepare.json"
@@ -1007,12 +1021,18 @@ def _bounded(text: str, limit: int = 60) -> tuple[str, ...]:
     return tuple((text or "").splitlines()[-limit:])
 
 
+def _case_key_for(case_dir: Path) -> str:
+    """System case key ``<experiment>/<case_dir_name>`` used by authorization scopes."""
+    return f"{case_dir.parent.name}/{case_dir.name}"
+
+
 def solve(
     case_dir: str | os.PathLike[str],
     request: str | os.PathLike[str],
     *,
     backend: str = "beat_cpu",
-    authorized_by: str | None,
+    authorized_by: str | None = None,
+    authorization: AuthorizationRecord | str | None = None,
     out: str | os.PathLike[str] | None = None,
     timeout_s: float | None = None,
 ) -> ReferenceSolveResult:
@@ -1021,14 +1041,54 @@ def solve(
     The call matches the parent's recorded smoke invocation exactly. A non-zero return code or
     a non-complete run manifest raises :class:`ReferenceError` after the invocation record is
     written, so a failed solve is never silently treated as reusable evidence.
+
+    Authorization is typed: pass ``authorization=`` an :class:`AuthorizationRecord` (or a
+    free string, which is wrapped with :func:`from_legacy_string`).  The
+    legacy ``authorized_by`` value still works and is wrapped the same way when no typed
+    record is supplied; the record keeps ``authorized_by`` and adds the typed
+    ``authorization`` dict beside it.  A refused/expired/out-of-scope record raises the
+    matching ``AUTH_*`` token before any Boundary Lab process starts.
+
+    A failed solve still writes ``reference_solve.json`` and the case directory is never
+    rewritten.  To retry, call :func:`new_case_for_retry`: it creates a sibling case
+    directory whose manifest records ``retry_of: <case_key>``, so the failed record stays
+    provenance instead of being overwritten.
     """
-    if not isinstance(authorized_by, str) or not authorized_by.strip():
+    root = Path(case_dir).resolve()
+    case_key = _case_key_for(root)
+    record: AuthorizationRecord | None = None
+    if authorization is not None:
+        if isinstance(authorization, AuthorizationRecord):
+            record = authorization
+        elif isinstance(authorization, str):
+            if not authorization.strip():
+                raise ReferenceError(
+                    "REFERENCE_SOLVE_UNAUTHORIZED",
+                    "BL solve refused: pass a non-empty authorization record",
+                )
+            record = from_legacy_string(authorization)
+        else:
+            raise ReferenceError(
+                "REFERENCE_SOLVE_UNAUTHORIZED",
+                "BL solve refused: authorization must be an AuthorizationRecord or string",
+            )
+    elif not isinstance(authorized_by, str) or not authorized_by.strip():
         raise ReferenceError(
             "REFERENCE_SOLVE_UNAUTHORIZED",
-            "BL solve refused: pass authorized_by=<senior approval record>; no solve is started "
-            "without it",
+            "BL solve refused: pass authorized_by=<senior approval record> or a typed "
+            "authorization=; no solve is started without it",
         )
-    root = Path(case_dir).resolve()
+    if record is None:
+        record = from_legacy_string(authorized_by)  # type: ignore[arg-type]
+    if not isinstance(authorized_by, str) or not authorized_by.strip():
+        authorized_by = record.who
+
+    try:
+        check_authorization(
+            record, action="bl_solve", case_key=case_key, now_utc=_utc_now())
+    except AuthorizationError as exc:
+        raise ReferenceError(exc.token, f"BL solve refused: {exc.detail}") from None
+
     if not root.is_dir():
         raise ReferenceError("REFERENCE_CASE_NOT_FOUND", f"case directory not found: {root}")
     project = _resolve_project(root).resolve()
@@ -1097,6 +1157,7 @@ def solve(
         "request": loaded.as_dict(),
         "backend": backend,
         "authorized_by": authorized_by,
+        "authorization": record.to_dict(),
         "argv": argv,
         "returncode": returncode,
         "run_dir": str(run_dir),
@@ -1133,6 +1194,35 @@ def solve(
         stdout_tail=_bounded(stdout),
         stderr_tail=_bounded(stderr),
     )
+
+
+def new_case_for_retry(case_dir: str | os.PathLike[str]) -> Path:
+    """Create a sibling case directory whose manifest records ``retry_of: <case_key>``.
+
+    A solve/record is immutable, so a rerun (including after ``REFERENCE_SOLVE_FAILED``)
+    needs a fresh case directory.  This helper copies the source manifest payload when one
+    exists, adds ``retry_of`` (the source ``<experiment>/<case_dir_name>``) and writes the
+    new manifest with :func:`provenance.write_manifest`.  It never edits the source case.
+    """
+    root = Path(case_dir).resolve()
+    if not root.is_dir():
+        raise ReferenceError("REFERENCE_CASE_NOT_FOUND", f"case directory not found: {root}")
+    case_key = _case_key_for(root)
+    payload: dict[str, Any] = {}
+    manifest = root / "manifest.json"
+    if manifest.is_file():
+        try:
+            payload = dict(provenance.load_manifest(manifest)["payload"])
+        except (OSError, ValueError, KeyError) as exc:
+            raise ReferenceError(
+                "REFERENCE_CASE_INCOMPLETE",
+                f"cannot read the source manifest {manifest}: {exc}",
+            ) from None
+    payload["retry_of"] = case_key
+    stamp = _dt.datetime.now(_dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    retry_dir = Path(tempfile.mkdtemp(prefix=f"{stamp}-retry-", dir=str(root.parent)))
+    provenance.write_manifest(retry_dir, payload)
+    return retry_dir
 
 
 # --------------------------------------------------------------------------- report: presets
@@ -1198,13 +1288,68 @@ class PresetSum:
         return float(np.max(np.abs(self.total_pa))) if self.total_pa.size else 0.0
 
 
+_GEOMETRY_FIELDS_KEYS = ("geometry_fields", "driver_geometry_fields", "installed_geometry_fields")
+_GEOMETRY_COMPLETENESS_KEYS = ("geometry_completeness", "driver_geometry_completeness")
+
+
+def _as_geometry_completeness(value: Any) -> Mapping[str, bool] | None:
+    """Classify a completeness mapping *or* a field collection with the shared classifier."""
+    if value is None:
+        return None
+    if isinstance(value, Mapping) and "INSTALLED_EXTERIOR_BEM" in value:
+        return {str(key): bool(flag) for key, flag in value.items()}
+    return sys_drivers.geometry_completeness(value)
+
+
+def _geometry_completeness_for(result: R.BLHeadlessResult) -> Mapping[str, bool] | None:
+    """Driver-geometry completeness carried by a BL result, when the reader provides it.
+
+    ``bl_results.BLHeadlessResult`` does not carry the woofer's driver geometry today (the
+    reader explicitly says it cannot see it).  We accept either a precomputed completeness
+    mapping or the field names, on the result's ``data_quality`` or as an attribute, so a
+    future reader can supply it without changing this call site.
+    """
+    quality = getattr(result, "data_quality", None) or {}
+    if isinstance(quality, Mapping):
+        for key in _GEOMETRY_COMPLETENESS_KEYS + _GEOMETRY_FIELDS_KEYS:
+            completeness = _as_geometry_completeness(quality.get(key))
+            if completeness is not None:
+                return completeness
+    for key in _GEOMETRY_COMPLETENESS_KEYS + _GEOMETRY_FIELDS_KEYS:
+        completeness = _as_geometry_completeness(getattr(result, key, None))
+        if completeness is not None:
+            return completeness
+    return None
+
+
 def _fidelity_for(result: R.BLHeadlessResult) -> str:
+    """Fidelity label from the solve kind, capped by driver-geometry completeness (B24).
+
+    An installed/coupled label claims the full installed moving-surface geometry.  When the
+    result carries the woofer's geometry fields or a completeness mapping, a missing
+    installed field caps the label at ``SCREEN_COMPLEX_APPROX``.  When it carries neither
+    (today's ``BLHeadlessResult``), the previous label is kept and a diagnostic is emitted;
+    callers must not read that as proof of geometry completeness.
+    """
     kind = result.provenance.solve_kind
     if kind == "coupled_bem_fem":
-        return "COUPLED_VENTED_FEM_BEM_LEM"
-    if kind == "exterior_bem":
-        return "INSTALLED_EXTERIOR_BEM"
-    return "SCREEN_COMPLEX_APPROX"
+        base = "COUPLED_VENTED_FEM_BEM_LEM"
+    elif kind == "exterior_bem":
+        base = "INSTALLED_EXTERIOR_BEM"
+    else:
+        return "SCREEN_COMPLEX_APPROX"
+    completeness = _geometry_completeness_for(result)
+    if completeness is None:
+        warnings.warn(
+            "B24: BL result carries no driver geometry completeness; the "
+            f"{base} label is unverified for installed-surface geometry",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+        return base
+    if not completeness.get("INSTALLED_EXTERIOR_BEM", False):
+        return "SCREEN_COMPLEX_APPROX"
+    return base
 
 
 def _channel_for(excitation_name: str) -> str:

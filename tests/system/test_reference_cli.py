@@ -26,7 +26,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from hornlab_search.system import cli  # noqa: E402
+from hornlab_search.system import authorization as AUTH  # noqa: E402
 from hornlab_search.system import contracts as C  # noqa: E402
+from hornlab_search.system import drivers as DRIVERS  # noqa: E402
 from hornlab_search.system import dsp as SYSDSP  # noqa: E402
 from hornlab_search.system import provenance  # noqa: E402
 from hornlab_search.system import reference as REF  # noqa: E402
@@ -545,3 +547,157 @@ def test_solve_builds_absolute_argv_and_writes_no_output_dir(tmp_path, monkeypat
     assert Path(argv[5]).is_absolute()
     assert Path(argv[9]).is_absolute() and Path(argv[9]).name == "run"
     assert not (case / "run").exists()  # output dir creation belongs to BL, not this wrapper
+
+
+# ------------------------------------------------------- A3 authorization (contract section 4)
+
+def _solve_case(tmp_path: Path) -> Path:
+    case = tmp_path / "ref" / "20261120T000000Z-case-1234"
+    case.mkdir(parents=True)
+    (case / "case.blab.json").write_text(
+        json.dumps(_fake_project(), indent=2, sort_keys=True), encoding="utf-8")
+    return case
+
+
+def _patch_solve_process(monkeypatch, tmp_path: Path) -> None:
+    class _Proc:
+        returncode = 1
+        stdout = ""
+        stderr = ""
+
+    def fake_run(argv, **kwargs):
+        return _Proc()
+
+    monkeypatch.setattr(REF, "_root_for_case", lambda root: _fake_root(tmp_path))
+    monkeypatch.setattr(REF.subprocess, "run", fake_run)
+
+
+def _solve_record(case: Path) -> dict[str, Any]:
+    body = json.loads((case / "reference_solve.json").read_text(encoding="utf-8"))
+    return json.loads(body["payload"])
+
+
+def _typed_record(case: Path, *, scope=("*",), expires_utc=None):
+    return AUTH.AuthorizationRecord.from_dict({
+        "who": "owner",
+        "why": "test authorization",
+        "scope_kind": "case",
+        "scope": list(scope),
+        "actions": ["bl_solve"],
+        "created_utc": "2026-11-19T00:00:00+00:00",
+        "expires_utc": expires_utc,
+        "legacy_free_string": False,
+    })
+
+
+def test_solve_wraps_a_legacy_authorization_string_and_records_it(
+        tmp_path: Path, monkeypatch) -> None:
+    case = _solve_case(tmp_path)
+    _patch_solve_process(monkeypatch, tmp_path)
+    with pytest.raises(REF.ReferenceError, match="REFERENCE_SOLVE_FAILED"):
+        REF.solve(case, FIXTURE / "request.json", authorization="legacy-approval")
+    stored = _solve_record(case)
+    assert stored["authorized_by"] == "legacy-approval"
+    authorization = stored["authorization"]
+    assert authorization["legacy_free_string"] is True
+    assert authorization["scope"] == ["*"]
+    assert authorization["actions"] == ["bl_solve"]
+    assert authorization["who"] == "legacy-approval"
+
+
+def test_solve_records_a_typed_authorization_next_to_authorized_by(
+        tmp_path: Path, monkeypatch) -> None:
+    case = _solve_case(tmp_path)
+    _patch_solve_process(monkeypatch, tmp_path)
+    record = _typed_record(case, scope=(f"ref/{case.name}",))
+    with pytest.raises(REF.ReferenceError, match="REFERENCE_SOLVE_FAILED"):
+        REF.solve(case, FIXTURE / "request.json", authorization=record)
+    stored = _solve_record(case)
+    stored_authorization = stored["authorization"]
+    assert stored_authorization["record_id"] == record.record_id
+    assert stored_authorization["who"] == record.who
+    assert stored_authorization["actions"] == ["bl_solve"]
+    assert stored_authorization["scope"] == list(record.scope)
+    # The solve record's canonical payload renders null as "None"; from_dict tolerates it.
+    assert AUTH.AuthorizationRecord.from_dict(stored_authorization) == record
+    assert stored["authorized_by"] == "owner"
+
+
+def test_solve_refuses_expired_and_out_of_scope_typed_records(tmp_path: Path) -> None:
+    case = _solve_case(tmp_path)
+    expired = _typed_record(case, expires_utc="2020-01-01T00:00:00+00:00")
+    with pytest.raises(REF.ReferenceError, match="AUTH_EXPIRED"):
+        REF.solve(case, FIXTURE / "request.json", authorization=expired)
+
+    outside = _typed_record(case, scope=("other/case",))
+    with pytest.raises(REF.ReferenceError, match="AUTH_SCOPE_MISMATCH"):
+        REF.solve(case, FIXTURE / "request.json", authorization=outside)
+    assert not (case / "reference_solve.json").exists()
+
+
+def test_solve_keeps_the_legacy_unauthorized_refusal() -> None:
+    with pytest.raises(REF.ReferenceError, match="REFERENCE_SOLVE_UNAUTHORIZED"):
+        REF.solve("does-not-matter", FIXTURE / "request.json", authorized_by=None)
+    with pytest.raises(REF.ReferenceError, match="REFERENCE_SOLVE_UNAUTHORIZED"):
+        REF.solve("does-not-matter", FIXTURE / "request.json", authorization="  ")
+
+
+# ------------------------------------------------------------- B25 retry case helper
+
+def test_new_case_for_retry_creates_a_sibling_and_records_retry_of(tmp_path: Path) -> None:
+    case = tmp_path / "ref" / "20261120T000000Z-case-1234"
+    case.mkdir(parents=True)
+    provenance.write_manifest(case, {"kind": "bl_stage_reference_project", "experiment": "ref"})
+
+    retry = REF.new_case_for_retry(case)
+    assert retry.parent == case.parent
+    assert retry != case and retry.is_dir()
+    payload = provenance.load_manifest(retry / "manifest.json")["payload"]
+    assert payload["retry_of"] == f"ref/{case.name}"
+    assert payload["kind"] == "bl_stage_reference_project"
+    source = provenance.load_manifest(case / "manifest.json")["payload"]
+    assert "retry_of" not in source  # the failed/original case is untouched
+
+
+def test_new_case_for_retry_refuses_a_missing_case(tmp_path: Path) -> None:
+    with pytest.raises(REF.ReferenceError, match="REFERENCE_CASE_NOT_FOUND"):
+        REF.new_case_for_retry(tmp_path / "absent")
+
+
+# ---------------------------------------------------------------- B24 fidelity cap
+
+def _with_quality(result, **entries):
+    return replace(result, data_quality={**result.data_quality, **entries})
+
+
+def test_fidelity_label_is_capped_by_incomplete_driver_geometry() -> None:
+    result = R.read_bl_headless_result(FIXTURE)
+    assert result.provenance.solve_kind == "exterior_bem"
+    incomplete = _with_quality(result, geometry_fields=("cutout_mm",))
+    assert REF._fidelity_for(incomplete) == "SCREEN_COMPLEX_APPROX"
+
+    complete = _with_quality(result, geometry_fields=DRIVERS.GEOMETRY_FIELDS)
+    assert REF._fidelity_for(complete) == "INSTALLED_EXTERIOR_BEM"
+
+    coupled = replace(result, provenance=replace(result.provenance, solve_kind="coupled_bem_fem"))
+    assert REF._fidelity_for(_with_quality(coupled, geometry_fields=("cutout_mm",))) \
+        == "SCREEN_COMPLEX_APPROX"
+
+    other = replace(result, provenance=replace(result.provenance, solve_kind=None))
+    assert REF._fidelity_for(other) == "SCREEN_COMPLEX_APPROX"
+
+
+def test_fidelity_label_reads_a_precomputed_completeness_mapping() -> None:
+    result = R.read_bl_headless_result(FIXTURE)
+    capped = _with_quality(
+        result, geometry_completeness={"INSTALLED_EXTERIOR_BEM": False})
+    assert REF._fidelity_for(capped) == "SCREEN_COMPLEX_APPROX"
+    allowed = _with_quality(
+        result, geometry_completeness={"INSTALLED_EXTERIOR_BEM": True})
+    assert REF._fidelity_for(allowed) == "INSTALLED_EXTERIOR_BEM"
+
+
+def test_fidelity_label_keeps_the_current_label_and_warns_without_geometry() -> None:
+    result = R.read_bl_headless_result(FIXTURE)
+    with pytest.warns(RuntimeWarning, match="B24"):
+        assert REF._fidelity_for(result) == "INSTALLED_EXTERIOR_BEM"

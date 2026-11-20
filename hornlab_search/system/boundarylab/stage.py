@@ -43,6 +43,7 @@ from hornlab_search.system.boundarylab.generate import (
 from hornlab_search.system.boundarylab.probe import BLCapabilityError, BLRoot
 
 __all__ = [
+    "BEM_SURFACE_ROLES",
     "BLOCKED_BY_FULL_DOMAIN_HORN_MESH_INPUT",
     "StagedProject",
     "build_stage_spec",
@@ -54,6 +55,10 @@ __all__ = [
 
 #: Blocker token used when Lane A's full-domain closed horn mesh is not present yet.
 BLOCKED_BY_FULL_DOMAIN_HORN_MESH_INPUT = "BLOCKED_BY_FULL_DOMAIN_HORN_MESH_INPUT"
+
+#: BL mesh purposes that carry the horn's acoustic surface (B23: membership test, not equality,
+#: so a declared role/label can be added without silently disabling the clearance gate).
+BEM_SURFACE_ROLES: frozenset[str] = frozenset({"bem_surface"})
 
 #: BL source files whose behaviour this staging depends on (hashed into every case manifest).
 _STAGE_DEPENDENCIES: tuple[str, ...] = (
@@ -262,7 +267,8 @@ def _stage(
     clearance: dict[str, Any] | None = None
     horn_spec = spec.get("horn")
     if staged and horn_spec:
-        surfaces = [m["path"] for m in meshes if m.get("purpose") == "bem_surface" and m.get("path")]
+        surfaces = [m["path"] for m in meshes
+                    if m.get("purpose") in BEM_SURFACE_ROLES and m.get("path")]
         try:
             report = body_clearance(
                 horn_spec["mesh_path"], surfaces,
@@ -286,7 +292,7 @@ def _stage(
         "argv": argv,
         "spec_sha256": provenance.file_sha256(spec_path),
         "runner_version": spec.get("runner_version"),
-        "overrides": spec.get("overrides", {}),
+        "overrides": spec.get("source", {}),
     }
     manifest_payload: dict[str, Any] = {
         "kind": kind,

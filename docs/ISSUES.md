@@ -1,5 +1,47 @@
 ﻿# ISSUES
 
+## 2026-11-20 - System v1 Pass A (DONE, branch `claude/system-v1-pass-a`) + deferrals
+
+- DONE (A1-A6): `paths.py`, `case_schema.py`, `read_case.py` (N1 helper; one reader for every
+  writer kind), `calibration.py` + `combine(calibration=)`, `authorization.py`, `observation.py`,
+  `reference.solve(authorization=)` + B24/B25, `jobs.py` + `tools/evidence/verify_evidence_quotes.py`,
+  `tools/system/capture_fixture_cases.py`, plus B18/B19/B21/B22/B23/B26. Regression
+  `tests/system tests/test_tools_data_system_cases.py`: 401 -> 497 tests, 0 failed both sides,
+  8 pre-existing skips, exit 0.
+- CLOSED BY MERGE (B18/B19): the integration branch's `df0e20f` fix is adopted wholesale (scalar
+  `numeric_axes` + `axis_directions`, `score.validate_axes()` rejecting nested axes). The A4
+  `score.dominates` dict-unwrapping hunk was dropped; `test_optimize_fixes.py` now asserts the
+  canonical schema. Post-merge regression 493 passed / 8 skipped, exit 0.
+- OPEN (B26, partial): `dsp.filter_bank` range-checks only when a caller supplies `ranges=`;
+  no product call site passes the spec's `DspRanges` yet (a `DspRanges()` default would reject
+  valid specs). Owner: the pass that owns those call sites (Pass B2/C).
+- OPEN (B24, diagnostic): `BLHeadlessResult` carries no driver-geometry completeness, so
+  `_fidelity_for` keeps the current label and emits a `RuntimeWarning`; the capping branch is ready
+  for a reader that supplies it.
+- OPEN (low): `REFERENCE_REFUSAL_TOKENS` aliases `INCOMPATIBLE_BASIS` /
+  `SENSITIVITY_REFERENCE_MISMATCH` without changing token text; `contracts.canonical_json` writes
+  `None` as `"None"` in solve records (tolerated on read).
+- OPEN (owner, Pass 0 step 0.3): the fixture pack is not captured; run
+  `.venv\Scripts\python.exe tools\system\capture_fixture_cases.py --store system_runs --out
+  tests\system\fixtures\case_store --per-kind 2` locally and commit.
+- NOT DONE HERE: Pass 0 (GUI trio commit) and Pass B/C/D remain open; N3 still blocks cloud GUI work.
+
+## 2026-11-20 - System v1 handoffs self-contained (DONE)
+
+- DONE: `docs/system_v1/HANDOFFS.md`. No change to open items from the previous entry.
+
+## 2026-11-20 - System v1 plan (docs only)
+
+- DONE: `docs/system_v1/` architecture, frozen contracts, and pass handoffs 0/A/B/C/D/E.
+- OPEN (N1, new): `tools/data/system_cases.py:539` `horn_mesh` not portable (Windows path on Linux);
+  export test 15/16 on Linux. Owner: Pass A lane A1 + Pass B lane B1.
+- OPEN (N3): cloud GUI work blocked until Pass 0 commits `hw3d.js`/`hw_screen.js`/`data_hw_stage.py`.
+- OPEN (owner): confirm calibration/authorization/observation record shapes (Pass 0 step 0.6);
+  values for decisions 1-6 remain open (Pass E).
+
+
+﻿# ISSUES
+
 ## 2026-11-20 - Pilot contracts repaired; system fidelity/normalization decision recorded
 
 - DONE: pilot `--geometry` fidelity fix; scalar Pareto axes + F3 minimise; boolean feasibility;
@@ -78,6 +120,203 @@
   states `33 risks + 12 decisions = 45 rows`. Browser pass re-run 24/24 clean.
 - OPEN (pre-existing, other lane): the shell's sidebar "Resume search" button is clipped at 1280 by
   the nav column (`app.js` taskbar + `app.css`); present in HEAD, unrelated to the Overview work.
+
+## 2026-11-19 - GUI Overview phase 1 (DONE) + phases 2-4 planned
+
+- DONE: `#/overview` live briefing, score identity registry, typology resolver, GPU lane log fix;
+  24 tests passed.
+- OPEN (owner): decisions O1-O6 in `docs/overview/OVERVIEW_IMPLEMENTATION_PLAN_2026-11-19.md` §5
+  (Overview as landing page, night-end snapshots, GUI-written finding state, v7 floors).
+- OPEN (dev): phases 2-4 (findings engine, index cache, registry, snapshots) per the plan.
+- KNOWN: `tests/test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  fails on `subprocess.Popen` in `gui/study_jobs.py` (pre-existing, not this change).
+
+## 2026-11-19 - Senior handbook + system solve-data export (DONE)
+
+- DONE: `docs/HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md`, `tools/data/system_cases.py`,
+  `tests/test_tools_data_system_cases.py` (16 passed), `docs/system_data/` (37x53 CSV + JSON +
+  screens); companion horn export `docs/top_designs/` (11 tests passed, committed at `9714b39`).
+- OPEN (owner, decisions 1-6): real 12PR300 geometry/panel policy; calibration/sum; DSP
+  realization; far-field standard; solve authorization. GUI gates D/E remain open.
+- OPEN (GUI): P4/P5/P6/P8 are backend-only; P7/P9 absent; the tracked GUI diff imports untracked
+  `hw_screen.js`/`hw3d.js` (partial commit breaks boot); `#/hw/new` is a dead CTA.
+- OPEN (backend): `pilot --geometry` raises `SchemaError` (`LF_TS_SCREENING` is not a fidelity);
+  pilot Pareto dominance is inert (dict axes); preview prefix can lie for bridge geometry jobs.
+- NOTE: the 62864 clearance verdict is in readiness/handoff/R16 replay, not in
+  `payload.clearance`; the flat export reports `clearance_status=not_recorded`. No GPU was used.
+
+## 2026-11-19 - BO/TuRBO runs invisible in the GUI (fixed)
+
+- DONE: study solves mirrored as ordinary run folders (`tools/night_queue/mirror_bo_studies.py`, hard
+  links, auto-run by `run_bo_arm.py`); GUI optimizer filter/badge/header; CMA vs TuRBO matched render set
+  `docs/renders/2026-11-19-turbo-vs-cma/` (TuRBO wins 6/6 on screen J; warm-started, not independent).
+- OPEN (pre-existing): `test_b8_lanes_bounded_gui::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  fails on `hornlab_search/gui/study_jobs.py` `subprocess.Popen` (commit 6791bfa) - owner of that lane to fix
+  or whitelist.
+- NOTE: mirror runs are read-only views; "resume"/"continue" buttons on them do not apply (they are not CMA runs).
+
+## 2026-11-19 - P11 s2w attempted; superseded by the compact-slate night (no GPU spent)
+
+- RESOLVED (coordination): the p11_s2w night (box-widened v10 s2 seeded at the published bests, 80
+  valid) collided at launch with `compact400_next10_2026-11-19`, which had independently generated the
+  same s2w lanes from the same Q3 finding and was already running them (its ext s2w held the GPU lock
+  from 18:34:00). This night was stopped cleanly with ZERO jobs run and zero GPU seconds; the lock
+  holder was never touched.
+- DEDUPE: the compact lane's ext s2w is strictly wider (`az_a_cos_pow` lo 0.5, `L_mm` [180,330]) with
+  the same brief/seed/budget -> the p11 ext config is dominated and dropped; their fold s2w covered
+  fold. The two `p11_v10_s2w` configs stay in-tree as provenance + fallback (narrower ext widen +
+  refusal-tolerant watchdog) if their 10-valid ext result stays inconclusive.
+- MEASURED (their night): fold s2w **1.3738** (first v10 design below the published 1.4214; a tie by
+  the 0.4677 floor), ext s2w 1.5710 at 10 valid (inconclusive), morph 1.4243, twinray 1.4568 - three
+  constructions now inside one floor of the leader.
+- OPEN (owner/GPU): the v10 leaderboard is now a 4-way inside-floor cluster (fold 1.3738, morph
+  1.4243, twinray 1.4568, ext 1.5710). Ranking them needs verify-grid solves (same source/mesh/grid),
+  not more screen evals. Do not queue while `compact400_next10_2026-11-19` is live.
+
+## 2026-11-19 - Top-designs export for cloud agents
+
+- DONE (CPU, no GPU): `tools/data/top_designs.py` + `docs/top_designs/` bundle (52 typology×score
+  groups, 437 designs, 161-column CSV, full acoustic NPZ) + README + CODE_MAP/INDEX rows; tests
+  `tests/test_tools_data_top_designs.py` 11 passed. Snapshot 2026-11-19T23:40:55Z (HEAD `ddfba68`).
+- OPEN (owner/cloud): consume the bundle for cross-typology analysis; if the live compact400 night
+  adds winners, regenerate with `tools/data/top_designs.py` and commit the refreshed files.
+- NOTE: rank only within objective version; `unversioned` is its own set (pre-provenance rows).
+  Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
+  raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
+
+## 2026-11-19 - v10 rescore + compact XO loading done
+
+- DONE: v10 rescore of the W4 v7 bests (petal 1.9591, tri v9 3.0658, tri v8 3.6076 - all behind the
+  v10 leaders, petal 0.585 behind fold, outside the 0.4677 floor); compact XO loading healthy
+  (load_raw 0.000, driver +/-1.9 dB at 828 Hz).
+- OPEN (owner): B6 lane set; compact400 floor re-measure on its own pairs (GPU); rolled cap / KL-HV-B
+  lip decisions.
+
+## 2026-11-19 - compact400 queue DONE; continuation bundle published
+
+- DONE: bundle docs/evidence/runs/compact400_cont_2026-11-19/ (9 runs, ~9.9 MB) + README chains.
+- RESULTS: compact fold 1.2071, morph 1.2258, twinray 1.4351 (bar 1.7302); v7 petal 4.1202, tri v8
+  4.7503, tri v9 4.878 (the continuation regressed), b3 2.800.
+- OPEN: v10 rescore of the v7 rows; compact floor re-measure; xo_loading_report on the winners; B6.
+
+## 2026-11-19 - W2/W3 evidence bundle published
+
+- DONE: docs/evidence/runs/scout40w2_2026-11-19/ (15 runs, 18.5 MB, full scores + geometry + best
+  meshes/responses) and the README chains.
+- LIVE: compact400 queue (w4 tri v9 running; w4 b3, c4x_04, c4x_05 pending).
+- OPEN: read those, v10 rescore, compact floor re-measure, archive the appended compact runs, B6.
+
+## 2026-11-19 - Queue verified (19 jobs); fold cont2 appended
+
+- VERIFIED: 19 jobs, 0 config errors, warm starts read, live == docs/queue, lock on the running job.
+- WIN so far: compact morph 1.2271 (+0.197), compact fold 1.3147 (+0.153); twinray/petal/tri-v8 ties.
+- APPENDED: c4x_05_fold_cont2 (az_a_cos_amp to 0, 80 evals, warm 1.3147) - job 19.
+- OPEN: w4 tri v9 / b3, c4x_04/05; then v10 rescore, compact floor re-measure, archive, B6.
+
+## 2026-11-19 - compact morph win 1.2271; cont2 appended
+
+- WIN: c4x_01_morph_cont 1.4243 -> 1.2271 (0.197 J > the 0.1293 compact400 floor); cont2 (a0 widened to
+  0.25, 80 evals, warm 1.2271) appended as job 18.
+- LIVE: c4x_02 twinray (1.443 at 9 evals), then c4x_03, the w4 v7 lanes, c4x_04.
+- NOTE: p11_s2w queue_state is stale ("running" with a dead runner); display-only.
+
+## 2026-11-19 - p11_s2w night superseded (GPU-lock refusal, no relaunch)
+
+- NOTE: p11_s2w exited 1 on `gpu-clean rc=3 GPU busy` while the compact400 night was live - correct
+  lock behaviour, no solve interrupted. Its v10 s2w work is already covered by c4n__09 (1.3738, tie)
+  and c4n__10 (1.5710, tie); do not relaunch.
+- LIVE: compact400 night with the 7 appended 80-eval continuations (c4x_01 running).
+- OPEN: read the appended results; v10 rescore of the v7 rows; B6 set; archive.
+
+## 2026-11-19 - 7 x 80-eval continuations appended to the live compact400 queue
+
+- DONE: polled the live queue (compact400 night, job 9/10, GPU locked), checked overlap, appended 7
+  continuations (jobs 11-17) to the live + docs/queue night files. Warm starts + shape_check pass.
+- OPEN (after the appended jobs): read the compact400 winners (morph 1.4243 / twinray 1.4568 / fold
+  1.4677 vs the 1.7302 bar) and the v7 lanes (petal 4.162, tri v8 4.891, tri v9 4.878, b3 2.800);
+  v10 rescore for the v7 rows; B6 lane set.
+- NOTE: mixed briefs in one night file; the append header states J is not comparable across groups.
+
+## 2026-11-19 - compact400 (400 mm cube) + next-10 night staged
+
+- DONE (CPU): compact400 brief identity + floor 0.1293 J + stored bar 1.7302; 10 configs shape-checked
+  and preflighted; night `docs/queue/compact400_next10_2026-11-19.yaml` dry-run OK. Readout:
+  `docs/research/compact400_2026-11-19/README.md`.
+- OPEN (owner): approve GPU time (~3-5 h) and launch the staged night (command in README section 5).
+- OPEN (after the night): re-measure the compact400 floor on its own screen->verify pairs (the
+  published 0.1293 comes from 600 mm-class pairs); verify any lane winner that beats 1.7302 by > floor;
+  run `xo_loading_report.py --fx 1000` on it (report-only).
+- OPEN (carried): ATH core at r0 18 and ext-throat lanes refuse ~half of uniform box samples
+  (invalid_geometry); `resample_strict` absorbs it, but watch valid/attempt ratios.
+
+## 2026-11-19 - Q3 night: continuations + never-run typologies
+
+- DONE (GPU): `q3_more_solves_2026-11-19`, 6/6 jobs, ~45 min. Continuations proved the point cheaply:
+  fold_warm and ext_throat are **bound-pinned** (L_mm high / az_a_cos_pow low) with unchanged bests;
+  crowe v2a improved 6.7324 -> 6.4779 then stalled (tie by floor). First-ever solves: Le Cleach H/V
+  pair 7.8865, Crowe ES biradial 9.2355. New rows type `lecleach_ar` storm-limited (44 %) at 15 valid.
+  Evidence: `docs/evidence/Q3_MORE_SOLVES_2026-11-19.md`.
+- OPEN (local, next GPU): v10 s2 = widen `L_mm` (fold) and `az_a_cos_pow` (ext-throat) AND warm-start at
+  the published best designs (00826f071b24 / 436a4d221328 / a23763f1c6fc / 85c59331e4a3). Without both,
+  the current boxes cannot beat the published v10 leaders.
+- OPEN (local): fix the `lecleach_ar` box (AR_m <= 1.8, stop <= 215 suggested), re-preflight, rerun 40
+  valid; the uniform-box preflight under-predicted the 44 % storm.
+- OPEN (owner): the October portrait/square sculpture families (quatrefoil, chanterelle, petal_os,
+  ripple, cone_plughorn) need their own square/tall brief identity with a measured frequency floor
+  before a fair test on this tree; a landscape-corridor run would measure the brief mismatch.
+- NOTE (dead configs): `hl__klangfilm_ellipse_smooth_v7`, `hl__rolled_es_spiral_v7`,
+  `hl__rosse_rect_cd_v7_r50_negb` reference rows types removed from the generator ("unknown rows
+  type"); do not queue without a kernel decision.
+
+## 2026-11-19 - Compact slate: owner decisions executed (CPU only)
+
+- DONE (owner decision): crossover-aware identity authored —
+  `examples/briefs/compact_2026-11-19/compact_xo900_1250_hf1440_v10xo.yaml`; floor 0.2783 J (257
+  pairs) published in `docs/research/compact_horn_system_2026-11-19/compact_xo900_identity.md`.
+  CPU replay: fold_warm 1.0624 < A3 1.6028 ≈ A1 1.6578 ≈ A2 1.7074 < C2 2.4680 < K1 3.4445 —
+  the petal/tritonia candidates still do not beat fold_warm under the new identity.
+- DONE (CPU): A5 re-emit `examples/typologies/compact_2026-11-19/rf__rect_radial_wide_v8_currentgen.yaml`
+  (recipe drift was provenance-only; geometry identical to the archived saved mesh within 0.1 mm).
+  No solve run; config scoreable for a future authorised screen.
+- DONE (CPU): 10-inch panel fit `driver_10inch_fit.md` — 10PR300 legal on the 371.2 mm BL front
+  only with the 45 cm² port (+18.0 mm); 12PR300 illegal (−32.0 mm); 170 cm² port fails the 10-inch
+  too (−53.4 mm). Register's "frame radius NOT_YET_AVAILABLE" superseded: `frame_od_mm: 261`
+  measured (radius 130.5 mm).
+- OPEN (owner): first GPU under the new identity — a compact_xo900 search (e.g. warm-start from
+  fold_warm 00826f071b24, which now leads on BOTH v10 and the crossover identity) or another lane;
+  nothing queued and no GPU spent this pass.
+- OPEN (owner): PR #75 disposition (still OPEN/draft at d902a33; superseded locally at 627b880) and
+  whether to open a PR from `hornfab-all-2026-11-18` into `main`.
+- OPEN (owner, carried): gates D (GUI solve authorization) and E (calibration policy); B6 s2 must
+  warm-start at the published bests if ever run.
+- OPEN (staging): real 10-inch BL case still needs maker cone/surround/dust-cap dimensions; BL
+  stages its demo cone without them.
+
+## 2026-11-19 - Horn sheets: set B added, dated, larger text
+
+- DONE (render): set A 61 horns (sheets 01-21) and set B 4 new horns (sheets 22-23), all dated.
+- OPEN: the stray letter near the first V cut on sheet 1 is still unidentified.
+
+## 2026-11-20 - GUI Overview phases 2-4 (DONE) + owner decisions closed
+
+- DONE: findings engine + software health (`GET /api/overview/findings`, `/health`), persisted index
+  (`runs/overview/index.json`), line states, project readiness registry (`docs/registry/project_readiness.yaml`,
+  HW merged at read time, 45 rows, 0 errors), finding state (dismiss/acknowledge,
+  `POST /api/overview/findings/<id>`, `runs/overview/finding_state.json`), parameters tab (bounds +
+  2 % bound hits), snapshot spec (`tools/analysis/overview_snapshot_spec.py`) and the CPU-only
+  `overview-snapshot` job. Tests **79 + 4 passed**; browser check 24/24 (1280/375, dark/light).
+  Evidence: `docs/evidence/overview_phase234_2026-11-20/`.
+- RESOLVED (owner, 2026-11-20): O1-O6 accepted as the plan's recommendations. O1 applied: `#/` and
+  an empty hash land on `#/overview`; Home remains a route and Status stays in the nav. O4's GUI
+  state file is live. O3 (night-end snapshot) is **not** wired into the night runner yet - an
+  unattended edit to `tools/night_queue` needs its own approval; the Overview button covers manual
+  use.
+- OPEN (dev, low): no full-window snapshot has been generated yet (smoke used `--days 1`: 27 lines,
+  102/102 sections ok). Judge the first real 14-day snapshot on cost before scheduling it.
+- KNOWN: `tests/test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  still fails on `subprocess.Popen` in `gui/study_jobs.py` (pre-existing, untouched here).
+- NOTE: `runs/overview/index.json` (306 KB) and `finding_state.json` are the only GUI-written state;
+  both are ignored with `runs/`. The index rebuilds itself when corrupt or when the schema changes.
 
 ## 2026-11-19 - GUI Overview phase 1 (DONE) + phases 2-4 planned
 

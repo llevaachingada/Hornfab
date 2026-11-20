@@ -28,6 +28,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -44,6 +45,9 @@ __all__ = [
     "DEFAULT_TS_DIR",
     "DEFAULT_GEOMETRY_DIR",
     "DEFAULT_DRIVER_STEMS",
+    "RESERVED_SPEC_KEYS",
+    "reserved_spec_keys",
+    "warn_reserved_spec_keys",
     "HornEnvelope",
     "envelope_from_bbox_m",
     "validate_bbox_m",
@@ -69,6 +73,18 @@ DEFAULT_TS_DIR = REPO_ROOT / "examples" / "systems" / "driver_ts"
 DEFAULT_GEOMETRY_DIR = REPO_ROOT / "examples" / "systems" / "driver_geometry"
 
 SEED_SCHEMA = "hornlab.system.woofer_seed.v1"
+
+#: Frozen v1 spec keys that are parsed (and validated) but never consumed by a screen (B21).
+#: They stay user-visible and reserved instead of being silently implemented or removed.
+RESERVED_SPEC_KEYS: tuple[str, ...] = (
+    "cabinet.port_nfr_range",
+    "assembly.woofer_center_y_mm_range",
+    "assembly.woofer_center_x_mm_range",
+    "assembly.horn_mounting_offset_z_mm_range",
+    "target.beamwidth_h_deg",
+    "target.beamwidth_v_deg",
+    "dsp.active",
+)
 #: The sourced system catalog (10-inch pair added Stage 5; 12-inch pair verified Stage 0).
 DEFAULT_DRIVER_STEMS: tuple[str, ...] = (
     "faitalpro_10pr300", "faitalpro_10pr320",
@@ -98,6 +114,32 @@ SEED_AXIS_DIRECTIONS: Mapping[str, str] = {
     "cabinet_footprint_m2": "-",
     "mounting_distance_mm": "-",
 }
+
+
+def reserved_spec_keys(spec: Mapping[str, Any]) -> tuple[str, ...]:
+    """Which :data:`RESERVED_SPEC_KEYS` are present in a raw schema-v1 spec mapping."""
+    present: list[str] = []
+    for dotted in RESERVED_SPEC_KEYS:
+        section, key = dotted.split(".", 1)
+        sub = spec.get(section)
+        if isinstance(sub, Mapping) and key in sub:
+            present.append(dotted)
+    return tuple(present)
+
+
+def warn_reserved_spec_keys(spec: Mapping[str, Any]) -> tuple[str, ...]:
+    """Emit one :class:`UserWarning` naming the reserved keys present in ``spec`` (B21).
+
+    The keys are parsed and range-checked but no screen consumes them yet, so a user edit
+    silently does nothing. Warning (rather than implementing or removing them) keeps the frozen
+    v1 schema intact while making the reserved status visible. Returns the keys for tests.
+    """
+    present = reserved_spec_keys(spec)
+    if present:
+        warnings.warn(
+            "reserved spec key(s) parsed but not used by any screen: " + ", ".join(present),
+            UserWarning, stacklevel=2)
+    return present
 
 
 # --------------------------------------------------------------------------- numeric helpers
@@ -1580,6 +1622,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     spec_doc = yaml.safe_load(Path(args.spec).read_text(encoding="utf-8"))
     spec = C.parse_system_spec_dict(spec_doc)
+    warn_reserved_spec_keys(spec_doc)
     asset = horn_import.find_asset(args.asset_id, args.runs_root, scan_limit=args.scan_limit)
     catalog = load_driver_catalog(args.drivers, ts_dir=args.ts_dir,
                                   geometry_dir=args.geometry_dir)

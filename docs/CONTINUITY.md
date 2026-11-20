@@ -1,5 +1,42 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 - System v1 Pass A built (6 lanes, offline, no GPU; branch `claude/system-v1-pass-a`)
+
+- **Owner ask:** execute wave A (Pass A) of `docs/system_v1/` from the plan PR #76.
+- **Where it ran:** an isolated clone of `origin/hornfab-all-2026-11-18`
+  (`%TEMP%\opencode\hornlab-pass-a`), because the canonical checkout had a live GUI session with
+  uncommitted work; no local checkout file was touched. Plan branch merged in first (docs only).
+- **Lanes (all six reported, one commit):** A1 `paths.py` + `case_schema.py` + `read_case.py` (one
+  reader for every writer kind; N1 portability helper); A2 `calibration.py` + `combine(...,
+  calibration=, case_key=)` (None path byte-identical); A3 `authorization.py` + `observation.py` +
+  `reference.solve(authorization=)` (typed record beside `authorized_by`), B24 fidelity cap, B25
+  `new_case_for_retry`; A4 B18/B19/B21/B22/B23/B26; A5 `jobs.py` (`build_job` argv == `preview()`)
+  + `tools/evidence/verify_evidence_quotes.py`; A6 `tools/system/capture_fixture_cases.py`.
+- **Regression command (as specified by the pass):** `pytest -q tests/system
+  tests/test_tools_data_system_cases.py`, exit 0 both sides. Before: **401 tests, 0 failed, 0
+  errors, 8 skipped, 16.0 s**. After: **497 tests, 0 failed, 0 errors, 8 skipped, 15.8 s** (96 new
+  tests; the 8 skips are the pre-existing `HORNLAB_BL_REAL_TESTS` gates and absent local stores).
+  Lane counters: A1 23, A2 30, A3 51 passed + 2 skipped, A4 6 + 116-touched-area passed/5 skipped,
+  A5 25, A6 10.
+- **Deferrals (recorded in ISSUES):** B26 ships as an opt-in `filter_bank(..., ranges=)` entry check
+  — no product call site passes a spec's `DspRanges` yet, so wiring is deferred to the pass that
+  owns those call sites (defaulting `DspRanges()` would reject valid specs); B24's capping branch is
+  live with a `RuntimeWarning` because `BLHeadlessResult` carries no driver-geometry completeness;
+  `REFERENCE_REFUSAL_TOKENS` aliases the two R13 guard families without changing token or message
+  text; `contracts.canonical_json` renders `None` as the string `"None"` in solve records
+  (`from_dict` tolerates it — shared helper left untouched); the fixture pack is not captured yet
+  (owner runs `tools\system\capture_fixture_cases.py` locally in Pass 0 step 0.3).
+- **Reconciled with the integration branch:** `origin/hornfab-all-2026-11-18` moved to `df0e20f`
+  (senior decision + pilot Pareto/fidelity repair) while this pass ran. Merged it in and adopted that
+  branch's B18/B19 contract: `optimize.run_pilot` emits scalar `numeric_axes` plus `axis_directions`
+  and drops the bogus `LF_TS_SCREENING` call; `score.validate_axes()` raises on nested axes / list
+  feasibility inside `render_report`. Our B19 test was rewritten to that invariant (nested axes are
+  a `SchemaError`, scalar axes + directions rank correctly); the A4 `dominates`-unwrapping hunk was
+  dropped so the tree has one contract. Post-merge regression: **493 passed, 8 skipped, exit 0**.
+- **Not changed:** `contracts.py`, any GUI file, any solver/mesher path; no GPU, no BL, no
+  `system_runs/` writes.
+- **Next:** Pass 0 step 0.3 (capture fixtures) and Pass B (needs Pass 0's GUI trio committed).
+
 ## 2026-11-20 - Senior engineering decision + pilot Pareto/fidelity repair (CPU only, no GPU)
 
 - **Mandate:** adversarial reconciliation of the horn + woofer stack, a fidelity/source-
@@ -71,6 +108,32 @@
   item 6 (scoring) stays deferred. A second GUI lane's unstaged `app.js`/`app.css`/`hw*` work was left
   untouched; the previously staged Overview phases 2–4 were committed separately (`3fd2027`, 79 tests
   re-verified).
+## 2026-11-20 - System v1 handoffs made self-contained (docs only)
+
+- **Owner ask:** handoffs must carry branch names, file locations and rules.
+- **New:** `docs/system_v1/HANDOFFS.md`: locations table, 10 rules every session follows, and full
+  paste-ready briefs for Pass 0, A, B, C, D (repo, branch to cut, plan-branch fallback while PR #76 is
+  open, owned files per lane, commands, stop conditions, done-when, report). README points to it.
+
+## 2026-11-20 - System v1 architecture + implementation plan (cloud, docs only, no GPU)
+
+- **Owner ask:** senior review of the 2026-11-19 handbook + system export, turned into an architecture
+  and a pass-by-pass plan that lower-effort parallel agents can execute; handoffs per pass.
+- **New:** `docs/system_v1/` - `README.md` (verdict, target architecture L0-L4, pass map, lane and
+  integrator protocol, owner-decision table, v1 definition of done), `01_CONTRACTS.md` (frozen for
+  the effort: path helper, `SystemCase` + `read_case`, `CalibrationRecord`, `AuthorizationRecord`,
+  `ObservationStandard`, `JobSpec`, funnel ledger, `CaseReadModel`), and handoffs
+  `PASS_0_LOCAL`, `PASS_A_CLOUD` (6 lanes), `PASS_B_CLOUD` (5), `PASS_C_GUI` (C0 + 6),
+  `PASS_D_LOCAL_MEASURE`, `PASS_E_GATED`.
+- **New finding N1 [measured]:** `tools/data/system_cases.py` derives `horn_mesh` with `Path()`, so a
+  Windows path is not split on Linux; `tests/test_tools_data_system_cases.py` = 15 passed / 1 failed on
+  Linux (Python 3.13). Fix assigned to lanes A1 (helper) + B1 (export). Not fixed in this commit.
+- **Other findings:** N2 calibration method must cap fidelity (horn velocity-per-volt is load
+  dependent); N3 Pass 0 (commit the local GUI trio) blocks all cloud GUI edits; N4 lanes write
+  lane reports, only the pass integrator edits the four shared docs.
+- **Next:** Pass 0 (local) and Pass A (cloud) can start in parallel. No code changed; no GPU.
+- Merged `origin/hornfab-all-2026-11-18` (`1caca6c`) into the working branch first.
+
 
 ## 2026-11-20 - GUI Overview phases 2-4 built (findings, registry, parameters, snapshots; CPU only)
 
