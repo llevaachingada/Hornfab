@@ -1,0 +1,86 @@
+# v11 CD-matrix shortlist night (2026-11-20). Identity: objective v11 CD matrix (Sridhar et al. 2019)
+# + off-axis smoothness; loud-home 110 dB max; CD-only identity. J is NEVER ranked against v7/v9/v10 and
+# this queue does NOT rescore any stored run - it only runs fresh searches.
+#
+# LIVE APPEND (2026-11-20, owner request): the 8 jobs below were appended to
+# runs/nights/fable_expand_2026-11-19.yaml, which was already live (its runner reloads the night file
+# before every job). The separate waiter was stopped; do NOT launch this file as a second night while
+# fable_expand is live. The runner summary for these ids is runs/nights/fable_expand_2026-11-19/summary.jsonl.
+#
+# 8-family CD-likely shortlist (docs/research/cd_metrics_2026-11-20/V11_CD_MATRIX.md sections 1 and 4),
+# 50 valid evals each, one GPU at a time (env HORNLAB_GPU_LOCK=refuse on every job; gpu-clean before the
+# first job - the lock was stale-held by a dead pid at design time).
+#
+# Every config is a copy of its home_landscape_2026-11-15 seed with brief_file switched to
+# examples/briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd.yaml and no warm_start, so the
+# eight lanes start from their seeds and the CD matrix is a clean comparison.
+# Two substitutions (runtime check, 2026-11-20): the source R-OSSE-rect rows type and the legacy
+# Klangfilm-lame rows type are bridge-only / not in the stock ROWS_TYPES, so the stock search would
+# refuse their seeds. Replaced by two stock-runnable CD lanes:
+#   cd11__ath_tritonia_v9    (ATH Tritonia v9, OSSE + az law; source home_landscape hl__ath_tritonia_landscape_v9)
+#   cd11__klangfilm_b3_soft  (Klangfilm LAME HV core, rows type klangfilm_lame_hv_core; source priority10 B3 soft)
+# Evidence target: docs/evidence/cd_v11_2026-11-20/ (per-family cd_lw / cd_omega_2pi / cd_di_std /
+# cd_nacc / offaxis_smooth best+median, run dirs, exit codes, decoded logs; no pooled J rank).
+#
+# Launch:
+#   .venv\Scripts\python.exe tools\run_campaign_night.py --night docs\queue\cd_v11_2026-11-20.yaml --dry-run
+#   .venv\Scripts\python.exe tools\run_campaign_night.py --night docs\queue\cd_v11_2026-11-20.yaml
+night: cd_v11_2026-11-20
+lane: gpu
+jobs:
+  - id: cd11__osse_fold_warm
+    kind: search
+    mode: screen
+    budget: 50
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: "refuse"}
+    config: examples/typologies/cd_v11_2026-11-20/cd11__osse_fold_warm.yaml
+  - id: cd11__osse_morph
+    kind: search
+    mode: screen
+    budget: 50
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: "refuse"}
+    config: examples/typologies/cd_v11_2026-11-20/cd11__osse_morph.yaml
+  - id: cd11__ext_throat_hvlaw
+    kind: search
+    mode: screen
+    budget: 50
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: "refuse"}
+    config: examples/typologies/cd_v11_2026-11-20/cd11__ext_throat_hvlaw.yaml
+  - id: cd11__ath_tritonia_v9
+    kind: search
+    mode: screen
+    budget: 50
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: "refuse"}
+    config: examples/typologies/cd_v11_2026-11-20/cd11__ath_tritonia_v9.yaml
+  - id: cd11__crowe_x_osse_cd
+    kind: search
+    mode: screen
+    budget: 50
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: "refuse"}
+    config: examples/typologies/cd_v11_2026-11-20/cd11__crowe_x_osse_cd.yaml
+  - id: cd11__klangfilm_b3_soft
+    kind: search
+    mode: screen
+    budget: 50
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: "refuse"}
+    config: examples/typologies/cd_v11_2026-11-20/cd11__klangfilm_b3_soft.yaml
+  - id: cd11__ath_core_petal
+    kind: search
+    mode: screen
+    budget: 50
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: "refuse"}
+    config: examples/typologies/cd_v11_2026-11-20/cd11__ath_core_petal.yaml
+  - id: cd11__biradial_es
+    kind: search
+    mode: screen
+    budget: 50
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: "refuse"}
+    config: examples/typologies/cd_v11_2026-11-20/cd11__biradial_es.yaml

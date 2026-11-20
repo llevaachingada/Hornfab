@@ -1,0 +1,47 @@
+# v11 CD-matrix identity (2026-11-20, docs/research/cd_metrics_2026-11-20/V11_CD_MATRIX.md section 4).
+# Copy of hl__biradial_es_style_v7.yaml for the objective-v11 CD shortlist. Only name/description/brief_file/
+# search.budget changed; every family/generator/mesh/solve/bounds/seed knob is the source's and every lane
+# starts from its seed (no warm_start). New identity: J is never ranked against v7/v9/v10.
+# HOME KEELE BI-RADIAL, ES-450-STYLE MOUTH (revised 2026-11-15 study: docs/research/typologies/
+# BIRADIAL_CROWE_STUDY_2026-11-15.md). Per plane the US4308932A law r = r0 + tan(a) z + c z^n (registry 'biradial').
+# FIX: the law starts at its full wall angle (36 / 22.5 deg) right at the 2-deg driver exit - a throat kink the mesher
+# closed with a domed source cap (17/19 screens refused 'not round'). Now h/v_throat_blend_mm 25 (same both planes, so the
+# throat stays round) blends an OS throat from the driver exit angle into the patent contour (registry THROAT_BLEND_TYPES
+# gained 'biradial'; default 0 is bit-for-bit unchanged). Seeds by Keele's rule: initial wall angle = 0.9 x half-coverage
+# (80 H -> 36, 50 V -> 22.5); box 32-37 H / 18-24 V. The same law needs rm >= r0 + tan(a) L (the cone must close before
+# c z^n can add flare); the earlier 32-42 / 18-28 / L<=400 box violated that on 32/64 random samples. Box coupled:
+# L 220-320, h_rm 260-292 (>= 18 + tan(37) 320), v_rm 162-230 (>= 18 + tan(24) 320) -> 64/64 random samples mesh, fit
+# the envelope and keep a round coupling plane. Mouth half-sizes h 260-292 > v 162-230 (landscape), flare exponents 3-7
+# (patent claim range 2-8, paper prefers 4-6), mouth superellipse exponent 2.2-5 (ES-450 is squarish). seed_policy
+# explicit (no K-law re-aim). V pattern control to 700 Hz needs ~794 mm of mouth by the K-law (A = 0.9 B, 50 deg);
+# impossible in 480 mm - at 700 Hz the 480 mm height supports only ~83 deg. Accepted (vertical misses are half-weighted).
+name: cd11__biradial_es
+family: FREEFORM
+brief_file: ../../briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd.yaml
+generator:
+  name: typology
+  profile_h: {type: biradial}
+  profile_v: {type: biradial}
+  n_anchors: 16
+  max_wall_deg: 80.0
+  mouth: superellipse
+  seed_policy: explicit
+seed_params: {L_mm: 255.0, h_a_deg: 36.0, v_a_deg: 22.5, h_rm_mm: 280.0, v_rm_mm: 175.0, h_n: 5.0, v_n: 5.0, h_throat_blend_mm: 25.0,
+  v_throat_blend_mm: 25.0, mouth_exponent: 3.0}
+bounds:
+  L_mm: {lo: 220.0, hi: 320.0}
+  h_a_deg: {lo: 32.0, hi: 37.0}
+  v_a_deg: {lo: 18.0, hi: 24.0}
+  h_rm_mm: {lo: 260.0, hi: 292.0}
+  v_rm_mm: {lo: 162.0, hi: 230.0}
+  h_n: {lo: 3.0, hi: 7.0}
+  v_n: {lo: 3.0, hi: 7.0}
+  h_throat_blend_mm: {lo: 25.0, hi: 25.0, search: false}
+  v_throat_blend_mm: {lo: 25.0, hi: 25.0, search: false}
+  mouth_exponent: {lo: 2.2, hi: 5.0}
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51,
+  rear_res_factor: 1.5}
+solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
+search: {algorithm: cma, sigma0: 0.2, seed: 1234, budget: 50, popsize: null, tolfun: 0.001, infeasible_penalty: graded, budget_counts: valid, max_attempts: 200}
+description: 'v11 CD matrix: Keele Bi-Radial per-plane law, ES-450-style landscape mouth, OS throat blend'

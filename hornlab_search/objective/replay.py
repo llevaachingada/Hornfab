@@ -51,6 +51,7 @@ import numpy as np
 from ..metrics.compute import compute_metrics
 from .scalar_v9 import V9Params, objective_v9, resolve_v9_weights
 from .scalar_v10 import V10Params, objective_v10
+from .scalar_v11 import V11Params, objective_v11, resolve_v11_weights
 from ..targets.spec import Target
 from ..types import MetricSet, Response
 from .scalar import objective as _objective_v1
@@ -207,6 +208,11 @@ def _params_from_block(version: int, block: dict | None):
         if block is None:
             raise ValueError("objective v10 needs its objective block (tolerances, ripple_region)")
         return block if isinstance(block, V10Params) else V10Params.from_block(dict(block))
+    if version == 11:
+        if block is None:
+            raise ValueError("objective v11 needs its objective block (tolerances, ripple_region, "
+                             "cd)")
+        return block if isinstance(block, V11Params) else V11Params.from_block(dict(block))
     return None
 
 
@@ -580,7 +586,7 @@ def _identity(
 #: each (pinned by tests/test_replay_versions_single_source.py). v5 (MEH inputs) and v6 are not
 #: replayable here. Adding an objective version = add it here AND in ``_dispatch`` (the 2026-11-18
 #: v10 gap: dispatch existed, the gate refused it).
-REPLAY_VERSIONS = (1, 2, 3, 4, 7, 9, 10)
+REPLAY_VERSIONS = (1, 2, 3, 4, 7, 9, 10, 11)
 
 def _dispatch(version: int, metrics: MetricSet, response: Response | None, target: Target,
               weights: dict, params):
@@ -598,10 +604,15 @@ def _dispatch(version: int, metrics: MetricSet, response: Response | None, targe
         return objective_v9(metrics, response, True, target, weights, params)
     if version == 10:
         return objective_v10(metrics, response, True, target, weights, params)
+    if version == 11:
+        return objective_v11(metrics, response, True, target, weights, params)
     raise ValueError(f"no replay dispatch for objective version {version}")
 
 
 def _weight_for(version: int, weights: dict, key: str, params=None) -> float:
+    if version == 11:
+        return float(resolve_v11_weights(weights, params if isinstance(params, V11Params) else None)
+                     .get(key, 0.0))
     if version == 10:
         p9 = params.v9 if isinstance(params, V10Params) else None
         return float(resolve_v9_weights(weights, p9).get(key, 0.0))

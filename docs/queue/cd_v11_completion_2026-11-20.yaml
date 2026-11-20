@@ -1,0 +1,67 @@
+# v11 CD completion night (2026-11-20). Seven partial lanes from the fable_expand append;
+# each starts from its own partial-run best design, 50 valid evals, watchdog OFF (the 30%
+# refusal / bound-pinned stop was the blocker), one GPU at a time. Bound changes: fold
+# az_fold_h_deg hi 10; ext az_a_cos_pow lo 0.5; klangfilm g_beak_v_projection_mm pinned at its
+# legal best 0.0411280271 (the proposed -5 widening was rejected: the generator requires >= 0).
+# Storm lanes use resample_strict + retry_same_then_stop. biradial_es is already complete
+# (50/50) and is NOT rerun. Evidence target: docs/evidence/cd_v11_2026-11-20/.
+night: cd_v11_completion_2026-11-20
+lane: gpu
+watchdog: false
+jobs:
+- id: cd11c__osse_fold_warm
+  kind: search
+  mode: screen
+  budget: 50
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/cd_v11_completion_2026-11-20/cd11c__osse_fold_warm.yaml
+- id: cd11c__osse_morph
+  kind: search
+  mode: screen
+  budget: 50
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/cd_v11_completion_2026-11-20/cd11c__osse_morph.yaml
+- id: cd11c__ext_throat_hvlaw
+  kind: search
+  mode: screen
+  budget: 50
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/cd_v11_completion_2026-11-20/cd11c__ext_throat_hvlaw.yaml
+- id: cd11c__ath_tritonia_v9
+  kind: search
+  mode: screen
+  budget: 50
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/cd_v11_completion_2026-11-20/cd11c__ath_tritonia_v9.yaml
+- id: cd11c__crowe_x_osse_cd
+  kind: search
+  mode: screen
+  budget: 50
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/cd_v11_completion_2026-11-20/cd11c__crowe_x_osse_cd.yaml
+- id: cd11c__klangfilm_b3_soft
+  kind: search
+  mode: screen
+  budget: 50
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/cd_v11_completion_2026-11-20/cd11c__klangfilm_b3_soft.yaml
+- id: cd11c__ath_core_petal
+  kind: search
+  mode: screen
+  budget: 50
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  config: examples/typologies/cd_v11_completion_2026-11-20/cd11c__ath_core_petal.yaml

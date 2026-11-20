@@ -1,0 +1,74 @@
+# v11 CD-matrix identity (2026-11-20, docs/research/cd_metrics_2026-11-20/V11_CD_MATRIX.md section 4).
+# Copy of hl__ext_throat_hvlaw_v7.yaml for the objective-v11 CD shortlist. Only name/description/brief_file/
+# search.budget changed; every family/generator/mesh/solve/bounds/seed knob is the source's and every lane
+# starts from its seed (no warm_start). New identity: J is never ranked against v7/v9/v10.
+# HOME LANDSCAPE core cell (2026-11-15). Brief room_landscape_80x50_700_hf1440_v7 (no K-law; vertical half-weighted).
+# OSSE + extended throat (the family BoTorch and CMA both liked) with a PER-DIRECTION wall angle:
+#   a(p) = a_deg + az_a_cos_amp*|cos p|^az_a_cos_pow   (p = 0 is horizontal; shape_check confirmed it widens W only).
+# Seed a_deg 24 + cos 14 -> a(0) = 38 deg (H ~76), a(90) = 24 deg (V ~48). NO mouth morph: the mouth follows the walls
+# (seed mouth 524 W x 363 H, landscape), so no mouth target can flare the vertical walls the wrong way again.
+# Throat extension seeded in the short/steep region BoTorch found (115 mm @ 4.5 deg); r0/a0 are re-derived per design.
+# The superformula petal term is pinned at 0 (no gain on this family 2026-11-14/15); petal/ripple shapes live in
+# their own cells. Searched (8): a_deg, cos amp/pow, s, s cos^2 amp, L, throat ext length/angle. sigma0 0.2 (explore).
+# Intended as the BoTorch task for the landscape home horn: CMA seeds build the cohort, then scalar/TuRBO/Pareto.
+name: cd11__ext_throat_hvlaw
+family: OSSE
+seed_params: {r0_mm: 27.0507, a0_deg: 4.5, a_deg: 24.0, L_mm: 250.0, n: 6.0, s: 0.55, q: 0.996, k: 1.0, exponent: 2.0, aspect_ratio: 1.0,
+  throat_ext_length_mm: 115.0, throat_ext_angle_deg: 4.5, slot_length_mm: 0.0, morph_target: 0, morph_width_mm: 500.0, morph_height_mm: 660.0,
+  morph_corner_mm: 35.0, morph_exponent: 4.0, morph_rate: 4.1236, morph_fixed: 0.0, morph_allow_shrinkage: 0, wall_thickness_mm: 5.0,
+  az_sf_m: 4.0, az_sf_n1: 7.4958, az_sf_n2: 12.4449, az_sf_n3: 13.4442, az_sf_a: 1.0, az_sf_b: 0.8569, az_a_cos_pow: 2.0,
+  az_n_cos2_amp: 0.0, az_a_sf_amp: 0.0, az_a_cos_amp: 14.0, az_s_cos2_amp: 0.0}
+bounds:
+  r0_mm: {lo: 27.0507, hi: 27.0507, search: false}
+  a0_deg: {lo: 4.5, hi: 4.5, search: false}
+  a_deg: {lo: 15.0, hi: 40.0}
+  L_mm: {lo: 180.0, hi: 330.0}
+  n: {lo: 6.0, hi: 6.0, search: false}
+  s: {lo: 0.3, hi: 0.9}
+  q: {lo: 0.996, hi: 0.996, search: false}
+  k: {lo: 1.0, hi: 1.0, search: false}
+  exponent: {lo: 2.0, hi: 2.0, search: false}
+  aspect_ratio: {lo: 1.0, hi: 1.0, search: false}
+  throat_ext_length_mm: {lo: 60.0, hi: 220.0}
+  throat_ext_angle_deg: {lo: 1.5, hi: 6.0}
+  slot_length_mm: {lo: 0.0, hi: 0.0, search: false}
+  morph_target: {lo: 0, hi: 0, search: false}
+  morph_width_mm: {lo: 500.0, hi: 500.0, search: false}
+  morph_height_mm: {lo: 660.0, hi: 660.0, search: false}
+  morph_corner_mm: {lo: 35.0, hi: 35.0, search: false}
+  morph_exponent: {lo: 4.0, hi: 4.0, search: false}
+  morph_rate: {lo: 4.1236, hi: 4.1236, search: false}
+  morph_fixed: {lo: 0.0, hi: 0.0, search: false}
+  morph_allow_shrinkage: {lo: 0, hi: 0, search: false}
+  wall_thickness_mm: {lo: 5.0, hi: 5.0, search: false}
+  az_sf_m: {lo: 4.0, hi: 4.0, search: false}
+  az_sf_n1: {lo: 7.4958, hi: 7.4958, search: false}
+  az_sf_n2: {lo: 12.4449, hi: 12.4449, search: false}
+  az_sf_n3: {lo: 13.4442, hi: 13.4442, search: false}
+  az_sf_a: {lo: 1.0, hi: 1.0, search: false}
+  az_sf_b: {lo: 0.8569, hi: 0.8569, search: false}
+  az_a_cos_pow: {lo: 1.0, hi: 6.0}
+  az_n_cos2_amp: {lo: 0.0, hi: 0.0, search: false}
+  az_a_sf_amp: {lo: 0.0, hi: 0.0, search: false}
+  az_a_cos_amp: {lo: 0.0, hi: 25.0}
+  az_s_cos2_amp: {lo: -0.25, hi: 0.5}
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 60.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+    - [2500.0, 5500.0, 2.0]
+weights: {cov: 1.0, rip: 1.0, di: 0.3, dislope: 0.5, flat: 0.5, load: 1.0, distd: 0.5, diag: 0.5, flat_cv: 0.5}
+mesh: {epw: 6.0, quadrants: '1', dof_cap_screen: 24000, dof_cap_verify: 24000, dof_cap_final: 24000, dof_per_triangle: 0.51}
+solve: {backend: beat_cuda, distance_m: 10.0, angle_count: 73, balloon: true, balloon_points_screen: 512, balloon_points_verify: 1024,
+  gmres_tol: 1.0e-05, timeout_s: 900, cuda_fused: true}
+search: {algorithm: cma, sigma0: 0.1, seed: 1234, budget: 50, popsize: null, tolfun: 0.001, infeasible_penalty: resample_strict, error_policy: retry_same_then_stop, budget_counts: valid, max_attempts: 300}
+description: 'v11 CD matrix: OSSE extended throat with a per-direction wall angle (cosine law), mouth follows the walls'
+brief_file: ../../briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd.yaml

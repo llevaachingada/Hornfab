@@ -358,10 +358,10 @@ def _validate_objective_block(block, where: str) -> dict:
     if not isinstance(block, dict):
         raise ConfigError(f"{where}: objective must be a mapping")
     v = block.get("version", 1)
-    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2, 3, 4, 5, 6, 7, 9, 10):
+    if isinstance(v, bool) or not isinstance(v, int) or v not in (1, 2, 3, 4, 5, 6, 7, 9, 10, 11):
         raise ConfigError(f"{where}: objective.version must be 1, 2, 3, 4, 5, 6 or 7 "
                           f"(or 9 for the non-CD profile objective, 10 for v9 with an explicit "
-                          f"ripple_region), got {v!r}")
+                          f"ripple_region, 11 for v10 plus the objective.cd CD matrix), got {v!r}")
     if v == 4:
         from .objective.scalar_v4 import V4Params
         try:
@@ -398,6 +398,12 @@ def _validate_objective_block(block, where: str) -> dict:
             return V10Params.from_block(block).to_block()
         except ValueError as e:
             raise ConfigError(f"{where}: {e}") from None
+    if v == 11:
+        from .objective.scalar_v11 import V11Params
+        try:
+            return V11Params.from_block(block).to_block()
+        except ValueError as e:
+            raise ConfigError(f"{where}: {e}") from None
     unknown = set(block) - {"version"}
     if unknown:
         raise ConfigError(f"{where}: objective unknown key(s) {sorted(unknown)} (allowed: version)")
@@ -418,13 +424,13 @@ def _target_has_coverage_profile(target) -> bool:
 
 def _require_v9_coverage_profile(objective, target, where: str) -> None:
     """v9 is profile-driven: refuse a version-9 block with no ``target.coverage_profile``."""
-    if not isinstance(objective, dict) or objective.get("version") not in (9, 10):
+    if not isinstance(objective, dict) or objective.get("version") not in (9, 10, 11):
         return
     version = objective.get("version")
     if not _target_has_coverage_profile(target):
         raise ConfigError(f"{where}: objective.version {version} requires target.coverage_profile "
                           f"(corridor or target mode); absent")
-    if version == 10:
+    if version in (10, 11):
         region = objective.get("ripple_region")
         mode = region if isinstance(region, str) else (region or {}).get("mode")             if isinstance(region, dict) else None
         profile = target.get("coverage_profile") if isinstance(target, dict) else None
@@ -1653,6 +1659,16 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         if worst > 0.5 * PENALTY_INVALID:
             raise ConfigError(
                 f"{where}: objective v10 tolerances/weights let an all-unmeasurable valid design score "
+                f"J = {worst:.0f}, above half the refusal penalty ({PENALTY_INVALID:g}); raise the "
+                f"tolerances or lower the weights so refused designs always rank below valid ones")
+    elif objective_version == 11:
+        from .objective.scalar_v11 import V11Params, worst_valid_v11_j
+        from .objective.terms import PENALTY_INVALID
+        objective_params = _validate_objective_block(raw["objective"], where)
+        worst = worst_valid_v11_j(V11Params.from_block(objective_params), raw.get("weights"))
+        if worst > 0.5 * PENALTY_INVALID:
+            raise ConfigError(
+                f"{where}: objective v11 tolerances/weights let an all-unmeasurable valid design score "
                 f"J = {worst:.0f}, above half the refusal penalty ({PENALTY_INVALID:g}); raise the "
                 f"tolerances or lower the weights so refused designs always rank below valid ones")
 

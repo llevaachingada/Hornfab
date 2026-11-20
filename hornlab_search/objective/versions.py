@@ -23,7 +23,10 @@ from __future__ import annotations
 #: 10 = v9 with an explicit, REQUIRED ``objective.ripple_region`` (preferred_edge / min_edge /
 #: seat_zone_deg); fixes the v9 ripple-window semantics as a NEW identity (2026-11-18 PR-A,
 #: ``objective/scalar_v10.py``; OWNER-GATED: no brief uses it until the owner picks the policy).
-SUPPORTED_OBJECTIVE_VERSIONS: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7, 9, 10)
+#: 11 = v10 plus the REQUIRED ``objective.cd`` constant-directivity matrix (cd_lw / cd_di_std /
+#: cd_nacc / offaxis_smooth, with cd_omega_2pi report-only) (2026-11-20 owner-directed,
+#: ``objective/scalar_v11.py``; a NEW identity, never ranked against v9/v10).
+SUPPORTED_OBJECTIVE_VERSIONS: tuple[int, ...] = (1, 2, 3, 4, 5, 6, 7, 9, 10, 11)
 
 
 def is_supported_objective_version(value: object) -> bool:

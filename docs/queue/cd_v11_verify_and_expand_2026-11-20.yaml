@@ -1,0 +1,182 @@
+# v11 CD verify + x_s2b/x_s2c completion night (2026-11-20, owner request).
+# A. Five verify-grid solves of the v11 CD completion bests (29-frequency / 1024-point balloon):
+#    ext_throat_hvlaw, osse_fold_warm, osse_morph, ath_core_petal, crowe_x_osse_cd.
+# B. Eight watchdog-stopped compact400 expansion lanes from fable_expand_2026-11-19, resumed
+#    to their original budgets (x_s2b 80, x_s2c 60) with the watchdog OFF. Same run dirs/CMA state,
+#    no rescore of stored rows. One GPU at a time; HORNLAB_GPU_LOCK=refuse.
+night: cd_v11_verify_and_expand_2026-11-20
+lane: gpu
+watchdog: false
+jobs:
+- id: cd11v__ext_throat_hvlaw
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_v11_verify_2026-11-20/cd11v__ext_throat_hvlaw.yaml
+  - --mode
+  - verify
+- id: cd11v__osse_fold_warm
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_v11_verify_2026-11-20/cd11v__osse_fold_warm.yaml
+  - --mode
+  - verify
+- id: cd11v__osse_morph
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_v11_verify_2026-11-20/cd11v__osse_morph.yaml
+  - --mode
+  - verify
+- id: cd11v__ath_core_petal
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_v11_verify_2026-11-20/cd11v__ath_core_petal.yaml
+  - --mode
+  - verify
+- id: cd11v__crowe_x_osse_cd
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_v11_verify_2026-11-20/cd11v__crowe_x_osse_cd.yaml
+  - --mode
+  - verify
+- id: xr__x_s2b_morph
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --resume
+  - runs/20261120T043224Z-screen-83f65e
+  - --budget
+  - '80'
+  - --mode
+  - screen
+- id: xr__x_s2b_fold
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --resume
+  - runs/20261120T043857Z-screen-ae2855
+  - --budget
+  - '80'
+  - --mode
+  - screen
+- id: xr__x_s2b_twinray
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --resume
+  - runs/20261120T044531Z-screen-b1626e
+  - --budget
+  - '80'
+  - --mode
+  - screen
+- id: xr__x_s2b_petal
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --resume
+  - runs/20261120T045235Z-screen-0d3643
+  - --budget
+  - '80'
+  - --mode
+  - screen
+- id: xr__x_s2b_ext
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --resume
+  - runs/20261120T045839Z-screen-5e8a4e
+  - --budget
+  - '80'
+  - --mode
+  - screen
+- id: xr__x_s2c_morph
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --resume
+  - runs/20261120T050543Z-screen-29377f
+  - --budget
+  - '60'
+  - --mode
+  - screen
+- id: xr__x_s2c_fold
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --resume
+  - runs/20261120T052219Z-screen-c1c895
+  - --budget
+  - '60'
+  - --mode
+  - screen
+- id: xr__x_s2c_twinray
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --resume
+  - runs/20261120T053053Z-screen-32a9e3
+  - --budget
+  - '60'
+  - --mode
+  - screen

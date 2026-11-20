@@ -1,0 +1,44 @@
+# NATIVE-ROUTE source sensitivity, CLEAN CACHE (2026-11-20). 3 jobs. STAGED.
+#
+# WHY A FOURTH RUN: `source_sensitivity3` re-ran the morph jobs with the native fix in place, but
+# `ss_morph_cap150` came back `cached: true, solve 0.0 s` with the AUTO mesh copied in - a poisoned
+# solve-cache entry. Cause: the v2 (pre-fix) run recorded a cap-aware `mesh_hash` (`bcf9a8cec98b`)
+# while the native builder silently ignored the cap, so its response was cached under a key that only
+# became meaningful after the fix. Anything keyed by (design, mesh, solve) can inherit that.
+#
+# So this night passes a FRESH `--cache-dir` (and fresh verify dirs) to guarantee real solves.
+# Expected: auto mesh sha `04fe395f3fa5`-class (fresh build) and cap150/cap60 different shas, three
+# real solve times. Readout identical to v2/v3: beamwidth 8/10/12 kHz and the +25/+35 level.
+night: source_sensitivity4_2026-11-20
+lane: gpu
+jobs:
+- id: ss4_morph_auto
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --cache-dir, runs/source_sensitivity4/cache,
+         --run, runs/20261119T081214Z-screen-8470bd,
+         --designs, cf716e738ef8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_auto.yaml,
+         --verify-dir, runs/source_sensitivity4/ss_morph_auto]
+- id: ss4_morph_cap150
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --cache-dir, runs/source_sensitivity4/cache,
+         --run, runs/20261119T081214Z-screen-8470bd,
+         --designs, cf716e738ef8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_cap150.yaml,
+         --verify-dir, runs/source_sensitivity4/ss_morph_cap150]
+- id: ss4_morph_cap60
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --cache-dir, runs/source_sensitivity4/cache,
+         --run, runs/20261119T081214Z-screen-8470bd,
+         --designs, cf716e738ef8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_cap60.yaml,
+         --verify-dir, runs/source_sensitivity4/ss_morph_cap60]

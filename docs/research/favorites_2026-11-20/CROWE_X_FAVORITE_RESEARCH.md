@@ -219,3 +219,25 @@ FAV-001's while `load` falls below ~1.0. If the CD terms degrade as fast as load
 Sources: [diyAudio "Geddes on waveguides"](https://www.diyaudio.com/community/threads/geddes-on-waveguides.103872/) ·
 [diyAudio "Acoustic Horn Design – The Easy Way (Ath4)" p. 228](https://diyaudio.com/community/threads/acoustic-horn-design-the-easy-way-ath4.338806/page-228)
 · in-repo dossiers cited inline.
+
+---
+
+## Addendum 2026-11-20 15:23: k-attribution measured [measured, screen grid, same v11 home brief]
+
+Night `fav_crowe_2026-11-20` jobs 1–3: FAV-001 knobs, only `g_k` changed (depth re-solved so the mouth holds 587 mm).
+Weighted contributions; "non-load" = J − load.
+
+| design | J | load | LFP20 / LFP50 Hz | min Re z ≥ 700 | cd_lw | cd_di_std | cd_nacc | off-axis | dislope | flat | non-load |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| FAV-001 (k 1) | 4.996 | 2.645 | 674 / 995 | 0.33 | 0.346 | 0.319 | 0.153 | 0.543 | 0.111 | 0.444 | **2.352** |
+| k 2 (L 274.2) | **4.800** | 1.508 | 595 / 832 | 0.49 | 0.304 | 0.519 | 0.193 | 1.142 | 0.313 | 0.324 | 3.292 |
+| k 3 (L 286.7) | 5.177 | 1.039 | 543 / 728 | 0.68 | 0.375 | 0.685 | 0.259 | 1.541 | 0.536 | 0.243 | 4.138 |
+| k 4 (L 298.2) | 5.603 | 0.792 | 516 / 665 | 0.86 | 0.454 | 0.811 | 0.324 | 1.808 | 0.745 | 0.198 | 4.812 |
+
+Read: the Webster proxy's loading prediction held (k 3: LFP50 728 vs proxy 673; min Re z 0.68). The ATH warning
+also held. **Every step in k costs about as much directivity as it buys loading:** off-axis smoothness ×2–3,
+DI std ×1.6–2.5, DI slope ×3–7. Only k 2 is a net J gain (−0.20), and it is a weaker horn on every CD-matrix
+metric except listening-window deviation. With the other knobs frozen, k is not a free improvement. Whether
+re-balancing the other knobs recovers the directivity is what `fav__crowe_k_home` (CMA, k ∈ [1, 5]) answers.
+Practical reading for the owner: if FAV-001's directivity is the point, **keep k ≈ 1–1.5 and cross ≥ 900 Hz**
+rather than buy 700 Hz loading with k.
