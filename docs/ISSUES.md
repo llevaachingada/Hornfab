@@ -20,6 +20,13 @@
   still fails on `subprocess.Popen` in `gui/study_jobs.py` (pre-existing, untouched here).
 - NOTE: `runs/overview/index.json` (306 KB) and `finding_state.json` are the only GUI-written state;
   both are ignored with `runs/`. The index rebuilds itself when corrupt or when the schema changes.
+- RESOLVED (visual QA, same day): 16 issues from an independent image review are fixed - params
+  keeps best J + bound hits at 375 px (right-aligned nowrap group, header printed once, no duplicate
+  timestamp), findings groups follow the payload's severity-tied order with matching-subset tile
+  counts, registry drops `WP WP4` / the 50 px SOURCE column / the always-empty DECIDED column and
+  states `33 risks + 12 decisions = 45 rows`. Browser pass re-run 24/24 clean.
+- OPEN (pre-existing, other lane): the shell's sidebar "Resume search" button is clipped at 1280 by
+  the nav column (`app.js` taskbar + `app.css`); present in HEAD, unrelated to the Overview work.
 
 ## 2026-11-19 - GUI Overview phase 1 (DONE) + phases 2-4 planned
 

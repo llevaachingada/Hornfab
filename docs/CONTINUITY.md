@@ -37,8 +37,27 @@
 - **Deferred:** wiring the snapshot into the night runner (O3) needs an edit to `tools/night_queue`
   and an owner-approved unattended path; the job is available from the Overview button instead. A
   full 14-day snapshot was not run (smoke only).
+- **Visual QA (same day):** an independent image review of the six tabs found 16 issues — 2 blockers
+  (the Parameters table lost BEST J / bound-hit columns at 375 px; an expanded findings group
+  repeated its own header) and 14 cosmetic bugs (`WP WP4`, a character-broken SOURCE column, a risk
+  counter implying missing rows, a duplicated timestamp, severity order). All fixed: the narrow
+  params row now labels `J 2.498 · 0 hits` in a right-aligned nowrap group; findings groups follow the
+  payload's severity-tied order and the severity tiles count the *matching* subset with an
+  "of N in payload" note; the registry hides an all-empty Decided column and prints `source:` under
+  the recommendation. Final Playwright pass 24/24 clean at 1280/375 dark/light, URL state reload-safe
+  (also verified with `tab=next&status=all&sort=newest&kind=budget`). Screenshots refreshed.
 - **State:** GPU lane untouched (no solve, no lock change). `runs/overview/{index.json,finding_state.json}`
   are the only GUI-written state; both are git-ignored with `runs/`.
+- **Visual QA (same day, follow-up commit):** an independent image review of the first browser pass
+  found 16 issues, 2 of them blockers (the Parameters table lost BEST J / bound-hit values at 375 px;
+  an expanded findings group repeated its own header). All are fixed in the three `overview_*.js`
+  modules: narrow params rows print a right-aligned `J <v> · N hits` group with nowrap segments, the
+  line-table header prints once, the tab timestamp is gone; findings groups keep the payload's
+  severity-tied order, the severity tiles count the matching subset (`of 30 in payload`) and the
+  counter reads `X of Y groups · X of Y findings shown`; the registry drops `WP WP4`, the 50 px
+  SOURCE column and the always-empty DECIDED column and states `33 risks + 12 decisions = 45 rows`.
+  A severity tie-break (`F.sort_key`: status, −score, severity) keeps HIGH above MEDIUM at equal
+  score. Browser pass re-run: 24/24, 0 failures.
 
 ## 2026-11-19 - GUI Overview phase 1 + implementation plan (CPU only, no GPU)
 

@@ -82,6 +82,8 @@ const STYLE = `
 .ovf-empty{margin:0}
 .ovf-more{align-self:start}
 .ovf-more[hidden]{display:none}
+.ovf-kpihead{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline;margin:0 0 4px}
+.ovf-kpihead .muted{font-size:.74rem}
 /* Four severity tiles: two full columns at phone width; no empty tinted track. */
 @media (max-width:640px){
   .kpis.ovf-kpis{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
@@ -155,28 +157,32 @@ function groupFindings(list, s) {
   const idx = new Map();
   list.forEach((f, i) => idx.set(f.id, i));
   const by = new Map();
+  let seq = 0;
   for (const f of list) {
     const key = String(f.identity_id || "") + "\u0000" + String(f.line_key || "");
     let g = by.get(key);
     if (!g) {
-      g = { key, identity_id: String(f.identity_id || ""), line_key: String(f.line_key || ""), findings: [] };
+      // first finding in payload order fixes the group's place; Map keeps that insertion order.
+      g = { key, identity_id: String(f.identity_id || ""), line_key: String(f.line_key || ""), findings: [], first: seq++ };
       by.set(key, g);
     }
     g.findings.push(f);
   }
   const groups = [...by.values()];
   for (const g of groups) {
-    g.findings.sort((a, b) => compareFindings(a, b, s, idx));
+    // Priority order is the payload's order (server sorts status, score, severity). Only the
+    // explicit sort controls reorder findings/groups; priority never re-sorts by score.
+    if (s.sort !== "priority") g.findings.sort((a, b) => compareFindings(a, b, s, idx));
     g.top = [...g.findings].sort((a, b) => (sevOf(a) - sevOf(b)) || (scoreOf(b) - scoreOf(a)))[0];
     g.score = Math.max(...g.findings.map(scoreOf));
     g.open = g.findings.some(isOpen);
     g.newest = Math.max(...g.findings.map(f => tsOf(f.first_seen_utc)));
   }
-  groups.sort((a, b) => {
-    if (s.sort === "newest") return (b.newest - a.newest) || (Number(b.open) - Number(a.open)) || (b.score - a.score);
-    if (s.sort === "identity") return a.identity_id.localeCompare(b.identity_id) || (Number(b.open) - Number(a.open)) || (b.score - a.score);
-    return (Number(b.open) - Number(a.open)) || (b.score - a.score) || a.identity_id.localeCompare(b.identity_id);
-  });
+  if (s.sort === "newest") {
+    groups.sort((a, b) => (b.newest - a.newest) || (a.first - b.first));
+  } else if (s.sort === "identity") {
+    groups.sort((a, b) => a.identity_id.localeCompare(b.identity_id) || (a.first - b.first));
+  }
   return groups;
 }
 
@@ -203,7 +209,7 @@ function findingHtml(f, isLead = false) {
       <b class="ovf-ftitle">${esc(f.title)}</b>
       ${statusHtml(f)}
     </div>`;
-  return `<article class="ovf-find">
+  return `<article class="ovf-find" data-sev="${esc(sev)}">
     ${head}
     ${f.detail ? `<p class="ovf-detail">${esc(f.detail)}</p>` : ""}
     ${why ? `<div class="pill-row ovf-why">${why}</div>` : ""}
@@ -264,25 +270,27 @@ export function findingsTabHtml(fd, state) {
   if (!fd || typeof fd !== "object") return `<p class="muted">No findings data available.</p>`;
   const s = normState(state);
   const all = (fd && Array.isArray(fd.findings)) ? fd.findings.filter(Boolean) : [];
-  const counts = {};
-  for (const sv of SEV) {
-    const n = fd && fd.counts ? Number(fd.counts[sv]) : NaN;
-    counts[sv] = isFinite(n) ? n : all.filter(f => sevName(f) === sv).length;
-  }
   const head = `<div>
     <div class="eyebrow">Next solves · findings engine</div>
     <p class="muted" style="font-size:.8rem;margin:2px 0 0">Ranked, explainable recommendations: one finding per line of work, never one per run. Priority is computed by the findings engine; this page only filters and sorts it.</p>
   </div>`;
-  const kpis = `<div class="kpis ovf-kpis">${SEV.map(sv => kpi(SEV_LABEL[sv], int(counts[sv]), "", SEV_CLASS[sv])).join("")}</div>`;
-  if (!all.length) {
-    return `${head}${kpis}<p class="muted ovf-empty">${s.status === "open"
-      ? "Nothing open — every line has room to run" : "No findings match"}</p>`;
-  }
 
   const kindSet = new Set(s.kind.split(",").map(x => x.trim()).filter(Boolean));
   const cards = [...new Set(all.map(cardOf).filter(Boolean))].sort();
   const idents = [...new Set(all.map(f => String(f.identity_id || "")).filter(Boolean))].sort();
   const list = all.filter(f => matches(f, s, kindSet));
+  // Tiles count what the list predicate matches (wireFindings refines them for the local search),
+  // so the strip, the counter and the groups always add up.
+  const matchCounts = {};
+  for (const sv of SEV) matchCounts[sv] = list.filter(f => sevName(f) === sv).length;
+  const kpis = `<div class="ovf-kpihead"><span class="eyebrow">Matching</span><span class="muted">of ${int(all.length)} in payload</span></div>
+    <div class="kpis ovf-kpis">${SEV.map(sv =>
+      `<div class="kpi"><span>${esc(SEV_LABEL[sv])}</span><b class="${SEV_CLASS[sv]}" data-ovf-sev="${sv}">${int(matchCounts[sv])}</b></div>`).join("")}</div>`;
+  if (!all.length) {
+    return `${head}${kpis}<p class="muted ovf-empty">${s.status === "open"
+      ? "Nothing open — every line has room to run" : "No findings match"}</p>`;
+  }
+
   const groups = groupFindings(list, s);
   const top = groups.slice(0, 10);
   const rest = groups.slice(10);
@@ -298,9 +306,7 @@ export function findingsTabHtml(fd, state) {
     <label>Sort <select id="ovf-sort">${option("priority", "priority", s.sort === "priority")}${option("newest", "newest", s.sort === "newest")}${option("identity", "identity", s.sort === "identity")}</select></label>
     <label>Search <input type="search" id="ovf-q" value="${esc(s.q)}" placeholder="title, subject, evidence" autocomplete="off" aria-label="Search findings"></label>
     <button type="button" class="btn btn-sm" id="ovf-reset">Reset</button>
-    <span class="muted" id="ovf-shown" aria-live="polite">${rest.length
-      ? `${int(top.length)} of ${int(groups.length)} groups · ${int(top.reduce((n, g) => n + g.findings.length, 0))} of ${int(list.length)} findings shown`
-      : `${int(groups.length)} groups · ${int(list.length)} findings`}</span>
+    <span class="muted" id="ovf-shown" aria-live="polite">${int(top.length)} of ${int(groups.length)} groups · ${int(top.reduce((n, g) => n + g.findings.length, 0))} of ${int(list.length)} findings shown</span>
   </div>`;
 
   const body = `<div class="ovf-body">
@@ -340,10 +346,27 @@ export function wireFindings(root, state, onChange) {
   const more = qs("#ovf-more");
   const nomatch = qs("#ovf-nomatch");
   const counter = qs("#ovf-shown");
+  const sevValues = [...root.querySelectorAll("[data-ovf-sev]")];
   const allGroups = [...root.querySelectorAll("details.ovf-grp")];
   const totalGroups = allGroups.length;
   const totalRows = root.querySelectorAll(".ovf-find").length;
   let restOpen = false;
+
+  // Tiles follow the filter predicate (kind/card/identity/status, plus the local search). The
+  // 10-group paging is a display choice and must not change the matching totals.
+  const updateCounts = () => {
+    if (!sevValues.length) return;
+    const counts = { critical: 0, high: 0, medium: 0, low: 0 };
+    for (const f of root.querySelectorAll(".ovf-find")) {
+      if (f.hidden) continue;
+      const sv = String(f.dataset.sev || "").toLowerCase();
+      if (sv in counts) counts[sv]++;
+    }
+    for (const b of sevValues) {
+      const sv = b.dataset.ovfSev;
+      b.textContent = (counts[sv] || 0).toLocaleString("en-US");
+    }
+  };
 
   // Group count and finding count are different units: always label both.
   const updateCounter = () => {
@@ -356,9 +379,7 @@ export function wireFindings(root, state, onChange) {
       gvis++;
       for (const f of g.querySelectorAll(".ovf-find")) if (!f.hidden) fvis++;
     }
-    counter.textContent = (gvis === totalGroups && fvis === totalRows)
-      ? `${int(totalGroups)} groups · ${int(totalRows)} findings`
-      : `${int(gvis)} of ${int(totalGroups)} groups · ${int(fvis)} of ${int(totalRows)} findings shown`;
+    counter.textContent = `${int(gvis)} of ${int(totalGroups)} groups · ${int(fvis)} of ${int(totalRows)} findings shown`;
   };
 
   const applyQ = () => {
@@ -378,6 +399,7 @@ export function wireFindings(root, state, onChange) {
     }
     if (nomatch) nomatch.hidden = vis !== 0;
     updateCounter();
+    updateCounts();
   };
 
   q?.addEventListener("input", applyQ);
@@ -394,6 +416,7 @@ export function wireFindings(root, state, onChange) {
     more.setAttribute("aria-expanded", restOpen ? "true" : "false");
     more.textContent = restOpen ? "Show top 10 groups" : `Show all ${topCount(root)} groups`;
     updateCounter();
+    updateCounts();
   });
 
   applyQ();

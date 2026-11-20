@@ -39,12 +39,15 @@ const STYLE = `
 .ovp-tbl th,.ovp-tbl td{padding:6px 8px;vertical-align:top}
 .ovp-tbl th.r,.ovp-tbl td.r{white-space:nowrap}
 .ovp-linecell{white-space:normal;min-width:0}
-.ovp-narrow{display:none;font-size:.76rem}
-.ovp-narrow .pill{font-size:.68rem}
+.ovp-lname{min-width:0;white-space:normal;overflow-wrap:anywhere}
+.ovp-rowmeta{min-width:0}
+.ovp-narrow{display:none;font-size:.76rem;white-space:nowrap}
+.ovp-seg{white-space:nowrap}
 .ovp-line>summary{cursor:pointer;padding:2px 0;overflow-wrap:anywhere}
 .ovp-line>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.ovp-line>summary a{overflow-wrap:anywhere}
+.ovp-line>summary a{white-space:normal;overflow-wrap:anywhere}
 .ovp-knobs{font-size:.72rem;margin-left:8px}
+.ovp-knobs .ovp-seg + .ovp-seg::before{content:"·";margin:0 6px;color:var(--muted)}
 .ovp-body{display:grid;gap:8px;margin:8px 0 2px;min-width:0}
 .ovp-sub{display:grid;gap:3px;min-width:0}
 .ovp-chips .pill{font-size:.7rem;white-space:normal;overflow-wrap:anywhere}
@@ -61,7 +64,10 @@ const STYLE = `
   /* Best J and the hit count move into the line cell; the table never clips a header to one letter. */
   .ovp-tbl .ovp-num{display:none}
   .ovp-tbl{min-width:0}
-  .ovp-narrow{display:inline}
+  /* One right-aligned meta block per row; breaks happen only between nowrap segments. */
+  .ovp-rowmeta{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:baseline;gap:2px 10px;width:max-content;max-width:100%;margin-left:auto}
+  .ovp-narrow{display:inline-flex;align-items:baseline}
+  .ovp-knobs{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:2px 8px;margin-left:0}
   .ovp-free-scroll .tbl-scroll-hint{display:block}
 }
 @media (max-width:640px){
@@ -130,19 +136,26 @@ function lineRow(l) {
     ? `<a href="#/run/${encodeURIComponent(String(l.best_run_id))}">${label}</a>`
     : label;
   const hasKnobs = !err && (fixed.length > 0 || free.length > 0);
-  const hitText = hits
-    ? pill(`${int(hits)} hit${hits === 1 ? "" : "s"}`, "bad", "free knobs within 2% of their own bound")
-    : `<span class="muted">0 hits</span>`;
-  // Narrow layout hides the numeric columns, so J and the hit count stay in the row header itself.
-  const narrow = `<span class="ovp-narrow muted">J <span class="mono">${num(l.best_j)}</span> · ${hitText}</span>`;
-  const summary = `<summary>${linked}${narrow}<span class="ovp-knobs muted">${int(fixed.length)} fixed · ${int(free.length)} free${hits ? ` · ${int(hits)} at a bound` : ""}</span></summary>`;
+  const hitText = `${int(hits)} hit${hits === 1 ? "" : "s"}`;
+  const hitCell = hits
+    ? pill(hitText, "bad", "free knobs within 2% of their own bound")
+    : `<span class="muted">${hitText}</span>`;
+  // Narrow layout: one right-aligned meta block, each segment nowrap.
+  const narrow = `<span class="ovp-narrow mono"><span class="ovp-j">J ${esc(num(l.best_j))}</span> · <span class="ovp-hitseg${hits ? " bad-text" : ""}">${esc(hitText)}</span></span>`;
+  const knobSegs = [
+    `${int(fixed.length)} fixed`,
+    `${int(free.length)} free`,
+    hits ? `${int(hits)} at a bound` : "",
+  ].filter(Boolean).map(s => `<span class="ovp-seg">${esc(s)}</span>`).join("");
+  const knobs = `<span class="ovp-knobs muted">${knobSegs}</span>`;
+  const summary = `<summary><span class="ovp-lname">${linked}</span> <span class="ovp-rowmeta">${narrow}${knobs}</span></summary>`;
   const cell = hasKnobs
     ? `<details class="ovp-line">${summary}<div class="ovp-body">${fixedBlock(fixed)}${freeBlock(free)}</div></details>`
-    : `<div class="ovp-lineflat">${linked}${narrow}</div>`;
+    : `<div class="ovp-lineflat"><span class="ovp-lname">${linked}</span> <span class="ovp-rowmeta">${narrow}</span></div>`;
   return `<tr>
     <td class="ovp-linecell">${cell}${err ? `<p class="muted ovp-err">${esc(err)}</p>` : ""}</td>
     <td class="r mono ovp-num">${num(l.best_j)}</td>
-    <td class="r ovp-num">${hitText}</td></tr>`;
+    <td class="r ovp-num">${hitCell}</td></tr>`;
 }
 
 function identityCard(ident, first = false) {
@@ -154,12 +167,13 @@ function identityCard(ident, first = false) {
   const head = `<div class="eyebrow">score identity${ident.objective_version != null ? ` · v${esc(ident.objective_version)}` : ""}</div>
     <h3>${esc(ident.label || ident.id || MISSING)} ${statusPill} ${pill(`${int(nBound)} line${nBound === 1 ? "" : "s"} at a bound`, nBound ? "warn" : "", "lines with at least one free knob within 2% of its bound")}</h3>
     <p class="muted mono ovp-meta">${brk(ident.id || MISSING)} · ${int(lines.length)} line${lines.length === 1 ? "" : "s"}</p>`;
-  // One visible header row for the whole page; later tables keep a hidden caption for screen readers.
-  const caption = first ? "" : `<caption class="sr-only">Line of work, best J, bound hits</caption>`;
+  // One visible header row for the whole page. Later tables carry no header/caption at all — only
+  // an aria-label — so nothing can repeat (or show if a .sr-only rule is missing from the theme).
   const thead = first ? `<thead><tr><th>Line of work</th><th class="r ovp-num">best J</th><th class="r ovp-num">bound hits</th></tr></thead>` : "";
+  const tableLabel = first ? "" : ` aria-label="Line of work, best J, bound hits"`;
   const table = `<div class="tbl-scroll ovp-scroll">
-    <div class="tbl-wrap"><table class="ov-tbl ovp-tbl">
-    ${caption}${thead}
+    <div class="tbl-wrap"><table class="ov-tbl ovp-tbl"${tableLabel}>
+    ${thead}
     <tbody>${lines.map(lineRow).join("")}</tbody></table></div></div>`;
   return `<section class="card ovp-id">${head}${table}</section>`;
 }
@@ -175,7 +189,6 @@ export function paramsTabHtml(pd) {
   const fixedTotal = lines.reduce((n, l) => n + (Array.isArray(l.fixed) ? l.fixed.length : 0), 0);
   const windowPills = [
     pd.days != null ? pill(`last ${int(pd.days)} day${Number(pd.days) === 1 ? "" : "s"}`) : "",
-    pd.generated_utc ? pill(`generated ${pd.generated_utc}`) : "",
     pd.show_legacy ? pill("includes legacy scores", "warn") : "",
   ].filter(Boolean).join(" ");
 
