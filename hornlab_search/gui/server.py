@@ -917,12 +917,18 @@ def make_handler(app: App, port: int):
             """Only three kinds of run files are served: runs/<id>/report.html,
             runs/<id>/step/<name>.step, and runs/<id>/cma[/restart_k]/<pycma-log>."""
             parts = [unquote(x) for x in path.strip("/").split("/")]
-            if len(parts) == 3 and parts[2] == "report.html" and D.RUN_ID.match(parts[1]):
-                p = app.runs / parts[1] / "report.html"
+            if len(parts) < 3:
+                raise FileNotFoundError(path)
+            try:
+                run_dir = D._resolve_run(app.runs, parts[1])   # nested runs included; id -> real dir only
+            except (ValueError, FileNotFoundError):
+                raise FileNotFoundError(path) from None
+            if len(parts) == 3 and parts[2] == "report.html":
+                p = run_dir / "report.html"
                 if p.is_file():
                     return self._send(200, p.read_bytes(), "text/html; charset=utf-8")
-            if len(parts) == 4 and parts[2] == "step" and D.RUN_ID.match(parts[1]) and D.STEP_NAME.match(parts[3]):
-                p = app.runs / parts[1] / "step" / parts[3]
+            if len(parts) == 4 and parts[2] == "step" and D.STEP_NAME.match(parts[3]):
+                p = run_dir / "step" / parts[3]
                 if p.is_file():
                     body = p.read_bytes()
                     self.send_response(200)
@@ -932,7 +938,7 @@ def make_handler(app: App, port: int):
                     self.end_headers()
                     self.wfile.write(body)
                     return
-            p = self._cma_log(parts)
+            p = self._cma_log(parts, run_dir)
             if p is not None:
                 body = p.read_bytes()                       # raw bytes, never parsed, never cached
                 self.send_response(200)
@@ -946,22 +952,22 @@ def make_handler(app: App, port: int):
                 return
             raise FileNotFoundError(path)
 
-        def _cma_log(self, parts: list[str]) -> Path | None:
+        def _cma_log(self, parts: list[str], run_dir: Path) -> Path | None:
             """C-5: ``runs/<id>/cma/<name>`` and ``runs/<id>/cma/restart_k/<name>`` by strict
             pycma-log name. The name regexes forbid ``/`` and ``..``; the resolved-path check keeps
             every served file inside the run's own ``cma/`` tree (same guard style as ``_report_step``)."""
-            if not (len(parts) in (4, 5) and parts[2] == "cma" and D.RUN_ID.match(parts[1])):
+            if not (len(parts) in (4, 5) and parts[2] == "cma"):
                 return None
             if len(parts) == 4:
-                name, base = parts[3], app.runs / parts[1] / "cma"
+                name, base = parts[3], run_dir / "cma"
             elif D.CMA_RESTART_DIR.match(parts[3]):
-                name, base = parts[4], app.runs / parts[1] / "cma" / parts[3]
+                name, base = parts[4], run_dir / "cma" / parts[3]
             else:
                 return None
             if not D.CMA_LOG_NAME.match(name):
                 return None
             p = (base / name).resolve()
-            cma_root = (app.runs / parts[1] / "cma").resolve()
+            cma_root = (run_dir / "cma").resolve()
             return p if cma_root in p.parents and p.is_file() else None
 
     return Handler

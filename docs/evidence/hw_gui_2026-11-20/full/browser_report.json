@@ -1,0 +1,3422 @@
+{
+  "base": "http://127.0.0.1:8840",
+  "runs": [
+    {
+      "route": "/#/hw",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3381
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/cases",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/cases",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/cases",
+        "title": "Boundary Lab cases",
+        "body_text_len": 10602
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_cases__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screens",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/screens",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screens",
+        "title": "Screens",
+        "body_text_len": 1250
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screens__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/screen/27616eedee09009f",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2384
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screen_27616eedee09009f__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+        "title": "#2 \u00b7 G4 wide basis (25 freqs, 200-2500 Hz)",
+        "body_text_len": 2931
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+        "title": "bl_horn_assembly",
+        "body_text_len": 2325
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_horn_assembly_20261118T224519Z-assembly-11000-4a85a0f8__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/readiness",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/readiness",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/readiness",
+        "title": "Readiness",
+        "body_text_len": 4345
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_readiness__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6699
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_new__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17427
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_launch__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 10,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?a=bl_motor12pr%2F20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin%2F20261119T013209Z-ref_case-11372-452574f9",
+        "title": "Compare",
+        "body_text_len": 10370
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?matrix=motor%2Cbox",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/compare?matrix=motor%2Cbox",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?matrix=motor%2Cbox",
+        "title": "Compare",
+        "body_text_len": 2107
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered SPL in dB SPL per normal_velocity_mps; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 4,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 3221
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a_crossover__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 2,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 2829
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_motor12pr_20261119T010548Z-motor12pr-17944-fa37ab5e_crossover__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3435
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/cases",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/cases",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/cases",
+        "title": "Boundary Lab cases",
+        "body_text_len": 11196
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_cases__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screens",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/screens",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screens",
+        "title": "Screens",
+        "body_text_len": 1275
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screens__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/screen/27616eedee09009f",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2426
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screen_27616eedee09009f__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+        "title": "#2 \u00b7 G4 wide basis (25 freqs, 200-2500 Hz)",
+        "body_text_len": 2931
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+        "title": "bl_horn_assembly",
+        "body_text_len": 2325
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_horn_assembly_20261118T224519Z-assembly-11000-4a85a0f8__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/readiness",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/readiness",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/readiness",
+        "title": "Readiness",
+        "body_text_len": 4399
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_readiness__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6699
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_new__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17427
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_launch__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 10,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?a=bl_motor12pr%2F20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin%2F20261119T013209Z-ref_case-11372-452574f9",
+        "title": "Compare",
+        "body_text_len": 10370
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?matrix=motor%2Cbox",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/compare?matrix=motor%2Cbox",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?matrix=motor%2Cbox",
+        "title": "Compare",
+        "body_text_len": 2106
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered SPL in dB SPL per normal_velocity_mps; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 4,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 3220
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a_crossover__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 2,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 2828
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_motor12pr_20261119T010548Z-motor12pr-17944-fa37ab5e_crossover__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3434
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/cases",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/cases",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/cases",
+        "title": "Boundary Lab cases",
+        "body_text_len": 11195
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_cases__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screens",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/screens",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screens",
+        "title": "Screens",
+        "body_text_len": 1274
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screens__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/screen/27616eedee09009f",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2425
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screen_27616eedee09009f__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+        "title": "#2 \u00b7 G4 wide basis (25 freqs, 200-2500 Hz)",
+        "body_text_len": 2930
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+        "title": "bl_horn_assembly",
+        "body_text_len": 2324
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_horn_assembly_20261118T224519Z-assembly-11000-4a85a0f8__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/readiness",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/readiness",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/readiness",
+        "title": "Readiness",
+        "body_text_len": 4398
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_readiness__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6698
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_new__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17395
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_launch__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 10,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?a=bl_motor12pr%2F20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin%2F20261119T013209Z-ref_case-11372-452574f9",
+        "title": "Compare",
+        "body_text_len": 10338
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?matrix=motor%2Cbox",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/compare?matrix=motor%2Cbox",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?matrix=motor%2Cbox",
+        "title": "Compare",
+        "body_text_len": 2075
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered SPL in dB SPL per normal_velocity_mps; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 4,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 3189
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a_crossover__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 2,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 2797
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_motor12pr_20261119T010548Z-motor12pr-17944-fa37ab5e_crossover__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3301
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/cases",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/cases",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/cases",
+        "title": "Boundary Lab cases",
+        "body_text_len": 11062
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_cases__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screens",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/screens",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screens",
+        "title": "Screens",
+        "body_text_len": 1259
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screens__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/screen/27616eedee09009f",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 3657
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screen_27616eedee09009f__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+        "title": "#2 \u00b7 G4 wide basis (25 freqs, 200-2500 Hz)",
+        "body_text_len": 2797
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+        "title": "bl_horn_assembly",
+        "body_text_len": 2191
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_horn_assembly_20261118T224519Z-assembly-11000-4a85a0f8__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/readiness",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/readiness",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/readiness",
+        "title": "Readiness",
+        "body_text_len": 4265
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_readiness__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6565
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_new__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17293
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_launch__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 10,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?a=bl_motor12pr%2F20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin%2F20261119T013209Z-ref_case-11372-452574f9",
+        "title": "Compare",
+        "body_text_len": 10236
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?matrix=motor%2Cbox",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/compare?matrix=motor%2Cbox",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?matrix=motor%2Cbox",
+        "title": "Compare",
+        "body_text_len": 1945
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered SPL in dB SPL per normal_velocity_mps; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 4,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 3080
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a_crossover__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8840/?theme=dark#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 2,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 2688
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_motor12pr_20261119T010548Z-motor12pr-17944-fa37ab5e_crossover__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3342
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/cases",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/cases",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/cases",
+        "title": "Boundary Lab cases",
+        "body_text_len": 10563
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_cases__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screens",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/screens",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screens",
+        "title": "Screens",
+        "body_text_len": 1211
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screens__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/screen/27616eedee09009f",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2345
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screen_27616eedee09009f__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+        "title": "#2 \u00b7 G4 wide basis (25 freqs, 200-2500 Hz)",
+        "body_text_len": 2892
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+        "title": "bl_horn_assembly",
+        "body_text_len": 2286
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_horn_assembly_20261118T224519Z-assembly-11000-4a85a0f8__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/readiness",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/readiness",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/readiness",
+        "title": "Readiness",
+        "body_text_len": 4306
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_readiness__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6660
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_new__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17388
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_launch__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 10,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?a=bl_motor12pr%2F20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin%2F20261119T013209Z-ref_case-11372-452574f9",
+        "title": "Compare",
+        "body_text_len": 10331
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?matrix=motor%2Cbox",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/compare?matrix=motor%2Cbox",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?matrix=motor%2Cbox",
+        "title": "Compare",
+        "body_text_len": 2068
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered SPL in dB SPL per normal_velocity_mps; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 4,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 3182
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a_crossover__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "446",
+            "rendered": 446,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 2,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 2790
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_motor12pr_20261119T010548Z-motor12pr-17944-fa37ab5e_crossover__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3396
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/cases",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/cases",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/cases",
+        "title": "Boundary Lab cases",
+        "body_text_len": 11157
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_cases__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screens",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/screens",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screens",
+        "title": "Screens",
+        "body_text_len": 1236
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screens__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/screen/27616eedee09009f",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2387
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screen_27616eedee09009f__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+        "title": "#2 \u00b7 G4 wide basis (25 freqs, 200-2500 Hz)",
+        "body_text_len": 2899
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+        "title": "bl_horn_assembly",
+        "body_text_len": 2293
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_horn_assembly_20261118T224519Z-assembly-11000-4a85a0f8__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/readiness",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/readiness",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/readiness",
+        "title": "Readiness",
+        "body_text_len": 4367
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_readiness__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6667
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_new__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17395
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_launch__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 10,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?a=bl_motor12pr%2F20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin%2F20261119T013209Z-ref_case-11372-452574f9",
+        "title": "Compare",
+        "body_text_len": 10338
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?matrix=motor%2Cbox",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/compare?matrix=motor%2Cbox",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?matrix=motor%2Cbox",
+        "title": "Compare",
+        "body_text_len": 2075
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered SPL in dB SPL per normal_velocity_mps; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 4,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 3189
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a_crossover__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "669",
+            "rendered": 669,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 2,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 2797
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_motor12pr_20261119T010548Z-motor12pr-17944-fa37ab5e_crossover__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3403
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/cases",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/cases",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/cases",
+        "title": "Boundary Lab cases",
+        "body_text_len": 11164
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_cases__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screens",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/screens",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screens",
+        "title": "Screens",
+        "body_text_len": 1243
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screens__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/screen/27616eedee09009f",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2394
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screen_27616eedee09009f__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+        "title": "#2 \u00b7 G4 wide basis (25 freqs, 200-2500 Hz)",
+        "body_text_len": 2899
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+        "title": "bl_horn_assembly",
+        "body_text_len": 2293
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_horn_assembly_20261118T224519Z-assembly-11000-4a85a0f8__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/readiness",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/readiness",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/readiness",
+        "title": "Readiness",
+        "body_text_len": 4367
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_readiness__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6667
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_new__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17395
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_launch__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 10,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?a=bl_motor12pr%2F20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin%2F20261119T013209Z-ref_case-11372-452574f9",
+        "title": "Compare",
+        "body_text_len": 10338
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?matrix=motor%2Cbox",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/compare?matrix=motor%2Cbox",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?matrix=motor%2Cbox",
+        "title": "Compare",
+        "body_text_len": 2075
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered SPL in dB SPL per normal_velocity_mps; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 4,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 3189
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a_crossover__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "428",
+            "rendered": 428,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 2,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 2797
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_motor12pr_20261119T010548Z-motor12pr-17944-fa37ab5e_crossover__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3301
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/cases",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/cases",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/cases",
+        "title": "Boundary Lab cases",
+        "body_text_len": 11062
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_cases__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screens",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/screens",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screens",
+        "title": "Screens",
+        "body_text_len": 1259
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screens__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/screen/27616eedee09009f",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 3657
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_screen_27616eedee09009f__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a",
+        "title": "#2 \u00b7 G4 wide basis (25 freqs, 200-2500 Hz)",
+        "body_text_len": 2797
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 1,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8",
+        "title": "bl_horn_assembly",
+        "body_text_len": 2191
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_horn_assembly_20261118T224519Z-assembly-11000-4a85a0f8__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/readiness",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/readiness",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/readiness",
+        "title": "Readiness",
+        "body_text_len": 4265
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_readiness__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6565
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_new__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17293
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_launch__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/compare?a=bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "on_axis_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "down30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "horz_left_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "horz_right_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: |B_a/B_b| magnitude ratio in dB per probe and excitation; not a channel sum.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "up30_2m \u00b7 bl_motor12pr/voltage: wrapped phase of p_a \u00d7 conj(p_b) in degrees per probe and excitation; not a channel sum.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 10,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?a=bl_motor12pr%2F20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin%2F20261119T013209Z-ref_case-11372-452574f9",
+        "title": "Compare",
+        "body_text_len": 10236
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/compare?matrix=motor%2Cbox",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/compare?matrix=motor%2Cbox",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/compare?matrix=motor%2Cbox",
+        "title": "Compare",
+        "body_text_len": 1952
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_compare__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered SPL in dB SPL per normal_velocity_mps; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Horn filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 4,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 3087
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_smoke_wide_20261118T231115Z-g4wide-56836-b5d6490a_crossover__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8840/?theme=light#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered SPL in dB SPL per V_rms; one channel, not summed.",
+            "stretched": false
+          },
+          {
+            "width_attr": "295",
+            "rendered": 295,
+            "has_viewbox": true,
+            "aria_label": "Woofer filtered phase (wrapped) in degrees; one channel, not summed.",
+            "stretched": false
+          }
+        ],
+        "svg_total": 2,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/case/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/crossover",
+        "title": "Crossover preview (locked)",
+        "body_text_len": 2695
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\full\\hw_case_bl_motor12pr_20261119T010548Z-motor12pr-17944-fa37ab5e_crossover__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    }
+  ],
+  "failures": []
+}

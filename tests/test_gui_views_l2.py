@@ -226,6 +226,17 @@ const act = [
 ];
 assert.deepEqual(sortRunsForTable(act, "active").map(r => r.name), ["old-live", "new-idle", "mid"]);
 assert.deepEqual(sortRunsForTable(act, "date").map(r => r.name), ["new-idle", "mid", "old-live"]);
+// Mixed versions on a recent-first sort: version blocks stay intact, but the block holding the
+// newest row comes FIRST. Otherwise today's v10 single solves sit below an older v11 block and
+// read as missing from the top of the page.
+const mixed = [
+  { name: "v11-old", last: "2026-11-20T09:00:00Z", started: "2026-11-20T09:00:00Z", objective_version: 11 },
+  { name: "v10-new", last: "2026-11-20T11:40:00Z", started: "2026-11-20T11:40:00Z", objective_version: 10 },
+  { name: "v10-mid", last: "2026-11-20T10:00:00Z", started: "2026-11-20T10:00:00Z", objective_version: 10 },
+];
+assert.deepEqual(sortRunsForTable(mixed, "active").map(r => r.name), ["v10-new", "v10-mid", "v11-old"]);
+// J still never compares across definitions: a version-blocked sort keeps the newest version first.
+assert.equal(sortRunsForTable(mixed, "best_j")[0].name, "v11-old");
 
 assert.equal(gateAuditHtml(null), "");
 assert.equal(gateAuditHtml({ available: false }), "");

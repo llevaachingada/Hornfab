@@ -2816,8 +2816,23 @@ function sortRunsForTable(runs, sort) {
     if (sort === "activity" || sort === "active") return String(b.last || b.started || "").localeCompare(String(a.last || a.started || ""));
     return String(b.started || "").localeCompare(String(a.started || ""));
   };
-  if (objectiveVersions(arr).length <= 1) return arr.sort(byKey);
-  return arr.sort((a, b) => objectiveVersionOf(b) - objectiveVersionOf(a) || byKey(a, b));
+  const versions = objectiveVersions(arr);
+  if (versions.length <= 1) return arr.sort(byKey);
+  // Mixed J versions: keep each version's block intact (J is never compared across versions) but
+  // order the BLOCKS the same way when the user asked for recent-first. Newest-definition-first
+  // would otherwise park today's v10 single solves under an older v11 block — a just-finished run
+  // reads as "missing" from the top of the page.
+  const groups = new Map(versions.map(v => [v, []]));
+  for (const r of arr) groups.get(objectiveVersionOf(r)).push(r);
+  const newest = list => (list || []).reduce((m, r) => {
+    const t = String(r.last || r.started || "");
+    return t > m ? t : m;
+  }, "");
+  const recentFirst = sort === "activity" || sort === "active" || sort === "date";
+  const order = [...groups.keys()];
+  if (recentFirst) order.sort((a, b) => newest(groups.get(b)).localeCompare(newest(groups.get(a))));
+  else order.sort((a, b) => b - a);
+  return order.flatMap(v => groups.get(v).sort(byKey));
 }
 
 /** The run's verify re-solves (``verify --run X`` → ``X/verify/``). Rows pair by design hash:
@@ -6534,6 +6549,8 @@ async function viewRunDetail(id) {
     function drawOneBw(svgId, key, tgtDeg, label, plane) {
       const svg = document.getElementById(svgId);
       if (!svg) return;
+      // Owner request: the H/V beamwidth plots were too short — 2.5x the chart() default (240).
+      const BW_CHART_H = 600;
       const dataSets = [...(B[key] || []), ...(S[key] || [])].filter(v => v != null);
       const profile = sv && sv.profile ? sv.profile : null;
       if (!dataSets.length && !tgtDeg && !profile) return;
@@ -6622,6 +6639,7 @@ async function viewRunDetail(id) {
         vlines: f0Finite ? [{ x: f0Finite, color: css("--warn"), dash: true, label: "f0 " + fmtHz(f0Finite) }] : [],
         series: seriesList, markers: true, unscored,
         ariaLabel: "Beamwidth −6 dB " + label,
+        H: BW_CHART_H,
       });
       const capEl = document.getElementById(plane === "h" ? "cap-bwh" : "cap-bwv");
       if (capEl) capEl.innerHTML = bwCaption(plane, tgtDeg, scoreLo) + (svFloor ? ` narrow-only 8 kHz floor ${svFloor.floor_h_deg}° × ${svFloor.floor_v_deg}° (pen ${fmt(svFloor.penalty_raw, 2)}).` : "");

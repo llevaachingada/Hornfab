@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+import pytest
 import yaml
 
 from hornlab_search.gui import data as D
@@ -66,6 +67,65 @@ def test_run_list_has_no_cap(tmp_path):
     for i in range(305):
         (runs / f"20261026T{i // 60:02d}{i % 60:02d}00Z-screen-{i:06x}").mkdir(parents=True)
     assert len(D.list_runs(runs)) == 305
+
+
+def test_tool_written_runs_at_depth_are_listed_and_routable(tmp_path):
+    """`verify --verify-dir runs/<topic>/<id>` and a night's `<night>/<run>` are runs too.
+
+    Owner rule (see module docstring): anything that runs and saves in the folder shows up. Their
+    ids are the run-relative path joined with ``~`` (one URL segment); a run's own inline
+    ``verify/`` tree and the BO study source tree are not independent runs (BO study sources are
+    mirrored into top-level run folders, so listing them again would double-count)."""
+    runs = tmp_path / "runs"
+    top = _run(runs, "20261026T010000Z-screen-aaaaaa", "b", "top", 9.0)
+    ss = runs / "source_sensitivity" / "ss_a"          # ndjson only: no run.json, no config
+    ss.mkdir(parents=True)
+    (ss / "search.ndjson").write_text(json.dumps(_row(0, "cccccccccccc", True, 4.0, 100.0)) + "\n")
+    nr = runs / "night_2026-11-18" / "20261026T020000Z-screen-bbbbbb__refine"
+    nr.mkdir(parents=True)
+    (nr / "run.json").write_text(json.dumps({"mode": "screen"}))
+    (nr / "search.ndjson").write_text(json.dumps(_row(1, "dddddddddddd", True, 7.0, 110.0)) + "\n")
+    inline = top / "verify"
+    inline.mkdir()
+    (inline / "search.ndjson").write_text(json.dumps(_row(2, "eeeeeeeeeeee", True, 9.0, 100.0)) + "\n")
+    study = runs / "study-0123456789abcdef" / "screen"
+    study.mkdir(parents=True)
+    (study / "run.json").write_text(json.dumps({"mode": "screen"}))
+    # A hand-named top-level run (the committed `elites_<date>_<topic>` evidence dirs) is a run
+    # too — named by its folder, not by the CLI's timestamp pattern.
+    elite = runs / "elites_20261030_topic"
+    elite.mkdir()
+    (elite / "run.json").write_text(json.dumps({"mode": "screen"}))
+    (elite / "search.ndjson").write_text(json.dumps(_row(3, "ffffffffffff", True, 8.0, 100.0)) + "\n")
+
+    runs_by_id = {s["id"]: s for s in D.list_runs(runs)}
+    assert "20261026T010000Z-screen-aaaaaa" in runs_by_id
+    assert D._resolve_run(runs, "elites_20261030_topic") == elite
+    assert runs_by_id["source_sensitivity~ss_a"]["n"] == 1
+    assert runs_by_id["night_2026-11-18~20261026T020000Z-screen-bbbbbb__refine"]["best_j"] == 7.0
+    assert not any(i.endswith("~verify") for i in runs_by_id)
+    assert not any(i.startswith("study-") for i in runs_by_id)
+    assert D._resolve_run(runs, "source_sensitivity~ss_a") == ss
+    assert D.run_detail(runs, "source_sensitivity~ss_a")["summary"]["id"] == "source_sensitivity~ss_a"
+    with pytest.raises(FileNotFoundError):
+        D._resolve_run(runs, "source_sensitivity~nope")
+    with pytest.raises(ValueError):
+        D._resolve_run(runs, "..")
+
+
+def test_started_run_without_rows_is_listed_and_opens(tmp_path):
+    """A run killed between `new_run_dir` and its first row used to 404 on its own page; the Runs
+    list showed it with blank cells and clicking it errored. It is a real run: list and open it."""
+    runs = tmp_path / "runs"
+    rid = "20261026T030000Z-screen-cccccc"
+    rd = runs / rid
+    rd.mkdir(parents=True)
+    (rd / "run.json").write_text(json.dumps({"mode": "screen", "status": "running"}))
+    (rd / "config.yaml").write_text("name: started\nfamily: OSSE\n")
+    [s] = [x for x in D.list_runs(runs) if x["id"] == rid]
+    assert s["n"] == 0 and s["last"] is None
+    d = D.run_detail(runs, rid)
+    assert d["summary"]["id"] == rid and d["J"] == [] and d["best"] is None
 
 
 def test_unclaimed_runs_get_an_auto_campaign_per_brief_and_mode(tmp_path):

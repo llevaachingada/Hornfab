@@ -167,19 +167,21 @@ def cached_records(runs: Path, since: datetime) -> list[dict]:
             if nd is None or (nd[0] / 1_000_000_000.0) < cutoff:
                 continue                       # same cheap pre-filter as run_records
             rj = _stat_pair(d / "run.json")
-            ent = index.get(d.name)
+            rid = D._run_id(runs, d)           # nested runs must not collide on their folder name
+            ent = index.get(rid)
             if ent is not None and ent.get("ndjson") == nd and ent.get("run_json") == rj:
                 summary = dict(ent.get("summary") or {})
+                summary["id"] = rid
                 # ``active`` depends on wall-clock time, so refresh it from the cached stamp exactly
                 # as D.run_summary's cache-hit path does -- no ndjson read.
                 summary["active"] = bool(nd is not None and (now - nd[0] / 1_000_000_000.0) < 120.0)
             else:
                 try:
-                    summary = D.run_summary(d)
+                    summary = D.run_summary(d, rid)
                 except Exception:              # noqa: BLE001 - one unreadable run never hides the rest
                     continue
-                index[d.name] = {"ndjson": nd, "run_json": rj,
-                                 "summary": D.clean(dict(summary))}
+                index[rid] = {"ndjson": nd, "run_json": rj,
+                              "summary": D.clean(dict(summary))}
                 changed = True
                 summary = dict(summary)
             last = _parse_utc(summary.get("last"))

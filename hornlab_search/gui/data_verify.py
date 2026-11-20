@@ -19,11 +19,12 @@ import numpy as np
 # ── re-use helpers from data.py without circular imports ─────────────────────
 from .data import (
     HASH,
-    RUN_ID,
     _as_dict,
     _config,
     _read_json,
+    _resolve_run,
     _run_dirs,
+    _run_id,
     _spearman,
     clean,
     design_curves,
@@ -126,10 +127,7 @@ def verify_sources(runs: Path, run_id: str) -> list[dict] | dict:
 
     For other runs returns a list (possibly empty) of source dicts.
     """
-    if not RUN_ID.match(run_id):
-        raise ValueError(f"not a run id: {run_id!r}")
-
-    run_dir = runs / run_id
+    run_dir = _resolve_run(runs, run_id)
 
     # Is run_id itself a verify run?
     rj = _as_dict(_read_json(run_dir / "run.json"))
@@ -137,16 +135,17 @@ def verify_sources(runs: Path, run_id: str) -> list[dict] | dict:
         # Layout B: linked verify run
         vo = _as_dict(rj.get("verify_of"))
         vo_run = vo.get("run") or ""
-        # Try to find parent in this runs folder
+        # Try to find parent in this runs folder (top-level or a nested tool-written run)
         parent_id = None
         for d in _run_dirs(runs):
             if _match_parent(vo_run, d.name, runs):
-                parent_id = d.name
+                parent_id = _run_id(runs, d)
+                parent_missing = not (d / "search.ndjson").exists()
+                if parent_missing:
+                    parent_id = None
                 break
-        parent_missing = parent_id is None
-        if not parent_missing and not (runs / parent_id / "search.ndjson").exists():
+        else:
             parent_missing = True
-            parent_id = None
         return {"redirect_to": parent_id, "parent_missing": parent_missing}
 
     sources = []
@@ -169,17 +168,19 @@ def verify_sources(runs: Path, run_id: str) -> list[dict] | dict:
         vo = _as_dict(vrj.get("verify_of"))
         if _match_parent(vo.get("run") or "", run_id, runs):
             rows = read_ndjson(vdir / "search.ndjson")
+            vid = _run_id(runs, vdir)
             sources.append({
                 "kind": "linked",
-                "path": f"runs/{vdir.name}/search.ndjson",
-                "run_id": vdir.name,
+                "path": f"runs/{vid}/search.ndjson",
+                "run_id": vid,
                 "n_rows": len(rows),
                 "newest_row_utc": _newest_utc(rows),
                 "status": vrj.get("status") or _source_status(rows, vdir / "search.ndjson"),
             })
 
-    # Layout C: run_id itself is mode=='verify' WITHOUT verify_of (standalone)
-    if rj.get("mode") == "verify" and "verify_of" not in rj:
+    # Layout C: run_id itself is a verify solve — ``search --mode verify`` (run.json says so) or a
+    # tool-written ``verify --verify-dir`` tree (no run.json at all).
+    if not rj or (rj.get("mode") == "verify" and "verify_of" not in rj):
         rows = read_ndjson(run_dir / "search.ndjson")
         sources.append({
             "kind": "standalone",
@@ -383,12 +384,7 @@ def verify_report(runs: Path, run_id: str, root: Path) -> dict:
 
     Raises FileNotFoundError when the run does not exist in this runs folder.
     """
-    if not RUN_ID.match(run_id):
-        raise ValueError(f"not a run id: {run_id!r}")
-
-    run_dir = runs / run_id
-    if not run_dir.is_dir():
-        raise FileNotFoundError(run_id)
+    run_dir = _resolve_run(runs, run_id)
 
     rj = _as_dict(_read_json(run_dir / "run.json"))
 
@@ -399,10 +395,11 @@ def verify_report(runs: Path, run_id: str, root: Path) -> dict:
         parent_id: str | None = None
         for d in _run_dirs(runs):
             if _match_parent(vo_run, d.name, runs):
-                parent_id = d.name
+                parent_id = _run_id(runs, d)
+                parent_missing = not (d / "search.ndjson").exists()
                 break
-        parent_missing = (parent_id is None
-                          or not (runs / parent_id / "search.ndjson").exists())
+        else:
+            parent_missing = True
         if parent_missing:
             parent_id = None
 
@@ -431,10 +428,32 @@ def verify_report(runs: Path, run_id: str, root: Path) -> dict:
     # ── Load screen rows ──────────────────────────────────────────────────────
     screen_ndjson = run_dir / "search.ndjson"
     if not screen_ndjson.is_file():
-        raise FileNotFoundError(run_id)
+        # A started run (run.json written, first solve still in flight) has nothing to verify yet.
+        # The run page must still open: an empty report, not a 404 that blanks the whole view.
+        cfg = _config(run_dir)
+        return clean({
+            "run_id": run_id,
+            "name": cfg.get("name") or run_id,
+            "brief": _as_dict(cfg.get("brief")).get("name"),
+            "kind": "none",
+            "redirect_to": None,
+            "parent_missing": False,
+            "objective_version": run_objective_version(run_dir),
+            "band_hz": None,
+            "sources": [],
+            "state": rj.get("status") or "running",
+            "comparable": False,
+            "comparable_reason": "this run has written no rows yet",
+            "latest_only": False,
+            "fidelity": {},
+            "summary": None,
+            "gate_audit": {"available": False},
+            "rows": [],
+        })
 
     all_screen_rows = read_ndjson(screen_ndjson)
-    is_standalone = (rj.get("mode") == "verify" and "verify_of" not in rj)
+    # No run.json = a tool-written ``verify --verify-dir`` tree; its own rows are the verify data.
+    is_standalone = not rj or (rj.get("mode") == "verify" and "verify_of" not in rj)
 
     if is_standalone:
         # Layout C: single-design verification; no pairing
@@ -486,15 +505,16 @@ def verify_report(runs: Path, run_id: str, root: Path) -> dict:
             vo = _as_dict(vrj.get("verify_of"))
             if _match_parent(vo.get("run") or "", run_id, runs):
                 linked_rows = read_ndjson(vdir / "search.ndjson")
+                vid = _run_id(runs, vdir)
                 for r in linked_rows:
                     h = str(r.get("design_hash") or "")
-                    source_run_id_for_hash[h] = vdir.name
+                    source_run_id_for_hash[h] = vid
                     source_kind_for_hash[h] = "linked"
                 verify_all_rows.extend(linked_rows)
                 verify_sources_list.append({
                     "kind": "linked",
-                    "path": f"runs/{vdir.name}/search.ndjson",
-                    "run_id": vdir.name,
+                    "path": f"runs/{vid}/search.ndjson",
+                    "run_id": vid,
                     "n_rows": len(linked_rows),
                     "newest_row_utc": _newest_utc(linked_rows),
                     "status": vrj.get("status") or _source_status(
@@ -1011,12 +1031,12 @@ def design_payload(runs: Path, run_id: str, h: str, tier: str) -> dict:
         raise ValueError(f"unknown tier {tier!r}; must be 'screen' or 'verify'")
     if not HASH.match(h):
         raise ValueError(f"not a design hash: {h!r}")
-    if not RUN_ID.match(run_id):
-        raise ValueError(f"not a run id: {run_id!r}")
 
-    run_dir = runs / run_id
+    run_dir = _resolve_run(runs, run_id)
     rj = _as_dict(_read_json(run_dir / "run.json"))
-    is_standalone = (rj.get("mode") == "verify" and "verify_of" not in rj)
+    # A tool-written verify dir (``verify --verify-dir runs/<topic>/<id>``) has no run.json at
+    # all: its designs are its own, exactly like a standalone ``search --mode verify`` run.
+    is_standalone = not rj or (rj.get("mode") == "verify" and "verify_of" not in rj)
 
     if tier == "screen":
         # design dir is runs/<run_id>/designs/<h>/

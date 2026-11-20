@@ -1,0 +1,71 @@
+{
+ "steps": [
+  {
+   "step": "overview",
+   "hash": "#/hw"
+  },
+  {
+   "step": "new-system",
+   "hash": "#/hw/new?step=1",
+   "focus_samples": [
+    "\u25a4Screens",
+    "\u25a3Cases",
+    "\u2630Readiness",
+    "\u25c9Status",
+    "\u25a0 Kill GPU run",
+    "? Glossary"
+   ]
+  },
+  {
+   "step": "screens",
+   "hash": "#/hw/screens"
+  },
+  {
+   "step": "screen-detail",
+   "hash": "#/hw/screen/27616eedee09009f",
+   "opened": "27616eedee09009f \u2192screens/system_evidence_2026-11-19 2026-11-20 05:33 UTCfile mtime lecleach_rollback_1in_v69e02db06 MAG"
+  },
+  {
+   "step": "shortlist-tab",
+   "hash": "#/hw/screen/27616eedee09009f"
+  },
+  {
+   "step": "shortlist-row-selected",
+   "hash": "#/hw/screen/27616eedee09009f?row=01e7d07d2bf70364"
+  },
+  {
+   "step": "stage-dialog-esc-focus",
+   "hash": "#/hw/screen/27616eedee09009f?row=01e7d07d2bf70364"
+  },
+  {
+   "step": "cases",
+   "hash": "#/hw/cases"
+  },
+  {
+   "step": "case-detail",
+   "hash": "#/hw/case/ev_mesh_refine2/20261120T152208Z-assembly-38896-9ba147b1"
+  },
+  {
+   "step": "response-tab",
+   "hash": "#/hw/case/ev_mesh_refine2/20261120T152208Z-assembly-38896-9ba147b1?tab=response&phase=wrapped"
+  },
+  {
+   "step": "compare-quick-pair",
+   "hash": "#/hw/compare?a=bl_motor12pr%2F20261119T010548Z-motor12pr-17944-fa37ab5e&b=bl_motor12pr_demo_twin%2F20261119T013209Z-ref_case-11372-452574f9",
+   "has_maxima": true
+  },
+  {
+   "step": "crossover-locked",
+   "hash": "#/hw/case/ev_mesh_refine2/20261120T152208Z-assembly-38896-9ba147b1/crossover"
+  },
+  {
+   "step": "readiness",
+   "hash": "#/hw/readiness"
+  },
+  {
+   "step": "back-overview",
+   "hash": "#/hw"
+  }
+ ],
+ "console_errors": []
+}

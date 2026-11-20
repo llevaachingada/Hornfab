@@ -25,6 +25,17 @@ import yaml
 
 RUN_ID = re.compile(r"^[0-9]{8}T[0-9]{6}Z-[a-z]+-[0-9a-f]{6}$")
 CAMPAIGN_ID = re.compile(r"^campaign_[0-9]{8}T[0-9]{6}Z$")
+#: Path parts under ``runs/`` that are never themselves run directories and whose subtrees the
+#: discovery walk prunes: a run's own design/verify/CMA/STEP trees, the GUI cache, analysis
+#: workspaces (they copy run inputs), lane scratch, and night/study containers.
+RUN_TREE_SKIP = frozenset({"designs", "verify", "cma", "step", "analysis", "lanes", "nights",
+                           "overnight", "studies", ".gui_cache"})
+#: Top-level containers whose children are already surfaced elsewhere (BO study sources are
+#: mirrored into top-level run folders; ``_backup_*`` trees are provenance).
+RUN_TREE_SKIP_PREFIX = ("study-", "_backup")
+#: How deep below ``runs/`` a tool-written run directory may sit (``b1_mesh_<date>/<run>`` is 2,
+#: ``m3_wp8/hv_band/run`` is 3). Deeper trees are backups/analysis and are not enumerated.
+RUN_MAX_DEPTH = 3
 HASH = re.compile(r"^[0-9a-f]{6,40}$")
 STEP_NAME = re.compile(r"^[A-Za-z0-9_\-]{1,80}_rank\d+_[0-9a-f]{6,40}\.step$")
 #: Design hash at the end of an exported STEP (``<config name>_rankN_<hash>.step`` for a run,
@@ -144,11 +155,62 @@ def _spearman(x: np.ndarray, y: np.ndarray) -> float | None:
 # ---------------------------------------------------------------------------- runs
 
 
+def _run_id(runs: Path, run_dir: Path) -> str:
+    """The id a run is addressed by in the GUI API.
+
+    Top-level runs keep their folder name (every historical id/route). Tool-written runs live one
+    or more levels down (``verify --verify-dir runs/<topic>/<id>``, a night's ``<night>/<run>``
+    refine run), where names are not unique (many are literally ``run``), so their id is the
+    run-relative path joined with ``~`` — one URL path segment, no slash to confuse the router.
+    """
+    try:
+        rel = run_dir.relative_to(runs)
+    except ValueError:
+        return run_dir.name
+    return "~".join(rel.parts) if len(rel.parts) > 1 else run_dir.name
+
+
+def _is_run_dir(p: Path) -> bool:
+    """A run folder is either the CLI's own ``RUN_ID`` name (a run created but killed before its
+    first write still shows, exactly as the Runs page has always listed it) or a tool-written
+    folder that has proved it is a run by writing ``run.json`` or its first row."""
+    return (RUN_ID.match(p.name) is not None or (p / "search.ndjson").is_file()
+            or (p / "run.json").is_file())
+
+
 def _run_dirs(runs: Path) -> list[Path]:
+    """Every run under ``runs``, at any depth (owner rule: anything that runs and saves in the
+    folder must show up).
+
+    The top level is the CLI's own ``<UTC timestamp>-<mode>-<id>`` layout, but several tools write
+    runs one or more levels down: ``verify --verify-dir runs/<topic>/<id>`` (ripple/source audits),
+    a night's refine run under ``runs/<night>/<run>``, BO study sources under ``runs/study-<id>/``.
+    The last are mirrored into top-level run folders, so the source tree is skipped rather than
+    double-listed. Pruned trees (``RUN_TREE_SKIP``) hold a run's own designs/verify/CMA files, not
+    runs — walking them would enumerate every design directory on every request.
+    """
     if not runs.is_dir():
         return []
-    return sorted((p for p in runs.iterdir() if p.is_dir() and RUN_ID.match(p.name)),
-                  key=lambda p: p.name, reverse=True)
+
+    out: list[Path] = []
+
+    def walk(d: Path, depth: int) -> None:
+        try:
+            entries = list(d.iterdir())
+        except OSError:
+            return
+        for p in entries:
+            if not p.is_dir() or p.name in RUN_TREE_SKIP or p.name.startswith("."):
+                continue
+            if depth == 0 and p.name.startswith(RUN_TREE_SKIP_PREFIX):
+                continue
+            if _is_run_dir(p):
+                out.append(p)
+            if depth < RUN_MAX_DEPTH:
+                walk(p, depth + 1)
+
+    walk(runs, 0)
+    return sorted(out, key=lambda p: _run_id(runs, p), reverse=True)
 
 
 def _config(run_dir: Path) -> dict:
@@ -188,11 +250,14 @@ def _ts(s: str | None):
         return None
 
 
-def run_summary(run_dir: Path) -> dict:
+def run_summary(run_dir: Path, run_id: str | None = None) -> dict:
     """Memoized on the run's search.ndjson stamp: list_runs and the auto campaigns both summarize
     every run on each refresh, and a finished run's summary never changes. ``active`` is computed
     AFTER the cache lookup on every call: a live run's stamp changes with every row, but an
-    inactive run's stamp never does, so only the cache-miss path would ever refresh it."""
+    inactive run's stamp never does, so only the cache-miss path would ever refresh it.
+
+    ``run_id`` names a nested run for display/routing (see ``_run_id``); the cached body is
+    id-independent, so a cache hit is copied with the caller's id rather than re-read."""
     # The stamp carries BOTH files' identities: a resume rewrites run.json (new command/budget/
     # resumes) at session start and at finish, and at finish the ndjson goes quiet — without the
     # run.json stamp a finished resumed run could keep a pre-finish memo all night.
@@ -214,11 +279,14 @@ def run_summary(run_dir: Path) -> dict:
         verify_stamp = None
     stamp = (nd, rj, verify_stamp) if (nd is not None or rj is not None or verify_stamp is not None) else None
     key = str(run_dir.resolve())
+    sum_id = run_id or run_dir.name
     hit = _RUN_SUMMARY_CACHE.get(key)
     if stamp is not None and hit is not None and hit[0] == stamp:
         hit[1]["active"] = bool(nd_mtime is not None and (time.time() - nd_mtime) < 120.0)
-        return hit[1]
-    out = _run_summary(run_dir)
+        # The cached body was computed for this same directory; only the caller's display id can
+        # differ (``_run_dirs`` may name a nested run by its relative path).
+        return hit[1] if hit[1].get("id") == sum_id else dict(hit[1], id=sum_id)
+    out = _run_summary(run_dir, sum_id)
     out["active"] = bool(nd_mtime is not None and (time.time() - nd_mtime) < 120.0)
     if stamp is not None:
         _RUN_SUMMARY_CACHE[key] = (stamp, dict(out))
@@ -229,7 +297,7 @@ def run_summary(run_dir: Path) -> dict:
 _RUN_SUMMARY_CACHE: dict[str, tuple] = {}
 
 
-def _run_summary(run_dir: Path) -> dict:
+def _run_summary(run_dir: Path, run_id: str | None = None) -> dict:
     rows = read_ndjson(run_dir / "search.ndjson")
     cfg = _config(run_dir)
     rj_sum = _as_dict(_read_json(run_dir / "run.json"))
@@ -258,8 +326,8 @@ def _run_summary(run_dir: Path) -> dict:
         srows = rows
     ok_s = [r for r in srows if r.get("ok")]
     return clean({
-        "id": run_dir.name,
-        "name": cfg.get("name"),
+        "id": run_id or run_dir.name,
+        "name": cfg.get("name") or run_id or run_dir.name,
         "family": cfg.get("family") or (rows[0].get("family") if rows else None),
         "generator": (cfg.get("generator") or {}).get("name") if isinstance(cfg.get("generator"), dict) else None,
         "brief": brief.get("name") if brief else None,
@@ -271,7 +339,7 @@ def _run_summary(run_dir: Path) -> dict:
         "seed_j": rows[0].get("objective") if rows else None,
         "best_j": best["objective"] if best else None,
         "best_hash": best["design_hash"] if best else None,
-        "objective_version": run_objective_version(run_dir),
+        "objective_version": run_objective_version(run_dir, rows),
         "started": rows[0].get("created_utc") if rows else None,
         "last": rows[-1].get("created_utc") if rows else None,
         "has_report": (run_dir / "report.html").exists(),
@@ -306,9 +374,9 @@ def _run_algorithm(rj: dict, cfg: dict) -> str:
 
 
 def list_runs(runs: Path, limit: int | None = None) -> list[dict]:
-    """Every run under ``runs`` (no cap: anything a search wrote must show up)."""
+    """Every run under ``runs`` at any depth (no cap: anything a search wrote must show up)."""
     dirs = _run_dirs(runs)
-    out = [run_summary(d) for d in (dirs if limit is None else dirs[:limit])]
+    out = [run_summary(d, _run_id(runs, d)) for d in (dirs if limit is None else dirs[:limit])]
     # Additive (GUI plan WP4): mark parents that have a linked verify run, so the Runs list can
     # badge "verified designs" without the client cross-referencing. Copies: run_summary is cached.
     parents = {s.get("verify_of_run_id") for s in out if s.get("verify_of_run_id")}
@@ -317,13 +385,38 @@ def list_runs(runs: Path, limit: int | None = None) -> list[dict]:
     return out
 
 
-def _resolve_run(runs: Path, run_id: str) -> Path:
-    if not RUN_ID.match(run_id):
-        raise ValueError(f"not a run id: {run_id!r}")
-    d = runs / run_id
-    if not (d / "search.ndjson").exists():
-        raise FileNotFoundError(run_id)
+def _direct_run_path(runs: Path, run_id: str) -> Path | None:
+    """Resolve an id to a run directory without walking the tree (``_run_id``'s inverse).
+
+    Every path part is re-validated exactly like the discovery walk (no ``.``/``..``, no pruned or
+    skipped container, within the depth cap) and the directory must actually be a run, so this is
+    an O(1) equivalent of the id index — not a path join that trusts the id.
+    """
+    parts = run_id.split("~") if "~" in run_id else [run_id]
+    if len(parts) > RUN_MAX_DEPTH + 1:
+        return None
+    for p in parts:
+        if (not p or p in (".", "..") or p.startswith(".") or p in RUN_TREE_SKIP
+                or p.startswith(RUN_TREE_SKIP_PREFIX)):
+            return None
+    d = runs.joinpath(*parts)
+    if not d.is_dir() or not _is_run_dir(d):
+        return None
+    try:
+        d.resolve().relative_to(runs.resolve())
+    except (OSError, ValueError):
+        return None
     return d
+
+
+def _resolve_run(runs: Path, run_id: str) -> Path:
+    d = _direct_run_path(runs, run_id)
+    if d is not None:
+        return d
+    # Not addressable as a run (wrong shape, or a run removed since the page loaded).
+    if not RUN_ID.match(run_id) and "~" not in run_id:
+        raise ValueError(f"not a run id: {run_id!r}")
+    raise FileNotFoundError(run_id)
 
 
 def _norm_polar(spl: np.ndarray) -> np.ndarray:
@@ -615,11 +708,14 @@ def _campaign_scoring_view(runs: Path, brief_raw: Any, entries: list[dict]) -> d
     version = _brief_objective_version(brief_raw)
     for entry in entries or []:
         rid = entry.get("best_run_id")
-        if not rid or not RUN_ID.match(str(rid)):
+        if not rid:
             continue
-        rd = runs / str(rid)
+        try:
+            rd = _resolve_run(runs, str(rid))        # auto entries may point at a nested run
+        except (ValueError, FileNotFoundError):
+            continue
         return _run_scoring_view(rd, target, objective, weights,
-                                 run_summary(rd).get("best_hash"), version)
+                                 run_summary(rd, str(rid)).get("best_hash"), version)
     return None
 
 
@@ -985,7 +1081,7 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
     rows = read_ndjson(d / "search.ndjson")
     cfg = _config(d)
     run_json = _read_json(d / "run.json") or {}
-    summ = run_summary(d)
+    summ = run_summary(d, run_id)
     best_hash, seed_hash = summ["best_hash"], (rows[0]["design_hash"] if rows else None)
     seed_ok = bool(rows and rows[0].get("ok"))
     version = run_objective_version(d)
@@ -1237,12 +1333,14 @@ def compare_scoring_views(runs: Path, run_a: str, run_b: str) -> dict:
     return out
 
 
-def run_objective_version(run_dir: Path) -> int:
+def run_objective_version(run_dir: Path, rows: list[dict] | None = None) -> int:
     """The run's objective version, with v1 as the unlabelled default.
 
     Reads the same two places as ``_solve_group_fingerprint``: the committed config's
     ``objective.version`` (top level or inside ``brief``) and ``run.json``'s
-    ``objective_version`` sidecar. A missing or malformed value is v1, never a guess.
+    ``objective_version`` sidecar. A tool-written verify dir has neither, so the first stored
+    row's own ``objective_version`` is the last source. A missing or malformed value is v1,
+    never a guess.
     """
     cfg = _config(run_dir)
     rj = _as_dict(_read_json(run_dir / "run.json"))
@@ -1250,6 +1348,9 @@ def run_objective_version(run_dir: Path) -> int:
     version = obj.get("version")
     if version is None:
         version = rj.get("objective_version")
+    if version is None:
+        rows = read_ndjson(run_dir / "search.ndjson") if rows is None else rows
+        version = rows[0].get("objective_version") if rows else None
     if isinstance(version, bool):
         return 1
     try:
@@ -1608,7 +1709,7 @@ class _Snapshot:
 
     def run_list(self) -> list[tuple[Path, dict]]:
         if self._run_list is None:
-            self._run_list = [(d, run_summary(d)) for d in _run_dirs(self.runs)]
+            self._run_list = [(d, run_summary(d, _run_id(self.runs, d))) for d in _run_dirs(self.runs)]
         return self._run_list
 
     def auto_groups(self) -> dict[str, list[tuple[Path, dict]]]:
@@ -1666,7 +1767,7 @@ def list_campaigns(runs: Path, snap: _Snapshot | None = None) -> list[dict]:
     # still get a per-brief leaderboard: grouped by brief and mode, listed AFTER the real
     # campaigns so a real campaign of the same tier keeps precedence in leaders().
     for cid, members in sorted(snap.auto_groups().items()):
-        names = sorted({s.get("name") or d.name for d, s in members})
+        names = sorted({s.get("name") or s.get("id") or d.name for d, s in members})
         out.append(clean({"id": cid, "tier": members[0][1].get("mode") or "screen",
                           "brief": members[0][1].get("brief"), "superseded": False, "seeds": None,
                           "n_entries": len(names), "families": names, "auto": True,
@@ -1697,7 +1798,7 @@ def _group_auto_runs(run_list: list[tuple[Path, dict]],
     Pure: the walks live on ``_Snapshot``."""
     groups: dict[str, list[tuple[Path, dict]]] = {}
     for d, s in run_list:
-        if d.name in claimed:
+        if s.get("id") in claimed or d.name in claimed:
             continue
         brief, mode = s.get("brief"), s.get("mode") or "screen"
         if not brief or not s.get("n"):
@@ -1727,7 +1828,7 @@ def _auto_campaign_detail(runs: Path, cid: str, snap: _Snapshot | None = None,
         raise FileNotFoundError(cid)
     by_name: dict[str, list[tuple[Path, dict]]] = {}
     for d, s in members:
-        by_name.setdefault(s.get("name") or d.name, []).append((d, s))
+        by_name.setdefault(s.get("name") or s.get("id") or d.name, []).append((d, s))
     entries = []
     for name, rs in by_name.items():
         js = [s["best_j"] for _, s in rs if s.get("best_j") is not None]
@@ -1745,10 +1846,10 @@ def _auto_campaign_detail(runs: Path, cid: str, snap: _Snapshot | None = None,
             "failures": dict(sum((Counter(s.get("failures") or {}) for _, s in rs), Counter())),
             "pinned": [],
             "jobs": [{"seed": s.get("cma_seed") if s.get("cma_seed") is not None else d.name[-6:],
-                      "best_j": s.get("best_j"), "run_id": d.name,
+                      "best_j": s.get("best_j"), "run_id": s.get("id") or d.name,
                       "returncode": None, "wall_min": None} for d, s in rs],
             "best": best, "dims": best_s.get("dims") if best_s else None,
-            "best_run_id": best_d.name if best_d is not None else None,
+            "best_run_id": (best_s.get("id") or best_d.name) if best_s and best_d is not None else None,
         })
     entries.sort(key=lambda e: (e["best_j"] is None, e["median_j"] if e["median_j"] is not None else 0))
     brief = members[0][1].get("brief")

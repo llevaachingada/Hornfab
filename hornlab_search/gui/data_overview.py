@@ -168,7 +168,7 @@ def run_records(runs: Path, since: datetime) -> list[dict]:
         except OSError:
             continue
         try:
-            s = D.run_summary(d)
+            s = D.run_summary(d, D._run_id(runs, d))
         except Exception:                      # noqa: BLE001 - one unreadable run never hides the rest
             continue
         last = _parse_utc(s.get("last"))
