@@ -92,10 +92,45 @@ source assumption returned "no difference" for a purely mechanical reason. A rea
 compare hashes would file that as "the source doesn't matter" — the exact wrong conclusion, and the
 third silent-killer of this session alongside the void dense pair and the bridge-cell verify hole.
 
-Fix in flight: thread the brief's cap into `source_radius_mm` in `grid_build.py`, with a test that the
-`auto` path is byte-identical to today's hashes and that `cap: 60` changes the mesh hash. Until that
-lands, **mandate item 5 has no lever and must not be attempted** — and item 4's comparisons are
-implicitly "at the auto cap", which is at least consistent across designs.
+Fix landed the same afternoon (see 2b): the brief's cap now reaches `source_radius_mm` in
+`grid_build.py` **and** the mesh identity (`MeshSpec.source_cap_mm`, hash-neutral at 0), so `auto`
+stays byte-identical to every stored hash while 150/60 produce distinct meshes. Item 4's comparisons
+remain at the auto cap, which is now a declared condition rather than an invisible default.
+
+## 2b. Source sensitivity, re-run with the knob live
+
+Night `source_sensitivity2_2026-11-20` (same six jobs, new output dirs; the pre-fix runs stay under
+`runs/source_sensitivity/` as the record of the bug). The fix works: the meshes now differ.
+
+| anchor | cap | mesh sha256 | bwH 8 / 10 / 12 k | bwV 8 / 10 / 12 k | V+25 8 k / 12 k |
+|---|---|---:|---|---|---|
+| Crowe X (grid route) | auto | `884b6eef…` | 74.1 / 68.1 / **65.7** | 54.3 / 48.7 / 53.4 | −4.99 / −5.11 |
+| Crowe X | 150 | `f3cb5316…` | 74.1 / 69.0 / **63.3** | 54.2 / 49.5 / 55.4 | −5.00 / −4.50 |
+| Crowe X | 60 | `d59e8c75…` | 74.1 / 71.1 / **55.6** | 54.1 / 52.2 / 57.0 | −5.03 / −3.89 |
+| OSSE morph (native route) | all three | `c59ec195…` (identical) | 60.3 / 52.5 / 50.4 | 50.4 / 47.1 / 44.1 | −5.94 / −7.71 |
+
+**The answer, and it is frequency-dependent.** For the grid route the wavefront assumption is
+irrelevant where the handoff made its comparisons and decisive where it warned:
+
+- **8 kHz: the source does not matter** — width moves ≤ 0.2 deg, the +25 deg level ≤ 0.05 dB across a
+  cap change from ~513 mm curvature to 60 mm (a 0.31 mm dome vs a 2.73 mm dome). Every 8 kHz claim in
+  the handoff, including Crowe X OSSE's 74.0 x 53.9 deg, survives a change of source model.
+- **10 kHz: it starts to matter** — up to 3.1 deg (H) and 3.5 deg (V).
+- **12 kHz: it decides** — H width **65.7 -> 55.6 deg (-10.1)**, and the +25 deg level **-5.11 ->
+  -3.89 dB (+1.2)** as the cap tightens. A 10 deg swing at 12 kHz is larger than most of the design
+  differences we have been ranking.
+
+So the handoff's "8–16 kHz is source-conditional" is right in substance but wrong in scope: the
+conditionality starts around 10 kHz, not at 8. Any report above ~10 kHz must state its cap; at 8 kHz
+it need not.
+
+**Second gap, found by the same run.** The native route (OSSE/FREEFORM, e.g. OSSE morph) still ignores
+`source.cap`: all three meshes are **byte-identical** (`c59ec195…`) while the recorded `mesh_hash`
+differs, because `MeshSpec` now carries the cap on every route. That is safe for the response (same
+mesh, same answer) but it makes the provenance overstate what changed - a reader sees three mesh hashes
+and one mesh. The native spec path needs the same wiring, or an explicit refusal when a native brief
+sets a cap.
+
 
 ## 3. HF width — one knob at a time, and an envelope that binds
 
