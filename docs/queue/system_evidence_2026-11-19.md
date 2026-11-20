@@ -48,6 +48,19 @@ in the separate CPU lane. **No GPU job was started.** Results:
 - Readout: `docs/evidence/system_evidence_2026-11-19/README.md`. Current census after the queue:
   **47 cases / 14 solved / 29 staged / 3 refused / 2 invalid**.
 
+## Follow-up runs after the queue (same CPU lane, manual)
+
+- **Real-motor assembled (WP3):** `evidence_case.py --source-case
+  system_runs/system/bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8
+  --motor-patch docs/queue/system_evidence_2026-11-19/overrides/motor_12pr300_assembled.json
+  --request .../wide_assembled_200_2500.json --solve` (and the `lf_assembled_20_200.json` variant).
+  BL validate true, 25/25 + 12/12; real vs demo assembled = +4.8..+7.8 dB / mean 6.75 / phase 32°.
+- **Mesh convergence:** `reference prepare` with `overrides/mesh_refine.json` (0.03/0.009) and
+  `overrides/mesh_refine2.json` (0.0225/0.00675), then solve the 49-freq assembled request. The
+  three meshes (3,954 / 5,976 / 9,148 interior triangles) do **not** converge at the nulls; max
+  delta ~16 dB, RMS 2.6–3.3 dB. Do not use small system differences yet.
+- Both are documented in `docs/evidence/system_evidence_2026-11-19/README.md`.
+
 ## Authorization (mandatory)
 
 The queue file deliberately contains **no standing authorization**. `--solve` refuses before

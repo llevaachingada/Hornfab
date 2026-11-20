@@ -88,6 +88,41 @@ Observations (all `[measured]` on this grid):
 - The 162 Hz null appears in both seed-box cases but not in the default-box curves; it is a
   box/port/motor interaction, not a universal LF feature. Do not extrapolate it to another box.
 
+### Bassbox comparison (analysis only, no new solve)
+
+The committed `bassbox` model was evaluated on the same 20–200 Hz grid for the seed box
+(115 L, 45 cm², Fb 30 Hz, effective port length 0.129569 m) and the R0 default box
+(0.04216945 m³, 28.274 cm², 0.22 m, derived Fb 30.14 Hz), using the real 12PR300 T/S. Curves are
+dB relative to the 200 Hz value, model output at 2 m (1 m half-space minus 6.02 dB), `[model]`.
+
+| f Hz | bassbox seed | bassbox R0 default |
+|---:|---:|---:|
+| 20.0 | −19.9 | −22.7 |
+| 24.7 | −13.3 | −20.0 |
+| 30.4 | −10.0 | −17.2 |
+| 37.5 | −8.3 | −14.4 |
+| 46.2 | −6.9 | −11.5 |
+| 57.0 | −5.5 | −8.7 |
+| 70.2 | −4.2 | −6.1 |
+| 86.6 | −3.0 | −3.9 |
+| 106.7 | −1.9 | −2.3 |
+| 131.6 | −1.1 | −1.1 |
+| 162.2 | −0.5 | −0.4 |
+| 200.0 | 0.0 | 0.0 |
+
+`bassbox._f3_hz` = **53.06 Hz** (seed) and **65.01 Hz** (default). Neither curve reproduces the
+BL shape:
+
+- Seed box: BL real (#4) is **3.5–5.4 dB below** bassbox over 46–132 Hz, has a **30 Hz port peak**
+  (BL −3.8 dB vs model −10.0 dB), and a **162 Hz null** (BL −16.1 dB vs model −0.5 dB) that the
+  lumped model does not produce. A single bassbox F3 is not a BL F3.
+- Default box: BL real (#6) is **+7.4 dB at 30 Hz**, +1.9 dB at 46 Hz, essentially equal at 57 Hz,
+  and **−1.2 to −2.3 dB above 70 Hz** relative to the model; the shapes differ, not just the
+  level. (The demo default #R0 is not a clean motor comparison; use #6 for the real-motor cell.)
+- **Conclusion:** `bassbox` remains the fast box-feasibility/F3/port-velocity screen, but it is not
+  a drop-in installed-LF reference for this cabinet. The next LF work is a model-difference audit
+  (finite baffle/cabinet, port end correction/NFR, losses), not another blind F3 comparison.
+
 ## Motor × box, 200–2500 Hz wide grid
 
 On-axis probe, same 25 log frequencies; values are `[measured]` differences between the two cases
@@ -105,6 +140,47 @@ The large maxima are **interference nulls**, not smooth sensitivity offsets: the
 moves nulls by tens of dB and flips phase near them. The motor comparison is a smooth +4.5 to
 +8.6 dB over most of the band for the seed box; the default-box motor comparison is corrupted at
 1641/1823 Hz by a deep null. This is exactly why a single-number motor or box delta is not used.
+
+## Real-motor assembled case (WP3)
+
+`ev_assembled_motor_real` derives the assembled #2 project, patches the woofer component
+`vented/driver` with the real 12PR300 T/S through the same `component_parameters` fields used by
+`motor_map`, runs BL `project validate` (valid true, rc 0), then solves 25/25. The transducer
+**shape** remains BL's demo shape; only the motor is real. `ev_assembled_motor_real_lf` repeats the
+same case at 20–200 Hz.
+
+Against the demo-motor assembled #2 (same geometry, same 25-freq grid), on-axis `[measured]`:
+
+- **+4.8 to +7.8 dB across 200–2500 Hz; mean 6.75 dB; max phase 32.1°**. The difference is smooth
+  and positive, not a null artefact: the demo motor understates the assembled woofer basis by
+  roughly 6–7 dB per 2.83 V.
+- LF real vs demo assembled: **max 5.31 dB / mean 3.10 dB / max 40.6°** on 20–200 Hz. This is the
+  same motor-difference magnitude as the vented-only pairs; the horn still does not change the LF
+  on-axis shape.
+- The real-motor assembled basis is still **not a calibrated system SPL**: the horn channel is
+  per 1 m/s, the woofer per 2.83 V, and the transducer shape is demo. It is the first assembled
+  case with a real woofer motor, not a complete-system answer.
+
+## Mesh convergence
+
+Three meshes of the same assembled geometry were solved on the same 49-frequency grid:
+
+| mesh | interior tris | exterior tris | on-axis max \|ΔdB\| vs default | mean | RMS | max \|Δphase\| |
+|---|---:|---:|---:|---:|---:|---:|
+| default (0.04/0.012) | 3,954 | 2,010 | — | — | — | — |
+| refine1 (0.03/0.009) | 5,976 | 3,246 | 9.75 | 1.11 | 2.64 | 174.0° |
+| refine2 (0.0225/0.00675) | 9,148 | 5,688 | 15.99 | 1.27 | 3.30 | 170.5° |
+
+Refine1 vs refine2 is **not monotonic**: max 15.51 dB / mean 1.01 / RMS 2.75 / phase 66.1°.
+The large deltas are at nulls (e.g. 636, 1077, 1641, 1730, 2250, 2500 Hz) whose depth and frequency
+move with the mesh. The 49-point grid agrees with the 25-point grid at shared points (≤0.03 dB), but
+that does **not** mean convergence: the extra points expose nulls and the mesh refinement moves
+them.
+
+**Conclusion:** every current system case is a `SINGLE_MESH` result; mesh/frequency convergence at
+nulls is **not established**. Small dB differences, J changes, or crossover rankings at these
+frequencies are not defensible until a convergence protocol (finer mesh + denser frequencies around
+the nulls, with predeclared tolerances) is run. This is a result, not a reason to hide the numbers.
 
 ## Observation distance: 10 m vs 2 m
 

@@ -1,0 +1,18 @@
+{
+  "component_parameters": {
+    "vented/driver": {
+      "re_ohm": 5.4,
+      "le_h": 0.00042,
+      "bl_n_per_a": 14.1,
+      "mmd_kg": 0.0295,
+      "cms_m_per_n": 0.00023,
+      "rms_n_s_per_m": 1.4,
+      "motion_profile": "rigid_translation",
+      "motion_axis": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  }
+}

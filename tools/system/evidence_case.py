@@ -10,6 +10,8 @@ This tool is the narrow, auditable bridge for that:
 * it copies and validates the BL request overlay;
 * it writes a self-checksummed manifest naming the source case, source project hash, request
   hash, Boundary Lab root and authorization record;
+* optional ``--motor-patch`` applies the same ``component_parameters`` fields used by the sanctioned
+  motor staging path to the copied project, then runs BL validate before solving;
 * with ``--solve`` it invokes the existing authorized ``reference.solve`` path on the new case.
 
 It owns no acoustics and no solver logic.  ``--dry-run`` prints the exact plan and writes nothing.
@@ -118,6 +120,17 @@ def _plan(args: argparse.Namespace) -> dict[str, Any]:
     project = _project_for(source, payload)
     request = Path(args.request).resolve()
     loaded = reference.load_request(request)
+    motor_patch = Path(args.motor_patch).resolve() if args.motor_patch else None
+    if motor_patch is not None:
+        if not motor_patch.is_file():
+            raise SystemExit(f"motor patch not found: {motor_patch}")
+        try:
+            patch_payload = json.loads(motor_patch.read_text(encoding="utf-8"))
+        except ValueError as exc:
+            raise SystemExit(f"motor patch is not valid JSON: {exc}") from None
+        if not isinstance(patch_payload, Mapping) or not isinstance(
+                patch_payload.get("component_parameters"), Mapping):
+            raise SystemExit("motor patch must contain a 'component_parameters' object")
     return {
         "source_case": str(source),
         "source_manifest_sha256": _sha256(source / "manifest.json"),
@@ -128,6 +141,8 @@ def _plan(args: argparse.Namespace) -> dict[str, Any]:
         "request_sha256": loaded.sha256,
         "frequencies_hz": list(loaded.frequencies_hz),
         "excitation_port_ids": list(loaded.excitation_port_ids),
+        "motor_patch": None if motor_patch is None else str(motor_patch),
+        "motor_patch_sha256": None if motor_patch is None else _sha256(motor_patch),
         "experiment_id": args.experiment_id,
         "tag": args.tag,
         "solve": bool(args.solve),
@@ -158,6 +173,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--timeout-s", type=float, default=None,
                         help="BL solve timeout in seconds (default: reference default)")
     parser.add_argument("--notes", default="", help="free-text provenance note")
+    parser.add_argument("--motor-patch", default=None, metavar="JSON",
+                        help="optional {component_parameters: {id: {...}}} patch applied to the "
+                             "copied project (the same fields BL's component_parameters patch uses); "
+                             "the derived case is validated before solving")
     parser.add_argument("--dry-run", action="store_true", help="print the plan; write nothing")
     args = parser.parse_args(argv)
     # The queue file deliberately carries no standing authorization.  The owner/operator sets
@@ -196,6 +215,29 @@ def main(argv: list[str] | None = None) -> int:
     case = provenance.new_case_dir(args.experiment_id, store_root=store, tag=args.tag)
     shutil.copyfile(project, case / "case.blab.json")
     shutil.copyfile(request, case / "request.json")
+
+    patched_components: list[str] = []
+    if args.motor_patch:
+        patch_path = Path(plan["motor_patch"])
+        patch_payload = json.loads(patch_path.read_text(encoding="utf-8"))
+        case_project = json.loads((case / "case.blab.json").read_text(encoding="utf-8"))
+        components = (case_project.get("physical_system") or {}).get("components") or []
+        by_id = {str(c.get("id")): c for c in components if isinstance(c, Mapping)}
+        for component_id, values in patch_payload["component_parameters"].items():
+            component = by_id.get(str(component_id))
+            if component is None:
+                raise SystemExit(
+                    f"motor patch component {component_id!r} is not in the copied project; "
+                    f"available: {sorted(by_id)}")
+            params = component.setdefault("parameters", {})
+            if not isinstance(params, dict):
+                raise SystemExit(f"component {component_id!r} parameters are not an object")
+            params.update(dict(values))
+            patched_components.append(str(component_id))
+        (case / "case.blab.json").write_text(
+            json.dumps(case_project, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8", newline="\n")
+        shutil.copyfile(patch_path, case / "motor_patch.json")
     # BL generator documents store mesh paths RELATIVE to the project's directory.  A byte copy
     # of only the project would leave those paths dangling in the new case, so copy the
     # project's bl_output tree when present.  Imported absolute horn meshes are read-only and
@@ -222,6 +264,9 @@ def main(argv: list[str] | None = None) -> int:
         "notes": args.notes,
         "derivation": "project and request copied byte-identically; source hashes recorded",
         "copied_artifacts": copied_artifacts,
+        "motor_patch_file": None if args.motor_patch else None,
+        "motor_patch_sha256": plan["motor_patch_sha256"],
+        "motor_patch_component_ids": patched_components,
     }
     provenance.write_manifest(case, payload)
     print(f"evidence_case: prepared {case}")
@@ -229,6 +274,20 @@ def main(argv: list[str] | None = None) -> int:
 
     if not args.solve:
         return 0
+
+    if args.motor_patch:
+        # The copied project was edited, so BL's own validate is the authority before any solve.
+        try:
+            validation = reference.validate(case, case / "request.json")
+        except reference.ReferenceError as exc:
+            print(f"evidence_case: VALIDATE FAILED: {exc}", file=sys.stderr)
+            return 1
+        (case / "reference_validate.json").write_text(
+            json.dumps(validation.as_dict(), indent=2, sort_keys=True) + "\n",
+            encoding="utf-8", newline="\n")
+        if not validation.valid:
+            print("evidence_case: BL validate refused the motor-patched project", file=sys.stderr)
+            return 1
 
     try:
         result = reference.solve(case, case / "request.json", backend="beat_cpu",

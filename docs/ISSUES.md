@@ -3,19 +3,23 @@
 ## 2026-11-20 - System evidence queue ran (CPU only) + first readout
 
 - DONE: `docs/queue/system_evidence_2026-11-19.yaml` ran in the CPU lane beside the live GPU night;
-  9 solves complete (LF 20-200 Hz, 2x2 wide, 10 m, 49-freq), screen replay, census export. No GPU
-  job started. Census now **47 cases / 14 solved / 29 staged / 3 refused / 2 invalid**.
+  9 solves complete (LF 20-200 Hz, 2x2 wide, 10 m, 49-freq), screen replay, census export. Then the
+  real-motor assembled case (validate valid true; 25/25 + 12/12 LF) and two refined-mesh 49-freq
+  cases. No GPU job started. Census now **54 cases / 19 solved / 29 staged / 3 refused / 3 invalid**.
 - FIRST FAILURE (retained): #4 LF attempt used `vented/voltage`; the project port is
   `bl_motor12pr/voltage`. Corrected request completed 12/12 in a manual retry. The failed case is
   evidence, not a bug to erase.
 - READOUT: `docs/evidence/system_evidence_2026-11-19/README.md` — motor up to 8.6 dB/40 deg wide,
   box/null structure up to 23.6 dB, 10 m vs 2 m max 1.38 dB/17.3 deg after path correction, 25 vs
   49 shared points 0.03 dB but denser grid exposes -20 dB nulls, assembled LF = vented-only
-  default within 0.06 dB.
+  default within 0.06 dB. Real-motor assembled vs demo = +4.8..+7.8 dB (mean 6.75, phase 32 deg).
+- CRITICAL OPEN: **mesh convergence not established** — default/refine1/refine2 (3,954/5,976/9,148
+  interior tris) move nulls by up to ~16 dB, RMS 2.6-3.3 dB. Do not rank small system differences
+  or use 25-freq J changes until a convergence protocol is set.
 - FIX (runner): CPU-lane `gpu-clean` now uses `--force`, so a busy GPU lane no longer produces a
   false "blocked" retry/classification; test `tests/test_night_runner_live.py` 11 passed.
-- OPEN (not in queue): real-motor assembled WP3, mesh-refinement convergence, real 12PR300 shape/
-  panel fit, calibration/decision 3, solve authorization shape/decision 6.
+- OPEN (not in queue): real 12PR300 shape/panel fit (needs maker CAD), calibration/decision 3,
+  solve authorization shape/decision 6, float64 control, full-sphere far field.
 - NOTE: the queue does not rank systems or change scoring; it produces LF/matrix/observation/
   sampling evidence for the decision report.
 

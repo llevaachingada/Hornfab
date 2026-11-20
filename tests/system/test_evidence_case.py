@@ -19,7 +19,10 @@ def _source(tmp_path: Path) -> tuple[Path, Path, Path]:
     case = provenance.new_case_dir("src", store_root=store, tag="case")
     project = {"schema_version": 10, "generator_documents": [
         {"artifact": {"meshes": [{"id": "interior", "mesh_path": "bl_output/x/interior.msh"}]}}
-    ]}
+    ], "physical_system": {"components": [
+        {"id": "vented/driver", "kind": "electrodynamic_transducer",
+         "parameters": {"re_ohm": 5.8, "bl_n_per_a": 8.0}}
+    ]}}
     (case / "case.blab.json").write_text(json.dumps(project), encoding="utf-8")
     mesh = case / "bl_output" / "x" / "interior.msh"
     mesh.parent.mkdir(parents=True)
@@ -104,6 +107,40 @@ def test_solve_calls_the_reference_path_with_the_copied_request(
     assert seen["request_path"].parent == seen["case_dir"]
     payload = provenance.load_manifest(Path(seen["case_dir"]) / "manifest.json")["payload"]
     assert payload["authorized_by"] == "owner test"
+
+
+def test_motor_patch_is_applied_validated_and_recorded(tmp_path: Path, monkeypatch,
+                                                        capsys) -> None:
+    store, case, request = _source(tmp_path)
+    patch = tmp_path / "motor.json"
+    patch.write_text(json.dumps({"component_parameters": {
+        "vented/driver": {"re_ohm": 5.4, "bl_n_per_a": 14.1}}}), encoding="utf-8")
+    seen: dict[str, object] = {}
+
+    def fake_validate(case_dir, request_path):
+        seen["validate_case"] = Path(case_dir)
+        return SimpleNamespace(valid=True, as_dict=lambda: {"valid": True})
+
+    def fake_solve(case_dir, request_path, *, backend, authorized_by, timeout_s=None):
+        seen["solve_case"] = Path(case_dir)
+        return SimpleNamespace(run_dir=Path(case_dir) / "run", status="complete",
+                               returncode=0, record_path=Path(case_dir) / "reference_solve.json")
+
+    monkeypatch.setattr(evidence_case.reference, "validate", fake_validate)
+    monkeypatch.setattr(evidence_case.reference, "solve", fake_solve)
+    rc = evidence_case.main(_base_args(store, case, request)
+                            + ["--motor-patch", str(patch), "--solve",
+                               "--authorized-by", "owner test"])
+    assert rc == 0
+    new_case = Path(seen["solve_case"])
+    project = json.loads((new_case / "case.blab.json").read_text(encoding="utf-8"))
+    params = project["physical_system"]["components"][0]["parameters"]
+    assert params["re_ohm"] == 5.4 and params["bl_n_per_a"] == 14.1
+    assert (new_case / "motor_patch.json").is_file()
+    assert (new_case / "reference_validate.json").is_file()
+    payload = provenance.load_manifest(new_case / "manifest.json")["payload"]
+    assert payload["motor_patch_component_ids"] == ["vented/driver"]
+    assert payload["motor_patch_sha256"]
 
 
 def test_source_outside_store_is_refused(tmp_path: Path, capsys) -> None:

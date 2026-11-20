@@ -9,7 +9,9 @@
   `...md` + admission `...admission.json` + six request overlays under `requests/`.
 - **Results:** 9 solves complete (LF 20-200 Hz on #4/#5/#6/R0 and assembled #2; two wide 2x2
   cells; 10 m vs 2 m; 49-freq sampling), screen replay `27616eedee09009f` byte-identical, census
-  export. Current census: **47 cases / 14 solved / 29 staged / 3 refused / 2 invalid**.
+  export. Then the **real-motor assembled case** (validate valid true; 25/25 wide + 12/12 LF) and
+  **two refined-mesh** 49-freq cases. Current census: **54 cases / 19 solved / 29 staged /
+  3 refused / 3 invalid**.
 - **First #4 LF attempt failed** on the wrong project port (`vented/voltage`; #4 uses
   `bl_motor12pr/voltage`). The case is retained; the corrected request
   `requests/lf_motor12pr_20_200.json` completed 12/12 in a manual retry.
@@ -19,12 +21,14 @@
   `--solve` refuses without `HORNLAB_EVIDENCE_AUTHORIZED_BY` or `--authorized-by`.
 - **Tests:** `tests/system/test_evidence_case.py` **6 passed**; `tests/test_night_runner_live.py`
   11 passed after the CPU-lane `gpu-clean --force` fix; per-job dry-runs 9/9; night dry-run 11 jobs.
-- **Readout:** `docs/evidence/system_evidence_2026-11-19/README.md`: motor difference up to
-  ~8.6 dB / 40 deg on the wide grid; box/null structure up to 23.6 dB; 10 m vs 2 m after 1/r and
-  propagation correction max 1.38 dB / 17.3 deg; 25 vs 49 shared points agree to 0.03 dB but the
-  denser grid exposes -20 dB nulls; assembled LF matches vented-only default within 0.06 dB.
-- **Not in this queue:** real-motor assembled WP3, mesh-refinement convergence, real-driver shape,
-  calibration/system ranking. Those need separate work/owner gates.
+- **Readout:** `docs/evidence/system_evidence_2026-11-19/README.md`: wide motor difference up to
+  ~8.6 dB / 40 deg; box/null structure up to 23.6 dB; 10 m vs 2 m after 1/r and propagation
+  correction max 1.38 dB / 17.3 deg; 25 vs 49 shared points agree to 0.03 dB but the denser grid
+  exposes -20 dB nulls; assembled LF matches vented-only default within 0.06 dB. Real-motor
+  assembled vs demo = +4.8..+7.8 dB (mean 6.75, phase 32 deg) on the wide grid. **Mesh convergence
+  is NOT established**: default/refine1/refine2 nulls move; max delta up to ~16 dB, RMS 2.6-3.3 dB.
+- **Not done / still gated:** real 12PR300 shape/panel fit (needs maker CAD), calibration/system
+  ranking (decision 3), `float64` control, full-sphere far field.
 
 ## 2026-11-20 - Senior engineering decision + pilot Pareto/fidelity repair (CPU only, no GPU)
 

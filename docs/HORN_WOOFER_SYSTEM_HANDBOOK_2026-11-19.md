@@ -7,9 +7,9 @@ committed state differs.
 
 **Post-handbook update (2026-11-20):** the owner authorised and the local orchestrator ran the
 `system_evidence_2026-11-19` CPU queue (LF 20–200 Hz, 2×2 motor×box, 10 m vs 2 m, 25 vs 49
-frequency sampling, screen replay). Current census: **47 case dirs / 14 solved / 29 staged /
-3 refused / 2 invalid**; readout and caveats in
-`docs/evidence/system_evidence_2026-11-19/README.md`. The §0/§6 counts below are the pre-queue
+frequency sampling, screen replay), then the real-motor assembled and two refined-mesh cases.
+Current census: **54 case dirs / 19 solved / 29 staged / 3 refused / 3 invalid**; readout and
+caveats in `docs/evidence/system_evidence_2026-11-19/README.md`. The §0/§6 counts below are the pre-queue
 snapshot; use the evidence/export files for current numbers.
 
 **Audience:** a senior architecture/implementation agent working in the cloud, with no access to the
