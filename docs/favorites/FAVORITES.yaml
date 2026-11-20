@@ -1,0 +1,40 @@
+# HornFab favorites registry: horns the OWNER has starred. Machine-readable; agents and the GUI read this file.
+# Rules: append-only (retire with status: retired, never delete); one entry per design hash; J is only
+# comparable within the same brief/objective identity, never across. How to add: docs/favorites/README.md.
+schema: hornlab-favorites-v1
+favorites:
+- id: FAV-001
+  added: '2026-11-20'
+  added_by: owner
+  title: Crowe-X on OS-SE CD (v11 completion best)
+  owner_note: >-
+    "Some of the best directivity plots and esthetics of anything I've seen so far." Flares immediately at the
+    throat; H and V are clearly distinct, unlike the throat-extension horns.
+  design_hash: 4140768780f0
+  family: FREEFORM
+  generator: grid / rows.type osse_rollback (Crowe-X on OS-SE CD; LABELED HYPOTHESIS-SHAPE EXPERIMENT, not Crowe geometry)
+  contract: docs/knowledge/contracts/crowe_v2a_and_crowe_x_osse.md (Contract B)
+  config: examples/typologies/cd_v11_completion_2026-11-20/cd11c__crowe_x_osse_cd.yaml
+  replay_config: examples/typologies/cd_v11_verify_2026-11-20/cd11v__crowe_x_osse_cd.yaml
+  brief: examples/briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd.yaml
+  objective: v11 (CD identity; never rank against v7/v9/v10)
+  runs:
+    screen: {run_dir: runs/20261120T084006Z-screen-fc4e18, eval_no: 44, J: 4.996463749003073}
+    verify: {run_dir: runs/20261120T185832Z-verify-e5de4a, J: 4.993881286003633, dofs: 4487}
+  gui: http://127.0.0.1:8765/#/run/20261120T084006Z-screen-fc4e18
+  size_mm: {outer_w: 587, outer_h: 450, depth: 264, throat_d: 36}
+  knobs: {g_L_mm: 260.313, g_a_h_deg: 34.893, g_a_v_deg: 26.757, g_k: 1.0, g_n: 2.5627, g_q: 0.996,
+          g_r_lip_mm: 18.214, g_s: 0.43706, g_sf_ab: 0.83076, g_sf_amt: 0.18804, g_sf_m: 4, g_sf_n1: 1.8,
+          g_sf_n2: 7.0, g_sf_start: 0.25, g_wrap_deg: 81.39}
+  strengths: >-
+    Best of the five v11 verify finalists on every CD-matrix metric (LW 0.318 dB, DI std 0.462 dB, NACC 0.9954,
+    off-axis 0.419 dB); steadiest H beamwidth (67-82 deg over 700 Hz-8 kHz); monotone throat impedance with no resonance.
+  weaknesses: >-
+    Throat loading: Re z 0.21/0.30/0.38/0.52 at 682/782/896/1028 Hz (LFP20 674 Hz, LFP50 995 Hz) -> v11 load
+    term 2.73 of J 4.99. Actual pattern ~69 x 58 deg above 3 kHz (target 80 x 50, inside the corridors).
+  research: docs/research/favorites_2026-11-20/CROWE_X_FAVORITE_RESEARCH.md
+  follow_up:
+    night: docs/queue/fav_crowe_2026-11-20.yaml
+    configs: examples/typologies/fav_crowe_2026-11-20/
+    variants: [favk__k2_hold_mouth, favk__k3_hold_mouth, favk__k4_hold_mouth, fav__crowe_k_home, fav__crowe_c500_xo900]
+  status: active

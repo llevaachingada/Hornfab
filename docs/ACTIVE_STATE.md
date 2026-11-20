@@ -32,6 +32,9 @@ git log --oneline -5; git status --porcelain
 
 ## State, at write time
 
+- **2026-11-20 afternoon:** night `fav_crowe_2026-11-20` queued behind `cd_v11_verify_and_expand_2026-11-20`
+  (FAV-001 k-variants + compact500_xo900); see CONTINUITY.
+
 - **GPU lane:** FREE. `p12_verify_2026-11-19` ran 6/6 (~20 min): compact400 trio is a 3-way verify
   tie (morph 1.1864 > fold 1.2763 > twinray 1.3734, gaps < floor 0.1293); home v10 fold s2w beats the
   published best by 0.184 J on the same verify grid (1.4867 vs 1.6704); **ext-throat v10 closed**.
@@ -67,6 +70,7 @@ git log --oneline -5; git status --porcelain
 | Need | Read |
 |---|---|
 | Newest status entry | `docs/CONTINUITY.md`, first 60–80 lines only |
+| Owner's favorite horns (seeds, renders) | `docs/favorites/FAVORITES.yaml` (FAV-001 Crowe-X; research `docs/research/favorites_2026-11-20/`) |
 | Open issues / TO-DO | `docs/ISSUES.md`, first 60–80 lines, then search by ID |
 | Senior rulings, blockers | `NOTES_FOR_SENIOR.md`, last 60 lines, then search |
 | Next-round priorities | `docs/NEXT_DEV_PRIORITIES.md`, current section only |

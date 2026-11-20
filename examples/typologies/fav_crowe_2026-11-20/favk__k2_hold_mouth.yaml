@@ -1,0 +1,122 @@
+# Favorite follow-up (2026-11-20): Crowe-X on OS-SE CD, favorite 4140768780f0 from runs/20261120T084006Z-screen-fc4e18.
+# Research + rationale: docs/research/favorites_2026-11-20/CROWE_X_FAVORITE_RESEARCH.md; registry docs/favorites/FAVORITES.yaml.
+# k-attribution single screen solve: g_k 2.0, g_L_mm 274.2 (mouth W held at 587 mm), every other knob = favorite.
+# Run with: hornlab-search run --config <this> --mode screen. Same v11 home brief: J comparable with the favorite's screen J 4.9965.
+name: favk__k2_hold_mouth
+family: FREEFORM
+brief_file: ../../briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_L_mm: 274.2
+  g_a_h_deg: 34.8933034795
+  g_a_v_deg: 26.757225392
+  g_k: 2.0
+  g_n: 2.5626991237
+  g_q: 0.996
+  g_r_lip_mm: 18.2138278197
+  g_s: 0.4370597301
+  g_sf_ab: 0.8307639652
+  g_sf_amt: 0.1880415375
+  g_sf_m: 4.0
+  g_sf_n1: 1.8
+  g_sf_n2: 7.0
+  g_sf_start: 0.25
+  g_wrap_deg: 81.3898015929
+bounds:
+  g_L_mm:
+    lo: 274.2
+    hi: 274.2
+    search: false
+  g_a_h_deg:
+    lo: 34.8933034795
+    hi: 34.8933034795
+    search: false
+  g_a_v_deg:
+    lo: 26.757225392
+    hi: 26.757225392
+    search: false
+  g_k:
+    lo: 2.0
+    hi: 2.0
+    search: false
+  g_n:
+    lo: 2.5626991237
+    hi: 2.5626991237
+    search: false
+  g_q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  g_r_lip_mm:
+    lo: 18.2138278197
+    hi: 18.2138278197
+    search: false
+  g_s:
+    lo: 0.4370597301
+    hi: 0.4370597301
+    search: false
+  g_sf_ab:
+    lo: 0.8307639652
+    hi: 0.8307639652
+    search: false
+  g_sf_amt:
+    lo: 0.1880415375
+    hi: 0.1880415375
+    search: false
+  g_sf_m:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  g_sf_n1:
+    lo: 1.8
+    hi: 1.8
+    search: false
+  g_sf_n2:
+    lo: 7.0
+    hi: 7.0
+    search: false
+  g_sf_start:
+    lo: 0.25
+    hi: 0.25
+    search: false
+  g_wrap_deg:
+    lo: 81.3898015929
+    hi: 81.3898015929
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.1
+  seed: 1234
+  budget: 1
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 300
+  error_policy: retry_same_then_stop
+description: 'k-attribution: favorite 4140768780f0 with g_k 2.0, g_L_mm 274.2 (mouth held)'

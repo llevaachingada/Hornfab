@@ -1,0 +1,46 @@
+# Favorite follow-up night (2026-11-20, owner request): improve the favorite Crowe-X on OS-SE CD horn
+# (4140768780f0, runs/20261120T084006Z-screen-fc4e18) and make a 500 mm-cube / 900 Hz crossover variant.
+# Rationale + CPU evidence: docs/research/favorites_2026-11-20/CROWE_X_FAVORITE_RESEARCH.md
+# 1-3  k-attribution: the favorite with OS k = 2 / 3 / 4, depth re-solved so the mouth stays 587 mm (one screen solve each).
+# 4    fav__crowe_k_home: CMA, same v11 home brief, k unlocked [1,5], 60 valid (J comparable with the cd11c lanes).
+# 5    fav__crowe_c500_xo900: CMA, NEW compact500_xo900 v11 brief (500x500x500, F_X 900): own J identity.
+# 6    verify-grid solve of the top 3 of jobs 4 and 5.
+# Chained behind cd_v11_verify_and_expand_2026-11-20 (queue.ps1 -WaitPid). One GPU at a time.
+night: fav_crowe_2026-11-20
+lane: gpu
+watchdog: false
+jobs:
+- id: favk__k3_hold_mouth
+  kind: command
+  timeout_s: 1800
+  env: {HORNLAB_GPU_LOCK: refuse}
+  argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/fav_crowe_2026-11-20/favk__k3_hold_mouth.yaml, --mode, screen]
+- id: favk__k2_hold_mouth
+  kind: command
+  timeout_s: 1800
+  env: {HORNLAB_GPU_LOCK: refuse}
+  argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/fav_crowe_2026-11-20/favk__k2_hold_mouth.yaml, --mode, screen]
+- id: favk__k4_hold_mouth
+  kind: command
+  timeout_s: 1800
+  env: {HORNLAB_GPU_LOCK: refuse}
+  argv: [.venv/Scripts/hornlab-search.exe, run, --config, examples/typologies/fav_crowe_2026-11-20/favk__k4_hold_mouth.yaml, --mode, screen]
+- id: fav__crowe_k_home
+  kind: search
+  mode: screen
+  budget: 60
+  timeout_s: 5400
+  env: {HORNLAB_GPU_LOCK: refuse}
+  config: examples/typologies/fav_crowe_2026-11-20/fav__crowe_k_home.yaml
+- id: fav__crowe_c500_xo900
+  kind: search
+  mode: screen
+  budget: 60
+  timeout_s: 5400
+  env: {HORNLAB_GPU_LOCK: refuse}
+  config: examples/typologies/fav_crowe_2026-11-20/fav__crowe_c500_xo900.yaml
+- id: fav_verify_top3
+  kind: command
+  timeout_s: 3600
+  env: {HORNLAB_GPU_LOCK: refuse}
+  argv: [.venv/Scripts/python.exe, tools/night_queue/verify_night_jobs.py, --night, fav_crowe_2026-11-20, --top, '3', --jobs, 'fav__crowe_k_home,fav__crowe_c500_xo900']

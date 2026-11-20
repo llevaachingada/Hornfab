@@ -44,6 +44,10 @@ per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 freq
 
 [V11 CD night evidence (2026-11-20)](evidence/cd_v11_2026-11-20/COMPLETION.md): all eight CD lanes at 50 valid evals (7 completion reruns + biradial first run), per-family best/median CD matrix, seed deltas, decoded queue/runner/job logs, exit codes, the watchdog-off and bound-pin changes, and the two runnability substitutions.
 
+[Favorites registry](favorites/FAVORITES.yaml) ([how to add](favorites/README.md)): the owner's starred horns (machine-readable, append-only). FAV-001 = Crowe-X on OS-SE CD `4140768780f0`. Read it before proposing seeds/variants.
+
+[FAV-001 Crowe-X favorite research (2026-11-20)](research/favorites_2026-11-20/CROWE_X_FAVORITE_RESEARCH.md): why the best-CD-matrix v11 finalist scores J 5.0 (load term 53 %; CPU rescore at F_X 700/800/900/1000), why one-sided `load` rewards throat resonances, the OS `k` lever (Webster proxy, scripts in `cpu/`), the compact500_xo900 brief, and night `fav_crowe_2026-11-20`.
+
 [B1 readiness + zero-dimension truth fix (2026-11-18, WP 2.2/D7)](evidence/b1_readiness_2026-11-18/README.md):
 B1/B1f lines checked (kind: command, safe), search/CLI/night dry-run now refuse a zero-free-dimension
 search, the feasibility table, the ext-throat exclusion finding and the queue-ready batches for GPU approval.

@@ -1,5 +1,29 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 - FAV-001 favorite: Crowe-X on OS-SE CD research pass + favorites registry + night queued
+
+- **Owner ask:** the v11 completion best `4140768780f0` (`runs/20261120T084006Z-screen-fc4e18`) has "some
+  of the best directivity plots and esthetics" so far. Add it to a favorites list agents can find, explain
+  why it does not score higher, do a senior research pass on improving it, queue variants. Then, mid-pass:
+  a variant for a **500 mm cube max bounding box designed around a 900 Hz crossover**.
+- **Registry (new):** `docs/favorites/FAVORITES.yaml` (+ `README.md`), FAV-001. Indexed in `docs/INDEX.md`.
+- **Finding:** verify J 4.9939; it is best of the five v11 verify finalists on all four CD-matrix metrics. The
+  `load` term is 2.73 of J (LFP20 674 Hz, Re z 0.21-0.52 at 682-1028 Hz). CPU replay (parity exact):
+  F_X 900 puts it 0.17 J behind ext_throat; F_X 1000 or load weight 0 makes it **#1 by 0.67-1.08 J**.
+  The competitors' `load` ~0 comes with throat resonances (peak Re z 3.23/1.95/1.71/1.39 rho c) that the
+  one-sided term does not charge. Lever: OS `k` (frozen at 1.0 in every Crowe-X lane); Webster proxy at
+  k 3 / L 286.7 (same mouth) gives Re z 0.5-0.9 at 700-1000 Hz. Report:
+  `docs/research/favorites_2026-11-20/CROWE_X_FAVORITE_RESEARCH.md` (CPU scripts in `cpu/`).
+- **New brief:** `examples/briefs/compact500_xo900_2026-11-20/compact500_xo900_80x50_hf1440_v11cd.yaml`:
+  v11 CD with envelope 500x500x500 and F_X 900; own J identity.
+- **Configs:** `examples/typologies/fav_crowe_2026-11-20/` (3 k-attribution single solves, `fav__crowe_k_home`,
+  `fav__crowe_c500_xo900`); shape_check 5/5 fit; preflight no HARD.
+- **Queued (GPU, launched detached):** night `fav_crowe_2026-11-20` (`docs/queue/`, live copy `runs/nights/`),
+  controller pid 52188 (parent WmiPrvSE) waiting on the `cd_v11_verify_and_expand_2026-11-20` runner pid 26752;
+  cutoff 23:30. Jobs: k3/k2/k4 hold-mouth, k-home CMA 60, c500_xo900 CMA 60, verify top 3 of both.
+- **Not done:** no objective change (v11 frozen); GUI favorite star and score-breakdown fix are proposals.
+  Committed in this commit (not pushed).
+
 ## 2026-11-20 - System evidence queue ran (CPU only, no GPU)
 
 - **Owner ask:** queue a variety of runs whose data will guide the open system questions. The owner

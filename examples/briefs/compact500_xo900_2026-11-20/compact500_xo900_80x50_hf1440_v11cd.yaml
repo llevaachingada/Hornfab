@@ -1,0 +1,132 @@
+# COMPACT500 XO900 v11 CD brief (2026-11-20, owner request: 'maybe 500mm cubed max bounding box and designed
+# around a 900 Hertz crossover'). Copied from cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd.yaml;
+# changed keys ONLY: name, description, envelope 600x480x480 -> 500x500x500, target.f0_hz/f0_v_hz 700 -> 900,
+# coverage_profile.h[0].hz 700 -> 900, objective.cd.band_hz [700,8000] -> [900,8000]. Key mapping follows
+# docs/research/compact_horn_system_2026-11-19/compact_xo900_identity.md sec 1.1 (F_X = target.f0_hz).
+# Loading rule at F_X 900: LFP20 <= 900/1.6 = 562.5 Hz and Re z >= 0.5 from 900 Hz (scalar_v7 _load_v7).
+# NEW J IDENTITY: never rank against any other brief. Research: docs/research/favorites_2026-11-20/CROWE_X_FAVORITE_RESEARCH.md
+name: compact500_xo900_80x50_hf1440_v11cd
+description: '(objective v11) COMPACT500 XO900 CD identity: the v11 CD brief with the envelope cut to
+  500x500x500 mm and F_X 900 Hz (H corridor 60-90 pref 80 from 900 Hz, V 40-60 pref 50 from 1000 Hz, CD
+  block band 900-8000 Hz); HF1440, band 350-8000. Own identity: never ranked against the 700 Hz 600x480x480
+  v11 brief or any v7/v9/v10 brief.'
+driver:
+  exit_angle_deg: 2.0
+  exit_radius_mm: 18.0
+envelope:
+  max_depth_mm: 500.0
+  max_mouth_h_mm: 500.0
+  max_mouth_w_mm: 500.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_profile:
+    h:
+    - hz: 900
+      max_deg: 90
+      min_deg: 60
+      preferred_deg: 80
+    - hz: 8000
+      max_deg: 90
+      min_deg: 60
+      preferred_deg: 80
+    interpolation: log_frequency
+    mode: corridor
+    v:
+    - hz: 1000
+      max_deg: 60
+      min_deg: 40
+      preferred_deg: 50
+    - hz: 8000
+      max_deg: 60
+      min_deg: 40
+      preferred_deg: 50
+  coverage_v_deg: 50.0
+  coverage_v_down_deg: null
+  coverage_v_up_deg: null
+  di_slope_target: 0.0
+  di_target_db: null
+  driver_exit_radius_mm: null
+  f0_hz: 900.0
+  f0_v_hz: 900.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov_profile: 1.0
+  di_roughness: 0.5
+  dislope: 0.5
+  flat: 0.5
+  flat_cv: 0.5
+  load: 1.0
+  rip: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+objective:
+  cov_below_f0: one_sided
+  cov_narrow_ratio: 2.0
+  cov_v_weight: 0.5
+  flat_band: scored
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  tolerances:
+    cov_profile: 3.0
+    di_roughness: 1.0
+    dislope: 9.0
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3
+    rip: 1.0
+  version: 11
+  ripple_region: preferred_edge
+  cd:
+    band_hz:
+    - 900.0
+    - 8000.0
+    window_h_deg: 30.0
+    window_v_deg: 10.0
+    lw:
+      weight: 1.5
+      tolerance_db: 1.5
+    di_std:
+      weight: 0.75
+      tolerance_db: 1.0
+    nacc:
+      weight: 0.75
+      tolerance: 0.02
+    offaxis:
+      weight: 1.0
+      tolerance_db: 1.0
+      reference: band_mean
+      band_hz:
+      - 2500.0
+      - 8000.0
+      angles_h_deg:
+      - -40
+      - -30
+      - 30
+      - 40
+      angles_v_deg:
+      - -25
+      - -10
+      - 10
+      - 25
+    report:
+      omega: true
+      contour: false

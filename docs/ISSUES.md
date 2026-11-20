@@ -1,5 +1,18 @@
 ﻿# ISSUES
 
+## 2026-11-20 - FAV-001 favorite + objective/GUI findings
+
+- DONE: favorites registry `docs/favorites/FAVORITES.yaml` (FAV-001 Crowe-X `4140768780f0`); research
+  `docs/research/favorites_2026-11-20/CROWE_X_FAVORITE_RESEARCH.md`.
+- QUEUED: night `fav_crowe_2026-11-20` (k-attribution x3, k-home CMA, compact500_xo900 CMA, verify top 3),
+  chained behind `cd_v11_verify_and_expand_2026-11-20`. Read results within each brief only.
+- OPEN (objective, owner-gated): v7/v10/v11 `load` is one-sided, so throat resonances (Re z up to 3.2 rho c)
+  score as perfect loading. Candidate: carry v6 `z_smooth` or a peak/trough term into a future CD identity;
+  rescore offline first.
+- OPEN (GUI bug): the run page "Score breakdown" omits `flat_cv`, `di_roughness` and all v11 CD terms
+  (1.54 of FAV-001's J 5.0). It must list every weighted term of the run's objective version.
+- OPEN (GUI feature): a favorite/star toggle on the run page that writes `docs/favorites/FAVORITES.yaml`.
+
 ## 2026-11-20 - System evidence queue ran (CPU only) + first readout
 
 - DONE: `docs/queue/system_evidence_2026-11-19.yaml` ran in the CPU lane beside the live GPU night;
