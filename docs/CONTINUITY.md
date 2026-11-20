@@ -37,14 +37,18 @@
 - **Deferred:** wiring the snapshot into the night runner (O3) needs an edit to `tools/night_queue`
   and an owner-approved unattended path; the job is available from the Overview button instead. A
   full 14-day snapshot was not run (smoke only).
-- **Visual QA (same day):** an independent image review of the six tabs found 16 issues — 2 blockers
-  (the Parameters table lost BEST J / bound-hit columns at 375 px; an expanded findings group
-  repeated its own header) and 14 cosmetic bugs (`WP WP4`, a character-broken SOURCE column, a risk
-  counter implying missing rows, a duplicated timestamp, severity order). All fixed: the narrow
-  params row now labels `J 2.498 · 0 hits` in a right-aligned nowrap group; findings groups follow the
-  payload's severity-tied order and the severity tiles count the *matching* subset with an
-  "of N in payload" note; the registry hides an all-empty Decided column and prints `source:` under
-  the recommendation. Final Playwright pass 24/24 clean at 1280/375 dark/light, URL state reload-safe
+- **Visual QA (same day, follow-up commits):** an independent image review of the six tabs found 16
+  issues — 2 blockers (the Parameters table lost BEST J / bound-hit columns at 375 px; an expanded
+  findings group repeated its own header) and 14 cosmetic bugs (`WP WP4`, a character-broken SOURCE
+  column, a risk counter implying missing rows, a duplicated timestamp, severity order). All fixed:
+  narrow params rows carry a labelled `J 2.498 · 0 hits` group (nowrap segments, header printed once,
+  no tab timestamp); findings groups follow the payload's severity-tied order, the severity tiles
+  count the *matching* subset with a sentence saying so ("…match the filters below; the payload holds
+  N") and the counter reads `X of Y groups · X of Y findings shown`; the registry hides an all-empty
+  Decided column, moves `source:` under the recommendation and states
+  `33 risks + 12 decisions = 45 rows`. Tie-verify evidence now prints 4-decimal J values instead of
+  raw floats. A severity tie-break (`F.sort_key`: status, −score, severity) keeps HIGH above MEDIUM
+  at equal score. Final Playwright pass 24/24 clean at 1280/375 dark/light, URL state reload-safe
   (also verified with `tab=next&status=all&sort=newest&kind=budget`). Screenshots refreshed.
 - **State:** GPU lane untouched (no solve, no lock change). `runs/overview/{index.json,finding_state.json}`
   are the only GUI-written state; both are git-ignored with `runs/`.
