@@ -121,3 +121,18 @@ acoustic target or spends GPU time, so it belongs to the owner.
 6. **H6 — `load` weight and a Re(z) gate.** Crowe X OSSE scores well on J partly *because*
    `load` is weighted 1.0 and its RE deficit is charged once. Whether an explicit `rez` qualification
    gate is wanted (rather than a weighted penalty) is an objective-design decision, not a bug.
+
+## Item 3 - RESULT (2026-11-20, dense2)
+
+Two re-solves of `ee85bcd2ad67` on the dense brief
+(`room_landscape_80x50_700_hf1440_v7_smooth_dense.yaml`, 91 screen frequencies: 1.8-3.6 kHz at 25 Hz
+plus the v7 base/extras), epw 6.0 (3375 dof) and epw 9.0 (7326 dof). On-axis 1 kHz-relative the
+2.27-3.31 kHz band is -8.28 dB (min, at 2800 Hz) to -6.18 dB: a smooth ~2.1 dB dip. epw6 vs epw9
+over 1.8-3.6 kHz at 25 Hz agree to mean|d| 0.00 / max|d| 0.01 dB. The deviation persists and is
+mesh-independent -> a real, smooth radiator feature, not a sampling or mesh artifact. (Dense-grid J
+2.1509 / 2.1492 is not comparable to the 18-freq screen J 2.8000.) The first attempt was invalid
+because a config-level top-level `grid:` block is ignored by the runner; those 18-freq runs are kept
+in the bundle for the record.
+
+Evidence: `docs/evidence/runs/expand_2026-11-19/20261120T065945Z-screen-c0ef06` and
+`.../20261120T070119Z-screen-83e864`.

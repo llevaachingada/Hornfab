@@ -278,6 +278,15 @@
   hornlab_search/metrics/spectral.py, its two tests, tools/analysis/spectral_ripple_audit.py). They were in the git
   index when this lane committed; no work was lost or modified. Recorded for the log.
 
+## 2026-11-20 02:10 - Item 3 RESOLVED: B3 deviation is real and mesh-independent (local orchestrator)
+
+- Expansion night closed 26/26 (my 16 + the other agent's 8 + 2 dense2), no interruption. The other
+  agent has since launched their own `ripple_audit_2026-11-20` night (live, GPU lock held).
+- Item 3 (dense B3): 91-freq grid (1.8-3.6 kHz @25 Hz + base), epw 6/9. The 2.27-3.31 kHz deviation
+  is a smooth ~2.1 dB dip at 2800 Hz (band -8.28..-6.18 dB); epw6-vs-epw9 mean|d| 0.00, max 0.01 dB.
+  Verdict: physical, not a grid artifact. Dense J 2.1509/2.1492 (not comparable to screen 2.8000).
+- Bundle extended to 18 runs; MANDATE_STATUS item 3 marked DONE.
+
 ## 2026-11-20 00:50 - Expansion night 16/16 done; item 3 grid bug found + re-queued (local orchestrator)
 
 - All 16 expansion jobs completed. The other agent then appended 8 `cd11__*` jobs to the LIVE

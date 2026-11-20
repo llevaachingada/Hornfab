@@ -186,6 +186,11 @@
   Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
   raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
 
+## 2026-11-20 - Item 3 resolved (dense B3)
+
+- 91-freq dense B3 at epw 6/9: smooth 2.1 dB dip at 2800 Hz, epw6 vs epw9 0.01 dB -> real feature,
+  not a grid/mesh artifact. Bundle updated; MANDATE_STATUS item 3 DONE.
+
 ## 2026-11-20 - Expansion results + item 3 requeued
 
 - Expansion night 16/16: DI morph 1.1692 / fold 1.2558 / twinray 1.3591 (same 181-angle grid);

@@ -54,3 +54,12 @@ the dense grid; the epw6-vs-epw9 agreement is the mesh-independence check.
 - Interpreter `.venv\Scripts\python.exe`; git `079e227`+ (docs/queue) at run time.
 - Configs `examples/typologies/expand_2026-11-19/`; night `docs/queue/fable_expand_2026-11-19.yaml`.
 - Owner-directed; all launches `HORNLAB_GPU_LOCK=refuse`; no solve was ever concurrent.
+
+### C result (dense2, 2026-11-20)
+
+`x_r3_b3_dense2_epw6/epw9` ran on the dense brief (91 frequencies: 1.8-3.6 kHz @25 Hz + base/extras),
+epw 6.0 (3375 dof) and epw 9.0 (7326 dof), same design ee85bcd2ad67. On-axis 1 kHz-relative the
+2.27-3.31 kHz band is -8.28 dB (min, 2800 Hz) to -6.18 dB: a smooth ~2.1 dB dip. epw6 vs epw9 over
+1.8-3.6 kHz at 25 Hz: mean|d| 0.00 dB, max|d| 0.01 dB. **Item 3 answered: a real smooth feature,
+mesh-independent, not a grid artifact.** Dense-grid J (2.1509 / 2.1492) is not comparable to the
+18-freq screen J (2.8000). Both dense2 runs are archived in this bundle.
