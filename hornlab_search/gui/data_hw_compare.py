@@ -50,6 +50,9 @@ BANDS: tuple[tuple[str, float | None, float | None], ...] = (
     ("HF", 1500.0, None),
 )
 
+#: Recorded log grids may round to different decimal places (222.2 vs 222.195 Hz).
+GRID_TOL_HZ = 0.01
+
 BAND_NOTE = (
     "Band edges are display choices: LF < 500 Hz, XO 500-1500 Hz, HF > 1500 Hz. "
     "max_relative_delta_percent is the recorded-evidence statistic "
@@ -145,7 +148,11 @@ def _first_diff(fa: np.ndarray, fb: np.ndarray) -> int | None:
     limit = min(len(fa), len(fb))
     for i in range(limit):
         f = float(fa[i])
-        tol = max(1e-9, abs(f) * 1e-12)          # tight: two solves of the same request are exact
+        # Two solves of the same request are exact; two staging paths may round the stored log
+        # grid differently (the #4 seed records 222.2 Hz where the #2-derived cases record
+        # 222.195 Hz). 0.01 Hz cannot mask a physically different grid: lengths and endpoints
+        # still have to match.
+        tol = max(GRID_TOL_HZ, abs(f) * 1e-9)
         if abs(f - float(fb[i])) > tol:
             return i
     return None
@@ -287,6 +294,11 @@ def _max_abs(values: list) -> float | None:
     return round(max(finite), 6) if finite else None
 
 
+def _max_abs_index(values: list) -> int | None:
+    finite = [(abs(v), i) for i, v in enumerate(values) if v is not None]
+    return max(finite)[1] if finite else None
+
+
 def _band_rows(pa: np.ndarray, pb: np.ndarray, frequencies_hz: np.ndarray) -> list[dict]:
     rows = []
     for name, _lo_hz, _hi_hz in BANDS:
@@ -294,16 +306,19 @@ def _band_rows(pa: np.ndarray, pb: np.ndarray, frequencies_hz: np.ndarray) -> li
         n = int(mask.sum())
         if n == 0:
             rows.append({"band": name, "n_freqs": 0, "max_abs_ratio_db": None,
+                         "max_abs_ratio_at_hz": None,
                          "max_abs_delta_phase_deg": None, "max_relative_delta_percent": None,
                          "max_relative_delta_at_hz": None, "max_abs_delta_pa": None})
             continue
         ratio_db, phase = _series(pa[mask], pb[mask])
         delta = np.abs(pa[mask] - pb[mask])
         i = int(np.argmax(delta))
+        j = _max_abs_index(ratio_db)
         rows.append({
             "band": name,
             "n_freqs": n,
             "max_abs_ratio_db": _max_abs(ratio_db),
+            "max_abs_ratio_at_hz": None if j is None else round(float(frequencies_hz[mask][j]), 6),
             "max_abs_delta_phase_deg": _max_abs(phase),
             "max_relative_delta_percent": relative_delta_percent(
                 pa[mask], pb[mask], frequencies_hz[mask]),
@@ -316,7 +331,15 @@ def _band_rows(pa: np.ndarray, pb: np.ndarray, frequencies_hz: np.ndarray) -> li
 def _whole_grid(pa: np.ndarray, pb: np.ndarray, frequencies_hz: np.ndarray) -> dict:
     delta = np.abs(pa - pb)
     i = int(np.argmax(delta)) if delta.size else None
+    ra, rb = np.abs(pa), np.abs(pb)
+    ok = np.isfinite(pa) & np.isfinite(pb) & (ra > 0.0) & (rb > 0.0)
+    ratio = np.full(pa.shape, np.nan, dtype=np.float64)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ratio[ok] = 20.0 * np.log10(ra[ok] / rb[ok])
+    j = int(np.nanargmax(np.abs(ratio))) if np.any(ok) else None
     return {
+        "max_abs_ratio_db": None if j is None else round(abs(float(ratio[j])), 6),
+        "max_abs_ratio_at_hz": None if j is None else round(float(frequencies_hz[j]), 6),
         "max_relative_delta_percent": relative_delta_percent(pa, pb, frequencies_hz),
         "max_relative_delta_at_hz": None if i is None else round(float(frequencies_hz[i]), 6),
         "max_abs_delta_pa": None if i is None else round(float(delta[i]), 9),

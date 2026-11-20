@@ -49,6 +49,8 @@ FIXTURE_RUN = Path(__file__).resolve().parent / "fixtures" / "bl_results" / "ref
 
 MOTOR_REAL = "bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e"
 MOTOR_DEMO = "bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9"
+WIDE_REAL = "ev_wide_default_real/20261120T051740Z-wide_200_2500-46632-3de4e1d9"
+WIDE_DEMO = "ev_wide_default_demo/20261120T051840Z-wide_200_2500-36092-b530b722"
 G6 = "bl_g6_offset30/20261118T235110Z-assembly-21668-c17f7cf6"
 # The brief names the staged 20 mm project as the reference; its solved `run/` lives in the wide
 # study that solved it (the wide manifest's `project` points at the staged project, see
@@ -144,7 +146,31 @@ def test_recorded_motor_ab_reproduces_evidence() -> None:
     assert 140.0 <= min(xo_values) and max(xo_values) <= 149.5
 
 
-# --------------------------------------------------------------------------- 2. G6 offset
+# --------------------------------------------------------------------------- 2. README matrix
+
+README_MATRIX = (
+    # label, A, B, README max |dB|, README at Hz
+    ("motor: #4 real seed vs #5 demo seed", MOTOR_REAL, MOTOR_DEMO, 8.58, 1641.0),
+    ("motor: #6 real default vs R0 demo default", WIDE_REAL, WIDE_DEMO, 22.25, 1641.0),
+    ("box: #4 real seed vs #6 real default", MOTOR_REAL, WIDE_REAL, 23.64, 1823.0),
+    ("box: #5 demo seed vs R0 demo default", MOTOR_DEMO, WIDE_DEMO, 21.28, 1641.0),
+)
+
+
+def test_readme_matrix_pairs_reproduce_the_per_frequency_max() -> None:
+    """system_evidence_2026-11-19/README.md section Motor x box, on-axis probe, to 0.01 dB."""
+    for label, a, b, expected_db, expected_hz in README_MATRIX:
+        store = _live_store(a, b)
+        result = CMP.hw_compare(REPO, store, a, b)
+        assert result["ok"] is True, (label, result.get("mismatches"))
+        _no_summed_field(result)
+        probe = next(p for p in result["probes"] if p["probe_id"] == "on_axis_2m")
+        woofer = next(e for e in probe["excitations"] if e["per_input"] == "V_rms")
+        assert woofer["max_abs_ratio_db"] == pytest.approx(expected_db, abs=0.01), label
+        assert woofer["max_abs_ratio_at_hz"] == pytest.approx(expected_hz, abs=1.0), label
+
+
+# --------------------------------------------------------------------------- 3. G6 offset
 
 def test_recorded_g6_offset_reproduces_evidence() -> None:
     store = _live_store(G6, G6_REF_STAGED, G6_REF_WIDE)
