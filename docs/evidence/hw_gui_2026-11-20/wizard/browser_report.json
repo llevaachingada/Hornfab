@@ -1,0 +1,390 @@
+{
+  "base": "http://127.0.0.1:8828",
+  "runs": [
+    {
+      "route": "/#/hw/new",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8828/?theme=dark#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6669
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_new__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8828/?theme=dark#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17765
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_launch__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8828/?theme=dark#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6669
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_new__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8828/?theme=dark#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17765
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_launch__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8828/?theme=dark#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6669
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_new__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8828/?theme=dark#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17765
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_launch__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8828/?theme=dark#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6567
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_new__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8828/?theme=dark#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17663
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_launch__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8828/?theme=light#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6669
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_new__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8828/?theme=light#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17765
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_launch__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8828/?theme=light#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6669
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_new__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8828/?theme=light#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17765
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_launch__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8828/?theme=light#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6669
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_new__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8828/?theme=light#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17765
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_launch__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/new",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8828/?theme=light#/hw/new",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/new?step=1",
+        "title": "New system",
+        "body_text_len": 6567
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_new__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/launch",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8828/?theme=light#/hw/launch",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/launch?spec=examples%2Fsystems%2Ftwo_way_80x50_700_research.yaml",
+        "title": "Quick launch",
+        "body_text_len": 17663
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\wizard\\hw_launch__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    }
+  ],
+  "failures": []
+}

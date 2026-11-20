@@ -20,6 +20,7 @@ import { mountCompareMethods } from "./compare_methods.js";
 import { viewHwCases, viewHwCase, viewHwReadiness, viewHwOverview } from "./hw.js";
 import { viewOverview } from "./overview.js";
 import { viewHwScreens, viewHwScreen } from "./hw_screen.js";
+import { viewHwNew, viewHwLaunch } from "./hw_new.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -256,6 +257,8 @@ const ROUTES = [
   { re: /^#\/glossary$/,                fn: () => viewGlossary() },
   // Horn + woofer system (read-only G0 views; hw.js)
   { re: /^#\/hw$/,                       fn: () => viewHwOverview(ROOT) },
+  { re: /^#\/hw\/new(?:\?(.*))?$/,      query: true, fn: m => viewHwNew(ROOT, m[1] || "") },
+  { re: /^#\/hw\/launch(?:\?(.*))?$/,   query: true, fn: m => viewHwLaunch(ROOT, m[1] || "") },
   { re: /^#\/hw\/cases(?:\?(.*))?$/,     query: true, fn: m => viewHwCases(ROOT, m[1] || "") },
   { re: /^#\/hw\/screens(?:\?(.*))?$/,   query: true, fn: m => viewHwScreens(ROOT, m[1] || "") },
   { re: /^#\/hw\/screen\/([0-9a-f]{16})(?:\?(.*))?$/, query: true,
