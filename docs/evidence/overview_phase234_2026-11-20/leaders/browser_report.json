@@ -1,0 +1,30 @@
+{
+  "base": "http://127.0.0.1:8766",
+  "runs": [
+    {
+      "route": "/#/overview?tab=leaders",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=leaders",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 6,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=leaders",
+        "title": "Project overview",
+        "body_text_len": 9212
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\leaders\\overview__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    }
+  ],
+  "failures": []
+}

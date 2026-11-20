@@ -35,6 +35,8 @@ FAMILIES = re.compile(r"^[a-z0-9_]+(,[a-z0-9_]+)*$")
 CLI_BOOT = "import sys; from hornlab_search.cli import main; sys.exit(main(sys.argv[1:]))"
 #: Repo-relative entry script for every system (Horn + woofer) CPU job kind (``hw-*``).
 HW_ENTRY = "tools/system/gui_system_job.py"
+#: Repo-relative entry script for the API snapshot job (Overview phase 4). Not a GPU kind.
+SNAPSHOT_ENTRY = "hornlab_search/gui/data_overview_snapshot.py"
 
 
 def auto_backend() -> str | None:
@@ -363,6 +365,19 @@ class JobManager:
                     "--top", self._int(a.get("top", 5), 1, 25, "top"), *brief], True
         if kind == "report":
             return ["report", self._run_id(a.get("run"))], False
+        if kind == "overview-snapshot":
+            # Overview phase 4: a CPU-only frozen snapshot (spec builder + report_day). Deliberately
+            # NOT a GPU kind: it reads runs/ and writes runs/analysis, so it may launch while a solve
+            # holds the GPU lock. The entry script owns the two child steps.
+            from . import data_overview_snapshot as OSN
+            raw_days = a.get("days")
+            try:
+                days = 14.0 if raw_days in (None, "") else float(raw_days)
+            except (TypeError, ValueError):
+                raise JobError("days must be a number") from None
+            if not 1 <= days <= 365:
+                raise JobError("days must be between 1 and 365")
+            return OSN.snapshot_argv(days), False
         if kind == "hw-screen":
             # P5: a CPU-only deterministic woofer/cabinet/XO/placement screen. The system data
             # layer owns the whole validation (repo-contained spec, 16-hex saved asset, real driver
@@ -371,6 +386,19 @@ class JobManager:
             try:
                 return HWN.screen_argv(self.root, a, system_root=self.system_root), False
             except HWN.ScreenArgError as exc:
+                raise JobError(str(exc)) from None
+        if kind in ("hw-stage", "hw-validate", "hw-solve"):
+            # P6: Boundary Lab actions (CPU only). The system data layer owns the whole validation
+            # (allow-listed mesh, mesh-own groups, bounded translation, safe experiment id, preset
+            # enum, and the gate-D solve refusal); this branch only forwards its argv.
+            from . import data_hw_stage as HWS
+            try:
+                if kind == "hw-stage":
+                    return HWS.stage_argv(self.root, self.system_root, a), False
+                if kind == "hw-validate":
+                    return HWS.validate_argv(self.root, self.system_root, a), False
+                return HWS.solve_argv(self.root, self.system_root, a), False
+            except HWS.StageArgError as exc:
                 raise JobError(str(exc)) from None
         raise JobError(f"unknown job kind: {kind!r}")
 
@@ -459,6 +487,8 @@ class JobManager:
         geometry bridge behaviour unchanged."""
         if str(kind).startswith("hw-"):
             return HW_ENTRY
+        if kind == "overview-snapshot":
+            return SNAPSHOT_ENTRY
         return self._bridge_entry(argv)
 
     def preview(self, kind: str, args: dict) -> dict:

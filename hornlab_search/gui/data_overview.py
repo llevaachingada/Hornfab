@@ -180,6 +180,20 @@ def run_records(runs: Path, since: datetime) -> list[dict]:
 
 # ---------------------------------------------------------------------------- overview
 
+def _records(runs: Path, since: datetime) -> list[dict]:
+    """Phase 2.3: the persisted index when it is usable, else the plain scan.
+
+    The index is a cache, never a source of truth: any failure (missing module, unreadable or
+    stale-schema file, a write error on a read-only tree) degrades to ``run_records`` so the
+    Overview keeps working on a tree the GUI may not write.
+    """
+    try:
+        from . import data_overview_index as IDX
+        return IDX.cached_records(runs, since)
+    except Exception:                          # noqa: BLE001 - a cache must never break the page
+        return run_records(runs, since)
+
+
 def overview(root: Path, runs: Path, days: float = 14.0, show_legacy: bool = False) -> dict:
     """Briefing KPIs + per-identity leaders (lines of work) for runs active in the last ``days``."""
     t0 = time.time()
@@ -187,7 +201,7 @@ def overview(root: Path, runs: Path, days: float = 14.0, show_legacy: bool = Fal
     since = now - timedelta(days=float(days))
     reg = load_identities(root)
     min_valid = int(reg["defaults"].get("min_valid_for_leader", 10))
-    recs = run_records(runs, since)
+    recs = _records(runs, since)
 
     day_ago = now - timedelta(days=1)
     kpi = {"runs": len(recs), "evals": 0, "valid": 0, "refused": 0,
@@ -218,10 +232,12 @@ def overview(root: Path, runs: Path, days: float = 14.0, show_legacy: bool = Fal
         line = g["lines"].setdefault(key, {
             "key": key, **typ, "runs": [], "best_j": None, "best_run_id": None,
             "best_run_name": None, "best_dims": None, "evals": 0, "valid": 0, "refused": 0,
-            "last": None, "verified": False, "active": False, "probe_only": True})
+            "last": None, "verified": False, "active": False, "probe_only": True, "failures": {}})
         line["evals"] += n
         line["valid"] += ok
         line["refused"] += ref
+        for _k, _v in (s.get("failures") or {}).items():
+            line["failures"][_k] = line["failures"].get(_k, 0) + int(_v or 0)
         line["active"] = line["active"] or bool(s.get("active"))
         line["verified"] = line["verified"] or bool(s.get("has_verify") or s.get("has_inline_verify"))
         if line["last"] is None or (s.get("last") or "") > line["last"]:
@@ -302,10 +318,16 @@ def overview(root: Path, runs: Path, days: float = 14.0, show_legacy: bool = Fal
         readiness = {"error": f"{type(exc).__name__}: {exc}"}
 
     kpi["refused_pct"] = round(100.0 * kpi["refused"] / kpi["evals"], 1) if kpi["evals"] else None
-    return D.clean({
+    payload = {
         "generated_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ"), "days": float(days),
         "since_utc": since.strftime("%Y-%m-%dT%H:%M:%SZ"), "show_legacy": bool(show_legacy),
         "registry": {"path": reg["path"], "error": reg["error"], "updated": reg.get("updated"),
                      "min_valid_for_leader": min_valid},
         "kpis": kpi, "identities": identities, "typology": typology,
-        "lanes": lanes, "readiness": readiness, "elapsed_s": round(time.time() - t0, 2)})
+        "lanes": lanes, "readiness": readiness, "elapsed_s": round(time.time() - t0, 2)}
+    try:
+        from . import data_overview_states as ST
+        ST.annotate_states(payload, runs)      # phase 2.4: per-line state (+ typology cells)
+    except Exception:                          # noqa: BLE001 - a state must never hide the briefing
+        payload["states"] = None
+    return D.clean(payload)

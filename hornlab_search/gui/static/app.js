@@ -215,7 +215,8 @@ function studyLinkHash(id, phase, query) {
 }
 
 const ROUTES = [
-  { re: /^#\/$|^#\/home$/,              fn: () => viewHome() },
+  { re: /^#\/$/,                        fn: () => { location.hash = "#/overview"; } },   // O1: Overview lands first
+  { re: /^#\/home$/,                    fn: () => viewHome() },
 
   { re: /^#\/status$/,                  fn: () => viewStatus() },
   { re: /^#\/campaigns$/,               fn: () => viewCampaignsList() },
@@ -281,7 +282,7 @@ function route() {
   const fresh = document.createElement("div");
   fresh.id = "view-root"; fresh.className = ROOT.className; fresh.setAttribute("role", "main");
   ROOT.replaceWith(fresh); ROOT = fresh;
-  const hash = location.hash || "#/home";
+  const hash = location.hash || "#/overview";   // owner O1: the live Overview is the landing page
   const path = hash.split("?")[0];
   if (path.startsWith("#/run/") && hash.includes("?")) {
     const params = new URLSearchParams(hash.split("?")[1]);
