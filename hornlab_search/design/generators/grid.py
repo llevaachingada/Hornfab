@@ -2020,7 +2020,12 @@ ROWS_OSSE_ROLL_SAMPLES = 400
 #: on the SAME angle-law weights as a(phi), so the H row (phi 0) keeps exactly k and s. Batik OS-SE s5
 #: (parameters may vary around the device); ATH OS.k is azimuth-capable. Kept OUT of the defaults dict on
 #: purpose: absent keys leave the knob dict, meta and design hashes byte-identical.
-ROWS_OSSE_ROLL_SPLIT_KNOBS = ("k_v", "s_v")
+ROWS_OSSE_ROLL_SPLIT_KNOBS = ("k_v", "s_v", "k_v_log", "v_exp_mm")
+#: SplitCore variant (owner 2026-11-20 ~18:25, from the owner-supplied analytic reference fixture
+#: HornFab_SplitCore_Analytic_Reference_Fixture.py): k_v_log 1 = geometric k(phi) = exp(c^2 ln k + s^2 ln k_v);
+#: v_exp_mm > 0 = V-weighted exponential throat r0 exp(z tan a0 / r0) for z < v_exp_mm, blended back to the base
+#: V meridian with a quintic smootherstep (C2 at v_exp_mm). LABELED HYPOTHESIS-SHAPE EXPERIMENT, not a validated cutoff.
+ROWS_OSSE_ROLL_V_EXP_MAX_MM = 120.0
 OSSE_ROLL_LABEL = (
     "LABELED HYPOTHESIS-SHAPE EXPERIMENT (owner-directed hybrid 2026-10-28): per-azimuth OS/OSSE "
     "wall from Magnus's profile_points formula (the constant-directivity throat), the even-lobe "
@@ -2106,7 +2111,14 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
             if not math.isfinite(v) or (n == "k_v" and v <= 0.0) or (n == "s_v" and v < 0.0):
                 raise registry.GeneratorError(
                     f"osse_rollback rows: {n} must be finite and {'> 0' if n == 'k_v' else '>= 0'}, got {v!r}")
+            if n == "k_v_log" and v not in (0.0, 1.0):
+                raise registry.GeneratorError(f"osse_rollback rows: k_v_log must be 0 or 1, got {v!r}")
+            if n == "v_exp_mm" and not 0.0 <= v <= ROWS_OSSE_ROLL_V_EXP_MAX_MM:
+                raise registry.GeneratorError(
+                    f"osse_rollback rows: v_exp_mm must be in [0, {ROWS_OSSE_ROLL_V_EXP_MAX_MM:g}], got {v!r}")
             split[n] = v
+    if split.get("k_v_log") and "k_v" not in split:
+        raise registry.GeneratorError("osse_rollback rows: k_v_log needs k_v")
     hv_block = _rows_throat_hv_block(knobs, prefix, "osse_rollback")
     if "k_v" in split and hv_block is not None and hv_block.get("throat_hv_ratio") not in (None, 1.0):
         raise registry.GeneratorError(
@@ -2133,6 +2145,7 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
     """One OS/OSSE wall per azimuth, flutes in the ripple window, then the curled lip."""
     from hornlab_mesher.profile_formulas import profile_points
     out = []
+    v_base = None   # SplitCore v_exp_mm: base V meridian, built once on first use
     lobes = int(ok["ripple_lobes"])
     sf_m = int(ok["sf_m"])
     hv = ok.get("_hv")
@@ -2165,7 +2178,8 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
         k_phi = (ok["k"] if hv_rho is None
                  else ok["k"] * float(throat_hv.hv_scale_inverse(hv_rho, float(phi))))
         if "k_v" in split:
-            k_phi = ok["k"] * c2 + split["k_v"] * s2
+            k_phi = (math.exp(c2 * math.log(ok["k"]) + s2 * math.log(split["k_v"])) if split.get("k_v_log")
+                     else ok["k"] * c2 + split["k_v"] * s2)
         s_phi = ok["s"] * c2 + split["s_v"] * s2 if "s_v" in split else ok["s"]
         prm = {"type": "OSSE", "r0": r0, "a0": a0, "L": ok["L_mm"], "a": a_phi,
                "k": k_phi, "s": s_phi, "n": ok["n"], "q": ok["q"]}
@@ -2174,6 +2188,17 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
         except Exception as exc:  # noqa: BLE001 - an illegal knob combination is a refusal
             raise registry.GeneratorError(f"osse_rollback: OSSE wall failed: {exc}") from exc
         xs, ys = pts[:, 0] - pts[0, 0], pts[:, 1]
+        le = split.get("v_exp_mm", 0.0)
+        if le > 0.0 and s2 > 0.0:
+            if v_base is None:
+                prm_v = dict(prm, a=ok["a_v_deg"], s=split.get("s_v", ok["s"]),
+                             k=(split["k_v"] if "k_v" in split else ok["k"]))
+                pv = np.asarray(profile_points(prm_v, ROWS_OSSE_ROLL_SAMPLES, 0.5 * math.pi), dtype=float)
+                v_base = (pv[:, 0] - pv[0, 0], pv[:, 1])
+            u = np.clip(xs / le, 0.0, 1.0)
+            ss = u * u * u * (10.0 + u * (-15.0 + 6.0 * u))
+            r_exp = r0 * np.exp(xs * math.tan(math.radians(a0)) / r0)
+            ys = ys + s2 * (r_exp - np.interp(xs, v_base[0], v_base[1])) * (1.0 - ss)
         if (not np.all(np.isfinite(pts)) or not np.all(np.diff(xs) > 0.0)
                 or not np.all(ys > 0.0)):
             raise registry.GeneratorError(

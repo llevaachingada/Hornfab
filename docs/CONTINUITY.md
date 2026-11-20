@@ -1,5 +1,14 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 ~18:27 - SplitCore variant (owner fixture) built as optional osse_rollback knobs and queued
+
+- **Owner:** try the ideas of `HornFab_SplitCore_Analytic_Reference_Fixture.py` as a geometry variant, without
+  disturbing P1. Added optional `g_k_v_log` (geometric k(phi)) and `g_v_exp_mm` (V-only exponential throat,
+  quintic C2 blend back to the base V wall); absent = P1/parent unchanged. Fixture a0 9 deg not adopted (driver 2 deg).
+- Tests +6 in `tests/test_design_generators_grid_osse_split.py`; grid + mesh + catalog **204 passed / 0 failed**.
+- Queue (live fav8): `favSCs__fav_core`, `favSC__core_fav`, `favSC__core_polish`, `favSC_verify_top3` after
+  `favP1_verify_top3`. Record: `docs/research/typologies/FAV_SPLIT_PLANE_PROPOSALS_2026-11-20.md` s6.
+
 ## 2026-11-20 ~18:10 - P1 split-plane OS-SE knobs built (`g_k_v`, `g_s_v`) and queued next
 
 - **Owner:** "Yes, build P1". `osse_rollback` gains optional `g_k_v` / `g_s_v`: k(phi) = k cos^2 + k_v sin^2,

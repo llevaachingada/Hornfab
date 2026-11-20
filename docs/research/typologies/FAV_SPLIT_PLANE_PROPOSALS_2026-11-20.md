@@ -126,3 +126,27 @@ result.
   winner + k_v 2.5 → 0.44 (447 mm); 2" + k_v 1.4 → 0.4115 (461 mm). shape_check 4/4 fit; preflight no HARD (valid 30–40 %).
 - Queue: next in the live `fav8_2026-11-20` after `favL__2in_home`. The coupled-law lanes `favL__kv_home`,
   `favM__polish_kv` and `favM__polish_2in_kv` were removed before starting (superseded: P1 keeps k_H exactly 1).
+
+## 6. SplitCore variant (owner-supplied analytic fixture, 2026-11-20 ~18:25)
+
+Source: `HornFab_SplitCore_Analytic_Reference_Fixture.py` (owner download; reference-only math on the
+generalized OS term of Batík OS-SE Eq. 3). Its two ideas are adopted as **optional** `osse_rollback` knobs;
+P1 rows are unchanged when they are absent:
+- `g_k_v_log` 1: geometric k(φ) = exp(c² ln k + s² ln k_v) (fixture `split_k(..., 'log')`; k(45°) = √3 at k_v 3).
+- `g_v_exp_mm` > 0: V-weighted exponential throat r0·exp(z tan a0 / r0) for z < L_e. It is blended back into
+  the base V meridian with a quintic smootherstep (value, slope and curvature continuous at L_e; fixture
+  `exp_V_blend`). This is proposal P2 in the fixture's form, a LABELED HYPOTHESIS-SHAPE EXPERIMENT and not a
+  validated cutoff.
+- Not adopted: the fixture's a0 = 9° default. The brief's driver a0 = 2° stays (the driver sets it).
+
+Tests (`tests/test_design_generators_grid_osse_split.py`, +6 checks): log-k identity at 45°; H row unchanged;
+V row equal to linear k at φ 90°; diagonal differs; V r(z) beyond L_e equal to the base within the 0.2 mm
+fidelity rule (interpolated, morph off: the grid is arc-length resampled); V radius smaller inside L_e; all rows
+start at r0; illegal values refused. Grid + mesh + catalog: **204 passed / 0 failed**.
+
+Lanes `examples/typologies/favSC_2026-11-20/` (writer `cpu/write_favSC.py`):
+- `favSCs__fav_core` (single: FAV-001 + log k_v 3 + V exp 50 mm, s_v 0.5512 → V mouth 450 mm; compare
+  `favP1s__fav_kv3_sv`).
+- `favSC__core_fav` and `favSC__core_polish` (CMA 80 valid; `v_exp_mm` searched in [10, 90]).
+- `favSC_verify_top3`.
+Queued after `favP1_verify_top3`. shape_check 3/3 fit; preflight no HARD (valid 40 %).

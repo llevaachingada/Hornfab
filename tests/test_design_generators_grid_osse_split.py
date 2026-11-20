@@ -69,3 +69,43 @@ def test_illegal_values_refused(bad):
 def test_k_v_and_throat_hv_ratio_are_exclusive():
     with pytest.raises(GeneratorError, match="two per-azimuth k laws"):
         _pts({**FAV, "g_k_v": 2.0, "g_throat_hv_ratio": 2.0})
+
+
+# --- SplitCore variant (owner fixture HornFab_SplitCore_Analytic_Reference_Fixture.py, 2026-11-20) ---
+
+def test_log_k_interpolation_matches_fixture_at_45deg():
+    import math
+    k_h, k_v = 1.0, 3.0
+    c2 = s2 = 0.5
+    assert math.exp(c2 * math.log(k_h) + s2 * math.log(k_v)) == pytest.approx(math.sqrt(3.0), abs=1e-14)
+    p_lin, _ = _pts({**FAV, "g_k_v": 3.0})
+    p_log, meta = _pts({**FAV, "g_k_v": 3.0, "g_k_v_log": 1.0})
+    np.testing.assert_array_equal(p_lin[0], p_log[0])                      # H row: k_h either way
+    np.testing.assert_allclose(p_lin[-1], p_log[-1], atol=1e-9)            # V row: k_v either way
+    assert not np.allclose(p_lin[12], p_log[12])                           # diagonal differs
+    assert meta["split_plane"]["k_v_log"] == 1.0
+
+
+def test_v_exp_blend_keeps_h_row_and_rejoins_base_beyond_le():
+    # The output grid is arc-length resampled and the superformula window is arc-fraction based, so compare
+    # the V meridian r(z) by interpolation with the morph off (sf_amt 0) instead of station by station.
+    plain = {**FAV, "g_sf_amt": 0.0, "g_sf_m": 0.0, "g_k_v": 3.0}
+    base, _ = _pts(plain)
+    new, _ = _pts({**plain, "g_v_exp_mm": 50.0})
+    np.testing.assert_array_equal(base[0], new[0])                         # H meridian untouched
+    zb, rb = base[-1][:, 2], base[-1][:, 1]
+    zn, rn = new[-1][:, 2], new[-1][:, 1]
+    mono = np.argmax(zb)                                                   # before the lip rolls back
+    probe = np.linspace(55.0, 0.9 * zb[mono], 20)
+    np.testing.assert_allclose(np.interp(probe, zn[:mono + 1], rn[:mono + 1]),
+                               np.interp(probe, zb[:mono + 1], rb[:mono + 1]), atol=0.2)   # 0.2 mm fidelity rule
+    inside = np.linspace(5.0, 45.0, 9)
+    assert np.all(np.interp(inside, zn, rn) < np.interp(inside, zb, rb))  # slower V throat inside L_e
+    np.testing.assert_allclose(np.hypot(new[:, 0, 0], new[:, 0, 1]), 18.0, atol=1e-9)
+
+
+@pytest.mark.parametrize("bad", [{"g_k_v_log": 1.0}, {"g_k_v": 2.0, "g_k_v_log": 0.5},
+                                 {"g_v_exp_mm": -1.0}, {"g_v_exp_mm": 500.0}])
+def test_splitcore_illegal_values_refused(bad):
+    with pytest.raises(GeneratorError):
+        _pts({**FAV, **bad})
