@@ -228,6 +228,13 @@
 - **Registered:** CODE_MAP and INDEX rows in the same commit. The other lane's uncommitted GUI edits
   and its budget-driver INDEX row were left untouched and excluded from staging.
 
+## 2026-11-19 - Commit-scope note (local orchestrator)
+
+- The expansion-night commit f9f5ac5 also carried another lane's ALREADY-STAGED spectral-mandate files
+  (docs/research/ripple_hf_2026-11-19/, docs/evidence/spectral_ripple_audit_2026-11-19/, 
+  hornlab_search/metrics/spectral.py, its two tests, tools/analysis/spectral_ripple_audit.py). They were in the git
+  index when this lane committed; no work was lost or modified. Recorded for the log.
+
 ## 2026-11-19 - Expansion night STAGED (3-4 h): DI tie-breakers + new-identity data (local orchestrator)
 
 - **`fable_expand_2026-11-19` staged (16 jobs, all shape-check PASS, dry-run clean)**, to be appended
