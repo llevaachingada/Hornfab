@@ -7,7 +7,7 @@ handoff itself is preserved verbatim and must not be edited. Update this file, n
 |---|---|---|---|
 | 1 | Reproduce and check the data audit (read-only, no BEM) | **DONE** — report-only tool + verified table | `hornlab_search/metrics/spectral.py`, `tools/analysis/spectral_ripple_audit.py`, [`evidence/spectral_ripple_audit_2026-11-19`](../../evidence/spectral_ripple_audit_2026-11-19/README.md) |
 | 2 | Build a rigorous measurement taxonomy before writing weighted terms | **DONE (documents only)** | [`MEASUREMENT_TAXONOMY.md`](MEASUREMENT_TAXONOMY.md) |
-| 3 | Validate the B3 2.3–3.0 kHz anomaly with a densely sampled re-solve | **STAGED, NOT LAUNCHED** — dense B3 at epw 6/9 in `docs/queue/fable_expand_2026-11-19.yaml`; the audit-stability night in `docs/queue/ripple_audit_2026-11-20.yaml` | §"Staged nights" below |
+| 3 | Validate the B3 2.3-3.0 kHz anomaly with a densely sampled re-solve | **DONE** - dense B3 at epw 6/9 on 91 freqs (1.8-3.6 kHz @25 Hz): a smooth 2.1 dB dip at 2800 Hz, epw6-vs-epw9 max|d| 0.01 dB -> physical, not a grid artifact | [`evidence/runs/expand_2026-11-19`](../../evidence/runs/expand_2026-11-19/README.md) |
 | 4 | Controlled HF-width experiment (Crowe X OSSE / R-OSSE rect / OSSE morph) | **NOT STARTED — owner GPU gate + new configs** | plan below |
 | 5 | Check installed-source validity above the first transverse mode | **NOT STARTED — needs real-driver data or a modelled wavefront** | plan below |
 | 6 | Then revise scoring if justified | **DELIBERATELY DEFERRED** — nothing to score until 1–3 produce rank reversals | — |
