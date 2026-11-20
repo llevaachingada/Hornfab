@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -12,6 +13,17 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from hornlab_search.system import provenance  # noqa: E402
 from tools.system import evidence_case  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _isolated_cpu_lane_lock(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Every test locks a temp runs/ dir, never the repository's real CPU-lane marker."""
+    from hornlab_search.search import gpulock
+    runs = tmp_path / "runs"
+    runs.mkdir()
+    monkeypatch.setattr(gpulock, "_DEFAULT_RUNS", runs)
+    monkeypatch.delenv("HORNLAB_CPU_LANE_LOCK_OWNER", raising=False)
+    return runs
 
 
 def _source(tmp_path: Path) -> tuple[Path, Path, Path]:
@@ -107,6 +119,26 @@ def test_solve_calls_the_reference_path_with_the_copied_request(
     assert seen["request_path"].parent == seen["case_dir"]
     payload = provenance.load_manifest(Path(seen["case_dir"]) / "manifest.json")["payload"]
     assert payload["authorized_by"] == "owner test"
+
+
+def test_solve_refuses_when_the_cpu_lane_is_held(
+        _isolated_cpu_lane_lock: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+        capsys) -> None:
+    # F6: a manual --solve takes the CPU-lane marker. With the shared policy set to refuse, a
+    # live holder stops the solve and its command is named in the error.
+    runs = _isolated_cpu_lane_lock
+    monkeypatch.setenv("HORNLAB_GPU_LOCK", "refuse")
+    (runs / ".cpu.lane.lock").write_text(json.dumps({
+        "pid": os.getpid(), "user": "lane-test", "command": "night test-holder",
+        "start_time": "2026-11-20T00:00:00"}), encoding="utf-8")
+    store, case, request = _source(tmp_path)
+    rc = evidence_case.main(_base_args(store, case, request)
+                            + ["--solve", "--authorized-by", "owner test"])
+    err = capsys.readouterr().err
+    assert rc == 1
+    assert "CPU LANE BUSY" in err and "night test-holder" in err
+    new_cases = list((store / "system" / "ev_test").iterdir())
+    assert len(new_cases) == 1 and not (new_cases[0] / "run").exists()
 
 
 def test_motor_patch_is_applied_validated_and_recorded(tmp_path: Path, monkeypatch,

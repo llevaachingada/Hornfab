@@ -289,9 +289,18 @@ def main(argv: list[str] | None = None) -> int:
             print("evidence_case: BL validate refused the motor-patched project", file=sys.stderr)
             return 1
 
+    from hornlab_search.search.gpulock import GpuBusyError, cpu_lane_lock
+
     try:
-        result = reference.solve(case, case / "request.json", backend="beat_cpu",
-                                 authorized_by=plan["authorized_by"], timeout_s=args.timeout_s)
+        # F6: a manual evidence solve takes the CPU-lane marker like a queued night does, so a
+        # GUI hw-* job (which reads the same lock) refuses while this solve is live, and this
+        # solve refuses/warns per the shared lock policy while a night holds it. No bypass.
+        with cpu_lane_lock(f"evidence_case {plan['experiment_id']}"):
+            result = reference.solve(case, case / "request.json", backend="beat_cpu",
+                                     authorized_by=plan["authorized_by"], timeout_s=args.timeout_s)
+    except GpuBusyError as exc:
+        print(f"evidence_case: CPU LANE BUSY: {exc}", file=sys.stderr)
+        return 1
     except reference.ReferenceError as exc:
         print(f"evidence_case: SOLVE FAILED: {exc}", file=sys.stderr)
         return 1
