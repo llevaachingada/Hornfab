@@ -1,5 +1,15 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 evening - FAV-001 8-hour variation night `fav8_2026-11-20` launched
+
+- **Owner ask:** "queue up like 8 hours of solves related to variations on this new FAV horn".
+- **Launched 17:14** detached (queue.ps1 pid 61992); GPU was free (fav_crowe night + xr__x_s2c tail done).
+  12 CMA lanes x 80 valid + verify top 3 of every lane; est. ~8 h. Plan + lane table:
+  `docs/research/favorites_2026-11-20/FAV8_NIGHT_PLAN.md`; configs `examples/typologies/fav8_2026-11-20/`.
+- **New brief:** `examples/briefs/home_xo900_2026-11-20/room_landscape_80x50_900_hf1440_v11cd.yaml` (v11 home,
+  envelope unchanged, F_X 900): own J identity. Three identities in the night; rank within each only.
+- shape_check 12/12 fit; preflight no HARD (envelope-refusal WARNs only; `max_attempts` 450).
+
 ## 2026-11-20 - Consolidation: everything on hornfab-all, local main fast-forwarded, stale worktrees removed
 
 - **Owner ask:** merge all local work into one local `main` and remove worktrees once integrated.
