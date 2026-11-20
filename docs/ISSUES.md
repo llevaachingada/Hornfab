@@ -1,5 +1,56 @@
 ﻿# ISSUES
 
+## 2026-11-20 - Pilot contracts repaired; system fidelity/normalization decision recorded
+
+- DONE: pilot `--geometry` fidelity fix; scalar Pareto axes + F3 minimise; boolean feasibility;
+  `rules_skips` top-level; `score.validate_axes` contract guard. 25 targeted tests; full `tests/system`
+  passes (7 real-BL env gates).
+- DECIDED: explicit calibration records are the only route to a coherent two-channel sum;
+  velocity-referenced geometry experiments are a separate track; arbitrary gain matching and
+  magnitude-only phase are rejected. Report: `docs/HORNFAB_SENIOR_DECISION_2026-11-19.md`.
+- OPEN (owner decisions 1-6): real 12PR300 geometry/panel policy; calibration/sum; DSP realization;
+  far-field standard; solve authorization. Gates D/E remain open.
+- OPEN (evidence; CPU solves need authorization): LF 20-200 Hz overlay on #4/#5; 2x2 motor-box (#6 +
+  demo-default); real-motor assembled R2; numerical/angular convergence. No solves were run here.
+- OPEN (GUI): P4/P5/P6/P8 are backend-only; P7/P9 absent; untracked
+  `hw_screen.js`/`hw3d.js`/`data_hw_stage.py` mean a partial commit breaks boot; `#/hw/new` is a dead
+  CTA. The current GUI edits belong to another lane.
+
+## 2026-11-20 - P12 verify night done: tie cluster ranked; ext-throat closed
+
+- DONE (GPU): 5 verify-grid replays of the tie-cluster screen bests + 1 ext fallback, ~20 min, chained
+  behind the compact400 night (never concurrent). Results in `docs/evidence/P12_VERIFY_2026-11-19.md`.
+- MEASURED: compact400 trio stays a 3-way tie on verify (morph 1.1864 > fold 1.2763 > twinray 1.3734,
+  gaps inside the 0.1293 floor); home v10 fold s2w beats the published best by 0.184 J on the same
+  verify grid (1.4867 vs 1.6704) - a real improvement.
+- CLOSED: ext-throat v10 (seed never improved in two independent attempts; no new freedom queued).
+- OPEN (owner, GPU): full polars/balloon DI on the compact400 trio - the only step that separates the
+  tie. Then the promotion gate (real-driver gaps: 12PR300 geometry, calibration, panel fit) before any
+  assembled BL test.
+
+## 2026-11-20 - Fixed-angle spectral ripple audit (item 1 done) + mandate items 3-6 open
+
+- DONE: handoff moved to `docs/research/ripple_hf_2026-11-19/` (verbatim) with `MANDATE_STATUS.md`
+  and `MEASUREMENT_TAXONOMY.md`; report-only `hornlab_search/metrics/spectral.py` +
+  `tools/analysis/spectral_ripple_audit.py`; evidence `docs/evidence/spectral_ripple_audit_2026-11-19/`.
+  All handoff numbers reproduce to ≤0.002 dB; 14 new tests pass.
+- OPEN (owner, decisions H1–H6 in `docs/research/ripple_hf_2026-11-19/MANDATE_STATUS.md`): is
+  fixed-angle spectral consistency a brief target (and at what tolerance); standardise the band/angles
+  or keep them per-report; GPU authorisation for mandate items 3–5; Crowe X OSSE pursued as an HF
+  direction rather than a 700 Hz winner; no retroactive scoring; whether an explicit Re(z) gate is
+  wanted beside the weighted `load` term.
+- OPEN (dev): mandate items 3–5 not started - dense-frequency + finer-mesh re-solve of the B3
+  2.27–3.31 kHz feature, the controlled HF-width experiment (Crowe X OSSE / R-OSSE rect / OSSE morph),
+  and installed-source validity above the 5.61 kHz throat cut-on. Item 3 is the only one that can
+  settle whether the feature is acoustic or a sampled-grid artefact.
+- FINDING (limits item 6): the two references disagree almost completely (ρ = −0.018; band-mean
+  penalises legitimately narrowing families) and the metric is largely redundant with `rip`
+  (ρ = 0.885) on the 24 SCOUT40 bests. No rank reversal proven, so no new term.
+- NOTE: `metrics.json` `on_axis_db` is band-mean-normalised (11.6–15.5 dB below the npz 0° cut); the
+  ± angle check cannot validate the metric under `symmetry: hv` (mirror, ≤1.1e-6 dB apart).
+- KNOWN (pre-existing, untouched): `tests/test_b8_lanes_bounded_gui::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  fails on `subprocess.Popen` in `gui/study_jobs.py`.
+
 ## 2026-11-20 - GUI Overview phases 2-4 (DONE) + owner decisions closed
 
 - DONE: findings engine + software health (`GET /api/overview/findings`, `/health`), persisted index

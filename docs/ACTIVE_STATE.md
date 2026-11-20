@@ -3,7 +3,8 @@
 **This is a pointer, not authority.** It names where current state lives and what was verified when
 it was last written. If it disagrees with the tools below, the tools win.
 
-Last verified: **2026-11-18 evening**, after the Fable integration merges (PR #69, #67, #70).
+Last verified: **2026-11-20** against HEAD `1dd8053` (+ local commits ahead of origin). The GPU lock
+was stale-held (holder pid gone) at this check; run `gpu-clean` before any solve.
 
 ## Verify first (never trust this file alone)
 
@@ -31,12 +32,10 @@ git log --oneline -5; git status --porcelain
 
 ## State, at write time
 
-- **GPU lane:** LIVE — `compact400_next10_2026-11-19` (the compact-slate lane; do not start anything).
-  Its s2w lanes measured: fold **1.3738** (first v10 design below the published 1.4214, tie by floor),
-  ext 1.5710 at 10 valid (inconclusive); morph 1.4243, twinray 1.4568 — three constructions inside one
-  floor of the leader. The p11_s2w night was stopped at launch with zero GPU spent (full duplicate of
-  their s2w lanes); its two configs remain in-tree as a fallback (narrower ext widen + relaxed
-  refusal stop). Evidence: `docs/evidence/Q3_MORE_SOLVES_2026-11-19.md` addendum.
+- **GPU lane:** FREE. `p12_verify_2026-11-19` ran 6/6 (~20 min): compact400 trio is a 3-way verify
+  tie (morph 1.1864 > fold 1.2763 > twinray 1.3734, gaps < floor 0.1293); home v10 fold s2w beats the
+  published best by 0.184 J on the same verify grid (1.4867 vs 1.6704); **ext-throat v10 closed**.
+  Evidence: `docs/evidence/P12_VERIFY_2026-11-19.md`. Next GPU move (owner): full polars on the trio.
 - **Q3 (done, ~45 min):** v10 leaders are **box-limited** (fold L_mm high, ext-throat az_a_cos_pow
   low), crowe v2a closed at 6.4779 (tie), first-ever solves of Le Cleach H/V 7.8865 and Crowe ES
   biradial 9.2355, new rows type `lecleach_ar` storm-limited.
@@ -47,6 +46,12 @@ git log --oneline -5; git status --porcelain
 - **CPU lane:** free. Compact-horn candidate register (10 rows, measured geometry/config_sha) is in
   `docs/research/compact_horn_system_2026-11-19/`; its one conditional GPU ask FAILED its own gate
   (A1 v10 1.9858 vs 1.4214+0.4677), so no GPU was authorised.
+- **System layer:** 37 case dirs = **5 solved / 27 staged / 3 refused / 2 invalid** (the 9 readiness
+  cases are 5 solved + 2 staged + 1 refused + the 62864 clearance case). The pilot fidelity/Pareto
+  contract is fixed and tested (`pilot --geometry` now works; `score.validate_axes` rejects nested
+  axes/list feasibility). Full `tests/system` passes with 7 real-BL env gates.
+- **GUI:** Overview is the landing page; P2/P3 views exist (some modules still untracked); P4/P5/P6/P8
+  are backend-only; P7/P9 absent. Do not commit another lane's untracked GUI work blindly.
 - **Objective versions:** never rank J across versions; v7 = nights' default (R1), v10 = shipped
   second score and OPT-IN ONLY (this night runs it by owner handoff), v10_slope5 = its own identity
   (floor 0.486 J published; diagnostic). Never edit `hornlab_search/objective/scalar_v9.py`.
@@ -61,6 +66,7 @@ git log --oneline -5; git status --porcelain
 | Next-round priorities | `docs/NEXT_DEV_PRIORITIES.md`, current section only |
 | Doc map / module map | `docs/INDEX.md` / `docs/CODE_MAP.md` — search, do not read whole |
 | Horn + woofer system + GUI handoff | `docs/HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md` (one-file senior packet) |
+| Senior engineering decision (this round) | `docs/HORNFAB_SENIOR_DECISION_2026-11-19.md` (fidelity, source normalization, evidence plan, search/GUI) |
 | Solve-data exports | `docs/top_designs/` (horn GPU) + `docs/system_data/` (system cases/screens) |
 | Queue mechanics | `tools/night_status.py`, `runs/nights/`, queue logs in `runs/` |
 
