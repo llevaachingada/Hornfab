@@ -13,6 +13,7 @@ No solver, no GPU, no Boundary Lab: ``data_hw_screen`` is a read-only JSON/GUI l
 """
 from __future__ import annotations
 
+import hashlib
 import importlib
 import json
 import os
@@ -119,14 +120,22 @@ def test_live_replays_group_and_are_byte_identical() -> None:
     grouped = {row["study_id"]: row for row in screens["studies"]}
     assert LIVE_STUDY in grouped
     row = grouped[LIVE_STUDY]
-    if not (store / "woofer_seed_stage5_blfit_replay" / G.STUDY_FILE).is_file():
-        pytest.skip("the byte-identical replay dir is not staged next to the live store")
-    assert row["replay_count"] == 2
+    committed = ("woofer_seed_stage5_blfit", "woofer_seed_stage5_blfit_replay")
+    missing = [name for name in committed if not (store / name / G.STUDY_FILE).is_file()]
+    if missing:
+        pytest.skip(f"committed replay dir(s) not staged next to the live store: {missing}")
+    # The store is allowed to gain replays: assert the committed pair is grouped and identical,
+    # never an exact count (F2 — a new replay must not turn the suite red).
+    assert set(committed) <= set(row["paths"])
+    assert row["replay_count"] == len(row["paths"]) >= len(committed)
     assert row["byte_identical"] is True
-    assert len(row["paths"]) == 2 and len(set(row["paths"])) == 2
-    assert row["dir"] == row["paths"][0]
+    shas = {hashlib.sha256((store / rel / G.STUDY_FILE).read_bytes()).hexdigest()
+            for rel in row["paths"]}
+    assert len(shas) == 1, "grouped replays must be byte-identical"
     detail = G.hw_screen(REPO, store, LIVE_STUDY)
-    assert detail["replay"] == {"paths": row["paths"], "count": 2, "byte_identical": True}
+    assert detail["replay"]["paths"] == row["paths"]
+    assert detail["replay"]["count"] == len(row["paths"])
+    assert detail["replay"]["byte_identical"] is True
 
 
 # --------------------------------------------------------------------------- panel fit

@@ -6,6 +6,7 @@ is executed, no solve is started, no GPU is touched: the real-BL lane is separat
 """
 from __future__ import annotations
 
+import datetime
 import json
 import os
 import shutil
@@ -288,20 +289,57 @@ def test_stage_preview_helper_matches_build_argv(tmp_path: Path) -> None:
 # --------------------------------------------------------------------------- presets
 
 
-def test_solve_presets_are_sourced_from_the_recorded_runs() -> None:
-    if not STORE.is_dir():
-        pytest.skip("canonical system store is absent")
-    data = HWS.solve_presets(REPO, STORE)
+def _write_recorded_run(case_dir: Path, freqs: list[float], seconds: float = 30.0) -> None:
+    """A run/manifest.json shaped like the real reader's input (test wiring, not a solve)."""
+    run = case_dir / "run"
+    run.mkdir(parents=True)
+    started = datetime.datetime(2026, 1, 1, tzinfo=datetime.timezone.utc)
+    finished = started + datetime.timedelta(seconds=seconds)
+    (run / "manifest.json").write_text(json.dumps({
+        "status": "complete",
+        "frequencies_hz": freqs,
+        "started_at_utc": started.isoformat(),
+        "finished_at_utc": finished.isoformat(),
+    }), encoding="utf-8")
+
+
+def test_solve_presets_are_sourced_from_the_recorded_runs(tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    store = root / "system_runs"
+    _write_recorded_run(store / "system" / "proj_smoke" / "case_a", [250.0, 700.0, 1100.0], 12.0)
+    _write_recorded_run(store / "system" / "proj_wide" / "case_b",
+                        HWS._log_grid(200.0, 2500.0, 25), 150.0)
+    data = HWS.solve_presets(root, store)
     assert [p["id"] for p in data["presets"]] == list(HWS.SOLVE_PRESETS)
     smoke, wide, low = data["presets"]
+    # The grids come from the recorded manifests, never from a JS or Python constant.
     assert smoke["frequencies_hz"] == [250.0, 700.0, 1100.0]
     assert smoke["frequency_count"] == 3
+    assert smoke["recorded_runs"] == ["proj_smoke/case_a"]
+    assert smoke["estimate_text"].startswith("about 12 s")
     assert wide["frequency_count"] == 25
     assert min(wide["frequencies_hz"]) == 200.0 and max(wide["frequencies_hz"]) == 2500.0
+    assert wide["recorded_runs"] == ["proj_wide/case_b"]
+    # No LF run in the synthetic store: the documented R3 grid is offered, the estimate stays
+    # unavailable, and no number is fabricated from the wide runs.
     assert low["frequency_count"] == 12
     assert low["band_hz"] == [20.0, 200.0]
     assert low["recorded_runs"] == []
     assert "unavailable" in low["estimate_text"]
+
+
+def test_live_lowband_estimate_is_available_now_lf_runs_exist() -> None:
+    if not STORE.is_dir():
+        pytest.skip("canonical system store is absent")
+    low = next(p for p in HWS.solve_presets(REPO, STORE)["presets"]
+               if p["id"] == "lowband12")
+    if not low["recorded_runs"]:
+        pytest.skip("no LF run recorded in this store yet")
+    # A fact that only grows with the evidence queue: the R3 preset now has a recorded estimate.
+    assert low["frequency_count"] == 12
+    assert low["band_hz"] == [20.0, 200.0]
+    assert low["frequencies_source"].startswith("recorded run ")
+    assert "unavailable" not in low["estimate_text"]
 
 
 def test_solve_presets_say_unavailable_when_no_run_is_recorded(tmp_path: Path) -> None:
