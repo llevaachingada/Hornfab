@@ -31,7 +31,13 @@
 ## Per-fix outcome
 
 - **B18** PASS — documented `run_pilot(..., geometry_path=...)` path completes; driver geometry is retained.
+  *Superseded at integration:* the integration branch's `df0e20f` landed its own B18 fix first
+  (drop the label call; authority is `SCREEN_MAGNITUDE`), and this pass adopts that version.
 - **B19** PASS — dict axis cells normalise to numbers; a strictly worse dict-axis row is dominated (reverse is not).
+  *Superseded at integration:* `df0e20f` made scalar `numeric_axes` + `axis_directions` the contract
+  and added `score.validate_axes()`, which rejects nested axes at `render_report` instead of ranking
+  them. This pass adopts that version and drops the `dominates` unwrapping; the test now asserts the
+  canonical schema (`test_nested_axes_cannot_produce_an_all_pareto_report`).
 - **B21** PASS — one warning per spec names every reserved key present (`port_nfr_range`, the three placement ranges, both beamwidths, `dsp.active`); silent when absent.
 - **B22** PASS — staged run records the resolved `spec.source` (provider defaults + caller overrides) in `detail.overrides`.
 - **B23** PASS — clearance finds the horn surface via `BEM_SURFACE_ROLES` membership; adding a declared role keeps the gate working.
