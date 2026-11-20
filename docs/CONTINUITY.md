@@ -244,6 +244,15 @@
   hornlab_search/metrics/spectral.py, its two tests, tools/analysis/spectral_ripple_audit.py). They were in the git
   index when this lane committed; no work was lost or modified. Recorded for the log.
 
+## 2026-11-19 23:27 - Expansion night LAUNCHED (local orchestrator)
+
+- The other queue did not appear after ~15 min of polling and the GPU had been idle since p12; launched
+  able_expand_2026-11-19 detached at 23:27:36 (controller pid 63028, parent WmiPrvSE; 16 jobs;
+  cutoff arg 23:59 = a no-op for a single night, per-line timeouts bound it). If the other agent's queue
+  appears it will find the GPU busy (its pre-hygiene refuses; no interruption).
+- First job x_di_morph (full-polar DI, 181 angles/2048 points): verify J **1.1692** vs the p12
+  73/1024 verify 1.1864 - the higher-resolution DI pass is separating the compact trio.
+
 ## 2026-11-19 - Expansion night STAGED (3-4 h): DI tie-breakers + new-identity data (local orchestrator)
 
 - **`fable_expand_2026-11-19` staged (16 jobs, all shape-check PASS, dry-run clean)**, to be appended
