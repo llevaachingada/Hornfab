@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-20 evening - FAV split-plane P1 + throat-loading follow-ups
+
+- DONE: P1 split-plane knobs `g_k_v` / `g_s_v` on `osse_rollback` (tests 198/0); lanes queued in `fav8_2026-11-20`.
+- OPEN (owner-gated): P2 "Keele-in-V" exponential V throat (build only if P1 leaves a large loading gap); P3
+  azimuth-varying lip wrap / R-OSSE rollback (needs R-OSSE equation re-check, KH-003 s0).
+- OPEN: transient (ringing / phase) stage from `docs/research/TIME_DOMAIN_RINGING.md` still unbuilt; HF1440 has no
+  Thiele/Small data, so `driver/compression.py` cannot predict its response; v11 `load` still one-sided (rewards resonance).
+
 ## 2026-11-20 - GUI senior-review pass complete (steps 1-14; gates G/H answered)
 
 - DONE: registry v2 (`cases.d/`) with 20 approved / 5 proposed entries; validated control links

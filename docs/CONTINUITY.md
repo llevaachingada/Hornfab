@@ -1,5 +1,28 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 ~18:10 - P1 split-plane OS-SE knobs built (`g_k_v`, `g_s_v`) and queued next
+
+- **Owner:** "Yes, build P1". `osse_rollback` gains optional `g_k_v` / `g_s_v`: k(phi) = k cos^2 + k_v sin^2,
+  s(phi) = s cos^2 + s_v sin^2 (H row keeps k and s exactly); absent = byte-identical; refused together with
+  `throat_hv_ratio` != 1. Tests `tests/test_design_generators_grid_osse_split.py`; grid + mesh + param-catalog
+  **198 passed / 0 failed** (CPU, during the live night).
+- **Queue (live fav8):** `favP1s__fav_kv3_sv` single, `favP1__split_fav`, `favP1__split_polish`, `favP1__split_2in`,
+  `favP1_verify_top3` placed after the running `favL__2in_home`; `favL__kv_home`, `favM__polish_kv`,
+  `favM__polish_2in_kv` (+ their verifies) removed before starting as superseded. Record:
+  `docs/research/typologies/FAV_SPLIT_PLANE_PROPOSALS_2026-11-20.md` s5.
+
+## 2026-11-20 evening - FAV split-plane findings, proposal dossier, favM lanes queued
+
+- **Measured (favL singles):** V-only k (k_H 1, k_V 3) J 4.657 vs FAV-001 4.996 with 8 kHz H unchanged (70 deg) and
+  off-axis 0.574 (FAV 0.543); 2-inch same shape load 2.645 -> 0.696 (2" identity); 2" + k_V 2 overshoots (V 43 deg).
+  `fav8__k1_cd_polish` best non-load `392276e62470` beats FAV-001 on every CD-matrix term (lip wrap 105, L 274).
+  Table: `docs/research/favorites_2026-11-20/THROAT_LOADING_LEVERS.md` s4.
+- **Proposal (owner ask: improve geometry / new typology):** `docs/research/typologies/FAV_SPLIT_PLANE_PROPOSALS_2026-11-20.md`.
+  P1 split-plane OS-SE (new knobs `g_k_v`, `g_s_v`; H kept pure OS) recommended; P2 Keele-in-V hybrid gated on P1.
+  NOT implemented (owner decision pending).
+- **Queued (no code):** `favM__polish_kv` (1.4") and `favM__polish_2in_kv` (2") seeded at `392276e62470`, + verify,
+  inserted after `favL_verify_top3` in the live `fav8_2026-11-20`.
+
 ## 2026-11-20 evening - FAV-001 throat-loading levers (V-only k, 2-inch exit) moved to the FRONT of fav8
 
 - **Owner ask:** improve throat loading without losing FAV-001's directivity, a new parameter allowed; then

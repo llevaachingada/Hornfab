@@ -90,3 +90,25 @@ fraction 38–46 % after tightening the boxes):
 **Success test:** a design whose 8 kHz H beamwidth stays ≥ ~66° and whose CD-matrix "non-load" stays within
 ~10 % of FAV-001's 2.352 while `load` falls under ~1.5. Rank J only within an identity. Across the 1.4"/2"
 identities, compare the physical numbers (Re z, LFP50, beamwidths, CD-matrix values), not J.
+
+## 4. Single-solve results, 17:51–17:54 [measured, screen]
+
+| design | identity | J | load | non-load | off-axis | DI std (w) | LFP20 / LFP50 | 8 kHz H / V | DI 8 kHz |
+|---|---|---|---|---|---|---|---|---|---|
+| FAV-001 | 1.4" home | 4.996 | 2.645 | 2.352 | 0.543 | 0.319 | 674 / 995 | 69 / 57 | 12.5 |
+| `favL1__kv3` (k_H 1, k_V 3) | 1.4" home | **4.657** | 1.951 | 2.706 | **0.574** | 0.426 | 631 / 868 | **70** / 51 | 12.9 |
+| `favL1__2in` (FAV knobs, 2") | 2" home | 3.378 | **0.696** | 2.682 | 0.934 | 0.429 | 506 / 717 | 63 / 54 | 13.2 |
+| `favL1__2in_kv2` | 2" home | 3.737 | 0.000 | 3.737 | 1.362 | 0.618 | 424 / 671 | 60 / 43 | 14.5 |
+| ref: `favk__k2` (global k 2) | 1.4" home | 4.800 | 1.508 | 3.292 | 1.142 | 0.519 | 595 / 832 | 61 / 52 | 13.6 |
+| ref: `fav8__k1_cd_polish` best non-load `392276e62470` | 1.4" home | 4.852 | 2.652 | **2.199** | **0.408** | **0.258** | — | — | — |
+
+Read:
+- **V-only k works as designed.** H at 8 kHz stays 70°, off-axis smoothness is essentially unchanged
+  (0.543 → 0.574), V moves toward its 50° target (57 → 51°), and J improves 0.34 on FAV-001's own
+  scale. That beats the global k 2 (4.800) at less than half its directivity cost.
+- **The 2" exit** cuts load 74 % (2.645 → 0.696) at a moderate HF cost (8 kHz H 69 → 63°, off-axis 0.54 → 0.93).
+- **Both together overshoot:** V collapses to 43° and DI std doubles.
+- `fav8__k1_cd_polish` found the first k = 1 design that beats FAV-001 on every CD-matrix term (longer
+  lip wrap 105°, depth 274 mm). Its loading is unchanged.
+- Next best combination to test: k1_cd_polish geometry (`392276e62470`) + V-only k ~3. The CMA lane
+  `favL__kv_home` explores that region from FAV-001.

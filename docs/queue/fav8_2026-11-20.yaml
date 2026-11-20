@@ -4,6 +4,11 @@
 # home XO900 v11 (x900_*), compact500 XO900 v11 (c500_*). Order interleaves identities so a cutoff still leaves each covered.
 # RE-ORDER 2026-11-20 evening (owner: move throat-loading variations to the front; also consider a 2-inch driver):
 # favL1__* singles + favL__* lanes + favL_verify_top3 inserted after the running job. Rationale: THROAT_LOADING_LEVERS.md
+# 2026-11-20 evening: favM__polish_kv / favM__polish_2in_kv (+ verify incl. fav8__k1_cd_polish) inserted after favL_verify_top3.
+# Proposal: docs/research/typologies/FAV_SPLIT_PLANE_PROPOSALS_2026-11-20.md
+# 2026-11-20 ~18:10 (owner: 'Yes, build P1'): P1 split-plane knobs g_k_v/g_s_v landed; favP1s single + favP1__split_fav/_polish/_2in
+# put next. Superseded and REMOVED before starting: favL__kv_home, favM__polish_kv, favM__polish_2in_kv (coupled throat_hv_ratio law;
+# P1 keeps k_H exactly 1) and their verify jobs; one favP1_verify_top3 covers 2in_home, split x3, 2in_c500 and k1_cd_polish.
 night: fav8_2026-11-20
 lane: gpu
 watchdog: false
@@ -57,13 +62,32 @@ jobs:
   timeout_s: 5400
   env: *id001
   config: examples/typologies/favL_2026-11-20/favL__2in_home.yaml
-- id: favL__kv_home
+- id: favP1s__fav_kv3_sv
+  kind: command
+  timeout_s: 1800
+  env: &id002
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/favP1_2026-11-20/favP1s__fav_kv3_sv.yaml
+  - --mode
+  - screen
+- id: favP1__split_fav
   kind: search
   mode: screen
   budget: 80
   timeout_s: 5400
-  env: *id001
-  config: examples/typologies/favL_2026-11-20/favL__kv_home.yaml
+  env: *id002
+  config: examples/typologies/favP1_2026-11-20/favP1__split_fav.yaml
+- id: favP1__split_polish
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 5400
+  env: *id002
+  config: examples/typologies/favP1_2026-11-20/favP1__split_polish.yaml
 - id: favL__2in_c500
   kind: search
   mode: screen
@@ -71,10 +95,17 @@ jobs:
   timeout_s: 5400
   env: *id001
   config: examples/typologies/favL_2026-11-20/favL__2in_c500.yaml
-- id: favL_verify_top3
+- id: favP1__split_2in
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 5400
+  env: *id002
+  config: examples/typologies/favP1_2026-11-20/favP1__split_2in.yaml
+- id: favP1_verify_top3
   kind: command
-  timeout_s: 3600
-  env: *id001
+  timeout_s: 5400
+  env: *id002
   argv:
   - .venv/Scripts/python.exe
   - tools/night_queue/verify_night_jobs.py
@@ -83,7 +114,7 @@ jobs:
   - --top
   - '3'
   - --jobs
-  - favL__2in_home,favL__kv_home,favL__2in_c500
+  - favL__2in_home,favP1__split_fav,favP1__split_polish,favL__2in_c500,favP1__split_2in,fav8__k1_cd_polish
 - id: fav8__x900_k1
   kind: search
   mode: screen

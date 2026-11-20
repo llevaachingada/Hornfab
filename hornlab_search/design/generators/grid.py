@@ -2015,6 +2015,12 @@ ROWS_OSSE_ROLL_A_RANGE = (5.0, 85.0)
 ROWS_OSSE_ROLL_MAX_WRAP_DEG = 200.0
 ROWS_OSSE_ROLL_MAX_WRAP_COS_AMP = 0.9
 ROWS_OSSE_ROLL_SAMPLES = 400
+#: Split-plane OS-SE (owner 2026-11-20, P1 of docs/research/typologies/FAV_SPLIT_PLANE_PROPOSALS_2026-11-20.md):
+#: optional per-plane throat law and mouth flare, k(phi) = k cos^2 + k_v sin^2 and s(phi) = s cos^2 + s_v sin^2
+#: on the SAME angle-law weights as a(phi), so the H row (phi 0) keeps exactly k and s. Batik OS-SE s5
+#: (parameters may vary around the device); ATH OS.k is azimuth-capable. Kept OUT of the defaults dict on
+#: purpose: absent keys leave the knob dict, meta and design hashes byte-identical.
+ROWS_OSSE_ROLL_SPLIT_KNOBS = ("k_v", "s_v")
 OSSE_ROLL_LABEL = (
     "LABELED HYPOTHESIS-SHAPE EXPERIMENT (owner-directed hybrid 2026-10-28): per-azimuth OS/OSSE "
     "wall from Magnus's profile_points formula (the constant-directivity throat), the even-lobe "
@@ -2027,7 +2033,8 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
     names = tuple(ROWS_OSSE_ROLL_KNOB_DEFAULTS)
     allowed = ({f"{prefix}_{n}" for n in names}
                | {f"{prefix}_ripple_lobes", f"{prefix}_ripple_amp_mm", f"{prefix}_ripple_start"}
-               | {f"{prefix}_{n}" for n in _THROAT_HV_KNOB_NAMES})
+               | {f"{prefix}_{n}" for n in _THROAT_HV_KNOB_NAMES}
+               | {f"{prefix}_{n}" for n in ROWS_OSSE_ROLL_SPLIT_KNOBS})
     foreign = sorted(str(k) for k in knobs
                      if str(k).startswith(f"{prefix}_") and k not in allowed)
     if foreign:
@@ -2091,7 +2098,21 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
     if out["wrap_cos_amp"] > 0.0 and not out["ripple_lobes"]:
         raise registry.GeneratorError(
             "osse_rollback rows: wrap_cos_amp follows the flute count; set ripple_lobes")
+    split = {}
+    for n in ROWS_OSSE_ROLL_SPLIT_KNOBS:
+        key = f"{prefix}_{n}"
+        if key in knobs:
+            v = float(knobs[key])
+            if not math.isfinite(v) or (n == "k_v" and v <= 0.0) or (n == "s_v" and v < 0.0):
+                raise registry.GeneratorError(
+                    f"osse_rollback rows: {n} must be finite and {'> 0' if n == 'k_v' else '>= 0'}, got {v!r}")
+            split[n] = v
     hv_block = _rows_throat_hv_block(knobs, prefix, "osse_rollback")
+    if "k_v" in split and hv_block is not None and hv_block.get("throat_hv_ratio") not in (None, 1.0):
+        raise registry.GeneratorError(
+            "osse_rollback rows: k_v and throat_hv_ratio are two per-azimuth k laws; use one")
+    if split:
+        out["_split"] = split   # only when present: absent = byte-identical dict
     if hv_block is not None:
         window = hv_block["hv_onset_frac"] is not None or hv_block["section_exp_ramp"] is not None
         if window:
@@ -2140,10 +2161,14 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
                 ang = 0.25 * math.pi + abs(x)
         c2, s2 = math.cos(ang) ** 2, math.sin(ang) ** 2
         a_phi = ok["a_h_deg"] * c2 + ok["a_v_deg"] * s2
+        split = ok.get("_split") or {}
+        k_phi = (ok["k"] if hv_rho is None
+                 else ok["k"] * float(throat_hv.hv_scale_inverse(hv_rho, float(phi))))
+        if "k_v" in split:
+            k_phi = ok["k"] * c2 + split["k_v"] * s2
+        s_phi = ok["s"] * c2 + split["s_v"] * s2 if "s_v" in split else ok["s"]
         prm = {"type": "OSSE", "r0": r0, "a0": a0, "L": ok["L_mm"], "a": a_phi,
-               "k": (ok["k"] if hv_rho is None
-                     else ok["k"] * float(throat_hv.hv_scale_inverse(hv_rho, float(phi)))),
-               "s": ok["s"], "n": ok["n"], "q": ok["q"]}
+               "k": k_phi, "s": s_phi, "n": ok["n"], "q": ok["q"]}
         try:
             pts = np.asarray(profile_points(prm, ROWS_OSSE_ROLL_SAMPLES, float(phi)), dtype=float)
         except Exception as exc:  # noqa: BLE001 - an illegal knob combination is a refusal
@@ -2790,7 +2815,7 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "construction_label": OSSE_ROLL_LABEL,
             "source_auto_angle_deg": a0,
             "wall_thickness_mm": wt,
-            **{k: float(v) for k, v in ok.items() if k not in ("ripple_lobes", "_hv")},
+            **{k: float(v) for k, v in ok.items() if k not in ("ripple_lobes", "_hv", "_split")},
             "ripple_lobes": int(ok["ripple_lobes"]),
             "lip_model": ("[inferred] tangent-continuous circular lip arc (C1 at the joint) "
                           "curling back; wrap(phi) = wrap_deg (1 + wrap_cos_amp cos(N phi))"),
@@ -2804,6 +2829,10 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
         if ok.get("_hv") is not None:
             meta["throat_hv"] = {k: v for k, v in ok["_hv"].items() if v is not None}
             meta["throat_hv_status"] = throat_hv.STATUS["osse_rollback"]
+        if ok.get("_split"):
+            meta["split_plane"] = dict(ok["_split"])
+            meta["split_plane_law"] = ("k(phi) = k cos^2 + k_v sin^2, s(phi) = s cos^2 + s_v sin^2 on the a(phi) "
+                                       "weights; H row keeps k and s (P1, FAV_SPLIT_PLANE_PROPOSALS_2026-11-20)")
     elif kind == "lecleach_asym":
         assert asym is not None
         march0 = marches[0]["march"]
