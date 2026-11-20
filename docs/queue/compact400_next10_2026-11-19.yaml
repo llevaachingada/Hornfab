@@ -165,3 +165,12 @@ jobs:
     env: {HORNLAB_GPU_LOCK: refuse}
     config: examples/typologies/compact400_2026-11-19/c4x_04_morph_cont2.yaml
     watchdog: {pin_ignore: [morph_width_mm, a0_deg]}
+  # c4x_05: fold cont2 - 1.4677 -> 1.3147 (0.153 J, above the compact400 floor); az_a_cos_amp to 0.
+  - id: c4x_05_fold_cont2
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 5400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/compact400_2026-11-19/c4x_05_fold_cont2.yaml
+    watchdog: {pin_ignore: [q, az_a_cos_amp]}

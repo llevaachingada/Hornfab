@@ -65,6 +65,22 @@
 - **Registered:** CODE_MAP and INDEX rows in the same commit. The other lane's uncommitted GUI edits
   and its budget-driver INDEX row were left untouched and excluded from staging.
 
+## 2026-11-19 - Queue verification + fold cont2 (local orchestrator)
+
+- **End-to-end verification of the live queue passed** (`scratch/verify_live_queue.py`, exit 0): 19 jobs,
+  every config loads, every warm start reads (hairline table in the log), budgets 80 / timeouts 5400 /
+  `HORNLAB_GPU_LOCK=refuse`, the live `runs/nights` file is byte-identical to the `docs/queue` copy, and
+  the GPU lock is held by the running job (w4__tritonia_v9). The runner's queue_state shows 15 done,
+  the rest pending (it re-reads before each job, so the last appends are picked up).
+- Appended-job results so far: c4x_01 morph **1.2271** (from 1.4243, +0.197 above the compact400
+  floor), c4x_02 twinray **1.4351** (from 1.4568, tie), c4x_03 fold **1.3147** (from 1.4677, +0.153
+  above the floor), w4__petal **4.1202** (from 4.162, tie), w4__tritonia_v8 **4.7503** (from 4.891,
+  tie). Pins: twinray at the 400 mm morph_height envelope (tie, no further), fold at az_a_cos_amp low
+  8.13 (kernel allows -60..60).
+- **c4x_05_fold_cont2** appended (job 19): az_a_cos_amp low widened to 0 (neutral cosine term), budget
+  80, warm from 1.3147 (mean d805f33c65b2), pin-ignore q + az_a_cos_amp; shape-check PASS.
+- Live order now: ... w4__klangfilm_b3_soft, c4x_04_morph_cont2, c4x_05_fold_cont2.
+
 ## 2026-11-19 - c4x_01 morph: 1.4243 -> 1.2271 (real win); cont2 appended (local orchestrator)
 
 - **`c4x_01_morph_cont`: best 1.2271** (37 evals) from the compact400 run's 1.4243 -> **0.197 J, ABOVE

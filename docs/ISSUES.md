@@ -53,6 +53,13 @@
   Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
   raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
 
+## 2026-11-19 - Queue verified (19 jobs); fold cont2 appended
+
+- VERIFIED: 19 jobs, 0 config errors, warm starts read, live == docs/queue, lock on the running job.
+- WIN so far: compact morph 1.2271 (+0.197), compact fold 1.3147 (+0.153); twinray/petal/tri-v8 ties.
+- APPENDED: c4x_05_fold_cont2 (az_a_cos_amp to 0, 80 evals, warm 1.3147) - job 19.
+- OPEN: w4 tri v9 / b3, c4x_04/05; then v10 rescore, compact floor re-measure, archive, B6.
+
 ## 2026-11-19 - compact morph win 1.2271; cont2 appended
 
 - WIN: c4x_01_morph_cont 1.4243 -> 1.2271 (0.197 J > the 0.1293 compact400 floor); cont2 (a0 widened to
