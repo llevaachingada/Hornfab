@@ -4,7 +4,8 @@ Two hand-maintained files, one merged read:
 
 * ``docs/registry/project_readiness.yaml`` (schema ``project_readiness_v1``) carries only the
   project-side rows (areas ``search`` / ``software`` / ``gui`` / ``data``).
-* ``docs/research/system_woofer_2026-11-18/readiness.yaml`` (schema ``hw_readiness_v1``) keeps the
+* ``docs/research/system_woofer_2026-11-18/readiness.yaml`` (schema ``hw_readiness_v1``,
+  or ``hw_readiness_v2`` since 2026-11-20, whose case declarations live in ``cases.d/``) keeps the
   hardware rows where they already live; this loader merges them at read time with ``area: hw``.
   Nothing is duplicated into the project file.
 
@@ -27,6 +28,7 @@ from . import data as D
 
 SCHEMA = "project_readiness_v1"
 HW_SCHEMA = "hw_readiness_v1"
+HW_SCHEMA_V2 = "hw_readiness_v2"
 PROJECT_REL = Path("docs/registry/project_readiness.yaml")
 HW_REL = Path("docs/research/system_woofer_2026-11-18/readiness.yaml")
 AREAS = ("search", "hw", "software", "gui", "data")
@@ -60,7 +62,8 @@ def _cached(key: tuple, fn):
 
 # --------------------------------------------------------------------------- parsing
 
-def _read_yaml(path: Path, expected_schema: str, label: str, errors: list[str]) -> dict | None:
+def _read_yaml(path: Path, expected_schema: str, label: str, errors: list[str],
+               *, also: tuple[str, ...] = ()) -> dict | None:
     if not path.is_file():
         errors.append(f"{label} not found: {path.as_posix()}")
         return None
@@ -74,8 +77,10 @@ def _read_yaml(path: Path, expected_schema: str, label: str, errors: list[str]) 
         errors.append(f"{label} is not a mapping")
         return None
     schema = data.get("schema")
-    if schema != expected_schema:
-        errors.append(f"{label}: schema must be {expected_schema!r}, got {schema!r}")
+    allowed = (expected_schema, *also)
+    if schema not in allowed:
+        wanted = " or ".join(repr(s) for s in allowed)
+        errors.append(f"{label}: schema must be {wanted}, got {schema!r}")
     return data
 
 
@@ -158,7 +163,7 @@ def _load(root: Path) -> dict[str, Any]:
     project_path = root / PROJECT_REL
     hw_path = root / HW_REL
     project = _read_yaml(project_path, SCHEMA, PROJECT_REL.as_posix(), errors)
-    hw = _read_yaml(hw_path, HW_SCHEMA, HW_REL.as_posix(), errors)
+    hw = _read_yaml(hw_path, HW_SCHEMA, HW_REL.as_posix(), errors, also=(HW_SCHEMA_V2,))
 
     project_risks = _rows((project or {}).get("risks"), "risk", "search",
                           PROJECT_REL.as_posix(), "project", errors, report_missing_area=True)
