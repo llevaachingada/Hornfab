@@ -1,5 +1,35 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 - System v1 Pass A built (6 lanes, offline, no GPU; branch `claude/system-v1-pass-a`)
+
+- **Owner ask:** execute wave A (Pass A) of `docs/system_v1/` from the plan PR #76.
+- **Where it ran:** an isolated clone of `origin/hornfab-all-2026-11-18`
+  (`%TEMP%\opencode\hornlab-pass-a`), because the canonical checkout had a live GUI session with
+  uncommitted work; no local checkout file was touched. Plan branch merged in first (docs only).
+- **Lanes (all six reported, one commit):** A1 `paths.py` + `case_schema.py` + `read_case.py` (one
+  reader for every writer kind; N1 portability helper); A2 `calibration.py` + `combine(...,
+  calibration=, case_key=)` (None path byte-identical); A3 `authorization.py` + `observation.py` +
+  `reference.solve(authorization=)` (typed record beside `authorized_by`), B24 fidelity cap, B25
+  `new_case_for_retry`; A4 B18/B19/B21/B22/B23/B26; A5 `jobs.py` (`build_job` argv == `preview()`)
+  + `tools/evidence/verify_evidence_quotes.py`; A6 `tools/system/capture_fixture_cases.py`.
+- **Regression command (as specified by the pass):** `pytest -q tests/system
+  tests/test_tools_data_system_cases.py`, exit 0 both sides. Before: **401 tests, 0 failed, 0
+  errors, 8 skipped, 16.0 s**. After: **497 tests, 0 failed, 0 errors, 8 skipped, 15.8 s** (96 new
+  tests; the 8 skips are the pre-existing `HORNLAB_BL_REAL_TESTS` gates and absent local stores).
+  Lane counters: A1 23, A2 30, A3 51 passed + 2 skipped, A4 6 + 116-touched-area passed/5 skipped,
+  A5 25, A6 10.
+- **Deferrals (recorded in ISSUES):** B26 ships as an opt-in `filter_bank(..., ranges=)` entry check
+  — no product call site passes a spec's `DspRanges` yet, so wiring is deferred to the pass that
+  owns those call sites (defaulting `DspRanges()` would reject valid specs); B24's capping branch is
+  live with a `RuntimeWarning` because `BLHeadlessResult` carries no driver-geometry completeness;
+  `REFERENCE_REFUSAL_TOKENS` aliases the two R13 guard families without changing token or message
+  text; `contracts.canonical_json` renders `None` as the string `"None"` in solve records
+  (`from_dict` tolerates it — shared helper left untouched); the fixture pack is not captured yet
+  (owner runs `tools\system\capture_fixture_cases.py` locally in Pass 0 step 0.3).
+- **Not changed:** `contracts.py`, any GUI file, any solver/mesher path; no GPU, no BL, no
+  `system_runs/` writes.
+- **Next:** Pass 0 step 0.3 (capture fixtures) and Pass B (needs Pass 0's GUI trio committed).
+
 ## 2026-11-20 - System v1 handoffs made self-contained (docs only)
 
 - **Owner ask:** handoffs must carry branch names, file locations and rules.

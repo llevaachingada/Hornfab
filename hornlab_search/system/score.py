@@ -120,9 +120,36 @@ def _sort_key(row: Mapping[str, Any]) -> tuple[tuple[int, float, str], ...]:
     return tuple(_sortable(v) for v in values) + (_sortable(row_id),)
 
 
+def _raw_axis_value(value: Any) -> Any:
+    """Unwrap a ``{value, direction}`` axis cell; plain numbers pass through unchanged."""
+    if isinstance(value, Mapping):
+        return value.get("value")
+    return value
+
+
+def _embedded_direction(value: Any) -> str | None:
+    if isinstance(value, Mapping):
+        direction = value.get("direction")
+        if direction is not None:
+            return str(direction)
+    return None
+
+
+def _axis_direction(key: str, a_value: Any, b_value: Any,
+                    directions: Mapping[str, str]) -> str | None:
+    """Resolve the direction: explicit map first, else the axis cell's own ``direction``."""
+    if key in directions:
+        return str(directions[key])
+    a_dir = _embedded_direction(a_value)
+    b_dir = _embedded_direction(b_value)
+    if a_dir is not None and b_dir is not None and a_dir != b_dir:
+        return None
+    return a_dir if a_dir is not None else (b_dir if b_dir is not None else "+")
+
+
 def _finite_number(value: Any) -> float | None:
     try:
-        number = float(value)
+        number = float(_raw_axis_value(value))
     except (TypeError, ValueError):
         return None
     return number if math.isfinite(number) else None
@@ -154,7 +181,10 @@ def dominates(a: Mapping[str, Any], b: Mapping[str, Any],
         bv = _finite_number(_numeric_axes(b).get(key))
         if av is None or bv is None:
             return False
-        direction = directions.get(key, "+")
+        direction = _axis_direction(
+            key, _numeric_axes(a).get(key), _numeric_axes(b).get(key), directions)
+        if direction is None:
+            return False
         if direction == "+" and av < bv:
             return False
         if direction == "-" and av > bv:
@@ -172,11 +202,12 @@ def dominates(a: Mapping[str, Any], b: Mapping[str, Any],
 
     strict = False
     for key in sorted(num_keys):
-        av = float(_numeric_axes(a)[key])
-        bv = float(_numeric_axes(b)[key])
-        if directions.get(key, "+") == "+" and av > bv:
+        av = float(_raw_axis_value(_numeric_axes(a)[key]))
+        bv = float(_raw_axis_value(_numeric_axes(b)[key]))
+        direction = _axis_direction(key, _numeric_axes(a)[key], _numeric_axes(b)[key], directions)
+        if direction == "+" and av > bv:
             strict = True
-        if directions.get(key, "-") == "-" and av < bv:
+        if direction == "-" and av < bv:
             strict = True
     for key in sorted(feas_keys):
         if bool(feasible_a[key]) and not bool(feasible_b[key]):

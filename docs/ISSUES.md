@@ -1,5 +1,27 @@
 ﻿# ISSUES
 
+## 2026-11-20 - System v1 Pass A (DONE, branch `claude/system-v1-pass-a`) + deferrals
+
+- DONE (A1-A6): `paths.py`, `case_schema.py`, `read_case.py` (N1 helper; one reader for every
+  writer kind), `calibration.py` + `combine(calibration=)`, `authorization.py`, `observation.py`,
+  `reference.solve(authorization=)` + B24/B25, `jobs.py` + `tools/evidence/verify_evidence_quotes.py`,
+  `tools/system/capture_fixture_cases.py`, plus B18/B19/B21/B22/B23/B26. Regression
+  `tests/system tests/test_tools_data_system_cases.py`: 401 -> 497 tests, 0 failed both sides,
+  8 pre-existing skips, exit 0.
+- OPEN (B26, partial): `dsp.filter_bank` range-checks only when a caller supplies `ranges=`;
+  no product call site passes the spec's `DspRanges` yet (a `DspRanges()` default would reject
+  valid specs). Owner: the pass that owns those call sites (Pass B2/C).
+- OPEN (B24, diagnostic): `BLHeadlessResult` carries no driver-geometry completeness, so
+  `_fidelity_for` keeps the current label and emits a `RuntimeWarning`; the capping branch is ready
+  for a reader that supplies it.
+- OPEN (low): `REFERENCE_REFUSAL_TOKENS` aliases `INCOMPATIBLE_BASIS` /
+  `SENSITIVITY_REFERENCE_MISMATCH` without changing token text; `contracts.canonical_json` writes
+  `None` as `"None"` in solve records (tolerated on read).
+- OPEN (owner, Pass 0 step 0.3): the fixture pack is not captured; run
+  `.venv\Scripts\python.exe tools\system\capture_fixture_cases.py --store system_runs --out
+  tests\system\fixtures\case_store --per-kind 2` locally and commit.
+- NOT DONE HERE: Pass 0 (GUI trio commit) and Pass B/C/D remain open; N3 still blocks cloud GUI work.
+
 ## 2026-11-20 - System v1 handoffs self-contained (DONE)
 
 - DONE: `docs/system_v1/HANDOFFS.md`. No change to open items from the previous entry.

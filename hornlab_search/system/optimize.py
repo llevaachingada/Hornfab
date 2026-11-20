@@ -165,7 +165,9 @@ def run_pilot(
                       and bool(geometry.completeness["INSTALLED_EXTERIOR_BEM"]),
                       "supports_lf_ts_screening": True})
     if geometry is not None:
-        sys_drivers.require_fidelity(driver, "LF_TS_SCREENING")
+        # T/S screening is a SCREEN_MAGNITUDE claim on the frozen fidelity ladder; the old
+        # "LF_TS_SCREENING" string was never a ladder label (B18).
+        sys_drivers.require_fidelity(driver, "SCREEN_MAGNITUDE")
 
     # 1. horn asset (optional for the LF-only path but required for the polar screen)
     if asset is not None and asset_id is None:

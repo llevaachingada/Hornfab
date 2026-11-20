@@ -40,11 +40,13 @@ from typing import Mapping
 import numpy as np
 
 from hornlab_search.system import contracts
+from hornlab_search.system import calibration as _calibration
 
 __all__ = [
     "combine",
     "recombine_with_dsp",
     "recombine_cache_key",
+    "REFERENCE_REFUSAL_TOKENS",
 ]
 
 #: Contract wording kept byte-exact so callers/tests can match on it.
@@ -52,6 +54,17 @@ PHASE_REFUSAL = (
     "coherent combination refused: MAGNITUDE_ONLY / PHASE_ALIGNMENT_UNAVAILABLE — "
     "a magnitude-only SystemResponse carries no complex fields, so phase-sensitive "
     "combination, delay optimisation and crossover claims are refused"
+)
+
+#: R13: the two reference-mismatch guard families are aliased here, not merged or removed.
+#: ``INCOMPATIBLE_BASIS`` is the :class:`contracts.IncompatibleBasis` family raised by
+#: :func:`_require_compatible` (via :meth:`contracts.SourceBasis.compatible_for_sum_with`);
+#: ``SENSITIVITY_REFERENCE_MISMATCH`` is the Boundary Lab duplicate guard in
+#: ``boundarylab.bl_results.assert_shared_sensitivity_reference``. No refusal message or token
+#: text changes: both guards keep running exactly as before.
+REFERENCE_REFUSAL_TOKENS: tuple[str, ...] = (
+    "INCOMPATIBLE_BASIS",
+    "SENSITIVITY_REFERENCE_MISMATCH",
 )
 
 
@@ -85,7 +98,9 @@ def _require_compatible(bases: Mapping[str, contracts.SourceBasis],
 
 def combine(response: contracts.SystemResponse,
             filter_bank: Mapping[str, np.ndarray],
-            input_levels: Mapping[str, float]) -> contracts.SystemResponse:
+            input_levels: Mapping[str, float],
+            calibration: _calibration.CalibrationRecord | None = None,
+            case_key: str | None = None) -> contracts.SystemResponse:
     """Return a new response whose ``p_total`` is the coherent DSP-weighted sum.
 
     ``filter_bank`` maps each excitation name (``"horn"`` / ``"woofer"``) to a ``(nf,)``,
@@ -93,12 +108,22 @@ def combine(response: contracts.SystemResponse,
     **linear** multiplicative level (not dB). The input fields are not modified and no spatial
     phase factor is introduced (see the phase-once rule above).
 
+    Calibration gate (contract §3): with ``calibration=None`` (the default) this function is
+    byte-identical to the uncalibrated combiner — a mixed-reference response is refused by the
+    basis guard. With a :class:`~hornlab_search.system.calibration.CalibrationRecord`,
+    :func:`~hornlab_search.system.calibration.apply_calibration` runs first (it needs
+    ``case_key`` for the scope check), then the same checks run on the calibrated fields.
+
     Refusals:
 
     * magnitude-only / no ``p_by_excitation`` -> :class:`contracts.PhaseUnavailable`;
     * basis metadata that does not prove a shared frame -> :class:`contracts.IncompatibleBasis`;
-    * missing/shape-mismatched fields, filters or levels -> :class:`contracts.DataQualityError`.
+    * missing/shape-mismatched fields, filters or levels -> :class:`contracts.DataQualityError`;
+    * a rejected calibration record -> :class:`calibration.CalibrationError` with its token.
     """
+    if calibration is not None:
+        response = _calibration.apply_calibration(
+            response, calibration, case_key=case_key or "")
     _require_complex(response)
     names = tuple(response.excitation_names)
     p_by_excitation = response.p_by_excitation
