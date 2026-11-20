@@ -1115,6 +1115,12 @@ def run_detail(runs: Path, run_id: str, root: Path | None = None) -> dict:
         "step_files_detail": step_files_detail,
         "objective_version": version,
     })
+    # Score breakdown (2026-11-20 FAV-001): every weighted term of THIS run's objective version,
+    # with weights resolved the way the objective resolves them (v11's CD weights live only in
+    # objective.cd); the rows sum to the stored total. See gui/data_breakdown.py.
+    from .data_breakdown import score_breakdown
+    out["score_breakdown"] = clean(score_breakdown(cfg, version, out.get("terms_seed"),
+                                                   out.get("terms_best")))
     # Verify re-solves (2026-11-12): ``verify --run X`` writes ``X/verify/search.ndjson``; rows may
     # pair the same design across backends (the two-lane CPU/GPU cross-checks). Absent dir =
     # absent key, never fabricated.

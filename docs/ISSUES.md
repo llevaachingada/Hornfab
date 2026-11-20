@@ -22,9 +22,18 @@
 - OPEN (objective, owner-gated): v7/v10/v11 `load` is one-sided, so throat resonances (Re z up to 3.2 rho c)
   score as perfect loading. Candidate: carry v6 `z_smooth` or a peak/trough term into a future CD identity;
   rescore offline first.
-- OPEN (GUI bug): the run page "Score breakdown" omits `flat_cv`, `di_roughness` and all v11 CD terms
+- DONE 2026-11-20 (GUI bug, merged from claude/hungry-sinoussi-4bc609): the run page "Score breakdown" omitted `flat_cv`, `di_roughness` and all v11 CD terms
   (1.54 of FAV-001's J 5.0). It must list every weighted term of the run's objective version.
-- OPEN (GUI feature): a favorite/star toggle on the run page that writes `docs/favorites/FAVORITES.yaml`.
+- DONE 2026-11-20 (GUI feature, merged): a favorite/star toggle on the run page that writes `docs/favorites/FAVORITES.yaml`.
+## 2026-11-20 - GUI: full score breakdown + favorites star (closes the FAV-001 GUI items)
+
+- DONE (GUI bug): run page "Score breakdown" now lists every weighted term of the run's objective version
+  (`gui/data_breakdown.py`; v11 adds `flat_cv`, `di_roughness`, `cd_lw`, `cd_di_std`, `cd_nacc`,
+  `offaxis_smooth`) and sums to the stored J (FAV-001: 4.9965; the old chart showed 3.247 of it).
+- DONE (GUI feature): star toggle on the run page backed by `docs/favorites/FAVORITES.yaml` (append-only,
+  retire on un-star), star marker + Favorites filter on Runs and Elites (`gui/favorites.py`).
+- INTEGRATION: the FAV-001 ISSUES entry with these two OPEN lines is in the main working copy only; mark them
+  DONE there when this branch is merged.
 
 ## 2026-11-20 - System evidence queue ran (CPU only) + first readout
 

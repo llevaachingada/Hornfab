@@ -1,5 +1,42 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 - Consolidation: everything on hornfab-all, local main fast-forwarded, stale worktrees removed
+
+- **Owner ask:** merge all local work into one local `main` and remove worktrees once integrated.
+- **Committed (was live but uncommitted):** `22ae1f7` v11 CD-matrix objective (`objective/scalar_v11.py`,
+  `metrics/cd.py`, v11 briefs/configs/queues/evidence; tests pass) and `f460398` the GUI lane's pending edits +
+  hw GUI screenshot evidence. Merged `claude/hungry-sinoussi-4bc609` (score breakdown + favorites star);
+  3 text conflicts (CONTINUITY/ISSUES tops, app.css tail) resolved keep-both.
+- **Branch audit:** every side branch is contained in `hornfab-all` or superseded by newer content; the only
+  unlanded change is agent-a527's Fix D (0.9 Keele factor) + its night-runner guard, already an OPEN owner
+  decision. `main` fast-forwarded to `hornfab-all`. Nothing pushed (origin/main stays behind until the owner pushes).
+
+## 2026-11-20 - GUI: full v11 score breakdown + owner favorites star (FAV-001 GUI items)
+
+- **Ask:** the two GUI items from the FAV-001 entry (main-checkout working copy, ISSUES "FAV-001 favorite +
+  objective/GUI findings"): the run page breakdown hid the v11 CD terms, and there was no way to star a horn.
+- **Bug fixed:** "Score breakdown: start vs best" drew the fixed v1 list (`cov rip di dislope flat load`) with
+  the brief's top-level weights. On FAV-001 (`runs/20261120T084006Z-screen-fc4e18`, J v11 4.996464) it showed
+  3.247 of J; missing were `cov_profile` 0.005, `flat_cv` 0.276, `di_roughness` 0.108 and the CD block 1.360
+  (`cd_lw` 0.346, `cd_di_std` 0.319, `cd_nacc` 0.153, `offaxis_smooth` 0.543). New `gui/data_breakdown.py`
+  resolves the weighted key set + weights per objective version through the objective package's own resolvers
+  (v11: `scalar_v11.resolve_v11_weights` when importable, else v10 resolver + `objective.cd.<term>.weight`;
+  both paths give the identical sum on FAV-001), `run_detail` returns it as `score_breakdown`, and the chart
+  lists all 11 v11 terms with a sum line (start sum 5.2952 = stored J; best sum 4.9965 = stored J). A gap to
+  the stored total (penalty, v7 `oa_excess`) shows as an explicit `unattributed` row.
+- **Feature:** `gui/favorites.py` + `GET/POST /api/favorites`. Run page: star toggle under the title (owner
+  note required; optional title) appends an entry built from `best.json`/`run.json`/config brief (J read from
+  best.json); un-star retires (`status: retired` + `retired_note`), never deletes; re-star re-activates.
+  Writes are append-only text edits with a re-parse check (file untouched on any mismatch). Runs list: star
+  marker + "Favorites" filter (by run id or best design hash). Elites: star marker + "Favorites" toggle.
+- **Tests:** `tests/test_gui_score_breakdown.py` (5, incl. v11 sum == stored J on FAV-001's numbers, fallback
+  path, node rows helper) + `tests/test_gui_favorites.py` (9, incl. append-only bytes, retire/re-activate,
+  broken-registry refusal, HTTP, node helpers): 14 passed. Existing GUI suite: see the commit's test note.
+- **Browser check:** preview (worktree GUI on :8767, `--runs` = main `runs/`) of FAV-001's run page shows the
+  full 11-term breakdown and the FAV-001 star; Runs filter shows the 2 FAV-001 runs; a star -> retire
+  round-trip on another run wrote then retired FAV-002 in a scratch copy (restored afterwards).
+- **Integrated:** merged into `hornfab-all-2026-11-18` in the 2026-11-20 consolidation (entry above).
+
 ## 2026-11-20 - Rolled H terminal/rollback: width-500 size win, C look not accepted (senior handoff)
 
 - **Owner ask:** width ~500 mm; start the H rollback at the yellow mark (x≈220/z≈160, lip x≈190/z≈125),
