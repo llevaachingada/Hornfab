@@ -2,6 +2,7 @@
 //
 // Horn + woofer system views (G0, house style P1 —
 // docs/research/system_woofer_2026-11-18/GUI_COMPLETION_HANDOFF_2026-11-19.md §4, §5.5, §5.6, §8):
+//   #/hw                      Overview: KPIs, the seven-step story, next step and recents (P8)
 //   #/hw/cases                 ledger of every staged / solved / refused Boundary Lab case
 //   #/hw/case/<exp>/<case>     one case: overview, per-channel bases, polars, provenance
 //   #/hw/readiness             risk register R1-R17 + open owner decisions
@@ -391,6 +392,223 @@ export async function viewHwCases(root, query = "") {
   });
   syncControls();
   draw();
+}
+
+// ── Overview ────────────────────────────────────────────────────────────────
+
+/** P8 (handoff §5.1): verdict KPIs, the seven-step story, one server-computed next step,
+ * recent screens and cases, and the readiness summary. Every count and tick comes from
+ * /api/hw/overview; this view never guesses a step, a label or a number. */
+export async function viewHwOverview(root) {
+  skel(root, "Loading overview");
+  let k;
+  try { k = await api("/api/hw/overview"); } catch (e) { busyDone(root); root.innerHTML = errBanner(e.message); return; }
+  busyDone(root);
+
+  const kp = k.kpis || {};
+  const rdy = k.readiness || {};
+  const next = k.next_step || {};
+  const screens = Array.isArray(k.recent_screens) ? k.recent_screens : [];
+  const cases = Array.isArray(k.recent_cases) ? k.recent_cases : [];
+  const open = Array.isArray(rdy.open_decisions) ? rdy.open_decisions : [];
+  const screenErrors = Array.isArray(k.screen_errors) ? k.screen_errors : [];
+  const missing = Array.isArray(k.declared_missing) ? k.declared_missing : [];
+
+  const fmtWhen = iso => {
+    if (!iso) return MISSING;
+    const t = new Date(iso);
+    if (isNaN(t.getTime())) return String(iso);
+    return t.toISOString().slice(0, 16).replace("T", " ") + " UTC";
+  };
+
+  // The seven steps (§5.1). next_step.id names the step that is *next*, so every earlier step
+  // has produced something on disk; ids after the story (compare, r3_audit) mean all seven are done.
+  // An id this view does not know falls back to the recorded counts — never a fabricated tick.
+  const STEPS = [
+    { n: 1, label: "Pick a horn", href: "#/hw/new", note: "A saved horn from the inventory." },
+    { n: 2, label: "Drivers", href: "#/hw/new", note: "Woofer drivers from the catalog." },
+    { n: 3, label: "Box limits", href: "#/hw/new", note: "Box size, tuning and assembly ranges." },
+    { n: 4, label: "Screen", href: "#/hw/screens", note: "The fast CPU shortlist; estimates, not results." },
+    { n: 5, label: "Check in Boundary Lab", href: "#/hw/cases", note: "Stage and validate one shortlisted design." },
+    { n: 6, label: "Solve", href: "#/hw/cases", note: "The full Boundary Lab solve; needs owner approval (decision 6)." },
+    { n: 7, label: "Read", href: "#/hw/cases", note: "Per-channel response, polars and provenance." },
+  ];
+  const NEXT_AT = { new: 1, screen: 4, stage: 5, solve: 6, read: 7, compare: 8, r3_audit: 8 };
+  const byCount = kp.screens
+    ? (kp.shortlisted ? (kp.checked_in_bl ? (kp.solved ? 7 : 6) : 5) : 4)
+    : 1;
+  const nextAt = NEXT_AT[String(next.id || "")] || byCount;
+  const steps = STEPS.map(s => ({
+    ...s,
+    done: s.n < nextAt,
+    current: s.n === nextAt,
+    // The current step links to exactly what the server says to do next.
+    href: s.n === nextAt && next.href ? next.href : s.href,
+    title: s.n === nextAt && next.why ? `Next: ${next.label || s.label}. ${next.why}` : s.note,
+  }));
+  const stepHtml = s => `<a class="btn btn-sm" href="${esc(s.href)}" title="${esc(s.title)}"${s.current ? ' aria-current="step"' : ""}>
+    <span class="mono muted" aria-hidden="true">${s.n}</span> ${esc(s.label)}${s.done
+      ? ` <span class="good-text" aria-hidden="true">✓</span><span class="sr-only"> (done)</span>`
+      : s.current ? ` <span aria-hidden="true">→</span><span class="sr-only"> (next step)</span>` : ""}</a>`;
+
+  const cnt = (s, key) => {
+    const miss = new Set(s.counts_missing || []);
+    return (miss.has(key) || (s.counts || {})[key] == null) ? MISSING : String(s.counts[key]);
+  };
+  const screenRow = s => {
+    const h = s.horn || {};
+    const hash = h.design_hash ? String(h.design_hash).slice(0, 8) : MISSING;
+    const replay = Number(s.replay_count) || 1;
+    const replayChip = replay > 1
+      ? (s.byte_identical
+        ? `<span class="pill good" title="This study file has byte-identical replays">replay ×${esc(replay)}</span>`
+        : `<span class="pill warn" title="The replays differ; the study needs investigation">replays differ</span>`)
+      : "";
+    return `<tr class="clickable" data-study="${esc(s.study_id)}" tabindex="0">
+      <td><a href="#/hw/screen/${encodeURIComponent(s.study_id)}" class="mono">${esc(s.study_id)}</a></td>
+      <td class="mono">${esc(fmtWhen(s.mtime_utc))}</td>
+      <td>${esc(h.brief_id || MISSING)}<br><span class="mono muted">${esc(hash)}</span></td>
+      <td class="r">${esc(s.driver_count == null ? MISSING : s.driver_count)}</td>
+      <td class="r">${esc(cnt(s, "shortlist_rows"))}</td>
+      <td class="r">${esc(cnt(s, "bl_panel_fit_rejected"))}</td>
+      <td><span class="pill" title="${esc(s.claim || "")}">heuristic · no winner</span>${replayChip ? " " + replayChip : ""}</td>
+    </tr>`;
+  };
+
+  // Recent cases reuse the Cases ledger's exact seven columns and row idiom (§5.1).
+  const caseRow = r => {
+    const solve = r.solve && r.solve.fmin_hz != null
+      ? `<span class="hw-ledger-band ${r.state === "solved" ? "good-text" : "muted"}">${num(r.solve.fmin_hz)}–${num(r.solve.fmax_hz)} Hz</span>`
+      : `<span class="muted">${MISSING}</span>`;
+    const horn = r.horn
+      ? `<div>${num((r.horn.translation_mm || [])[2], 1)} mm</div>${clearancePill(r.clearance)}`
+      : `<span class="muted">vented only</span>`;
+    const ref = r.ref && r.ref !== "-" ? `${esc(r.ref)} · ` : "";
+    const title = ref + esc(r.gate || caseShort(r.case));
+    const tokens = (r.tokens || []).filter(t => !isClearanceToken(t));
+    const note = r.note ? `<div class="hw-row-note">${esc(r.note)}</div>` : "";
+    const tokenRow = tokens.length || note
+      ? `<tr class="hw-tokens-row"><td colspan="7">${note}${tokens.length ? tokenChips(tokens) : ""}</td></tr>`
+      : "";
+    return `<tr class="clickable" data-key="${esc(r.key)}" tabindex="0">
+      <td class="hw-ledger-case">
+        <div class="hw-ledger-title">${title}</div>
+        <div class="hw-ledger-id">${brk(r.case)}</div>
+      </td>
+      <td>${statePill(r)}</td>
+      <td>${roleBadge("motor", r.motor)}<br>${roleBadge("shape", r.transducer_shape)}</td>
+      <td style="white-space:normal">${esc(boxText(r.box))}</td>
+      <td style="white-space:normal">${horn}</td>
+      <td>${solve}</td>
+      <td>${fidelityBadge(r.fidelity, r.status)}</td>
+    </tr>${tokenRow}`;
+  };
+
+  const levels = rdy.risks_by_level || {};
+  const levelBits = [["CRITICAL", "critical"], ["HIGH", "high"], ["MEDIUM", "medium"], ["LOW", "low"]]
+    .filter(([key]) => levels[key]).map(([key, word]) => `${levels[key]} ${word}`);
+  const blocked = kp.blocked_decisions == null ? open.length : Number(kp.blocked_decisions);
+  const decisionPills = open.length
+    ? open.map(d => `<span class="pill warn" style="white-space:normal" title="${esc([d.question, d.recommendation ? `Recommendation: ${d.recommendation}` : ""].filter(Boolean).join(" "))}">${esc(d.blocks || `decision ${d.id}`)} (${esc(d.id)})</span>`).join("")
+    : `<span class="pill good">none open</span>`;
+
+  const pills = [
+    `<span class="pill">updated ${esc(rdy.updated || MISSING)}</span>`,
+    `<span class="pill">read-only from disk</span>`,
+    screenErrors.length ? `<span class="pill bad">${esc(screenErrors.length)} unreadable study file${screenErrors.length === 1 ? "" : "s"}</span>` : "",
+    missing.length ? `<span class="pill bad">${esc(missing.length)} registry ${missing.length === 1 ? "entry" : "entries"} missing on disk</span>` : "",
+  ].filter(Boolean).join("");
+
+  root.innerHTML = `<div class="stack" style="gap:18px">
+    ${pageHead({
+      eyebrow: "Horn + woofer · Overview · system story",
+      title: "Design a two-way: a saved horn over a vented woofer",
+      id: k.store,
+      pills,
+      story: "Steps 1–7 of the system story: pick a horn, choose drivers and box limits, screen the field, check one design in Boundary Lab, then read the solved case. Every tick and count below comes from what is already on disk.",
+      storyTitle: "This page is read-only. The next step is computed server-side from the studies, cases and readiness registry; the GUI does not guess it.",
+    })}
+    ${k.registry_error ? errBanner(k.registry_error) : ""}
+    ${screenErrors.map(e => `<div class="alert warn" role="alert"><b>Unreadable study file:</b>
+      <code style="overflow-wrap:anywhere">${esc(e && typeof e === "object" ? e.path : e)}</code>${e && typeof e === "object" && e.error ? ` — ${esc(e.error)}` : ""}</div>`).join("")}
+    ${missing.length ? `<div class="alert warn" role="alert">Registry cases missing on disk:
+      ${missing.map(m => `<code>${esc((m && m.key) || m || MISSING)}</code>`).join(", ")}</div>` : ""}
+    <div class="kpis">
+      ${kpi("Screens", kp.screens ?? 0, "screen studies on disk")}
+      ${kpi("Shortlisted", kp.shortlisted ?? 0, "shortlist rows across screens")}
+      ${kpi("Checked in BL", kp.checked_in_bl ?? 0, "staged or solved")}
+      ${kpi("Solved", kp.solved ?? 0, "full Boundary Lab solves", kp.solved ? "good" : "")}
+      ${kpi("Blocked by decisions", blocked, "open owner decisions", blocked ? "warn" : "good")}
+    </div>
+    <section class="card">
+      <div class="fig-head"><h3>How it works</h3>
+        <span class="muted">Steps 1–7 · a tick means the step produced something on disk</span></div>
+      <nav class="btn-row" aria-label="The seven steps of the system story" style="margin-top:8px">
+        ${steps.map(stepHtml).join("")}
+      </nav>
+      <p class="hint" style="font-size:0.8rem;margin:8px 0 0">✓ = the step produced
+        something on disk · → = the server's next step. Solving needs owner approval (decision 6).</p>
+    </section>
+    <section class="card" data-next-id="${esc(next.id || "")}">
+      <div class="fig-head"><h3>Next step</h3>
+        <span class="muted">computed from what is on disk</span></div>
+      <p style="margin:6px 0 4px"><b>${esc(next.label || "—")}</b></p>
+      <p class="muted" style="margin:0 0 12px;max-width:82ch">${esc(next.why || "")}</p>
+      ${next.href ? `<a class="btn primary" style="white-space:normal;text-align:left;max-width:100%" href="${esc(next.href)}">${esc(next.label || "Open")} →</a>` : ""}
+    </section>
+    <section class="card">
+      <div class="fig-head"><h3>Recent screens</h3>
+        <a class="btn btn-sm" href="#/hw/screens">All screens →</a></div>
+      ${screens.length ? `<div class="tbl-scroll hw-tbl-scroll">
+        <p class="tbl-scroll-hint">scroll for all columns →</p>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Study</th><th>When</th><th>Horn</th><th class="r">Drivers</th>
+            <th class="r">Shortlisted</th><th class="r">Panel-fit rejected</th><th>Claim</th></tr></thead>
+          <tbody>${screens.map(screenRow).join("")}</tbody></table></div>
+      </div>` : `<div class="alert info" role="status">No screen studies yet. A screen is step 4: pick a horn,
+        drivers and box limits, then screen.</div>
+        <div class="btn-row" style="margin-top:8px"><a class="btn btn-sm primary" href="#/hw/new">Start a new system →</a></div>`}
+    </section>
+    <section class="card">
+      <div class="fig-head"><h3>Recent cases</h3>
+        <a class="btn btn-sm" href="#/hw/cases">All cases →</a></div>
+      ${cases.length ? `<div class="tbl-scroll hw-tbl-scroll">
+        <p class="tbl-scroll-hint">scroll for all columns →</p>
+        <div class="tbl-wrap"><table class="hw-ledger" style="table-layout:fixed">
+          <colgroup><col style="width:200px"><col style="width:108px"><col style="width:140px">
+            <col style="width:150px"><col style="width:140px"><col style="width:100px">
+            <col style="width:160px"></colgroup>
+          <thead><tr><th>Case</th><th>State</th><th>Motor / shape</th>
+            <th>Box</th><th>${tip("clearance", "Gap / offset")}</th><th>Solved band</th>
+            <th>${tip("hw_fidelity", "Fidelity")}</th></tr></thead>
+          <tbody>${cases.map(caseRow).join("")}</tbody></table></div>
+      </div>` : `<div class="alert info" role="status">No Boundary Lab cases yet. Check a shortlisted design
+        in Boundary Lab once a screen has produced a shortlist.</div>
+        <div class="btn-row" style="margin-top:8px"><a class="btn btn-sm" href="${kp.screens ? "#/hw/screens" : "#/hw/new"}">${kp.screens ? "Open the screens →" : "Start a new system →"}</a></div>`}
+    </section>
+    <section class="card">
+      <div class="fig-head"><h3>Readiness</h3>
+        <a class="btn btn-sm" href="#/hw/readiness">Open Readiness →</a></div>
+      <p class="muted" style="margin:6px 0;max-width:82ch">${rdy.risks_total != null
+        ? `${esc(rdy.risks_total)} risks tracked${levelBits.length ? " · " + levelBits.map(esc).join(" · ") : ""}.`
+        : "The readiness registry was not read."}</p>
+      <p style="margin:0 0 8px"><b>${esc(blocked)} owner ${Number(blocked) === 1 ? "decision" : "decisions"}</b>
+        open${Number(blocked) ? " and blocking:" : "."}</p>
+      <div class="pill-row">${decisionPills}</div>
+    </section>
+  </div>`;
+
+  root.querySelectorAll("tr[data-study]").forEach(tr => {
+    const go = () => { location.hash = "#/hw/screen/" + encodeURIComponent(tr.dataset.study); };
+    tr.addEventListener("click", e => { if (!e.target.closest("a")) go(); });
+    tr.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+  });
+  root.querySelectorAll("tr[data-key]").forEach(tr => {
+    const go = () => { location.hash = caseHref(tr.dataset.key); };
+    tr.addEventListener("click", e => { if (!e.target.closest("a")) go(); });
+    tr.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); go(); } });
+  });
+  wireScrollHints(root);
 }
 
 // ── Case detail ─────────────────────────────────────────────────────────────

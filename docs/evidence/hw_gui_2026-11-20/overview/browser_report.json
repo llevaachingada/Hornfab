@@ -1,0 +1,198 @@
+{
+  "base": "http://127.0.0.1:8825",
+  "runs": [
+    {
+      "route": "/#/hw",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8825/?theme=dark#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3452
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\overview\\hw__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8825/?theme=dark#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3452
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\overview\\hw__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8825/?theme=dark#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3452
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\overview\\hw__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8825/?theme=dark#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3350
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\overview\\hw__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8825/?theme=light#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3452
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\overview\\hw__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8825/?theme=light#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3452
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\overview\\hw__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8825/?theme=light#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3452
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\overview\\hw__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8825/?theme=light#/hw",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw",
+        "title": "Design a two-way: a saved horn over a vented woofer",
+        "body_text_len": 3350
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\overview\\hw__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    }
+  ],
+  "failures": []
+}
