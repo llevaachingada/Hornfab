@@ -48,6 +48,8 @@ per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 freq
 
 [FAV-001 Crowe-X favorite research (2026-11-20)](research/favorites_2026-11-20/CROWE_X_FAVORITE_RESEARCH.md): why the best-CD-matrix v11 finalist scores J 5.0 (load term 53 %; CPU rescore at F_X 700/800/900/1000), why one-sided `load` rewards throat resonances, the OS `k` lever (Webster proxy, scripts in `cpu/`), the compact500_xo900 brief, and night `fav_crowe_2026-11-20`.
 
+[FAV-001 throat-loading levers (2026-11-20)](research/favorites_2026-11-20/THROAT_LOADING_LEVERS.md): k damages only >3 kHz (HF beaming), so V-only k (existing `g_throat_hv_ratio`) and a 2-inch exit (briefs `hf2in_2026-11-20`) are the levers; lanes `favL_*` and the fav8 night plan `FAV8_NIGHT_PLAN.md`.
+
 [B1 readiness + zero-dimension truth fix (2026-11-18, WP 2.2/D7)](evidence/b1_readiness_2026-11-18/README.md):
 B1/B1f lines checked (kind: command, safe), search/CLI/night dry-run now refuse a zero-free-dimension
 search, the feasibility table, the ext-throat exclusion finding and the queue-ready batches for GPU approval.

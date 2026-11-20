@@ -1,0 +1,131 @@
+# 2-INCH COMPRESSION-DRIVER study brief (2026-11-20 evening, owner: 'also consider a two inch compression driver size').
+# Copied from examples/briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd.yaml; changed ONLY name, description, driver.exit_radius_mm 18.0 -> 25.4 (50.8 mm exit),
+# target.loaded_hi_hz -> 3957.1 (first cross-mode 1.8412 c / (2 pi a) of a 25.4 mm exit; scalar_v7 loaded window rule).
+# driver.exit_angle_deg stays 2.0 (ASSUMED; no specific 2-inch driver chosen). Ideal uniform-velocity cap source:
+# real 2-inch driver response/phase plug not modeled. NEW J IDENTITY: never rank against the 1.4-inch briefs.
+name: room_landscape_80x50_700_hf2in_v11cd
+description: '(objective v11) CD MATRIX: corridor H 60-90 (pref 80) from 700 Hz, V 40-60 (pref 50) from
+  1000 Hz, ripple_region preferred_edge, loading on, plus the v11 CD block (M2 listening window 1.5 dB,
+  M4 DI std 1.0 dB, M5 NACC 0.02, band-mean off-axis smoothness 2.5-8 kHz); 2-INCH EXIT (r0 25.4 mm),
+  600x480x480; band 350-8000 Hz. CD-only identity, loud-home 110 dB max; never rankable against v7/v9/v10.
+  DRIVER-SIZE STUDY: 2-inch exit.'
+driver:
+  exit_angle_deg: 2.0
+  exit_radius_mm: 25.4
+envelope:
+  max_depth_mm: 480.0
+  max_mouth_h_mm: 480.0
+  max_mouth_w_mm: 600.0
+symmetry: hv
+source:
+  cap: auto
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_profile:
+    h:
+    - hz: 700
+      max_deg: 90
+      min_deg: 60
+      preferred_deg: 80
+    - hz: 8000
+      max_deg: 90
+      min_deg: 60
+      preferred_deg: 80
+    interpolation: log_frequency
+    mode: corridor
+    v:
+    - hz: 1000
+      max_deg: 60
+      min_deg: 40
+      preferred_deg: 50
+    - hz: 8000
+      max_deg: 60
+      min_deg: 40
+      preferred_deg: 50
+  coverage_v_deg: 50.0
+  coverage_v_down_deg: null
+  coverage_v_up_deg: null
+  di_slope_target: 0.0
+  di_target_db: null
+  driver_exit_radius_mm: null
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 3957.1
+  z_min: 0.5
+weights:
+  cov_profile: 1.0
+  di_roughness: 0.5
+  dislope: 0.5
+  flat: 0.5
+  flat_cv: 0.5
+  load: 1.0
+  rip: 0.5
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+objective:
+  cov_below_f0: one_sided
+  cov_narrow_ratio: 2.0
+  cov_v_weight: 0.5
+  flat_band: scored
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  tolerances:
+    cov_profile: 3.0
+    di_roughness: 1.0
+    dislope: 9.0
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3
+    rip: 1.0
+  version: 11
+  ripple_region: preferred_edge
+  cd:
+    band_hz:
+    - 700.0
+    - 8000.0
+    window_h_deg: 30.0
+    window_v_deg: 10.0
+    lw:
+      weight: 1.5
+      tolerance_db: 1.5
+    di_std:
+      weight: 0.75
+      tolerance_db: 1.0
+    nacc:
+      weight: 0.75
+      tolerance: 0.02
+    offaxis:
+      weight: 1.0
+      tolerance_db: 1.0
+      reference: band_mean
+      band_hz:
+      - 2500.0
+      - 8000.0
+      angles_h_deg:
+      - -40
+      - -30
+      - 30
+      - 40
+      angles_v_deg:
+      - -25
+      - -10
+      - 10
+      - 25
+    report:
+      omega: true
+      contour: false

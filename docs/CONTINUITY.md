@@ -1,5 +1,18 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 evening - FAV-001 throat-loading levers (V-only k, 2-inch exit) moved to the FRONT of fav8
+
+- **Owner ask:** improve throat loading without losing FAV-001's directivity, a new parameter allowed; then
+  "also consider a two inch compression driver size".
+- **Diagnosis [measured]:** the k = 2/3/4 solves equal FAV-001 below ~2.3 kHz; the whole cost is HF beaming
+  (8 kHz H 69 -> 52 deg, DI 12.5 -> 14.8 dB at k 4). V narrowing is toward target; H narrowing is the harm.
+- **Levers:** 2-inch exit with the same OS law (proxy load term 2.88 -> 1.44) and V-only k through the
+  EXISTING `g_throat_hv_ratio` (k = sqrt(K), rho = K -> k_H 1, k_V K; no code change). Note:
+  `docs/research/favorites_2026-11-20/THROAT_LOADING_LEVERS.md`. New briefs `examples/briefs/hf2in_2026-11-20/`
+  (driver r0 25.4 mm, loaded_hi 3957 Hz; own identities).
+- **Queue:** 3 singles + 3 CMA lanes (80 valid) + verify inserted after the running `fav8__k1_cd_polish` in the
+  live `fav8_2026-11-20` (night now ~10 h). shape_check 6/6, preflight no HARD.
+
 ## 2026-11-20 evening - FAV-001 8-hour variation night `fav8_2026-11-20` launched
 
 - **Owner ask:** "queue up like 8 hours of solves related to variations on this new FAV horn".
