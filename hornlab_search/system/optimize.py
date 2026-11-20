@@ -164,10 +164,10 @@ def run_pilot(
                       "has_full_geometry": geometry is not None
                       and bool(geometry.completeness["INSTALLED_EXTERIOR_BEM"]),
                       "supports_lf_ts_screening": True})
-    if geometry is not None:
-        # T/S screening is a SCREEN_MAGNITUDE claim on the frozen fidelity ladder; the old
-        # "LF_TS_SCREENING" string was never a ladder label (B18).
-        sys_drivers.require_fidelity(driver, "SCREEN_MAGNITUDE")
+    # Geometry is optional on the LF/T/S pilot. There is no separate driver-data fidelity
+    # tier: the pilot's authority is SCREEN_MAGNITUDE, and installed tiers are only claimed
+    # when a caller asks for them. ``data_quality.has_full_geometry`` records completeness.
+    # (The old "LF_TS_SCREENING" label was never in the fidelity contract.)
 
     # 1. horn asset (optional for the LF-only path but required for the polar screen)
     if asset is not None and asset_id is None:
@@ -234,8 +234,7 @@ def run_pilot(
         lf_axis = "PASS" if f3_ok else "FAIL"
         feasibility = {
             "bassbox_feasible": bool(point.fits.get("feasible", True)),
-            "rules_pass": fit["passed"],
-            "rules_skips": fit["skips"],
+            "rules_pass": bool(fit["passed"]),
             "f3_gate": bool(f3_ok),
             "horn_asset_declared": asset is not None,
         }
@@ -254,16 +253,25 @@ def run_pilot(
             },
             "sort_key": [0 if xp == "PASS" else 1, 0 if lf_axis == "PASS" else 1,
                          point.net_volume_l],
+            # Canonical score-row contract (same shape as woofer_seed): scalar numeric axes,
+            # a separate direction map, boolean feasibility columns. A lower F3 is better.
             "numeric_axes": {
-                "net_volume_l": {"value": point.net_volume_l, "direction": "-"},
-                "f3_hz": {"value": lf["f3_hz"], "direction": "+",
-                          "nan_ok": True},
-                "margin_40hz_db": {"value": lf["margin_40hz_db"], "direction": "+"},
-                "margin_63_120hz_db": {"value": lf["margin_63_120hz_db"], "direction": "+"},
-                "spl_max_40hz_db": {"value": lf["spl_max_40hz_db"], "direction": "+"},
+                "net_volume_l": float(point.net_volume_l),
+                "f3_hz": float(lf["f3_hz"]),
+                "margin_40hz_db": float(lf["margin_40hz_db"]),
+                "margin_63_120hz_db": float(lf["margin_63_120hz_db"]),
+                "spl_max_40hz_db": float(lf["spl_max_40hz_db"]),
+            },
+            "axis_directions": {
+                "net_volume_l": "-",
+                "f3_hz": "-",
+                "margin_40hz_db": "+",
+                "margin_63_120hz_db": "+",
+                "spl_max_40hz_db": "+",
             },
             "feasibility": feasibility,
             "feasibility_reasons": fit["reasons"],
+            "rules_skips": fit["skips"],
             "lf_row": lf,
             "crossover_screen": {
                 "horn_bw_deg": horn_bw_by_xo,

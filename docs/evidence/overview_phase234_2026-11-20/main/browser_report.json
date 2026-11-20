@@ -1,0 +1,582 @@
+{
+  "base": "http://127.0.0.1:8766",
+  "runs": [
+    {
+      "route": "/#/overview",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview",
+        "title": "Project overview",
+        "body_text_len": 3362
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=leaders",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=leaders",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 6,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=leaders",
+        "title": "Project overview",
+        "body_text_len": 9186
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=typologies",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=typologies",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=typologies",
+        "title": "Project overview",
+        "body_text_len": 2745
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=next",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=next",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=next",
+        "title": "Project overview",
+        "body_text_len": 2907
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=decisions",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=decisions",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=decisions",
+        "title": "Project overview",
+        "body_text_len": 13741
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=params",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=params",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=params",
+        "title": "Project overview",
+        "body_text_len": 4879
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview",
+        "title": "Project overview",
+        "body_text_len": 3264
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=leaders",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=leaders",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 6,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=leaders",
+        "title": "Project overview",
+        "body_text_len": 9088
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=typologies",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=typologies",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=typologies",
+        "title": "Project overview",
+        "body_text_len": 2647
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=next",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=next",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=next",
+        "title": "Project overview",
+        "body_text_len": 2809
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=decisions",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=decisions",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=decisions",
+        "title": "Project overview",
+        "body_text_len": 13725
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=params",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview?tab=params",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=params",
+        "title": "Project overview",
+        "body_text_len": 4983
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview",
+        "title": "Project overview",
+        "body_text_len": 3362
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=leaders",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview?tab=leaders",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 6,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=leaders",
+        "title": "Project overview",
+        "body_text_len": 9186
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=typologies",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview?tab=typologies",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=typologies",
+        "title": "Project overview",
+        "body_text_len": 2745
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=next",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview?tab=next",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=next",
+        "title": "Project overview",
+        "body_text_len": 2906
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=decisions",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview?tab=decisions",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=decisions",
+        "title": "Project overview",
+        "body_text_len": 13741
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=params",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview?tab=params",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=params",
+        "title": "Project overview",
+        "body_text_len": 4879
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview",
+        "title": "Project overview",
+        "body_text_len": 3264
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=leaders",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview?tab=leaders",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 6,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=leaders",
+        "title": "Project overview",
+        "body_text_len": 9088
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=typologies",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview?tab=typologies",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=typologies",
+        "title": "Project overview",
+        "body_text_len": 2647
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=next",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview?tab=next",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=next",
+        "title": "Project overview",
+        "body_text_len": 2809
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=decisions",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview?tab=decisions",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=decisions",
+        "title": "Project overview",
+        "body_text_len": 13725
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/overview?tab=params",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8766/?theme=light#/overview?tab=params",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview?tab=params",
+        "title": "Project overview",
+        "body_text_len": 4983
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\main\\overview__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    }
+  ],
+  "failures": []
+}

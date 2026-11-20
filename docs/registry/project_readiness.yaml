@@ -1,0 +1,44 @@
+# Project-side readiness registry (WP3.1) — read by the GUI (#/overview registry tab).
+#
+# This file carries ONLY project-side rows (areas search / software / gui / data). The hardware
+# rows stay in their own file and are merged at read time by
+# `hornlab_search/gui/data_overview_registry.py` with `area: hw`:
+#   docs/research/system_woofer_2026-11-18/readiness.yaml
+# Never copy the HW risks/decisions into this file (duplicate ids are reported as an error).
+#
+# Search-side rows are seeded BY HAND, one per `docs/ISSUES.md` "OPEN (owner...)" bullet from the
+# last three days (2026-11-17 .. 2026-11-19); each `source` names the ISSUES.md item so the row can
+# be traced back. Do not add inferred or guessed rows. Status facts stay in ISSUES.md; this file
+# only makes the open owner items visible in the Overview.
+schema: project_readiness_v1
+updated: 2026-11-19
+
+sources:
+  - docs/research/system_woofer_2026-11-18/readiness.yaml
+  - docs/ISSUES.md
+
+risks:
+  - {id: S1, area: search, level: HIGH, status: open, wp: "-", title: "v10 leaderboard is a 4-way inside-floor cluster; ranking needs verify-grid solves, not more screen evals", blocked_by: null, evidence: "fold 1.3738, morph 1.4243, twinray 1.4568, ext 1.5710 all inside the 0.4677 floor", source: "docs/ISSUES.md (2026-11-19 item P11 s2w attempted; superseded by the compact-slate night)"}
+  - {id: S2, area: search, level: MEDIUM, status: open, wp: "-", title: "Approve GPU time (~3-5 h) and launch the staged compact400 next-10 night", blocked_by: null, evidence: "night docs/queue/compact400_next10_2026-11-19.yaml dry-run OK", source: "docs/ISSUES.md (2026-11-19 item compact400 400 mm cube + next-10 night staged)"}
+  - {id: S3, area: search, level: MEDIUM, status: open, wp: "-", title: "October portrait/square sculpture families need their own brief identity with a measured floor before a fair test", blocked_by: null, evidence: "quatrefoil, chanterelle, petal_os, ripple, cone_plughorn", source: "docs/ISSUES.md (2026-11-19 item Q3 night: continuations + never-run typologies)"}
+  - {id: S4, area: search, level: MEDIUM, status: open, wp: "-", title: "First GPU under the compact_xo900 identity (search or another lane); nothing queued", blocked_by: null, evidence: "fold_warm 00826f071b24 leads on both v10 and the crossover identity", source: "docs/ISSUES.md (2026-11-19 item Compact slate: owner decisions executed)"}
+  - {id: S5, area: search, level: MEDIUM, status: open, wp: "-", title: "Compact-horn GPU ask: authorise the A1 petal screen, start from the fold/morph mechanism, or spend no new GPU", blocked_by: null, evidence: "A1 petal v10 misses its own 0.4677 gate by 0.10 J", source: "docs/ISSUES.md (2026-11-19 item PRIORITY10 night complete; compact-horn register delivered)"}
+  - {id: S6, area: search, level: MEDIUM, status: open, wp: "-", title: "V corridor onset: accept the 480 mm envelope limit or move the onset to ~1.2 kHz", blocked_by: null, evidence: "40-60 deg V from 1 kHz sits at the 480 mm envelope limit (~63 deg measured)", source: "docs/ISSUES.md (2026-11-19 item Fable senior: score-term audit + Gate A)"}
+  - {id: S7, area: search, level: MEDIUM, status: open, wp: "-", title: "Rolled rollback cap: 225 implemented + a 270 control arm; literal 180-200 not implemented", blocked_by: null, evidence: "sources warn 160-200 deg cavity; 270 is the documented range", source: "docs/ISSUES.md (2026-11-19 item Owner construction fixes wired into SCOUT40)"}
+  - {id: S8, area: search, level: MEDIUM, status: open, wp: "-", title: "Klangfilm returning/curled lip: KL-HV-B has none (H coverage 65.2 vs >=70)", blocked_by: null, evidence: "gated construction change (digest + tests + shape_check), not in this pass", source: "docs/ISSUES.md (2026-11-19 item Owner construction fixes wired into SCOUT40)"}
+  - {id: S9, area: search, level: LOW, status: open, wp: "-", title: "vt bounds [350, 465] + success > 0.3105 J consent", blocked_by: null, evidence: "dense-scored success threshold 0.1302 J over the control", source: "docs/ISSUES.md (2026-11-19 item Senior review queue closed)"}
+  - {id: S10, area: search, level: LOW, status: open, wp: "-", title: "BO re-queues after the causes; t_hvlaw needs a CMA cohort first", blocked_by: null, evidence: "night cd_rrect_2026-11-17 failure causes", source: "docs/ISSUES.md (2026-11-18 item night cd_rrect_2026-11-17: failure causes not yet read)"}
+  - {id: S11, area: search, level: HIGH, status: open, wp: "-", title: "v10 ripple inspection region policy (preferred_edge / min_edge / seat_zone_deg / other)", blocked_by: null, evidence: "v9 corridor-mode second scores PROVISIONAL until settled; E1-E4 in evidence_scoring_2026-11-18/", source: "docs/ISSUES.md (2026-11-18 item v10 ripple region: owner policy needed)"}
+  - {id: S12, area: search, level: MEDIUM, status: open, wp: "-", title: "Approve the shared throat H/V block and the BEM onset sweep as a separate GPU budget", blocked_by: null, evidence: "90x40, onset at 0/25/50/75 % depth", source: "docs/ISSUES.md (2026-11-18 item Near-throat H/V control for asymmetric briefs)"}
+  - {id: S13, area: data, level: LOW, status: open, wp: "-", title: "Consume the top-designs export bundle for cross-typology analysis; regenerate if the compact400 night adds winners", blocked_by: null, evidence: "52 typology x score groups, 437 designs, 2026-11-19T23:40:55Z snapshot", source: "docs/ISSUES.md (2026-11-19 item Top-designs export for cloud agents)"}
+  - {id: S14, area: data, level: LOW, status: open, wp: "-", title: "Brief identity by digest instead of the raw brief_file string (C5) so warm-start/preflight history survives a directory move", blocked_by: null, evidence: "the 2026-11-17 path fix made _w1 loadable but cannot restore history identity", source: "docs/ISSUES.md (2026-11-17 item local orchestrator night truth + data-agreement gate)"}
+  - {id: S15, area: software, level: MEDIUM, status: open, wp: "-", title: "PR #75 disposition (open/draft; superseded locally) and whether to open a PR from hornfab-all-2026-11-18 into main", blocked_by: null, evidence: "upstream main still 138d88a; gh cannot resolve the repo here", source: "docs/ISSUES.md (2026-11-19 item Compact slate: owner decisions executed)"}
+  - {id: S16, area: software, level: LOW, status: open, wp: "-", title: "Crowe-X g_L_mm bound (header 320 vs file 285 + a diverged copy) and stale Klangfilm kernel / seed comments", blocked_by: null, evidence: "Klangfilm kernel SHA docstrings and b1-b3 SEEDS mouth comments are stale", source: "docs/ISSUES.md (2026-11-18 item WP-K0/K1 draft contracts delivered)"}
+
+decisions:
+  - {id: O1, area: gui, question: "Make #/overview the landing page instead of Home?", recommendation: "Yes after phase 2; keep Home as Status.", status: open, decided: null, source: "docs/overview/OVERVIEW_IMPLEMENTATION_PLAN_2026-11-19.md section 5 (O1)"}
+  - {id: O2, area: gui, question: "Hide legacy identities (v1-v6) by default?", recommendation: "Yes (already the default in phase 1).", status: open, decided: null, source: "docs/overview/OVERVIEW_IMPLEMENTATION_PLAN_2026-11-19.md section 5 (O2)"}
+  - {id: O3, area: software, question: "Auto-generate a snapshot at the end of every night?", recommendation: "Yes, CPU-only, after the GPU lock is released.", status: open, decided: null, source: "docs/overview/OVERVIEW_IMPLEMENTATION_PLAN_2026-11-19.md section 5 (O3)"}
+  - {id: O4, area: data, question: "May the GUI write runs/overview/finding_state.json (dismiss/ack)?", recommendation: "Yes; it is the only GUI-written state.", status: open, decided: null, source: "docs/overview/OVERVIEW_IMPLEMENTATION_PLAN_2026-11-19.md section 5 (O4)"}
+  - {id: O5, area: data, question: "Fold the HW readiness registry into the project registry file?", recommendation: "No: merge at read time, keep files separate.", status: open, decided: null, source: "docs/overview/OVERVIEW_IMPLEMENTATION_PLAN_2026-11-19.md section 5 (O5)"}
+  - {id: O6, area: gui, question: "Publish floors for the v7 identities?", recommendation: "Yes, via rescore_identity.py floor (CPU).", status: open, decided: null, source: "docs/overview/OVERVIEW_IMPLEMENTATION_PLAN_2026-11-19.md section 5 (O6)"}

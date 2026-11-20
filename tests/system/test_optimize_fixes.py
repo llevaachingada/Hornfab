@@ -57,22 +57,20 @@ def test_pilot_geometry_path_does_not_raise_schema_error() -> None:
     assert result.rows
 
 
-# --------------------------------------------------------------------------- B19: dict axes
+# --------------------------------------------------------------------------- B19: axis schema
 
-def test_dict_axis_cells_are_normalised_before_dominance() -> None:
-    # B19: pilot rows carry numeric_axes cells as {value, direction}; dominance must read the
-    # number and honour "-" (minimise) instead of treating the dict as unorderable.
-    better = {"numeric_axes": {
-        "net_volume_l": {"value": 40.0, "direction": "-"},
-        "f3_hz": {"value": 40.0, "direction": "+"},
-    }}
-    worse = {"numeric_axes": {
-        "net_volume_l": {"value": 50.0, "direction": "-"},
-        "f3_hz": {"value": 30.0, "direction": "+"},
-    }}
-    assert score.dominates(better, worse, {})
-    assert not score.dominates(worse, better, {})
-    # The report path (pilot rows) must flag the strictly worse row as dominated.
+def test_nested_axes_cannot_produce_an_all_pareto_report() -> None:
+    # B19: pilot rows once carried numeric_axes cells as {value, direction} dicts, so dominance
+    # silently discarded every pair and the report looked Pareto-clean. The canonical contract
+    # (reconciled on the integration branch) is scalar numeric_axes + axis_directions, and a
+    # nested cell is a schema error at render time instead of an unorderable row.
+    nested = {"numeric_axes": {"net_volume_l": {"value": 40.0, "direction": "-"}}}
+    with pytest.raises(C.SchemaError, match="numeric axis"):
+        score.render_report([{"row_id": "nested", "sort_key": [0], **nested}])
+
+    better = {"numeric_axes": {"net_volume_l": 40.0, "f3_hz": 40.0},
+              "axis_directions": {"net_volume_l": "-", "f3_hz": "+"}}
+    worse = {"numeric_axes": {"net_volume_l": 50.0, "f3_hz": 30.0}}
     payload = json.loads(score.render_report([
         {"row_id": "better", "sort_key": [0], **better},
         {"row_id": "worse", "sort_key": [1], **worse},

@@ -5,8 +5,13 @@
 //
 // Tabs: Briefing (KPIs, lanes, leader per current score identity, what changed since last visit),
 // Leaders (per score identity: lines of work ranked by best J, floor tie band, runs inside each
-// line), Typologies (knowledge-hub family card x score identity matrix).
-// View state (tab, window, legacy) lives in the URL. J is never compared across identities.
+// line), Typologies (knowledge-hub family card x score identity matrix), Next (ranked findings),
+// Decisions (project readiness registry + software health).
+// View state (tab, window, legacy, filters) lives in the URL. J is never compared across identities.
+
+import { findingsTabHtml, wireFindings } from "./overview_findings.js";
+import { paramsTabHtml, wireParams } from "./overview_params.js";
+import { registryTabHtml, snapshotListHtml, wireRegistry } from "./overview_registry.js";
 
 const MISSING = "—";
 const esc = s => (s == null ? MISSING : String(s))
@@ -38,6 +43,8 @@ function store(get, val) {
 const STYLE = `
 .ov-tabs{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .ov-tabs .sp{flex:1}
+.ov-tabctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media (max-width:640px){.ov-tabs .sp{display:none}.ov-tabctl{flex-basis:100%;justify-content:flex-start}}
 .ov-ctl{display:flex;gap:8px;align-items:center;font-size:.8rem}
 .ov-ctl select{font:inherit}
 .ov-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
@@ -74,6 +81,16 @@ const pill = (t, cls = "", title = "") => `<span class="pill ${cls}"${title ? ` 
 const kpi = (label, value, sub = "", cls = "") =>
   `<div class="kpi"><span>${esc(label)}</span><b class="${cls}">${esc(value)}</b>${sub ? `<small class="muted" style="font-size:.72rem">${sub}</small>` : ""}</div>`;
 const STATUS_PILL = { current: "good", diagnostic: "warn", unregistered: "warn", legacy: "" };
+const STATE_PILL = { converged: "good", improving: "warn", box_limited: "", refusal_storm: "bad",
+  probe: "", stale: "" };
+const STATE_TIP = {
+  converged: "The budget rule is closed and the line is not box-limited or stale.",
+  improving: "Still improving in the last 20% of its budget: more evals may pay.",
+  box_limited: "A walls proposal says a bound is binding: widen before adding budget.",
+  refusal_storm: "At least 40% of evaluations never reached the solver.",
+  probe: "Every run had fewer valid evaluations than the leaderboard minimum.",
+  stale: "Top-3 line with no row for more than 7 days.",
+};
 const STATUS_TIP = {
   current: "In active use; listed in examples/score_identities.yaml.",
   diagnostic: "Pilot / probe identity: read as diagnostic, not a leaderboard.",
@@ -82,17 +99,28 @@ const STATUS_TIP = {
 };
 const runLink = (id, label) => id ? `<a href="#/run/${encodeURIComponent(id)}">${label ?? brk(id)}</a>` : MISSING;
 
+const TABS = ["briefing", "leaders", "typologies", "next", "decisions", "params"];
+
 function parseQuery(q) {
   const p = new URLSearchParams(q || "");
   const days = Number(p.get("days"));
-  return { tab: ["briefing", "leaders", "typologies"].includes(p.get("tab")) ? p.get("tab") : "briefing",
+  return { tab: TABS.includes(p.get("tab")) ? p.get("tab") : "briefing",
            days: isFinite(days) && days > 0 ? days : 14, legacy: p.get("legacy") === "1",
-           ident: p.get("ident") || "" };
+           ident: p.get("ident") || "",
+           kind: p.get("kind") || "", card: p.get("card") || "",
+           status: ["open", "resolved", "all", "dismissed"].includes(p.get("status")) ? p.get("status") : "open",
+           sort: ["priority", "newest", "identity"].includes(p.get("sort")) ? p.get("sort") : "priority",
+           q: p.get("q") || "" };
 }
 function hashFor(s) {
   const p = new URLSearchParams({ tab: s.tab, days: String(s.days) });
   if (s.legacy) p.set("legacy", "1");
   if (s.ident) p.set("ident", s.ident);
+  if (s.kind) p.set("kind", s.kind);
+  if (s.card) p.set("card", s.card);
+  if (s.status && s.status !== "open") p.set("status", s.status);
+  if (s.sort && s.sort !== "priority") p.set("sort", s.sort);
+  if (s.q) p.set("q", s.q);
   return "#/overview?" + p.toString();
 }
 
@@ -114,7 +142,8 @@ function dotsSvg(ident) {
 }
 
 function lineRow(l, ident) {
-  const badges = [l.tie ? pill("tie", "", "within the published floor of the leader") : "",
+  const badges = [l.state ? pill(esc(l.state), STATE_PILL[l.state] || "", STATE_TIP[l.state] || "") : "",
+    l.tie ? pill("tie", "", "within the published floor of the leader") : "",
     l.active ? pill("running", "warn") : "", l.verified ? pill("verified", "good") : "",
     l.probe_only ? pill("probes only", "", "every run had fewer valid evaluations than the leaderboard minimum") : ""].join(" ");
   const runs = l.runs.map(r => `<li>${runLink(r.id, brk(r.name || r.id))} · J ${num(r.best_j)} · ${int(r.n_ok)}/${int(r.n)} valid${r.refused ? ` · ${int(r.refused)} refused` : ""} · ${ago(r.last)}${r.probe ? " · probe" : ""}${r.mode === "verify" ? " · verify" : ""}</li>`).join("");
@@ -167,7 +196,7 @@ function typologiesTab(d) {
       const cell = c.cells[i.id];
       if (!cell) return `<td class="muted">${MISSING}</td>`;
       const cls = cell.rank === 1 ? "lead" : cell.tie ? "tie" : "";
-      return `<td><a class="cell ${cls}" href="${hashFor({ tab: "leaders", days: d.days, legacy: d.show_legacy, ident: i.id })}"><b>#${cell.rank}<small class="muted"> / ${cell.of}</small></b><small class="mono">${num(cell.best_j)}</small><small class="muted">${esc(cell.construction)}</small></a></td>`;
+      return `<td><a class="cell ${cls}" href="${hashFor({ tab: "leaders", days: d.days, legacy: d.show_legacy, ident: i.id })}"><b>#${cell.rank}<small class="muted"> / ${cell.of}</small></b><small class="mono">${num(cell.best_j)}</small><small class="muted">${esc(cell.construction)}</small>${cell.state ? `<small>${pill(esc(cell.state), STATE_PILL[cell.state] || "", STATE_TIP[cell.state] || "")}</small>` : ""}</a></td>`;
     }).join("")}</tr>`).join("");
   return `<section class="card"><div class="eyebrow">Typologies × score identities</div>
     <p class="muted" style="font-size:.8rem">Best rank of each knowledge-hub family inside each score identity (green = leads, accent = inside the leader's floor). Ranks compare lines within one column only — never across columns. Family targets differ: read the family card before applying one family's heuristics to another.</p>
@@ -191,7 +220,7 @@ function lanesHtml(lanes) {
     }).join("")}</tbody></table></div>`;
 }
 
-function briefingTab(d, lastVisit) {
+function briefingTab(d, lastVisit, snaps = []) {
   const k = d.kpis || {}, rd = d.readiness || {};
   const cur = (d.identities || []).filter(i => i.status === "current");
   const leaderRows = cur.map(i => {
@@ -228,7 +257,9 @@ function briefingTab(d, lastVisit) {
       <div class="tbl-wrap"><table class="ov-tbl"><thead><tr><th>Score identity</th><th>Leading line</th><th class="r">best J</th><th>standing</th><th class="r">evals</th><th>last</th></tr></thead>
       <tbody>${leaderRows || `<tr><td class="muted" colspan="6">No current identity has runs in this window.</td></tr>`}</tbody></table></div></section>
     <section class="card"><div class="eyebrow">What changed ${lastVisit ? `since your last visit (${ago(new Date(since).toISOString())})` : "in the last 24 h"}</div>
-      ${chg ? `<ul class="ov-chg">${chg}</ul>${changed.length > 12 ? `<p class="muted">${changed.length - 12} more lines updated — see Leaders.</p>` : ""}` : `<p class="muted">Nothing new.</p>`}</section>`;
+      ${chg ? `<ul class="ov-chg">${chg}</ul>${changed.length > 12 ? `<p class="muted">${changed.length - 12} more lines updated — see Leaders.</p>` : ""}` : `<p class="muted">Nothing new.</p>`}</section>
+    <section class="card"><div class="eyebrow">Frozen snapshots</div>
+      ${snapshotListHtml(snaps) || `<p class="muted">No snapshot yet. "Generate snapshot" writes one under <span class="mono">runs/analysis/overview_&lt;date&gt;/</span> (CPU only).</p>`}</section>`;
 }
 
 // ── View ───────────────────────────────────────────────────────────────────
@@ -241,11 +272,28 @@ export async function viewOverview(root, query = "") {
   root.innerHTML = `<div class="stack" style="gap:18px;opacity:.6" aria-hidden="true">
     <div class="skeleton-block" style="height:2.2rem;width:min(260px,60%)"></div>
     <div class="skeleton-block" style="height:180px"></div></div><p class="sr-only" role="status">Loading overview…</p>`;
-  let d;
-  try {
-    const r = await fetch(`/api/overview?days=${encodeURIComponent(s.days)}${s.legacy ? "&legacy=1" : ""}`);
+  let d, fd = null, reg = null, health = [], snaps = [], pd = null;
+  const qs = `days=${encodeURIComponent(s.days)}${s.legacy ? "&legacy=1" : ""}`;
+  const getJson = async url => {
+    const r = await fetch(url);
     if (!r.ok) throw new Error(r.status + " " + ((await r.json().catch(() => ({}))).error || ""));
-    d = await r.json();
+    return r.json();
+  };
+  try {
+    d = await getJson(`/api/overview?${qs}`);
+    if (s.tab === "next") {
+      fd = await getJson(`/api/overview/findings?${qs}`);
+    } else if (s.tab === "decisions") {
+      [reg, health] = await Promise.all([
+        getJson("/api/overview/registry"),
+        getJson(`/api/overview/health?${qs}`).then(h => h.findings || []).catch(() => []),
+      ]);
+    } else if (s.tab === "params") {
+      pd = await getJson(`/api/overview/params?${qs}`);
+    }
+    if (s.tab === "briefing") {
+      snaps = await getJson("/api/overview/snapshots").then(x => x.snapshots || []).catch(() => []);
+    }
   } catch (e) {
     root.removeAttribute("aria-busy");
     root.innerHTML = `<div class="alert error" role="alert"><b>Error:</b> ${esc(e.message)}</div>`;
@@ -255,20 +303,46 @@ export async function viewOverview(root, query = "") {
   if (s.tab === "briefing") store(false, String(Date.now()));
   const tabBtn = (t, label) => `<a class="btn btn-sm" href="${hashFor({ ...s, tab: t })}"${s.tab === t ? ` aria-current="page" style="border-color:var(--accent);color:var(--accent)"` : ""}>${label}</a>`;
   const dayOpts = [1, 3, 7, 14, 30, 90].map(n => `<option value="${n}"${n === s.days ? " selected" : ""}>last ${n} day${n === 1 ? "" : "s"}</option>`).join("");
-  const body = s.tab === "leaders" ? leadersTab(d, s) : s.tab === "typologies" ? typologiesTab(d) : briefingTab(d, lastVisit);
+  const body = s.tab === "leaders" ? leadersTab(d, s)
+    : s.tab === "typologies" ? typologiesTab(d)
+      : s.tab === "next" ? findingsTabHtml(fd, s)
+        : s.tab === "decisions" ? registryTabHtml(reg, health)
+          : s.tab === "params" ? paramsTabHtml(pd)
+            : briefingTab(d, lastVisit, snaps);
   root.innerHTML = `<div class="stack" style="gap:18px">
     <div><div class="eyebrow">Overview · live from runs/</div><h2>Project overview</h2>
       <p class="hw-story">Where the search stands: leaders per score identity, families against each score, and what changed. Rolled up by line of work, not run folder.</p>
-      <div class="pill-row" style="margin:8px 0 0">${pill(`generated ${esc(d.generated_utc)}`)} ${pill(`${int(d.kpis && d.kpis.runs)} runs since ${esc(String(d.since_utc).slice(0, 10))}`)} ${pill(`leaders need ≥ ${esc(d.registry.min_valid_for_leader)} valid evals`)} ${pill(`${esc(d.elapsed_s)} s`)}</div></div>
+      <div class="pill-row" style="margin:8px 0 0">${pill(`generated ${esc(d.generated_utc)}`)} ${pill(`${int(d.kpis && d.kpis.runs)} runs since ${esc(String(d.since_utc).slice(0, 10))}`)} ${pill(`leaders need ≥ ${esc(d.registry.min_valid_for_leader)} valid evals`)} ${pill(`${esc(d.elapsed_s)} s`)}</div>
+      ${s.tab === "briefing" ? `<div class="pill-row" style="margin:8px 0 0"><button class="btn btn-sm" id="ov-snap">Generate snapshot</button><span class="muted" style="font-size:.76rem" id="ov-snap-msg">CPU-only; writes runs/analysis/overview_&lt;date&gt;/ — it never takes the GPU lock.</span></div>` : ""}</div>
     ${d.registry.error ? `<div class="alert error" role="alert"><b>Score identity registry:</b> ${esc(d.registry.error)}</div>` : ""}
-    <div class="ov-tabs" role="navigation" aria-label="Overview tabs">${tabBtn("briefing", "Briefing")}${tabBtn("leaders", "Leaders")}${tabBtn("typologies", "Typologies")}
+    <div class="ov-tabs" role="navigation" aria-label="Overview tabs">${tabBtn("briefing", "Briefing")}${tabBtn("leaders", "Leaders")}${tabBtn("typologies", "Typologies")}${tabBtn("next", "Next solves")}${tabBtn("decisions", "Decisions")}${tabBtn("params", "Parameters")}
       <span class="sp"></span>
-      <label class="ov-ctl">Window <select id="ov-days">${dayOpts}</select></label>
-      <label class="ov-ctl"><input type="checkbox" id="ov-legacy"${s.legacy ? " checked" : ""}> show legacy scores</label></div>
+      <div class="ov-tabctl"><label class="ov-ctl">Window <select id="ov-days">${dayOpts}</select></label>
+      <label class="ov-ctl"><input type="checkbox" id="ov-legacy"${s.legacy ? " checked" : ""}> show legacy scores</label></div></div>
     ${body}
   </div>`;
   root.querySelector("#ov-days").addEventListener("change", e => { location.hash = hashFor({ ...s, days: Number(e.target.value) }); });
   root.querySelector("#ov-legacy").addEventListener("change", e => { location.hash = hashFor({ ...s, legacy: e.target.checked }); });
   const sel = root.querySelector("#ov-ident");
   if (sel) sel.addEventListener("change", e => { location.hash = hashFor({ ...s, ident: e.target.value }); });
+  if (s.tab === "next") {
+    wireFindings(root, s, patch => { location.hash = hashFor({ ...s, ...patch }); });
+  }
+  if (s.tab === "decisions") wireRegistry(root);
+  if (s.tab === "params") wireParams(root);
+  const snapBtn = root.querySelector("#ov-snap");
+  if (snapBtn) snapBtn.addEventListener("click", async () => {
+    const msg = root.querySelector("#ov-snap-msg");
+    snapBtn.disabled = true;
+    if (msg) msg.textContent = "Starting snapshot job…";
+    try {
+      const r = await fetch("/api/jobs", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: "overview-snapshot", args: { days: s.days } }) });
+      const out = await r.json().catch(() => ({}));
+      if (msg) msg.textContent = out.error ? `Refused: ${out.error}` : `Snapshot job ${out.id} started (${out.status}).`;
+      if (!out.error) setTimeout(() => { location.hash = hashFor({ ...s, tab: "briefing" }); }, 1200);
+    } catch (e) {
+      if (msg) msg.textContent = `Refused: ${e.message}`;
+    } finally { snapBtn.disabled = false; }
+  });
 }

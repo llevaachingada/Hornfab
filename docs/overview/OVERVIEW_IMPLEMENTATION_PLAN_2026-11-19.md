@@ -4,7 +4,11 @@
 Where it says "must", do not improvise. Where something is ambiguous, stop and append the question
 to `NOTES_FOR_SENIOR.md` instead of guessing.
 
-**Status:** Phase 1 is **built** (same change as this document). Phases 2–4 are **not started**.
+**Status:** Phase 1 is **built** (same change as this document). Phases 2–4 are **built** as of
+2026-11-20 (WP2.1–WP4.3, CPU only): findings/health/state/index, decisions registry, parameters,
+snapshot spec + CPU snapshot job, all wired into `#/overview`; evidence and measured numbers in
+`docs/evidence/overview_phase234_2026-11-20/README.md`. Owner decisions O1–O6 were confirmed as
+recommended (O1 landing page applied; the nav keeps both Home and Status entries).
 
 ---
 

@@ -61,6 +61,24 @@ def test_boolean_feasibility_participates_in_dominance() -> None:
     assert not score.dominates(not_feasible, feasible, directions)
 
 
+def test_nested_numeric_axis_is_a_schema_error_not_a_pareto_row() -> None:
+    """The old pilot shipped {value, direction} axes; dominance silently discarded every pair."""
+    row = _row("nested", 1, cost=1.0, headroom=2.0)
+    row["numeric_axes"]["cost"] = {"value": 1.0, "direction": "-"}
+    with pytest.raises(C.SchemaError, match="numeric axis 'cost'"):
+        score.render_report([row])
+    with pytest.raises(C.SchemaError, match="numeric axis 'cost'"):
+        score.validate_axes([row])
+
+
+def test_non_boolean_feasibility_is_a_schema_error() -> None:
+    """A skipped-rule list is detail, not a boolean feasibility column."""
+    row = _row("bad-feas", 1, cost=1.0, headroom=2.0)
+    row["feasibility"] = {"buildable": True, "rules_skips": ["no geometry"]}
+    with pytest.raises(C.SchemaError, match="feasibility column 'rules_skips'"):
+        score.render_report([row])
+
+
 # --------------------------------------------------------------------------- determinism
 
 def test_report_is_byte_identical_and_order_independent() -> None:

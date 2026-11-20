@@ -26,10 +26,88 @@
   text; `contracts.canonical_json` renders `None` as the string `"None"` in solve records
   (`from_dict` tolerates it — shared helper left untouched); the fixture pack is not captured yet
   (owner runs `tools\system\capture_fixture_cases.py` locally in Pass 0 step 0.3).
+- **Reconciled with the integration branch:** `origin/hornfab-all-2026-11-18` moved to `df0e20f`
+  (senior decision + pilot Pareto/fidelity repair) while this pass ran. Merged it in and adopted that
+  branch's B18/B19 contract: `optimize.run_pilot` emits scalar `numeric_axes` plus `axis_directions`
+  and drops the bogus `LF_TS_SCREENING` call; `score.validate_axes()` raises on nested axes / list
+  feasibility inside `render_report`. Our B19 test was rewritten to that invariant (nested axes are
+  a `SchemaError`, scalar axes + directions rank correctly); the A4 `dominates`-unwrapping hunk was
+  dropped so the tree has one contract. Post-merge regression: **493 passed, 8 skipped, exit 0**.
 - **Not changed:** `contracts.py`, any GUI file, any solver/mesher path; no GPU, no BL, no
   `system_runs/` writes.
 - **Next:** Pass 0 step 0.3 (capture fixtures) and Pass B (needs Pass 0's GUI trio committed).
 
+## 2026-11-20 - Senior engineering decision + pilot Pareto/fidelity repair (CPU only, no GPU)
+
+- **Mandate:** adversarial reconciliation of the horn + woofer stack, a fidelity/source-
+  normalization decision, and the next bounded reference study.
+- **Report:** `docs/HORNFAB_SENIOR_DECISION_2026-11-19.md`. Keeps the three-layer architecture;
+  separates acoustic model / driver state / calibration state / numerical confidence; adopts explicit
+  calibration records as the only route to a coherent sum (arbitrary gain matching rejected);
+  prioritises LF 20-200 Hz, the 2x2 motor-box + real-motor assembly, real driver shape, and
+  convergence/angular validation; report-only system metrics before any scalar; fixed-horn screen as
+  the near-term search.
+- **Fixed (real defects):** `pilot --geometry` called the non-existent `LF_TS_SCREENING` fidelity;
+  pilot Pareto axes were nested `{value,direction}` dicts and `rules_skips` was a list inside boolean
+  feasibility; F3 direction was `+` (maximise). The pilot now uses scalar axes + `axis_directions`
+  with F3 `-`, boolean feasibility, top-level `rules_skips`. `score.validate_axes()` now rejects
+  nested axes/list feasibility in `render_report` instead of silently making every row Pareto.
+- **Tests:** targeted `tests/system/test_score.py` + `test_horn_import.py` = **25 passed**; full
+  `tests/system` passes with the 7 real-BL env gates; `pilot --geometry` CLI verified.
+- **State:** no GPU, no solve; `runs/`/`system_runs/` read-only. Other lane's uncommitted GUI/ripple
+  work left untouched. System census unchanged: 37 cases = 5 solved / 27 staged / 3 refused / 2 invalid.
+
+## 2026-11-20 - P12 verify night: the tie cluster ranked on the verify grid (6/6 jobs, ~20 min GPU)
+
+- **Compact400 trio (one identity, mesh normalized):** screen order **holds on the verify grid** -
+  morph_cont 1.2271 -> **1.1864**, fold_cont 1.3147 -> **1.2763**, twinray_cont 1.4351 -> **1.3734**.
+  Pairwise gaps (0.090/0.097) are still inside the compact400 floor 0.1293: a three-way tie, ordered
+  but not separated. Full polars are the next (and only) separator.
+- **Home v10 fold pair:** the widened-box winner `56203404ce56` **beats the published best** on the
+  same verify grid, 1.4867 vs **1.6704** (0.184 J) - the fold-family s2w improvement is real, not a
+  screen-grid artefact. (Verify J > screen J is expected on a finer grid; only same-grid comparisons
+  count.)
+- **Ext-throat closed** [measured]: the p11 fallback (narrower az_a_cos_pow widen, refusal-tolerant
+  watchdog) ran 30 valid / 47 attempts and never left its seed (1.5710). Two independent attempts now
+  fail to improve `a23763f1c6fc`; no further ext-throat v10 work without a new freedom.
+- Mechanics: 5 one-solve `run --mode verify` replays of stored screen bests + 1 screen fallback,
+  chained behind `compact400_next10_2026-11-19` with `-WaitPid` (that night was never touched).
+  Evidence: `docs/evidence/P12_VERIFY_2026-11-19.md`; queue `docs/queue/p12_verify_2026-11-19.yaml`.
+
+## 2026-11-20 - Fixed-angle spectral ripple audit (handoff item 1 done; report-only, no GPU)
+
+- **Owner ask:** move `HornFab_Data_Backed_Ripple_and_HF_Handoff_2026-11-19.md` into the repo and
+  begin its implementation; up to two background lanes while the orchestrator integrates; flag the
+  human-review items, update CONTINUITY, commit and push.
+- **Moved (verbatim, SHA-256 `D2DE2A79…8D066`):** `docs/research/ripple_hf_2026-11-19/HANDOFF_2026-11-19.md`
+  plus a bundle index, `MANDATE_STATUS.md` (items 1–6 + flags **H1–H6**) and `MEASUREMENT_TAXONOMY.md`
+  (seven phenomena P1–P7, band-mean vs trend reference, Sridhar/Tylka/Choueiri metrics with the three
+  we must not adopt, 5.61 kHz throat cut-on, per-family applicability, sources S1–S9).
+- **Built (mandate item 1, report-only, zero solver calls):** `hornlab_search/metrics/spectral.py`
+  (`fixed_angle_residual_db/_curve` with `reference="trend"|"band_mean"`, `symmetric_pair_report`,
+  `cut_identity_check`, `sensitivity_scan`) and `tools/analysis/spectral_ripple_audit.py` (design- or
+  run-dir scan, `audit.json` + `disagreement.md`, non-empty `--out` refusal, rank column only within
+  one objective version); tests `tests/test_metrics_spectral.py` +
+  `tests/test_tools_analysis_spectral_ripple_audit.py` — **14 passed**.
+- **Measured (24 SCOUT40 bests, all `objective_version` 7):** every handoff number reproduces to
+  ≤0.002 dB (incl. Crowe X OSSE 0.266/0.351 and B3 1.151/1.441) and its B3 claim holds in the arrays
+  (−6.88 dB at 1,763 Hz, −6.74 at 2,269; `z_throat` 0.966−0.122j / 1.016−0.135j / 0.983−0.136j, no
+  large feature); `metrics.json on_axis_db` is band-mean-normalised (shape matches npz to 1.8e-15);
+  all 864 ± pairs agree to ≤1.1e-6 dB, i.e. ± is **not** an independent check under `symmetry: hv`.
+- **Two results that qualify the handoff:** the trend and band-mean references are effectively
+  orthogonal (Spearman **ρ = −0.018**; band-mean punishes the Le Cleac'h/Iwata/Lame taper at 2.1–2.4
+  dB while they are best on trend at 0.04–0.12 dB), and the fixed-angle residual is largely redundant
+  with `rip` (**ρ = 0.885**, 44/276 discordant pairs). Detrend order is stable (ρ 0.955/0.959) but
+  absolute values move up to 0.559 dB. Conclusion: no term promotion; `J` under-charges a defect it
+  partly sees rather than being blind to a class.
+- **Evidence:** `docs/evidence/spectral_ripple_audit_2026-11-19/` (README + `audit/audit.json` +
+  `audit/disagreement.md`; regenerable per-design JSONs not committed).
+- **State:** GPU untouched — no solve, no lock change; the lock was observed stale-held (holder pid
+  gone) after `p12_verify_2026-11-19` exit 1 and needs `gpu-clean` before any solve. Mandate items 3–5
+  (dense-frequency validation, controlled HF-width experiment, source validity) need owner approval;
+  item 6 (scoring) stays deferred. A second GUI lane's unstaged `app.js`/`app.css`/`hw*` work was left
+  untouched; the previously staged Overview phases 2–4 were committed separately (`3fd2027`, 79 tests
+  re-verified).
 ## 2026-11-20 - System v1 handoffs made self-contained (docs only)
 
 - **Owner ask:** handoffs must carry branch names, file locations and rules.
@@ -94,6 +172,19 @@
 - **Deferred:** wiring the snapshot into the night runner (O3) needs an edit to `tools/night_queue`
   and an owner-approved unattended path; the job is available from the Overview button instead. A
   full 14-day snapshot was not run (smoke only).
+- **Visual QA (same day, follow-up commits):** an independent image review of the six tabs found 16
+  issues — 2 blockers (the Parameters table lost BEST J / bound-hit columns at 375 px; an expanded
+  findings group repeated its own header) and 14 cosmetic bugs (`WP WP4`, a character-broken SOURCE
+  column, a risk counter implying missing rows, a duplicated timestamp, severity order). All fixed:
+  narrow params rows carry a labelled `J 2.498 · 0 hits` group (nowrap segments, header printed once,
+  no tab timestamp); findings groups follow the payload's severity-tied order, the severity tiles
+  count the *matching* subset with a sentence saying so ("…match the filters below; the payload holds
+  N") and the counter reads `X of Y groups · X of Y findings shown`; the registry hides an all-empty
+  Decided column, moves `source:` under the recommendation and states
+  `33 risks + 12 decisions = 45 rows`. Tie-verify evidence now prints 4-decimal J values instead of
+  raw floats. A severity tie-break (`F.sort_key`: status, −score, severity) keeps HIGH above MEDIUM
+  at equal score. Final Playwright pass 24/24 clean at 1280/375 dark/light, URL state reload-safe
+  (also verified with `tab=next&status=all&sort=newest&kind=budget`). Screenshots refreshed.
 - **State:** GPU lane untouched (no solve, no lock change). `runs/overview/{index.json,finding_state.json}`
   are the only GUI-written state; both are git-ignored with `runs/`.
 

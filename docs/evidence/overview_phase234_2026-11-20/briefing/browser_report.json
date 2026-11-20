@@ -1,0 +1,30 @@
+{
+  "base": "http://127.0.0.1:8766",
+  "runs": [
+    {
+      "route": "/#/overview",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8766/?theme=dark#/overview",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/overview",
+        "title": "Project overview",
+        "body_text_len": 3425
+      },
+      "screenshot": "docs\\evidence\\overview_phase234_2026-11-20\\briefing\\overview__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    }
+  ],
+  "failures": []
+}

@@ -48,6 +48,7 @@ __all__ = [
     "render_report",
     "flag_off_axis_cancellation",
     "dominates",
+    "validate_axes",
 ]
 
 _NUMERIC_ALIASES = ("numeric_axes", "dominance_axes")
@@ -120,36 +121,9 @@ def _sort_key(row: Mapping[str, Any]) -> tuple[tuple[int, float, str], ...]:
     return tuple(_sortable(v) for v in values) + (_sortable(row_id),)
 
 
-def _raw_axis_value(value: Any) -> Any:
-    """Unwrap a ``{value, direction}`` axis cell; plain numbers pass through unchanged."""
-    if isinstance(value, Mapping):
-        return value.get("value")
-    return value
-
-
-def _embedded_direction(value: Any) -> str | None:
-    if isinstance(value, Mapping):
-        direction = value.get("direction")
-        if direction is not None:
-            return str(direction)
-    return None
-
-
-def _axis_direction(key: str, a_value: Any, b_value: Any,
-                    directions: Mapping[str, str]) -> str | None:
-    """Resolve the direction: explicit map first, else the axis cell's own ``direction``."""
-    if key in directions:
-        return str(directions[key])
-    a_dir = _embedded_direction(a_value)
-    b_dir = _embedded_direction(b_value)
-    if a_dir is not None and b_dir is not None and a_dir != b_dir:
-        return None
-    return a_dir if a_dir is not None else (b_dir if b_dir is not None else "+")
-
-
 def _finite_number(value: Any) -> float | None:
     try:
-        number = float(_raw_axis_value(value))
+        number = float(value)
     except (TypeError, ValueError):
         return None
     return number if math.isfinite(number) else None
@@ -161,6 +135,32 @@ def _bool_or_none(value: Any) -> bool | None:
     if isinstance(value, (bool, np.bool_)):
         return bool(value)
     return None
+
+
+def validate_axes(rows: Sequence[Mapping[str, Any]]) -> None:
+    """Reject a row schema that dominance cannot interpret.
+
+    The canonical contract is scalar ``numeric_axes`` values plus boolean ``feasibility``
+    columns. Nested ``{value, direction, ...}`` axes or list-valued feasibility columns are a
+    schema error, not silently unorderable rows: a report must never look Pareto-clean because
+    every pair was quietly discarded. Missing/NaN numeric axes remain allowed (they make a pair
+    unorderable, by design).
+    """
+    for index, row in enumerate(rows):
+        row_id = str(row.get("row_id", row.get("id", f"row-{index}")))
+        for key, value in _numeric_axes(row).items():
+            if value is None:
+                continue
+            if isinstance(value, bool) or not isinstance(
+                    value, (int, float, np.integer, np.floating)):
+                raise contracts.SchemaError(
+                    f"row {row_id!r}: numeric axis {key!r} must be a scalar number or None, "
+                    f"got {type(value).__name__}")
+        for key, value in _feasibility_axes(row).items():
+            if value is not None and not isinstance(value, (bool, np.bool_)):
+                raise contracts.SchemaError(
+                    f"row {row_id!r}: feasibility column {key!r} must be bool or None, "
+                    f"got {type(value).__name__}")
 
 
 def dominates(a: Mapping[str, Any], b: Mapping[str, Any],
@@ -181,10 +181,7 @@ def dominates(a: Mapping[str, Any], b: Mapping[str, Any],
         bv = _finite_number(_numeric_axes(b).get(key))
         if av is None or bv is None:
             return False
-        direction = _axis_direction(
-            key, _numeric_axes(a).get(key), _numeric_axes(b).get(key), directions)
-        if direction is None:
-            return False
+        direction = directions.get(key, "+")
         if direction == "+" and av < bv:
             return False
         if direction == "-" and av > bv:
@@ -202,12 +199,11 @@ def dominates(a: Mapping[str, Any], b: Mapping[str, Any],
 
     strict = False
     for key in sorted(num_keys):
-        av = float(_raw_axis_value(_numeric_axes(a)[key]))
-        bv = float(_raw_axis_value(_numeric_axes(b)[key]))
-        direction = _axis_direction(key, _numeric_axes(a)[key], _numeric_axes(b)[key], directions)
-        if direction == "+" and av > bv:
+        av = float(_numeric_axes(a)[key])
+        bv = float(_numeric_axes(b)[key])
+        if directions.get(key, "+") == "+" and av > bv:
             strict = True
-        if direction == "-" and av < bv:
+        if directions.get(key, "-") == "-" and av < bv:
             strict = True
     for key in sorted(feas_keys):
         if bool(feasible_a[key]) and not bool(feasible_b[key]):
@@ -323,6 +319,7 @@ def render_report(rows: list[dict],
     """
     axes = tuple(str(a) for a in axes)
     raw_rows = [dict(r) for r in rows]
+    validate_axes(raw_rows)
     ids = [str(r.get("row_id", r.get("id", f"row-{i}"))) for i, r in enumerate(raw_rows)]
     if len(set(ids)) != len(ids):
         raise contracts.SchemaError("report rows must have unique row_id values")

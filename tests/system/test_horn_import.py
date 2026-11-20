@@ -1,6 +1,7 @@
 """Stage 2 tests: the accel->velocity import boundary and the fixed-horn pilot engine."""
 from __future__ import annotations
 
+import copy
 import json
 import math
 import sys
@@ -17,6 +18,7 @@ from hornlab_search.system import contracts as C  # noqa: E402
 from hornlab_search.system import horn_import  # noqa: E402
 from hornlab_search.system import optimize  # noqa: E402
 from hornlab_search.system import provenance  # noqa: E402
+from hornlab_search.system import score  # noqa: E402
 
 
 # --------------------------------------------------------------------------- synthetic asset
@@ -186,6 +188,44 @@ def test_pilot_manifest_round_trips(tmp_path: Path) -> None:
     # the manifest stores the CANONICAL form (lists/str-keys/floats); compare like-for-like
     canonical_rows = json.loads(C.canonical_json(list(result.rows)))
     assert payload["rows"] == canonical_rows
+
+
+def test_pilot_geometry_path_is_a_supported_lf_screening_input() -> None:
+    """Regression: the pilot used the non-existent 'LF_TS_SCREENING' fidelity label."""
+    geometry = (Path(__file__).resolve().parents[2]
+                / "examples" / "systems" / "driver_geometry" / "faitalpro_12pr300.yaml")
+    result = optimize.run_pilot(_spec(), geometry_path=geometry, limit_boxes=2)
+    assert result.driver.geometry_mm is not None
+    # the vendor geometry has only cutout/frame/depth; installed tiers stay refused
+    assert result.driver.data_quality["has_full_geometry"] is False
+    assert result.rows
+
+
+def test_pilot_rows_use_scalar_axes_and_f3_is_minimized() -> None:
+    """The pilot must emit the same canonical Pareto row contract as woofer_seed."""
+    result = optimize.run_pilot(_spec(), limit_boxes=3)
+    for row in result.rows:
+        assert set(row["axis_directions"]) == set(row["numeric_axes"])
+        assert row["axis_directions"]["f3_hz"] == "-"
+        assert row["axis_directions"]["net_volume_l"] == "-"
+        assert row["axis_directions"]["margin_40hz_db"] == "+"
+        assert all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                   for v in row["numeric_axes"].values())
+        assert all(isinstance(v, bool) for v in row["feasibility"].values())
+        assert isinstance(row["rules_skips"], list)
+
+    # Lower F3 dominates higher F3 when every other axis and feasibility flag is equal.
+    a = copy.deepcopy(result.rows[0])
+    b = copy.deepcopy(result.rows[0])
+    for key in a["numeric_axes"]:
+        a["numeric_axes"][key] = 1.0
+        b["numeric_axes"][key] = 1.0
+    a["feasibility"] = {key: True for key in a["feasibility"]}
+    b["feasibility"] = {key: True for key in b["feasibility"]}
+    a["numeric_axes"]["f3_hz"] = 40.0
+    b["numeric_axes"]["f3_hz"] = 50.0
+    assert score.dominates(a, b, a["axis_directions"])
+    assert not score.dominates(b, a, a["axis_directions"])
 
 
 # --------------------------------------------------------------------------- beamwidth screen

@@ -296,6 +296,45 @@ class App:
                 raise ValueError("days must be between 1 and 365")
             return OV.overview(self.root, self.runs, days=days,
                                show_legacy=bool(_q_bool(q, "legacy", False)))
+        if head == "overview" and len(parts) == 2 and parts[1] == "snapshots":
+            from . import data_overview_snapshot as OSN
+            return {"snapshots": OSN.snapshots(self.root, self.runs)}
+        if head == "overview" and len(parts) == 2 and parts[1] == "findings":
+            # Phase 2 findings: computed from the SAME phase-1 overview payload; the engine reads
+            # run ndjson only for the budget curve and an existing walls.json (read-only). Phase 3.3
+            # software health joins the same list so one tab ranks every recommendation.
+            from . import data_overview as OV, data_overview_findings as F, data_overview_state as ST
+            from . import data_overview_health as H
+            days = _q_int(q, "days", 14)
+            if not 1 <= days <= 365:
+                raise ValueError("days must be between 1 and 365")
+            ov = OV.overview(self.root, self.runs, days=days,
+                             show_legacy=bool(_q_bool(q, "legacy", False)))
+            fs = F.findings(ov, self.runs) + H.health_findings(ov, self.root, self.runs)
+            fs.sort(key=F.sort_key)
+            fs = ST.merge_state(fs, ST.load_state(self.runs))
+            return {"findings": fs, "counts": {s: sum(1 for f in fs if f["severity"] == s)
+                                               for s in F.SEVERITIES},
+                    "generated_utc": ov["generated_utc"]}
+        if head == "overview" and len(parts) == 2 and parts[1] == "health":
+            from . import data_overview as OV, data_overview_health as H
+            days = _q_int(q, "days", 14)
+            if not 1 <= days <= 365:
+                raise ValueError("days must be between 1 and 365")
+            ov = OV.overview(self.root, self.runs, days=days,
+                             show_legacy=bool(_q_bool(q, "legacy", False)))
+            return {"findings": H.health_findings(ov, self.root, self.runs),
+                    "generated_utc": ov["generated_utc"]}
+        if head == "overview" and len(parts) == 2 and parts[1] == "registry":
+            from . import data_overview_registry as RG
+            return RG.load_project_registry(self.root)
+        if head == "overview" and len(parts) == 2 and parts[1] == "params":
+            from . import data_overview_params as PR
+            days = _q_int(q, "days", 14)
+            if not 1 <= days <= 365:
+                raise ValueError("days must be between 1 and 365")
+            return PR.params(self.root, self.runs, days=days,
+                             show_legacy=bool(_q_bool(q, "legacy", False)))
         if head == "studies":
             from .data_studies import build_study_view, study_summaries
             index = self._study_index()
@@ -608,6 +647,14 @@ class App:
     def post(self, path: str, body: dict) -> object:
         parts = [unquote(p) for p in path.strip("/").split("/")][1:]
         head = parts[0] if parts else ""
+        if head == "overview" and len(parts) == 3 and parts[1] == "findings":
+            # GUI-written finding state (owner decision O4: the one GUI-written state file).
+            # set_status validates status/id and writes atomically; ValueError maps to 400.
+            from . import data_overview_state as ST
+            payload = body or {}
+            state = ST.set_status(self.runs, parts[2], payload.get("status"),
+                                  note=payload.get("note"), by="gui")
+            return {"ok": True, "id": parts[2], "state": state}
         if head == "hw":
             # Horn + woofer pure recompute endpoints (no solver, no Boundary Lab, no writes).
             from . import data_hw_screen as SW
@@ -678,9 +725,9 @@ class App:
             if head == "preview":                       # the exact command a launch would run (same validation)
                 kind = str(body.get("kind", ""))
                 args = body.get("args") or {}
-                if kind.startswith("hw-"):
-                    # hw-* jobs run through tools/system/gui_system_job.py, not the stock CLI;
-                    # the preview must print the command that will really run (never a lie).
+                if kind.startswith("hw-") or kind == "overview-snapshot":
+                    # These jobs run through a repo entry script, not the stock CLI; the preview
+                    # must print the command that will really run (never a lie).
                     prev = self.jobs.preview(kind, args)
                     return {"command": prev["command"], "gpu": prev["gpu"], "entry": prev.get("entry"),
                             "gpu_busy": None}
