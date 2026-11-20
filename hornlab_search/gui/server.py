@@ -579,6 +579,15 @@ class App:
             return NEW.hw_specs(self.root)
         if sub == "overview" and len(parts) == 1:
             return HW.hw_overview(self.root, self.system_store)
+        if sub == "stage-options" and len(parts) == 1:
+            from . import data_hw_stage as HWS
+            return HWS.stage_options(self.root, self.system_store)
+        if sub == "solve-presets" and len(parts) == 1:
+            from . import data_hw_stage as HWS
+            return HWS.solve_presets(self.root, self.system_store)
+        if sub == "authorization" and len(parts) == 1:
+            from . import data_hw_stage as HWS
+            return HWS.authorization_state(self.root)
         raise FileNotFoundError("/".join(["hw", *parts]))
 
     def _budget_hint(self, q: dict) -> dict:
@@ -656,7 +665,9 @@ class App:
                                   note=payload.get("note"), by="gui")
             return {"ok": True, "id": parts[2], "state": state}
         if head == "hw":
-            # Horn + woofer pure recompute endpoints (no solver, no Boundary Lab, no writes).
+            # Horn + woofer endpoints: pure recompute plus the one GUI-written spec file
+            # (examples/systems/user/). panel-fit/validate are pure; spec/save writes that file;
+            # no solver and no Boundary Lab import happens here.
             from . import data_hw_screen as SW
             from . import data_hw_new as NEW
             if len(parts) == 2 and parts[1] == "panel-fit":

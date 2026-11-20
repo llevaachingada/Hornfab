@@ -295,6 +295,13 @@ def test_server_dispatch(env) -> None:
                 {"domain": ["observation:probe:on_axis"]})
     assert len(b["excitations"]) == 2
     assert app.get("/api/hw/readiness", {})["decisions"]
+    # P6 backend routes for the stage/solve dialogs (no solver, no write on GET).
+    options = app.get("/api/hw/stage-options", {})
+    assert options["horn_meshes"] and "clearance_m" not in options
+    presets = app.get("/api/hw/solve-presets", {})
+    assert [p["id"] for p in presets["presets"]] == ["smoke3", "wide25", "lowband12"]
+    auth = app.get("/api/hw/authorization", {})
+    assert auth["allowed"] is False and "decision 6" in auth["reason"]
     # P2: screens list/detail and the pure panel-fit recompute are wired.
     screens = app.get("/api/hw/screens", {})
     assert screens["studies"] == [] and "store" in screens          # fixture store has no studies
@@ -376,6 +383,12 @@ def test_overview_next_step_is_computed_from_disk(env) -> None:
     assert HW.overview_next_step([study], {"staged": 7, "solved": 0})["id"] == "solve"
     assert HW.overview_next_step([study], {"staged": 0, "solved": 0,
                                            "shortlist_rows": 0})["id"] == "stage"
+    # An in-progress R3 audit outranks "compare": the next scientific step is not a GUI action.
+    r3 = [{"id": "R3", "status": "in_progress",
+           "evidence": "README#lf-on-axis (LF solved; bassbox model-difference audit open)"}]
+    nxt = HW.overview_next_step([study], {"staged": 0, "solved": 2}, r3)
+    assert nxt["id"] == "r3_audit" and nxt["href"] == "#/hw/readiness"
+    assert "bassbox" in nxt["why"]
 
     app = App(root, system_store=store)
     ov = app.get("/api/hw/overview", {})

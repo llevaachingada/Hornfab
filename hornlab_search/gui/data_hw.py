@@ -1081,11 +1081,13 @@ def hw_readiness(root: Path, store: Path) -> dict:
 
 # --------------------------------------------------------------------------- overview (P8)
 
-def overview_next_step(studies: list[dict], counts: dict) -> dict:
+def overview_next_step(studies: list[dict], counts: dict,
+                       risks: list[dict] | None = None) -> dict:
     """The one next action, computed from disk (never guessed in JS).
 
     Order: no studies -> start a new system; a shortlist with no Boundary Lab case -> check one
-    in BL; two or more solved -> compare; one solved -> read it; staged only -> open a staged case
+    in BL; an in-progress R3 bassbox audit -> point at Readiness (the GUI cannot run that audit);
+    two or more solved -> compare; one solved -> read it; staged only -> open a staged case
     (solving needs decision 6); otherwise run a screen.
     """
     solved = int(counts.get("solved") or 0)
@@ -1100,6 +1102,16 @@ def overview_next_step(studies: list[dict], counts: dict) -> dict:
         return {"id": "stage", "label": "Check a shortlisted design in Boundary Lab",
                 "href": f"#/hw/screen/{newest}",
                 "why": f"Shortlist ready ({shortlist} designs). Boundary Lab proves the box can be built."}
+    r3 = next((r for r in (risks or [])
+               if str(r.get("id")) == "R3"
+               and str(r.get("status") or "").lower() == "in_progress"
+               and "bassbox" in str(r.get("evidence") or "").lower()), None)
+    if r3 is not None and solved:
+        return {"id": "r3_audit", "label": "Next: bassbox model-difference audit (R3)",
+                "href": "#/hw/readiness",
+                "why": ("LF 20-200 Hz is solved separately; the open question is how the lumped "
+                        "bassbox model differs from BL, which this GUI cannot run. Readiness "
+                        "tracks it.")}
     if solved >= 2:
         return {"id": "compare", "label": "Compare two solved cases", "href": "#/hw/compare",
                 "why": f"{solved} solved cases; A/B the differences on the shared grid."}
@@ -1152,7 +1164,7 @@ def hw_overview(root: Path, store: Path) -> dict:
             "solved": int(counts.get("solved") or 0),
             "blocked_decisions": len(decisions),
         },
-        "next_step": overview_next_step(studies, counts),
+        "next_step": overview_next_step(studies, counts, risks),
         "recent_screens": [{k: s.get(k) for k in (
             "study_id", "mtime_utc", "horn", "driver_count", "counts", "counts_missing",
             "claim", "replay_count", "byte_identical")} for s in studies[:3]],
