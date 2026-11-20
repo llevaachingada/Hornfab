@@ -1612,3 +1612,6 @@ tbody tr[tabindex]:focus-visible { outline:2px solid var(--accent); outline-offs
 .hw3d-scale-label { color:var(--ink); border-color:var(--accent); }
 .hw3d-note { margin:6px 0 0; color:var(--muted); font-size:0.78rem; }
 .hw3d-fallback { margin-top:8px; }
+
+/* Registry v2 (2026-11-20): a proposed declaration is visible but greyed until approved. */
+.pill.hw-proposed { color:var(--muted); border-color:var(--rule); }

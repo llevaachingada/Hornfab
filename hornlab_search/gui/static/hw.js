@@ -130,10 +130,13 @@ function statePill(r) {
   return `<span class="pill ${STATE_PILL[s] || ""}">${esc(STATE_LABEL[s] || s)}${esc(extra)}</span>`;
 }
 
-function fidelityBadge(f) {
+function fidelityBadge(f, status) {
   const cls = f === "UNDECLARED" ? "warn" : "";
   const title = f === "UNDECLARED" ? GLOSS.UNDECLARED : `${TERMS.hw_fidelity.label}: ${TERMS.hw_fidelity.long}`;
-  return `<span class="pill ${cls}" title="${esc(title)}">${enumText(f)}</span>`;
+  const proposed = status === "proposed"
+    ? ` <span class="pill warn" title="Proposed from the evidence queue; the owner's approval is gate H.">proposed</span>`
+    : "";
+  return `<span class="pill ${cls}${status === "proposed" ? " hw-proposed" : ""}" title="${esc(title)}">${enumText(f)}</span>${proposed}`;
 }
 
 function roleBadge(label, v) {
@@ -299,7 +302,7 @@ export async function viewHwCases(root, query = "") {
         <td style="white-space:normal">${esc(boxText(r.box))}</td>
         <td style="white-space:normal">${horn}</td>
         <td>${solve}</td>
-        <td>${fidelityBadge(r.fidelity)}</td>
+        <td>${fidelityBadge(r.fidelity, r.status)}</td>
       </tr>${tokenRow}`;
     }).join("");
     return `<details class="hw-group" data-exp="${esc(exp)}"${open ? " open" : ""}>
@@ -481,7 +484,7 @@ export async function viewHwCase(root, key) {
   const title = `${r.ref && r.ref !== "-" ? r.ref + " · " : ""}${r.gate || r.experiment}`;
 
   const pills = [
-    statePill(r), fidelityBadge(r.fidelity),
+    statePill(r), fidelityBadge(r.fidelity, r.status),
     roleBadge("motor", r.motor), roleBadge("shape", r.transducer_shape),
     r.horn ? clearancePill(r.clearance) : "",
     r.integrity !== "ok" ? `<span class="pill bad" title="${esc(r.integrity)}">manifest ${esc(r.integrity.split(":")[0])}</span>` : "",
@@ -549,8 +552,8 @@ export async function viewHwCase(root, key) {
         <section class="card"><h3>Box and horn</h3>${boxTable(r, d)}</section>
         <section class="card"><h3>Related</h3>${relatedBlock(r)}
           <p class="muted" style="font-size:0.8rem;margin-top:6px">Fidelity, motor and transducer shape are
-            declared in <code>docs/research/system_woofer_2026-11-18/readiness.yaml</code>; a case missing from
-            it shows UNDECLARED. Nothing on this page infers them.</p>
+            declared in <code>docs/research/system_woofer_2026-11-18/cases.d/</code> (registry v2); a case
+            missing from it shows UNDECLARED. Nothing on this page infers them.</p>
         </section>
       </div>
     </div>`;

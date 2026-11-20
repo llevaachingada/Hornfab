@@ -26,6 +26,8 @@ from typing import Any
 import numpy as np
 
 REGISTRY_REL = Path("docs/research/system_woofer_2026-11-18/readiness.yaml")
+CASE_FILES_DIR = "cases.d"
+_REGISTRY_SCHEMAS = ("hw_readiness_v1", "hw_readiness_v2")
 _KEY_PART = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,120}$")
 _P_REF = 20e-6                                        # Pa, dB SPL reference
 _CACHE: dict[tuple, Any] = {}
@@ -75,7 +77,31 @@ def _stamp(p: Path) -> tuple:
 
 # --------------------------------------------------------------------------- registry
 
+def _case_files(reg_dir: Path, patterns: list[str] | None) -> list[Path]:
+    """The case files a v2 registry declares; only ``cases.d/*.yaml`` inside the registry folder.
+
+    ``case_files`` may name narrower globs under ``cases.d/`` but can never point outside it
+    (the registry is committed, yet a typo must not send the loader at an arbitrary file).
+    """
+    chosen = list(patterns or [f"{CASE_FILES_DIR}/*.yaml"])
+    out: list[Path] = []
+    for pattern in chosen:
+        rel = Path(str(pattern))
+        if rel.is_absolute() or ".." in rel.parts or not rel.parts \
+                or rel.parts[0] != CASE_FILES_DIR:
+            raise ValueError(
+                f"case_files entry {pattern!r} must be a relative glob under {CASE_FILES_DIR}/")
+        out.extend(sorted(p for p in reg_dir.glob(str(rel)) if p.is_file()))
+    return sorted(set(out))
+
+
 def load_registry(root: Path) -> dict[str, Any]:
+    """Read the readiness registry (v1 inline cases, or v2 ``cases.d/*.yaml``).
+
+    Duplicate case keys are reported in ``error`` and excluded from the declaration map by
+    :func:`_declared`, so an ambiguous key shows ``UNDECLARED`` instead of silently taking the
+    last file's row (senior review 2026-11-20 §3.1).
+    """
     path = Path(root) / REGISTRY_REL
     if not path.is_file():
         return {"schema": None, "cases": [], "risks": [], "decisions": [],
@@ -83,11 +109,61 @@ def load_registry(root: Path) -> dict[str, Any]:
 
     def read():
         import yaml
+        reg_dir = path.parent
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-        if data.get("schema") != "hw_readiness_v1":
-            raise ValueError(f"{REGISTRY_REL.as_posix()}: schema must be hw_readiness_v1")
-        return _plain(data)
-    return _cached(("registry",) + _stamp(path), read)
+        schema = data.get("schema")
+        if schema not in _REGISTRY_SCHEMAS:
+            raise ValueError(
+                f"{REGISTRY_REL.as_posix()}: schema must be one of {', '.join(_REGISTRY_SCHEMAS)}")
+        errors: list[str] = []
+        cases: list[dict[str, Any]] = []
+        if schema == "hw_readiness_v1":
+            cases = [dict(c) for c in data.get("cases") or [] if isinstance(c, dict)]
+        else:
+            try:
+                files = _case_files(reg_dir, data.get("case_files"))
+            except ValueError as exc:
+                files, errors = [], [str(exc)]
+            if not files and not errors:
+                errors.append(f"cases.d: no case files under {CASE_FILES_DIR}/")
+            for case_file in files:
+                rel = case_file.relative_to(reg_dir).as_posix()
+                try:
+                    doc = yaml.safe_load(case_file.read_text(encoding="utf-8")) or {}
+                except (OSError, yaml.YAMLError) as exc:
+                    errors.append(f"{rel}: {exc}")
+                    continue
+                rows = doc.get("cases") if isinstance(doc, dict) else doc
+                if not isinstance(rows, list):
+                    errors.append(f"{rel}: expected a 'cases:' list")
+                    continue
+                for row in rows:
+                    if not isinstance(row, dict) or not row.get("key"):
+                        errors.append(f"{rel}: case entry without a key")
+                        continue
+                    entry = dict(row)
+                    entry.setdefault("declared_in", rel)
+                    cases.append(entry)
+        counts: dict[str, int] = {}
+        for case in cases:
+            key = str(case.get("key"))
+            counts[key] = counts.get(key, 0) + 1
+        duplicates = sorted(k for k, n in counts.items() if n > 1)
+        if duplicates:
+            errors.append("duplicate case key(s) across registry files: " + ", ".join(duplicates))
+        out = _plain({k: v for k, v in data.items() if k != "cases"})
+        out["cases"] = _plain(cases)
+        out.setdefault("risks", [])
+        out.setdefault("decisions", [])
+        if errors:
+            out["error"] = "; ".join(errors)
+        return out
+
+    stamps = [_stamp(path)]
+    cases_dir = path.parent / CASE_FILES_DIR
+    if cases_dir.is_dir():
+        stamps.extend(_stamp(p) for p in sorted(cases_dir.glob("*.yaml")))
+    return _cached(("registry", *stamps), read)
 
 
 def _plain(x: Any) -> Any:
@@ -103,7 +179,14 @@ def _plain(x: Any) -> Any:
 
 
 def _declared(registry: dict) -> dict[str, dict]:
-    return {str(c.get("key")): dict(c) for c in registry.get("cases") or []}
+    """Declaration map; a key declared more than once is dropped (never a silent last-wins)."""
+    rows = [dict(c) for c in registry.get("cases") or []]
+    counts: dict[str, int] = {}
+    for row in rows:
+        key = str(row.get("key"))
+        counts[key] = counts.get(key, 0) + 1
+    return {str(row.get("key")): row for row in rows
+            if counts[str(row.get("key"))] == 1}
 
 
 # --------------------------------------------------------------------------- manifests
@@ -313,6 +396,9 @@ def _row(store: Path, case: Path, declared: dict[str, dict]) -> dict:
         "declared": bool(decl),
         "ref": decl.get("ref"), "gate": decl.get("gate"), "note": decl.get("note"),
         "evidence": decl.get("evidence"),
+        "status": decl.get("status") or ("approved" if decl else None),
+        "proposed_by": decl.get("proposed_by"), "approved_by": decl.get("approved_by"),
+        "declared_in": decl.get("declared_in"),
         "fidelity": decl.get("fidelity") or "UNDECLARED",
         "motor": decl.get("motor") or motor_fact or "UNDECLARED",
         "motor_fact": motor_fact,
@@ -768,7 +854,8 @@ def overview_next_step(studies: list[dict], counts: dict) -> dict:
 def _case_row_brief(row: dict) -> dict:
     return {k: row.get(k) for k in (
         "key", "ref", "gate", "experiment", "case", "state", "solve", "box", "horn",
-        "clearance", "fidelity", "motor", "transducer_shape", "created_utc", "tokens")}
+        "clearance", "fidelity", "motor", "transducer_shape", "status", "created_utc",
+        "tokens")}
 
 
 def hw_overview(root: Path, store: Path) -> dict:

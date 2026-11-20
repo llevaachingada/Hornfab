@@ -216,6 +216,69 @@ def test_readiness_and_missing_registry(env) -> None:
     assert data["registry_error"] and all(r["fidelity"] == "UNDECLARED" for r in data["cases"])
 
 
+def _write_v2(root: Path, case_files: dict[str, str]) -> None:
+    """A v2 registry with one file per ``cases.d/<name>`` entry (test wiring)."""
+    reg = root / HW.REGISTRY_REL
+    reg.parent.mkdir(parents=True, exist_ok=True)
+    reg.write_text(
+        "schema: hw_readiness_v2\nupdated: 2026-11-20\ncase_files: [cases.d/*.yaml]\n"
+        "risks:\n  - {id: R1, level: CRITICAL, status: open, wp: WP4, title: t, evidence: e}\n"
+        "decisions:\n  - {id: 1, question: q, recommendation: r, status: open}\n",
+        encoding="utf-8")
+    cases_dir = reg.parent / "cases.d"
+    cases_dir.mkdir(exist_ok=True)
+    for name, body in case_files.items():
+        (cases_dir / name).write_text(body, encoding="utf-8")
+    HW._CACHE.clear()
+
+
+def test_registry_v2_loads_cases_d_and_ignores_files_outside_it(env) -> None:
+    root, store = env
+    _write_v2(root, {
+        "00_a.yaml": (
+            "cases:\n"
+            "  - {key: bl_motor/20261119T000000Z-solved-1-aaaa, ref: '#4', gate: motor A,\n"
+            "     fidelity: COUPLED_VENTED_FEM_BEM_LEM, motor: real, transducer_shape: demo,\n"
+            "     status: approved, approved_by: senior review 2026-11-19}\n"),
+        "10_b.yaml": (
+            "cases:\n"
+            "  - {key: bl_horn/20261118T000000Z-ok-2-bbbb, ref: EV-1, gate: clearance control,\n"
+            "     fidelity: COUPLED_VENTED_FEM_BEM_LEM, motor: demo, transducer_shape: demo,\n"
+            "     status: proposed, proposed_by: evidence tool}\n"),
+    })
+    # A YAML beside cases.d/ (not inside it) must never be read.
+    (root / HW.REGISTRY_REL).parent.joinpath("stray.yaml").write_text(
+        "cases:\n  - {key: bl_horn/nope, ref: STRAY}\n", encoding="utf-8")
+    data = HW.load_registry(root)
+    assert data["schema"] == "hw_readiness_v2" and "error" not in data
+    keys = {c["key"]: c for c in data["cases"]}
+    assert keys["bl_motor/20261119T000000Z-solved-1-aaaa"]["status"] == "approved"
+    assert keys["bl_horn/20261118T000000Z-ok-2-bbbb"]["status"] == "proposed"
+    assert all(c["declared_in"].startswith("cases.d/") for c in data["cases"])
+    assert "bl_horn/nope" not in keys
+    rows = _by_key(HW.hw_cases(root, store))
+    assert rows["bl_motor/20261119T000000Z-solved-1-aaaa"]["status"] == "approved"
+    assert rows["bl_horn/20261118T000000Z-ok-2-bbbb"]["status"] == "proposed"
+
+
+def test_registry_v2_duplicate_key_is_reported_and_never_overrides(env) -> None:
+    root, store = env
+    _write_v2(root, {
+        "00_a.yaml": (
+            "cases:\n  - {key: bl_motor/20261119T000000Z-solved-1-aaaa, ref: '#4',\n"
+            "     fidelity: COUPLED_VENTED_FEM_BEM_LEM, motor: real, transducer_shape: demo}\n"),
+        "10_b.yaml": (
+            "cases:\n  - {key: bl_motor/20261119T000000Z-solved-1-aaaa, ref: DUP,\n"
+            "     fidelity: COUPLED_VENTED_FEM_BEM_LEM, motor: demo, transducer_shape: demo}\n"),
+    })
+    data = HW.hw_cases(root, store)
+    assert "duplicate case key(s)" in data["registry_error"]
+    assert "bl_motor/20261119T000000Z-solved-1-aaaa" in data["registry_error"]
+    row = _by_key(data)["bl_motor/20261119T000000Z-solved-1-aaaa"]
+    # Ambiguous declarations are dropped, not resolved last-wins: the case shows UNDECLARED.
+    assert row["declared"] is False and row["fidelity"] == "UNDECLARED"
+
+
 def test_server_dispatch(env) -> None:
     from hornlab_search.gui.server import App
 
@@ -320,7 +383,7 @@ def test_committed_registry_parses_and_names_real_cases() -> None:
     repo = Path(__file__).resolve().parents[2]
     HW._CACHE.clear()
     reg = HW.load_registry(repo)
-    assert reg.get("schema") == "hw_readiness_v1"
+    assert reg.get("schema") == "hw_readiness_v2" and "error" not in reg
     ids = [r["id"] for r in reg["risks"]]
     assert ids == [f"R{i}" for i in range(1, 18)]
     allowed = {"SCREEN_MAGNITUDE", "SCREEN_COMPLEX_APPROX", "INSTALLED_EXTERIOR_BEM",
@@ -329,3 +392,11 @@ def test_committed_registry_parses_and_names_real_cases() -> None:
         assert len(c["key"].split("/")) == 2
         assert c.get("fidelity") is None or c["fidelity"] in allowed
         assert c.get("motor") in ("real", "demo") and c.get("transducer_shape") in ("real", "demo")
+        assert c.get("status") in ("approved", "proposed")
+        assert c.get("declared_in", "").startswith("cases.d/")
+    # The 2026-11-19 handoff entries stay approved; the evidence-queue entries stay proposed
+    # until the owner answers gate H.
+    assert sum(1 for c in reg["cases"] if c["status"] == "approved") == 9
+    assert sum(1 for c in reg["cases"] if c["status"] == "proposed") == 16
+    assert all(c.get("approved_by") for c in reg["cases"] if c["status"] == "approved")
+    assert all(c.get("proposed_by") for c in reg["cases"] if c["status"] == "proposed")

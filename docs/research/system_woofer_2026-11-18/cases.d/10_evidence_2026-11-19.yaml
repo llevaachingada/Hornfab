@@ -1,0 +1,197 @@
+# Evidence-queue case declarations (2026-11-19 / 2026-11-20), registry v2.
+#
+# Every entry is `status: proposed`: the orchestrator wrote it from the evidence readout and the
+# case manifests, and it stays greyed in the GUI until the owner/senior approves it (gate H).
+# Motor and shape values follow docs/evidence/system_evidence_2026-11-19/README.md intro:
+# real 12PR300 T/S in #4/#6, BL demo defaults in #5/R0/assembled #2, BL provider-default
+# transducer shape in every case.  The three post-readout cases (assembled real-motor pair and
+# the mesh-refinement controls) are declared from their own manifests, cited per entry.
+#
+# Deliberately not declared: ev_mesh_refine/20261120T145909Z-assembly-52652-a14fe6ac is an empty
+# directory (no case.blab.json, no manifest); the GUI counts it under "empty" and hides it.
+cases:
+  - key: ev_lf_motor_real/20261120T051055Z-lf_20_200-23176-3a9c8637
+    ref: "EV-LF-4-FAIL1"
+    gate: LF 20-200 Hz, #4 real motor, failed first attempt
+    evidence: system_evidence_2026-11-19/README.md section LF on-axis 20-200 Hz, row "ev_lf_motor_real (first attempt)"
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+    note: >-
+      Failed, retained: wrong project port (vented/voltage; this project uses
+      bl_motor12pr/voltage). The corrected retry is EV-LF-4.
+  - key: ev_lf_motor_real/20261120T051257Z-lf_20_200-46360-9a853740
+    ref: "EV-LF-4-FAIL2"
+    gate: LF 20-200 Hz, #4 real motor, failed second attempt
+    evidence: system_evidence_2026-11-19/README.md section LF on-axis 20-200 Hz, first-attempt row (same wrong port, retained)
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+    note: >-
+      Failed, retained: second attempt on the same wrong project port (vented/voltage);
+      no run was produced. The corrected retry is EV-LF-4.
+  - key: ev_lf_motor_real/20261120T053351Z-lf_20_200-30640-c2cf0f62
+    ref: "EV-LF-4"
+    gate: LF 20-200 Hz control for #4 (real 12PR300 T/S, seed box)
+    evidence: system_evidence_2026-11-19/README.md section LF on-axis 20-200 Hz, column "#4 real seed" and row "retry, manual"
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+  - key: ev_lf_demo_twin/20261120T051258Z-lf_20_200-23196-0a6370e7
+    ref: "EV-LF-5"
+    gate: LF 20-200 Hz control for #5 (demo motor twin, seed box)
+    evidence: system_evidence_2026-11-19/README.md section LF on-axis 20-200 Hz, column "#5 demo seed"
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+  - key: ev_lf_default_real/20261120T051351Z-lf_20_200-45416-03efa73a
+    ref: "EV-LF-6"
+    gate: LF 20-200 Hz control for #6 (real motor, default box)
+    evidence: system_evidence_2026-11-19/README.md section LF on-axis 20-200 Hz, column "#6 real default"
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+  - key: ev_lf_default_demo/20261120T051425Z-lf_20_200-01448-88659fb9
+    ref: "EV-LF-R0"
+    gate: LF 20-200 Hz control for R0 (demo motor, default box)
+    evidence: system_evidence_2026-11-19/README.md section LF on-axis 20-200 Hz, column "R0 demo default"
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+  - key: ev_lf_assembled_demo/20261120T051458Z-lf_20_200-35104-5973f4ef
+    ref: "EV-LF-2"
+    gate: LF 20-200 Hz control for #2 (assembled horn+woofer, demo motor)
+    evidence: system_evidence_2026-11-19/README.md section LF on-axis 20-200 Hz, column "assembled demo (#2)"
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+  - key: ev_wide_default_real/20261120T051740Z-wide_200_2500-46632-3de4e1d9
+    ref: "EV-WIDE-6"
+    gate: 2x2 wide cell, #6 real motor x default box
+    evidence: 'system_evidence_2026-11-19/README.md section Motor x box 200-2500 Hz, row "motor: #6 real default vs R0 demo default"'
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+  - key: ev_wide_default_demo/20261120T051840Z-wide_200_2500-36092-b530b722
+    ref: "EV-WIDE-R0"
+    gate: 2x2 wide cell, R0 demo motor x default box
+    evidence: 'system_evidence_2026-11-19/README.md section Motor x box 200-2500 Hz, row "box: #5 demo seed vs R0 demo default"'
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+  - key: ev_farfield_g4_10m/20261120T051941Z-farfield_10m-10828-d72876e6
+    ref: "EV-FAR-10M"
+    gate: Observation-distance control, 10 m probes on the #2 assembled project
+    evidence: system_evidence_2026-11-19/README.md section Observation distance 10 m vs 2 m
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+  - key: ev_dense_g4_49/20261120T052433Z-dense_49-50100-30d7ef04
+    ref: "EV-SAMP-49"
+    gate: Frequency-sampling control, 49 log freqs 200-2500 Hz on the #2 mesh
+    evidence: system_evidence_2026-11-19/README.md section Frequency sampling 25 vs 49
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+  - key: ev_assembled_motor_real/20261120T150709Z-wide_assembled-01612-383da940
+    ref: "EV-WP3-WIDE"
+    gate: WP3 assembled #2 with the real 12PR300 T/S motor patch (wide grid)
+    evidence: >-
+      case manifest notes/motor_patch_component_ids (assembled #2 + real 12PR300 T/S; BL demo
+      shape); README intro for the real-vs-demo motor convention
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+    note: >-
+      Post-readout WP3 pair: a new motor-axis case derived from bl_horn_assembly, not one of
+      #2's controls. Readout pending (ISSUES WP3).
+  - key: ev_assembled_motor_real_lf/20261120T151127Z-lf_20_200-32036-ca8f9305
+    ref: "EV-WP3-LF"
+    gate: WP3 assembled #2 with the real 12PR300 T/S motor patch (LF 20-200 Hz)
+    evidence: >-
+      case manifest notes/motor_patch_component_ids (assembled #2 + real 12PR300 T/S; BL demo
+      shape); README intro for the real-vs-demo motor convention
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+    note: >-
+      Post-readout WP3 pair (LF arm): a new motor-axis case derived from bl_horn_assembly, not
+      one of #2's controls. Readout pending (ISSUES WP3).
+  - key: ev_mesh_refine/20261120T145915Z-assembly-35700-6860289b
+    ref: "EV-MESH-1"
+    gate: Mesh-refinement control on assembled #2 (mesh 0.03 m / detail 0.009 m)
+    evidence: >-
+      senior review 2026-11-20 F3 list; case manifest spec (mesh_size_m 0.03,
+      detail_size_m 0.009). README section Frequency sampling covers the 49-freq arm only.
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+    note: Its own staging by definition (mesh sizes differ); convergence readout pending (R6).
+  - key: ev_mesh_refine2/20261120T152208Z-assembly-38896-9ba147b1
+    ref: "EV-MESH-2"
+    gate: Mesh-refinement control on assembled #2 (mesh 0.0225 m / detail 0.00675 m)
+    evidence: >-
+      senior review 2026-11-20 F3 list; case manifest spec (mesh_size_m 0.0225,
+      detail_size_m 0.00675). README section Frequency sampling covers the 49-freq arm only.
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+    note: Second refinement, finer than EV-MESH-1; convergence readout pending (R6).
+  - key: ev_mesh_refine_dense/20261120T151300Z-dense_49-40968-168d31ad
+    ref: "EV-MESH-DENSE"
+    gate: Refined mesh + 49 freqs; dense control of EV-MESH-1
+    evidence: >-
+      case manifest notes (refined mesh 0.03/0.009 + 49 freqs; compare with ev_dense_g4_49);
+      README section Frequency sampling for the 49-freq method
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: demo
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-20 (senior review section 4 step 3)
+    note: Derives from EV-MESH-1 (its declared source_case); convergence readout pending (R6).
