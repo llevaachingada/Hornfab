@@ -1,5 +1,26 @@
 ﻿# ISSUES
 
+## 2026-11-20 - GUI Overview phases 2-4 (DONE) + owner decisions closed
+
+- DONE: findings engine + software health (`GET /api/overview/findings`, `/health`), persisted index
+  (`runs/overview/index.json`), line states, project readiness registry (`docs/registry/project_readiness.yaml`,
+  HW merged at read time, 45 rows, 0 errors), finding state (dismiss/acknowledge,
+  `POST /api/overview/findings/<id>`, `runs/overview/finding_state.json`), parameters tab (bounds +
+  2 % bound hits), snapshot spec (`tools/analysis/overview_snapshot_spec.py`) and the CPU-only
+  `overview-snapshot` job. Tests **79 + 4 passed**; browser check 24/24 (1280/375, dark/light).
+  Evidence: `docs/evidence/overview_phase234_2026-11-20/`.
+- RESOLVED (owner, 2026-11-20): O1-O6 accepted as the plan's recommendations. O1 applied: `#/` and
+  an empty hash land on `#/overview`; Home remains a route and Status stays in the nav. O4's GUI
+  state file is live. O3 (night-end snapshot) is **not** wired into the night runner yet - an
+  unattended edit to `tools/night_queue` needs its own approval; the Overview button covers manual
+  use.
+- OPEN (dev, low): no full-window snapshot has been generated yet (smoke used `--days 1`: 27 lines,
+  102/102 sections ok). Judge the first real 14-day snapshot on cost before scheduling it.
+- KNOWN: `tests/test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
+  still fails on `subprocess.Popen` in `gui/study_jobs.py` (pre-existing, untouched here).
+- NOTE: `runs/overview/index.json` (306 KB) and `finding_state.json` are the only GUI-written state;
+  both are ignored with `runs/`. The index rebuilds itself when corrupt or when the schema changes.
+
 ## 2026-11-19 - GUI Overview phase 1 (DONE) + phases 2-4 planned
 
 - DONE: `#/overview` live briefing, score identity registry, typology resolver, GPU lane log fix;
@@ -62,6 +83,14 @@
 - NOTE: rank only within objective version; `unversioned` is its own set (pre-provenance rows).
   Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
   raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
+
+## 2026-11-19 - v10 rescore + compact XO loading done
+
+- DONE: v10 rescore of the W4 v7 bests (petal 1.9591, tri v9 3.0658, tri v8 3.6076 - all behind the
+  v10 leaders, petal 0.585 behind fold, outside the 0.4677 floor); compact XO loading healthy
+  (load_raw 0.000, driver +/-1.9 dB at 828 Hz).
+- OPEN (owner): B6 lane set; compact400 floor re-measure on its own pairs (GPU); rolled cap / KL-HV-B
+  lip decisions.
 
 ## 2026-11-19 - compact400 queue DONE; continuation bundle published
 

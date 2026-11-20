@@ -1,5 +1,45 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 - GUI Overview phases 2-4 built (findings, registry, parameters, snapshots; CPU only)
+
+- **Owner ask:** follow `docs/overview/OVERVIEW_IMPLEMENTATION_PLAN_2026-11-19.md` for phases 2-4;
+  owner decisions = the document's recommendations; up to two parallel background sub-agents while
+  the orchestrator integrates. **No GPU; `runs/` read-only** apart from the plan's two GUI-written
+  files and an explicit snapshot job.
+- **Built (phases 2-4, plan §4):** findings engine (`gui/data_overview_findings.py`: budget
+  tail-gain with `resolved_by`, refusals, tie-verify, stale, probe-only, unregistered registry,
+  existing `walls.json` only; stable 16-hex ids, `100*impact*confidence*currency`, one identity per
+  finding); persisted index (`gui/data_overview_index.py`, `runs/overview/index.json`); per-line
+  states (`gui/data_overview_states.py`); software health (`gui/data_overview_health.py`);
+  project readiness registry (`docs/registry/project_readiness.yaml` + `gui/data_overview_registry.py`,
+  HW file merged with `area: hw`, 45 rows, 0 errors); finding state (owner O4,
+  `gui/data_overview_state.py` + `POST /api/overview/findings/<id>`); parameters
+  (`gui/data_overview_params.py`, bounds + 2 % bound hits); snapshot spec
+  (`tools/analysis/overview_snapshot_spec.py`) and the CPU-only `overview-snapshot` job
+  (`gui/data_overview_snapshot.py`, entry script, **not** a GPU kind).
+- **GUI:** `#/overview` tabs Briefing / Leaders / Typologies / Next solves / Decisions / Parameters;
+  state pills on leader and typology rows; frozen-snapshot card + "Generate snapshot" button; O1
+  applied as the default landing route (`#/` and an empty hash go to `#/overview`; Home stays a
+  route). New files `gui/static/overview_findings.js`, `overview_registry.js`, `overview_params.js`;
+  the other lanes' uncommitted `app.js`/`app.css`/`hw.js`/`index.html` edits were preserved (only
+  the 2-line O1 hook added to `app.js`).
+- **Measured (14-day window, 305 runs):** cold 9.98 s (index build) -> 0.06 s records / 0.82 s full
+  payload warm; 43 ranked lines; 19 engine findings (13 open / 6 resolved) in 1.57 s; health adds 11
+  software findings; params covers 10 identities / 43 lines (28 at-bound rows); snapshot smoke
+  (`--days 1`): 27 lines -> 102 sections, **102 ok / 0 errored**, exit 0.
+- **Tests:** overview modules **79 passed** (phase 1 + findings + index + states + registry + state +
+  health + params + snapshot) and API routes **4 passed**; `-o addopts=""` needed to see the summary
+  (repo `addopts` is `-ra -q`).
+- **Browser check:** `tools/gui/browser_check.py` against the separate `gui-verify-8766` server
+  (owner's 8765 untouched), Python 3.13 because the `.venv` has no Playwright: **24/24 combinations
+  pass** (6 tabs x 1280/375 x dark/light), zero console errors, no horizontal scroll, URL state
+  restored. Evidence + verbatim bytes: `docs/evidence/overview_phase234_2026-11-20/`.
+- **Deferred:** wiring the snapshot into the night runner (O3) needs an edit to `tools/night_queue`
+  and an owner-approved unattended path; the job is available from the Overview button instead. A
+  full 14-day snapshot was not run (smoke only).
+- **State:** GPU lane untouched (no solve, no lock change). `runs/overview/{index.json,finding_state.json}`
+  are the only GUI-written state; both are git-ignored with `runs/`.
+
 ## 2026-11-19 - GUI Overview phase 1 + implementation plan (CPU only, no GPU)
 
 - **Owner ask:** review the three-week analysis report as an entry point, propose a better structure,
@@ -85,6 +125,25 @@
   complex throat impedance). Raw complex pressure is not copied (local `response.npz` is the source).
 - **Registered:** CODE_MAP and INDEX rows in the same commit. The other lane's uncommitted GUI edits
   and its budget-driver INDEX row were left untouched and excluded from staging.
+
+## 2026-11-19 - v10 rescore of the W4 v7 bests + compact XO loading (local orchestrator)
+
+- **v10 rescore** (`docs/evidence/v10_rescore_scout40w4_2026-11-19/`, the shipped v10 scalar on the
+  stored responses, same brief family):
+  - petal (v7 4.1202) -> **v10 1.9591**
+  - tritonia v9 (v7 4.878) -> **v10 3.0658**
+  - tritonia v8 (v7 4.7503) -> **v10 3.6076**
+  Against the v10 leaders (fold 1.3738 / ext 1.5710 / morph 1.5769) petal is 0.585 behind the fold
+  leader - **outside the v10 floor 0.4677** - so the v7-home gains do NOT translate into v10 leaders;
+  the B6 set should treat them as ties/candidates, not leaders. (Same-brief comparison; the smooth
+  Klangfilm lane stays on its own identity.)
+- **Compact XO loading** (`docs/evidence/compact400_cont_2026-11-19/xo_loading.json`, report-only):
+  fold (1.2071) and morph (1.2258) both **load_raw 0.000**, driver on-axis within -1.9/+1.8 dB at
+  828 Hz - healthy crossover loading. The compact winners clear the stored bar 1.7302 by 0.50-0.52
+  with the floor 0.1293.
+- Remaining: B6 lane set (owner approval) and the compact400 floor re-measure on its own
+  screen->verify pairs (GPU, owner-approved action); the open design decisions (rolled cap 225 vs
+  180-200; KL-HV-B returning lip).
 
 ## 2026-11-19 - compact400 queue DONE; continuation bundle + final chains (local orchestrator)
 
