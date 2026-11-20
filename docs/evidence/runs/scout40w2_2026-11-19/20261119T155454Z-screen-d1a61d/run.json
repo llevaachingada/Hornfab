@@ -1,0 +1,801 @@
+{
+ "backend": "beat_cuda",
+ "best": {
+  "design_hash": "74d8eed97268",
+  "eval_no": 37,
+  "objective": 4.161632688418152
+ },
+ "budget": 40,
+ "budget_counts": {
+  "attempts": 54,
+  "attempts_cap": 160,
+  "budget": 40,
+  "mode": "valid",
+  "refused_free": 14,
+  "valid": 40
+ },
+ "cma_seed": 1234,
+ "command": "hornlab-search search --config examples/typologies/scout40w2_2026-11-19/scout40w3__petal_hvlaw_v7.yaml --budget 40 --mode screen",
+ "config": {
+  "bounds": {
+   "L_mm": {
+    "hi": 340.0,
+    "lo": 160.0
+   },
+   "a0_deg": {
+    "hi": 3.0,
+    "lo": 1.0
+   },
+   "a_deg": {
+    "hi": 36.0,
+    "lo": 12.0
+   },
+   "aspect_ratio": {
+    "hi": 1.0,
+    "lo": 1.0,
+    "search": false
+   },
+   "az_a_cos_amp": {
+    "hi": 25.0,
+    "lo": 0.0
+   },
+   "az_a_cos_pow": {
+    "hi": 6.0,
+    "lo": 1.0
+   },
+   "az_a_sf_amp": {
+    "hi": 8.0,
+    "lo": 0.0
+   },
+   "az_n_cos2_amp": {
+    "hi": 0.0,
+    "lo": 0.0,
+    "search": false
+   },
+   "az_s_cos2_amp": {
+    "hi": 0.5,
+    "lo": -0.25
+   },
+   "az_sf_a": {
+    "hi": 1.0,
+    "lo": 1.0,
+    "search": false
+   },
+   "az_sf_b": {
+    "hi": 0.8569,
+    "lo": 0.8569,
+    "search": false
+   },
+   "az_sf_m": {
+    "hi": 4.0,
+    "lo": 4.0,
+    "search": false
+   },
+   "az_sf_n1": {
+    "hi": 7.4958,
+    "lo": 7.4958,
+    "search": false
+   },
+   "az_sf_n2": {
+    "hi": 12.4449,
+    "lo": 12.4449,
+    "search": false
+   },
+   "az_sf_n3": {
+    "hi": 13.4442,
+    "lo": 13.4442,
+    "search": false
+   },
+   "exponent": {
+    "hi": 2.0,
+    "lo": 2.0,
+    "search": false
+   },
+   "k": {
+    "hi": 3.0,
+    "lo": 0.3
+   },
+   "morph_allow_shrinkage": {
+    "hi": 0,
+    "lo": 0,
+    "search": false
+   },
+   "morph_corner_mm": {
+    "hi": 15.0,
+    "lo": 15.0,
+    "search": false
+   },
+   "morph_exponent": {
+    "hi": 4.5,
+    "lo": 4.5,
+    "search": false
+   },
+   "morph_fixed": {
+    "hi": 0.0,
+    "lo": 0.0,
+    "search": false
+   },
+   "morph_height_mm": {
+    "hi": 400.0,
+    "lo": 400.0,
+    "search": false
+   },
+   "morph_rate": {
+    "hi": 3.46,
+    "lo": 3.46,
+    "search": false
+   },
+   "morph_target": {
+    "hi": 0,
+    "lo": 0,
+    "search": false
+   },
+   "morph_width_mm": {
+    "hi": 540.0,
+    "lo": 540.0,
+    "search": false
+   },
+   "n": {
+    "hi": 10.0,
+    "lo": 2.0
+   },
+   "q": {
+    "hi": 1.0,
+    "lo": 0.9
+   },
+   "r0_mm": {
+    "hi": 18.0,
+    "lo": 18.0,
+    "search": false
+   },
+   "s": {
+    "hi": 1.2,
+    "lo": 0.2
+   },
+   "s1": {
+    "hi": 1.1799,
+    "lo": 1.1799,
+    "search": false
+   },
+   "s2": {
+    "hi": 0.0286,
+    "lo": 0.0286,
+    "search": false
+   }
+  },
+  "brief": {
+   "description": "(objective v7) HOME living-room horn, LANDSCAPE 80H x 50V, vertical half-weighted, no K-law mouth, pattern+loading from 700 Hz XO, HF1440 1.4-inch, 600W x 480H x 480D envelope, band 350-8000 Hz",
+   "driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "envelope": {
+    "max_depth_mm": 480.0,
+    "max_mouth_h_mm": 480.0,
+    "max_mouth_w_mm": 600.0
+   },
+   "grid": {
+    "screen_extra_hz": [
+     250,
+     315,
+     400,
+     2573,
+     3311,
+     4260
+    ],
+    "verify_points_per_octave": 6
+   },
+   "name": "room_landscape_80x50_700_hf1440_v7",
+   "objective": {
+    "bw8k_floor": 0.75,
+    "cov_below_f0": "mask",
+    "cov_narrow_ratio": 2.0,
+    "cov_v_weight": 0.5,
+    "flat_band": "scored",
+    "lfp_crossover_ratio": 1.6,
+    "lfp_re_z": 0.2,
+    "loaded_re_z": 0.5,
+    "tolerances": {
+     "cov": 3.0,
+     "di": 0.4,
+     "diag": 2.0,
+     "dislope": 9.0,
+     "distd": 2.0,
+     "flat": 1.5,
+     "flat_cv": 1.5,
+     "load": 0.3,
+     "rip": 1.0
+    },
+    "version": 7
+   },
+   "source": {
+    "cap": "auto"
+   },
+   "symmetry": "hv",
+   "target": {
+    "band_hi_hz": 8000.0,
+    "band_lo_hz": 350.0,
+    "coverage_h_deg": 80.0,
+    "coverage_v_deg": 50.0,
+    "di_slope_target": 0.0,
+    "di_target_db": null,
+    "f0_hz": 700.0,
+    "f0_v_hz": 700.0,
+    "freq_weights": {
+     "band_hz": [
+      [
+       2500.0,
+       5500.0,
+       2.0
+      ]
+     ]
+    },
+    "loaded_hi_hz": 5600.0,
+    "z_min": 0.5
+   },
+   "weights": {
+    "cov": 1.0,
+    "di": 0.3,
+    "diag": 1.0,
+    "dislope": 1.0,
+    "distd": 0.5,
+    "flat": 0.5,
+    "flat_cv": 1.0,
+    "load": 1.0,
+    "rip": 1.0
+   }
+  },
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "description": "SCOUT40 2026-11-19 (cloud Fable senior): 40 valid evals, warm from the lane best (top 10); source scratch/fable_architecture/space_cards/proposals/hl__ath_core_petal_hvlaw_v7/hl__ath_core_petal_hvlaw_v7__space_v1.yaml; R19 space_v1 (sigma0 0.05). Gains below the floor (v7 0.31 J) are ties. HOME LANDSCAPE: ATH CORE-style OSSE, gentle petal creases (amp 0-8 deg) + H/V cosine wall law, mouth follows walls",
+  "family": "OSSE",
+  "feasibility": {
+   "derivation": [
+    {
+     "knob": "-",
+     "note": "no generator block in this config"
+    }
+   ],
+   "envelope_mouth_h_mm": 480.0,
+   "envelope_mouth_w_mm": 600.0,
+   "f0_hz": 700.0,
+   "f0_v_hz": 700.0,
+   "feasible_v": false,
+   "feasible_w": true,
+   "held_coverage_v_deg": 75.5952380952381,
+   "held_coverage_w_deg": 60.476190476190474,
+   "required_mouth_h_mm": 725.7142857142857,
+   "required_mouth_w_mm": 453.57142857142856,
+   "rule": "d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)",
+   "screen_freqs_below_f0": 2,
+   "screen_freqs_total": 12,
+   "verify_freqs_below_f0": 7,
+   "verify_freqs_total": 25
+  },
+  "grid": {
+   "screen_extra_hz": [
+    250,
+    315,
+    400,
+    2573,
+    3311,
+    4260
+   ],
+   "verify_points_per_octave": 6
+  },
+  "mesh": {
+   "dof_cap_final": 24000,
+   "dof_cap_screen": 24000,
+   "dof_cap_verify": 24000,
+   "dof_per_triangle": 0.51,
+   "epw": 6.0,
+   "quadrants": "1",
+   "rear_res_factor": 1.5
+  },
+  "name": "scout40w3__petal_hvlaw_v7",
+  "objective": {
+   "bw8k_floor": 0.75,
+   "cov_below_f0": "mask",
+   "cov_narrow_ratio": 2.0,
+   "cov_v_weight": 0.5,
+   "flat_band": "scored",
+   "lfp_crossover_ratio": 1.6,
+   "lfp_re_z": 0.2,
+   "loaded_re_z": 0.5,
+   "tolerances": {
+    "cov": 3.0,
+    "di": 0.4,
+    "diag": 2.0,
+    "dislope": 9.0,
+    "distd": 2.0,
+    "flat": 1.5,
+    "flat_cv": 1.5,
+    "load": 0.3,
+    "rip": 1.0
+   },
+   "version": 7
+  },
+  "search": {
+   "algorithm": "cma",
+   "budget": 40,
+   "budget_counts": "valid",
+   "error_policy": "retry_same_then_stop",
+   "infeasible_penalty": "resample_strict",
+   "popsize": null,
+   "seed": 1234,
+   "sigma0": 0.05,
+   "tolfun": 0.001,
+   "warm_start": {
+    "from_runs": [
+     "runs/20261119T143027Z-screen-401992"
+    ],
+    "sigma_from_spread": false,
+    "top_k": 10
+   }
+  },
+  "seed_params": {
+   "L_mm": 250.0,
+   "a0_deg": 1.9863,
+   "a_deg": 24.0,
+   "aspect_ratio": 1.0,
+   "az_a_cos_amp": 14.0,
+   "az_a_cos_pow": 2.0,
+   "az_a_sf_amp": 3.0,
+   "az_n_cos2_amp": 0.0,
+   "az_s_cos2_amp": 0.0,
+   "az_sf_a": 1.0,
+   "az_sf_b": 0.8569,
+   "az_sf_m": 4.0,
+   "az_sf_n1": 7.4958,
+   "az_sf_n2": 12.4449,
+   "az_sf_n3": 13.4442,
+   "exponent": 2.0,
+   "k": 1.2163,
+   "morph_allow_shrinkage": 0,
+   "morph_corner_mm": 15.0,
+   "morph_exponent": 4.5,
+   "morph_fixed": 0.0,
+   "morph_height_mm": 400.0,
+   "morph_rate": 3.46,
+   "morph_target": 0,
+   "morph_width_mm": 540.0,
+   "n": 6.9046,
+   "q": 0.9869,
+   "r0_mm": 18.0,
+   "s": 0.7503,
+   "s1": 1.1799,
+   "s2": 0.0286
+  },
+  "solve": {
+   "angle_count": 73,
+   "backend": "beat_cuda",
+   "balloon": true,
+   "balloon_points_screen": 512,
+   "balloon_points_verify": 1024,
+   "cuda_fused": true,
+   "distance_m": 10.0,
+   "gmres_tol": 1e-05,
+   "timeout_s": 900
+  },
+  "target": {
+   "band_hi_hz": 8000.0,
+   "band_lo_hz": 350.0,
+   "coverage_h_deg": 80.0,
+   "coverage_v_deg": 50.0,
+   "di_slope_target": 0.0,
+   "di_target_db": null,
+   "f0_hz": 700.0,
+   "f0_v_hz": 700.0,
+   "freq_weights": {
+    "band_hz": [
+     [
+      2500.0,
+      5500.0,
+      2.0
+     ]
+    ]
+   },
+   "loaded_hi_hz": 5600.0,
+   "z_min": 0.5
+  },
+  "weights": {
+   "cov": 1.0,
+   "di": 0.3,
+   "diag": 1.0,
+   "dislope": 1.0,
+   "distd": 0.5,
+   "flat": 0.5,
+   "flat_cv": 1.0,
+   "load": 1.0,
+   "rip": 1.0
+  }
+ },
+ "config_name": "scout40w3__petal_hvlaw_v7",
+ "config_path": "examples/typologies/scout40w2_2026-11-19/scout40w3__petal_hvlaw_v7.yaml",
+ "config_sha": "2e79402be1ec",
+ "created_utc": "2026-11-19T15:55:11Z",
+ "dataset_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\dataset",
+ "family": "OSSE",
+ "finished_utc": "2026-11-19T16:18:17Z",
+ "last_invocation": {
+  "cache_hits": 1,
+  "candidates_per_hour": 140.39899330960833,
+  "evaluations": 55,
+  "failures": 14,
+  "failures_by_reason": {
+   "invalid_envelope": 2,
+   "invalid_geometry": 12
+  },
+  "mean_seconds_per_candidate": 25.641209492587087,
+  "non_cached": 54,
+  "projected_hours": {
+   "1000": 7.122558192385302,
+   "10000": 71.22558192385301
+  },
+  "total_gpu_seconds": 1222.2778264009394,
+  "total_mesh_seconds": 134.1860585990362
+ },
+ "lib_shas": {
+  "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+  "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+  "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+  "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+  "hornlab_search": "138d88a2163c324d45cef347b8667967d149c4a9"
+ },
+ "mode": "screen",
+ "objective_version": 7,
+ "run_id": "20261119T155454Z-screen-d1a61d",
+ "runtime": {
+  "gpu": [
+   "NVIDIA GeForce RTX 4060 Laptop GPU, 610.62, 8188 MiB"
+  ],
+  "julia": "julia version 1.12.7",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "sources": [
+   {
+    "module": "hornlab_beat_bem",
+    "n_files": 111,
+    "sha256": "2fb5ad6c0f0900ef68c2a79761208474815a583d4b6c782bb8c08486561e5543"
+   },
+   {
+    "module": "hornlab_mesher",
+    "n_files": 66,
+    "sha256": "47d00e50f8d7cb8de813b3dcb41d1bcdf893d404424a7689d70f2ca5792949da"
+   },
+   {
+    "module": "hornlab_bempp_bem",
+    "n_files": 21,
+    "sha256": "08f71637ae90cc4900971b15b043320ef4e0a26a3fe884aaacecb35b5c8fc794"
+   }
+  ]
+ },
+ "seed": {
+  "design_hash": "c73a8ae29ccb",
+  "objective": 8.68305366643394,
+  "terms": {
+   "cov": 2.603055845094731,
+   "di": 2.164167853123046,
+   "di_estimated": 0.0,
+   "diag": 2.7386057875390537,
+   "dislope": 1.8111456117692224,
+   "distd": 0.6156786881903984,
+   "f11_hz": 5600.0,
+   "flat": 0.2748001896886264,
+   "flat_cv": 0.2427890708841716,
+   "lfp20_hz": 364.41210181303364,
+   "lfp50_hz": 526.2708632789374,
+   "load": 0.0,
+   "loaded_hi_hz": 5600.0,
+   "n_in_band": 13,
+   "n_nan": 0,
+   "oa_excess_raw": 0.0,
+   "penalty": 0.0,
+   "rez_min_from_fx": 1.0047318902675315,
+   "rip": 0.1929675562703355,
+   "total": 8.68305366643394
+  }
+ },
+ "started_utc": "2026-11-19T15:55:11Z",
+ "stats": {
+  "cache_hits": 1,
+  "candidates_per_hour": 140.45804438901808,
+  "evaluations": 55,
+  "failures": 14,
+  "failures_by_reason": {
+   "invalid_envelope": 2,
+   "invalid_geometry": 12
+  },
+  "mean_seconds_per_candidate": 25.630429468527264,
+  "non_cached": 54,
+  "projected_hours": {
+   "1000": 7.119563741257574,
+   "10000": 71.19563741257573
+  },
+  "total_gpu_seconds": 1222.2778264009394,
+  "total_mesh_seconds": 134.1860585990362
+ },
+ "status": "finished",
+ "stop_reason": "budget",
+ "strict": {
+  "attempts": 54,
+  "backend_calls": 40,
+  "cached_refusals": 0,
+  "caps": {
+   "budget": 40,
+   "deadline_s": null,
+   "draws": 160,
+   "max_attempts": 160
+  },
+  "code": "hornlab_search.search.cma/strict/1",
+  "draws": 55,
+  "extensions": [],
+  "generation": 3,
+  "last_generation": {
+   "design_hashes": [
+    "3eb00080bdd4",
+    "a20c1559359d",
+    "2fd961c8d480",
+    "b33ad27a3703",
+    "56d9eb05d041",
+    "74d8eed97268",
+    "fd3918bf3cc4",
+    "2b8b67decda7",
+    "3eb0c7da376b",
+    "b8ae23a26784",
+    "d60b362bc5ec"
+   ],
+   "generation": 2,
+   "originals": [
+    [
+     0.30687759365285144,
+     0.36580476886890195,
+     0.8496663639299976,
+     0.5042861011152415,
+     0.036467617528122366,
+     0.4646684228116295,
+     0.46678205545854023,
+     0.622741075138256,
+     0.7994430594052724,
+     0.994250008817764,
+     0.16298874863770374
+    ],
+    [
+     0.37201160694241414,
+     0.3781060390246235,
+     0.8101494515070516,
+     0.476869152189436,
+     0.03626559092678061,
+     0.4120025795734781,
+     0.44013331775029463,
+     0.635990632660757,
+     0.9055629234631963,
+     0.9990337904312852,
+     0.17324309957866244
+    ],
+    [
+     0.3425036597549649,
+     0.36970045891703496,
+     0.8548973556367533,
+     0.5199729004491365,
+     0.01235022010443801,
+     0.45455431171051347,
+     0.48899166646393827,
+     0.633436896022778,
+     0.8845784923857233,
+     0.9858482756364134,
+     0.22710413308957197
+    ],
+    [
+     0.30778531787508445,
+     0.3205728030586134,
+     0.7678407251491628,
+     0.4651361764359361,
+     6.887297428398192e-05,
+     0.4003349143759308,
+     0.45961498924443844,
+     0.5514807330766396,
+     0.7905934141167443,
+     0.9986967620420673,
+     0.29613438374248163
+    ],
+    [
+     0.35402314955081554,
+     0.4286347952915168,
+     0.8731955826486255,
+     0.4783185221560469,
+     0.0019490332335677112,
+     0.43108757021417715,
+     0.37812189571632193,
+     0.6903693039834371,
+     0.8524324021401175,
+     0.9318054690123504,
+     0.2535702771741599
+    ],
+    [
+     0.33739347115141555,
+     0.2944625095099672,
+     0.7676100191092577,
+     0.5460174213827542,
+     0.051131500426646465,
+     0.41962173171692424,
+     0.4743957605779173,
+     0.6308726423678722,
+     0.9261043455841431,
+     0.996668899027971,
+     0.26882403257036047
+    ],
+    [
+     0.36606496783157794,
+     0.37589790035626863,
+     0.8126952490573656,
+     0.39391181924267804,
+     4.789751301383579e-05,
+     0.4563344131076569,
+     0.4348580404735905,
+     0.637111101452431,
+     0.8513854573006204,
+     0.9725674435111845,
+     0.23151414580830312
+    ],
+    [
+     0.2726298622338314,
+     0.37624786095134666,
+     0.7621914247922281,
+     0.509547379661276,
+     0.006745482281413403,
+     0.45754642708969473,
+     0.4100898225909972,
+     0.6502260140102469,
+     0.8910839415023998,
+     0.9935292509364329,
+     0.20546509173765404
+    ],
+    [
+     0.2910685836106088,
+     0.3436566804470045,
+     0.8634668925742452,
+     0.4956810042447172,
+     0.0017704872344162558,
+     0.4067372565780224,
+     0.47482029501322576,
+     0.6778796371389393,
+     0.8603568123390524,
+     0.9898628559946205,
+     0.3040825562358018
+    ],
+    [
+     0.2847780069619114,
+     0.3523505110865916,
+     0.7952886112679983,
+     0.4774588992096665,
+     1.8557665097742574e-06,
+     0.4358820536227197,
+     0.3927968893781475,
+     0.6736133376362717,
+     0.8038661540950555,
+     0.9937624996549346,
+     0.20726567989010902
+    ],
+    [
+     0.29948445546616215,
+     0.30524515474306413,
+     0.7545242257382933,
+     0.5504289364550354,
+     0.016363053163587292,
+     0.49839188664317113,
+     0.4182095439998203,
+     0.5907992434639237,
+     0.9127774796322968,
+     0.9967930480983845,
+     0.2118825613500508
+    ]
+   ],
+   "replacements": [
+    [],
+    [
+     [
+      0.37201160694241414,
+      0.3781060390246235,
+      0.8101494515070516,
+      0.476869152189436,
+      0.03626559092678061,
+      0.4120025795734781,
+      0.44013331775029463,
+      0.635990632660757,
+      0.9055629234631963,
+      0.9990337904312852,
+      0.17324309957866244
+     ]
+    ],
+    [],
+    [],
+    [],
+    [
+     [
+      0.33739347115141555,
+      0.2944625095099672,
+      0.7676100191092577,
+      0.5460174213827542,
+      0.051131500426646465,
+      0.41962173171692424,
+      0.4743957605779173,
+      0.6308726423678722,
+      0.9261043455841431,
+      0.996668899027971,
+      0.26882403257036047
+     ]
+    ],
+    [],
+    [],
+    [],
+    [
+     [
+      0.2847780069619114,
+      0.3523505110865916,
+      0.7952886112679983,
+      0.4774588992096665,
+      1.8557665097742574e-06,
+      0.4358820536227197,
+      0.3927968893781475,
+      0.6736133376362717,
+      0.8038661540950555,
+      0.9937624996549346,
+      0.20726567989010902
+     ]
+    ],
+    []
+   ]
+  },
+  "protocol": "strict-cma-v1",
+  "refusals": 14,
+  "replacements": 14,
+  "retries": 0,
+  "scored": 40,
+  "seed": {
+   "cached": true,
+   "category": "complete_score",
+   "design_hash": "c73a8ae29ccb",
+   "eligible": true,
+   "kind": "",
+   "objective": 8.68305366643394
+  },
+  "slot": 6,
+  "stop_reason": "budget",
+  "told": 33,
+  "unknown_attempts": 0,
+  "valid": 40
+ },
+ "toolchain": {
+  "beat_status": "`{'available': True, 'reason': 'NVIDIA GPU detected and Julia CUDA.functional() confirmed a usable device', 'state': 'ready', 'version': '0.2.0', 'backend': 'cuda'}`",
+  "cpu": "Intel(R) Core(TM) i7-14650HX, 16 cores / 24 threads",
+  "driver": "610.62; CUDA UMD version 13.3",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop, 8 GB (8188 MiB)",
+  "os": "Microsoft Windows 11 Pro 10.0.26200, build 26200",
+  "present": true,
+  "python": "`C:\\Users\\hunte\\Hrns\\hornlab-search\\.venv\\Scripts\\python.exe` 3.12.10",
+  "ram": "31.7 GB",
+  "sha256": "7e829ed0af8ece14"
+ },
+ "trace_fraction": 0.05,
+ "warm_start": {
+  "designs_clipped_to_box": 0,
+  "from_runs": [
+   "runs\\20261119T143027Z-screen-401992"
+  ],
+  "mean_design_hash": "fab20de9dd19",
+  "mean_objective": 4.196013028240638,
+  "rows_seen": 40,
+  "sigma0": 0.05,
+  "sigma_from_spread": null,
+  "sources": [
+   {
+    "config_sha": "1d795201d636",
+    "objective_version": 7,
+    "path": "runs\\20261119T143027Z-screen-401992",
+    "rows": 40,
+    "valid": 30
+   }
+  ],
+  "top_k": 10
+ }
+}

@@ -65,6 +65,19 @@
 - **Registered:** CODE_MAP and INDEX rows in the same commit. The other lane's uncommitted GUI edits
   and its budget-driver INDEX row were left untouched and excluded from staging.
 
+## 2026-11-19 - SCOUT40W2/W3 evidence bundle published (local orchestrator)
+
+- `docs/evidence/runs/scout40w2_2026-11-19/`: all **15** W2/W3 runs (18.5 MB) with the same schema as
+  the SCOUT40 bundle - `config.yaml` (seed + bounds), `run.json` (objective/warm start/lib SHAs),
+  `search.ndjson` + `scores.csv` (per-eval terms + H/V beamwidth, DI, ripple, on-axis, impedance arrays
+  + scalars), `summary.json`, and each best design's `design.json`/`metrics.json`/`mesh_meta.json`/
+  `mesh.msh`/`response.npz`. Plus the night yaml, queue log/state, summary and the preflight logs.
+  README carries the result chains: petal 4.892->4.196->4.162 (+0.73), tritonia v8 5.325->4.891
+  (+0.43), tritonia v9 5.289->4.878 (+0.41), crowe_x square 7.911->7.598 (+0.31), fold/morph closed
+  as ties, crowe_x osse no-headroom, rosse tie.
+- Commit with the bundle (mesh.msh/response.npz force-added). The live compact400 queue continues
+  independently (w4__tritonia_v9 running, then w4 b3, c4x_04, c4x_05).
+
 ## 2026-11-19 - Queue verification + fold cont2 (local orchestrator)
 
 - **End-to-end verification of the live queue passed** (`scratch/verify_live_queue.py`, exit 0): 19 jobs,

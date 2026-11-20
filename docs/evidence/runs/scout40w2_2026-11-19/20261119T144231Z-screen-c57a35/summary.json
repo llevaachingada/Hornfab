@@ -1,0 +1,89 @@
+{
+  "run": "20261119T144231Z-screen-c57a35",
+  "config_name": "scout40w2__crowe_x_osse_cd_v7",
+  "family": "FREEFORM",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "seed_params": {
+    "g_a_h_deg": 36.388866,
+    "g_a_v_deg": 22.707717,
+    "g_k": 1.0,
+    "g_L_mm": 259.603653,
+    "g_s": 0.389835,
+    "g_n": 2.143998,
+    "g_q": 0.996,
+    "g_r_lip_mm": 18.284822,
+    "g_wrap_deg": 86.087609,
+    "g_sf_m": 4,
+    "g_sf_n1": 1.8,
+    "g_sf_n2": 7.0,
+    "g_sf_ab": 0.847983,
+    "g_sf_amt": 0.239269,
+    "g_sf_start": 0.25
+  },
+  "bounds": {
+    "g_a_h_deg": {
+      "lo": 33.0,
+      "hi": 40.0
+    },
+    "g_a_v_deg": {
+      "lo": 20.0,
+      "hi": 28.0
+    },
+    "g_L_mm": {
+      "lo": 200.0,
+      "hi": 285.0
+    },
+    "g_s": {
+      "lo": 0.2,
+      "hi": 0.45
+    },
+    "g_n": {
+      "lo": 1.8,
+      "hi": 3.2
+    },
+    "g_r_lip_mm": {
+      "lo": 8.0,
+      "hi": 30.0
+    },
+    "g_wrap_deg": {
+      "lo": 80.0,
+      "hi": 160.0
+    },
+    "g_sf_ab": {
+      "lo": 0.7,
+      "hi": 0.9
+    },
+    "g_sf_amt": {
+      "lo": 0.15,
+      "hi": 0.38
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.2,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "resample_strict",
+    "error_policy": "retry_same_then_stop",
+    "budget_counts": "valid",
+    "max_attempts": 220
+  },
+  "warm_start_config": {
+    "from_runs": [
+      "runs/20261119T090559Z-screen-9b8767"
+    ],
+    "top_k": 10,
+    "sigma_from_spread": false
+  },
+  "warm_start_run": null,
+  "rows": 38,
+  "valid": 30,
+  "best_n": 0,
+  "best_J": 5.345396237349772,
+  "best_design_hash": "9b5428e6dec8",
+  "best_json_hash": "9b5428e6dec8",
+  "missing": []
+}

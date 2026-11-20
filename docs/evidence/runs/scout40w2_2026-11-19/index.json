@@ -1,0 +1,1699 @@
+[
+  {
+    "run": "20261119T134012Z-screen-50fbd8",
+    "config_name": "scout40w2__fold_warm_v7",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "L_mm": 255.830467,
+      "a0_deg": 2.302789,
+      "a_deg": 38.500213,
+      "aspect_ratio": 1.0,
+      "az_a_cos_amp": 9.405874,
+      "az_a_cos_pow": 1.239298,
+      "az_a_sf_amp": 0.0,
+      "az_n_cos2_amp": 0.0,
+      "az_s_cos2_amp": -0.15903,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "exponent": 2.0,
+      "k": 2.607528,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 32.108556,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 394.716486,
+      "morph_rate": 3.886928,
+      "morph_target": 1,
+      "morph_width_mm": 564.83109,
+      "n": 5.780056,
+      "q": 0.96217,
+      "r0_mm": 18.0,
+      "s": 1.001287,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "az_fold_v_deg": -2.273623,
+      "az_fold_v_width_deg": 20.45899,
+      "az_fold_h_deg": -0.093971,
+      "az_fold_h_width_deg": 30.715508
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 228.712,
+        "hi": 271.912
+      },
+      "a_deg": {
+        "lo": 36.3038,
+        "hi": 40.0
+      },
+      "az_a_cos_amp": {
+        "lo": 8.13355,
+        "hi": 11.73355
+      },
+      "az_a_cos_pow": {
+        "lo": 1.23779,
+        "hi": 2.43779
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.25,
+        "hi": -0.122676
+      },
+      "k": {
+        "lo": 2.16454,
+        "hi": 2.81254
+      },
+      "morph_corner_mm": {
+        "lo": 30.0,
+        "hi": 46.3363
+      },
+      "morph_height_mm": {
+        "lo": 378.827,
+        "hi": 412.427
+      },
+      "morph_rate": {
+        "lo": 3.14408,
+        "hi": 4.34408
+      },
+      "morph_width_mm": {
+        "lo": 559.529,
+        "hi": 588.329
+      },
+      "n": {
+        "lo": 4.64958,
+        "hi": 6.56958
+      },
+      "q": {
+        "lo": 0.950949,
+        "hi": 0.974949
+      },
+      "s": {
+        "lo": 0.769626,
+        "hi": 1.009626
+      },
+      "az_fold_v_deg": {
+        "lo": -25.0,
+        "hi": 10.0
+      },
+      "az_fold_v_width_deg": {
+        "lo": 8.0,
+        "hi": 40.0
+      },
+      "az_fold_h_deg": {
+        "lo": -15.0,
+        "hi": 10.0,
+        "search": true
+      },
+      "az_fold_h_width_deg": {
+        "lo": 8.0,
+        "hi": 40.0
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 40,
+      "infeasible_penalty": "graded",
+      "popsize": null,
+      "seed": 1234,
+      "sigma0": 0.25,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 200
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T074356Z-screen-7c9137"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 31,
+    "valid": 31,
+    "best_n": 19,
+    "best_J": 3.681759353674477,
+    "best_design_hash": "b6430673c2e9",
+    "best_json_hash": "b6430673c2e9",
+    "missing": []
+  },
+  {
+    "run": "20261119T135116Z-screen-28debc",
+    "config_name": "scout40w2__morph_v8",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "r0_mm": 18.0,
+      "a0_deg": 2.2466,
+      "L_mm": 250.312,
+      "a_deg": 38.7038,
+      "n": 5.60958,
+      "s": 0.889626,
+      "q": 0.962949,
+      "k": 2.48854,
+      "exponent": 2.0,
+      "aspect_ratio": 1.0,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "morph_target": 1,
+      "morph_width_mm": 573.929,
+      "morph_height_mm": 395.627,
+      "morph_corner_mm": 37.9363,
+      "morph_exponent": 4.0,
+      "morph_rate": 3.74408,
+      "morph_fixed": 0.0,
+      "morph_allow_shrinkage": 1,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_a_cos_pow": 1.83779,
+      "az_n_cos2_amp": 0.0,
+      "az_a_sf_amp": 0.0,
+      "az_a_cos_amp": 9.93355,
+      "az_s_cos2_amp": -0.212676
+    },
+    "bounds": {
+      "a0_deg": {
+        "lo": 1.0,
+        "hi": 3.0
+      },
+      "L_mm": {
+        "lo": 160.0,
+        "hi": 340.0
+      },
+      "a_deg": {
+        "lo": 20.0,
+        "hi": 48.0
+      },
+      "n": {
+        "lo": 2.0,
+        "hi": 10.0
+      },
+      "s": {
+        "lo": 0.2,
+        "hi": 1.2
+      },
+      "q": {
+        "lo": 0.9,
+        "hi": 1.0
+      },
+      "k": {
+        "lo": 0.3,
+        "hi": 4.0
+      },
+      "morph_width_mm": {
+        "lo": 480.0,
+        "hi": 600.0
+      },
+      "morph_height_mm": {
+        "lo": 320.0,
+        "hi": 460.0
+      },
+      "morph_corner_mm": {
+        "lo": 30.0,
+        "hi": 100.0
+      },
+      "morph_rate": {
+        "lo": 0.5,
+        "hi": 6.0,
+        "search": true
+      },
+      "az_a_cos_pow": {
+        "lo": 0.5,
+        "hi": 6.0
+      },
+      "az_a_cos_amp": {
+        "lo": 0.0,
+        "hi": 15.0
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.5,
+        "hi": 0.5
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.22,
+      "seed": 1234,
+      "budget": 40,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "graded",
+      "budget_counts": "valid"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T081214Z-screen-8470bd"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 25,
+    "valid": 14,
+    "best_n": 20,
+    "best_J": 3.232488693018465,
+    "best_design_hash": "69aca6e15dca",
+    "best_json_hash": "69aca6e15dca",
+    "missing": []
+  },
+  {
+    "run": "20261119T140149Z-screen-f8fffb",
+    "config_name": "scout40w2__tritonia_v8",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "L_mm": 218.088262,
+      "a0_deg": 9.663561,
+      "a_deg": 48.887334,
+      "aspect_ratio": 1.0,
+      "exponent": 2.0,
+      "k": 1.177418,
+      "az_a_cos_amp": -14.645733,
+      "az_a_cos_pow": 2.0,
+      "az_fold_v_deg": -28.789806,
+      "az_fold_v_width_deg": 22.997014,
+      "az_fold_h_deg": 0.0,
+      "az_fold_h_width_deg": 20.0,
+      "az_a_cos2p_amp": 0.0,
+      "az_a_cos2p_pow": 5.0,
+      "az_s_cos2_amp": 0.0,
+      "az_n_cos2_amp": 0.0,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 24.485256,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 471.476891,
+      "morph_rate": 1.380681,
+      "morph_target": 1,
+      "morph_width_mm": 584.425399,
+      "n": 6.057854,
+      "q": 0.974736,
+      "r0_mm": 18.0,
+      "s": 0.955564,
+      "s1": 1.0,
+      "s2": 0.015
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 140.0,
+        "hi": 400.0
+      },
+      "a0_deg": {
+        "lo": 5.0,
+        "hi": 11.0
+      },
+      "a_deg": {
+        "lo": 44.0,
+        "hi": 56.0
+      },
+      "k": {
+        "lo": 0.9,
+        "hi": 1.3
+      },
+      "az_a_cos_amp": {
+        "lo": -22.0,
+        "hi": -13.5
+      },
+      "az_fold_v_deg": {
+        "lo": -31.0,
+        "hi": -27.5
+      },
+      "az_fold_v_width_deg": {
+        "lo": 21.5,
+        "hi": 25.5
+      },
+      "morph_corner_mm": {
+        "lo": 10.0,
+        "hi": 30.0
+      },
+      "morph_height_mm": {
+        "lo": 250.0,
+        "hi": 480.0
+      },
+      "morph_rate": {
+        "lo": 0.6,
+        "hi": 2.1
+      },
+      "morph_width_mm": {
+        "lo": 330.0,
+        "hi": 590.0
+      },
+      "n": {
+        "lo": 4.0,
+        "hi": 7.5
+      },
+      "q": {
+        "lo": 0.97,
+        "hi": 0.995
+      },
+      "s": {
+        "lo": 0.92,
+        "hi": 1.04
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 40,
+      "infeasible_penalty": "graded",
+      "popsize": null,
+      "seed": 1234,
+      "sigma0": 0.2,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 260
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T083421Z-screen-ab2159"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 33,
+    "valid": 30,
+    "best_n": 7,
+    "best_J": 5.372771250487765,
+    "best_design_hash": "3f90557b9b31",
+    "best_json_hash": "3f90557b9b31",
+    "missing": []
+  },
+  {
+    "run": "20261119T141723Z-screen-433f54",
+    "config_name": "scout40w2__tritonia_v9",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "L_mm": 218.088262,
+      "a0_deg": 9.663561,
+      "a_deg": 48.887334,
+      "aspect_ratio": 1.0,
+      "exponent": 2.0,
+      "k": 1.177418,
+      "az_a_cos_amp": -14.645733,
+      "az_a_cos_pow": 2.0,
+      "az_fold_v_deg": -28.789806,
+      "az_fold_v_width_deg": 22.997014,
+      "az_fold_h_deg": 0.0,
+      "az_fold_h_width_deg": 20.0,
+      "az_a_cos2p_amp": 0.0,
+      "az_a_cos2p_pow": 5.0,
+      "az_s_cos2_amp": 0.0,
+      "az_n_cos2_amp": 0.0,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 24.485256,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 471.476891,
+      "morph_rate": 1.380681,
+      "morph_target": 1,
+      "morph_width_mm": 584.425399,
+      "n": 6.057854,
+      "q": 0.974736,
+      "r0_mm": 18.0,
+      "s": 0.955564,
+      "s1": 1.0,
+      "s2": 0.015
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 140.0,
+        "hi": 400.0
+      },
+      "a0_deg": {
+        "lo": 5.0,
+        "hi": 11.0
+      },
+      "a_deg": {
+        "lo": 44.0,
+        "hi": 56.0
+      },
+      "k": {
+        "lo": 0.9,
+        "hi": 1.3
+      },
+      "az_a_cos_amp": {
+        "lo": -18.0,
+        "hi": -13.5
+      },
+      "az_fold_v_deg": {
+        "lo": -31.0,
+        "hi": -27.5
+      },
+      "az_fold_v_width_deg": {
+        "lo": 21.5,
+        "hi": 25.5
+      },
+      "morph_corner_mm": {
+        "lo": 10.0,
+        "hi": 30.0
+      },
+      "morph_height_mm": {
+        "lo": 250.0,
+        "hi": 480.0
+      },
+      "morph_rate": {
+        "lo": 1.0,
+        "hi": 2.1
+      },
+      "morph_width_mm": {
+        "lo": 330.0,
+        "hi": 590.0
+      },
+      "n": {
+        "lo": 4.0,
+        "hi": 7.5
+      },
+      "q": {
+        "lo": 0.97,
+        "hi": 0.995
+      },
+      "s": {
+        "lo": 0.92,
+        "hi": 1.04
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 40,
+      "infeasible_penalty": "graded",
+      "popsize": null,
+      "seed": 1234,
+      "sigma0": 0.18,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 260
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T090801Z-screen-6a429f"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 30,
+    "valid": 30,
+    "best_n": 28,
+    "best_J": 4.878473401275163,
+    "best_design_hash": "5f689f0f4865",
+    "best_json_hash": "5f689f0f4865",
+    "missing": []
+  },
+  {
+    "run": "20261119T143027Z-screen-401992",
+    "config_name": "scout40w2__petal_hvlaw_v7",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "r0_mm": 18.0,
+      "a0_deg": 1.9863,
+      "L_mm": 250.0,
+      "a_deg": 24.0,
+      "n": 6.9046,
+      "s": 0.7503,
+      "q": 0.9869,
+      "k": 1.2163,
+      "exponent": 2.0,
+      "aspect_ratio": 1.0,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "morph_target": 0,
+      "morph_width_mm": 540.0,
+      "morph_height_mm": 400.0,
+      "morph_corner_mm": 15.0,
+      "morph_exponent": 4.5,
+      "morph_rate": 3.46,
+      "morph_fixed": 0.0,
+      "morph_allow_shrinkage": 0,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_a_cos_pow": 2.0,
+      "az_n_cos2_amp": 0.0,
+      "az_a_sf_amp": 3.0,
+      "az_a_cos_amp": 14.0,
+      "az_s_cos2_amp": 0.0
+    },
+    "bounds": {
+      "a0_deg": {
+        "lo": 1.0,
+        "hi": 3.0
+      },
+      "L_mm": {
+        "lo": 160.0,
+        "hi": 340.0
+      },
+      "a_deg": {
+        "lo": 12.0,
+        "hi": 36.0
+      },
+      "n": {
+        "lo": 2.0,
+        "hi": 10.0
+      },
+      "s": {
+        "lo": 0.2,
+        "hi": 1.2
+      },
+      "q": {
+        "lo": 0.9,
+        "hi": 1.0
+      },
+      "k": {
+        "lo": 0.3,
+        "hi": 3.0
+      },
+      "az_a_cos_pow": {
+        "lo": 1.0,
+        "hi": 6.0
+      },
+      "az_a_sf_amp": {
+        "lo": 0.0,
+        "hi": 8.0
+      },
+      "az_a_cos_amp": {
+        "lo": 0.0,
+        "hi": 25.0
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.25,
+        "hi": 0.5
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.05,
+      "seed": 1234,
+      "budget": 40,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "resample_strict",
+      "error_policy": "retry_same_then_stop",
+      "budget_counts": "valid"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T082618Z-screen-2fb8dc"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 40,
+    "valid": 30,
+    "best_n": 33,
+    "best_J": 4.196013028240638,
+    "best_design_hash": "fab20de9dd19",
+    "best_json_hash": "fab20de9dd19",
+    "missing": []
+  },
+  {
+    "run": "20261119T144231Z-screen-c57a35",
+    "config_name": "scout40w2__crowe_x_osse_cd_v7",
+    "family": "FREEFORM",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "g_a_h_deg": 36.388866,
+      "g_a_v_deg": 22.707717,
+      "g_k": 1.0,
+      "g_L_mm": 259.603653,
+      "g_s": 0.389835,
+      "g_n": 2.143998,
+      "g_q": 0.996,
+      "g_r_lip_mm": 18.284822,
+      "g_wrap_deg": 86.087609,
+      "g_sf_m": 4,
+      "g_sf_n1": 1.8,
+      "g_sf_n2": 7.0,
+      "g_sf_ab": 0.847983,
+      "g_sf_amt": 0.239269,
+      "g_sf_start": 0.25
+    },
+    "bounds": {
+      "g_a_h_deg": {
+        "lo": 33.0,
+        "hi": 40.0
+      },
+      "g_a_v_deg": {
+        "lo": 20.0,
+        "hi": 28.0
+      },
+      "g_L_mm": {
+        "lo": 200.0,
+        "hi": 285.0
+      },
+      "g_s": {
+        "lo": 0.2,
+        "hi": 0.45
+      },
+      "g_n": {
+        "lo": 1.8,
+        "hi": 3.2
+      },
+      "g_r_lip_mm": {
+        "lo": 8.0,
+        "hi": 30.0
+      },
+      "g_wrap_deg": {
+        "lo": 80.0,
+        "hi": 160.0
+      },
+      "g_sf_ab": {
+        "lo": 0.7,
+        "hi": 0.9
+      },
+      "g_sf_amt": {
+        "lo": 0.15,
+        "hi": 0.38
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.2,
+      "seed": 1234,
+      "budget": 40,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "resample_strict",
+      "error_policy": "retry_same_then_stop",
+      "budget_counts": "valid",
+      "max_attempts": 220
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T090559Z-screen-9b8767"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 38,
+    "valid": 30,
+    "best_n": 0,
+    "best_J": 5.345396237349772,
+    "best_design_hash": "9b5428e6dec8",
+    "best_json_hash": "9b5428e6dec8",
+    "missing": []
+  },
+  {
+    "run": "20261119T144903Z-screen-0ec862",
+    "config_name": "scout40w2__crowe_x_square_v7",
+    "family": "FREEFORM",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "g_a_h_deg": 34.0,
+      "g_a_v_deg": 34.0,
+      "g_k": 1.0,
+      "g_L_mm": 220.0,
+      "g_s": 0.32,
+      "g_n": 2.0,
+      "g_q": 0.996,
+      "g_r_lip_mm": 24.0,
+      "g_wrap_deg": 120.0,
+      "g_sf_m": 4,
+      "g_sf_n1": 1.5,
+      "g_sf_n2": 6.0,
+      "g_sf_ab": 1.0,
+      "g_sf_amt": 0.6,
+      "g_sf_start": 0.12
+    },
+    "bounds": {
+      "g_a_h_deg": {
+        "lo": 32.0,
+        "hi": 36.0
+      },
+      "g_a_v_deg": {
+        "lo": 32.0,
+        "hi": 36.0
+      },
+      "g_L_mm": {
+        "lo": 210.0,
+        "hi": 240.0
+      },
+      "g_s": {
+        "lo": 0.25,
+        "hi": 0.4
+      },
+      "g_n": {
+        "lo": 1.8,
+        "hi": 2.4
+      },
+      "g_r_lip_mm": {
+        "lo": 18.0,
+        "hi": 30.0
+      },
+      "g_wrap_deg": {
+        "lo": 90.0,
+        "hi": 150.0
+      },
+      "g_sf_amt": {
+        "lo": 0.4,
+        "hi": 0.8
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.2,
+      "seed": 1234,
+      "budget": 40,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "resample_strict",
+      "error_policy": "retry_same_then_stop",
+      "budget_counts": "valid"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T092235Z-screen-690db0"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 26,
+    "valid": 16,
+    "best_n": 24,
+    "best_J": 7.618312117278556,
+    "best_design_hash": "b35c19653487",
+    "best_json_hash": "b35c19653487",
+    "missing": []
+  },
+  {
+    "run": "20261119T145406Z-screen-afaf16",
+    "config_name": "scout40w2__rosse_rect_cd_v7",
+    "family": "FREEFORM",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "g_width_mm": 560.968198,
+      "g_height_mm": 410.778704,
+      "g_rect_exponent": 5.381518,
+      "g_a_h_deg": 35.667049,
+      "g_a_v_deg": 19.192696,
+      "g_a_diag_deg": 0.0,
+      "g_k": 0.967541,
+      "g_r": 0.376617,
+      "g_m": 0.85,
+      "g_b": 0.04501,
+      "g_q": 3.0,
+      "g_tmax": 0.998015
+    },
+    "bounds": {
+      "g_width_mm": {
+        "lo": 480.0,
+        "hi": 590.0
+      },
+      "g_height_mm": {
+        "lo": 280.0,
+        "hi": 420.0
+      },
+      "g_rect_exponent": {
+        "lo": 2.5,
+        "hi": 8.0
+      },
+      "g_a_h_deg": {
+        "lo": 32.0,
+        "hi": 46.0
+      },
+      "g_a_v_deg": {
+        "lo": 12.0,
+        "hi": 30.0
+      },
+      "g_k": {
+        "lo": 0.5,
+        "hi": 3.0
+      },
+      "g_r": {
+        "lo": 0.1,
+        "hi": 0.6
+      },
+      "g_b": {
+        "lo": 0.0,
+        "hi": 0.4
+      },
+      "g_tmax": {
+        "lo": 0.85,
+        "hi": 1.0
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.2,
+      "seed": 1234,
+      "budget": 40,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "graded",
+      "budget_counts": "valid",
+      "max_attempts": 220
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261116T150941Z-screen-0e777a"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": true
+    },
+    "warm_start_run": null,
+    "rows": 33,
+    "valid": 32,
+    "best_n": 30,
+    "best_J": 4.559601646366622,
+    "best_design_hash": "efe4a8959d85",
+    "best_json_hash": "efe4a8959d85",
+    "missing": []
+  },
+  {
+    "run": "20261119T145538Z-screen-a277c4",
+    "config_name": "scout40w3__fold_warm_v7",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "L_mm": 255.830467,
+      "a0_deg": 2.302789,
+      "a_deg": 38.500213,
+      "aspect_ratio": 1.0,
+      "az_a_cos_amp": 9.405874,
+      "az_a_cos_pow": 1.239298,
+      "az_a_sf_amp": 0.0,
+      "az_n_cos2_amp": 0.0,
+      "az_s_cos2_amp": -0.15903,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "exponent": 2.0,
+      "k": 2.607528,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 32.108556,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 394.716486,
+      "morph_rate": 3.886928,
+      "morph_target": 1,
+      "morph_width_mm": 564.83109,
+      "n": 5.780056,
+      "q": 0.96217,
+      "r0_mm": 18.0,
+      "s": 1.001287,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "az_fold_v_deg": -2.273623,
+      "az_fold_v_width_deg": 20.45899,
+      "az_fold_h_deg": -0.093971,
+      "az_fold_h_width_deg": 30.715508
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 228.712,
+        "hi": 271.912
+      },
+      "a_deg": {
+        "lo": 36.3038,
+        "hi": 40.0
+      },
+      "az_a_cos_amp": {
+        "lo": 8.13355,
+        "hi": 11.73355
+      },
+      "az_a_cos_pow": {
+        "lo": 1.23779,
+        "hi": 2.43779
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.25,
+        "hi": -0.122676
+      },
+      "k": {
+        "lo": 2.16454,
+        "hi": 2.81254
+      },
+      "morph_corner_mm": {
+        "lo": 30.0,
+        "hi": 46.3363
+      },
+      "morph_height_mm": {
+        "lo": 378.827,
+        "hi": 412.427
+      },
+      "morph_rate": {
+        "lo": 3.14408,
+        "hi": 4.34408
+      },
+      "morph_width_mm": {
+        "lo": 559.529,
+        "hi": 588.329
+      },
+      "n": {
+        "lo": 4.64958,
+        "hi": 6.56958
+      },
+      "q": {
+        "lo": 0.950949,
+        "hi": 0.974949
+      },
+      "s": {
+        "lo": 0.769626,
+        "hi": 1.009626
+      },
+      "az_fold_v_deg": {
+        "lo": -25.0,
+        "hi": 10.0
+      },
+      "az_fold_v_width_deg": {
+        "lo": 3.0,
+        "hi": 40.0
+      },
+      "az_fold_h_deg": {
+        "lo": -15.0,
+        "hi": 10.0,
+        "search": true
+      },
+      "az_fold_h_width_deg": {
+        "lo": 3.0,
+        "hi": 40.0
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 40,
+      "infeasible_penalty": "graded",
+      "popsize": null,
+      "seed": 1234,
+      "sigma0": 0.25,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 200
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T134012Z-screen-50fbd8"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 30,
+    "valid": 30,
+    "best_n": 15,
+    "best_J": 3.6945142598615806,
+    "best_design_hash": "680d4bcde649",
+    "best_json_hash": "680d4bcde649",
+    "missing": []
+  },
+  {
+    "run": "20261119T150842Z-screen-18b29b",
+    "config_name": "scout40w3__morph_v8",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "r0_mm": 18.0,
+      "a0_deg": 2.2466,
+      "L_mm": 250.312,
+      "a_deg": 38.7038,
+      "n": 5.60958,
+      "s": 0.889626,
+      "q": 0.962949,
+      "k": 2.48854,
+      "exponent": 2.0,
+      "aspect_ratio": 1.0,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "morph_target": 1,
+      "morph_width_mm": 573.929,
+      "morph_height_mm": 395.627,
+      "morph_corner_mm": 37.9363,
+      "morph_exponent": 4.0,
+      "morph_rate": 3.74408,
+      "morph_fixed": 0.0,
+      "morph_allow_shrinkage": 1,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_a_cos_pow": 1.83779,
+      "az_n_cos2_amp": 0.0,
+      "az_a_sf_amp": 0.0,
+      "az_a_cos_amp": 9.93355,
+      "az_s_cos2_amp": -0.212676
+    },
+    "bounds": {
+      "a0_deg": {
+        "lo": 1.0,
+        "hi": 3.0
+      },
+      "L_mm": {
+        "lo": 160.0,
+        "hi": 340.0
+      },
+      "a_deg": {
+        "lo": 20.0,
+        "hi": 48.0
+      },
+      "n": {
+        "lo": 2.0,
+        "hi": 10.0
+      },
+      "s": {
+        "lo": 0.2,
+        "hi": 1.2
+      },
+      "q": {
+        "lo": 0.9,
+        "hi": 1.0
+      },
+      "k": {
+        "lo": 0.3,
+        "hi": 4.0
+      },
+      "morph_width_mm": {
+        "lo": 480.0,
+        "hi": 600.0
+      },
+      "morph_height_mm": {
+        "lo": 320.0,
+        "hi": 460.0
+      },
+      "morph_corner_mm": {
+        "lo": 30.0,
+        "hi": 100.0
+      },
+      "morph_rate": {
+        "lo": 0.5,
+        "hi": 6.0,
+        "search": true
+      },
+      "az_a_cos_pow": {
+        "lo": 0.5,
+        "hi": 6.0
+      },
+      "az_a_cos_amp": {
+        "lo": 0.0,
+        "hi": 15.0
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.5,
+        "hi": 0.5
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.22,
+      "seed": 1234,
+      "budget": 40,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "resample_strict",
+      "budget_counts": "valid",
+      "error_policy": "retry_same_then_stop"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T135116Z-screen-28debc"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 25,
+    "valid": 13,
+    "best_n": 3,
+    "best_J": 3.7573643031639703,
+    "best_design_hash": "b0caf1a829a5",
+    "best_json_hash": "b0caf1a829a5",
+    "missing": []
+  },
+  {
+    "run": "20261119T152446Z-screen-d98c8d",
+    "config_name": "scout40w3__tritonia_v8",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "L_mm": 218.088262,
+      "a0_deg": 9.663561,
+      "a_deg": 48.887334,
+      "aspect_ratio": 1.0,
+      "exponent": 2.0,
+      "k": 1.177418,
+      "az_a_cos_amp": -14.645733,
+      "az_a_cos_pow": 2.0,
+      "az_fold_v_deg": -28.789806,
+      "az_fold_v_width_deg": 22.997014,
+      "az_fold_h_deg": 0.0,
+      "az_fold_h_width_deg": 20.0,
+      "az_a_cos2p_amp": 0.0,
+      "az_a_cos2p_pow": 5.0,
+      "az_s_cos2_amp": 0.0,
+      "az_n_cos2_amp": 0.0,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 24.485256,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 471.476891,
+      "morph_rate": 1.380681,
+      "morph_target": 1,
+      "morph_width_mm": 584.425399,
+      "n": 6.057854,
+      "q": 0.974736,
+      "r0_mm": 18.0,
+      "s": 0.955564,
+      "s1": 1.0,
+      "s2": 0.015
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 140.0,
+        "hi": 400.0
+      },
+      "a0_deg": {
+        "lo": 5.0,
+        "hi": 11.0
+      },
+      "a_deg": {
+        "lo": 44.0,
+        "hi": 56.0
+      },
+      "k": {
+        "lo": 0.9,
+        "hi": 1.3
+      },
+      "az_a_cos_amp": {
+        "lo": -22.0,
+        "hi": -13.5
+      },
+      "az_fold_v_deg": {
+        "lo": -31.0,
+        "hi": -27.5
+      },
+      "az_fold_v_width_deg": {
+        "lo": 21.5,
+        "hi": 25.5
+      },
+      "morph_corner_mm": {
+        "lo": 10.0,
+        "hi": 30.0
+      },
+      "morph_height_mm": {
+        "lo": 250.0,
+        "hi": 480.0
+      },
+      "morph_rate": {
+        "lo": 0.6,
+        "hi": 2.1
+      },
+      "morph_width_mm": {
+        "lo": 330.0,
+        "hi": 590.0
+      },
+      "n": {
+        "lo": 4.0,
+        "hi": 10.0,
+        "search": true
+      },
+      "q": {
+        "lo": 0.97,
+        "hi": 0.995
+      },
+      "s": {
+        "lo": 0.92,
+        "hi": 1.04
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 40,
+      "infeasible_penalty": "graded",
+      "popsize": null,
+      "seed": 1234,
+      "sigma0": 0.2,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 260
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T140149Z-screen-f8fffb"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 30,
+    "valid": 30,
+    "best_n": 13,
+    "best_J": 4.891129482719315,
+    "best_design_hash": "cded84a911d2",
+    "best_json_hash": "cded84a911d2",
+    "missing": []
+  },
+  {
+    "run": "20261119T153950Z-screen-5d766f",
+    "config_name": "scout40w3__tritonia_v9",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "L_mm": 218.088262,
+      "a0_deg": 9.663561,
+      "a_deg": 48.887334,
+      "aspect_ratio": 1.0,
+      "exponent": 2.0,
+      "k": 1.177418,
+      "az_a_cos_amp": -14.645733,
+      "az_a_cos_pow": 2.0,
+      "az_fold_v_deg": -28.789806,
+      "az_fold_v_width_deg": 22.997014,
+      "az_fold_h_deg": 0.0,
+      "az_fold_h_width_deg": 20.0,
+      "az_a_cos2p_amp": 0.0,
+      "az_a_cos2p_pow": 5.0,
+      "az_s_cos2_amp": 0.0,
+      "az_n_cos2_amp": 0.0,
+      "morph_allow_shrinkage": 1,
+      "morph_corner_mm": 24.485256,
+      "morph_exponent": 4.0,
+      "morph_fixed": 0.0,
+      "morph_height_mm": 471.476891,
+      "morph_rate": 1.380681,
+      "morph_target": 1,
+      "morph_width_mm": 584.425399,
+      "n": 6.057854,
+      "q": 0.974736,
+      "r0_mm": 18.0,
+      "s": 0.955564,
+      "s1": 1.0,
+      "s2": 0.015
+    },
+    "bounds": {
+      "L_mm": {
+        "lo": 140.0,
+        "hi": 400.0
+      },
+      "a0_deg": {
+        "lo": 5.0,
+        "hi": 11.0
+      },
+      "a_deg": {
+        "lo": 44.0,
+        "hi": 56.0
+      },
+      "k": {
+        "lo": 0.9,
+        "hi": 1.3
+      },
+      "az_a_cos_amp": {
+        "lo": -18.0,
+        "hi": -13.5
+      },
+      "az_fold_v_deg": {
+        "lo": -31.0,
+        "hi": -10.0,
+        "search": true
+      },
+      "az_fold_v_width_deg": {
+        "lo": 21.5,
+        "hi": 25.5
+      },
+      "morph_corner_mm": {
+        "lo": 10.0,
+        "hi": 30.0
+      },
+      "morph_height_mm": {
+        "lo": 250.0,
+        "hi": 480.0
+      },
+      "morph_rate": {
+        "lo": 1.0,
+        "hi": 2.1
+      },
+      "morph_width_mm": {
+        "lo": 330.0,
+        "hi": 590.0
+      },
+      "n": {
+        "lo": 4.0,
+        "hi": 7.5
+      },
+      "q": {
+        "lo": 0.97,
+        "hi": 0.995
+      },
+      "s": {
+        "lo": 0.92,
+        "hi": 1.04
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "budget": 40,
+      "infeasible_penalty": "graded",
+      "popsize": null,
+      "seed": 1234,
+      "sigma0": 0.18,
+      "tolfun": 0.001,
+      "budget_counts": "valid",
+      "max_attempts": 260
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T141723Z-screen-433f54"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 36,
+    "valid": 30,
+    "best_n": 29,
+    "best_J": 5.003223187167279,
+    "best_design_hash": "3ea64988763d",
+    "best_json_hash": "3ea64988763d",
+    "missing": []
+  },
+  {
+    "run": "20261119T155454Z-screen-d1a61d",
+    "config_name": "scout40w3__petal_hvlaw_v7",
+    "family": "OSSE",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "r0_mm": 18.0,
+      "a0_deg": 1.9863,
+      "L_mm": 250.0,
+      "a_deg": 24.0,
+      "n": 6.9046,
+      "s": 0.7503,
+      "q": 0.9869,
+      "k": 1.2163,
+      "exponent": 2.0,
+      "aspect_ratio": 1.0,
+      "s1": 1.1799,
+      "s2": 0.0286,
+      "morph_target": 0,
+      "morph_width_mm": 540.0,
+      "morph_height_mm": 400.0,
+      "morph_corner_mm": 15.0,
+      "morph_exponent": 4.5,
+      "morph_rate": 3.46,
+      "morph_fixed": 0.0,
+      "morph_allow_shrinkage": 0,
+      "az_sf_m": 4.0,
+      "az_sf_n1": 7.4958,
+      "az_sf_n2": 12.4449,
+      "az_sf_n3": 13.4442,
+      "az_sf_a": 1.0,
+      "az_sf_b": 0.8569,
+      "az_a_cos_pow": 2.0,
+      "az_n_cos2_amp": 0.0,
+      "az_a_sf_amp": 3.0,
+      "az_a_cos_amp": 14.0,
+      "az_s_cos2_amp": 0.0
+    },
+    "bounds": {
+      "a0_deg": {
+        "lo": 1.0,
+        "hi": 3.0
+      },
+      "L_mm": {
+        "lo": 160.0,
+        "hi": 340.0
+      },
+      "a_deg": {
+        "lo": 12.0,
+        "hi": 36.0
+      },
+      "n": {
+        "lo": 2.0,
+        "hi": 10.0
+      },
+      "s": {
+        "lo": 0.2,
+        "hi": 1.2
+      },
+      "q": {
+        "lo": 0.9,
+        "hi": 1.0
+      },
+      "k": {
+        "lo": 0.3,
+        "hi": 3.0
+      },
+      "az_a_cos_pow": {
+        "lo": 1.0,
+        "hi": 6.0
+      },
+      "az_a_sf_amp": {
+        "lo": 0.0,
+        "hi": 8.0
+      },
+      "az_a_cos_amp": {
+        "lo": 0.0,
+        "hi": 25.0
+      },
+      "az_s_cos2_amp": {
+        "lo": -0.25,
+        "hi": 0.5
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.05,
+      "seed": 1234,
+      "budget": 40,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "resample_strict",
+      "error_policy": "retry_same_then_stop",
+      "budget_counts": "valid"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T143027Z-screen-401992"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": {
+      "designs_clipped_to_box": 0,
+      "from_runs": [
+        "runs\\20261119T143027Z-screen-401992"
+      ],
+      "mean_design_hash": "fab20de9dd19",
+      "mean_objective": 4.196013028240638,
+      "rows_seen": 40,
+      "sigma0": 0.05,
+      "sigma_from_spread": null,
+      "sources": [
+        {
+          "config_sha": "1d795201d636",
+          "objective_version": 7,
+          "path": "runs\\20261119T143027Z-screen-401992",
+          "rows": 40,
+          "valid": 30
+        }
+      ],
+      "top_k": 10
+    },
+    "rows": 55,
+    "valid": 41,
+    "best_n": 37,
+    "best_J": 4.161632688418152,
+    "best_design_hash": "74d8eed97268",
+    "best_json_hash": "74d8eed97268",
+    "missing": []
+  },
+  {
+    "run": "20261119T161820Z-screen-9fda2a",
+    "config_name": "scout40w3__crowe_x_square_v7",
+    "family": "FREEFORM",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "g_a_h_deg": 34.0,
+      "g_a_v_deg": 34.0,
+      "g_k": 1.0,
+      "g_L_mm": 220.0,
+      "g_s": 0.32,
+      "g_n": 2.0,
+      "g_q": 0.996,
+      "g_r_lip_mm": 24.0,
+      "g_wrap_deg": 120.0,
+      "g_sf_m": 4,
+      "g_sf_n1": 1.5,
+      "g_sf_n2": 6.0,
+      "g_sf_ab": 1.0,
+      "g_sf_amt": 0.6,
+      "g_sf_start": 0.12
+    },
+    "bounds": {
+      "g_a_h_deg": {
+        "lo": 32.0,
+        "hi": 36.0
+      },
+      "g_a_v_deg": {
+        "lo": 32.0,
+        "hi": 36.0
+      },
+      "g_L_mm": {
+        "lo": 210.0,
+        "hi": 240.0
+      },
+      "g_s": {
+        "lo": 0.25,
+        "hi": 0.4
+      },
+      "g_n": {
+        "lo": 1.8,
+        "hi": 2.4
+      },
+      "g_r_lip_mm": {
+        "lo": 18.0,
+        "hi": 30.0
+      },
+      "g_wrap_deg": {
+        "lo": 90.0,
+        "hi": 150.0
+      },
+      "g_sf_amt": {
+        "lo": 0.4,
+        "hi": 0.8
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.12,
+      "seed": 1234,
+      "budget": 40,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "resample_strict",
+      "error_policy": "retry_same_then_stop",
+      "budget_counts": "valid"
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261119T144903Z-screen-0ec862"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": false
+    },
+    "warm_start_run": null,
+    "rows": 26,
+    "valid": 10,
+    "best_n": 9,
+    "best_J": 7.598245619219523,
+    "best_design_hash": "be9ab290d3cf",
+    "best_json_hash": "be9ab290d3cf",
+    "missing": []
+  },
+  {
+    "run": "20261119T162153Z-screen-d2b7d3",
+    "config_name": "scout40w3__rosse_rect_cd_v7",
+    "family": "FREEFORM",
+    "objective_version": 7,
+    "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+    "seed_params": {
+      "g_width_mm": 560.968198,
+      "g_height_mm": 410.778704,
+      "g_rect_exponent": 5.381518,
+      "g_a_h_deg": 35.667049,
+      "g_a_v_deg": 19.192696,
+      "g_a_diag_deg": 0.0,
+      "g_k": 0.967541,
+      "g_r": 0.376617,
+      "g_m": 0.85,
+      "g_b": 0.04501,
+      "g_q": 3.0,
+      "g_tmax": 0.998015
+    },
+    "bounds": {
+      "g_width_mm": {
+        "lo": 480.0,
+        "hi": 590.0
+      },
+      "g_height_mm": {
+        "lo": 280.0,
+        "hi": 420.0
+      },
+      "g_rect_exponent": {
+        "lo": 2.5,
+        "hi": 8.0
+      },
+      "g_a_h_deg": {
+        "lo": 32.0,
+        "hi": 46.0
+      },
+      "g_a_v_deg": {
+        "lo": 12.0,
+        "hi": 30.0
+      },
+      "g_k": {
+        "lo": 0.5,
+        "hi": 3.0
+      },
+      "g_r": {
+        "lo": 0.1,
+        "hi": 0.6
+      },
+      "g_b": {
+        "lo": -0.1,
+        "hi": 0.4,
+        "search": true
+      },
+      "g_tmax": {
+        "lo": 0.85,
+        "hi": 1.0
+      }
+    },
+    "search": {
+      "algorithm": "cma",
+      "sigma0": 0.2,
+      "seed": 1234,
+      "budget": 40,
+      "popsize": null,
+      "tolfun": 0.001,
+      "infeasible_penalty": "graded",
+      "budget_counts": "valid",
+      "max_attempts": 220
+    },
+    "warm_start_config": {
+      "from_runs": [
+        "runs/20261116T150941Z-screen-0e777a"
+      ],
+      "top_k": 10,
+      "sigma_from_spread": true
+    },
+    "warm_start_run": null,
+    "rows": 33,
+    "valid": 33,
+    "best_n": 23,
+    "best_J": 4.690277471589399,
+    "best_design_hash": "018057bc29c9",
+    "best_json_hash": "018057bc29c9",
+    "missing": []
+  }
+]

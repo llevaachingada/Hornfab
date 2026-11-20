@@ -1,0 +1,124 @@
+{
+  "run": "20261119T135116Z-screen-28debc",
+  "config_name": "scout40w2__morph_v8",
+  "family": "OSSE",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "seed_params": {
+    "r0_mm": 18.0,
+    "a0_deg": 2.2466,
+    "L_mm": 250.312,
+    "a_deg": 38.7038,
+    "n": 5.60958,
+    "s": 0.889626,
+    "q": 0.962949,
+    "k": 2.48854,
+    "exponent": 2.0,
+    "aspect_ratio": 1.0,
+    "s1": 1.1799,
+    "s2": 0.0286,
+    "morph_target": 1,
+    "morph_width_mm": 573.929,
+    "morph_height_mm": 395.627,
+    "morph_corner_mm": 37.9363,
+    "morph_exponent": 4.0,
+    "morph_rate": 3.74408,
+    "morph_fixed": 0.0,
+    "morph_allow_shrinkage": 1,
+    "az_sf_m": 4.0,
+    "az_sf_n1": 7.4958,
+    "az_sf_n2": 12.4449,
+    "az_sf_n3": 13.4442,
+    "az_sf_a": 1.0,
+    "az_sf_b": 0.8569,
+    "az_a_cos_pow": 1.83779,
+    "az_n_cos2_amp": 0.0,
+    "az_a_sf_amp": 0.0,
+    "az_a_cos_amp": 9.93355,
+    "az_s_cos2_amp": -0.212676
+  },
+  "bounds": {
+    "a0_deg": {
+      "lo": 1.0,
+      "hi": 3.0
+    },
+    "L_mm": {
+      "lo": 160.0,
+      "hi": 340.0
+    },
+    "a_deg": {
+      "lo": 20.0,
+      "hi": 48.0
+    },
+    "n": {
+      "lo": 2.0,
+      "hi": 10.0
+    },
+    "s": {
+      "lo": 0.2,
+      "hi": 1.2
+    },
+    "q": {
+      "lo": 0.9,
+      "hi": 1.0
+    },
+    "k": {
+      "lo": 0.3,
+      "hi": 4.0
+    },
+    "morph_width_mm": {
+      "lo": 480.0,
+      "hi": 600.0
+    },
+    "morph_height_mm": {
+      "lo": 320.0,
+      "hi": 460.0
+    },
+    "morph_corner_mm": {
+      "lo": 30.0,
+      "hi": 100.0
+    },
+    "morph_rate": {
+      "lo": 0.5,
+      "hi": 6.0,
+      "search": true
+    },
+    "az_a_cos_pow": {
+      "lo": 0.5,
+      "hi": 6.0
+    },
+    "az_a_cos_amp": {
+      "lo": 0.0,
+      "hi": 15.0
+    },
+    "az_s_cos2_amp": {
+      "lo": -0.5,
+      "hi": 0.5
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.22,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "graded",
+    "budget_counts": "valid"
+  },
+  "warm_start_config": {
+    "from_runs": [
+      "runs/20261119T081214Z-screen-8470bd"
+    ],
+    "top_k": 10,
+    "sigma_from_spread": false
+  },
+  "warm_start_run": null,
+  "rows": 25,
+  "valid": 14,
+  "best_n": 20,
+  "best_J": 3.232488693018465,
+  "best_design_hash": "69aca6e15dca",
+  "best_json_hash": "69aca6e15dca",
+  "missing": []
+}

@@ -1,0 +1,86 @@
+{
+  "run": "20261119T162153Z-screen-d2b7d3",
+  "config_name": "scout40w3__rosse_rect_cd_v7",
+  "family": "FREEFORM",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "seed_params": {
+    "g_width_mm": 560.968198,
+    "g_height_mm": 410.778704,
+    "g_rect_exponent": 5.381518,
+    "g_a_h_deg": 35.667049,
+    "g_a_v_deg": 19.192696,
+    "g_a_diag_deg": 0.0,
+    "g_k": 0.967541,
+    "g_r": 0.376617,
+    "g_m": 0.85,
+    "g_b": 0.04501,
+    "g_q": 3.0,
+    "g_tmax": 0.998015
+  },
+  "bounds": {
+    "g_width_mm": {
+      "lo": 480.0,
+      "hi": 590.0
+    },
+    "g_height_mm": {
+      "lo": 280.0,
+      "hi": 420.0
+    },
+    "g_rect_exponent": {
+      "lo": 2.5,
+      "hi": 8.0
+    },
+    "g_a_h_deg": {
+      "lo": 32.0,
+      "hi": 46.0
+    },
+    "g_a_v_deg": {
+      "lo": 12.0,
+      "hi": 30.0
+    },
+    "g_k": {
+      "lo": 0.5,
+      "hi": 3.0
+    },
+    "g_r": {
+      "lo": 0.1,
+      "hi": 0.6
+    },
+    "g_b": {
+      "lo": -0.1,
+      "hi": 0.4,
+      "search": true
+    },
+    "g_tmax": {
+      "lo": 0.85,
+      "hi": 1.0
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.2,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "graded",
+    "budget_counts": "valid",
+    "max_attempts": 220
+  },
+  "warm_start_config": {
+    "from_runs": [
+      "runs/20261116T150941Z-screen-0e777a"
+    ],
+    "top_k": 10,
+    "sigma_from_spread": true
+  },
+  "warm_start_run": null,
+  "rows": 33,
+  "valid": 33,
+  "best_n": 23,
+  "best_J": 4.690277471589399,
+  "best_design_hash": "018057bc29c9",
+  "best_json_hash": "018057bc29c9",
+  "missing": []
+}

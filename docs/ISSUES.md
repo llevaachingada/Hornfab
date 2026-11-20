@@ -53,6 +53,13 @@
   Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
   raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
 
+## 2026-11-19 - W2/W3 evidence bundle published
+
+- DONE: docs/evidence/runs/scout40w2_2026-11-19/ (15 runs, 18.5 MB, full scores + geometry + best
+  meshes/responses) and the README chains.
+- LIVE: compact400 queue (w4 tri v9 running; w4 b3, c4x_04, c4x_05 pending).
+- OPEN: read those, v10 rescore, compact floor re-measure, archive the appended compact runs, B6.
+
 ## 2026-11-19 - Queue verified (19 jobs); fold cont2 appended
 
 - VERIFIED: 19 jobs, 0 config errors, warm starts read, live == docs/queue, lock on the running job.

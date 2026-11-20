@@ -1,0 +1,84 @@
+{
+  "run": "20261119T161820Z-screen-9fda2a",
+  "config_name": "scout40w3__crowe_x_square_v7",
+  "family": "FREEFORM",
+  "objective_version": 7,
+  "brief_file": "../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml",
+  "seed_params": {
+    "g_a_h_deg": 34.0,
+    "g_a_v_deg": 34.0,
+    "g_k": 1.0,
+    "g_L_mm": 220.0,
+    "g_s": 0.32,
+    "g_n": 2.0,
+    "g_q": 0.996,
+    "g_r_lip_mm": 24.0,
+    "g_wrap_deg": 120.0,
+    "g_sf_m": 4,
+    "g_sf_n1": 1.5,
+    "g_sf_n2": 6.0,
+    "g_sf_ab": 1.0,
+    "g_sf_amt": 0.6,
+    "g_sf_start": 0.12
+  },
+  "bounds": {
+    "g_a_h_deg": {
+      "lo": 32.0,
+      "hi": 36.0
+    },
+    "g_a_v_deg": {
+      "lo": 32.0,
+      "hi": 36.0
+    },
+    "g_L_mm": {
+      "lo": 210.0,
+      "hi": 240.0
+    },
+    "g_s": {
+      "lo": 0.25,
+      "hi": 0.4
+    },
+    "g_n": {
+      "lo": 1.8,
+      "hi": 2.4
+    },
+    "g_r_lip_mm": {
+      "lo": 18.0,
+      "hi": 30.0
+    },
+    "g_wrap_deg": {
+      "lo": 90.0,
+      "hi": 150.0
+    },
+    "g_sf_amt": {
+      "lo": 0.4,
+      "hi": 0.8
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "sigma0": 0.12,
+    "seed": 1234,
+    "budget": 40,
+    "popsize": null,
+    "tolfun": 0.001,
+    "infeasible_penalty": "resample_strict",
+    "error_policy": "retry_same_then_stop",
+    "budget_counts": "valid"
+  },
+  "warm_start_config": {
+    "from_runs": [
+      "runs/20261119T144903Z-screen-0ec862"
+    ],
+    "top_k": 10,
+    "sigma_from_spread": false
+  },
+  "warm_start_run": null,
+  "rows": 26,
+  "valid": 10,
+  "best_n": 9,
+  "best_J": 7.598245619219523,
+  "best_design_hash": "be9ab290d3cf",
+  "best_json_hash": "be9ab290d3cf",
+  "missing": []
+}

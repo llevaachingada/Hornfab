@@ -1,0 +1,62 @@
+{
+ "design_hash": "018057bc29c9",
+ "di_source": "balloon",
+ "eval_no": 23,
+ "family": "FREEFORM",
+ "mode": "screen",
+ "objective": 4.690277471589399,
+ "ok": true,
+ "params": {
+  "grid": {
+   "knobs": {
+    "g_a_diag_deg": 0.0,
+    "g_a_h_deg": 33.7833669016,
+    "g_a_v_deg": 22.8704161301,
+    "g_b": -0.014027377,
+    "g_height_mm": 419.9942363488,
+    "g_k": 1.6857328023,
+    "g_m": 0.85,
+    "g_q": 3.0,
+    "g_r": 0.3509431374,
+    "g_rect_exponent": 5.0444986901,
+    "g_tmax": 0.9899888727,
+    "g_width_mm": 569.1272302033
+   },
+   "n_phi": 25,
+   "n_s": 48,
+   "rows": {
+    "driver": {
+     "exit_angle_deg": 2.0,
+     "exit_radius_mm": 18.0
+    },
+    "implementation_sha256": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+    "schema": "rosse-rect-v1",
+    "type": "rosse_rect"
+   },
+   "wall_thickness_mm": 3.0
+  }
+ },
+ "terms": {
+  "cov": 0.5794296604836946,
+  "di": 1.5888841113500156,
+  "di_estimated": 0.0,
+  "diag": 0.20293715142923197,
+  "dislope": 0.18862027220865862,
+  "distd": 0.2849447337506551,
+  "f11_hz": 5600.0,
+  "flat": 0.815294465106431,
+  "flat_cv": 0.8517220430356881,
+  "lfp20_hz": 605.932145358494,
+  "lfp50_hz": 853.9410827289416,
+  "load": 1.711729143865682,
+  "loaded_hi_hz": 5600.0,
+  "n_in_band": 13,
+  "n_nan": 0,
+  "oa_excess_raw": 0.0,
+  "penalty": 0.0,
+  "rez_min_from_fx": 0.4563544840294495,
+  "rip": 0.12905436773289522,
+  "total": 4.690277471589399
+ },
+ "written_utc": "2026-11-19T16:30:46Z"
+}

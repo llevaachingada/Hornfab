@@ -1,0 +1,25 @@
+{
+ "night": "fable_scout40w2_2026-11-19",
+ "night_file": "runs\\nights\\fable_scout40w2_2026-11-19.yaml",
+ "state": "done",
+ "updated": "2026-11-19T16:33:55Z",
+ "done": [
+  "s40x__fold_warm",
+  "s40x__morph_v8",
+  "s40x__tritonia_v8",
+  "s40x__tritonia_v9",
+  "s40x__petal_hvlaw_v7",
+  "s40x__crowe_x_osse_cd_v7",
+  "s40x__crowe_x_square_v7",
+  "s40x__rosse_rect_cd_v7",
+  "s40x3__fold_warm",
+  "s40x3__morph_v8",
+  "s40x3__tritonia_v8",
+  "s40x3__tritonia_v9",
+  "s40x3__petal_hvlaw_v7",
+  "s40x3__crowe_x_square_v7",
+  "s40x3__rosse_rect_cd_v7"
+ ],
+ "running": null,
+ "pending": []
+}
