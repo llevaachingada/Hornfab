@@ -1,19 +1,28 @@
 ﻿# CONTINUITY
 
-## 2026-11-20 - System evidence queue staged (CPU only, not launched)
+## 2026-11-20 - System evidence queue ran (CPU only, no GPU)
 
-- **Owner ask:** queue a variety of runs whose data will guide the open system questions.
+- **Owner ask:** queue a variety of runs whose data will guide the open system questions. The owner
+  then authorised the launch; the queue ran beside the live `fable_expand_2026-11-19` GPU night in
+  the separate CPU lane. **No GPU job was started.**
 - **Queue:** `docs/queue/system_evidence_2026-11-19.yaml` (11 CPU-lane `command` jobs) + runbook
   `...md` + admission `...admission.json` + six request overlays under `requests/`.
-- **Jobs:** LF 20-200 Hz on #4 real motor, #5 demo twin, #6 real/default box, R0 demo/default box,
-  and the assembled #2 project; 2x2 wide-grid cells (real/demo x default box); 10 m vs 2 m
-  observation; 25 vs 49 frequency sampling on #2; a CPU screen replay; and a census re-export.
+- **Results:** 9 solves complete (LF 20-200 Hz on #4/#5/#6/R0 and assembled #2; two wide 2x2
+  cells; 10 m vs 2 m; 49-freq sampling), screen replay `27616eedee09009f` byte-identical, census
+  export. Current census: **47 cases / 14 solved / 29 staged / 3 refused / 2 invalid**.
+- **First #4 LF attempt failed** on the wrong project port (`vented/voltage`; #4 uses
+  `bl_motor12pr/voltage`). The case is retained; the corrected request
+  `requests/lf_motor12pr_20_200.json` completed 12/12 in a manual retry.
 - **Tool:** `tools/system/evidence_case.py` copies an existing `case.blab.json` + `bl_output/` into
   a fresh case, copies/validates the request, writes a self-checksummed source/project/request/BL
   manifest, then calls the existing authorized `reference.solve`. `--dry-run` writes nothing;
   `--solve` refuses without `HORNLAB_EVIDENCE_AUTHORIZED_BY` or `--authorized-by`.
-- **Tests:** `tests/system/test_evidence_case.py` **6 passed**; per-job dry-runs 9/9; night dry-run
-  reports 11 jobs, lane=cpu. No solve and no GPU job was started; the queue is staged for owner go.
+- **Tests:** `tests/system/test_evidence_case.py` **6 passed**; `tests/test_night_runner_live.py`
+  11 passed after the CPU-lane `gpu-clean --force` fix; per-job dry-runs 9/9; night dry-run 11 jobs.
+- **Readout:** `docs/evidence/system_evidence_2026-11-19/README.md`: motor difference up to
+  ~8.6 dB / 40 deg on the wide grid; box/null structure up to 23.6 dB; 10 m vs 2 m after 1/r and
+  propagation correction max 1.38 dB / 17.3 deg; 25 vs 49 shared points agree to 0.03 dB but the
+  denser grid exposes -20 dB nulls; assembled LF matches vented-only default within 0.06 dB.
 - **Not in this queue:** real-motor assembled WP3, mesh-refinement convergence, real-driver shape,
   calibration/system ranking. Those need separate work/owner gates.
 

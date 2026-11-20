@@ -1,7 +1,7 @@
 {
   "tool": "system_cases",
   "schema_version": 1,
-  "generated_utc": "2026-11-20T00:08:07.254250Z",
+  "generated_utc": "2026-11-20T05:36:46.691348Z",
   "source": {
     "root": ".",
     "system_runs": "system_runs",
@@ -19,43 +19,43 @@
     "error": null
   },
   "census": {
-    "scanned": 37,
-    "included": 37,
+    "scanned": 48,
+    "included": 48,
     "by_status": {
       "invalid": 2,
       "refused": 3,
-      "solved": 5,
-      "staged": 27
+      "solved": 14,
+      "staged": 29
     },
     "by_fidelity": {
       "COUPLED_VENTED_FEM_BEM_LEM": 7,
-      "UNDECLARED": 30
+      "UNDECLARED": 41
     },
     "by_clearance": {
-      "not_recorded": 35,
+      "not_recorded": 46,
       "unknown": 2
     },
-    "experiments": 12,
-    "solved": 5,
+    "experiments": 21,
+    "solved": 14,
     "declared": 9,
     "declared_missing_on_disk": 0,
-    "on_disk_not_declared": 28,
+    "on_disk_not_declared": 39,
     "manifest_integrity": {
       "mismatch": 1,
       "unknown": 2,
-      "verified": 34
+      "verified": 45
     },
     "run_manifest_integrity": {
-      "unknown": 35,
+      "unknown": 46,
       "verified": 2
     },
     "project_integrity": {
-      "unknown": 25,
+      "unknown": 36,
       "verified": 12
     },
     "request_integrity": {
       "unknown": 35,
-      "verified": 2
+      "verified": 13
     },
     "diagnostics": 3
   },
@@ -2414,6 +2414,1363 @@
         "clearance_source": null,
         "sources": [
           "adapter_spec.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_dense_g4_49",
+      "case": "20261120T052433Z-dense_49-50100-30d7ef04",
+      "case_key": "ev_dense_g4_49/20261120T052433Z-dense_49-50100-30d7ef04",
+      "created_utc": "2026-11-20T05:24:33.479827+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 49,
+      "freq_min_hz": 200.0,
+      "freq_max_hz": 2500.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "49/49",
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); 8 solves",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": "5d275c46199e492a0d73c2cd14bc944f91d2d6ab47fe1b37f66b2e1ad993691d",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "ce8a292a47f64e07f8be18fb73b8ace127a1b07d649196542ca7758243609015",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "bfcdc90e0c2664f3969f34acc9fe078a6769273faa6af4328d235dae2a522cf1",
+      "manifest_integrity": "verified",
+      "box_width_mm": 320.0,
+      "box_height_mm": 500.0,
+      "box_depth_mm": 360.0,
+      "net_volume_l": 42.169,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 28.274,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": "complete",
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_dense_g4_49/20261120T052433Z-dense_49-50100-30d7ef04",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          200.0,
+          210.8057,
+          222.1952,
+          234.2,
+          246.8534,
+          260.1905,
+          274.2482,
+          289.0654,
+          304.6831,
+          321.1446,
+          338.4955,
+          356.7839,
+          376.0603,
+          396.3782,
+          417.7939,
+          440.3666,
+          464.1589,
+          489.2366,
+          515.6693,
+          543.53,
+          572.8961,
+          603.8487,
+          636.4736,
+          670.8613,
+          707.1068,
+          745.3106,
+          785.5785,
+          828.022,
+          872.7587,
+          919.9124,
+          969.6137,
+          1022.0004,
+          1077.2173,
+          1135.4176,
+          1196.7624,
+          1261.4215,
+          1329.574,
+          1401.4087,
+          1477.1245,
+          1556.9311,
+          1641.0495,
+          1729.7127,
+          1823.1662,
+          1921.6688,
+          2025.4934,
+          2134.9275,
+          2250.2741,
+          2371.8527,
+          2500.0
+        ],
+        "excitation_port_ids": [
+          "vented/voltage",
+          "excitation:horn"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-20T05:24:35.960724+00:00",
+        "finished_at_utc": "2026-11-20T05:33:09.353160+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "vented/mesh/interior",
+            "name": "vented__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "vented/mesh/exterior",
+            "name": "vented__exterior",
+            "purpose": "bem_surface"
+          },
+          {
+            "id": "mesh:horn",
+            "name": "horn",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 49,
+          "total": 49,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_farfield_g4_10m",
+      "case": "20261120T051941Z-farfield_10m-10828-d72876e6",
+      "case_key": "ev_farfield_g4_10m/20261120T051941Z-farfield_10m-10828-d72876e6",
+      "created_utc": "2026-11-20T05:19:41.414022+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 25,
+      "freq_min_hz": 200.0,
+      "freq_max_hz": 2500.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "25/25",
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); 8 solves",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": "6602b50203d870ff721f4d8be2b72f3fceba09434194d327a97629a4519c747f",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "c8f86df995cd466f61c11cff58e2fe9d52c903ea8545049e4455b3a3b11a15ad",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "ff05a0e2b02a1b987c32027d20067b6160846bfd119ef8a8b04cd25a953d9af3",
+      "manifest_integrity": "verified",
+      "box_width_mm": 320.0,
+      "box_height_mm": 500.0,
+      "box_depth_mm": 360.0,
+      "net_volume_l": 42.169,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 28.274,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": "complete",
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_farfield_g4_10m/20261120T051941Z-farfield_10m-10828-d72876e6",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          200.0,
+          222.1952,
+          246.8534,
+          274.2482,
+          304.6831,
+          338.4955,
+          376.0603,
+          417.7939,
+          464.1589,
+          515.6693,
+          572.8961,
+          636.4736,
+          707.1068,
+          785.5785,
+          872.7587,
+          969.6137,
+          1077.2173,
+          1196.7624,
+          1329.574,
+          1477.1245,
+          1641.0495,
+          1823.1662,
+          2025.4934,
+          2250.2741,
+          2500.0
+        ],
+        "excitation_port_ids": [
+          "vented/voltage",
+          "excitation:horn"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-20T05:19:44.277467+00:00",
+        "finished_at_utc": "2026-11-20T05:24:32.649792+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "vented/mesh/interior",
+            "name": "vented__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "vented/mesh/exterior",
+            "name": "vented__exterior",
+            "purpose": "bem_surface"
+          },
+          {
+            "id": "mesh:horn",
+            "name": "horn",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 25,
+          "total": 25,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_lf_assembled_demo",
+      "case": "20261120T051458Z-lf_20_200-35104-5973f4ef",
+      "case_key": "ev_lf_assembled_demo/20261120T051458Z-lf_20_200-35104-5973f4ef",
+      "created_utc": "2026-11-20T05:14:58.175151+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 12,
+      "freq_min_hz": 20.0,
+      "freq_max_hz": 200.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "12/12",
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); 8 solves",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": "6f40d0be5fde8c451bf6ee6302023efa910c377bfaf2064525dc723ea4b424d2",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "1df2b3e850c7e4e30b15ea45c547eed967ecc7d30895ab3bc60f91600b3587d0",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "0ee3dd427ecf7f378e3650058eef44c5415ac19836411f1b28d62e041d3bc68a",
+      "manifest_integrity": "verified",
+      "box_width_mm": 320.0,
+      "box_height_mm": 500.0,
+      "box_depth_mm": 360.0,
+      "net_volume_l": 42.169,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 28.274,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": "complete",
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_lf_assembled_demo/20261120T051458Z-lf_20_200-35104-5973f4ef",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          20.0,
+          24.6569,
+          30.3982,
+          37.4763,
+          46.2026,
+          56.9607,
+          70.2238,
+          86.5752,
+          106.734,
+          131.5866,
+          162.2262,
+          200.0
+        ],
+        "excitation_port_ids": [
+          "vented/voltage",
+          "excitation:horn"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-20T05:15:01.234424+00:00",
+        "finished_at_utc": "2026-11-20T05:17:39.280222+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "vented/mesh/interior",
+            "name": "vented__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "vented/mesh/exterior",
+            "name": "vented__exterior",
+            "purpose": "bem_surface"
+          },
+          {
+            "id": "mesh:horn",
+            "name": "horn",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 12,
+          "total": 12,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_lf_default_demo",
+      "case": "20261120T051425Z-lf_20_200-01448-88659fb9",
+      "case_key": "ev_lf_default_demo/20261120T051425Z-lf_20_200-01448-88659fb9",
+      "created_utc": "2026-11-20T05:14:25.698806+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 12,
+      "freq_min_hz": 20.0,
+      "freq_max_hz": 200.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "12/12",
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); 8 solves",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": "6534676fe290ff9d7a501bc03a7477ecbe2b2d93a8a84737dfbf4cd6ccd2e2ec",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "992233e68490c6f14f4ab227a4556b86c09eb5e05ee38fdef61f506cd9f14afe",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "fe38b77e9aed2cc472141d70822ac133e30584e447845e0db4e4aaa6c6ea53e9",
+      "manifest_integrity": "verified",
+      "box_width_mm": 320.0,
+      "box_height_mm": 500.0,
+      "box_depth_mm": 360.0,
+      "net_volume_l": 42.169,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 28.274,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": "complete",
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_lf_default_demo/20261120T051425Z-lf_20_200-01448-88659fb9",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          20.0,
+          24.6569,
+          30.3982,
+          37.4763,
+          46.2026,
+          56.9607,
+          70.2238,
+          86.5752,
+          106.734,
+          131.5866,
+          162.2262,
+          200.0
+        ],
+        "excitation_port_ids": [
+          "vented/voltage"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-20T05:14:26.835490+00:00",
+        "finished_at_utc": "2026-11-20T05:14:57.354151+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "vented/mesh/interior",
+            "name": "vented__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "vented/mesh/exterior",
+            "name": "vented__exterior",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 12,
+          "total": 12,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_lf_default_real",
+      "case": "20261120T051351Z-lf_20_200-45416-03efa73a",
+      "case_key": "ev_lf_default_real/20261120T051351Z-lf_20_200-45416-03efa73a",
+      "created_utc": "2026-11-20T05:13:51.262137+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 12,
+      "freq_min_hz": 20.0,
+      "freq_max_hz": 200.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "12/12",
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); 8 solves",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": "5cfd0633802df9a90df8fac00562b76c48b152032e01ef2b97c495cf13901a3a",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "992233e68490c6f14f4ab227a4556b86c09eb5e05ee38fdef61f506cd9f14afe",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "b4556c13a89a469eb5e83ea6f8e7515c792c019564e6c0acb1306f472fefa885",
+      "manifest_integrity": "verified",
+      "box_width_mm": 320.0,
+      "box_height_mm": 500.0,
+      "box_depth_mm": 360.0,
+      "net_volume_l": 42.169,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 28.274,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": "complete",
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_lf_default_real/20261120T051351Z-lf_20_200-45416-03efa73a",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          20.0,
+          24.6569,
+          30.3982,
+          37.4763,
+          46.2026,
+          56.9607,
+          70.2238,
+          86.5752,
+          106.734,
+          131.5866,
+          162.2262,
+          200.0
+        ],
+        "excitation_port_ids": [
+          "vented/voltage"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-20T05:13:52.411442+00:00",
+        "finished_at_utc": "2026-11-20T05:14:24.952605+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "vented/mesh/interior",
+            "name": "vented__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "vented/mesh/exterior",
+            "name": "vented__exterior",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 12,
+          "total": 12,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_lf_demo_twin",
+      "case": "20261120T051258Z-lf_20_200-23196-0a6370e7",
+      "case_key": "ev_lf_demo_twin/20261120T051258Z-lf_20_200-23196-0a6370e7",
+      "created_utc": "2026-11-20T05:12:58.885507+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 12,
+      "freq_min_hz": 20.0,
+      "freq_max_hz": 200.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "12/12",
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); 8 solves",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": "4721aaa47eb3a423647b0b3ed1a624d514e818971d59cf2569fce12dac130599",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "992233e68490c6f14f4ab227a4556b86c09eb5e05ee38fdef61f506cd9f14afe",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "a16ad84af1d6fbefc37cb9008b1bbdaece8a08c43cf1e347ae3d30af2d0a11f4",
+      "manifest_integrity": "verified",
+      "box_width_mm": 371.2,
+      "box_height_mm": 371.2,
+      "box_depth_mm": 1078.791,
+      "net_volume_l": 117.202,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 45.0,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": "complete",
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_lf_demo_twin/20261120T051258Z-lf_20_200-23196-0a6370e7",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          20.0,
+          24.6569,
+          30.3982,
+          37.4763,
+          46.2026,
+          56.9607,
+          70.2238,
+          86.5752,
+          106.734,
+          131.5866,
+          162.2262,
+          200.0
+        ],
+        "excitation_port_ids": [
+          "vented/voltage"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-20T05:13:00.092511+00:00",
+        "finished_at_utc": "2026-11-20T05:13:50.400368+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "vented/mesh/interior",
+            "name": "vented__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "vented/mesh/exterior",
+            "name": "vented__exterior",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 12,
+          "total": 12,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_lf_motor_real",
+      "case": "20261120T051055Z-lf_20_200-23176-3a9c8637",
+      "case_key": "ev_lf_motor_real/20261120T051055Z-lf_20_200-23176-3a9c8637",
+      "created_utc": "2026-11-20T05:10:55.268741+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "staged",
+      "solved": false,
+      "n_frequencies": null,
+      "freq_min_hz": null,
+      "freq_max_hz": null,
+      "backend_id": null,
+      "solve_kind": null,
+      "phasor_convention": null,
+      "completion": null,
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); 8 solves",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": null,
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "992233e68490c6f14f4ab227a4556b86c09eb5e05ee38fdef61f506cd9f14afe",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "4e96f2eb507d00fc8afbed8b7b46cc15f9c472c0009b8ed15fe1c90b95c57943",
+      "manifest_integrity": "verified",
+      "box_width_mm": 371.2,
+      "box_height_mm": 371.2,
+      "box_depth_mm": 1078.791,
+      "net_volume_l": 117.202,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 45.0,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": null,
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_lf_motor_real/20261120T051055Z-lf_20_200-23176-3a9c8637",
+      "run": {
+        "present": false,
+        "status": null,
+        "frequencies_hz": null,
+        "excitation_port_ids": null,
+        "schema": null,
+        "schema_version": null,
+        "started_at_utc": null,
+        "finished_at_utc": null,
+        "solver_options": null,
+        "engine_runs": [],
+        "meshes": [],
+        "completion_mask": null
+      },
+      "metadata": {
+        "box_source": "case.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_lf_motor_real",
+      "case": "20261120T051257Z-lf_20_200-46360-9a853740",
+      "case_key": "ev_lf_motor_real/20261120T051257Z-lf_20_200-46360-9a853740",
+      "created_utc": "2026-11-20T05:12:57.201219+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "staged",
+      "solved": false,
+      "n_frequencies": null,
+      "freq_min_hz": null,
+      "freq_max_hz": null,
+      "backend_id": null,
+      "solve_kind": null,
+      "phasor_convention": null,
+      "completion": null,
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); 8 solves",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": null,
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "992233e68490c6f14f4ab227a4556b86c09eb5e05ee38fdef61f506cd9f14afe",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "4e96f2eb507d00fc8afbed8b7b46cc15f9c472c0009b8ed15fe1c90b95c57943",
+      "manifest_integrity": "verified",
+      "box_width_mm": 371.2,
+      "box_height_mm": 371.2,
+      "box_depth_mm": 1078.791,
+      "net_volume_l": 117.202,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 45.0,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": null,
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_lf_motor_real/20261120T051257Z-lf_20_200-46360-9a853740",
+      "run": {
+        "present": false,
+        "status": null,
+        "frequencies_hz": null,
+        "excitation_port_ids": null,
+        "schema": null,
+        "schema_version": null,
+        "started_at_utc": null,
+        "finished_at_utc": null,
+        "solver_options": null,
+        "engine_runs": [],
+        "meshes": [],
+        "completion_mask": null
+      },
+      "metadata": {
+        "box_source": "case.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_lf_motor_real",
+      "case": "20261120T053351Z-lf_20_200-30640-c2cf0f62",
+      "case_key": "ev_lf_motor_real/20261120T053351Z-lf_20_200-30640-c2cf0f62",
+      "created_utc": "2026-11-20T05:33:51.110796+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 12,
+      "freq_min_hz": 20.0,
+      "freq_max_hz": 200.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "12/12",
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); #4 LF port corrected",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": "555afce94beb6d0ba38977c946575ecd92a5937e48b08033cb5ac3b28d49d1ab",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "3d6fe317175f233131aa5b8987a42bd4c1d145eedbb91f105fb03a857de0b901",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "b3e24d239fd099a3e25fb262738c044be649942e35fa0eb611ff793316d42577",
+      "manifest_integrity": "verified",
+      "box_width_mm": 371.2,
+      "box_height_mm": 371.2,
+      "box_depth_mm": 1078.791,
+      "net_volume_l": 117.202,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 45.0,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": "complete",
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_lf_motor_real/20261120T053351Z-lf_20_200-30640-c2cf0f62",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          20.0,
+          24.6569,
+          30.3982,
+          37.4763,
+          46.2026,
+          56.9607,
+          70.2238,
+          86.5752,
+          106.734,
+          131.5866,
+          162.2262,
+          200.0
+        ],
+        "excitation_port_ids": [
+          "bl_motor12pr/voltage"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-20T05:33:52.527843+00:00",
+        "finished_at_utc": "2026-11-20T05:34:16.566385+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "bl_motor12pr/mesh/interior",
+            "name": "FaitalPRO_12PR300_reference__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "bl_motor12pr/mesh/exterior",
+            "name": "FaitalPRO_12PR300_reference__exterior",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 12,
+          "total": 12,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_wide_default_demo",
+      "case": "20261120T051840Z-wide_200_2500-36092-b530b722",
+      "case_key": "ev_wide_default_demo/20261120T051840Z-wide_200_2500-36092-b530b722",
+      "created_utc": "2026-11-20T05:18:40.436863+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 25,
+      "freq_min_hz": 200.0,
+      "freq_max_hz": 2500.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "25/25",
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); 8 solves",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": "7596b5be6ce6d239159278870a6a0403abcb472db1d3c1fdc33015238d8721c6",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "d4cc282e6535e516211539c26ef63af7f768f9decb822ca01bb7654899666969",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "11444f07abc7d150aa66a6e4bd9be0f7a06d3ab2d50dda5e6fbba2fd0270957d",
+      "manifest_integrity": "verified",
+      "box_width_mm": 320.0,
+      "box_height_mm": 500.0,
+      "box_depth_mm": 360.0,
+      "net_volume_l": 42.169,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 28.274,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": "complete",
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_wide_default_demo/20261120T051840Z-wide_200_2500-36092-b530b722",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          200.0,
+          222.1952,
+          246.8534,
+          274.2482,
+          304.6831,
+          338.4955,
+          376.0603,
+          417.7939,
+          464.1589,
+          515.6693,
+          572.8961,
+          636.4736,
+          707.1068,
+          785.5785,
+          872.7587,
+          969.6137,
+          1077.2173,
+          1196.7624,
+          1329.574,
+          1477.1245,
+          1641.0495,
+          1823.1662,
+          2025.4934,
+          2250.2741,
+          2500.0
+        ],
+        "excitation_port_ids": [
+          "vented/voltage"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-20T05:18:41.661427+00:00",
+        "finished_at_utc": "2026-11-20T05:19:40.596957+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "vented/mesh/interior",
+            "name": "vented__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "vented/mesh/exterior",
+            "name": "vented__exterior",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 25,
+          "total": 25,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_wide_default_real",
+      "case": "20261120T051740Z-wide_200_2500-46632-3de4e1d9",
+      "case_key": "ev_wide_default_real/20261120T051740Z-wide_200_2500-46632-3de4e1d9",
+      "created_utc": "2026-11-20T05:17:40.252045+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 25,
+      "freq_min_hz": 200.0,
+      "freq_max_hz": 2500.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "25/25",
+      "authorized_by": "owner 2026-11-19: explicit launch of system_evidence_2026-11-19 (CPU beat_cpu only; no GPU); 8 solves",
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": "9d64996df726d3df822271221b6eb2f02599e9297b62ad13bdea0ec661d1bd82",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "d4cc282e6535e516211539c26ef63af7f768f9decb822ca01bb7654899666969",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "000404a56f70b55a2dd68f1885deb0829858f5fa92e6eb5eedcc8e92864826ea",
+      "manifest_integrity": "verified",
+      "box_width_mm": 320.0,
+      "box_height_mm": 500.0,
+      "box_depth_mm": 360.0,
+      "net_volume_l": 42.169,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 28.274,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": "complete",
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_wide_default_real/20261120T051740Z-wide_200_2500-46632-3de4e1d9",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          200.0,
+          222.1952,
+          246.8534,
+          274.2482,
+          304.6831,
+          338.4955,
+          376.0603,
+          417.7939,
+          464.1589,
+          515.6693,
+          572.8961,
+          636.4736,
+          707.1068,
+          785.5785,
+          872.7587,
+          969.6137,
+          1077.2173,
+          1196.7624,
+          1329.574,
+          1477.1245,
+          1641.0495,
+          1823.1662,
+          2025.4934,
+          2250.2741,
+          2500.0
+        ],
+        "excitation_port_ids": [
+          "vented/voltage"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-20T05:17:41.631745+00:00",
+        "finished_at_utc": "2026-11-20T05:18:39.563974+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "vented/mesh/interior",
+            "name": "vented__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "vented/mesh/exterior",
+            "name": "vented__exterior",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 25,
+          "total": 25,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "case.blab.json",
           "manifest.payload"
         ]
       }

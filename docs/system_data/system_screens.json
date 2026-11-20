@@ -1,23 +1,1205 @@
 {
   "tool": "system_cases",
   "schema_version": 1,
-  "generated_utc": "2026-11-20T00:08:07.283999Z",
+  "generated_utc": "2026-11-20T05:36:46.727400Z",
   "source": {
     "root": ".",
     "system_runs": "system_runs"
   },
   "census": {
-    "files": 5,
+    "files": 6,
     "unique_study_ids": 2,
     "duplicate_study_ids": [
       "27616eedee09009f",
       "65f6db3e8c8e8f86"
     ],
-    "shortlist_rows_total": 30,
-    "kept_rows_total": 432
+    "shortlist_rows_total": 36,
+    "kept_rows_total": 459
   },
   "diagnostics": [],
   "studies": [
+    {
+      "study_id": "27616eedee09009f",
+      "path": "system_runs/screens/system_evidence_2026-11-19/woofer_seed.json",
+      "created_utc": null,
+      "mtime_utc": "2026-11-20T05:33:41.765968Z",
+      "size_bytes": 245456,
+      "schema": "hornlab.system.woofer_seed.v1",
+      "system_objective_version": 1,
+      "claim": "heuristic fixed-horn screen; no scalar winner; not a validated ranking. Phase/delay optimisation is refused for magnitude-only assets.",
+      "input_sha256": {
+        "asset_response_npz": "d97b633c6147d67e3ea972acbe7d5e0f1a204ddc8063d9a3dd85c55f052c8360",
+        "drivers": {
+          "faitalpro_10pr300": {
+            "geometry": "11f82ee31c0a0620ea0fdf4f2ed28b0c368d2aad2769a14dac139d38f124939a",
+            "ts": "64859593b713a569f43f0914bfff53f4b23d0b01207b5d803e4bc055828c1c82"
+          },
+          "faitalpro_10pr320": {
+            "geometry": "41a4ad8c7cd41a58e37e241beeef45160f63c1f01f7b40de2692d3b3655b2fc1",
+            "ts": "758740dc454cbda8256b7627b273e754f324985c2fad4ea122ddb03191a14a97"
+          },
+          "faitalpro_12pr300": {
+            "geometry": "f9f5ba558c3b1367e13aebc970486f9760c796bcd9ac6a87dd69fe83cdd647c5",
+            "ts": "22e470b505c98a8854cb90bbb602696f19f50bc7c77d00845b710384aa7cabb3"
+          },
+          "faitalpro_12pr320": {
+            "geometry": "55e56e5517e8a80bc303a478f795b6cb9cde68b991ef2ff7bafa66d59ecfe84d",
+            "ts": "85d1c4f5643c058e9ffff72bc811a1217b7d02f8c128c66060ceb9949d628c52"
+          }
+        },
+        "horn_envelope": "620c91ea7cca89e1"
+      },
+      "counts": {
+        "drivers_loaded": 4,
+        "drivers_rejected": 0,
+        "boxes_considered": 32,
+        "boxes_rejected": 29,
+        "candidates_kept": 27,
+        "pareto_front_rows": 9,
+        "shortlist_rows": 6,
+        "placements_considered": 27,
+        "placements_rejected": 0,
+        "xo_hypotheses": 9,
+        "xo_rejected": 0,
+        "bl_panel_fit_rejected": 11
+      },
+      "catalog_driver_ids": [
+        "faitalpro_10pr300",
+        "faitalpro_10pr320",
+        "faitalpro_12pr300",
+        "faitalpro_12pr320"
+      ],
+      "catalog_count": 4,
+      "envelope": {
+        "depth_mm": 142.873887262489,
+        "design_hash": "f04827bc5973",
+        "envelope_sha256": "620c91ea7cca89e1",
+        "height_mm": 233.345575742092,
+        "source": "full_domain_provenance:lecleach_rollback_1in_v6_9e02db06ecc3",
+        "width_mm": 233.345575742092,
+        "x_max_mm": 116.672787871046,
+        "x_min_mm": -116.672787871046,
+        "y_max_mm": 116.672787871046,
+        "y_min_mm": -116.672787871046,
+        "z_max_mm": 139.873887262489,
+        "z_min_mm": -3.0
+      },
+      "shortlist_count": 6,
+      "kept_rows_count": 27,
+      "rejected_ledger_count": 29,
+      "shortlist": [
+        {
+          "axis_directions": {
+            "cabinet_footprint_m2": "-",
+            "excursion_margin_db": "+",
+            "lf_f3_hz": "-",
+            "match_error_h_db2": "-",
+            "match_error_v_db2": "-",
+            "mounting_distance_mm": "-",
+            "port_velocity_ratio": "-"
+          },
+          "box": {
+            "derived_tuning_hz": 30.0,
+            "external_depth_mm": 1073.349910120198,
+            "external_height_mm": 372.0,
+            "external_width_mm": 372.0,
+            "f3_hz": 49.187046144795,
+            "kind": "vented",
+            "net_volume_l": 115.0,
+            "port_throat_area_cm2": 45.0,
+            "port_type": "round_flared",
+            "wall_mm": 18.0
+          },
+          "candidate_id": "01e7d07d2bf70364",
+          "data_quality": "SCREEN_MAGNITUDE level-only match; LF SCREEN_MAGNITUDE; placement derived from real envelope; no coherent/phase claim",
+          "driver_geometry": {
+            "installed_claims_allowed": false,
+            "missing_fields": [
+              "cone_depth_mm",
+              "surround_width_mm",
+              "dust_cap_diameter_mm",
+              "mounting_depth_behind_baffle_mm"
+            ],
+            "mounting_depth_behind_baffle_mm": null,
+            "note": "missing geometry fields are recorded as None, never guessed; T/S-only screening remains allowed",
+            "present_fields": [
+              "cutout_mm",
+              "frame_od_mm",
+              "depth_mm"
+            ],
+            "rear_depth_mm_used": 135.0
+          },
+          "driver_id": "faitalpro_12pr320",
+          "driver_name": "FaitalPRO 12PR320",
+          "feasibility": {
+            "bl_panel_fit": true,
+            "driver_clearance": true,
+            "f3_gate": true,
+            "placement_legal": true,
+            "port_fits": true,
+            "wall": true,
+            "xo_data": true
+          },
+          "lf": {
+            "excursion_margin_db": -2.799864784544,
+            "f3_hz": 49.187046144795,
+            "f3_ok": true,
+            "f3_target_hz": 55.0,
+            "limiting_40hz": "port",
+            "limiting_63_120hz": "xmax",
+            "nfr_ignored_at_lf_tier": true,
+            "port_velocity_mps_40hz": 35.30440180623,
+            "port_velocity_mps_63hz": 12.732283048471,
+            "spl_max_40hz_db": 107.424560843382,
+            "spl_max_63_120hz_min_db": 114.652573742379
+          },
+          "match": {
+            "H": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.022795973868,
+              "e_shape_rms_db": 0.15098335626,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 25,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "H",
+              "reasons": [],
+              "uncertainty_db2": 0.013493449521,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 25.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            },
+            "V": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.001619522709,
+              "e_shape_rms_db": 0.040243293969,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 13,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "V",
+              "reasons": [],
+              "uncertainty_db2": 0.000968509975,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 13.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            }
+          },
+          "numeric_axes": {
+            "cabinet_footprint_m2": 0.399286166565,
+            "excursion_margin_db": -2.799864784544,
+            "lf_f3_hz": 49.187046144795,
+            "match_error_h_db2": 0.022795973868,
+            "match_error_v_db2": 0.001619522709,
+            "mounting_distance_mm": 312.672787871046,
+            "port_velocity_ratio": 2.076729518014
+          },
+          "placement": {
+            "dx_mm": 0.0,
+            "dy_min_mm": 312.672787871046,
+            "dy_mm": 312.672787871046,
+            "dz_mm": 0.0,
+            "gaps_mm": {
+              "woofer_frame": 38.0,
+              "x": -302.672787871046,
+              "y": 10.0,
+              "z": -3.0
+            },
+            "min_clearance_mm": -302.672787871046,
+            "transform": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.312672787871
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "shortlist_reason": "driver_best:faitalpro_12pr320",
+          "status": "PASS",
+          "xo_band_hz": [
+            763.206551775791,
+            1211.514883157912
+          ],
+          "xo_hz": 961.58
+        },
+        {
+          "axis_directions": {
+            "cabinet_footprint_m2": "-",
+            "excursion_margin_db": "+",
+            "lf_f3_hz": "-",
+            "match_error_h_db2": "-",
+            "match_error_v_db2": "-",
+            "mounting_distance_mm": "-",
+            "port_velocity_ratio": "-"
+          },
+          "box": {
+            "derived_tuning_hz": 30.0,
+            "external_depth_mm": 1078.791264974584,
+            "external_height_mm": 371.2,
+            "external_width_mm": 371.2,
+            "f3_hz": 52.813676753027,
+            "kind": "vented",
+            "net_volume_l": 115.0,
+            "port_throat_area_cm2": 45.0,
+            "port_type": "round_flared",
+            "wall_mm": 18.0
+          },
+          "candidate_id": "42d171062dcda386",
+          "data_quality": "SCREEN_MAGNITUDE level-only match; LF SCREEN_MAGNITUDE; placement derived from real envelope; no coherent/phase claim",
+          "driver_geometry": {
+            "installed_claims_allowed": false,
+            "missing_fields": [
+              "cone_depth_mm",
+              "surround_width_mm",
+              "dust_cap_diameter_mm",
+              "mounting_depth_behind_baffle_mm"
+            ],
+            "mounting_depth_behind_baffle_mm": null,
+            "note": "missing geometry fields are recorded as None, never guessed; T/S-only screening remains allowed",
+            "present_fields": [
+              "cutout_mm",
+              "frame_od_mm",
+              "depth_mm"
+            ],
+            "rear_depth_mm_used": 140.6
+          },
+          "driver_id": "faitalpro_12pr300",
+          "driver_name": "FaitalPRO 12PR300",
+          "feasibility": {
+            "bl_panel_fit": true,
+            "driver_clearance": true,
+            "f3_gate": true,
+            "placement_legal": true,
+            "port_fits": true,
+            "wall": true,
+            "xo_data": true
+          },
+          "lf": {
+            "excursion_margin_db": -6.038410246065,
+            "f3_hz": 52.813676753027,
+            "f3_ok": true,
+            "f3_target_hz": 55.0,
+            "limiting_40hz": "port",
+            "limiting_63_120hz": "xmax",
+            "nfr_ignored_at_lf_tier": true,
+            "port_velocity_mps_40hz": 33.837026311442,
+            "port_velocity_mps_63hz": 12.239578300643,
+            "spl_max_40hz_db": 107.363693561542,
+            "spl_max_63_120hz_min_db": 111.045294917342
+          },
+          "match": {
+            "H": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.024212553522,
+              "e_shape_rms_db": 0.155603835177,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 25,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "H",
+              "reasons": [],
+              "uncertainty_db2": 0.014281019825,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 25.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            },
+            "V": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.001727582018,
+              "e_shape_rms_db": 0.041564191533,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 13,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "V",
+              "reasons": [],
+              "uncertainty_db2": 0.001023638352,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 13.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            }
+          },
+          "numeric_axes": {
+            "cabinet_footprint_m2": 0.400447317559,
+            "excursion_margin_db": -6.038410246065,
+            "lf_f3_hz": 52.813676753027,
+            "match_error_h_db2": 0.024212553522,
+            "match_error_v_db2": 0.001727582018,
+            "mounting_distance_mm": 312.272787871046,
+            "port_velocity_ratio": 1.990413312438
+          },
+          "placement": {
+            "dx_mm": 0.0,
+            "dy_min_mm": 312.272787871046,
+            "dy_mm": 312.272787871046,
+            "dz_mm": 50.0,
+            "gaps_mm": {
+              "woofer_frame": 47.0,
+              "x": -302.272787871046,
+              "y": 10.0,
+              "z": 47.0
+            },
+            "min_clearance_mm": -302.272787871046,
+            "transform": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.312272787871
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.05
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "shortlist_reason": "driver_best:faitalpro_12pr300",
+          "status": "PASS",
+          "xo_band_hz": [
+            763.206551775791,
+            1211.514883157912
+          ],
+          "xo_hz": 961.58
+        },
+        {
+          "axis_directions": {
+            "cabinet_footprint_m2": "-",
+            "excursion_margin_db": "+",
+            "lf_f3_hz": "-",
+            "match_error_h_db2": "-",
+            "match_error_v_db2": "-",
+            "mounting_distance_mm": "-",
+            "port_velocity_ratio": "-"
+          },
+          "box": {
+            "derived_tuning_hz": 30.0,
+            "external_depth_mm": 1073.349910120198,
+            "external_height_mm": 372.0,
+            "external_width_mm": 372.0,
+            "f3_hz": 49.187046144795,
+            "kind": "vented",
+            "net_volume_l": 115.0,
+            "port_throat_area_cm2": 45.0,
+            "port_type": "round_flared",
+            "wall_mm": 18.0
+          },
+          "candidate_id": "627b9184c3a26662",
+          "data_quality": "SCREEN_MAGNITUDE level-only match; LF SCREEN_MAGNITUDE; placement derived from real envelope; no coherent/phase claim",
+          "driver_geometry": {
+            "installed_claims_allowed": false,
+            "missing_fields": [
+              "cone_depth_mm",
+              "surround_width_mm",
+              "dust_cap_diameter_mm",
+              "mounting_depth_behind_baffle_mm"
+            ],
+            "mounting_depth_behind_baffle_mm": null,
+            "note": "missing geometry fields are recorded as None, never guessed; T/S-only screening remains allowed",
+            "present_fields": [
+              "cutout_mm",
+              "frame_od_mm",
+              "depth_mm"
+            ],
+            "rear_depth_mm_used": 135.0
+          },
+          "driver_id": "faitalpro_12pr320",
+          "driver_name": "FaitalPRO 12PR320",
+          "feasibility": {
+            "bl_panel_fit": true,
+            "driver_clearance": true,
+            "f3_gate": true,
+            "placement_legal": true,
+            "port_fits": true,
+            "wall": true,
+            "xo_data": true
+          },
+          "lf": {
+            "excursion_margin_db": -2.799864784544,
+            "f3_hz": 49.187046144795,
+            "f3_ok": true,
+            "f3_target_hz": 55.0,
+            "limiting_40hz": "port",
+            "limiting_63_120hz": "xmax",
+            "nfr_ignored_at_lf_tier": true,
+            "port_velocity_mps_40hz": 35.30440180623,
+            "port_velocity_mps_63hz": 12.732283048471,
+            "spl_max_40hz_db": 107.424560843382,
+            "spl_max_63_120hz_min_db": 114.652573742379
+          },
+          "match": {
+            "H": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.022795973868,
+              "e_shape_rms_db": 0.15098335626,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 25,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "H",
+              "reasons": [],
+              "uncertainty_db2": 0.013493449521,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 25.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            },
+            "V": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.001619522709,
+              "e_shape_rms_db": 0.040243293969,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 13,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "V",
+              "reasons": [],
+              "uncertainty_db2": 0.000968509975,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 13.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            }
+          },
+          "numeric_axes": {
+            "cabinet_footprint_m2": 0.399286166565,
+            "excursion_margin_db": -2.799864784544,
+            "lf_f3_hz": 49.187046144795,
+            "match_error_h_db2": 0.022795973868,
+            "match_error_v_db2": 0.001619522709,
+            "mounting_distance_mm": 312.672787871046,
+            "port_velocity_ratio": 2.076729518014
+          },
+          "placement": {
+            "dx_mm": 0.0,
+            "dy_min_mm": 312.672787871046,
+            "dy_mm": 312.672787871046,
+            "dz_mm": 25.0,
+            "gaps_mm": {
+              "woofer_frame": 38.0,
+              "x": -302.672787871046,
+              "y": 10.0,
+              "z": 22.0
+            },
+            "min_clearance_mm": -302.672787871046,
+            "transform": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.312672787871
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.025
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "shortlist_reason": "pareto_fill",
+          "status": "PASS",
+          "xo_band_hz": [
+            763.206551775791,
+            1211.514883157912
+          ],
+          "xo_hz": 961.58
+        },
+        {
+          "axis_directions": {
+            "cabinet_footprint_m2": "-",
+            "excursion_margin_db": "+",
+            "lf_f3_hz": "-",
+            "match_error_h_db2": "-",
+            "match_error_v_db2": "-",
+            "mounting_distance_mm": "-",
+            "port_velocity_ratio": "-"
+          },
+          "box": {
+            "derived_tuning_hz": 30.0,
+            "external_depth_mm": 838.703433888271,
+            "external_height_mm": 372.0,
+            "external_width_mm": 372.0,
+            "f3_hz": 53.147275711326,
+            "kind": "vented",
+            "net_volume_l": 88.333333333333,
+            "port_throat_area_cm2": 45.0,
+            "port_type": "round_flared",
+            "wall_mm": 18.0
+          },
+          "candidate_id": "9ba3c003cab82690",
+          "data_quality": "SCREEN_MAGNITUDE level-only match; LF SCREEN_MAGNITUDE; placement derived from real envelope; no coherent/phase claim",
+          "driver_geometry": {
+            "installed_claims_allowed": false,
+            "missing_fields": [
+              "cone_depth_mm",
+              "surround_width_mm",
+              "dust_cap_diameter_mm",
+              "mounting_depth_behind_baffle_mm"
+            ],
+            "mounting_depth_behind_baffle_mm": null,
+            "note": "missing geometry fields are recorded as None, never guessed; T/S-only screening remains allowed",
+            "present_fields": [
+              "cutout_mm",
+              "frame_od_mm",
+              "depth_mm"
+            ],
+            "rear_depth_mm_used": 135.0
+          },
+          "driver_id": "faitalpro_12pr320",
+          "driver_name": "FaitalPRO 12PR320",
+          "feasibility": {
+            "bl_panel_fit": true,
+            "driver_clearance": true,
+            "f3_gate": true,
+            "placement_legal": true,
+            "port_fits": true,
+            "wall": true,
+            "xo_data": true
+          },
+          "lf": {
+            "excursion_margin_db": -1.713774386808,
+            "f3_hz": 53.147275711326,
+            "f3_ok": true,
+            "f3_target_hz": 55.0,
+            "limiting_40hz": "port",
+            "limiting_63_120hz": "xmax",
+            "nfr_ignored_at_lf_tier": true,
+            "port_velocity_mps_40hz": 31.154754787928,
+            "port_velocity_mps_63hz": 12.414657661763,
+            "spl_max_40hz_db": 107.424560843382,
+            "spl_max_63_120hz_min_db": 114.652573742379
+          },
+          "match": {
+            "H": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.022795973868,
+              "e_shape_rms_db": 0.15098335626,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 25,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "H",
+              "reasons": [],
+              "uncertainty_db2": 0.013493449521,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 25.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            },
+            "V": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.001619522709,
+              "e_shape_rms_db": 0.040243293969,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 13,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "V",
+              "reasons": [],
+              "uncertainty_db2": 0.000968509975,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 13.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            }
+          },
+          "numeric_axes": {
+            "cabinet_footprint_m2": 0.311997677406,
+            "excursion_margin_db": -1.713774386808,
+            "lf_f3_hz": 53.147275711326,
+            "match_error_h_db2": 0.022795973868,
+            "match_error_v_db2": 0.001619522709,
+            "mounting_distance_mm": 312.672787871046,
+            "port_velocity_ratio": 1.832632634584
+          },
+          "placement": {
+            "dx_mm": 0.0,
+            "dy_min_mm": 312.672787871046,
+            "dy_mm": 312.672787871046,
+            "dz_mm": 50.0,
+            "gaps_mm": {
+              "woofer_frame": 47.0,
+              "x": -302.672787871046,
+              "y": 10.0,
+              "z": 47.0
+            },
+            "min_clearance_mm": -302.672787871046,
+            "transform": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.312672787871
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.05
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "shortlist_reason": "axis_best:cabinet_footprint_m2",
+          "status": "PASS",
+          "xo_band_hz": [
+            763.206551775791,
+            1211.514883157912
+          ],
+          "xo_hz": 961.58
+        },
+        {
+          "axis_directions": {
+            "cabinet_footprint_m2": "-",
+            "excursion_margin_db": "+",
+            "lf_f3_hz": "-",
+            "match_error_h_db2": "-",
+            "match_error_v_db2": "-",
+            "mounting_distance_mm": "-",
+            "port_velocity_ratio": "-"
+          },
+          "box": {
+            "derived_tuning_hz": 30.0,
+            "external_depth_mm": 1078.791264974584,
+            "external_height_mm": 371.2,
+            "external_width_mm": 371.2,
+            "f3_hz": 52.813676753027,
+            "kind": "vented",
+            "net_volume_l": 115.0,
+            "port_throat_area_cm2": 45.0,
+            "port_type": "round_flared",
+            "wall_mm": 18.0
+          },
+          "candidate_id": "ccedbe0146d6b922",
+          "data_quality": "SCREEN_MAGNITUDE level-only match; LF SCREEN_MAGNITUDE; placement derived from real envelope; no coherent/phase claim",
+          "driver_geometry": {
+            "installed_claims_allowed": false,
+            "missing_fields": [
+              "cone_depth_mm",
+              "surround_width_mm",
+              "dust_cap_diameter_mm",
+              "mounting_depth_behind_baffle_mm"
+            ],
+            "mounting_depth_behind_baffle_mm": null,
+            "note": "missing geometry fields are recorded as None, never guessed; T/S-only screening remains allowed",
+            "present_fields": [
+              "cutout_mm",
+              "frame_od_mm",
+              "depth_mm"
+            ],
+            "rear_depth_mm_used": 140.6
+          },
+          "driver_id": "faitalpro_12pr300",
+          "driver_name": "FaitalPRO 12PR300",
+          "feasibility": {
+            "bl_panel_fit": true,
+            "driver_clearance": true,
+            "f3_gate": true,
+            "placement_legal": true,
+            "port_fits": true,
+            "wall": true,
+            "xo_data": true
+          },
+          "lf": {
+            "excursion_margin_db": -6.038410246065,
+            "f3_hz": 52.813676753027,
+            "f3_ok": true,
+            "f3_target_hz": 55.0,
+            "limiting_40hz": "port",
+            "limiting_63_120hz": "xmax",
+            "nfr_ignored_at_lf_tier": true,
+            "port_velocity_mps_40hz": 33.837026311442,
+            "port_velocity_mps_63hz": 12.239578300643,
+            "spl_max_40hz_db": 107.363693561542,
+            "spl_max_63_120hz_min_db": 111.045294917342
+          },
+          "match": {
+            "H": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.024212553522,
+              "e_shape_rms_db": 0.155603835177,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 25,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "H",
+              "reasons": [],
+              "uncertainty_db2": 0.014281019825,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 25.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            },
+            "V": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.001727582018,
+              "e_shape_rms_db": 0.041564191533,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 13,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "V",
+              "reasons": [],
+              "uncertainty_db2": 0.001023638352,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 13.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            }
+          },
+          "numeric_axes": {
+            "cabinet_footprint_m2": 0.400447317559,
+            "excursion_margin_db": -6.038410246065,
+            "lf_f3_hz": 52.813676753027,
+            "match_error_h_db2": 0.024212553522,
+            "match_error_v_db2": 0.001727582018,
+            "mounting_distance_mm": 312.272787871046,
+            "port_velocity_ratio": 1.990413312438
+          },
+          "placement": {
+            "dx_mm": 0.0,
+            "dy_min_mm": 312.272787871046,
+            "dy_mm": 312.272787871046,
+            "dz_mm": 25.0,
+            "gaps_mm": {
+              "woofer_frame": 38.0,
+              "x": -302.272787871046,
+              "y": 10.0,
+              "z": 22.0
+            },
+            "min_clearance_mm": -302.272787871046,
+            "transform": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.312272787871
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.025
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "shortlist_reason": "pareto_fill",
+          "status": "PASS",
+          "xo_band_hz": [
+            763.206551775791,
+            1211.514883157912
+          ],
+          "xo_hz": 961.58
+        },
+        {
+          "axis_directions": {
+            "cabinet_footprint_m2": "-",
+            "excursion_margin_db": "+",
+            "lf_f3_hz": "-",
+            "match_error_h_db2": "-",
+            "match_error_v_db2": "-",
+            "mounting_distance_mm": "-",
+            "port_velocity_ratio": "-"
+          },
+          "box": {
+            "derived_tuning_hz": 30.0,
+            "external_depth_mm": 1073.349910120198,
+            "external_height_mm": 372.0,
+            "external_width_mm": 372.0,
+            "f3_hz": 49.187046144795,
+            "kind": "vented",
+            "net_volume_l": 115.0,
+            "port_throat_area_cm2": 45.0,
+            "port_type": "round_flared",
+            "wall_mm": 18.0
+          },
+          "candidate_id": "d972180f3eb1e854",
+          "data_quality": "SCREEN_MAGNITUDE level-only match; LF SCREEN_MAGNITUDE; placement derived from real envelope; no coherent/phase claim",
+          "driver_geometry": {
+            "installed_claims_allowed": false,
+            "missing_fields": [
+              "cone_depth_mm",
+              "surround_width_mm",
+              "dust_cap_diameter_mm",
+              "mounting_depth_behind_baffle_mm"
+            ],
+            "mounting_depth_behind_baffle_mm": null,
+            "note": "missing geometry fields are recorded as None, never guessed; T/S-only screening remains allowed",
+            "present_fields": [
+              "cutout_mm",
+              "frame_od_mm",
+              "depth_mm"
+            ],
+            "rear_depth_mm_used": 135.0
+          },
+          "driver_id": "faitalpro_12pr320",
+          "driver_name": "FaitalPRO 12PR320",
+          "feasibility": {
+            "bl_panel_fit": true,
+            "driver_clearance": true,
+            "f3_gate": true,
+            "placement_legal": true,
+            "port_fits": true,
+            "wall": true,
+            "xo_data": true
+          },
+          "lf": {
+            "excursion_margin_db": -2.799864784544,
+            "f3_hz": 49.187046144795,
+            "f3_ok": true,
+            "f3_target_hz": 55.0,
+            "limiting_40hz": "port",
+            "limiting_63_120hz": "xmax",
+            "nfr_ignored_at_lf_tier": true,
+            "port_velocity_mps_40hz": 35.30440180623,
+            "port_velocity_mps_63hz": 12.732283048471,
+            "spl_max_40hz_db": 107.424560843382,
+            "spl_max_63_120hz_min_db": 114.652573742379
+          },
+          "match": {
+            "H": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.022795973868,
+              "e_shape_rms_db": 0.15098335626,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 25,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "H",
+              "reasons": [],
+              "uncertainty_db2": 0.013493449521,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 25.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            },
+            "V": {
+              "accepted": true,
+              "band_freqs_hz": [
+                773.24,
+                961.58,
+                1195.8
+              ],
+              "band_hz": [
+                763.206551775791,
+                1211.514883157912
+              ],
+              "data_quality": "SCREEN_MAGNITUDE level-only (stored magnitudes; no phase/delay claim); stored fields=['balloon_dirs', 'freqs_hz', 'h_angles_deg', 'p_balloon', 'p_h', 'p_v', 'spl_balloon_db', 'spl_h_db', 'spl_v_db', 'v_angles_deg', 'z_throat']",
+              "e_shape_db2": 0.001619522709,
+              "e_shape_rms_db": 0.040243293969,
+              "f_x_hz": 961.58,
+              "good_match": true,
+              "n_dirs": 13,
+              "n_freqs": 3,
+              "null_fraction": 0.0,
+              "plane": "V",
+              "reasons": [],
+              "uncertainty_db2": 0.000968509975,
+              "weights": {
+                "dir": "uniform",
+                "dir_sum": 13.0,
+                "floor_db": -120.0,
+                "freq": "uniform",
+                "freq_sum": 3.0,
+                "null_flag_db": -40.0
+              }
+            }
+          },
+          "numeric_axes": {
+            "cabinet_footprint_m2": 0.399286166565,
+            "excursion_margin_db": -2.799864784544,
+            "lf_f3_hz": 49.187046144795,
+            "match_error_h_db2": 0.022795973868,
+            "match_error_v_db2": 0.001619522709,
+            "mounting_distance_mm": 312.672787871046,
+            "port_velocity_ratio": 2.076729518014
+          },
+          "placement": {
+            "dx_mm": 0.0,
+            "dy_min_mm": 312.672787871046,
+            "dy_mm": 312.672787871046,
+            "dz_mm": 50.0,
+            "gaps_mm": {
+              "woofer_frame": 47.0,
+              "x": -302.672787871046,
+              "y": 10.0,
+              "z": 47.0
+            },
+            "min_clearance_mm": -302.672787871046,
+            "transform": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.312672787871
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.05
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          "shortlist_reason": "pareto_fill",
+          "status": "PASS",
+          "xo_band_hz": [
+            763.206551775791,
+            1211.514883157912
+          ],
+          "xo_hz": 961.58
+        }
+      ]
+    },
     {
       "study_id": "65f6db3e8c8e8f86",
       "path": "system_runs/seed_replay_a/woofer_seed.json",

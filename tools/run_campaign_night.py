@@ -1313,10 +1313,19 @@ class NightRunner:
     # -- hygiene -------------------------------------------------------
 
     def _gpu_clean(self, log_path: Path) -> int:
-        """Lane-aware ``hornlab-search gpu-clean``: only this lane's hosts are touched."""
-        rc, out = _run_capture(
-            [str(self.cli_exe), "gpu-clean", "--runs-dir", str(self.runs_root),
-             "--lane", self.lane], 180)
+        """Lane-aware ``hornlab-search gpu-clean``: only this lane's hosts are touched.
+
+        The CPU lane rides beside a live GPU solve.  ``gpu-clean`` without ``--force`` refuses
+        with rc=3 while the GPU lane is busy; that note then makes the runner's blocked-status
+        heuristic retry (and mislabel) a perfectly ordinary CPU job failure.  ``--force`` only
+        bypasses that global GPU-busy refusal; cleanup is still lane-scoped, so GPU hosts are
+        never touched.
+        """
+        argv = [str(self.cli_exe), "gpu-clean", "--runs-dir", str(self.runs_root),
+                "--lane", self.lane]
+        if self.lane == "cpu":
+            argv.append("--force")
+        rc, out = _run_capture(argv, 180)
         _append(log_path, f"gpu-clean --lane {self.lane} rc={rc}\n{out}\n")
         return rc
 

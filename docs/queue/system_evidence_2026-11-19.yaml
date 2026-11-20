@@ -28,8 +28,8 @@ jobs:
     argv: [.venv/Scripts/python.exe, tools/system/evidence_case.py,
            --source-case, system_runs/system/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e,
            --experiment-id, ev_lf_motor_real, --tag, lf_20_200,
-           --request, docs/queue/system_evidence_2026-11-19/requests/lf_vented_20_200.json,
-           --notes, "LF overlay: real 12PR300 T/S, seed box 115 L / 45 cm2 / Fb ~30 Hz",
+           --request, docs/queue/system_evidence_2026-11-19/requests/lf_motor12pr_20_200.json,
+           --notes, "LF overlay: real 12PR300 T/S, seed box; this project port is bl_motor12pr/voltage",
            --solve]
 
   - id: ev_lf_demo_twin

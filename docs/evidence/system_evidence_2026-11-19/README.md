@@ -1,0 +1,169 @@
+# System evidence — LF, motor×box, observation and sampling controls (2026-11-19)
+
+**Scope.** CPU-only Boundary Lab `beat_cpu` runs on existing immutable projects, launched by
+`docs/queue/system_evidence_2026-11-19.yaml` and derived by `tools/system/evidence_case.py`. No GPU
+job was started. The queue ran beside the live `fable_expand_2026-11-19` GPU night in the separate
+CPU lane.
+
+**Fidelity.** Every solve is `COUPLED_VENTED_FEM_BEM_LEM` for the vented-only cases and the same
+BL coupled model for the assembled cases. The motors are real 12PR300 T/S in #4/#6 and BL demo
+defaults in #5/R0/the assembled #2 source. The transducer acoustic **shape** remains BL's provider
+default in every case. This is not a calibrated system response and is not a measurement.
+
+**No byte-checked log quotes.** The numbers below are read-only recomputations from the stored
+per-frequency `run/*.npz`/JSON via `hornlab_search.system.boundarylab.bl_results`, not retyped from
+prose. Raw arrays stay local; the case paths and the recompute recipe are given so any reviewer can
+repeat them.
+
+## What ran
+
+Queue invocation (CPU lane; no GPU lock):
+
+```powershell
+.venv\Scripts\python.exe tools\run_campaign_night.py `
+  --night runs\nights\system_evidence_2026-11-19.yaml `
+  --admission docs\queue\system_evidence_2026-11-19.admission.json
+```
+
+Each solve job derived a fresh case from an existing project:
+
+```powershell
+.venv\Scripts\python.exe tools\system\evidence_case.py `
+  --source-case <case> --experiment-id <ev_id> --tag <tag> `
+  --request docs\queue\system_evidence_2026-11-19\requests\<request>.json --solve
+```
+
+| Job | Result | Case |
+|---|---|---|
+| `ev_lf_motor_real` (first attempt) | **failed, retained**: wrong project port (`vented/voltage`; this project uses `bl_motor12pr/voltage`) | `ev_lf_motor_real/20261120T051055Z-lf_20_200-23176-3a9c8637` (no run) |
+| `ev_lf_motor_real` (retry, manual) | complete **12/12**, 20–200 Hz | `ev_lf_motor_real/20261120T053351Z-lf_20_200-30640-c2cf0f62` |
+| `ev_lf_demo_twin` | complete **12/12** | `ev_lf_demo_twin/20261120T051258Z-lf_20_200-23196-0a6370e7` |
+| `ev_lf_default_real` | complete **12/12** | `ev_lf_default_real/20261120T051351Z-lf_20_200-45416-03efa73a` |
+| `ev_lf_default_demo` | complete **12/12** | `ev_lf_default_demo/20261120T051425Z-lf_20_200-01448-88659fb9` |
+| `ev_lf_assembled_demo` | complete **12/12** | `ev_lf_assembled_demo/20261120T051458Z-lf_20_200-35104-5973f4ef` |
+| `ev_wide_default_real` | complete **25/25** | `ev_wide_default_real/20261120T051740Z-wide_200_2500-46632-3de4e1d9` |
+| `ev_wide_default_demo` | complete **25/25** | `ev_wide_default_demo/20261120T051840Z-wide_200_2500-36092-b530b722` |
+| `ev_farfield_g4_10m` | complete **25/25** | `ev_farfield_g4_10m/20261120T051941Z-farfield_10m-10828-d72876e6` |
+| `ev_dense_g4_49` | complete **49/49** | `ev_dense_g4_49/20261120T052433Z-dense_49-50100-30d7ef04` |
+| `ev_screen_variety` | study **`27616eedee09009f`** (byte-identical replay of the re-ranked screen) | `system_runs/screens/system_evidence_2026-11-19/woofer_seed.json` |
+| `ev_export_system_data` | census exported to `system_runs/evidence_export_2026-11-19/` (before the #4 retry; regenerate) | — |
+
+The first attempt failed because the #4 project's excitation id is `bl_motor12pr/voltage`, not
+`vented/voltage`; the retry used `requests/lf_motor12pr_20_200.json`. The failed case is retained
+because cases are immutable; its failure record is the evidence, not a bug to erase.
+
+## LF on-axis, 20–200 Hz
+
+Source: per-case on-axis probe (`observation:probe:on_axis_2m`, 2 m), vented voltage port (or
+`bl_motor12pr/voltage` for #4). Values are dB relative to the maximum in the 20–200 Hz band
+`[measured, CPU recompute]`.
+
+| f Hz | #4 real seed | #5 demo seed | #6 real default | R0 demo default | assembled demo (#2) |
+|---:|---:|---:|---:|---:|---:|
+| 20.0 | −24.1 | −15.5 | −22.1 | −15.3 | −15.3 |
+| 24.7 | −11.9 | −4.1 | −12.9 | −13.6 | −13.6 |
+| 30.4 | −3.8 | −2.5 | −9.8 | −11.7 | −11.7 |
+| 37.5 | −9.5 | −2.2 | −10.0 | −8.6 | −8.6 |
+| 46.2 | −10.4 | −1.6 | −9.6 | −4.8 | −4.8 |
+| 57.0 | −10.1 | −2.0 | −8.6 | −1.3 | −1.3 |
+| 70.2 | −9.1 | −2.8 | −7.3 | 0.0 | 0.0 |
+| 86.6 | −8.0 | −3.6 | −6.0 | −0.7 | −0.7 |
+| 106.7 | −7.0 | −4.4 | −4.6 | −1.6 | −1.6 |
+| 131.6 | −6.5 | −5.4 | −3.1 | −2.0 | −2.0 |
+| 162.2 | −16.1 | −16.9 | −1.6 | −1.9 | −1.9 |
+| 200.0 | 0.0 | 0.0 | 0.0 | −1.4 | −1.4 |
+
+Observations (all `[measured]` on this grid):
+
+- The real-motor seed box (#4) has a broad **−9 to −10 dB plateau around 37–70 Hz** and a deep
+  **162 Hz null (−16.1 dB)**; the demo twin (#5) is smoother at 30–57 Hz but has the same 162 Hz
+  null (−16.9 dB). The motor model changes the LF curve by up to **5.3 dB** and **39.6°** on this
+  grid (real vs demo, seed box).
+- The real-motor default box (#6) rolls off earlier and more smoothly (−9.8 dB at 30 Hz, −1.6 dB
+  at 162 Hz); the demo default box (R0) peaks at **70 Hz** and is only −1.4 dB at 200 Hz. Motor
+  difference on the default box reaches **5.3 dB / 40.6°** on this grid.
+- The assembled demo case (#2) and the vented-only demo default box (R0) are **identical in shape**
+  to within **0.06 dB / 1.8°** at LF. At this level the horn contributes no measurable LF change
+  on-axis; the woofer/box dominates. This is a useful null result, not a coupling proof.
+- The 162 Hz null appears in both seed-box cases but not in the default-box curves; it is a
+  box/port/motor interaction, not a universal LF feature. Do not extrapolate it to another box.
+
+## Motor × box, 200–2500 Hz wide grid
+
+On-axis probe, same 25 log frequencies; values are `[measured]` differences between the two cases
+at each frequency (real minus demo, or seed-box minus default-box). "max" is the largest absolute
+per-frequency dB/phase difference, not a band statistic.
+
+| Comparison | max \|ΔdB\| | at Hz | mean \|ΔdB\| | max \|Δphase\| | at Hz |
+|---|---:|---:|---:|---:|---:|
+| motor: #4 real seed vs #5 demo seed | **8.58** | 1641 | 6.85 | **34.4°** | 200 |
+| motor: #6 real default vs R0 demo default | **22.25** | 1641 | 7.09 | **100.4°** | 2250 |
+| box: #4 real seed vs #6 real default | **23.64** | 1823 | 3.52 | **177.8°** | 2250 |
+| box: #5 demo seed vs R0 demo default | **21.28** | 1641 | 3.48 | **174.5°** | 1077 |
+
+The large maxima are **interference nulls**, not smooth sensitivity offsets: the box comparison
+moves nulls by tens of dB and flips phase near them. The motor comparison is a smooth +4.5 to
++8.6 dB over most of the band for the seed box; the default-box motor comparison is corrupted at
+1641/1823 Hz by a deep null. This is exactly why a single-number motor or box delta is not used.
+
+## Observation distance: 10 m vs 2 m
+
+`ev_farfield_g4_10m` is the same assembled #2 project and 25-freq grid with 10 m probes. After
+scaling by 1/r (×5) and removing the 8 m propagation phase (`exp(+jk·8 m)`, c=343 m/s):
+**max |ΔdB| = 1.38 at 1641 Hz; mean 0.25 dB; max |Δphase| = 17.3° at 1823 Hz**
+`[measured, CPU recompute]`.
+
+Without the propagation-phase correction the phase difference is hundreds of degrees, as it must
+be; that is a check that the comparison is not double-applying or omitting the path phase. The
+1.38 dB / 17° residual means **2 m is not an asymptotic far-field point** at the upper band, and a
+2 m H/V cut cannot be relabelled a far-field balloon.
+
+## Frequency sampling: 25 vs 49
+
+`ev_dense_g4_49` adds 24 log frequencies on the **same assembled mesh** (49 points, 200–2500 Hz).
+At the 25 shared/nearest frequencies the two curves agree to **max 0.03 dB / mean 0.00 dB**
+`[measured]`. The 49-point curve also exposes narrow nulls that the 25-point grid can step over:
+for example −19.5 dB at 1641, −20.5 dB at 1823, −19.2 dB at 1922 and 2025 Hz (relative to the
+band max). The 25-point grid still contains some nulls but cannot establish their depth/shape.
+
+**Interpretation:** the frequency grid matters more than a small J change; a 25-freq screen is
+not a convergence proof. This is a frequency-sampling control, not a mesh-refinement study.
+
+## What this does and does not establish
+
+Established:
+
+- A reproducible CPU pipeline can derive fresh cases from existing immutable projects and solve
+  LF / wide / 10 m / dense requests without touching GPU or source cases.
+- Real-vs-demo motor differences persist at LF (up to ~5.3 dB / ~40° on the seed box) and across
+  the wide band; the demo motor is not a harmless placeholder for system work.
+- The assembled horn does not change the LF on-axis shape relative to the vented-only default box
+  at this fidelity (0.06 dB), while the box configuration changes the null structure strongly.
+- 2 m is not far field at the upper band; 10 m differs by up to 1.38 dB after 1/r correction.
+- 25 vs 49 frequency sampling can miss deep nulls even when shared points agree.
+
+Not established:
+
+- No calibration of the two channel references; no complete-system SPL or system score.
+- No real transducer shape (BL demo shape in every case); #4/#6 use real T/S, #5/R0/#2 use demo.
+- No convergence (mesh unchanged between 25 and 49), no `float64` control, no full sphere.
+- No bassbox-vs-BL conclusion yet; the LF curves above are BL only. The next readout must compare
+  these curves with the committed `bassbox` F3/Fb/port-velocity predictions and state the model
+  differences (port end correction, NFR, lumped assumptions).
+
+## Recompute recipe
+
+```python
+from pathlib import Path
+from hornlab_search.system.boundarylab import bl_results as R
+
+run = Path("system_runs/system/ev_lf_demo_twin/<case>/run")
+res = R.read_bl_headless_result(run)
+field = next(f for f in res.fields
+             if f.excitation_id == "vented/voltage"
+             and f.observation.domain_id == "observation:probe:on_axis_2m")
+p = field.p_pa[:, 0]
+# relative dB, phase differences, and the 1/r+propagation correction as above
+```
+
+Raw `run/*.npz` remain local; this document is the committed text evidence.

@@ -70,6 +70,25 @@ def test_finished_ids_never_rerun_even_if_moved_back(tmp_path):
     assert runner.ran == ["a", "b", "c"]
 
 
+def test_cpu_lane_gpu_clean_forces_past_a_busy_gpu_lane(tmp_path, monkeypatch):
+    """A CPU-lane job must not inherit the GPU-busy refusal (and the false blocked retry)."""
+    seen: list[list[str]] = []
+
+    def fake_run(argv, timeout, cwd=None):
+        seen.append([str(a) for a in argv])
+        return 0, ""
+
+    monkeypatch.setattr(night, "_run_capture", fake_run)
+    runner = night.NightRunner(repo_root=tmp_path, runs_root=tmp_path / "runs",
+                               cli_exe=tmp_path / "cli.exe", lane="cpu")
+    assert runner._gpu_clean(tmp_path / "cpu.log") == 0
+    assert "--force" in seen[-1]
+    gpu = night.NightRunner(repo_root=tmp_path, runs_root=tmp_path / "runs",
+                            cli_exe=tmp_path / "cli.exe", lane="gpu")
+    assert gpu._gpu_clean(tmp_path / "gpu.log") == 0
+    assert "--force" not in seen[-1]
+
+
 def test_invalid_edit_keeps_last_good_plan(tmp_path):
     nf = tmp_path / "n.yaml"
     _write(nf, ["a", "b", "c"])

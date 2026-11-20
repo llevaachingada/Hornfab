@@ -33,6 +33,21 @@ writes a self-checksummed manifest naming the source case, source project hash, 
 root and authorization record. `reference.solve` then owns the BL invocation. Nothing is solved
 into an existing case.
 
+## First live run (2026-11-20, CPU only)
+
+The owner authorised the launch; the queue ran beside the live `fable_expand_2026-11-19` GPU night
+in the separate CPU lane. **No GPU job was started.** Results:
+
+- 9 solves complete: 5 LF cases (including the #4 retry), 2 wide 2×2 cells, 1 far-field, 1 dense
+  49-frequency case; the screen replay reproduced `27616eedee09009f`; the census export ran.
+- The first #4 LF attempt failed: that project's excitation id is `bl_motor12pr/voltage`, not the
+  vented `vented/voltage`. The failed case is retained; the corrected request is
+  `requests/lf_motor12pr_20_200.json`. The queue's live inserted retry did not execute before the
+  runner reached `done`; it was run manually with the same `evidence_case` command and completed
+  12/12.
+- Readout: `docs/evidence/system_evidence_2026-11-19/README.md`. Current census after the queue:
+  **47 cases / 14 solved / 29 staged / 3 refused / 2 invalid**.
+
 ## Authorization (mandatory)
 
 The queue file deliberately contains **no standing authorization**. `--solve` refuses before

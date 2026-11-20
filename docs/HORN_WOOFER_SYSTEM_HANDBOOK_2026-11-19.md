@@ -5,6 +5,13 @@ branch `hornfab-all-2026-11-18`, HEAD at scan time `ddfba68`. The tree also cont
 work from another lane; this handbook documents the working tree as found, and flags where the
 committed state differs.
 
+**Post-handbook update (2026-11-20):** the owner authorised and the local orchestrator ran the
+`system_evidence_2026-11-19` CPU queue (LF 20–200 Hz, 2×2 motor×box, 10 m vs 2 m, 25 vs 49
+frequency sampling, screen replay). Current census: **47 case dirs / 14 solved / 29 staged /
+3 refused / 2 invalid**; readout and caveats in
+`docs/evidence/system_evidence_2026-11-19/README.md`. The §0/§6 counts below are the pre-queue
+snapshot; use the evidence/export files for current numbers.
+
 **Audience:** a senior architecture/implementation agent working in the cloud, with no access to the
 local `runs/`, `system_runs/`, GPU, or Boundary Lab install. The goal is that you can plan the final
 architecture and next implementation round **without re-reading the repository or re-deriving the

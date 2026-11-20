@@ -162,9 +162,11 @@ Each study: `study_id`, `path` (repo-relative), `created_utc` (if the file recor
 * **Invalid rows are data.** Two `bl_ref_case` timestamped directories have no `manifest.json`; one
   `two_way_80x50_700_pilot` manifest fails its recorded payload hash. They are exported as
   `invalid` / `mismatch` with diagnostics so the gap is visible, not hidden.
-* **Snapshot census (regenerated on every run).** At the last generation: 37 timestamped case dirs
-  in 12 experiments (35 with a manifest), `solved 5`, `staged 27`, `refused 3`, `invalid 2`;
-  readiness declares 9 of them; 5 screens in 5 files over 2 study ids with 30 shortlist rows.
+* **Snapshot census (regenerated on every run).** At the last generation (after the 2026-11-19
+  system-evidence queue): **47 timestamped case dirs in 21 experiments** (45 with a manifest),
+  `solved 14`, `staged 29`, `refused 3`, `invalid 2`; readiness still declares 9 of the original
+  cases; 6 screens in 6 files over 2 study ids with 36 shortlist rows. The new `ev_*` experiments
+  are `UNDECLARED` by design (they are evidence runs, not readiness-registry cases).
 
 ## Determinism and safety
 
