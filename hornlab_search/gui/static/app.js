@@ -19,6 +19,7 @@ import { drawStudyCharts } from "./study_charts.js";
 import { mountCompareMethods } from "./compare_methods.js";
 import { viewHwCases, viewHwCase, viewHwReadiness } from "./hw.js";
 import { viewOverview } from "./overview.js";
+import { viewHwScreens, viewHwScreen } from "./hw_screen.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -255,7 +256,11 @@ const ROUTES = [
   { re: /^#\/glossary$/,                fn: () => viewGlossary() },
   // Horn + woofer system (read-only G0 views; hw.js)
   { re: /^#\/hw\/cases(?:\?(.*))?$/,     query: true, fn: m => viewHwCases(ROOT, m[1] || "") },
-  { re: /^#\/hw\/case\/([^\/?#]+)\/([^\/?#]+)$/, fn: m => viewHwCase(ROOT, decodeURIComponent(m[1]) + "/" + decodeURIComponent(m[2])) },
+  { re: /^#\/hw\/screens(?:\?(.*))?$/,   query: true, fn: m => viewHwScreens(ROOT, m[1] || "") },
+  { re: /^#\/hw\/screen\/([0-9a-f]{16})(?:\?(.*))?$/, query: true,
+    fn: m => viewHwScreen(ROOT, m[1], m[2] || "") },
+  { re: /^#\/hw\/case\/([^\/?#]+)\/([^\/?#]+)(?:\?(.*))?$/, query: true,
+    fn: m => viewHwCase(ROOT, decodeURIComponent(m[1]) + "/" + decodeURIComponent(m[2]), m[3] || "") },
   { re: /^#\/hw\/readiness$/,          fn: () => viewHwReadiness(ROOT) },
 ];
 
@@ -326,6 +331,7 @@ function updateNav(hash) {
       (h === "#/launch" && hash === "#/launch") ||
       (h === "#/typologies" && (hash === "#/typologies" || hash.startsWith("#/typology/"))) ||
       (h === "#/hw/cases" && (hash === "#/hw/cases" || hash.startsWith("#/hw/case/"))) ||
+      (h === "#/hw/screens" && (hash === "#/hw/screens" || hash.startsWith("#/hw/screen/"))) ||
       (h === "#/hw/readiness" && hash === "#/hw/readiness") ||
       (h === "#/glossary" && hash === "#/glossary");
     a.classList.toggle("active", isActive);

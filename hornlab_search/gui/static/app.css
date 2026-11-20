@@ -1460,3 +1460,155 @@ input:not([type=checkbox]):not([type=radio]):not([type=range]), select { min-hei
 .study-obs-measured { color:var(--accent); border-color:var(--accent); }
 .study-obs-notlaunched, .study-obs-unknown { color:var(--muted); }
 .res-identity { font-size:0.72rem; letter-spacing:0.04em; color:var(--muted); margin:2px 0 4px; text-transform:uppercase; overflow-wrap:anywhere; }
+
+/* -- Horn + woofer pages (hw.js, P1) ------------------------------
+   Cases ledger: one collapsible <details> per experiment. The summary keeps its native
+   disclosure marker (so no display change), only its type treatment is set. */
+.hw-group + .hw-group { margin-top:14px; }
+.hw-group > summary { cursor:pointer; padding:4px 2px; border-bottom:1px solid var(--rule);
+  font-family:var(--f-mono); font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase;
+  color:var(--label); }
+.hw-group > summary:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:4px; }
+.hw-group > summary .pill { text-transform:none; letter-spacing:0; }
+.hw-group > .tbl-wrap { margin-top:2px; }
+/* Token chip + its plain-English gloss on one line; the verbatim token is never truncated. */
+.hw-token { display:inline-flex; flex-wrap:wrap; gap:2px 6px; align-items:baseline;
+  margin:0 10px 4px 0; max-width:100%; }
+.hw-token .pill { white-space:normal; overflow-wrap:anywhere; }
+.hw-token .muted { font-size:0.78rem; }
+/* Keyboard focus on a clickable ledger row (rows open with Enter). */
+tbody tr[tabindex]:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+/* Provenance: hash + Copy button wraps instead of widening the page. */
+.hw-hash { display:inline-flex; flex-wrap:wrap; gap:4px 8px; align-items:center; max-width:100%; }
+.hw-hash code { overflow-wrap:anywhere; }
+
+/* -- Horn + woofer P1 polish (2026-11-19): one missing glyph, compact page heads,
+   short ledger rows with the token gloss on its own full-width line, readable readiness. -- */
+.hw-story { margin:2px 0 0; max-width:82ch; font-size:0.84rem; color:var(--muted); }
+.hw-channel-note { margin:-6px 0 0; font-size:0.8rem; }
+.hw-case-count-line { margin:0; font-size:0.82rem; }
+
+/* Case page: one slim KPI strip instead of four tall cards. */
+.kpis.hw-kpis-slim .kpi { padding:8px 12px; gap:1px; }
+.kpis.hw-kpis-slim .kpi b { font-size:1.05rem; }
+.kpis.hw-kpis-slim .kpi small { font-size:0.68rem; }
+
+/* One reconciled status band; the recorded error is verbatim inside <details>. */
+.hw-status-band > div { font-size:0.9rem; }
+.hw-refusal { margin-top:6px; }
+.hw-refusal > summary { cursor:pointer; font-size:0.82rem; }
+.hw-verbatim { margin:6px 0 0; padding:8px 10px; border:1px solid var(--rule); border-radius:4px;
+  background:var(--bg); color:var(--ink); font-family:var(--f-mono); font-size:0.78rem;
+  white-space:pre-wrap; overflow-wrap:anywhere; }
+
+/* Ledger: short rows. The token chip + gloss live in a full-width second row, never in a narrow cell. */
+.hw-ledger { min-width:1003px; }
+.hw-ledger th, .hw-ledger td { vertical-align:top; }
+.hw-ledger td { padding-top:9px; padding-bottom:9px; white-space:normal; }
+.hw-ledger td .pill { white-space:normal; overflow-wrap:anywhere; font-size:0.66rem; }
+.hw-row-note { margin:0 0 4px; font-size:0.78rem; color:var(--warn); }
+.hw-ledger-case { white-space:normal; }
+.hw-ledger-title { font-weight:500; color:var(--ink); }
+.hw-ledger-id { margin-top:2px; font-family:var(--f-mono); font-size:0.7rem; color:var(--muted);
+  overflow-wrap:anywhere; }
+.hw-tokens-row td { padding-top:2px; padding-bottom:8px; white-space:normal; }
+.hw-tokens-row:hover { background:transparent; }
+.hw-tokens-row .hw-token { margin:0 14px 2px 0; }
+
+/* Group summaries read as names, with the id in small mono instead of ALL-CAPS. */
+.hw-group > summary { text-transform:none; letter-spacing:0; font-family:var(--f-body);
+  font-size:0.9rem; color:var(--ink); }
+.hw-group-name { font-weight:500; }
+.hw-group-id { font-family:var(--f-mono); font-size:0.7rem; color:var(--muted); font-weight:400; }
+
+/* Response: light "not solved" tint with an explicit legend entry (no heavy hatch). */
+.hw-chart-legend { margin:4px 0 0; align-items:center; }
+.hw-swatch { display:inline-block; width:18px; height:10px; border:1px solid var(--rule); border-radius:2px;
+  vertical-align:middle; margin-right:6px; }
+.hw-swatch-band { background:var(--band); }
+
+/* Polars: colour scale for the fixed -40..0 dB ramp. */
+.hw-db-legend { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px; margin:4px 0 6px;
+  font-size:0.76rem; }
+.hw-db-legend svg { display:block; border:1px solid var(--rule); border-radius:3px; }
+
+/* Readiness: fixed columns, zebra rows, exceptions-only status badges, distinct medium/low tones. */
+.hw-readiness-table { table-layout:fixed; min-width:860px; }
+.hw-readiness-table th, .hw-readiness-table td { vertical-align:top; }
+.hw-readiness-table tbody tr:nth-child(even) { background:var(--band); }
+.hw-readiness-table .hw-wrap { white-space:normal; overflow-wrap:break-word; }
+.hw-readiness-table .hw-nowrap { white-space:nowrap; }
+.pill.hw-lvl-medium { color:var(--accent); }
+.pill.hw-lvl-low { color:var(--muted); }
+.kpi b.hw-lvl-medium { color:var(--accent); }
+.kpi b.hw-lvl-low { color:var(--muted); }
+
+/* Placeholders: open on first visit but compact, in two columns, so the page head stays short. */
+#hw-placeholders > summary { font-size:0.82rem; }
+#hw-placeholders ul { columns:2 300px; column-gap:24px; }
+#hw-placeholders li { break-inside:avoid; }
+
+/* -- Horn + woofer P1 second-pass fixes (2026-11-19): readable group headers,
+   underscore-boundary chip wrapping, a visible table-scroll cue, phase controls,
+   depth markers in the side view, and exceptions-only readiness status. -- */
+.hw-group-sep { color:var(--muted); margin:0 4px 0 6px; }
+.hw-group-id { font-size:0.68rem; }
+.hw-ledger { min-width:998px; }
+.hw-ledger th, .hw-ledger td { padding-left:12px; padding-right:12px; vertical-align:top; }
+.hw-ledger-band { white-space:nowrap; }
+
+/* A table that really scrolls gets a legible cue (the global hint is 10 px grey). */
+.hw-tbl-scroll .tbl-scroll-hint { font-size:0.78rem; font-weight:600; color:var(--accent); letter-spacing:0; }
+
+/* At 375 px the wide table scrolls, but the failure banner itself must wrap, not clip. */
+.hw-tokens-row .hw-token { max-width:min(100%, calc(100vw - 70px)); }
+.hw-tokens-row .hw-token .pill { max-width:100%; }
+.hw-row-note { max-width:min(100%, calc(100vw - 70px)); }
+
+/* Response controls: probe select + wrapped/unwrapped phase toggle. */
+.hw-chart-controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px; margin:8px 0 0; }
+.hw-chart-controls label { display:inline-flex; align-items:center; gap:6px; }
+.hw-chart-controls select { font:inherit; font-size:0.84rem; background:var(--surface); color:var(--ink);
+  border:1px solid var(--rule); border-radius:5px; padding:4px 8px; max-width:100%; }
+.hw-phase-toggle { display:inline-flex; flex-wrap:wrap; gap:6px; }
+.hw-phase-toggle .btn[aria-pressed="true"] { font-weight:600; }
+
+/* Readiness: the risk cell owns the exception status; evidence wraps at spaces, not mid-word. */
+.hw-readiness-table { min-width:900px; }
+.hw-readiness-table .hw-risk-id { white-space:normal; }
+.hw-risk-id .pill { font-size:0.66rem; white-space:normal; }
+.hw-evidence-cell { font-size:0.84rem; overflow-wrap:normal; }
+.hw-long-id { overflow-wrap:anywhere; }
+
+/* Geometry note for a vented-only case. */
+.hw-geo-note { margin:2px 0 0; color:var(--muted); font-size:0.8rem; }
+
+/* Evidence cells keep normal word wrapping; only long identifiers break anywhere. */
+.hw-readiness-table .hw-evidence-cell { overflow-wrap:normal; }
+
+.hw-group-sep { margin:0 2px 0 8px; }
+
+/* -- Horn + woofer P3: Geometry 3D tab (hw3d.js) -------------------------------
+   3-D stays in millimetres; the stage owns the fixed height so the canvas never
+   stretches the page, and every overlay uses existing theme tokens. */
+.hw3d-controls { display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; margin:0 0 8px; }
+.hw3d-control-label { font-family:var(--f-mono); font-size:0.72rem; letter-spacing:0.06em;
+  text-transform:uppercase; color:var(--label); }
+.hw3d-stage { position:relative; height:clamp(360px,58vh,680px); min-height:320px;
+  border:1px solid var(--rule); border-radius:6px; overflow:hidden; background:var(--viz-canvas,#e9edf0); }
+.hw3d-stage canvas { display:block; width:100%; height:100%; outline:none; }
+.hw3d-stage canvas:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+.hw3d-hud { position:absolute; left:8px; bottom:8px; z-index:2; display:flex; flex-wrap:wrap;
+  gap:4px 12px; padding:3px 8px; border:1px solid var(--rule); border-radius:4px;
+  background:var(--surface); color:var(--muted); font-family:var(--f-mono); font-size:0.7rem;
+  pointer-events:none; opacity:0.94; }
+.hw3d-clearance-label, .hw3d-scale-label { position:absolute; left:0; top:0; z-index:3;
+  transform:translate(-50%,-50%); padding:2px 7px; border:1px solid; border-radius:4px;
+  background:var(--surface); font-family:var(--f-mono); font-size:0.7rem; line-height:1.35;
+  pointer-events:none; max-width:min(82%, 22rem); white-space:normal; }
+.hw3d-clearance-label.pass { color:var(--good); border-color:var(--good); }
+.hw3d-clearance-label.violation { color:var(--bad); border-color:var(--bad); }
+.hw3d-clearance-label.warn { color:var(--warn); border-color:var(--warn); }
+.hw3d-scale-label { color:var(--ink); border-color:var(--accent); }
+.hw3d-note { margin:6px 0 0; color:var(--muted); font-size:0.78rem; }
+.hw3d-fallback { margin-top:8px; }

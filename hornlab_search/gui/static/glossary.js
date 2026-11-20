@@ -76,6 +76,71 @@ export const TERMS = {
               long: "The fidelity of the solve the gate audit scored this row from: 'screen' is the fast, coarse search solve; 'verify' is the slower, finer re-solve of a shortlist. Verify is the one to trust before printing." },
   band:     { label: "Scored band", unit: "Hz", short: "Frequencies that count",
               long: "Only frequencies inside the band enter the score. On an 8 GB GPU nothing above 5.5 kHz is solved." },
+
+  // ---- Horn + woofer system (P1, docs/research/system_woofer_2026-11-18/)
+  // Every `long` below is taken from the handoff/evidence docs named in its comment; none adds a
+  // new acoustic claim. The GUI labels are shortened plain-English forms of the same text.
+
+  // GUI_COMPLETION_HANDOFF §2/§5, SENIOR_REVIEW_HANDOFF §2, GUI_SYSTEM_PLAN §1 (declared labels).
+  hw_fidelity: { label: "Fidelity label", unit: "", short: "What the numbers are allowed to claim",
+              long: "One of SCREEN_MAGNITUDE, SCREEN_COMPLEX_APPROX, INSTALLED_EXTERIOR_BEM, COUPLED_VENTED_FEM_BEM_LEM or MEASURED_VALIDATED. Declared per case in readiness.yaml: the run files carry no label and the result reader refuses to guess one, so an undeclared case shows UNDECLARED." },
+  // SCREENING_EVIDENCE §1 and §5 ("display only, no winner"; "good match" is a relative-shape label).
+  hw_screen: { label: "Screen", unit: "", short: "Fast CPU shortlist, not a result",
+              long: "A fast CPU estimate over many box and driver candidates that produces a shortlist. It never names a single winner and is not a validated ranking. 'Good match' in a screen means the explicitly defined relative-shape label, not a validated crossover." },
+  // SCREENING_EVIDENCE §2 (E_shape definition, band, weights, 9 dB^2 threshold).
+  e_shape:  { label: "Shape match error", unit: "dB²", short: "Horn vs piston pattern difference",
+              long: "E_shape(f_x, plane) = Σ_f w_f [Σ_dir w_dir (L_h,rel − L_w,rel)² / Σ_dir w_dir] / Σ_f w_f: the mean of squared dB differences between the stored horn's relative pattern and an ideal rigid circular piston's, over the listening window, summed over the candidate overlap band. H and V are evaluated separately; the provisional good-match label is 9 dB² (3 dB RMS). It says nothing about absolute level, phase or delay." },
+  // SCREENING_EVIDENCE §11 (the pre-check mirrors BL's generator validator), readiness.yaml R2.
+  panel_fit: { label: "Panel fit", unit: "", short: "Do the driver and port fit on the front?",
+              long: "A pre-check that mirrors Boundary Lab's own generator validator: the driver circle, the port opening and their centres must fit the front panel with the required separation. A refusal means no legal placement exists on that panel. Boundary Lab's own validate remains the authority." },
+  // system/boundarylab/clearance.py docstring, readiness.yaml R16, SENIOR_REVIEW_HANDOFF §2.
+  clearance: { label: "Horn ↔ box clearance", unit: "mm", short: "Proven gap between horn and box",
+              long: "Recorded verdict for a two-body assembly. PASS when the bounding boxes are at least 1 mm apart (a proven lower bound on the true gap); BODY_CLEARANCE_VIOLATION when a horn vertex is closer than 1 mm (a proven violation); BODY_CLEARANCE_UNPROVEN when neither proof holds. A failed clearance fails the stage, so the case is not solved." },
+  // SCREENING_EVIDENCE §4 (the spec's own F3 ≤ 55 Hz gate), PILOT_EVIDENCE §3 (F3 ≤ 55 Hz per row).
+  f3:       { label: "F3", unit: "Hz", short: "Box's −3 dB low-frequency point",
+              long: "The −3 dB point of the box's low-frequency model, compared against the spec's own F3 target (for example F3 ≤ 55 Hz). It comes from the lumped bassbox model, not from a Boundary Lab solve." },
+  // GUI_SYSTEM_PLAN §1 ("Box tuning (Fb) is drawn as a marker inside that band"), readiness.yaml R3.
+  fb_tuning: { label: "Box tuning", unit: "Hz", short: "Ported box tuning frequency",
+              long: "The tuning frequency of the vented box in the lumped model. All recorded solve grids start at 200 Hz, so the tuning cannot be seen in the solved data; the plan draws Fb as a marker inside the hatched 'not solved' band." },
+  // SCREENING_EVIDENCE §5 (worst peak port velocity ÷ the 17 m/s convention; headroom warning only).
+  port_velocity: { label: "Port velocity", unit: "× limit", short: "Worst peak port velocity ÷ 17 m/s",
+              long: "Worst peak port velocity at the driver's AES voltage ceiling divided by the 17 m/s port convention (PORT_AIR_MPS_MAX). Values above 1 are a headroom warning, not a construction rejection; the geometric port-fit rule is the buildability gate. The lumped model does not predict port turbulence." },
+  // SCREENING_EVIDENCE §5 and bass_reference.py (20·log10(Xmax ÷ peak excursion)), readiness.yaml R8.
+  excursion_margin: { label: "Excursion margin", unit: "dB", short: "Headroom to the Xmax gate",
+              long: "20·log10(Xmax ÷ the peak cone excursion at 40 Hz) from the lumped model: positive is headroom, negative means the cone would pass Xmax at the driver's AES voltage ceiling. It is not yet a joint constraint in the DSP validator (R8)." },
+  // SCREENING_EVIDENCE §2 (band = the stored samples inside f_x·2^±1/3; fewer than 3 is a refusal).
+  xo_band:  { label: "XO band", unit: "Hz", short: "Overlap band a crossover could use",
+              long: "For each candidate crossover frequency f_x, the stored frequency samples inside [f_x·2^(−1/3), f_x·2^(+1/3)] — a one-third-octave half-width. The band is candidate-specific, not a universal 700–1300 Hz window, and a band with fewer than 3 stored frequencies is refused, not interpolated." },
+  // SENIOR_REVIEW_HANDOFF §5 R1, handoff §1 (woofer Pa per 2.83 V, horn Pa per 1 m/s).
+  per_input_ref: { label: "Per-input reference", unit: "", short: "What each channel's Pa is normalised to",
+              long: "Every channel is normalised to its own input: the woofer basis is Pa per 2.83 V and the horn basis Pa per 1 m/s. Because the references differ, the two channels are never summed and no calibrated system level is claimed until a channel-calibration policy exists (risk R1, owner decision 3)." },
+  // SENIOR_REVIEW_HANDOFF §4 (ideal normal-velocity source, not a compression driver), readiness.yaml.
+  ideal_horn_source: { label: "Ideal horn source", unit: "", short: "Throat driven at 1 m/s, not a driver",
+              long: "The horn throat is driven as an ideal normal-velocity source at 1 m/s. There is no compression-driver model, so the horn curve is a pressure basis per metre per second, not an absolute SPL for a real driver." },
+  // SENIOR_REVIEW_HANDOFF §3–§4 (motor A/B differs 120–144 % per 2.83 V), readiness.yaml cases.
+  demo_motor: { label: "Motor", unit: "", short: "Demo or real Thiele/Small set",
+              long: "Which motor the solve used. 'demo' is Boundary Lab's provider-default motor, not a real driver's Thiele/Small parameters; 'real' means a declared driver's T/S values were mapped in. Declared per case in readiness.yaml, never inferred. The recorded motor A/B differs 120–144 % in pressure per 2.83 V, so this label qualifies every level." },
+  // SENIOR_REVIEW_HANDOFF §4–§5 R2 (provider-default cone/surround/cap), readiness.yaml cases.
+  demo_shape: { label: "Transducer shape", unit: "", short: "Demo cone/surround/cap or real geometry",
+              long: "Which radiating geometry the solve used. 'demo' is Boundary Lab's provider-default cone, surround and dust-cap shape; the real driver's shape is not modelled. Every BL-buildable box today is demo-shape conditional. Declared per case in readiness.yaml, never inferred." },
+  // GUI_SYSTEM_PLAN §1 and readiness.yaml R3 ("no data is not zero"; band, Fb marker).
+  lf_not_solved: { label: "LF not solved", unit: "", short: "Nothing below the lowest solved frequency",
+              long: "All recorded grids start at 200 Hz, so nothing below that is solved and the box tuning cannot be seen in the data. Frequency plots show a hatched 'not solved' band rather than a line at zero: no data is not zero." },
+  // SENIOR_REVIEW_HANDOFF §5 R6.
+  convergence: { label: "Convergence", unit: "", short: "One mesh only; refinement not checked",
+              long: "Each case was solved on a single mesh, with no refinement delta or frequency-densification control, so how much the answer moves with a finer mesh is unknown." },
+  // GUI_COMPLETION_HANDOFF §5.7 (stage + validate as CPU jobs), readiness.yaml R16.
+  stage_validate: { label: "Stage + validate", unit: "", short: "Build the Boundary Lab project and check it",
+              long: "Staging builds the Boundary Lab project from the box parameters, the horn mesh and the offset; validate runs Boundary Lab's own check on it. A case that fails clearance or the panel-fit rule never reaches a solve. Both are CPU jobs of seconds to minutes." },
+  // GUI_COMPLETION_HANDOFF §2 and §5.7 (CPU, about 2.5 min for 25 freqs; needs approval).
+  bl_solve: { label: "BL solve", unit: "", short: "The full simulation, needs approval",
+              long: "The full Boundary Lab solve: CPU, about 2.5 minutes for 25 frequencies on this machine. It requires an authorization record and stays disabled until owner decision 6 is answered. A solve is a simulation, never a measurement." },
+  // SENIOR_REVIEW_HANDOFF §7 and R14, readiness.yaml decision 6.
+  authorization: { label: "Authorization record", unit: "", short: "Who, why and scope for a solve",
+              long: "The record written before a Boundary Lab solve: who asked, why, and the scope. Today authorized_by is a free string checked only for being non-empty; the shape of the record is owner decision 6." },
+  // SENIOR_REVIEW_HANDOFF §5 R1, readiness.yaml decision 3.
+  calibration_policy: { label: "Calibration policy", unit: "", short: "How unlike references would be joined",
+              long: "The standing rule for comparing the woofer's Pa per 2.83 V with the horn's Pa per 1 m/s. Until it exists, the channels are never summed and no system curve is shown (risk R1, owner decision 3)." },
 };
 
 /** HTML for a label with a hover/focus tooltip, e.g. tip("cov"). */

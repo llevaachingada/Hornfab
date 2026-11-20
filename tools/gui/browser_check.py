@@ -94,10 +94,11 @@ def main(argv=None) -> int:
                     page.on("console", lambda m: errors.append(f"console.{m.type}: {m.text}")
                             if m.type == "error" else None)
                     page.on("pageerror", lambda e: errors.append(f"pageerror: {e}"))
-                    sep = "&" if "?" in route else "?"
-                    url = f"{a.base}/{route.lstrip('/')}"
-                    url = url.replace("/#/", f"/{sep}theme={theme}#/", 1)
-                    name = route.strip("/#").replace("/", "_") or "home"
+                    # routes look like "/#/hw/cases" or "/#/hw/screen/<id>?tab=panel"; the query
+                    # inside the route belongs to the hash, so build base + ?theme= + fragment.
+                    frag = route[1:] if route.startswith("/") else "/" + route
+                    url = f"{a.base}/?theme={theme}{frag}"
+                    name = route.strip("/#").split("?")[0].replace("/", "_") or "home"
                     entry = {"route": route, "width": width, "theme": theme, "url": url,
                              "console_errors": [], "checks": {}, "screenshot": ""}
                     try:
