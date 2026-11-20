@@ -1,5 +1,15 @@
 ﻿# ISSUES
 
+## 2026-11-20 - GUI: full score breakdown + favorites star (closes the FAV-001 GUI items)
+
+- DONE (GUI bug): run page "Score breakdown" now lists every weighted term of the run's objective version
+  (`gui/data_breakdown.py`; v11 adds `flat_cv`, `di_roughness`, `cd_lw`, `cd_di_std`, `cd_nacc`,
+  `offaxis_smooth`) and sums to the stored J (FAV-001: 4.9965; the old chart showed 3.247 of it).
+- DONE (GUI feature): star toggle on the run page backed by `docs/favorites/FAVORITES.yaml` (append-only,
+  retire on un-star), star marker + Favorites filter on Runs and Elites (`gui/favorites.py`).
+- INTEGRATION: the FAV-001 ISSUES entry with these two OPEN lines is in the main working copy only; mark them
+  DONE there when this branch is merged.
+
 ## 2026-11-20 - System evidence queue ran (CPU only) + first readout
 
 - DONE: `docs/queue/system_evidence_2026-11-19.yaml` ran in the CPU lane beside the live GPU night;

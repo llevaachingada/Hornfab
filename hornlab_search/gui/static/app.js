@@ -2002,20 +2002,21 @@ async function viewCampaignDetail(id) {
 async function viewRunsList() {
   const ROOT = currentRoot();     // this view's own container (see route())
   skel();
-  let runs, status, studies;
+  let runs, status, studies, favs;
   try {
     // The night's open step and its studied arm belong on this page too: a BoTorch study is not a
     // `<ts>-screen-*` run folder, so a Runs page built from /api/runs alone showed nothing at all
     // while a study was solving. Both side calls are optional (an older server 404s).
-    [runs, status, studies] = await Promise.all([
+    [runs, status, studies, favs] = await Promise.all([
       api("/api/runs"),
       api("/api/status").catch(() => null),
       api("/api/studies").catch(() => null),
+      api("/api/favorites").catch(() => null),
     ]);
   }
   catch (e) { ROOT.innerHTML = errBanner(e.message); return; }
   if (ROOT !== currentRoot()) return;   // the user navigated away while this loaded
-  renderRunsList(runs, status, studies);
+  renderRunsList(runs, status, studies, favs);
 }
 
 /** Study ids the night is working on right now (from the annotated open queue steps). */
@@ -2051,7 +2052,10 @@ function studiesOnNightHtml(studies, status) {
   </div>`;
 }
 
-function renderRunsList(allRuns, status = null, studies = null) {
+function renderRunsList(allRuns, status = null, studies = null, favs = null) {
+  // Owner favorites (FAVORITES.yaml): a star on each run whose id or best design is starred.
+  const favOf = r => favoriteForRun(favs, r.id, r.best_hash);
+  const nFav = allRuns.filter(favOf).length;
   // Collect unique briefs and families for filter dropdowns
   const briefs = [...new Set(allRuns.map(r => r.brief).filter(Boolean))].sort();
   const families = [...new Set(allRuns.map(r => r.family).filter(Boolean))].sort();
@@ -2091,6 +2095,7 @@ function renderRunsList(allRuns, status = null, studies = null) {
           <option value="">All versions</option>
           ${objectiveVersions(allRuns).map(v => `<option value="${v}">J v${v} (${allRuns.filter(r => objectiveVersionOf(r) === v).length})</option>`).join("")}
         </select>
+        <label class="fav-filter" title="Runs whose id or best design is in docs/favorites/FAVORITES.yaml"><input type="checkbox" id="run-filter-fav"${nFav ? "" : " disabled"}> <span class="fav-mark" style="margin:0">★</span> Favorites (${nFav})</label>
         <select id="run-sort" class="sort-sel" aria-label="sort runs">
           <option value="active" selected>Recently active</option>
           <option value="date">Newest first</option>
@@ -2119,7 +2124,9 @@ function renderRunsList(allRuns, status = null, studies = null) {
     const sort = document.getElementById("run-sort").value;
     const mf = document.getElementById("run-filter-mode").value;
     const af = document.getElementById("run-filter-algo").value;
+    const favOnly = document.getElementById("run-filter-fav").checked;
     let filtered = allRuns.filter(r =>
+      (!favOnly || favOf(r)) &&
       runModeMatches(r, mf) &&
       optimizerMatches(r, af) &&
       (!bf || r.brief === bf) &&
@@ -2153,7 +2160,7 @@ function renderRunsList(allRuns, status = null, studies = null) {
       const flat = !isRunning && ch === "no change";
       return `<tr class="clickable${flat ? " row-flat" : ""}" onclick="location.hash='#/run/${esc(r.id)}'" ${isRunning ? 'style="background:var(--accent-soft)"' : ""}>
         <td class="muted mono" style="font-size:0.76rem;white-space:nowrap">${isRunning ? `<span class="live-dot" title="rows written in the last 2 min">●</span> ` : "⏸ "}${timeSince(r.last || r.started)}<br><span style="font-size:0.7rem">started ${timeSince(r.started)}</span></td>
-        <td><b>${brk(r.name)}</b> ${runModeBadgesHtml(r, isRunning)}<br><span class="mono muted" style="font-size:0.72rem">${brk(r.id)}</span>${runParentLineHtml(r)}
+        <td><b>${brk(r.name)}</b>${favoriteMarkHtml(favOf(r))} ${runModeBadgesHtml(r, isRunning)}<br><span class="mono muted" style="font-size:0.72rem">${brk(r.id)}</span>${runParentLineHtml(r)}
           <br><span class="muted" style="font-size:0.72rem">${r.dims ? esc(dimStr(r.dims)) : "size –"} · ${nf > 0 ? `<span class="warn-text">${esc(failPct)} failed</span>` : "no failures"}</span></td>
         <td>${brk(r.family || "–")}</td>
         <td>${brk(r.brief || "–")}</td>
@@ -2172,6 +2179,7 @@ function renderRunsList(allRuns, status = null, studies = null) {
   document.getElementById("run-sort").addEventListener("change", render);
   document.getElementById("run-filter-mode").addEventListener("change", render);
   document.getElementById("run-filter-algo").addEventListener("change", render);
+  document.getElementById("run-filter-fav").addEventListener("change", render);
 }
 
 /** Pure: <option>s for the Compare pickers, filtered by free text (name/family/brief/id) and
@@ -5240,6 +5248,20 @@ function _eliteOrder(a, b) {
   return va === vb ? 0 : va - vb;
 }
 
+/** The ACTIVE favorite for an elite card (by design hash; hashes may be stored shortened) or null. */
+function eliteFavorite(card, favs) {
+  const h = card && card.hash != null ? String(card.hash) : "";
+  if (!h || !favs || !favs.by_hash) return null;
+  const key = Object.keys(favs.by_hash).find(k => k && (h.startsWith(k) || k.startsWith(h)));
+  return key ? ((favs.favorites || []).find(f => f.id === favs.by_hash[key]) || null) : null;
+}
+
+/** The cards the Elites filters see: all, or only owner favorites when the star toggle is on. */
+function _eliteCards(state) {
+  const cards = (state && state.data && state.data.cards) || [];
+  return state && state.favOnly ? cards.filter(c => eliteFavorite(c, state.favs)) : cards;
+}
+
 function _eliteFilterArgs(state) {
   const data = (state && state.data) || {};
   return {
@@ -5768,7 +5790,7 @@ function armEliteThumbs(scope) {
 
 // ── Card / page markup ───────────────────────────────────────────────────
 
-function eliteCardHtml(c, labels) {
+function eliteCardHtml(c, labels, fav = null) {
   const card = c || {};
   const title = eliteHeadline(card);
   const constraint = eliteConstraintLine(card);
@@ -5789,7 +5811,7 @@ function eliteCardHtml(c, labels) {
   return `<article class="card elite-card">
     ${thumb}
     <div class="elite-copy">
-      <h3 class="elite-title">${esc(title)}</h3>
+      <h3 class="elite-title">${esc(title)}${favoriteMarkHtml(fav)}</h3>
       <p class="elite-constraints"><span class="elite-lab">Constraints</span>${esc(constraint)}</p>
       <div class="pill-row elite-gates">${chips}</div>
       <div class="elite-foot">
@@ -5805,9 +5827,12 @@ function elitesResultsHtml(state, r) {
   const res = r || { rows: [], total: 0, pool: 0, matched: 0 };
   if (!state.data || state.data.available !== true) return "";
   if (!res.rows.length) {
-    const msg = res.pool === 0
+    const favNone = state.favOnly && !_eliteCards(state).length;
+    const msg = favNone
+      ? "None of the owner's starred designs is in these audits. Star a horn on its run page; turn off ★ Favorites to see every design."
+      : res.pool === 0
       ? "These audits recorded no designs yet."
-      : (state.brief || state.family)
+      : (state.brief || state.family || state.favOnly)
         ? "No designs match these filters — clear one to see more."
         : "None of these designs passed every gate.";
     return `<div class="card elites-empty"><p class="muted" style="margin:0">${esc(msg)}</p></div>`;
@@ -5818,7 +5843,7 @@ function elitesResultsHtml(state, r) {
     ? `<div class="elites-more"><button type="button" id="elites-showmore">Show more designs ` +
       `(${shown.length} of ${res.rows.length})</button></div>`
     : "";
-  return `<div class="elites-grid">${shown.map(c => eliteCardHtml(c, labels)).join("")}</div>${more}`;
+  return `<div class="elites-grid">${shown.map(c => eliteCardHtml(c, labels, eliteFavorite(c, state.favs))).join("")}</div>${more}`;
 }
 
 function elitesHeadHtml(state) {
@@ -5856,8 +5881,10 @@ function elitesBarHtml(state) {
       <button type="button" data-elite-mode="all" aria-pressed="${best ? "false" : "true"}"
         title="Every passing design, best first">All passing</button>
     </div>
+    <button type="button" id="elites-fav" aria-pressed="${state.favOnly ? "true" : "false"}"
+      title="Only designs starred in docs/favorites/FAVORITES.yaml"><span class="fav-mark" style="margin:0">★</span> Favorites (${n(((state.data && state.data.cards) || []).filter(c => eliteFavorite(c, state.favs)).length)})</button>
     <button type="button" id="elites-refresh" aria-label="reload the designs from the latest audits">Refresh</button>
-    <button type="button" id="elites-clear" aria-label="clear the brief and typology filters"${state.brief || state.family || state.mode === "all" ? "" : " hidden"}>Clear</button>
+    <button type="button" id="elites-clear" aria-label="clear the brief and typology filters"${state.brief || state.family || state.mode === "all" || state.favOnly ? "" : " hidden"}>Clear</button>
   </div>`;
 }
 
@@ -5878,8 +5905,10 @@ function renderElitesHtml(data, opts = {}) {
     mode: opts.mode === "all" ? "all" : "best",
     page: Math.max(ELITE_PAGE, Number(opts.page) || ELITE_PAGE),
     busy: false,
+    favs: opts.favs || null,
+    favOnly: !!opts.favOnly,
   };
-  state.result = elitesFilter(data.cards || [], _eliteFilterArgs(state));
+  state.result = elitesFilter(_eliteCards(state), _eliteFilterArgs(state));
   if (opts && typeof opts === "object") opts.result = state.result;
   return `<div class="stack elites-view" style="gap:14px">
     ${elitesHeadHtml(state)}
@@ -5890,7 +5919,7 @@ function renderElitesHtml(data, opts = {}) {
 }
 
 function _paintEliteResults(ROOT, state) {
-  state.result = elitesFilter((state.data && state.data.cards) || [], _eliteFilterArgs(state));
+  state.result = elitesFilter(_eliteCards(state), _eliteFilterArgs(state));
   const q = sel => (ROOT.querySelector ? ROOT.querySelector(sel) : null);
   const results = q("#elites-results");
   const note = q("#elites-note");
@@ -5899,7 +5928,9 @@ function _paintEliteResults(ROOT, state) {
   if (results) results.innerHTML = elitesResultsHtml(state, state.result);
   if (note) note.textContent = elitesNoteText(state, state.result);
   if (counts) counts.textContent = eliteCountsText(state.result);
-  if (clear) clear.hidden = !(state.brief || state.family || state.mode === "all");
+  if (clear) clear.hidden = !(state.brief || state.family || state.mode === "all" || state.favOnly);
+  const favBtn = q("#elites-fav");
+  if (favBtn) favBtn.setAttribute("aria-pressed", state.favOnly ? "true" : "false");
   armEliteThumbs(results);
 }
 
@@ -5932,11 +5963,18 @@ function _wireEliteControls(ROOT, state) {
     if (btnAll) btnAll.setAttribute("aria-pressed", mode === "all" ? "true" : "false");
     _paintEliteResults(ROOT, state);
   };
+  const btnFav = q("#elites-fav");
+  if (btnFav) btnFav.addEventListener("click", () => {
+    state.favOnly = !state.favOnly;
+    state.page = ELITE_PAGE;
+    _paintEliteResults(ROOT, state);
+  });
   if (btnBest) btnBest.addEventListener("click", () => setMode("best"));
   if (btnAll) btnAll.addEventListener("click", () => setMode("all"));
   if (btnClear) btnClear.addEventListener("click", () => {
     state.brief = "";
     state.family = "";
+    state.favOnly = false;
     state.mode = "best";
     state.page = ELITE_PAGE;
     if (selBrief) selBrief.value = "";
@@ -5994,15 +6032,16 @@ async function viewElites() {
   const ROOT = currentRoot();
   _eliteGLDispose();          // one WebGL context per page visit (never leak scenes)
   skel("Loading elites…");
-  let data;
+  let data, favs;
   try {
-    data = await api("/api/elites");
+    [data, favs] = await Promise.all([api("/api/elites"), api("/api/favorites").catch(() => null)]);
   } catch (e) {
     ROOT.innerHTML = errBanner("Could not load elites: " + e.message);
     return;
   }
   if (ROOT !== currentRoot()) return;
-  const state = { data, brief: "", family: "", mode: "best", page: ELITE_PAGE, busy: false };
+  const state = { data, brief: "", family: "", mode: "best", page: ELITE_PAGE, busy: false,
+                  favs, favOnly: false };
   mountElites(ROOT, state);
 }
 
@@ -6032,6 +6071,7 @@ export { analysisPageHtml, analysisIndexHtml, analysisSectionsOf, analysisErrors
          analysisSurrogateSectionHtml, _anDrawGeometryNavigation, _anDrawQdFront };
 
 export { continueRunAvailable, continueRunArgs, runIsVerify };
+export { scoreBreakdownRows, favoriteForRun, favoriteMarkHtml, eliteFavorite };
 
 
 /** Compact run-detail card: top up an opened search run with N NEW evaluations while reusing the
@@ -6067,6 +6107,114 @@ function continueRunCardHtml(d, sum) {
   </div>`;
 }
 
+
+// ── Owner favorites (docs/favorites/FAVORITES.yaml, schema hornlab-favorites-v1) ──────────────
+// Read via GET /api/favorites; star = POST {action:"star"} (appends an entry built from the run's
+// best.json/config/brief), un-star = POST {action:"retire"} (status: retired, never deleted).
+
+/** Pure: the ACTIVE favorite entry for a run (by run id, else by its best design hash) or null. */
+function favoriteForRun(favs, runId, bestHash) {
+  if (!favs || !Array.isArray(favs.favorites)) return null;
+  const ids = (favs.by_run && favs.by_run[runId]) || [];
+  const id = ids[0] || (bestHash && favs.by_hash ? favs.by_hash[bestHash] : null);
+  return id ? (favs.favorites.find(f => f.id === id) || null) : null;
+}
+
+/** Pure: the star marker shown next to a run / elite name ("" when not a favorite). */
+function favoriteMarkHtml(fav) {
+  if (!fav) return "";
+  return `<span class="fav-mark" title="${esc(fav.id)} — owner favorite${fav.title ? ": " + esc(fav.title) : ""}" aria-label="favorite ${esc(fav.id)}">★</span>`;
+}
+
+async function wireFavoriteStar(runId, bestHash, root) {
+  const slot = root.querySelector("#fav-slot");
+  if (!slot) return;
+  let favs;
+  try { favs = await api("/api/favorites"); }
+  catch (e) { slot.innerHTML = `<span class="muted" style="font-size:0.78rem">favorites unavailable: ${esc(e.message)}</span>`; return; }
+  if (root !== currentRoot()) return;
+  const fav = favoriteForRun(favs, runId, bestHash);
+  const err = favs.error ? `<div class="warn-text" style="font-size:0.78rem">FAVORITES.yaml: ${esc(favs.error)}</div>` : "";
+  if (fav) {
+    slot.innerHTML = `${err}<div class="fav-row">
+        <span class="fav-badge on" title="Starred in ${esc(favs.path)}">★ ${esc(fav.id)}</span>
+        <span class="fav-title">${esc(fav.title || "")}</span>
+        <button class="btn-sm" id="fav-unstar" title="Retires the entry (status: retired); the registry never deletes">Un-star…</button>
+      </div>
+      ${fav.owner_note ? `<blockquote class="fav-note">${esc(fav.owner_note)}</blockquote>` : ""}
+      <div class="fav-form" id="fav-form" hidden>
+        <label for="fav-note-in">Why remove the star? (saved as <code>retired_note</code>)</label>
+        <textarea id="fav-note-in" rows="2"></textarea>
+        <div class="fav-actions"><button class="btn-sm primary" id="fav-save">Retire ${esc(fav.id)}</button>
+          <button class="btn-sm" id="fav-cancel">Cancel</button><span class="hint" id="fav-msg" role="status"></span></div>
+      </div>`;
+  } else {
+    slot.innerHTML = `${err}<div class="fav-row">
+        <button class="fav-badge" id="fav-star" title="Add this run's best design to ${esc(favs.path)}">☆ Star this horn</button>
+      </div>
+      <div class="fav-form" id="fav-form" hidden>
+        <label for="fav-note-in">Owner note — why this horn? (saved as <code>owner_note</code>)</label>
+        <textarea id="fav-note-in" rows="3" placeholder="e.g. best directivity plots I've seen; H and V clearly distinct"></textarea>
+        <label for="fav-title-in">Title (optional)</label>
+        <input id="fav-title-in" type="text" placeholder="defaults to config name + design hash">
+        <div class="fav-actions"><button class="btn-sm primary" id="fav-save">Star ${esc(bestHash || "best design")}</button>
+          <button class="btn-sm" id="fav-cancel">Cancel</button><span class="hint" id="fav-msg" role="status"></span></div>
+      </div>`;
+  }
+  const form = slot.querySelector("#fav-form");
+  const opener = slot.querySelector(fav ? "#fav-unstar" : "#fav-star");
+  opener.addEventListener("click", () => { form.hidden = false; slot.querySelector("#fav-note-in").focus(); });
+  slot.querySelector("#fav-cancel").addEventListener("click", () => { form.hidden = true; });
+  slot.querySelector("#fav-save").addEventListener("click", async () => {
+    const msg = slot.querySelector("#fav-msg");
+    const note = slot.querySelector("#fav-note-in").value.trim();
+    if (!note) { msg.textContent = "A note is required."; return; }
+    msg.textContent = "Saving…";
+    const titleIn = slot.querySelector("#fav-title-in");
+    const body = fav ? { action: "retire", id: fav.id, note }
+                     : { action: "star", run_id: runId, owner_note: note, title: titleIn ? titleIn.value.trim() : "" };
+    const r = await post("/api/favorites", body);
+    if (r && r.ok) { wireFavoriteStar(runId, bestHash, root); }
+    else msg.textContent = (r && r.error) || "Save failed.";
+  });
+}
+
+/** Labels for weighted terms the glossary does not carry (v7+ and the v11 CD matrix). */
+const BREAKDOWN_LABELS = {
+  cov_profile: "Coverage profile", flat_cv: "Flatness CV", di_roughness: "DI roughness",
+  cd_lw: "CD listening window", cd_di_std: "CD DI std", cd_nacc: "CD NACC",
+  offaxis_smooth: "CD off-axis", hf_floor: "HF floor", constancy: "Constancy",
+  distd: "DI std", diag: "H/V diagonal", load_near: "Near-band loading", z_smooth: "Z smoothness",
+  cov_pat: "Coverage pattern", di_rise: "DI rise", unattributed: "Penalty / other",
+};
+
+/** Pure: the run page's score-breakdown rows. Uses the server's per-version breakdown
+ *  (data_breakdown.py: every weighted term, weights as the objective resolves them, bars sum to
+ *  the stored total) and falls back to the legacy six-term list for an older server. */
+function scoreBreakdownRows(d, w) {
+  const sb = d && d.score_breakdown;
+  const label = k => (GLOSSARY[k] && GLOSSARY[k].label) || BREAKDOWN_LABELS[k] || k;
+  const wLabel = wt => wt == null ? "not a term" : (wt ? `×${wt}` : "(w=0)");
+  let rows, sumLine;
+  if (sb && sb.available && Array.isArray(sb.rows)) {
+    rows = sb.rows.map(r => ({ key: r.key, label: label(r.key), wLabel: wLabel(r.weight),
+                               seed: r.seed, best: r.best }));
+    const side = (name, s) => s ? `${name} Σ ${s.sum.toFixed(4)}${s.total != null ? ` (stored J ${s.total.toFixed(4)})` : ""}` : "";
+    // e.g. "start Σ 5.2952 (stored J 5.2952) · best Σ 4.9965 (stored J 4.9965) · 11 weighted terms, J v11"
+    sumLine = [side("start", sb.seed), side("best", sb.best)].filter(Boolean).join(" · ")
+      + ` · ${sb.keys.length} weighted terms, J v${sb.version}`;
+  } else {
+    const ts = d.terms_seed || {}, tb = d.terms_best || {};
+    rows = TERM_ORDER.map(k => ({ key: k, label: label(k), wLabel: wLabel(w[k] || 0),
+                                  seed: d.terms_seed ? (w[k] || 0) * (ts[k] || 0) : null,
+                                  best: d.terms_best ? (w[k] || 0) * (tb[k] || 0) : null }));
+    sumLine = sb && sb.reason ? `legacy six-term view (breakdown unavailable: ${sb.reason})` : "legacy six-term view";
+  }
+  // The unattributed (penalty / gap) row always stays last; the rest sort by best contribution.
+  const tail = rows.filter(r => r.key === "unattributed");
+  rows = rows.filter(r => r.key !== "unattributed").sort((a, b) => (b.best || 0) - (a.best || 0)).concat(tail);
+  return { rows, sumLine };
+}
 
 async function viewRunDetail(id) {
   const ROOT = currentRoot();     // this view's own container (see route())
@@ -6105,6 +6253,7 @@ async function viewRunDetail(id) {
         <div class="eyebrow">Run · ${esc(sum.generator ? "typology generator" : "mesher family")} · ${esc(sum.family || "")} mesh · ${esc(sum.mode || "")} fidelity${sum.brief ? " · brief " + esc(sum.brief) : ""} · optimizer ${esc(optimizerLabel(sum.algorithm))}${sum.cma_seed != null ? " · random seed " + esc(sum.cma_seed) : ""}${sum.source_study ? ` · study <span class="mono">${esc(sum.source_study)}</span>` : ""}</div>
         <h2>${esc(sum.name || id)}</h2>
         <p class="mono muted" style="font-size:0.78rem">${esc(id)}</p>
+        <div id="fav-slot" class="fav-slot"></div>
         ${provStripHtml}
         ${f11CaveatHtml(d)}
       </div>
@@ -6269,8 +6418,9 @@ async function viewRunDetail(id) {
           <div class="cap" id="conv-cap2" style="margin-top:4px"></div>
         </div>
         <div class="fig"><h3>${tip("J", "Score")} breakdown: start vs best</h3>
-          <div class="cap">Weighted contribution per term × weight. Sorted by best contribution. Upper bar = start, lower = best.</div>
+          <div class="cap">Weighted contribution (term × weight) for every weighted term of this run's ${esc(jVersionLabel(d))} objective; the bars add up to the score. Sorted by best contribution. Upper bar = start, lower = best.</div>
           <svg id="c-terms"></svg>
+          <div class="cap mono" id="c-terms-sum" style="margin-top:4px"></div>
         </div>
       </div>
 
@@ -6316,6 +6466,7 @@ async function viewRunDetail(id) {
     </div>`;
 
   wireScrollHints(ROOT);   // gate-audit tables: reveal the scroll hint when clipped
+  wireFavoriteStar(id, sum.best_hash, ROOT);   // owner star toggle (docs/favorites/FAVORITES.yaml)
 
   // KPI strip (designer-first order)
   // Name the fidelity on every score: a screen "best" is not a verified best (GUI plan G12/F6).
@@ -7001,36 +7152,31 @@ async function viewRunDetail(id) {
   }
 
   // ── H9: Score breakdown with weights ─────────────────────────────────────────────────────────
-  if (d.terms_seed && d.terms_best) {
+  if (d.terms_seed || d.terms_best) {
     const svgT = document.getElementById("c-terms");
     if (svgT) {
       svgT.innerHTML = "";
-      // Sort TERM_ORDER by best contribution descending (H9)
-      const sortedTerms = TERM_ORDER.slice().sort((a, b) => {
-        const vb_b = w[b] * (d.terms_best[b] || 0);
-        const vb_a = w[a] * (d.terms_best[a] || 0);
-        return vb_b - vb_a;
-      });
-      const W = 480, rowH = 32, H = sortedTerms.length * rowH + 30;
+      const bd = scoreBreakdownRows(d, w);
+      const rowsT = bd.rows;
+      const W = 480, rowH = 32, H = rowsT.length * rowH + 30;
       svgT.setAttribute("viewBox", `0 0 ${W} ${H}`);
-      const vals = sortedTerms.map(k => [w[k] * (d.terms_seed[k] || 0), w[k] * (d.terms_best[k] || 0)]);
-      const vmax = Math.max(...vals.flat(), 1e-9);
-      const L = 108, R = 54, X = v => L + v / vmax * (W - L - R);
-      sortedTerms.forEach((k, i) => {
+      const vmax = Math.max(...rowsT.flatMap(r => [r.seed || 0, r.best || 0]), 1e-9);
+      const L = 128, R = 54, X = v => L + Math.max(0, v) / vmax * (W - L - R);
+      rowsT.forEach((r, i) => {
         const y = 6 + i * rowH;
-        const gEntry = GLOSSARY[k];
-        const label = gEntry ? gEntry.label : k;
-        const wLabel = w[k] ? `×${w[k]}` : "(w=0)";
         const lab = el("text", { x: L - 8, y: y + 11, "text-anchor": "end", "font-size": "10", fill: css("--label") }, svgT);
-        lab.textContent = label;
+        lab.textContent = r.label;
         const wlab = el("text", { x: L - 8, y: y + 22, "text-anchor": "end", "font-size": "9", fill: css("--muted") }, svgT);
-        wlab.textContent = wLabel;
-        [[vals[i][0], "--seed", 0], [vals[i][1], "--best", 12]].forEach(([v, c, dy]) => {
+        wlab.textContent = r.wLabel;
+        [[r.seed, "--seed", 0], [r.best, "--best", 12]].forEach(([v, c, dy]) => {
+          if (v == null) return;
           el("rect", { x: L, y: y + dy, width: Math.max(0.5, X(v) - L), height: 10, rx: 2, fill: css(c) }, svgT);
           const tv = el("text", { x: X(v) + 4, y: y + dy + 9, "font-size": "9" }, svgT); tv.textContent = v.toFixed(3);
         });
       });
-      const lg = el("text", { x: L, y: H - 4, "font-size": "9", fill: css("--muted") }, svgT);
+      const sumEl = document.getElementById("c-terms-sum");
+      if (sumEl) sumEl.textContent = bd.sumLine;
+      const lg = el("text", { x: 6, y: H - 4, "font-size": "9", fill: css("--muted") }, svgT);
       lg.textContent = "upper = start · lower = best · sorted by best contribution";
     }
   }

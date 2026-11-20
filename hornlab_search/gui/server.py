@@ -458,6 +458,9 @@ class App:
                                          service_for=service_for)
         if head == "runs":
             return D.list_runs(self.runs)
+        if head == "favorites":
+            from . import favorites as FAV
+            return FAV.load_favorites(self.root)
         if head == "analysis" and len(parts) == 1:
             return D.analysis_sets(self.analysis_dir)
         if head == "analysis" and len(parts) == 2:
@@ -647,6 +650,18 @@ class App:
     def post(self, path: str, body: dict) -> object:
         parts = [unquote(p) for p in path.strip("/").split("/")][1:]
         head = parts[0] if parts else ""
+        if head == "favorites":
+            # Owner star toggle (docs/favorites/FAVORITES.yaml, append-only; un-star = retire).
+            # ValueError (already starred, empty note, unknown id) maps to 400.
+            from . import favorites as FAV
+            action = str((body or {}).get("action") or "")
+            if action == "star":
+                return FAV.star_run(self.root, self.runs, str(body.get("run_id") or ""),
+                                    str(body.get("owner_note") or ""), body.get("title"))
+            if action == "retire":
+                return FAV.retire_favorite(self.root, str(body.get("id") or ""),
+                                           str(body.get("note") or ""))
+            raise ValueError("favorites action must be 'star' or 'retire'")
         if head == "overview" and len(parts) == 3 and parts[1] == "findings":
             # GUI-written finding state (owner decision O4: the one GUI-written state file).
             # set_status validates status/id and writes atomically; ValueError maps to 400.
