@@ -1,0 +1,198 @@
+{
+  "base": "http://127.0.0.1:8823",
+  "runs": [
+    {
+      "route": "/#/hw/screen/27616eedee09009f?tab=shortlist",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8823/?theme=dark#/hw/screen/27616eedee09009f?tab=shortlist",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f?tab=shortlist",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2254
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\shortlist_before\\hw_screen_27616eedee09009f__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f?tab=shortlist",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8823/?theme=dark#/hw/screen/27616eedee09009f?tab=shortlist",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f?tab=shortlist",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2279
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\shortlist_before\\hw_screen_27616eedee09009f__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f?tab=shortlist",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8823/?theme=dark#/hw/screen/27616eedee09009f?tab=shortlist",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f?tab=shortlist",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2279
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\shortlist_before\\hw_screen_27616eedee09009f__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f?tab=shortlist",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8823/?theme=dark#/hw/screen/27616eedee09009f?tab=shortlist",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f?tab=shortlist",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 3402
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\shortlist_before\\hw_screen_27616eedee09009f__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f?tab=shortlist",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8823/?theme=light#/hw/screen/27616eedee09009f?tab=shortlist",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f?tab=shortlist",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2288
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\shortlist_before\\hw_screen_27616eedee09009f__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f?tab=shortlist",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8823/?theme=light#/hw/screen/27616eedee09009f?tab=shortlist",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f?tab=shortlist",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2283
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\shortlist_before\\hw_screen_27616eedee09009f__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f?tab=shortlist",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8823/?theme=light#/hw/screen/27616eedee09009f?tab=shortlist",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f?tab=shortlist",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 2283
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\shortlist_before\\hw_screen_27616eedee09009f__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/hw/screen/27616eedee09009f?tab=shortlist",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8823/?theme=light#/hw/screen/27616eedee09009f?tab=shortlist",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/hw/screen/27616eedee09009f?tab=shortlist",
+        "title": "Shortlist for lecleach_rollback_1in_v6 \u00d7 4 drivers",
+        "body_text_len": 3406
+      },
+      "screenshot": "docs\\evidence\\hw_gui_2026-11-20\\shortlist_before\\hw_screen_27616eedee09009f__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    }
+  ],
+  "failures": []
+}

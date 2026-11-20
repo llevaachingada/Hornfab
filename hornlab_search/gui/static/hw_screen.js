@@ -11,8 +11,10 @@
 //
 // House rules kept in this file: eyebrow + h2 + mono id + provenance pill-row (no <h1>); the run
 // toolbar for tabs; glossary tips on technical labels; skeletons while loading; view state in the
-// URL (?tab=, ?row=, ?x=, ?y=); a screen-estimate fidelity label is never invented — SCREEN_MAGNITUDE
-// is rendered because the study *is* a screen, with its title pointing at the recorded claim.
+// URL (?tab=, ?row=, ?x=, ?y=, ?cols=); a screen-estimate fidelity label is never invented —
+// SCREEN_MAGNITUDE is rendered because the study *is* a screen, with its title pointing at the
+// recorded claim. The shortlist table shows seven reading columns by default under grouped headers
+// (Box | Low end | Crossover | Match | Build); every remaining field lives in the Columns chooser.
 
 import { chart, niceTicks, css, el, NS, wireScrollHints } from "./charts.js";
 import { tip } from "./glossary.js";
@@ -138,6 +140,20 @@ const axisLabel = (key, dirs) => {
 };
 const axisOptionLabel = axisLabel;
 
+// ── Shortlist columns (senior review 2026-11-20 §4 step 8, F9) ──────────────
+// Seven reading columns by default; every other recorded shortlist field lives in the
+// "Columns" chooser and the choice is carried in the URL (?cols=a,b,c).
+const DEFAULT_COLS = ["driver", "box", "lowend", "xo", "match", "feasible", "pick"];
+const COL_ORDER = ["driver", "why", "box", "net", "foot", "lowend", "f3", "port",
+  "exc", "pv", "xo", "match", "matchh", "matchv", "feasible", "gates", "pick"];
+
+function parseCols(raw) {
+  const want = new Set(String(raw == null ? "" : raw).split(",").map(s => s.trim()).filter(Boolean));
+  const picked = COL_ORDER.filter(k => want.has(k));
+  return picked.length ? picked : DEFAULT_COLS.slice();
+}
+const colsParam = list => list.join(",");
+
 /** Plain-axis number formatting; unit stays in the header/axis label. */
 function fmtAxis(v, key) {
   if (v == null || !isFinite(v)) return "–";
@@ -159,6 +175,16 @@ const FEAS_LABEL = {
   placement_legal: "placement legal",
   xo_data: "XO data",
 };
+
+// Row identity helpers shared by the table, the cards and the trade-off tab.
+const modelOf = id => {
+  const s = String(id || "");
+  return (s.includes("_") ? s.slice(s.lastIndexOf("_") + 1) : s).toUpperCase();
+};
+const shortIdOf = r => String(r.candidate_id == null ? "" : r.candidate_id).slice(0, 8);
+const dzMmOf = r => r.placement && r.placement.dz_mm != null ? num(r.placement.dz_mm, 0) : "–";
+const xoBandOf = r => (Array.isArray(r.xo_band_hz) && r.xo_band_hz.length >= 2)
+  ? [Math.min(...r.xo_band_hz), Math.max(...r.xo_band_hz)] : null;
 
 /** Every feasibility key as a text chip (colour is never the only signal). */
 function feasChips(f) {
@@ -187,18 +213,54 @@ const cel = v => Array.isArray(v) ? `[${v.map(String).join(", ")}]`
 // scoped to ids/classes this file owns.
 const SCREEN_STYLE_ID = "hw-screen-style";
 const SCREEN_CSS = `
-#hw-shortlist { font-size:0.79rem; table-layout:fixed; }
-#hw-shortlist th, #hw-shortlist td { padding:4px 6px; vertical-align:middle; }
-#hw-shortlist thead th { position:sticky; top:0; z-index:2; background:var(--surface); font-size:0.74rem; white-space:normal; }
-#hw-shortlist .hw-num, #hw-shortlist th.hw-num { text-align:right; font-variant-numeric:tabular-nums; }
+#hw-shortlist-card .fig-head { align-items:flex-start; }
+#hw-shortlist-title { display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; min-width:0; }
+#hw-shortlist { font-size:0.82rem; }
+#hw-shortlist th, #hw-shortlist td { padding:5px 8px; vertical-align:middle; }
+#hw-shortlist thead th { background:var(--surface); font-size:0.74rem; white-space:nowrap; }
+#hw-shortlist thead tr.hw-groups th.hw-group {
+  font-size:0.66rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--label);
+  font-weight:600; text-align:left; padding:6px 8px 2px; border-bottom:1px solid var(--rule); }
+#hw-shortlist thead tr.hw-groups th:not(.hw-group) { padding-bottom:3px; }
+#hw-shortlist thead tr.hw-head th { padding-top:2px; }
+#hw-shortlist .hw-num, #hw-shortlist th.hw-num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
 #hw-shortlist .hw-wrap { white-space:normal; overflow-wrap:break-word; }
-#hw-shortlist .hw-pick, #hw-shortlist th.hw-pick { width:1%; text-align:center; }
+#hw-shortlist .hw-box { white-space:nowrap; font-variant-numeric:tabular-nums; }
 #hw-shortlist .hw-gate { white-space:normal; }
+#hw-shortlist .hw-gate .pill { white-space:normal; }
+#hw-shortlist .hw-pick, #hw-shortlist th.hw-pick { width:1%; text-align:center; }
+#hw-shortlist th[data-col="driver"] { min-width:8.5rem; }
+#hw-shortlist th[data-col="why"] { min-width:8rem; }
+#hw-shortlist th[data-col="box"] { min-width:10.5rem; }
+#hw-shortlist th[data-col="lowend"] { min-width:7.5rem; }
 #hw-shortlist input[type="radio"], .hw-card input[type="radio"] {
   width:15px; height:15px; margin:0; accent-color:var(--accent); }
 #hw-shortlist tbody tr[aria-selected="true"] {
   background:color-mix(in srgb, var(--accent) 10%, var(--surface)); }
 #hw-shortlist tbody tr:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+
+/* Column chooser: a native <details> popover that never widens the page. */
+#hw-shortlist-card .hw-cols { position:relative; }
+#hw-shortlist-card .hw-cols > summary {
+  cursor:pointer; list-style:none; display:inline-flex; align-items:center; gap:6px;
+  min-height:28px; padding:4px 10px; border:1px solid var(--control-border); border-radius:6px;
+  background:var(--surface); color:var(--ink); font-size:0.8rem; }
+#hw-shortlist-card .hw-cols > summary::-webkit-details-marker { display:none; }
+#hw-shortlist-card .hw-cols > summary::after { content:"▾"; font-size:0.7em; color:var(--muted); }
+#hw-shortlist-card .hw-cols[open] > summary { border-color:var(--accent); color:var(--accent); }
+#hw-shortlist-card .hw-cols[open] > summary::after { content:"▴"; }
+#hw-shortlist-card .hw-cols-panel {
+  position:absolute; right:0; top:calc(100% + 6px); z-index:30; width:min(440px, calc(100vw - 40px));
+  box-sizing:border-box; background:var(--surface); border:1px solid var(--rule); border-radius:8px;
+  padding:12px 14px; box-shadow:0 12px 28px rgba(0,0,0,0.22); text-align:left; }
+#hw-shortlist-card .hw-cols-hint { margin:0 0 8px; font-size:0.76rem; color:var(--muted); }
+#hw-shortlist-card .hw-cols-grid {
+  border:0; margin:0; padding:0; display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(10.5rem, 1fr)); gap:4px 16px; }
+#hw-shortlist-card .hw-cols-grid label {
+  display:flex; align-items:flex-start; gap:6px; font-size:0.8rem;
+  text-transform:none; letter-spacing:0; color:var(--ink); font-weight:400; }
+#hw-shortlist-card .hw-cols-grid input { margin-top:2px; }
 
 #hw-screens { font-size:0.8rem; }
 #hw-screens th, #hw-screens td { padding:5px 7px; vertical-align:middle; }
@@ -214,16 +276,14 @@ const SCREEN_CSS = `
 #hw-screens-scroll .tbl-scroll-hint,
 #hw-shortlist-scroll .tbl-scroll-hint { font-size:0.8rem; color:var(--label); }
 
-/* At desktop width both tables fit; let the page be the scroll container so the
-   sticky header really sticks (app.css keeps .tbl-wrap overflow-y:hidden). */
+/* At desktop width the screens list fits; let the page be the scroll container so the
+   sticky header really sticks. The shortlist keeps its own .tbl-wrap scroll at every
+   width, because a custom column set must never widen the page. */
 @media (min-width:1280px) {
-  #hw-shortlist-scroll .tbl-wrap,
   #hw-screens-scroll .tbl-wrap { overflow:visible; }
 }
-/* Between the card breakpoint and the full desktop table, keep the columns legible:
-   the table gets a real width and the wrap keeps its visible horizontal scroll cue. */
+/* Below the desktop table width the tables scroll inside .tbl-wrap with a visible cue. */
 @media (max-width:1279px) {
-  #hw-shortlist { table-layout:auto; min-width:1000px; }
   #hw-screens { min-width:720px; }
 }
 
@@ -231,6 +291,8 @@ const SCREEN_CSS = `
 @media (max-width:700px) {
   .hw-table-view { display:none !important; }
   .hw-cards { display:grid; gap:10px; }
+  /* The card layout carries every field, so the table's column chooser would be a dead control. */
+  #hw-shortlist-card .hw-cols { display:none; }
 }
 .hw-card {
   border:1px solid var(--rule); border-radius:8px; background:var(--surface);
@@ -415,6 +477,8 @@ export async function viewHwScreen(root, studyId, query = "") {
   const validAxis = k => (k && numericAxes.includes(k) ? k : null);
   let xKey = validAxis(q.get("x")) || validAxis(DEFAULT_X) || numericAxes[0] || null;
   let yKey = validAxis(q.get("y")) || validAxis(DEFAULT_Y) || numericAxes[1] || numericAxes[0] || null;
+  // Which shortlist columns are shown (?cols=). Default = the seven reading columns.
+  let colSel = parseCols(q.get("cols"));
 
   const counts = d.counts || {};
   const missing = new Set(d.counts_missing || []);
@@ -442,7 +506,8 @@ export async function viewHwScreen(root, studyId, query = "") {
     if (selected) p.set("row", selected);
     if (xKey && xKey !== DEFAULT_X) p.set("x", xKey);
     if (yKey && yKey !== DEFAULT_Y) p.set("y", yKey);
-    const qs = p.toString();
+    if (colsParam(colSel) !== colsParam(DEFAULT_COLS)) p.set("cols", colsParam(colSel));
+    const qs = p.toString().replace(/%2C/g, ",");       // keep ?cols=a,b,c readable
     return route + (qs ? "?" + qs : "");
   }
   function updateTabHrefs() {
@@ -512,9 +577,130 @@ export async function viewHwScreen(root, studyId, query = "") {
     return "No row picked. Pick one with the radio (or Enter on a row); the Panel fit tab then uses it.";
   }
 
+  /** The seven reading columns, plus every remaining recorded field behind the chooser. */
+  function columnDefs() {
+    const whyCell = r => {
+      const raw = r.shortlist_reason == null ? "" : String(r.shortlist_reason);
+      if (!raw) return `<td class="hw-wrap"><span class="muted">–</span></td>`;
+      const idx = raw.indexOf(":");
+      const head = idx < 0 ? raw : raw.slice(0, idx);
+      const tail = idx < 0 ? "" : raw.slice(idx + 1);
+      const sub = head === "driver_best" ? modelOf(tail)
+        : head === "axis_best" ? axisShort(tail)
+        : head === "pareto_fill" ? "Pareto front"
+        : tail;
+      return `<td class="hw-wrap"><code title="${esc(raw)}">${esc(head)}</code>${sub
+        ? `<br><small class="muted">${esc(sub)}</small>` : ""}</td>`;
+    };
+
+    const gatesCell = r => {
+      const f = r.feasibility;
+      if (!f || typeof f !== "object" || !Object.keys(f).length) {
+        return `<td class="hw-gate"><span class="muted">–</span></td>`;
+      }
+      const keys = Object.keys(f);
+      const fails = keys.filter(k => !f[k]);
+      const title = keys.map(k => `${FEAS_LABEL[k] || k}: ${f[k] ? "pass" : "fail"}`).join(" · ");
+      return fails.length
+        ? `<td class="hw-gate"><span class="pill bad" title="${esc(title)}">${fails.length} failing</span></td>`
+        : `<td class="hw-gate"><span class="pill good" title="${esc(title)}">all pass</span></td>`;
+    };
+
+    const numTd = (v, d = 0) =>
+      `<td class="hw-num" title="${v == null ? "" : esc(String(v))}">${num(v, d)}</td>`;
+    const fmtTd = (v, key) =>
+      `<td class="hw-num" title="${v == null ? "" : esc(String(v))}">${fmtAxis(v, key)}</td>`;
+
+    const boxCell = r => {
+      const b = r.box || {};
+      const dims = `${num(b.external_width_mm)} × ${num(b.external_height_mm)} × ${num(b.external_depth_mm)}`;
+      const title = `${dims} mm · net ${num(b.net_volume_l, 1)} L · wall ${num(b.wall_mm)} mm`;
+      return `<td class="hw-box" title="${esc(title)}"><span class="num">${dims} mm</span><br>
+        <span class="muted">${num(b.net_volume_l, 1)} L net</span></td>`;
+    };
+    const lowendCell = r => {
+      const b = r.box || {};
+      const title = `Tuning ${num(b.derived_tuning_hz, 1)} Hz · F3 ${num(b.f3_hz, 1)} Hz`;
+      return `<td class="hw-num" title="${esc(title)}"><span class="num">${num(b.derived_tuning_hz, 1)}</span> / ${num(b.f3_hz, 1)}</td>`;
+    };
+    const xoCell = r => {
+      const band = xoBandOf(r);
+      const text = `${num(r.xo_hz, 0)}${band ? ` (${num(band[0], 0)}–${num(band[1], 0)})` : ""}`;
+      const title = `${r.xo_hz == null ? "–" : String(r.xo_hz)} Hz${band ? ` · overlap band ${String(band[0])}–${String(band[1])} Hz` : ""}`;
+      return `<td class="hw-num" title="${esc(title)}">${text}</td>`;
+    };
+    const matchCell = r => {
+      const na = r.numeric_axes || {};
+      const title = `Match error H ${fmtAxis(na.match_error_h_db2, "match_error_h_db2")} dB² · `
+        + `V ${fmtAxis(na.match_error_v_db2, "match_error_v_db2")} dB²`;
+      return `<td class="hw-num" title="${esc(title)}">${fmtAxis(na.match_error_h_db2, "match_error_h_db2")} / ${fmtAxis(na.match_error_v_db2, "match_error_v_db2")}</td>`;
+    };
+
+    return [
+      { key: "driver", group: null, name: "Driver", sort: "driver", title: "Woofer driver",
+        head: () => "Driver",
+        cell: r => `<td class="hw-wrap"><b title="${esc(r.driver_name || r.driver_id || "")}">${esc(modelOf(r.driver_id) || r.driver_name || "–")}</b><br>
+          <span class="mono muted" style="font-size:0.68rem">dz ${esc(dzMmOf(r))} mm · ${esc(shortIdOf(r))}</span></td>` },
+      { key: "why", group: "Screen", name: "Why shortlisted", sort: "why", title: "Why the screen kept this row",
+        head: () => "Why shortlisted", cell: whyCell },
+      { key: "box", group: "Box", name: "Box (W×H×D, L)", sort: "box",
+        title: "External width × height × depth (mm) and net volume (L)",
+        head: () => "Box (W×H×D, L)", cell: boxCell },
+      { key: "net", group: "Box", name: "Net volume (L)", sort: "net", title: "Net internal volume (L)",
+        head: () => "Net volume (L)",
+        cell: r => numTd(r.box && r.box.net_volume_l, 1) },
+      { key: "foot", group: "Box", name: "Cabinet footprint (m²)", sort: "foot",
+        title: "Cabinet footprint (m²)", head: () => "Cabinet footprint (m²)",
+        cell: r => numTd(r.numeric_axes && r.numeric_axes.cabinet_footprint_m2, 3) },
+      { key: "lowend", group: "Low end", name: "Tuning / F3 (Hz)", sort: "tuning",
+        title: "Ported-box tuning and the box model's F3 (Hz)",
+        head: () => `${tip("fb_tuning", "Tuning")} / ${tip("f3", "F3")} (Hz)`, cell: lowendCell },
+      { key: "f3", group: "Low end", name: "F3 (Hz)", sort: "f3", axisKey: "lf_f3_hz",
+        title: "F3 (Hz)", head: () => `${tip("f3", "F3")} (Hz)`,
+        cell: r => numTd(r.box && r.box.f3_hz, 1) },
+      { key: "port", group: "Low end", name: "Port area (cm²)", sort: "port",
+        title: "Port throat area (cm²)", head: () => "Port area (cm²)",
+        cell: r => numTd(r.box && r.box.port_throat_area_cm2, 0) },
+      { key: "exc", group: "Low end", name: "Excursion margin (dB)", sort: "exc",
+        axisKey: "excursion_margin_db", title: "Excursion margin (dB)",
+        head: () => `${tip("excursion_margin", "Excursion margin")} (dB)`,
+        cell: r => numTd(r.numeric_axes && r.numeric_axes.excursion_margin_db, 1) },
+      { key: "pv", group: "Low end", name: "Port velocity (× limit)", sort: "pv",
+        axisKey: "port_velocity_ratio", title: "Port velocity as a ratio of the limit",
+        head: () => `${tip("port_velocity", "Port velocity")} (× limit)`,
+        cell: r => numTd(r.numeric_axes && r.numeric_axes.port_velocity_ratio, 2) },
+      { key: "xo", group: "Crossover", name: "Crossover (Hz)", sort: "xo",
+        title: "Crossover frequency and overlap band (Hz)",
+        head: () => `${tip("xo_band", "Crossover")} (Hz)`, cell: xoCell },
+      { key: "match", group: "Match", name: "Match error H / V (dB²)", sort: "mr_h",
+        axisKey: "match_error_h_db2", title: "Shape match error H and V (dB²)",
+        head: () => `${tip("e_shape", "Match H / V")} (dB²)`, cell: matchCell },
+      { key: "matchh", group: "Match", name: "Match error H (dB²)", sort: "mr_h",
+        axisKey: "match_error_h_db2", title: "Shape match error H (dB²)",
+        head: () => `${tip("e_shape", "Match error H")} (dB²)`,
+        cell: r => fmtTd(r.numeric_axes && r.numeric_axes.match_error_h_db2, "match_error_h_db2") },
+      { key: "matchv", group: "Match", name: "Match error V (dB²)", sort: "mr_v",
+        axisKey: "match_error_v_db2", title: "Shape match error V (dB²)",
+        head: () => `${tip("e_shape", "Match error V")} (dB²)`,
+        cell: r => fmtTd(r.numeric_axes && r.numeric_axes.match_error_v_db2, "match_error_v_db2") },
+      { key: "feasible", group: "Build", name: "Feasible", sort: "feasible",
+        title: "Every recorded feasibility gate", head: () => "Feasible", cell: gatesCell },
+      { key: "gates", group: "Build", name: "Feasibility gates (words)", sort: "feasible",
+        title: "Every recorded feasibility gate, written out", head: () => "Feasibility gates",
+        cell: r => `<td class="hw-gate">${feasChips(r.feasibility)}</td>` },
+      { key: "pick", group: null, name: "Pick", sort: null, title: "Pick the row the Panel fit tab uses",
+        head: () => "Pick",
+        cell: r => {
+          const cid = String(r.candidate_id);
+          const on = selected === cid;
+          return `<td class="hw-pick"><input type="radio" name="hw-pick-table" value="${esc(cid)}" data-cid="${esc(cid)}"${on ? " checked" : ""}
+            aria-label="Select ${esc(r.driver_name || r.driver_id || "row")} ${esc(cid)}"></td>`;
+        } },
+    ];
+  }
+
   function renderShortlist() {
-    const rows = shortlist.slice();
-    if (!rows.length) {
+    if (!shortlist.length) {
       body.innerHTML = `<section class="card"><h3>Shortlist</h3>
         <div class="alert info" role="status">This study recorded no shortlist rows (counts: shortlist
           ${esc(cnt("shortlist_rows"))}, Pareto ${esc(cnt("pareto_front_rows"))}). Nothing is named a winner
@@ -522,9 +708,16 @@ export async function viewHwScreen(root, studyId, query = "") {
       return;
     }
 
+    const defs = columnDefs();
+    const visible = () => defs.filter(d => colSel.includes(d.key));
+    const NUMERIC = new Set(["net", "foot", "lowend", "f3", "port", "exc", "pv", "xo",
+      "match", "matchh", "matchv"]);
+    const thClass = d => d.key === "pick" ? "hw-pick" : NUMERIC.has(d.key) ? "hw-num" : "";
+
     const SORTERS = {
       driver: r => String(r.driver_name || r.driver_id || ""),
       why: r => String(r.shortlist_reason || ""),
+      box: r => numOrNull(r.box && r.box.net_volume_l),
       net: r => numOrNull(r.box && r.box.net_volume_l),
       tuning: r => numOrNull(r.box && r.box.derived_tuning_hz),
       port: r => numOrNull(r.box && r.box.port_throat_area_cm2),
@@ -535,121 +728,27 @@ export async function viewHwScreen(root, studyId, query = "") {
       exc: r => numOrNull(r.numeric_axes && r.numeric_axes.excursion_margin_db),
       pv: r => numOrNull(r.numeric_axes && r.numeric_axes.port_velocity_ratio),
       foot: r => numOrNull(r.numeric_axes && r.numeric_axes.cabinet_footprint_m2),
+      feasible: r => Object.keys(r.feasibility || {}).filter(k => !r.feasibility[k]).length,
     };
     const compare = (a, b) => {
       const an = isNum(a), bn = isNum(b);
       if (an && bn) return a - b;
       return String(a == null ? "" : a).localeCompare(String(b == null ? "" : b), "en");
     };
-    if (sort && SORTERS[sort.key]) {
-      rows.sort((a, b) => sort.dir * compare(SORTERS[sort.key](a), SORTERS[sort.key](b)));
-    }
-
-    const thSort = (key, labelHtml, plain, axisKey = null, numeric = false) => {
-      const arrow = axisKey ? dirArrow(axisKey, axisDirs) : "";
-      const tipText = axisKey ? dirWord(axisKey, axisDirs) : "";
-      const active = sort && sort.key === key;
-      const ind = active ? (sort.dir > 0 ? "▲" : "▼") : "↕";
-      return `<th class="${numeric ? "hw-num" : ""}" aria-sort="${active ? (sort.dir > 0 ? "ascending" : "descending") : "none"}" data-sort-th="${key}">
-        ${labelHtml}${arrow ? ` <span class="muted" aria-hidden="true" title="${esc(tipText)}">${arrow}</span>` : ""}
-        <button type="button" class="linkish" data-sort="${key}"
-          title="Sort by ${esc(plain)}${tipText ? " (" + esc(tipText) + ")" : ""}"
-          aria-label="Sort by ${esc(plain)}${tipText ? ", " + esc(tipText) : ""}">${ind}</button></th>`;
-    };
-
-    const cidOf = r => String(r.candidate_id);
-    const shortId = r => cidOf(r).slice(0, 8);
-    const dzMm = r => r.placement && r.placement.dz_mm != null ? num(r.placement.dz_mm, 0) : "–";
-    const modelOf = id => {
-      const s = String(id || "");
-      return (s.includes("_") ? s.slice(s.lastIndexOf("_") + 1) : s).toUpperCase();
-    };
-    const driverHead = r => `<b title="${esc(r.driver_name || r.driver_id || "")}">${esc(modelOf(r.driver_id) || r.driver_name || "–")}</b><br>
-      <span class="mono muted" style="font-size:0.64rem">dz ${esc(dzMm(r))} mm · ${esc(shortId(r))}</span>`;
-
-    const whyCell = r => {
-      const raw = r.shortlist_reason == null ? "" : String(r.shortlist_reason);
-      if (!raw) return `<span class="muted">–</span>`;
-      const idx = raw.indexOf(":");
-      const head = idx < 0 ? raw : raw.slice(0, idx);
-      const tail = idx < 0 ? "" : raw.slice(idx + 1);
-      const sub = head === "driver_best" ? modelOf(tail)
-        : head === "axis_best" ? axisShort(tail)
-        : head === "pareto_fill" ? "Pareto front"
-        : tail;
-      return `<code title="${esc(raw)}">${esc(head)}</code>${sub
-        ? `<br><small class="muted">${esc(sub)}</small>` : ""}`;
-    };
-
-    const gatesCell = f => {
-      if (!f || typeof f !== "object") return `<span class="muted">–</span>`;
-      const keys = Object.keys(f);
-      if (!keys.length) return `<span class="muted">–</span>`;
-      const fails = keys.filter(k => !f[k]);
-      const title = keys.map(k => `${FEAS_LABEL[k] || k}: ${f[k] ? "pass" : "fail"}`).join(" · ");
-      if (!fails.length) {
-        return `<span class="pill good" title="${esc(title)}">${keys.length}/${keys.length}</span>`;
-      }
-      return `<span class="pill bad" title="${esc(title)}">${fails.length}✗</span>`;
-    };
-
-    const numTd = (v, d = 0) =>
-      `<td class="hw-num" title="${v == null ? "" : esc(String(v))}">${num(v, d)}</td>`;
-    const fmtTd = (v, key) =>
-      `<td class="hw-num" title="${v == null ? "" : esc(String(v))}">${fmtAxis(v, key)}</td>`;
-
-    const boxTd = r => {
-      const b = r.box || {};
-      const title = `${num(b.external_width_mm, 1)} × ${num(b.external_height_mm, 1)} × ${num(b.external_depth_mm, 1)} mm`;
-      return `<td class="hw-num" title="${esc(title)}">${num(b.external_width_mm)}×${num(b.external_height_mm)}×${num(b.external_depth_mm)}</td>`;
-    };
-    const bandOf = r => (Array.isArray(r.xo_band_hz) && r.xo_band_hz.length >= 2)
-      ? [Math.min(...r.xo_band_hz), Math.max(...r.xo_band_hz)] : null;
-    const xoTd = r => {
-      const band = bandOf(r);
-      const text = `${num(r.xo_hz, 0)} Hz${band ? ` (${num(band[0], 0)}–${num(band[1], 0)})` : ""}`;
-      const title = `${r.xo_hz == null ? "–" : String(r.xo_hz)} Hz${band ? ` · band ${String(band[0])}–${String(band[1])} Hz` : ""}`;
-      return `<td class="hw-num" title="${esc(title)}">${text}</td>`;
-    };
-
-    const rowHtml = r => {
-      const b = r.box || {};
-      const na = r.numeric_axes || {};
-      const cid = cidOf(r);
-      const on = selected === cid;
-      return `<tr class="clickable" data-cid="${esc(cid)}" tabindex="0" aria-selected="${on}">
-        <td class="hw-pick"><input type="radio" name="hw-pick-table" value="${esc(cid)}" data-cid="${esc(cid)}"${on ? " checked" : ""}
-          aria-label="Select ${esc(r.driver_name || r.driver_id || "row")} ${esc(cid)}"></td>
-        <td class="hw-wrap">${driverHead(r)}</td>
-        <td class="hw-wrap">${whyCell(r)}</td>
-        ${boxTd(r)}
-        ${numTd(b.net_volume_l, 1)}
-        ${numTd(b.derived_tuning_hz, 1)}
-        ${numTd(b.port_throat_area_cm2, 0)}
-        ${numTd(b.f3_hz, 1)}
-        ${xoTd(r)}
-        ${fmtTd(na.match_error_h_db2, "match_error_h_db2")}
-        ${fmtTd(na.match_error_v_db2, "match_error_v_db2")}
-        ${numTd(na.excursion_margin_db, 1)}
-        ${numTd(na.port_velocity_ratio, 2)}
-        ${numTd(na.cabinet_footprint_m2, 3)}
-        <td class="hw-gate">${gatesCell(r.feasibility)}</td>
-      </tr>`;
-    };
 
     const cardHtml = r => {
       const b = r.box || {};
       const na = r.numeric_axes || {};
-      const cid = cidOf(r);
+      const cid = String(r.candidate_id);
       const on = selected === cid;
-      const band = bandOf(r);
+      const band = xoBandOf(r);
       return `<article class="hw-card" data-cid="${esc(cid)}" tabindex="0" aria-selected="${on}">
         <div class="hw-card-head">
           <input type="radio" name="hw-pick-card" value="${esc(cid)}" data-cid="${esc(cid)}"${on ? " checked" : ""}
             aria-label="Select ${esc(r.driver_name || r.driver_id || "row")} ${esc(cid)}">
           <div>
             <b>${esc(r.driver_name || r.driver_id || "–")}</b>
-            <span class="mono muted">dz ${esc(dzMm(r))} mm · ${esc(shortId(r))}</span>
+            <span class="mono muted">dz ${esc(dzMmOf(r))} mm · ${esc(shortIdOf(r))}</span>
             <div class="muted" style="font-size:0.76rem;white-space:normal;overflow-wrap:break-word">
               <code>${esc(r.shortlist_reason || "–")}</code></div>
           </div>
@@ -671,47 +770,50 @@ export async function viewHwScreen(root, studyId, query = "") {
       </article>`;
     };
 
-    body.innerHTML = `<section class="card">
-      <div class="fig-head"><h3>${tip("hw_screen", "Shortlist")}</h3>
-        <span class="muted">${esc(rows.length)} rows · no single winner</span></div>
-      <p class="hint" role="status" id="hw-pick-status" style="font-size:0.8rem">${esc(shortlistStatus())}</p>
-      <div class="tbl-scroll hw-table-view" id="hw-shortlist-scroll">
-        <div class="tbl-scroll-hint" aria-hidden="true">scroll for all columns →</div>
-        <div class="tbl-wrap"><table id="hw-shortlist">
-          <colgroup>
-            <col style="width:3%"><col style="width:13.5%"><col style="width:10%"><col style="width:10%">
-            <col style="width:5%"><col style="width:5%"><col style="width:5%"><col style="width:5%">
-            <col style="width:13%"><col style="width:6%"><col style="width:6%"><col style="width:4.5%">
-            <col style="width:4.5%"><col style="width:4.5%"><col style="width:5%">
-          </colgroup>
-          <thead><tr>
-            <th class="hw-pick">Pick</th>
-            ${thSort("driver", "Driver", "Driver")}
-            ${thSort("why", "Why", "Why shortlisted")}
-            <th class="hw-num" title="External width × height × depth (mm)">Box mm</th>
-            ${thSort("net", "Net L", "Net volume (L)", null, true)}
-            ${thSort("tuning", `${tip("fb_tuning", "Tune")} Hz`, "Tuning (Hz)", null, true)}
-            ${thSort("port", "Port cm²", "Port throat area (cm²)", null, true)}
-            ${thSort("f3", `${tip("f3", "F3")} Hz`, "F3 (Hz)", "lf_f3_hz", true)}
-            ${thSort("xo", `${tip("xo_band", "XO")} Hz (band)`, "XO (Hz) and band", null, true)}
-            ${thSort("mr_h", `${tip("e_shape", "Match H")} dB²`, "Match error H (dB²)", "match_error_h_db2", true)}
-            ${thSort("mr_v", `${tip("e_shape", "Match V")} dB²`, "Match error V (dB²)", "match_error_v_db2", true)}
-            ${thSort("exc", `${tip("excursion_margin", "Exc.")} dB`, "Excursion margin (dB)", "excursion_margin_db", true)}
-            ${thSort("pv", `${tip("port_velocity", "Port vel")}`, "Port velocity ratio", "port_velocity_ratio", true)}
-            ${thSort("foot", "Foot m²", "Cabinet footprint (m²)", "cabinet_footprint_m2", true)}
-            <th class="hw-gate" title="Every recorded feasibility gate">Gates</th>
-          </tr></thead>
-          <tbody>${rows.map(rowHtml).join("")}</tbody>
-        </table></div>
-      </div>
-      <div class="hw-cards">${rows.map(cardHtml).join("")}</div>
-      <p class="cap" style="font-size:0.78rem">Arrows in a header are the study's own
-        <code>axis_directions</code>: ↓ lower is better, ↑ higher is better. Sort with the header
-        control; the radio (or Enter on a row) picks the row the Panel fit tab pre-checks. Below
-        700 px each row becomes a card.</p>
-    </section>`;
+    const headInner = d => {
+      const active = sort && d.sort && sort.key === d.sort;
+      const arrow = d.axisKey ? dirArrow(d.axisKey, axisDirs) : "";
+      const dirText = d.axisKey ? dirWord(d.axisKey, axisDirs) : "";
+      const ind = active ? (sort.dir > 0 ? "▲" : "▼") : "↕";
+      const title = d.title || d.name;
+      return `${d.head()}${arrow ? ` <span class="muted" aria-hidden="true" title="${esc(dirText)}">${arrow}</span>` : ""}${d.sort
+        ? ` <button type="button" class="linkish" data-sort="${esc(d.sort)}"
+            title="Sort by ${esc(title)}${dirText ? " (" + esc(dirText) + ")" : ""}"
+            aria-label="Sort by ${esc(title)}${dirText ? ", " + esc(dirText) : ""}">${ind}</button>` : ""}`;
+    };
 
-    const status = body.querySelector("#hw-pick-status");
+    function tableHtml(list) {
+      const vis = visible();
+      let groupRow = "", headRow = "";
+      for (let i = 0; i < vis.length;) {
+        const d = vis[i];
+        if (!d.group) {
+          groupRow += `<th scope="col" rowspan="2" data-col="${esc(d.key)}" class="${thClass(d)}"
+            data-sort-th="${d.sort ? esc(d.sort) : ""}"${d.sort ? ` aria-sort="${sort && sort.key === d.sort ? (sort.dir > 0 ? "ascending" : "descending") : "none"}"` : ""}
+            ${d.title ? `title="${esc(d.title)}"` : ""}>${headInner(d)}</th>`;
+          i += 1;
+          continue;
+        }
+        let j = i;
+        while (j < vis.length && vis[j].group === d.group) j += 1;
+        groupRow += `<th scope="colgroup" colspan="${j - i}" class="hw-group">${esc(d.group)}</th>`;
+        for (let k = i; k < j; k++) {
+          const c = vis[k];
+          headRow += `<th scope="col" data-col="${esc(c.key)}" class="${thClass(c)}"
+            data-sort-th="${esc(c.sort || "")}"${c.sort ? ` aria-sort="${sort && sort.key === c.sort ? (sort.dir > 0 ? "ascending" : "descending") : "none"}"` : ""}
+            ${c.title ? `title="${esc(c.title)}"` : ""}>${headInner(c)}</th>`;
+        }
+        i = j;
+      }
+      const rowsHtml = list.map(r => {
+        const cid = String(r.candidate_id);
+        return `<tr class="clickable" data-cid="${esc(cid)}" tabindex="0" aria-selected="${cid === selected}">${vis.map(d => d.cell(r)).join("")}</tr>`;
+      }).join("");
+      return `<table id="hw-shortlist" aria-label="Shortlist rows">
+        <thead><tr class="hw-groups">${groupRow}</tr><tr class="hw-head">${headRow}</tr></thead>
+        <tbody>${rowsHtml}</tbody></table>`;
+    }
+
     const paint = () => {
       body.querySelectorAll('input[type="radio"][data-cid]').forEach(r => {
         r.checked = r.dataset.cid === selected;
@@ -719,6 +821,7 @@ export async function viewHwScreen(root, studyId, query = "") {
       body.querySelectorAll("tr[data-cid], .hw-card[data-cid]").forEach(el => {
         el.setAttribute("aria-selected", String(el.dataset.cid === selected));
       });
+      const status = body.querySelector("#hw-pick-status");
       if (status) status.textContent = shortlistStatus();
     };
     const pick = cid => {
@@ -727,27 +830,120 @@ export async function viewHwScreen(root, studyId, query = "") {
       paint();
     };
 
-    body.querySelectorAll("th[data-sort-th]").forEach(th => th.addEventListener("click", e => {
-      if (e.target.closest("button")) return;        // the button handler below owns that path
-      const key = th.dataset.sortTh;
-      if (sort && sort.key === key) sort.dir = -sort.dir; else sort = { key, dir: 1 };
-      renderShortlist();
-    }));
-    body.querySelectorAll("button[data-sort]").forEach(btn => btn.addEventListener("click", () => {
-      const key = btn.dataset.sort;
-      if (sort && sort.key === key) sort.dir = -sort.dir; else sort = { key, dir: 1 };
-      renderShortlist();
-    }));
-    body.querySelectorAll("tr[data-cid], .hw-card[data-cid]").forEach(el => {
-      const cid = el.dataset.cid;
-      el.addEventListener("click", e => { if (!e.target.closest("input")) pick(cid); });
-      el.addEventListener("keydown", e => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(cid); }
+    function paintTable(refocusSort = false) {
+      const wrap = body.querySelector("#hw-shortlist-wrap");
+      if (!wrap) return;
+      const list = shortlist.slice();
+      if (sort && SORTERS[sort.key]) {
+        list.sort((a, b) => sort.dir * compare(SORTERS[sort.key](a), SORTERS[sort.key](b)));
+      }
+      wrap.innerHTML = tableHtml(list);
+
+      body.querySelectorAll("#hw-shortlist th[data-sort-th]").forEach(th => th.addEventListener("click", e => {
+        if (e.target.closest("button")) return;        // the button handler below owns that path
+        const key = th.dataset.sortTh;
+        if (!key) return;
+        if (sort && sort.key === key) sort.dir = -sort.dir; else sort = { key, dir: 1 };
+        paintTable(true);
+      }));
+      body.querySelectorAll("#hw-shortlist button[data-sort]").forEach(btn => btn.addEventListener("click", e => {
+        e.stopPropagation();
+        const key = btn.dataset.sort;
+        if (sort && sort.key === key) sort.dir = -sort.dir; else sort = { key, dir: 1 };
+        paintTable(true);
+      }));
+      body.querySelectorAll("#hw-shortlist tr[data-cid]").forEach(tr => {
+        const cid = tr.dataset.cid;
+        tr.addEventListener("click", e => { if (!e.target.closest("input")) pick(cid); });
+        tr.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(cid); }
+        });
+        const radio = tr.querySelector('input[type="radio"]');
+        if (radio) radio.addEventListener("change", () => pick(cid));
       });
-      const radio = el.querySelector('input[type="radio"]');
-      if (radio) radio.addEventListener("change", () => pick(cid));
-    });
-    wireScrollHints(root);
+      paint();
+      wireScrollHints(root);
+      // Keep keyboard focus on the sort control that just re-rendered the table.
+      if (refocusSort && sort) {
+        const again = body.querySelector(`#hw-shortlist button[data-sort="${sort.key}"]`);
+        if (again) again.focus({ preventScroll: true });
+      }
+    }
+
+    body.innerHTML = `<section class="card" id="hw-shortlist-card">
+      <div class="fig-head">
+        <div class="hw-shortlist-title">
+          <h3>${tip("hw_screen", "Shortlist")}</h3>
+          <span class="muted">${esc(shortlist.length)} rows · no single winner</span>
+        </div>
+        <details class="hw-cols" id="hw-cols">
+          <summary class="btn btn-sm" aria-label="Choose which shortlist columns are shown">Columns <span class="muted" data-cols-count>${colSel.length}/${defs.length}</span></summary>
+          <div class="hw-cols-panel">
+            <p class="hw-cols-hint">Shown in the table. The choice is saved in the page address, so a reload keeps it.</p>
+            <fieldset class="hw-cols-grid">
+              <legend class="sr-only">Shortlist columns</legend>
+              ${defs.map(d => `<label><input type="checkbox" value="${esc(d.key)}"${colSel.includes(d.key) ? " checked" : ""}> <span>${esc(d.name)}</span></label>`).join("")}
+            </fieldset>
+            <div class="btn-row" style="margin-top:8px">
+              <button type="button" class="btn btn-sm" data-cols-reset>Default columns</button>
+            </div>
+          </div>
+        </details>
+      </div>
+      <p class="hint" role="status" id="hw-pick-status" style="font-size:0.8rem">${esc(shortlistStatus())}</p>
+      <div class="tbl-scroll hw-table-view" id="hw-shortlist-scroll">
+        <div class="tbl-scroll-hint" aria-hidden="true">scroll for all columns →</div>
+        <div class="tbl-wrap" id="hw-shortlist-wrap"></div>
+      </div>
+      <div class="hw-cards">${shortlist.map(cardHtml).join("")}</div>
+      <p class="cap" style="font-size:0.78rem">The header groups the columns
+        (Box | Low end | Crossover | Match | Build); hover any label for its definition. Arrows are the
+        study's own <code>axis_directions</code>: ↓ lower is better, ↑ higher is better. Sort with the
+        header control; use <b>Columns</b> to show more fields. The radio (or Enter on a row) picks the
+        row the Panel fit tab pre-checks. Below 700 px each row becomes a card.</p>
+    </section>`;
+
+    const colsBox = body.querySelector("#hw-cols");
+    const colsSummary = colsBox ? colsBox.querySelector("summary") : null;
+    const colsCount = body.querySelector("[data-cols-count]");
+    const syncChecks = () => {
+      if (!colsBox) return;
+      colsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = colSel.includes(cb.value); });
+      if (colsCount) colsCount.textContent = `${colSel.length}/${defs.length}`;
+    };
+    const applyCols = next => {
+      const keys = defs.filter(d => next.includes(d.key)).map(d => d.key);
+      colSel = keys.length ? COL_ORDER.filter(k => keys.includes(k)) : DEFAULT_COLS.slice();
+      if (sort && !visible().some(d => d.sort === sort.key)) sort = null;
+      syncChecks();
+      syncUrl();
+      paintTable();
+    };
+    if (colsBox) {
+      colsBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener("change", () => {
+        const picked = [...colsBox.querySelectorAll('input[type="checkbox"]:checked')].map(i => i.value);
+        applyCols(picked);
+      }));
+      const reset = colsBox.querySelector("[data-cols-reset]");
+      if (reset) reset.addEventListener("click", () => applyCols(DEFAULT_COLS.slice()));
+      colsBox.addEventListener("keydown", e => {
+        if (e.key !== "Escape" || !colsBox.open) return;
+        e.preventDefault();
+        e.stopPropagation();
+        colsBox.open = false;
+        if (colsSummary) colsSummary.focus();
+      });
+      colsBox.addEventListener("focusout", e => {
+        if (!colsBox.open) return;
+        const to = e.relatedTarget;
+        if (to && colsBox.contains(to)) return;
+        setTimeout(() => {
+          if (colsBox.open && !colsBox.contains(document.activeElement)) colsBox.open = false;
+        }, 0);
+      });
+    }
+
+    paintTable();
   }
 
   // ── Trade-offs tab ───────────────────────────────────────────────────────
