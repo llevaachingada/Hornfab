@@ -60,6 +60,8 @@ git log --oneline -5; git status --porcelain
 | Senior rulings, blockers | `NOTES_FOR_SENIOR.md`, last 60 lines, then search |
 | Next-round priorities | `docs/NEXT_DEV_PRIORITIES.md`, current section only |
 | Doc map / module map | `docs/INDEX.md` / `docs/CODE_MAP.md` — search, do not read whole |
+| Horn + woofer system + GUI handoff | `docs/HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md` (one-file senior packet) |
+| Solve-data exports | `docs/top_designs/` (horn GPU) + `docs/system_data/` (system cases/screens) |
 | Queue mechanics | `tools/night_status.py`, `runs/nights/`, queue logs in `runs/` |
 
 Never load the living logs in full; they are hundreds of KB each. Any document over ~100 KB is

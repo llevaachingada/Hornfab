@@ -1,5 +1,27 @@
 ﻿# CONTINUITY
 
+## 2026-11-19 - Senior handbook + system solve-data export (CPU only, no GPU)
+
+- **Owner ask:** one consolidated cloud-ready handoff for the horn + woofer system and GUI, package the
+  solve data as CSV/JSON with a reusable script, identify remaining work/issues, and commit/push.
+- **Handbook:** `docs/HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md` (1,903 lines): pure-horn pipeline,
+  system backend/schemas/config surface, GUI routes/controls/UX, both data exports, remaining work
+  (R1-R17, WP1-WP8, P0-P9), known issues, target architecture. Four read-only recon lanes plus one
+  export writer lane; code claims checked against the tree, unverified doc claims marked.
+- **System data export (new):** `tools/data/system_cases.py` +
+  `tests/test_tools_data_system_cases.py` (**16 passed**) +
+  `docs/system_data/{system_cases.csv (37x53),system_cases.json,system_screens.json,README.md}`.
+  Deterministic, stdlib, read-only over `system_runs/`. Census: **5 solved / 27 staged / 3 refused /
+  2 invalid**; 9 readiness-declared cases (5 solved, 2 staged, 1 refused, the 62864 clearance case).
+  Readiness is joined, never inferred; known diagnostics: 2 missing manifests, 1 known broken pilot
+  payload hash.
+- **Horn solve export:** already committed (`9714b39`): `docs/top_designs/` +
+  `tools/data/top_designs.py`; 807 ndjson / 51,192 rows / 37,588 unique / 52 groups / 437 designs;
+  tests **11 passed**.
+- **Docs:** INDEX/CODE_MAP/ACTIVE_STATE updated. Unrelated uncommitted GUI edits (another lane) and
+  the budget-driver audit were NOT staged. No GPU used; `runs/` and `system_runs/` were read-only.
+- **State:** GPU lane free at the last check; nothing queued by this pass.
+
 ## 2026-11-19 - TuRBO/BO study runs now viewable like CMA runs; CMA vs TuRBO render set (CPU only)
 
 - **Owner ask:** make TuRBO results as viewable as CMA (GUI, graphics, runs), apples to apples.

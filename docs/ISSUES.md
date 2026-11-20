@@ -1,5 +1,19 @@
 ﻿# ISSUES
 
+## 2026-11-19 - Senior handbook + system solve-data export (DONE)
+
+- DONE: `docs/HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md`, `tools/data/system_cases.py`,
+  `tests/test_tools_data_system_cases.py` (16 passed), `docs/system_data/` (37x53 CSV + JSON +
+  screens); companion horn export `docs/top_designs/` (11 tests passed, committed at `9714b39`).
+- OPEN (owner, decisions 1-6): real 12PR300 geometry/panel policy; calibration/sum; DSP
+  realization; far-field standard; solve authorization. GUI gates D/E remain open.
+- OPEN (GUI): P4/P5/P6/P8 are backend-only; P7/P9 absent; the tracked GUI diff imports untracked
+  `hw_screen.js`/`hw3d.js` (partial commit breaks boot); `#/hw/new` is a dead CTA.
+- OPEN (backend): `pilot --geometry` raises `SchemaError` (`LF_TS_SCREENING` is not a fidelity);
+  pilot Pareto dominance is inert (dict axes); preview prefix can lie for bridge geometry jobs.
+- NOTE: the 62864 clearance verdict is in readiness/handoff/R16 replay, not in
+  `payload.clearance`; the flat export reports `clearance_status=not_recorded`. No GPU was used.
+
 ## 2026-11-19 - BO/TuRBO runs invisible in the GUI (fixed)
 
 - DONE: study solves mirrored as ordinary run folders (`tools/night_queue/mirror_bo_studies.py`, hard
