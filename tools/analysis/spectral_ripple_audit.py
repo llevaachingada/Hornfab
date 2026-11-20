@@ -13,7 +13,12 @@ directories (the parent holding ``designs/<hash>/``; ``best.json`` selects the d
 ``audit.json`` (aggregate + provenance), one JSON per design, and ``disagreement.md`` (unless
 ``--json-only``). ``--out`` is refused when it exists and is not empty.
 
+``--compare PATH_A PATH_B`` joins two stored ``audit.json`` files by ``design_hash`` and writes
+``<out>/compare.md`` (deltas B-A, band means, Spearman); it cannot be combined with positional
+design/run directories.
+
     python tools/analysis/spectral_ripple_audit.py <design-or-run-dir> [...] --out runs/analysis/<name>
+    python tools/analysis/spectral_ripple_audit.py --compare A/audit.json B/audit.json --out runs/analysis/<name>
 """
 from __future__ import annotations
 
@@ -193,6 +198,180 @@ def _design_row(design_dir: Path, run_dir: Path | None, band_hz, detrend_orders,
     }
 
 
+# ----------------------------------------------------------------------------- compare
+
+def _load_audit(path):
+    """Load an ``audit.json`` (or a directory holding one). Returns ``(data, error)``."""
+    p = Path(path)
+    if p.is_dir():
+        p = p / "audit.json"
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except OSError as exc:
+        return None, f"cannot read {p}: {exc}"
+    except ValueError as exc:
+        return None, f"cannot parse {p}: {exc}"
+    if not isinstance(data, dict) or not isinstance(data.get("rows"), list):
+        return None, f"{p} has no 'rows' list"
+    return data, None
+
+
+def _fixed_values(row, angle="35.0"):
+    """Return ``(trend_rms, band_mean)`` for one fixed angle from an audit row."""
+    trend = row.get("fixed_angle_rms_db") or {}
+    band = row.get("fixed_angle_band_mean_db") or {}
+    return trend.get(str(angle)), band.get(str(angle))
+
+
+def _fmt_value(value, digits=3):
+    if value is None:
+        return "-"
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return "nan" if not np.isfinite(v) else f"{v:.{digits}f}"
+
+
+def _spearman(xs, ys):
+    """Spearman over the finite pairs; None with a reason below n=3."""
+    pairs = [(float(x), float(y)) for x, y in zip(xs, ys)
+             if x is not None and y is not None
+             and np.isfinite(float(x)) and np.isfinite(float(y))]
+    if len(pairs) < 3:
+        return {"rho": None, "p": None, "n": len(pairs),
+                "reason": f"need n>=3 finite joined pairs, have {len(pairs)}"}
+    from scipy.stats import spearmanr
+
+    result = spearmanr([x for x, _ in pairs], [y for _, y in pairs])
+    rho, p = float(getattr(result, "statistic")), float(getattr(result, "pvalue"))
+    if not np.isfinite(rho):
+        return {"rho": None, "p": None, "n": len(pairs),
+                "reason": "Spearman undefined (constant values)"}
+    return {"rho": rho, "p": p, "n": len(pairs), "reason": None}
+
+
+def _trend_summary(records, key):
+    """Max/mean absolute B-A delta plus Spearman for one trend key."""
+    a_vals = [r["A"][key][0] for r in records]
+    b_vals = [r["B"][key][0] for r in records]
+    deltas = [abs(float(r["delta"][key])) for r in records
+              if r["delta"][key] is not None and np.isfinite(float(r["delta"][key]))]
+    return {
+        "n_joined": len(records),
+        "n_delta": len(deltas),
+        "max_abs": max(deltas) if deltas else None,
+        "mean_abs": float(np.mean(deltas)) if deltas else None,
+        "spearman": _spearman(a_vals, b_vals),
+    }
+
+
+def _compare_markdown(path_a, path_b, records, only_a, only_b, summary):
+    n_joined = len(records)
+    lines = [
+        "# Spectral ripple audit comparison (report-only)",
+        "",
+        f"- A: `{Path(path_a).as_posix()}`",
+        f"- B: `{Path(path_b).as_posix()}`",
+        "- Rows joined by `design_hash`; delta is **B minus A**.",
+        "",
+        "**Absolute values are grid-dependent.** The same horn has been measured at "
+        "**1.441 dB** (18-frequency screen), **1.908 dB** (verify) and **1.313 dB** "
+        "(91-frequency dense) for V+35, so only rankings and deltas are quotable. "
+        "A rank correlation is not accuracy.",
+        "",
+        "`(trend)` = residual about the exploratory log2(f) quadratic (order 2); "
+        "`(band_mean)` = deviation from the in-band mean, the IEC 60268-5 section 20.6 / "
+        "Klippel AN 40 smoothness definition. Neither is a hearing-weighted score.",
+        "",
+        "## Summary",
+        "",
+        "| trend | n joined | max abs delta (dB) | mean abs delta (dB) | Spearman rho | note |",
+        "|---|---|---|---|---|---|",
+    ]
+    for label, key in (("V+35", "35.0"), ("V+25", "25.0")):
+        s = summary[key]
+        sp = s["spearman"]
+        rho = _fmt_value(sp["rho"], 4) if sp["rho"] is not None else "null"
+        note = sp["reason"] or f"p={_fmt_value(sp['p'], 4)}"
+        lines.append(f"| {label} | {n_joined} | {_fmt_value(s['max_abs'])} | "
+                     f"{_fmt_value(s['mean_abs'])} | {rho} | {note} |")
+    lines += [
+        "",
+        "## Joined designs",
+        "",
+        "| design_hash | V+25 A | V+25 B | delta V+25 | V+25 A band_mean | "
+        "V+25 B band_mean | V+35 A | V+35 B | delta V+35 | V+35 A band_mean | "
+        "V+35 B band_mean |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    for r in records:
+        a25, b25 = r["A"]["25.0"], r["B"]["25.0"]
+        a35, b35 = r["A"]["35.0"], r["B"]["35.0"]
+        lines.append(
+            f"| {r['design_hash']} | {_fmt_value(a25[0])} | {_fmt_value(b25[0])} | "
+            f"{_fmt_value(r['delta']['25.0'])} | {_fmt_value(a25[1])} | "
+            f"{_fmt_value(b25[1])} | {_fmt_value(a35[0])} | {_fmt_value(b35[0])} | "
+            f"{_fmt_value(r['delta']['35.0'])} | {_fmt_value(a35[1])} | "
+            f"{_fmt_value(b35[1])} |")
+    lines += ["", "## Hashes present on only one side", ""]
+    lines.append(f"A only ({len(only_a)}): " + (", ".join(f"`{h}`" for h in only_a) or "-"))
+    lines.append("")
+    lines.append(f"B only ({len(only_b)}): " + (", ".join(f"`{h}`" for h in only_b) or "-"))
+    return "\n".join(lines) + "\n"
+
+
+def _compare_main(path_a, path_b, out):
+    data_a, err_a = _load_audit(path_a)
+    if err_a:
+        print(f"compare FAILED (A): {err_a}")
+        return 2
+    data_b, err_b = _load_audit(path_b)
+    if err_b:
+        print(f"compare FAILED (B): {err_b}")
+        return 2
+    assert data_a is not None and data_b is not None
+
+    rows_a = {str(r.get("design_hash")): r for r in data_a["rows"] if r.get("design_hash")}
+    rows_b = {str(r.get("design_hash")): r for r in data_b["rows"] if r.get("design_hash")}
+    joined = sorted(set(rows_a) & set(rows_b))
+    only_a = sorted(set(rows_a) - set(rows_b))
+    only_b = sorted(set(rows_b) - set(rows_a))
+
+    records = []
+    for h in joined:
+        a25, b25 = _fixed_values(rows_a[h], "25.0"), _fixed_values(rows_b[h], "25.0")
+        a35, b35 = _fixed_values(rows_a[h], "35.0"), _fixed_values(rows_b[h], "35.0")
+
+        def delta(x, y):
+            if x is None or y is None:
+                return None
+            xf, yf = float(x), float(y)
+            return yf - xf if np.isfinite(xf) and np.isfinite(yf) else None
+
+        records.append({
+            "design_hash": h,
+            "A": {"25.0": a25, "35.0": a35},
+            "B": {"25.0": b25, "35.0": b35},
+            "delta": {"25.0": delta(a25[0], b25[0]), "35.0": delta(a35[0], b35[0])},
+        })
+
+    summary = {"35.0": _trend_summary(records, "35.0"),
+               "25.0": _trend_summary(records, "25.0")}
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "compare.md").write_text(
+        _compare_markdown(path_a, path_b, records, only_a, only_b, summary),
+        encoding="utf-8")
+    s35, s25 = summary["35.0"], summary["25.0"]
+    print(f"compare OK: {len(joined)} joined, {len(only_a)} A-only, {len(only_b)} B-only; "
+          f"V+35 max|delta|={_fmt_value(s35['max_abs'])} mean|delta|={_fmt_value(s35['mean_abs'])} "
+          f"rho={_fmt_value(s35['spearman']['rho'], 4) if s35['spearman']['rho'] is not None else 'null'}; "
+          f"V+25 max|delta|={_fmt_value(s25['max_abs'])} mean|delta|={_fmt_value(s25['mean_abs'])} "
+          f"rho={_fmt_value(s25['spearman']['rho'], 4) if s25['spearman']['rho'] is not None else 'null'}")
+    print((out / "compare.md").as_posix())
+    return 0
+
+
 # ----------------------------------------------------------------------------- report
 
 def _fmt(value, digits=3):
@@ -277,17 +456,35 @@ def _write_markdown(out: Path, rows, provenance):
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     ap = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
-    ap.add_argument("designs", nargs="+",
+    ap.add_argument("designs", nargs="*",
                     help="design dir (.../designs/<hash>) or run dir (holding designs/<hash>/)")
     ap.add_argument("--band-hz", nargs=2, type=float, default=[1065.0, 4832.5],
                     metavar=("LO", "HI"))
     ap.add_argument("--detrend-orders", nargs="+", type=int, default=[1, 2, 3])
     ap.add_argument("--angles-v", nargs="+", type=float, default=[25.0, 35.0])
-    ap.add_argument("--out", required=True)
+    ap.add_argument("--out",
+                    help="output directory (required; with --compare this holds compare.md)")
     ap.add_argument("--json-only", action="store_true",
                     help="write JSON only (no disagreement.md)")
+    ap.add_argument("--compare", nargs=2, metavar=("PATH_A", "PATH_B"),
+                    help="compare two audit.json files by design_hash (cannot be combined with "
+                         "positional designs); writes <out>/compare.md")
     a = ap.parse_args(argv)
 
+    if a.compare is not None:
+        if a.designs:
+            ap.error("--compare cannot be combined with positional design/run directories")
+        if not a.out:
+            ap.error("--compare requires --out for the report directory")
+        out = Path(a.out)
+        if out.exists() and any(out.iterdir()):
+            raise SystemExit(f"refusing: {out} exists and is not empty")
+        return _compare_main(a.compare[0], a.compare[1], out)
+
+    if not a.designs:
+        ap.error("the following arguments are required: designs")
+    if not a.out:
+        ap.error("the following arguments are required: --out")
     out = Path(a.out)
     if out.exists() and any(out.iterdir()):
         raise SystemExit(f"refusing: {out} exists and is not empty")

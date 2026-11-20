@@ -1,0 +1,77 @@
+# SOURCE SENSITIVITY (2026-11-20). Copy of room_landscape_80x50_700_hf1440_v7_smooth with
+# band_hi_hz 8000 -> 12000 and verify_only: true (search/run refuse it; only `verify --brief`).
+# source.cap=60: spherical cap R=60 mm -> 2.73 mm dome at the 17.9 mm throat radius.
+# WHY: mandate item 5 - above the 5.61 kHz throat transverse-mode cut-on the uniform-velocity
+# cap is an assumption, not a measurement. This brief measures how much the 8-12 kHz answer
+# depends on it. Nothing here is a target or a score.
+name: room_landscape_80x50_700_hf1440_v7_12k_cap60
+description: 'SOURCE-SENSITIVITY variant (2026-11-20): HOME 80x50 smooth brief with
+  band_hi 12000 Hz, verify_only, source.cap=60. Same target/driver/envelope/objective
+  as the 8 kHz smooth brief; only the band and the assumed source wavefront change.
+  J NOT comparable with the 8 kHz brief.'
+driver:
+  exit_radius_mm: 18.0
+  exit_angle_deg: 2.0
+envelope:
+  max_mouth_w_mm: 600.0
+  max_mouth_h_mm: 480.0
+  max_depth_mm: 480.0
+symmetry: hv
+source:
+  cap: 60
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 12000.0
+  di_target_db: null
+  di_slope_target: 5.0
+  z_min: 0.5
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.0
+  dislope: 1.0
+  flat: 0.5
+  load: 1.0
+  distd: 1.0
+  diag: 1.0
+  flat_cv: 1.0
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+objective:
+  version: 7
+  flat_band: scored
+  cov_v_weight: 0.5
+  tolerances:
+    cov: 8.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 1.0
+  cov_below_f0: mask
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75
+verify_only: true

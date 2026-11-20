@@ -67,6 +67,42 @@
   chained behind `compact400_next10_2026-11-19` with `-WaitPid` (that night was never touched).
   Evidence: `docs/evidence/P12_VERIFY_2026-11-19.md`; queue `docs/queue/p12_verify_2026-11-19.yaml`.
 
+## 2026-11-20 - Ripple program: 730-design corpus sweep, an INERT source knob, HF width bound by the envelope
+
+- **Owner ask:** proceed with every next step, GPU time allowed, and establish what is needed to improve
+  these horns. Two background lanes (corpus sweep tool; audit compare + bridge refusal) while the
+  orchestrator ran the GPU work.
+- **Corpus sweep (CPU, 730 designs):** `tools/analysis/spectral_corpus_sweep.py` (report-only) walks
+  `runs/`, computes V±25/V±35/V+45/H+25/H+35 trend + V+25/V+35 band-mean residuals per best design via
+  `metrics/spectral.py`, groups by `brief.name`, and reports per-identity Spearman. **730 usable, 0
+  refused, 25 skipped (no resolvable design).** Pooled rho(rip, V+35) = **0.615**; **25 of 28 identities
+  below 0.8** — `organic_rollback_1in` -0.871 (n=29), `axi_90x90_1in` 0.050 (n=82), `freeform_sculpt`
+  0.014 (n=36), `compact400` 0.089 (n=27), `room_landscape_v7` 0.713 (n=112), `v7_smooth` 0.929 (n=58).
+- **REVISED CONCLUSION:** the earlier "largely redundant with `rip`" (rho 0.885) was a property of the
+  **v7_smooth family only**. The fixed-angle residual is a genuine second axis on most lines of work, so
+  item 6 is no longer dismissed on redundancy grounds — the remaining gate is acoustic, not statistical.
+- **Source sensitivity (6 jobs, 2 real solves):** three briefs differing only in `source.cap`
+  (auto / 150 / 60) gave **identical mesh hashes (`7abdb66729…`) and identical responses** — `source.cap`
+  is an **inert key**: `mesh/grid_build.py` hardcodes `source_auto_angle_deg` and never passes
+  `source_radius_mm`, so every grid-family solve we have ever stored uses the auto cap. Item 5 is
+  blocked by a bug, not by physics; fix in flight (thread the brief cap in, with an `auto`-path
+  byte-identical test).
+- **HF width (3 jobs, 2 real solves):** base = Crowe X OSSE `9b5428e6dec8`, all knobs pinned.
+  `wall_lo` (angles x0.85) → 8 kHz width **74.0 → 62.2 H / 53.9 → 47.2 V deg**, +25 deg level
+  -5.08 → -6.77 dB, J 5.3454 → 6.7169. `lip_lo` (18.28 → 9.14 mm) → **+0.2 deg / +0.06 dB** (inert),
+  J 5.5866. `shape_check` refused the two *wider* variants (wall x1.15 → 672 mm, lip x1.5 → 614 mm
+  mouth, envelope 600 mm), so the space is one-sided: **HF width tracks the wall angle and is already at
+  the envelope limit** — widening needs a bigger envelope or a different mouth law, not more wall angle.
+- **Tooling landed (lanes):** `--compare A B` in `spectral_ripple_audit.py` (per-design deltas + rank
+  correlation + the grid-dependence warning; reproduces rho 0.9636 / max 0.467 dB screen-vs-verify);
+  `verify` now REFUSES a bridge-cell run before any GPU work, naming `tools/geometry/<cell>_cli.py`
+  and the exact replacement command.
+- **GPU accounting:** `source_sensitivity_2026-11-20` (6 jobs; baselines 737-848 MiB, peaks 887-1697 MiB)
+  and `hf_width_2026-11-20` (3 jobs; 18.7 s / 22.1 s real solves). One night's first job was refused
+  `GPU busy` by a foreign job, waited, then ran — no concurrent solve. `gpu-clean` before/after each job.
+- **Evidence:** `docs/evidence/ripple_program_2026-11-20/README.md` (all three experiments, the
+  pre-declared readings and the "what we now know we need" section).
+
 ## 2026-11-20 - Ripple audit grid test RUN: PASS (rho 0.964) + DENSE verdict: the B3 feature is broad, not a resonance
 
 - **Launched (owner: "Launch"):** `ripple_audit_2026-11-20`, detached pid 2900 at 08:34 local,

@@ -809,6 +809,56 @@ def _search_body(args, argv, d) -> int:
 # ---------------------------------------------------------------------- verify
 
 
+#: Opt-in bridge rows types -> the process-local entry point required to materialize them.
+#: Derived from ``KINDS`` in ``tools/geometry/*_cli.py`` and the bridge-cell notes in
+#: ``examples/catalog.yaml``. A rows type with no ``tools/geometry`` CLI is not mapped (there is no
+#: ``n_cli.py`` in this checkout, so type ``n`` is deliberately absent rather than invented).
+BRIDGE_ENTRY_POINTS = {
+    "rosse_rect": "tools/geometry/rosse_rect_cli.py",
+    "rolled_rect": "tools/geometry/rolled_rect_cli.py",
+    "rolled_rect_pucker": "tools/geometry/rolled_rect_cli.py",
+    "crowe_panel": "tools/geometry/crowe_panel_cli.py",
+    "section_pucker": "tools/geometry/section_pucker_cli.py",
+    "klangfilm_ellipse": "tools/geometry/klangfilm_ellipse_cli.py",
+    "klangfilm_lame": "tools/geometry/klangfilm_lame_cli.py",
+}
+
+
+def _bridge_rows_type(config_path) -> str | None:
+    """Return the generator rows type when it is an opt-in bridge cell, else ``None``.
+
+    Pure detection: it reads the run's ``config.yaml`` directly (no config validation, no design
+    space, no solver), so a bridge cell is caught before the stock seed gate can fail.
+    """
+    try:
+        import yaml
+        raw = yaml.safe_load(Path(config_path).read_text(encoding="utf-8")) or {}
+    except Exception:  # noqa: BLE001 - detection must never crash verify; load_config reports later
+        return None
+    gen = raw.get("generator") if isinstance(raw, dict) else None
+    rows = gen.get("rows") if isinstance(gen, dict) else None
+    rows_type = rows.get("type") if isinstance(rows, dict) else None
+    return str(rows_type) if rows_type in BRIDGE_ENTRY_POINTS else None
+
+
+def _bridge_rows_refusal(config_path, run_dir, design_hash, verify_dir=None) -> str | None:
+    """Refusal text for a bridge-cell verify, or ``None`` when the rows type is stock."""
+    rows_type = _bridge_rows_type(config_path)
+    if rows_type is None:
+        return None
+    entry = BRIDGE_ENTRY_POINTS[rows_type]
+    vdir = Path(verify_dir) if verify_dir else Path(run_dir) / "verify"
+    design = design_hash or "<hash>"
+    return (
+        f"verify REFUSED: run {Path(run_dir)} has generator.rows.type {rows_type!r}, an opt-in "
+        "bridge cell; the stock generator cannot derive its seed in this process.\n"
+        f"  Required entry point: {entry}\n"
+        "  Re-run through the bridge (the bridge process must be the entry point):\n"
+        f"    python {entry} verify --run {Path(run_dir).as_posix()} "
+        f"--designs {design} --verify-dir {Path(vdir).as_posix()}"
+    )
+
+
 def _cmd_verify(args, argv) -> int:
     from hornlab_search.search.gpulock import GpuBusyError, gpu_lock
     d = _dirs(args)
@@ -855,6 +905,22 @@ def _verify_body(args, argv, d) -> int:
     if not (run_dir / "config.yaml").exists() or not rows:
         print(f"verify FAILED: {run_dir} has no config.yaml / search.ndjson")
         return 1
+    # Opt-in bridge cells (rosse_rect, rolled_rect, crowe_panel, ...) are not legal in the stock
+    # generator. Refuse BEFORE config load / warm-up: load_config would raise after the GPU slot
+    # was taken, with no hint that only the family's own CLI can re-derive the seed.
+    best_hash = None
+    def _objective_key(r):
+        value = r.get("objective")
+        return float(value) if value is not None else float("inf")
+    ok_rows = sorted((r for r in rows if r.get("ok") and r.get("design_hash")),
+                     key=_objective_key)
+    if ok_rows:
+        best_hash = ok_rows[0].get("design_hash")
+    refusal = _bridge_rows_refusal(run_dir / "config.yaml", run_dir, best_hash,
+                                   getattr(args, "verify_dir", None))
+    if refusal is not None:
+        print(refusal)
+        return 2
     # --brief was parsed but never applied (found 2026-10-23, same class as the 2026-10-22 search
     # bug): a 12 kHz verify (NEXT_DEV_PRIORITIES P2) would have re-solved at 5.5 kHz.
     brief = getattr(args, "brief", None)

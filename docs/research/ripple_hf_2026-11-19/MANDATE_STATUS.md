@@ -8,9 +8,28 @@ handoff itself is preserved verbatim and must not be edited. Update this file, n
 | 1 | Reproduce and check the data audit (read-only, no BEM) | **DONE** — report-only tool + verified table | `hornlab_search/metrics/spectral.py`, `tools/analysis/spectral_ripple_audit.py`, [`evidence/spectral_ripple_audit_2026-11-19`](../../evidence/spectral_ripple_audit_2026-11-19/README.md) |
 | 2 | Build a rigorous measurement taxonomy before writing weighted terms | **DONE (documents only)** | [`MEASUREMENT_TAXONOMY.md`](MEASUREMENT_TAXONOMY.md) |
 | 3 | Validate the B3 2.3-3.0 kHz anomaly with a densely sampled re-solve | **DONE** - dense B3 at epw 6/9 on 91 freqs (1.8-3.6 kHz @25 Hz): a smooth 2.1 dB dip at 2800 Hz, epw6-vs-epw9 max|d| 0.01 dB -> physical, not a grid artifact | [`evidence/runs/expand_2026-11-19`](../../evidence/runs/expand_2026-11-19/README.md) |
-| 4 | Controlled HF-width experiment (Crowe X OSSE / R-OSSE rect / OSSE morph) | **NOT STARTED — owner GPU gate + new configs** | plan below |
-| 5 | Check installed-source validity above the first transverse mode | **NOT STARTED — needs real-driver data or a modelled wavefront** | plan below |
-| 6 | Then revise scoring if justified | **DELIBERATELY DEFERRED** — nothing to score until 1–3 produce rank reversals | — |
+| 4 | Controlled HF-width experiment (Crowe X OSSE / R-OSSE rect / OSSE morph) | **FIRST PASS DONE** - one knob at a time on the Crowe X OSSE base; wall angle moves 8 kHz width (-11.8 H / -6.7 V deg) and costs +1.37 J, lip radius is inert (+0.2 deg); the 600 mm envelope makes the space one-sided (two wider variants refused by shape_check and deleted) | [`evidence/ripple_program_2026-11-20`](../../evidence/ripple_program_2026-11-20/README.md) |
+| 5 | Check installed-source validity above the first transverse mode | **BLOCKED BY A BUG, NOT BY PHYSICS** - `source.cap` is inert on the grid path (`mesh/grid_build.py` never passes `source_radius_mm`), so three briefs differing only in cap gave identical mesh hashes and identical responses; fix in flight, then re-run the staged night | [`evidence/ripple_program_2026-11-20`](../../evidence/ripple_program_2026-11-20/README.md) sec. 2 |
+| 6 | Then revise scoring if justified | **DEFERRED, but no longer on redundancy grounds** - the corpus sweep shows the fixed-angle residual is a second axis on 25/28 identities (pooled rho 0.615, per identity -0.87..+0.93), so the 24-design 0.885 was a family artefact; the remaining gate is acoustic, not statistical | sec. 1 and 4 of the program evidence |
+
+## Results, 2026-11-20 (after the first pass of items 1-5)
+
+[`evidence/ripple_program_2026-11-20`](../../evidence/ripple_program_2026-11-20/README.md) records three
+experiments run after this file's first version, and they revise two of its conclusions:
+
+1. **The redundancy verdict is overturned.** The 24-hours-earlier audit found rho(rip, V+35) = 0.885 on
+   the 24 SCOUT40 bests and called the fixed-angle residual "largely redundant". Across 730 stored
+   designs the pooled rho is **0.615** and **25 of 28 identities sit below 0.8**, several near zero or
+   negative (`organic_rollback_1in` -0.871, `axi_90x90_1in` 0.050, `freeform_sculpt` 0.014). The 0.885
+   sample was the v7_smooth family, which is the identity where the two numbers agree.
+2. **Item 5 has no lever yet.** Three briefs differing only in `source.cap` produced identical mesh
+   hashes and identical responses: `mesh/grid_build.py` hardcodes the auto cap and never passes
+   `source_radius_mm`. Every grid-family solve we have stored uses the auto cap (~513 mm curvature at
+   the 1.4-inch throat, i.e. a nearly flat piston). That is a bug to fix before any source-validity
+   claim, not a physics result.
+3. **Item 4's first pass is one-sided by envelope.** The Crowe X OSSE base already sits at 593 of 600 mm
+   mouth width; wider wall angles or a larger lip break the brief. Wall angle is the HF lever, lip
+   radius is not, and widening beyond 74 deg at 8 kHz needs a bigger envelope or a different mouth law.
 
 ## Item 1 — what "done" means here, and what it does not mean
 

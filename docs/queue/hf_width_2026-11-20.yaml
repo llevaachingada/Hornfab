@@ -1,0 +1,46 @@
+# HF-WIDTH first pass (2026-11-20). Ripple mandate item 4, legal subset only.
+#
+# Base: Crowe X OSSE best 9b5428e6dec8 (osse_rollback; wall angles H 36.39 / V 22.71 deg, lip
+# 18.28 mm, L 259.60 mm; 8 kHz beamwidth 74.0 x 53.9 deg in the SCOUT40 screen solve).
+#
+# ENVELOPE FINDING (tools/shape_check.py, 2026-11-20): the base seed is envelope-SATURATED - mouth
+# 593 x 412 mm inside the 600 x 480 mm HOME brief. Growing either factor breaks the brief:
+#   wall angles x1.15 -> 672 mm mouth (OVER 600)
+#   lip radius  x1.5 -> 614 mm mouth (OVER 600)
+# So the HF-width space is ONE-SIDED here: only shrinking is legal. Those two configs were deleted
+# rather than queued (a refused design would burn the slot). Widening HF beyond 74 deg on this
+# typology needs a larger envelope or a different mouth law, not a bigger wall angle - an owner
+# decision, recorded in docs/evidence.
+#
+# Jobs: baseline + one knob down at a time. Screen fidelity (18 freqs incl. 4260 / 6218 / 8000 Hz),
+# ~1 min each. Pre-declared reading:
+#   * beamwidth H/V and the +25/+35 V level at 4.26, 6.22 and 8 kHz per config;
+#   * a single legal knob moving 8 kHz width by >=1 deg or the off-axis level by >=0.5 dB means HF
+#     width IS controllable inside this family and item 4 continues with the next factor;
+#   * < 0.3 deg / < 0.2 dB means this typology's HF width is essentially fixed by the 600 mm
+#     envelope and the mouth law, and item 4 should move to a different construction instead.
+# J is comparable ONLY within these three configs (same brief, same grid).
+night: hf_width_2026-11-20
+lane: gpu
+jobs:
+- id: hf_crowex_baseline
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, run, --config,
+         examples/typologies/hf_width_2026-11-20/hf_crowex_baseline.yaml, --mode, screen]
+- id: hf_crowex_wall_lo
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, run, --config,
+         examples/typologies/hf_width_2026-11-20/hf_crowex_wall_lo.yaml, --mode, screen]
+- id: hf_crowex_lip_lo
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, run, --config,
+         examples/typologies/hf_width_2026-11-20/hf_crowex_lip_lo.yaml, --mode, screen]

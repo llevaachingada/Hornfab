@@ -51,6 +51,30 @@
   tie. Then the promotion gate (real-driver gaps: 12PR300 geometry, calibration, panel fit) before any
   assembled BL test.
 
+## 2026-11-20 - Ripple program: corpus sweep done, `source.cap` INERT (fix in flight), HF width envelope-bound
+
+- DONE: `tools/analysis/spectral_corpus_sweep.py` + tests (4 passed); 730-design sweep (0 refusals):
+  pooled rho(rip, V+35) 0.615, 25/28 identities below 0.8 -> the "redundant" verdict from the 24-design
+  sample is **overturned**. Report-only `--compare A B` in the audit tool. `verify` refuses bridge-cell
+  runs before any GPU work with the exact `tools/geometry/<cell>_cli.py` command.
+- **OPEN (bug, fix in flight):** `source.cap` in a brief never reaches the mesher for grid families —
+  `mesh/grid_build.py` hardcodes the auto cap (`source_auto_angle_deg`) and never passes
+  `source_radius_mm`. Measured: three briefs differing only in cap gave identical mesh hash
+  `7abdb66729…` and identical responses; 4 of 6 source-sensitivity jobs were cache hits. **Every stored
+  grid-family solve uses the auto cap (~513 mm curvature at a 1.4-inch throat: a nearly flat piston).**
+  Mandate item 5 must not be attempted until this lands; then re-run `docs/queue/source_sensitivity_2026-11-20.yaml`.
+- OPEN (analysis, cheap): `organic_rollback_1in` has rho(rip, V+35) = **-0.871** (n=29) — a real design
+  trade-off or a metric pathology? One stored-data pass settles it.
+- OPEN (owner): the HOME 600 x 480 mm envelope is the binding constraint on HF width — the Crowe X OSSE
+  base sits at 593 mm mouth, so wider-than-74 deg at 8 kHz needs a larger envelope or a different mouth
+  law, not a knob.
+- OPEN (owner): an acoustic criterion for the fixed-angle residual. The corpus shows it is a second axis;
+  nothing yet shows a large residual is audibly bad. A real driver on a real horn at the seat is the only
+  measurement that can settle it — no amount of BEM will.
+- NOTE: `J` remains incomparable across identities, grids and fidelity tiers (screen 2.80022 vs verify
+  3.49921 for the same B3 design). The corpus tool prints `J` for context only and never ranks it across
+  identities.
+
 ## 2026-11-20 - Ripple audit grid test RUN (PASS) + OPEN: bridge cells cannot be verified from the plain CLI
 
 - DONE: `ripple_audit_2026-11-20` launched (detached, 08:34 local) and finished 08:48 **exit 0**;
