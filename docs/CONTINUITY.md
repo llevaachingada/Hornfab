@@ -87,6 +87,10 @@
   unstarted jobs `xr__x_s2c_morph/fold/twinray` were appended VERBATIM (same `--resume` dirs, cumulative budget
   60) to the tail of `fav_crowe_2026-11-20` (now 9 jobs), so they are deferred, not dropped. The chained
   queue.ps1 (pid 52188) starts the favorite night as soon as runner 26752 exits.
+- **Results (16:15; research addenda):** k-attribution k2/k3/k4 J 4.800/5.177/5.603 vs FAV-001 4.996: each k step
+  trades directivity for loading ~1:1. k-home CMA verify best `cd7e60025f70` 4.649 (FAV-001 verify 4.994); no row
+  matched FAV-001's non-load. compact500_xo900 verify `746d33134776` 2.809 / `c6f0d22ff2b0` 2.824 (tie; own
+  identity). `xr__x_s2c_*` resumed at 16:15 on the tail of the night.
 
 ## 2026-11-20 - GUI senior-review pass (steps 1-14)
 

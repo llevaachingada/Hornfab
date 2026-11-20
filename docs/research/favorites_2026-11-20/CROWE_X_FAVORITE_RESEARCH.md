@@ -241,3 +241,24 @@ metric except listening-window deviation. With the other knobs frozen, k is not 
 re-balancing the other knobs recovers the directivity is what `fav__crowe_k_home` (CMA, k ∈ [1, 5]) answers.
 Practical reading for the owner: if FAV-001's directivity is the point, **keep k ≈ 1–1.5 and cross ≥ 900 Hz**
 rather than buy 700 Hz loading with k.
+
+## Addendum 2026-11-20 16:15: searches + verify [measured]
+
+**`fav__crowe_k_home`** (`runs/20261120T202339Z-screen-e4b845`, 61 valid, v11 home brief). Screen best
+`cd7e60025f70`: J 4.453 (k 1.93, L 297, a_h 33.8, a_v 28.2, s 0.40, wrap 53); load 1.474, non-load 2.979,
+off-axis 1.00 (FAV-001 0.54). No row in the run beat FAV-001's non-load 2.352 (lowest 2.855). Rebalancing
+recovered about a third of the k-only directivity loss at k ≈ 2 (non-load 3.29 → 2.98).
+Verify top 3 (`.../verify`): `cd7e60025f70` **4.649**, `4956246dec95` 4.673, `1fad969f13ce` 4.762, vs
+FAV-001 verify 4.994. The screen gain of 0.54 shrinks to **0.345** on the verify grid.
+
+**`fav__crowe_c500_xo900`** (`runs/20261120T205235Z-screen-f96805`, 60 valid / 25 envelope refusals,
+compact500_xo900 identity; never rank against the home brief). Verify top 3: `746d33134776` **2.809**
+(screen 2.995; k 1.59, L 263, a_h 33.4, a_v 29.8, s 0.32, wrap 91; screen non-load 2.286, DI std 0.154,
+dislope 0.022, off-axis 0.954), `c6f0d22ff2b0` 2.824 (screen 2.990; k 1.92; mouth 493 × 429, depth 259),
+`e3f723e2e9a1` 2.981. The top two are a tie (0.014). Loading at 900 Hz is handled (min Re z ≥ 900 Hz 0.70–0.82).
+H narrows from ~72° at 1.7 kHz to ~58° at 8 kHz (screen, `c6f0d22ff2b0`), so it is less constant and less
+H/V-distinct than FAV-001.
+
+**Conclusion:** at a 700 Hz crossover, k ≈ 2 buys a real but modest verify gain (−0.35 J) by trading away
+part of FAV-001's directivity. No searched design matched FAV-001's CD-matrix quality. The 500 mm / 900 Hz
+variant is viable; `746d33134776` is its best-directivity candidate.
