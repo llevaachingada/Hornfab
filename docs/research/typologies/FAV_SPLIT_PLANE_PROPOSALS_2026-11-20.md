@@ -162,3 +162,29 @@ The owner is not fixed on a 2° driver; some 1.4" drivers exit at ~9°, the fixt
 The a0 = 9° mouth is 593 × 450 mm (fits 600). shape_check 4/4; preflight no HARD (valid 31 %). Queued after
 `favSC_verify_top3`. Expectation [inferred]: a 9° start flares faster at the throat (slightly less loading on its
 own), but the exponential term grows with tan a0, so the SplitCore throat is stronger at 9°. The solves decide.
+
+## 8. ATH-style diagonal ridge + H/V beak (owner, 2026-11-20 ~18:45)
+
+Owner: try "ATH-style ridges in the openings" (diagonal dispersion) and reintroduce the beak on H and V.
+Repo grounding reused, not redone:
+- `docs/research/typologies/SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15.md`: ATH ridges are **radial**. Tritonia/CORE
+  open the diagonal 7–10° wider than H/V, so the diagonal is the ridge between concave panels. The axial pucker is
+  the wrong mechanism. The ATH guide allows Coverage.Angle to vary with azimuth (KH-003).
+- `hornlab_search/design/generators/_klangfilm_lame_hv_core_v1.py`: beak law dz = η(u)[−D_H c² + D_V s² + D_D sin²2φ]
+  after a start fraction, η a C2 gate.
+
+Implemented as optional `osse_rollback` knobs (absent → byte-identical; `meta.ridge_beak` when present):
+- `g_a_d_deg` ∈ [−15, 20]: a(φ) += a_d sin²(2φ) on the OS wall angle (H/V rows unchanged, φ 45° gets +a_d).
+- `g_beak_h_mm`, `g_beak_v_mm` ∈ [−60, 60], `g_beak_d_mm` ∈ [−40, 40] (signed, + = toward the listener), and
+  `g_beak_start` ∈ [0.3, 0.95] (arc fraction, default 0.7; refused without a beak amount). The offset is axial
+  only, with a quintic C2 gate. A beak that folds the wall back on itself is refused.
+
+Tests +6 (absent meta; ridge only on the diagonal angle; beak axial only, throat fixed, H lip +20 / V lip −10 mm
+measured at the rim; range refusals). Grid + mesh + catalog: **210 passed / 0 failed**.
+
+Lanes `examples/typologies/favRB_2026-11-20/` on P1 FAV-001 (k_v 3, s_v 0.5512), writer `cpu/write_ridge.py`:
+- Singles: ridge 8° (depth re-solved to 244.9 mm: the wider diagonal pushed the bbox to 614 × 501), beak
+  H −15 / V +15, ridge + beak.
+- CMA `favRB__ridge_beak_fav` (home 80×50) and `favRB__ridge_beak_w90x50` (room w90×50 brief).
+- `favRB_verify_top3`.
+Appended at the **end** of the live `fav8_2026-11-20`. shape_check 5/5; preflight no HARD.

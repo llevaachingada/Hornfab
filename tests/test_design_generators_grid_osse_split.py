@@ -109,3 +109,35 @@ def test_v_exp_blend_keeps_h_row_and_rejoins_base_beyond_le():
 def test_splitcore_illegal_values_refused(bad):
     with pytest.raises(GeneratorError):
         _pts({**FAV, **bad})
+
+
+# --- Ridge (radial diagonal angle) + beak (axial lip offset), 2026-11-20 ---
+
+def test_ridge_beak_absent_leaves_meta_unchanged():
+    _, meta = _pts(FAV)
+    assert "ridge_beak" not in meta
+
+
+def test_diagonal_ridge_opens_only_the_diagonal_angle():
+    _, m0 = _pts(FAV)
+    p1, m1 = _pts({**FAV, "g_a_d_deg": 8.0})
+    a0, a1 = np.array(m0["row_a_deg"]), np.array(m1["row_a_deg"])
+    assert a1[0] == pytest.approx(a0[0], abs=1e-9) and a1[-1] == pytest.approx(a0[-1], abs=1e-9)
+    assert a1[12] - a0[12] == pytest.approx(8.0, abs=1e-6)            # phi = 45 deg: full +a_d
+    assert m1["ridge_beak"] == {"a_d_deg": 8.0}
+
+
+def test_beak_moves_only_axially_after_start():
+    plain = {**FAV, "g_sf_amt": 0.0, "g_sf_m": 0.0, "g_wrap_deg": 0.0, "g_r_lip_mm": 0.0}
+    p0, _ = _pts(plain)
+    p1, _ = _pts({**plain, "g_beak_h_mm": 20.0, "g_beak_v_mm": -10.0, "g_beak_start": 0.6})
+    np.testing.assert_allclose(p1[:, 0], p0[:, 0], atol=1e-9)        # first station (throat) unchanged
+    zmax0, zmax1 = p0[:, :, 2].max(axis=1), p1[:, :, 2].max(axis=1)
+    assert zmax1[0] - zmax0[0] == pytest.approx(20.0, abs=0.5)       # H lip projects forward 20 mm
+    assert zmax1[-1] - zmax0[-1] == pytest.approx(-10.0, abs=0.5)    # V lip sets back 10 mm
+
+
+@pytest.mark.parametrize("bad", [{"g_a_d_deg": 40.0}, {"g_beak_start": 0.5}, {"g_beak_h_mm": 99.0}])
+def test_ridge_beak_illegal_values_refused(bad):
+    with pytest.raises(GeneratorError):
+        _pts({**FAV, **bad})

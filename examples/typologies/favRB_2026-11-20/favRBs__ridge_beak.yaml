@@ -1,0 +1,145 @@
+# Ridge + beak lanes (2026-11-20 ~18:45, owner: ATH-style ridges for diagonal dispersion + beak on H and V).
+# g_a_d_deg: radial diagonal angle a(phi) += a_d sin^2(2phi); g_beak_*: axial lip offset after g_beak_start (C2).
+# Base: P1 split-plane FAV-001 (k_v 3, s_v 0.5512). Record: docs/research/typologies/FAV_SPLIT_PLANE_PROPOSALS_2026-11-20.md s8.
+# single: P1 FAV + ridge 8 + beak H-15/V+15
+# depth re-solved to 244.9 mm so the ridge's wider diagonal fits the 600x480 envelope.
+name: favRBs__ridge_beak
+family: FREEFORM
+brief_file: ../../briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_L_mm: 244.9
+  g_a_d_deg: 8.0
+  g_a_h_deg: 34.8933034795
+  g_a_v_deg: 26.757225392
+  g_beak_h_mm: -15.0
+  g_beak_start: 0.7
+  g_beak_v_mm: 15.0
+  g_k: 1.0
+  g_k_v: 3.0
+  g_n: 2.5626991237
+  g_q: 0.996
+  g_r_lip_mm: 18.2138278197
+  g_s: 0.4370597301
+  g_s_v: 0.5512
+  g_sf_ab: 0.8307639652
+  g_sf_amt: 0.1880415375
+  g_sf_m: 4.0
+  g_sf_n1: 1.8
+  g_sf_n2: 7.0
+  g_sf_start: 0.25
+  g_wrap_deg: 81.3898015929
+bounds:
+  g_L_mm:
+    lo: 244.9
+    hi: 244.9
+    search: false
+  g_a_d_deg:
+    lo: 8.0
+    hi: 8.0
+    search: false
+  g_a_h_deg:
+    lo: 32.0
+    hi: 42.0
+  g_a_v_deg:
+    lo: 20.0
+    hi: 30.0
+  g_beak_h_mm:
+    lo: -15.0
+    hi: -15.0
+    search: false
+  g_beak_start:
+    lo: 0.7
+    hi: 0.7
+    search: false
+  g_beak_v_mm:
+    lo: 15.0
+    hi: 15.0
+    search: false
+  g_k:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  g_k_v:
+    lo: 3.0
+    hi: 3.0
+    search: false
+  g_n:
+    lo: 1.8
+    hi: 3.2
+  g_q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  g_r_lip_mm:
+    lo: 8.0
+    hi: 30.0
+  g_s:
+    lo: 0.2
+    hi: 0.55
+  g_s_v:
+    lo: 0.5512
+    hi: 0.5512
+    search: false
+  g_sf_ab:
+    lo: 0.7
+    hi: 0.9
+  g_sf_amt:
+    lo: 0.12
+    hi: 0.38
+  g_sf_m:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  g_sf_n1:
+    lo: 1.8
+    hi: 1.8
+    search: false
+  g_sf_n2:
+    lo: 7.0
+    hi: 7.0
+    search: false
+  g_sf_start:
+    lo: 0.25
+    hi: 0.25
+    search: false
+  g_wrap_deg:
+    lo: 50.0
+    hi: 160.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.1
+  seed: 1234
+  budget: 1
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 300
+  error_policy: retry_same_then_stop
+description: 'single: P1 FAV + ridge 8 + beak H-15/V+15'

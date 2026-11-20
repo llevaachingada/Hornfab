@@ -12,6 +12,7 @@
 # 2026-11-20 ~18:27 (owner: SplitCore fixture variant): favSCs single + favSC__core_fav/_polish + verify after favP1_verify_top3.
 # 2026-11-20 ~18:30 (owner: try the 9-deg throat/exit angle): favA9s x3 singles + favA9__core_fav + verify after favSC_verify_top3.
 # 2026-11-20 ~18:45 (owner: room 20x16x9 ft, speakers on the 20 ft wall, wide sweet spot; 400 cube at 1 kHz): 5 room__ lanes + verify after favA9_verify_top3.
+# 2026-11-20 ~18:50 (owner: ATH-style diagonal ridges + H/V beak): favRB singles x3 + 2 CMA + verify appended at the END.
 night: fav8_2026-11-20
 lane: gpu
 watchdog: false
@@ -362,3 +363,64 @@ jobs:
   - '3'
   - --jobs
   - fav8__k1_cd_polish,fav8__x900_k1,fav8__k_low,fav8__c500_polish,fav8__sf_shape,fav8__wide_h,fav8__x900_klow_sf,fav8__lip_study,fav8__c500_wide_h,fav8__deep,fav8__c500_sf,fav8__k_low_s2
+- id: favRBs__ridge8
+  kind: command
+  timeout_s: 1800
+  env: &id006
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/favRB_2026-11-20/favRBs__ridge8.yaml
+  - --mode
+  - screen
+- id: favRBs__beak_hv
+  kind: command
+  timeout_s: 1800
+  env: *id006
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/favRB_2026-11-20/favRBs__beak_hv.yaml
+  - --mode
+  - screen
+- id: favRBs__ridge_beak
+  kind: command
+  timeout_s: 1800
+  env: *id006
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/favRB_2026-11-20/favRBs__ridge_beak.yaml
+  - --mode
+  - screen
+- id: favRB__ridge_beak_fav
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 5400
+  env: *id006
+  config: examples/typologies/favRB_2026-11-20/favRB__ridge_beak_fav.yaml
+- id: favRB__ridge_beak_w90x50
+  kind: search
+  mode: screen
+  budget: 80
+  timeout_s: 5400
+  env: *id006
+  config: examples/typologies/favRB_2026-11-20/favRB__ridge_beak_w90x50.yaml
+- id: favRB_verify_top3
+  kind: command
+  timeout_s: 3600
+  env: *id006
+  argv:
+  - .venv/Scripts/python.exe
+  - tools/night_queue/verify_night_jobs.py
+  - --night
+  - fav8_2026-11-20
+  - --top
+  - '3'
+  - --jobs
+  - favRB__ridge_beak_fav,favRB__ridge_beak_w90x50

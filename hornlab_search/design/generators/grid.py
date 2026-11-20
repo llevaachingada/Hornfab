@@ -2026,6 +2026,14 @@ ROWS_OSSE_ROLL_SPLIT_KNOBS = ("k_v", "s_v", "k_v_log", "v_exp_mm")
 #: v_exp_mm > 0 = V-weighted exponential throat r0 exp(z tan a0 / r0) for z < v_exp_mm, blended back to the base
 #: V meridian with a quintic smootherstep (C2 at v_exp_mm). LABELED HYPOTHESIS-SHAPE EXPERIMENT, not a validated cutoff.
 ROWS_OSSE_ROLL_V_EXP_MAX_MM = 120.0
+#: Ridge + beak (owner 2026-11-20 ~18:40). a_d_deg: ATH-style RADIAL diagonal ridge, a(phi) += a_d sin^2(2 phi) on the
+#: a(phi) angle (ATH CORE/Tritonia open the diagonal 7-10 deg wider than H/V: SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15).
+#: beak_*: AXIAL lip offset dz = eta(u) [beak_h cos^2 + beak_v sin^2 + beak_d sin^2(2 phi)] (signed mm, + = toward the
+#: listener) after arc fraction beak_start, eta = quintic smootherstep (C2); the Klangfilm hv-core beak law in signed form.
+#: Optional: absent = byte-identical. LABELED HYPOTHESIS-SHAPE EXPERIMENT.
+ROWS_OSSE_ROLL_SHAPE_KNOBS = ("a_d_deg", "beak_h_mm", "beak_v_mm", "beak_d_mm", "beak_start")
+ROWS_OSSE_ROLL_SHAPE_RANGES = {"a_d_deg": (-15.0, 20.0), "beak_h_mm": (-60.0, 60.0), "beak_v_mm": (-60.0, 60.0),
+                               "beak_d_mm": (-40.0, 40.0), "beak_start": (0.3, 0.95)}
 OSSE_ROLL_LABEL = (
     "LABELED HYPOTHESIS-SHAPE EXPERIMENT (owner-directed hybrid 2026-10-28): per-azimuth OS/OSSE "
     "wall from Magnus's profile_points formula (the constant-directivity throat), the even-lobe "
@@ -2039,7 +2047,8 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
     allowed = ({f"{prefix}_{n}" for n in names}
                | {f"{prefix}_ripple_lobes", f"{prefix}_ripple_amp_mm", f"{prefix}_ripple_start"}
                | {f"{prefix}_{n}" for n in _THROAT_HV_KNOB_NAMES}
-               | {f"{prefix}_{n}" for n in ROWS_OSSE_ROLL_SPLIT_KNOBS})
+               | {f"{prefix}_{n}" for n in ROWS_OSSE_ROLL_SPLIT_KNOBS}
+               | {f"{prefix}_{n}" for n in ROWS_OSSE_ROLL_SHAPE_KNOBS})
     foreign = sorted(str(k) for k in knobs
                      if str(k).startswith(f"{prefix}_") and k not in allowed)
     if foreign:
@@ -2123,6 +2132,18 @@ def _rows_osse_rollback_knobs(knobs: dict, prefix: str = "g") -> dict:
     if "k_v" in split and hv_block is not None and hv_block.get("throat_hv_ratio") not in (None, 1.0):
         raise registry.GeneratorError(
             "osse_rollback rows: k_v and throat_hv_ratio are two per-azimuth k laws; use one")
+    shape = {}
+    for n in ROWS_OSSE_ROLL_SHAPE_KNOBS:
+        key = f"{prefix}_{n}"
+        if key in knobs:
+            v = float(knobs[key]); lo_s, hi_s = ROWS_OSSE_ROLL_SHAPE_RANGES[n]
+            if not (math.isfinite(v) and lo_s <= v <= hi_s):
+                raise registry.GeneratorError(f"osse_rollback rows: {n} must be in [{lo_s:g}, {hi_s:g}], got {v!r}")
+            shape[n] = v
+    if "beak_start" in shape and not any(k in shape for k in ("beak_h_mm", "beak_v_mm", "beak_d_mm")):
+        raise registry.GeneratorError("osse_rollback rows: beak_start needs a beak_h_mm / beak_v_mm / beak_d_mm")
+    if shape:
+        out["_shape"] = shape   # only when present: absent = byte-identical dict
     if split:
         out["_split"] = split   # only when present: absent = byte-identical dict
     if hv_block is not None:
@@ -2174,6 +2195,9 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
                 ang = 0.25 * math.pi + abs(x)
         c2, s2 = math.cos(ang) ** 2, math.sin(ang) ** 2
         a_phi = ok["a_h_deg"] * c2 + ok["a_v_deg"] * s2
+        shp = ok.get("_shape") or {}
+        if "a_d_deg" in shp:
+            a_phi = a_phi + shp["a_d_deg"] * math.sin(2.0 * ang) ** 2
         split = ok.get("_split") or {}
         k_phi = (ok["k"] if hv_rho is None
                  else ok["k"] * float(throat_hv.hv_scale_inverse(hv_rho, float(phi))))
@@ -2213,6 +2237,17 @@ def _rows_osse_rollback_marches(ok: dict, phis, r0: float, a0: float) -> list[di
             if not np.all(ys > 0.0):
                 raise registry.GeneratorError(
                     "osse_rollback: the superformula morph pinches the wall to zero radius")
+        beak = (shp.get("beak_h_mm", 0.0) * c2 + shp.get("beak_v_mm", 0.0) * s2
+                + shp.get("beak_d_mm", 0.0) * math.sin(2.0 * ang) ** 2)
+        if beak != 0.0:
+            fr = _arc_length(xs, ys); fr = fr / float(fr[-1])
+            b0 = shp.get("beak_start", 0.7)
+            u = np.clip((fr - b0) / (1.0 - b0), 0.0, 1.0)
+            xs = xs + beak * u * u * u * (10.0 + u * (-15.0 + 6.0 * u))
+            if not np.all(np.diff(xs) > 0.0):
+                raise registry.GeneratorError(
+                    f"osse_rollback: beak {beak:.1f} mm folds the wall back on itself at phi "
+                    f"{np.degrees(phi):.1f} deg (reduce the setback or move beak_start)")
         if lobes:
             l_arc = _arc_length(xs, ys)
             w = _rows_eps_window(l_arc / float(l_arc[-1]), ok["ripple_start"])
@@ -2840,7 +2875,7 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
             "construction_label": OSSE_ROLL_LABEL,
             "source_auto_angle_deg": a0,
             "wall_thickness_mm": wt,
-            **{k: float(v) for k, v in ok.items() if k not in ("ripple_lobes", "_hv", "_split")},
+            **{k: float(v) for k, v in ok.items() if k not in ("ripple_lobes", "_hv", "_split", "_shape")},
             "ripple_lobes": int(ok["ripple_lobes"]),
             "lip_model": ("[inferred] tangent-continuous circular lip arc (C1 at the joint) "
                           "curling back; wrap(phi) = wrap_deg (1 + wrap_cos_amp cos(N phi))"),
@@ -2854,6 +2889,8 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
         if ok.get("_hv") is not None:
             meta["throat_hv"] = {k: v for k, v in ok["_hv"].items() if v is not None}
             meta["throat_hv_status"] = throat_hv.STATUS["osse_rollback"]
+        if ok.get("_shape"):
+            meta["ridge_beak"] = dict(ok["_shape"])
         if ok.get("_split"):
             meta["split_plane"] = dict(ok["_split"])
             meta["split_plane_law"] = ("k(phi) = k cos^2 + k_v sin^2, s(phi) = s cos^2 + s_v sin^2 on the a(phi) "

@@ -1,5 +1,13 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 ~18:50 - ATH-style diagonal ridge + H/V beak knobs on osse_rollback; lanes at the end of fav8
+
+- Owner: ATH-style ridges for diagonal dispersion + beak on H and V. Optional knobs `g_a_d_deg` (radial diagonal angle,
+  per SPIRAL_PUCKER_VS_RADIAL_RIDGE_2026-11-15) and `g_beak_h_mm/_v_mm/_d_mm/_start` (axial C2 lip offset, Klangfilm
+  hv-core law, signed). Absent = byte-identical. Tests grid + mesh + catalog **210 passed / 0 failed**.
+- Lanes `examples/typologies/favRB_2026-11-20/` (3 singles + 2 CMA + verify) appended at the END of the live fav8.
+  Record: `docs/research/typologies/FAV_SPLIT_PLANE_PROPOSALS_2026-11-20.md` s8.
+
 ## 2026-11-20 ~18:45 - Room-targeted coverage lanes (20x16x9 ft, speakers on the 20 ft wall, wide sweet spot)
 
 - Owner questioned 80x50 for the room. Derived: floor bounce ~35 deg below / ceiling ~48 deg above axis at ~3 m, so V 50-60
