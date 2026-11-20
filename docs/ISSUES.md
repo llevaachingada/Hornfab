@@ -63,6 +63,16 @@
   ± angle check cannot validate the metric under `symmetry: hv` (mirror, ≤1.1e-6 dB apart).
 - KNOWN (pre-existing, untouched): `tests/test_b8_lanes_bounded_gui::test_study_modules_have_no_host_cleanup_or_process_kill_paths`
   fails on `subprocess.Popen` in `gui/study_jobs.py`.
+- KNOWN (2026-11-20 full offline run at `3032a0c` + another lane's uncommitted WIP: **5 failed /
+  5464 passed / 29 skipped**, 8:39): apart from the `subprocess.Popen` item above, the failures are
+  `test_targets::test_from_dict_round_trips_example_targets[score_identities.yaml]`,
+  `test_objective_v8::test_v8_key_set_is_v4_minus_load_plus_the_extras`,
+  `test_tools_search_preflight::test_generated_history_fallback_reads_grid_knobs`
+  (`KeyError: 'source'`) and `test_queue_fable_scout40::test_scout40_jobs_are_budgeted_and_grouped`
+  (night YAML now has 24 jobs; the test asserts 18). None is in this change's files - the first three
+  are in the areas that lane is editing (`objective/versions.py`, `examples/score_identities.yaml`,
+  search preflight) and the fourth is a stale assertion against a grown queue file. Owner/lane to
+  confirm, fix or re-baseline; do not weaken the assertions.
 
 ## 2026-11-20 - GUI Overview phases 2-4 (DONE) + owner decisions closed
 

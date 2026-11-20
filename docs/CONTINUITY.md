@@ -88,6 +88,15 @@
   item 6 (scoring) stays deferred. A second GUI lane's unstaged `app.js`/`app.css`/`hw*` work was left
   untouched; the previously staged Overview phases 2–4 were committed separately (`3fd2027`, 79 tests
   re-verified).
+- **Tests (2026-11-20, after the concurrent lane pushed):** targeted gate for these files **140
+  passed** (`tests/test_metrics_spectral.py`, `test_tools_analysis_spectral_ripple_audit.py`,
+  `test_metrics_smoothness{,_v2}.py`, `test_metrics_pattern_quality.py`,
+  `test_metrics_integration.py`, `test_objective_v7/v10.py`,
+  `test_replay_versions_single_source.py`). Full offline suite, run against that lane's *uncommitted*
+  WIP, gave **5 failed / 5464 passed / 29 skipped** in 8:39 — all five outside this change and
+  reviewed in `docs/ISSUES.md`; none touches `metrics/spectral.py`.
+- **Provenance note:** the commit meant for this slice was carried by the concurrent queue commit
+  `f9f5ac5` (already pushed); `3032a0c` records it. Nothing of this change is left uncommitted.
 
 ## 2026-11-20 - GUI Overview phases 2-4 built (findings, registry, parameters, snapshots; CPU only)
 
