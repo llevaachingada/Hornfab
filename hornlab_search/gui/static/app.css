@@ -1615,3 +1615,67 @@ tbody tr[tabindex]:focus-visible { outline:2px solid var(--accent); outline-offs
 
 /* Registry v2 (2026-11-20): a proposed declaration is visible but greyed until approved. */
 .pill.hw-proposed { color:var(--muted); border-color:var(--rule); }
+
+/* -- Horn + woofer P6: Boundary Lab dialogs (hw.js) -------------------------------
+   Native <dialog> supplies the top layer, Esc and the modal focus trap; these rules
+   only size and skin it with the existing tokens. */
+.hw-dialog { width:min(760px, calc(100vw - 32px)); max-height:calc(100vh - 40px); padding:0;
+  border:1px solid var(--rule); border-radius:10px; background:var(--surface); color:var(--ink);
+  box-shadow:0 24px 64px rgba(0,0,0,0.45); }
+.hw-dialog::backdrop { background:rgba(0,0,0,0.55); }
+.hw-dialog-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+  padding:14px 18px 10px; border-bottom:1px solid var(--rule); }
+.hw-dialog-head h3 { margin:0; font-size:1.05rem; }
+.hw-dialog-head p { margin:4px 0 0; font-size:0.82rem; }
+.hw-dialog-body { padding:14px 18px; overflow:auto; max-height:calc(100vh - 230px); }
+.hw-dialog-foot { display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+  padding:12px 18px; border-top:1px solid var(--rule); }
+.hw-dialog-foot .hint { margin-right:auto; }
+.hw-dialog h4 { margin:12px 0 6px; font-size:0.88rem; }
+.hw-dialog h4:first-child { margin-top:0; }
+.hw-dialog .form-grid { margin:0; }
+.hw-dialog .form-grid > label { padding-top:4px; }
+.hw-field-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:8px 10px; }
+.hw-field-grid label { display:grid; gap:2px; font-family:var(--f-body); font-size:0.74rem;
+  color:var(--label); text-transform:none; letter-spacing:0; }
+.hw-field-grid input { min-width:0; }
+.hw-dialog-adv { margin:2px 0 0; }
+.hw-dialog-adv > summary { cursor:pointer; color:var(--muted); font-size:0.8rem; }
+.hw-result { border:1px solid var(--rule); border-radius:8px; padding:10px 12px;
+  margin:0 0 12px; background:var(--bg); }
+.hw-verdict { display:flex; flex-wrap:wrap; align-items:center; gap:6px 10px;
+  margin:6px 0; font-size:0.95rem; }
+.hw-preset-list { display:grid; gap:6px; }
+.hw-preset { display:flex; gap:8px; align-items:flex-start; padding:8px 10px;
+  border:1px solid var(--rule); border-radius:8px; background:var(--bg); cursor:pointer; }
+.hw-preset:has(input:checked) { border-color:var(--accent); }
+.hw-preset input { margin-top:3px; }
+.hw-preset > span { min-width:0; }
+.hw-preset small { overflow-wrap:anywhere; }
+.hw-auth-state { border:1px solid var(--rule); border-radius:8px; padding:8px 10px;
+  background:var(--bg); }
+@media (max-width:700px) {
+  .hw-dialog { width:calc(100vw - 16px); max-height:calc(100vh - 16px); }
+  .hw-dialog-head, .hw-dialog-body, .hw-dialog-foot { padding-left:12px; padding-right:12px; }
+  .hw-dialog-body { max-height:calc(100vh - 250px); }
+  .hw-field-grid { grid-template-columns:1fr 1fr; }
+}
+
+/* -- Overview (P8) narrow KPI tiles and compact recent tables --------------------
+   D2: below 900 px the 5 tiles do not fill the auto-fit rows; the shared .kpis
+   container paints its rule-coloured gap as an empty slab. Per-tile surfaces make
+   the unused cells transparent without changing 1009/1280.
+   D3: the overview recents are summaries, so they wrap inside a fixed 7-column
+   layout and fit the 1280 card; below that the same .tbl-wrap scrolls as before. */
+@media (max-width:900px) {
+  .kpis.hw-kpi-fit { background:transparent; border:0; border-radius:0; overflow:visible;
+    gap:8px; }
+  .kpis.hw-kpi-fit .kpi { border:1px solid var(--rule); border-radius:8px;
+    background:var(--surface); }
+}
+.hw-ov-table { table-layout:fixed; width:100%; min-width:860px; }
+.hw-ov-table th, .hw-ov-table td { white-space:normal; overflow-wrap:anywhere;
+  vertical-align:top; }
+.hw-ov-table td.r { white-space:nowrap; }
+.hw-ov-table td .pill, .hw-ov-table th .term { white-space:normal; }

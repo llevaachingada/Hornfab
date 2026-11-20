@@ -18,6 +18,7 @@
 
 import { chart, niceTicks, css, el, NS, wireScrollHints } from "./charts.js";
 import { tip } from "./glossary.js";
+import { openHwStageDialog } from "./hw.js";
 
 // ── Helpers copied from hw.js / app.js / verify.js (local there, not exported) ──
 
@@ -579,17 +580,49 @@ export async function viewHwScreen(root, studyId, query = "") {
       <nav class="run-tabs" aria-label="Views of this screen">
         ${TABS.map(([k, l]) => `<a class="run-tab-link" data-tab="${k}" href="${tabHref(k)}"${k === tab ? ' aria-current="page"' : ""}>${esc(l)}</a>`).join("")}
       </nav>
-      <div class="run-actions">
-        <button class="btn btn-sm" type="button" disabled aria-disabled="true"
-          title="Boundary Lab actions arrive in a later phase">Check in Boundary Lab…</button>
-        <span class="hint" role="status" style="font-size:0.78rem">Boundary Lab actions arrive in a later phase</span>
-      </div>
+        <div class="run-actions" style="flex-wrap:wrap">
+          <button class="btn btn-sm" type="button" id="hw-stage-open" disabled aria-disabled="true"
+            title="Pick a shortlist row first">Check in Boundary Lab…</button>
+          <span class="hint" role="status" style="font-size:0.78rem" id="hw-stage-hint">Pick a row to stage it in Boundary Lab.</span>
+        </div>
     </div>
     <div id="hw-screen-body"></div>
   </div>`;
-
   const body = root.querySelector("#hw-screen-body");
+
   if (!body) return;
+
+  // P6: the toolbar action is live once a row with a box is picked. It opens the stage dialog
+  // prefilled from that row; the dialog previews and launches the CPU stage+validate job.
+  const stageOpen = root.querySelector("#hw-stage-open");
+  const stageHint = root.querySelector("#hw-stage-hint");
+  const syncStageButton = () => {
+    const row = selected ? byId.get(selected) : null;
+    const usable = !!(row && row.box);
+    if (!stageOpen) return;
+    stageOpen.disabled = !usable;
+    stageOpen.setAttribute("aria-disabled", String(!usable));
+    stageOpen.title = usable
+      ? `Open the stage dialog prefilled from ${row.driver_name || row.driver_id || "this row"}`
+      : "Pick a shortlist row first";
+    if (stageHint) stageHint.textContent = usable
+      ? "Stages a new case; the dialog previews the exact CPU command."
+      : "Pick a row to stage it in Boundary Lab.";
+  };
+  if (stageOpen) stageOpen.addEventListener("click", () => {
+    const row = selected ? byId.get(selected) : null;
+    if (!row || !row.box) return;
+    openHwStageDialog({
+      source: "shortlist",
+      studyId: d.study_id,
+      candidateId: row.candidate_id,
+      driver: row.driver_name || row.driver_id,
+      box: row.box,
+      dzMm: row.placement && row.placement.dz_mm != null ? row.placement.dz_mm : null,
+      designHash: d.asset && d.asset.design_hash,
+    });
+  });
+  syncStageButton();
 
   // ── Shortlist tab ────────────────────────────────────────────────────────
   let sort = null;                                   // {key, dir} · dir 1 = ascending
@@ -857,11 +890,12 @@ export async function viewHwScreen(root, studyId, query = "") {
       const status = body.querySelector("#hw-pick-status");
       if (status) status.textContent = shortlistStatus();
     };
-    const pick = cid => {
-      selected = String(cid);
-      syncUrl();
-      paint();
-    };
+      const pick = cid => {
+        selected = String(cid);
+        syncUrl();
+        paint();
+        syncStageButton();
+      };
 
     function paintTable(refocusSort = false) {
       const wrap = body.querySelector("#hw-shortlist-wrap");
@@ -1158,12 +1192,13 @@ export async function viewHwScreen(root, studyId, query = "") {
           + `${AXIS_META[xKey].label} ${fmtAxis(p.x, xKey)} ${AXIS_META[xKey].unit} · `
           + `${AXIS_META[yKey].label} ${fmtAxis(p.y, yKey)} ${AXIS_META[yKey].unit}`
           + (p.count > 1 ? ` · ${p.count} rows at this point` : "");
-        hit.addEventListener("click", () => {
-          selected = String(p.row.candidate_id);
-          syncUrl();
-          drawScatter();
-          drawSel();
-        });
+          hit.addEventListener("click", () => {
+            selected = String(p.row.candidate_id);
+            syncUrl();
+            drawScatter();
+            drawSel();
+            syncStageButton();
+          });
       }
       if (typeof ResizeObserver !== "undefined") {
         const ro = new ResizeObserver(() => {
@@ -1439,6 +1474,7 @@ export async function viewHwScreen(root, studyId, query = "") {
       if (!byId.has(cid)) return;
       selected = cid;
       syncUrl();                                     // replaceState: no history spam
+      syncStageButton();
       renderPanel();                                 // rebuild for the new row's box and sliders
       const again = body.querySelector("#hw-panel-row");
       if (again) again.focus();

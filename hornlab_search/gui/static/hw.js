@@ -64,6 +64,21 @@ async function api(path) {
   return r.json();
 }
 
+/** POST JSON. Validation refusals come back as HTTP 200 {error}; both shapes are reported. */
+async function postJson(path, body) {
+  const r = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  let data = null;
+  try { data = await r.json(); } catch { /* not JSON */ }
+  if (!r.ok) throw new Error((data && data.error) || (r.status + ""));
+  return data || {};
+}
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 const errBanner = msg => `<div class="alert error" role="alert"><b>Error:</b> ${esc(msg)}</div>`;
 const encKey = key => String(key).split("/").map(encodeURIComponent).join("/");
 const caseHref = key => "#/hw/case/" + encKey(key);
@@ -320,10 +335,10 @@ export async function viewHwCases(root, query = "") {
       </summary>
       <div class="tbl-scroll hw-tbl-scroll">
         <p class="tbl-scroll-hint">scroll for all columns →</p>
-        <div class="tbl-wrap"><table class="hw-ledger" style="table-layout:fixed">
-          <colgroup><col style="width:200px"><col style="width:108px"><col style="width:140px">
-            <col style="width:150px"><col style="width:140px"><col style="width:100px">
-            <col style="width:160px"></colgroup>
+        <div class="tbl-wrap"><table class="hw-ov-table hw-ov-cases">
+          <colgroup><col style="width:23%"><col style="width:11%"><col style="width:14%">
+            <col style="width:17%"><col style="width:12%"><col style="width:11%">
+            <col style="width:12%"></colgroup>
           <thead><tr><th>Case</th><th>State</th><th>Motor / shape</th>
             <th>Box</th><th>${tip("clearance", "Gap / offset")}</th><th>Solved band</th>
             <th>${tip("hw_fidelity", "Fidelity")}</th></tr></thead>
@@ -508,6 +523,11 @@ export async function viewHwOverview(root) {
   const levelBits = [["CRITICAL", "critical"], ["HIGH", "high"], ["MEDIUM", "medium"], ["LOW", "low"]]
     .filter(([key]) => levels[key]).map(([key, word]) => `${levels[key]} ${word}`);
   const blocked = kp.blocked_decisions == null ? open.length : Number(kp.blocked_decisions);
+  // The payload label starts with "Next:"; the card's heading already says Next step.
+  const nextLabel = String(next.label || "").replace(/^Next:\s*/i, "").trim();
+  const nextTitle = nextLabel ? nextLabel.charAt(0).toUpperCase() + nextLabel.slice(1) : "";
+  const nextWhy = String(next.why || "");
+  const nextWhyOne = (nextWhy.match(/^.*?[.!?](?=\s|$)/) || [""])[0] || nextWhy;
   const decisionPills = open.length
     ? open.map(d => `<span class="pill warn" style="white-space:normal" title="${esc([d.question, d.recommendation ? `Recommendation: ${d.recommendation}` : ""].filter(Boolean).join(" "))}">${esc(d.blocks || `decision ${d.id}`)} (${esc(d.id)})</span>`).join("")
     : `<span class="pill good">none open</span>`;
@@ -533,10 +553,10 @@ export async function viewHwOverview(root) {
       <code style="overflow-wrap:anywhere">${esc(e && typeof e === "object" ? e.path : e)}</code>${e && typeof e === "object" && e.error ? ` — ${esc(e.error)}` : ""}</div>`).join("")}
     ${missing.length ? `<div class="alert warn" role="alert">Registry cases missing on disk:
       ${missing.map(m => `<code>${esc((m && m.key) || m || MISSING)}</code>`).join(", ")}</div>` : ""}
-    <div class="kpis">
+    <div class="kpis hw-kpi-fit">
       ${kpi("Screens", kp.screens ?? 0, "screen studies on disk")}
       ${kpi("Shortlisted", kp.shortlisted ?? 0, "shortlist rows across screens")}
-      ${kpi("Checked in BL", kp.checked_in_bl ?? 0, "staged or solved")}
+      ${kpi("In BL", kp.checked_in_bl ?? 0, "staged or solved in Boundary Lab")}
       ${kpi("Solved", kp.solved ?? 0, "full Boundary Lab solves", kp.solved ? "good" : "")}
       ${kpi("Blocked by decisions", blocked, "open owner decisions", blocked ? "warn" : "good")}
     </div>
@@ -552,18 +572,20 @@ export async function viewHwOverview(root) {
     <section class="card" data-next-id="${esc(next.id || "")}">
       <div class="fig-head"><h3>Next step</h3>
         <span class="muted">computed from what is on disk</span></div>
-      <p style="margin:6px 0 4px"><b>${esc(next.label || "—")}</b></p>
-      <p class="muted" style="margin:0 0 12px;max-width:82ch">${esc(next.why || "")}</p>
-      ${next.href ? `<a class="btn primary" style="white-space:normal;text-align:left;max-width:100%" href="${esc(next.href)}">${esc(next.label || "Open")} →</a>` : ""}
+      <p style="margin:6px 0 4px"><b>${esc(nextTitle || "—")}</b></p>
+      <p class="muted" style="margin:0 0 12px;max-width:82ch" title="${esc(nextWhy)}">${esc(nextWhyOne)}</p>
+      ${next.href ? `<a class="btn primary" style="white-space:normal;text-align:left;max-width:100%" href="${esc(next.href)}">${esc(nextTitle || "Open")} →</a>` : ""}
     </section>
     <section class="card">
       <div class="fig-head"><h3>Recent screens</h3>
         <a class="btn btn-sm" href="#/hw/screens">All screens →</a></div>
       ${screens.length ? `<div class="tbl-scroll hw-tbl-scroll">
         <p class="tbl-scroll-hint">scroll for all columns →</p>
-        <div class="tbl-wrap"><table>
+        <div class="tbl-wrap"><table class="hw-ov-table">
+          <colgroup><col style="width:18%"><col style="width:14%"><col style="width:22%">
+            <col style="width:8%"><col style="width:11%"><col style="width:12%"><col style="width:15%"></colgroup>
           <thead><tr><th>Study</th><th>When</th><th>Horn</th><th class="r">Drivers</th>
-            <th class="r">Shortlisted</th><th class="r">Panel-fit rejected</th><th>Claim</th></tr></thead>
+            <th class="r">Shortlist</th><th class="r">Panel-fit rejected</th><th>Claim</th></tr></thead>
           <tbody>${screens.map(screenRow).join("")}</tbody></table></div>
       </div>` : `<div class="alert info" role="status">No screen studies yet. A screen is step 4: pick a horn,
         drivers and box limits, then screen.</div>
@@ -574,10 +596,10 @@ export async function viewHwOverview(root) {
         <a class="btn btn-sm" href="#/hw/cases">All cases →</a></div>
       ${cases.length ? `<div class="tbl-scroll hw-tbl-scroll">
         <p class="tbl-scroll-hint">scroll for all columns →</p>
-        <div class="tbl-wrap"><table class="hw-ledger" style="table-layout:fixed">
-          <colgroup><col style="width:200px"><col style="width:108px"><col style="width:140px">
-            <col style="width:150px"><col style="width:140px"><col style="width:100px">
-            <col style="width:160px"></colgroup>
+        <div class="tbl-wrap"><table class="hw-ov-table hw-ov-cases">
+          <colgroup><col style="width:23%"><col style="width:11%"><col style="width:14%">
+            <col style="width:17%"><col style="width:12%"><col style="width:11%">
+            <col style="width:12%"></colgroup>
           <thead><tr><th>Case</th><th>State</th><th>Motor / shape</th>
             <th>Box</th><th>${tip("clearance", "Gap / offset")}</th><th>Solved band</th>
             <th>${tip("hw_fidelity", "Fidelity")}</th></tr></thead>
@@ -609,6 +631,540 @@ export async function viewHwOverview(root) {
     tr.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); go(); } });
   });
   wireScrollHints(root);
+}
+
+// ── Boundary Lab dialogs (P6) ───────────────────────────────────────────────
+
+/** One native <dialog>. The element itself owns the top layer, the modal focus trap and Esc;
+ * this helper only skins it, restores focus to the opener and closes on a route change. */
+function hwDialog({ title, subtitle = "" }) {
+  const opener = document.activeElement;
+  const dlg = document.createElement("dialog");
+  const titleId = "hw-dialog-title-" + Math.random().toString(36).slice(2, 8);
+  dlg.className = "hw-dialog";
+  dlg.setAttribute("role", "dialog");
+  dlg.setAttribute("aria-modal", "true");
+  dlg.setAttribute("aria-labelledby", titleId);
+  dlg.innerHTML = `<div class="hw-dialog-head">
+      <div><h3 id="${titleId}">${esc(title)}</h3>${subtitle ? `<p class="muted">${esc(subtitle)}</p>` : ""}</div>
+      <button type="button" class="btn btn-sm" data-dlg-close aria-label="Close dialog">Close ×</button>
+    </div>
+    <div class="hw-dialog-body"><p class="muted">Loading…</p></div>
+    <div class="hw-dialog-foot"></div>`;
+  document.body.appendChild(dlg);
+  let closed = false;
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    if (dlg.open && typeof dlg.close === "function") dlg.close();
+    dlg.remove();
+    if (opener && opener.isConnected && typeof opener.focus === "function") opener.focus();
+  };
+  const onHash = () => close();
+  window.addEventListener("hashchange", onHash);
+  dlg.addEventListener("close", () => window.removeEventListener("hashchange", onHash));
+  dlg.addEventListener("click", event => {
+    if (event.target.closest("[data-dlg-close]")) close();
+  });
+  dlg.addEventListener("cancel", event => { event.preventDefault(); close(); });   // native Esc
+  dlg.addEventListener("keydown", event => {
+    if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); close(); return; }
+    if (event.key !== "Tab") return;
+    // Keep Tab inside the dialog even where the browser would hand focus to its own chrome.
+    const items = [...dlg.querySelectorAll(
+      'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), ' +
+      'textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])')]
+      .filter(el => el.getClientRects().length > 0);
+    if (!items.length) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !dlg.contains(document.activeElement))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !dlg.contains(document.activeElement))) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+  dlg.showModal();
+  const body = dlg.querySelector(".hw-dialog-body");
+  const foot = dlg.querySelector(".hw-dialog-foot");
+  const focusFirst = () => {
+    const first = dlg.querySelector("[autofocus]") || dlg.querySelector("select, input, button, a[href]");
+    if (first) first.focus();
+  };
+  focusFirst();
+  return { dlg, close, body, foot, focusFirst };
+}
+
+/** Verbatim failure block: the refusal token (when the log carries one) and the last log lines. */
+function hwFailurePanel(job, what) {
+  const lines = Array.isArray(job.log_tail) ? job.log_tail : [];
+  const tokens = [...new Set((lines.join("\n").match(/\b(?:BL|STAGE|BODY|REFERENCE|CONTROL)_[A-Z0-9_]+\b/g) || []))];
+  return `<div class="alert error" role="alert"><b>${esc(what)}</b> (${esc(job.status || "?")}).
+    ${tokens.length ? `<div class="pill-row" style="margin:6px 0 0">${tokens.map(t => `<span class="pill bad">${esc(t)}</span>`).join("")}</div>` : ""}
+    <pre class="log-tail" style="max-height:180px;margin:8px 0 0">${esc(lines.slice(-20).join("\n") || "(no log lines recorded)")}</pre></div>`;
+}
+
+/** P6 stage dialog: allow-listed mesh + its own groups, z-only translation, box overrides from a
+ * shortlist row or a case, the server's exact command, then one CPU stage+validate job.
+ * It never writes anything itself: POST /api/preview validates, POST /api/jobs launches. */
+export async function openHwStageDialog(prefill = {}) {
+  const sourceLine = prefill.source === "case" && prefill.caseKey
+    ? `From case ${prefill.caseKey}`
+    : prefill.source === "shortlist"
+      ? `From the picked row${prefill.driver ? ` · ${prefill.driver}` : ""}${prefill.candidateId ? ` · ${String(prefill.candidateId).slice(0, 8)}` : ""}`
+      : "CPU staging; nothing runs until you press the button";
+  const ui = hwDialog({ title: "Stage + validate in Boundary Lab", subtitle: sourceLine });
+  let opts;
+  try { opts = await api("/api/hw/stage-options"); }
+  catch (e) { ui.body.innerHTML = errBanner(e.message); return; }
+  if (!ui.dlg.isConnected) return;
+
+  const meshes = Array.isArray(opts.horn_meshes) ? opts.horn_meshes : [];
+  if (!meshes.length) {
+    ui.body.innerHTML = `<div class="alert warn" role="alert">No allow-listed full-domain horn mesh is
+      available, so staging is unavailable.</div>
+      ${(opts.notes || []).length ? `<ul class="hint">${opts.notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}`;
+    return;
+  }
+
+  const b = prefill.box && typeof prefill.box === "object" ? prefill.box : null;
+  const pick = (...keys) => {
+    for (const key of keys) if (b && b[key] != null && b[key] !== "") return Number(b[key]);
+    return null;
+  };
+  const fieldText = v => v == null || !isFinite(v) ? "" : String(Math.round(v * 1000) / 1000);
+  const width = pick("external_width_mm", "width_mm");
+  const height = pick("external_height_mm", "height_mm");
+  const depth = pick("external_depth_mm", "depth_mm");
+  const wall = pick("wall_mm");
+  const port = pick("port_throat_area_cm2", "port_area_cm2");
+  const net = pick("net_volume_l");
+  const tuning = pick("derived_tuning_hz", "requested_tuning_hz");
+  const zStart = prefill.dzMm != null && isFinite(Number(prefill.dzMm)) ? Number(prefill.dzMm) : 0;
+  const wanted = prefill.designHash
+    ? meshes.find(m => String(m.dir || "").includes(String(prefill.designHash))) : null;
+  const firstMesh = wanted || meshes[0];
+
+  const notes = [];
+  if (opts.defaults && opts.defaults.note) notes.push(opts.defaults.note);
+  notes.push(...(opts.notes || []));
+
+  ui.body.innerHTML = `<div id="hw-stage-result" aria-live="polite"></div>
+    <form id="hw-stage-form" class="stack" style="gap:10px" novalidate>
+      <div class="form-grid">
+        <label for="hw-stage-mesh">Horn mesh</label>
+        <div>
+          <select id="hw-stage-mesh" autofocus>${meshes.map(m => `<option value="${esc(m.rel)}"${m === firstMesh ? " selected" : ""}>${esc(m.dir)}${m.triangles != null ? ` · ${esc(m.triangles)} triangles` : ""}</option>`).join("")}</select>
+          <span class="hint">Only allow-listed full-domain horn meshes are offered; groups are read from the file.</span>
+        </div>
+        <label for="hw-stage-group">Source group</label>
+        <div>
+          <select id="hw-stage-group"></select>
+          <span class="hint">The mesh's own 2D physical groups; the server re-checks the choice.</span>
+        </div>
+        <label for="hw-stage-z">Horn translation z</label>
+        <div>
+          <input id="hw-stage-z" type="number" step="0.1" min="-100" max="200" value="${esc(fieldText(zStart))}">
+          <span class="muted" style="font-size:0.78rem">mm</span>
+          <span class="hint">Only z is exposed; x and y stay 0 (see Advanced).</span>
+        </div>
+        <label for="hw-stage-exp">Experiment id</label>
+        <div>
+          <input id="hw-stage-exp" type="text" autocomplete="off" spellcheck="false" value="${esc(opts.default_experiment_id || "")}">
+          <span class="hint">Letters, digits, <code>_</code> <code>.</code> <code>-</code>; the stage job creates a new case under it.</span>
+        </div>
+        <label>Box overrides</label>
+        <div>
+          <div class="hw-field-grid">
+            <label>Width (mm)<input data-box="width_mm" type="number" step="0.001" min="0.001" value="${esc(fieldText(width))}"></label>
+            <label>Height (mm)<input data-box="height_mm" type="number" step="0.001" min="0.001" value="${esc(fieldText(height))}"></label>
+            <label>Depth (mm)<input data-box="depth_mm" type="number" step="0.001" min="0.001" value="${esc(fieldText(depth))}"></label>
+            <label>Wall (mm)<input data-box="wall_mm" type="number" step="0.001" min="0.001" value="${esc(fieldText(wall))}"></label>
+            <label>Port area (cm²)<input data-box="port_area_cm2" type="number" step="0.001" min="0.001" value="${esc(fieldText(port))}"></label>
+          </div>
+          <span class="hint">Prefilled from ${prefill.source === "case" ? "the case" : "the picked row"}. An empty
+            field keeps the provider default. Boundary Lab re-derives net volume and tuning.</span>
+          ${net != null || tuning != null ? `<p class="hint" style="margin:4px 0 0">Recorded box:
+            ${net != null ? `net ${esc(fieldText(net))} L` : ""}${net != null && tuning != null ? " · " : ""}${tuning != null ? `tuning ${esc(fieldText(tuning))} Hz` : ""}${port != null ? ` · port ${esc(fieldText(port))} cm²` : ""}.</p>` : ""}
+        </div>
+      </div>
+      <details class="hw-dialog-adv">
+        <summary>Advanced</summary>
+        <div class="hw-field-grid" style="margin-top:6px">
+          <label>Horn x (mm)<input type="number" value="0" disabled></label>
+          <label>Horn y (mm)<input type="number" value="0" disabled></label>
+        </div>
+        <p class="hint">x and y are fixed at 0 in this GUI; only the z offset is a stage argument.</p>
+      </details>
+      <h4>Exact command</h4>
+      <pre class="hw-verbatim mono" id="hw-stage-cmd" aria-live="polite">— previewing…</pre>
+      <p class="hint">${esc(opts.clearance_note || "")}</p>
+      ${notes.length ? `<details class="hw-refusal"><summary>Stage notes</summary>
+        <ul class="hint" style="margin:6px 0 0;padding-left:1.2em">${notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul>
+      </details>` : ""}
+      <div id="hw-stage-progress" aria-live="polite"></div>
+    </form>`;
+  ui.foot.innerHTML = `<span class="hint" role="status" id="hw-stage-msg">Previewing the exact command…</span>
+    <span class="pill">CPU</span>
+    <span class="muted" style="font-size:0.76rem">one system job at a time; a live CPU-lane holder refuses the launch</span>
+    <button type="button" class="btn primary" id="hw-stage-run" disabled>Stage + validate</button>`;
+
+  const form = ui.body.querySelector("#hw-stage-form");
+  const result = ui.body.querySelector("#hw-stage-result");
+  const cmd = ui.body.querySelector("#hw-stage-cmd");
+  const progress = ui.body.querySelector("#hw-stage-progress");
+  const msg = ui.foot.querySelector("#hw-stage-msg");
+  const runBtn = ui.foot.querySelector("#hw-stage-run");
+  const meshSel = form.querySelector("#hw-stage-mesh");
+  const groupSel = form.querySelector("#hw-stage-group");
+  const zInput = form.querySelector("#hw-stage-z");
+  const expInput = form.querySelector("#hw-stage-exp");
+  const boxFields = [
+    { key: "width_m", label: "Box width", scale: "mm", input: form.querySelector('[data-box="width_mm"]') },
+    { key: "height_m", label: "Box height", scale: "mm", input: form.querySelector('[data-box="height_mm"]') },
+    { key: "depth_m", label: "Box depth", scale: "mm", input: form.querySelector('[data-box="depth_mm"]') },
+    { key: "wall_m", label: "Wall thickness", scale: "mm", input: form.querySelector('[data-box="wall_mm"]') },
+    { key: "port_area_m2", label: "Port area", scale: "cm2", input: form.querySelector('[data-box="port_area_cm2"]') },
+  ];
+
+  const fillGroups = preferred => {
+    const mesh = meshes.find(m => m.rel === meshSel.value) || meshes[0];
+    const groups = Array.isArray(mesh.groups) ? mesh.groups : [];
+    groupSel.innerHTML = groups.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join("");
+    if (preferred && groups.includes(preferred)) groupSel.value = preferred;
+    groupSel.disabled = !groups.length;
+  };
+  fillGroups(prefill.sourceGroup || (firstMesh.groups || [])[0] || "");
+
+  const setMsg = text => { if (msg) msg.textContent = text; };
+  const buildArgs = () => {
+    const mesh = meshSel.value;
+    const group = groupSel.value;
+    if (!mesh || !group) return { error: "Choose a horn mesh and one of its source groups." };
+    const experiment = expInput.value.trim();
+    if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,120}$/.test(experiment)) {
+      return { error: "Experiment id: letters, digits, _ . - (max 121 chars), starting with a letter or digit." };
+    }
+    const z = Number(zInput.value);
+    if (!isFinite(z) || z < -100 || z > 200) {
+      return { error: "Horn translation z must be a number between -100 and 200 mm." };
+    }
+    const overrides = {};
+    for (const field of boxFields) {
+      const raw = field.input.value.trim();
+      if (raw === "") continue;                         // empty keeps the provider default
+      const n = Number(raw);
+      if (!isFinite(n) || n <= 0) return { error: `${field.label} must be a positive number.` };
+      const value = field.scale === "cm2" ? n / 10000 : n / 1000;
+      overrides[field.key] = Math.round(value * 1e9) / 1e9;   // clean mm/m round-trip in the argv
+    }
+    const args = { horn_mesh: mesh, source_group: group, translation_z_mm: z, experiment_id: experiment };
+    if (Object.keys(overrides).length) args.overrides = overrides;
+    return { args };
+  };
+
+  let timer = null;
+  let seq = 0;
+  let running = false;
+  let lastJob = null;
+  const schedule = (delay = 220) => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(refreshPreview, delay);
+  };
+
+  async function refreshPreview() {
+    const my = ++seq;
+    const built = buildArgs();
+    if (built.error) {
+      cmd.textContent = "— " + built.error;
+      cmd.classList.add("muted");
+      setMsg(built.error);
+      runBtn.disabled = true;
+      lastJob = null;
+      return;
+    }
+    const job = { kind: "hw-stage", args: built.args };
+    let r;
+    try { r = await postJson("/api/preview", job); }
+    catch (e) {
+      if (my !== seq || !ui.dlg.isConnected) return;
+      cmd.textContent = "— " + e.message;
+      cmd.classList.add("muted");
+      setMsg("Preview failed: " + e.message);
+      runBtn.disabled = true;
+      lastJob = null;
+      return;
+    }
+    if (my !== seq || !ui.dlg.isConnected) return;
+    const bad = r.error || !r.command;
+    cmd.textContent = bad ? "— " + (r.error || "the server returned no command") : r.command;
+    cmd.classList.toggle("muted", !!bad);
+    runBtn.disabled = !!bad || running;
+    runBtn.title = bad ? (r.error || "") : "Stage + validate with the previewed command";
+    lastJob = bad ? null : job;
+    setMsg(bad ? "Fix the form: " + (r.error || "no command") : "Ready. The server validated this exact command.");
+  }
+
+  /** Identify the new case by diffing the experiment's cases before and after the job. */
+  async function findNewCase(experiment, before) {
+    let data;
+    try { data = await api("/api/hw/cases"); } catch { return null; }
+    const rows = (data && Array.isArray(data.cases) ? data.cases : [])
+      .filter(c => c.experiment === experiment && (!before || !before.has(c.key)))
+      .sort((a, b) => String(b.key).localeCompare(String(a.key)));
+    return rows[0] || null;
+  }
+
+  async function showStageResult(job, experiment, before) {
+    const row = await findNewCase(experiment, before);
+    if (!ui.dlg.isConnected) return;
+    progress.innerHTML = "";
+    if (!row) {
+      result.innerHTML = `<div class="alert warn" role="status"><b>The job finished, but no new case was
+        found under <code>${esc(experiment)}</code>.</b> It may have failed before writing a case.
+        <details class="hw-refusal" style="margin-top:6px"><summary>Last log lines</summary>
+          <pre class="log-tail" style="max-height:180px">${esc((job.log_tail || []).slice(-20).join("\n") || "(no log lines recorded)")}</pre>
+        </details></div>`;
+      result.scrollIntoView({ block: "nearest" });
+      return;
+    }
+    let caseData = null;
+    try { caseData = await api("/api/hw/case/" + encKey(row.key)); } catch { /* shown as no verdict */ }
+    if (!ui.dlg.isConnected) return;
+    const r = (caseData && caseData.row) || row;
+    const cl = r.clearance || {};
+    const tokens = Array.isArray(r.tokens) ? r.tokens : [];
+    const violation = tokens.find(t => String(t).startsWith("BODY_CLEARANCE_VIOLATION"));
+    const unproven = tokens.find(t => String(t).startsWith("BODY_CLEARANCE_UNPROVEN"));
+    const gap = cl.aabb_gap_m != null ? ` · gap ${num(cl.aabb_gap_m * 1000, 1)} mm` : "";
+    let verdict;
+    if (cl.status === "PASS") {
+      verdict = `<span class="pill good">clearance PASS</span><span class="muted">${esc(gap)}</span>`;
+    } else if (violation) {
+      verdict = `<span class="pill bad">clearance violation</span><code style="white-space:normal;overflow-wrap:anywhere">${esc(violation)}</code>`;
+    } else if (unproven) {
+      verdict = `<span class="pill warn">clearance unproven</span><code style="white-space:normal;overflow-wrap:anywhere">${esc(unproven)}</code>`;
+    } else {
+      verdict = `<span class="pill warn">clearance not recorded</span>`;
+    }
+    const validate = caseData && caseData.validate
+      ? `Boundary Lab validate: rc ${esc(caseData.validate.returncode)}, valid ${esc(caseData.validate.valid)}.`
+      : "";
+    result.innerHTML = `<div class="hw-result">
+      <p style="margin:0 0 6px"><b>New case:</b> ${statePill(r)}
+        <span class="mono" style="overflow-wrap:anywhere">${esc(row.key)}</span></p>
+      <p class="hw-verdict">${verdict}</p>
+      ${validate ? `<p class="muted" style="margin:4px 0">${esc(validate)}</p>` : ""}
+      <div class="btn-row" style="margin-top:8px">
+        <a class="btn primary" href="${caseHref(row.key)}">Open the new case →</a>
+        <a class="btn" href="#/hw/cases">All cases</a>
+      </div>
+      <details class="hw-refusal" style="margin-top:6px"><summary>Job log (last 20 lines)</summary>
+        <pre class="log-tail" style="max-height:160px">${esc((job.log_tail || []).slice(-20).join("\n") || "(no log lines recorded)")}</pre>
+      </details>
+    </div>`;
+    result.scrollIntoView({ block: "nearest" });
+    const link = result.querySelector("a.btn.primary");
+    if (link) link.focus();
+    setMsg("Staged. The clearance verdict is above.");
+  }
+
+  async function pollStage(id, experiment, before) {
+    const t0 = Date.now();
+    for (;;) {
+      await sleep(1500);
+      if (!ui.dlg.isConnected) return;                   // closing the dialog does not stop the job
+      let job;
+      try { job = await api("/api/job/" + encodeURIComponent(id)); } catch { continue; }
+      const elapsed = Math.round((Date.now() - t0) / 1000);
+      progress.innerHTML = `<div class="job-row">
+        <div class="job-head"><div>
+          <span class="job-title">hw-stage · <span class="mono">${esc(id)}</span></span>
+          <span class="job-status-${esc(job.status || "done")}"> ${esc(job.status || "")} · ${elapsed} s</span>
+        </div></div>
+        ${Array.isArray(job.log_tail) && job.log_tail.length
+          ? `<div class="log-tail" style="max-height:140px">${esc(job.log_tail.slice(-12).join("\n"))}</div>` : ""}
+      </div>
+      <p class="hint" style="margin:4px 0 0">Closing this dialog does not stop the job.</p>`;
+      if (job.status === "running" || job.status === "queued") continue;
+      running = false;
+      runBtn.disabled = true;
+      if (job.status !== "done") {
+        progress.innerHTML = "";
+        result.innerHTML = hwFailurePanel(job, "Staging failed");
+        result.scrollIntoView({ block: "nearest" });
+        setMsg("Staging failed — the refusal token and last log lines are above.");
+        schedule(0);
+        return;
+      }
+      await showStageResult(job, experiment, before);
+      runBtn.disabled = false;                            // the form can stage another variant
+      return;
+    }
+  }
+
+  runBtn.addEventListener("click", async () => {
+    if (running) return;
+    const built = buildArgs();
+    if (built.error) { setMsg(built.error); return; }
+    const job = lastJob && lastJob.args ? lastJob : { kind: "hw-stage", args: built.args };
+    running = true;
+    runBtn.disabled = true;
+    result.innerHTML = "";
+    progress.innerHTML = "";
+    setMsg("Starting the CPU stage job…");
+    const experiment = job.args.experiment_id;
+    let before = null;
+    try {
+      const data = await api("/api/hw/cases");
+      before = new Set((data.cases || []).filter(c => c.experiment === experiment).map(c => c.key));
+    } catch { /* the diff is optional; the newest case in the experiment is the fallback */ }
+    if (!ui.dlg.isConnected) return;
+    let res;
+    try { res = await postJson("/api/jobs", job); }
+    catch (e) {
+      running = false;
+      runBtn.disabled = false;
+      result.innerHTML = errBanner(e.message);
+      setMsg("Launch refused: " + e.message);
+      schedule(0);
+      return;
+    }
+    if (res.error) {
+      running = false;
+      runBtn.disabled = false;
+      result.innerHTML = errBanner(res.error);
+      setMsg("Launch refused: " + res.error);
+      schedule(0);
+      return;
+    }
+    await pollStage(res.id, experiment, before);
+  });
+
+  form.addEventListener("input", () => schedule());
+  form.addEventListener("change", () => schedule(0));
+  meshSel.addEventListener("change", () => { fillGroups(); schedule(0); });
+
+  ui.focusFirst();
+  refreshPreview();
+}
+
+/** P6 solve dialog. Visible so the reason is readable; the primary is disabled because owner
+ * decision 6 is open (the server's authorization state is shown, never overridden). */
+export async function openHwSolveDialog(caseKey) {
+  const ui = hwDialog({ title: "Solve in Boundary Lab", subtitle: caseKey ? `Case ${caseKey}` : "" });
+  let presetsData, auth;
+  try {
+    [presetsData, auth] = await Promise.all([
+      api("/api/hw/solve-presets"),
+      api("/api/hw/authorization"),
+    ]);
+  } catch (e) {
+    ui.body.innerHTML = errBanner(e.message);
+    return;
+  }
+  if (!ui.dlg.isConnected) return;
+
+  const presets = Array.isArray(presetsData.presets) ? presetsData.presets : [];
+  const notes = Array.isArray(presetsData.notes) ? presetsData.notes : [];
+  const reason = auth.reason || "needs owner approval for GUI-started Boundary Lab solves (decision 6)";
+  const allowed = !!auth.allowed;
+
+  ui.body.innerHTML = `<div class="stack" style="gap:12px">
+    <div class="alert warn" role="note"><b>Solve is ${allowed ? "authorized" : "disabled"}.</b> ${esc(reason)}</div>
+    <section>
+      <h4>Preset</h4>
+      <div class="hw-preset-list" role="radiogroup" aria-label="Solve preset">
+        ${presets.map((p, i) => `<label class="hw-preset">
+          <input type="radio" name="hw-solve-preset" value="${esc(p.id)}"${i === 0 ? " checked" : ""}>
+          <span><b>${esc(p.label)}</b> <span class="mono muted">${esc(p.id)}</span><br>
+            <span class="muted">${esc(p.estimate_text || "estimate unavailable")}</span><br>
+            <small class="muted">${p.frequency_count == null ? "—" : esc(p.frequency_count)} frequencies${p.band_hz ? ` · ${esc(p.band_hz[0])}–${esc(p.band_hz[1])} Hz` : ""} · ${esc(p.frequencies_source || "")}</small></span>
+        </label>`).join("") || `<p class="alert error" role="alert">The server returned no presets.</p>`}
+      </div>
+    </section>
+    <section>
+      <h4>Authorization</h4>
+      <div class="hw-auth-state">
+        ${allowed ? `<span class="pill good">authorized</span>` : `<span class="pill bad">not authorized</span>`}
+        <ul class="hint" style="margin:6px 0 0;padding-left:1.2em">
+          <li><code>${esc(auth.env_var || "HORNLAB_GUI_ALLOW_BL_SOLVE")}=1</code> is ${auth.env_set ? "set" : "not set"}.</li>
+          <li>Owner decision 6 is ${auth.decision_recorded ? "recorded" : "not recorded"}${auth.decision_status ? ` (${esc(auth.decision_status)})` : ""}.</li>
+          <li>The preset request JSON is written into the case directory by the job, never by the server.</li>
+        </ul>
+      </div>
+    </section>
+    <section>
+      <label for="hw-solve-confirm" style="font-weight:600">Typed confirmation</label>
+      <input id="hw-solve-confirm" type="text" autocomplete="off" spellcheck="false" placeholder="solve">
+      <p class="hint" id="hw-solve-confirm-msg">Type <code>solve</code> to confirm. The button stays disabled until decision 6 is recorded.</p>
+    </section>
+    ${notes.length ? `<ul class="hint" style="margin:0;padding-left:1.2em">${notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
+  </div>`;
+  ui.foot.innerHTML = `<span class="hint" role="status">${allowed ? "Authorized on the server; no GUI override exists." : "Solve is unavailable until decision 6 is recorded; this button has no override."}</span>
+    <button type="button" class="btn primary" disabled title="${esc(reason)}">Solve</button>`;
+  const input = ui.body.querySelector("#hw-solve-confirm");
+  const confirmMsg = ui.body.querySelector("#hw-solve-confirm-msg");
+  input.addEventListener("input", () => {
+    const ok = input.value.trim().toLowerCase() === "solve";
+    confirmMsg.textContent = ok
+      ? "Confirmation matches — solve remains disabled until owner decision 6 is recorded."
+      : "Type solve exactly to confirm. The button stays disabled until decision 6 is recorded.";
+  });
+  ui.focusFirst();
+}
+
+/** P6 validate: one click, one CPU job, then a fresh case read. */
+export async function runHwValidate(root, key, button) {
+  const host = root.querySelector("#hw-action-status") || root.querySelector(".stack");
+  if (!host) return;
+  const label = button.textContent;
+  button.disabled = true;
+  button.textContent = "Validating…";
+  host.innerHTML = `<p class="hint" role="status">Starting Boundary Lab validate (CPU)…</p>`;
+  let res;
+  try { res = await postJson("/api/jobs", { kind: "hw-validate", args: { case: key } }); }
+  catch (e) {
+    host.innerHTML = errBanner(e.message);
+    button.disabled = false;
+    button.textContent = label;
+    return;
+  }
+  if (res.error) {
+    host.innerHTML = errBanner(res.error);
+    button.disabled = false;
+    button.textContent = label;
+    return;
+  }
+  const t0 = Date.now();
+  for (;;) {
+    await sleep(1200);
+    if (!root.isConnected) return;
+    let job;
+    try { job = await api("/api/job/" + encodeURIComponent(res.id)); } catch { continue; }
+    const elapsed = Math.round((Date.now() - t0) / 1000);
+    button.textContent = `Validating… ${elapsed} s`;
+    host.innerHTML = `<div class="job-row">
+      <div class="job-head"><div>
+        <span class="job-title">hw-validate · <span class="mono">${esc(res.id)}</span></span>
+        <span class="job-status-${esc(job.status || "done")}"> ${esc(job.status || "")}</span>
+      </div></div>
+      ${Array.isArray(job.log_tail) && job.log_tail.length
+        ? `<div class="log-tail" style="max-height:140px">${esc(job.log_tail.slice(-12).join("\n"))}</div>` : ""}
+    </div>`;
+    if (job.status === "running" || job.status === "queued") continue;
+    if (job.status === "done") {
+      host.innerHTML = `<div class="alert info" role="status">Validate finished — refreshing the case…</div>`;
+      await viewHwCase(root, key);
+      return;
+    }
+    host.innerHTML = hwFailurePanel(job, "Validate failed");
+    button.disabled = false;
+    button.textContent = label;
+    return;
+  }
 }
 
 // ── Case detail ─────────────────────────────────────────────────────────────
@@ -729,8 +1285,17 @@ export async function viewHwCase(root, key) {
       <nav class="run-tabs" aria-label="Views of this case">
         ${TABS.map(([k, l]) => `<a class="run-tab-link" data-tab="${k}" href="${tabHref(key, k, probe, phaseMode)}"${k === tab ? ' aria-current="page"' : ""}>${esc(l)}</a>`).join("")}
       </nav>
-      <div class="run-actions"><a class="btn btn-sm" href="#/hw/cases">← All cases</a></div>
+      <div class="run-actions" style="flex-wrap:wrap">
+        <button class="btn btn-sm" type="button" data-hw-stage
+          title="Open the stage dialog prefilled from this case">Stage a variant…</button>
+        ${r.state === "staged" ? `<button class="btn btn-sm" type="button" data-hw-validate
+          title="Run Boundary Lab's own validate on this staged case (CPU, seconds)">Validate</button>` : ""}
+        ${(r.state === "staged" || r.state === "solved") ? `<button class="btn btn-sm" type="button" data-hw-solve
+          title="Open the solve dialog; running is disabled until owner decision 6 is recorded">Solve…</button>` : ""}
+        <a class="btn btn-sm" href="#/hw/cases">← All cases</a>
+      </div>
     </div>
+    <div id="hw-action-status" class="stack" style="gap:8px" aria-live="polite"></div>
     ${d.run && d.run.error ? errBanner("Result reader refused: " + d.run.error) : ""}
     ${caseStatusBand(r, d)}
     ${r.note ? `<div class="alert warn" role="note">${esc(r.note)}</div>` : ""}
@@ -743,6 +1308,20 @@ export async function viewHwCase(root, key) {
 
   root.querySelector("#hw-case-kpis").innerHTML = caseKpis(r, run);
   if (run) fillCaseLevels(root.querySelector("#hw-case-kpis"), key, run, probe);
+
+  // P6 actions (CPU jobs). The dialogs are URL-independent; a hash change closes them.
+  const stageCaseBtn = root.querySelector("[data-hw-stage]");
+  if (stageCaseBtn) stageCaseBtn.addEventListener("click", () => openHwStageDialog({
+    source: "case",
+    caseKey: r.key,
+    box: r.box || null,
+    dzMm: r.horn && Array.isArray(r.horn.translation_mm) ? r.horn.translation_mm[2] : null,
+    designHash: r.horn && r.horn.mesh ? (String(r.horn.mesh).match(/([0-9a-f]{8,})$/) || [])[1] : "",
+  }));
+  const validateBtn = root.querySelector("[data-hw-validate]");
+  if (validateBtn) validateBtn.addEventListener("click", () => runHwValidate(root, r.key, validateBtn));
+  const solveBtn = root.querySelector("[data-hw-solve]");
+  if (solveBtn) solveBtn.addEventListener("click", () => openHwSolveDialog(r.key));
 
   const ph = root.querySelector("#hw-placeholders");
   if (ph) ph.addEventListener("toggle", () => {
