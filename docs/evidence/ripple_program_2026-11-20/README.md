@@ -161,6 +161,28 @@ width tracks the wall angle, and the wall angle is already at the 600 mm mouth l
 requires a larger envelope (owner decision) or a different mouth/aspect law — which is what mandate
 item 4's *second* factor (aspect/morph) should test next, not more wall angle.
 
+## 3b. Item 4, second factor - the mouth law is also envelope-bound
+
+Follow-up to §3: if the wall angle is at the mouth limit, can a *mouth-law* change steer HF width
+inside the same 600 mm envelope? Three one-knob variants of the Crowe X OSSE base, all pins except one
+(`tools/shape_check.py`, before any solve):
+
+| variant | knob | mouth W x H (mm) | verdict |
+|---|---|---:|---|
+| `hf_crowex_sf0` | `g_sf_amt` 0.239 -> 0.0 (no superformula morph) | 610 x 447 | **OVER 600 - refused, deleted** |
+| `hf_crowex_sf5` | `g_sf_amt` 0.239 -> 0.5 (stronger morph) | 596 x 462 | fits - solve staged |
+| `hf_crowex_s550` | `g_s` 0.390 -> 0.550 (aspect) | 663 x 470 | **OVER 600 - refused, deleted** |
+
+Two of the three legal-looking mouth-law directions are already outside the envelope, and the one that
+fits is +3 mm wider than the base - i.e. this typology has essentially **no mouth-law headroom at
+600 mm**. Read together with §3, the answer to "how do we get a wider HF pattern?" is now measured, not
+guessed: neither the wall angle nor the mouth law can widen it inside the home envelope, so a wider
+horn needs a bigger envelope (owner decision) or a different construction - not another knob search.
+
+`hf_crowex_sf5` is queued in `docs/queue/hf_width2_2026-11-20.yaml` and **not yet run**: a concurrent
+night resumed a search and owns the GPU lane. Its pre-declared reading is in the file (>=1 deg or
+>=0.5 dB = the mouth law matters at the margin; <=0.3 deg / 0.2 dB = it does not).
+
 ## 4. What we now know we need
 
 1. **The native-route source knob.** The grid route is fixed and measured (2b); OSSE/FREEFORM configs

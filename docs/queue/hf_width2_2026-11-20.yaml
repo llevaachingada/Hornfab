@@ -1,0 +1,21 @@
+# HF-width second factor, single legal variant (2026-11-20). STAGED, NOT LAUNCHED.
+#
+# Item 4 second factor: change the MOUTH LAW at fixed wall angles. Shape-check results are in
+# docs/evidence/ripple_program_2026-11-20 sec. 3b: of three one-knob mouth-law variants, two break the
+# 600 mm envelope (sf_amt 0.0 -> 610 mm, g_s 0.55 -> 663 mm) and were deleted; only sf_amt 0.5 fits
+# (596 mm). This night solves that one against the already-solved baseline (J 5.3454, bwH 74.0 deg,
+# bwV 53.9 deg at 8 kHz).
+#
+# Pre-declared reading: >=1 deg change in 8 kHz width or >=0.5 dB at +25 deg = the mouth law matters at
+# the margin and is worth a wider-envelope experiment; <=0.3 deg / 0.2 dB = HF width is fixed by
+# wall angle x envelope, and a wider horn needs a bigger envelope or a different construction.
+night: hf_width2_2026-11-20
+lane: gpu
+jobs:
+- id: hf_crowex_sf5
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, run, --config,
+         examples/typologies/hf_width_2026-11-20/hf_crowex_sf5.yaml, --mode, screen]

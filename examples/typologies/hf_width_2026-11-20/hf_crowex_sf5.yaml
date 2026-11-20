@@ -1,0 +1,274 @@
+# HF-width second factor (2026-11-20): mouth law at fixed wall angles. Base Crowe X OSSE
+# 9b5428e6dec8, all knobs pinned, change = g_sf_amt=0.5. Envelope 600 x 480 x 480 mm; the base seed is
+# already at 593 mm mouth width, so a variant that grows the mouth is REFUSED by shape_check
+# rather than queued. Pre-declared reading: >=1 deg change in 8 kHz width or >=0.5 dB at +25 deg
+# inside the envelope = the mouth law can steer HF width without more mouth; below 0.3 deg /
+# 0.2 dB = HF width is fixed by wall angle x envelope and needs a new construction.
+# J comparable only within this family.
+name: hf_crowex_sf5
+family: FREEFORM
+brief_file: ../../briefs/home_landscape_2026-11-15/room_landscape_80x50_700_hf1440_v7.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_a_h_deg: 36.388866
+  g_a_v_deg: 22.707717
+  g_k: 1.0
+  g_L_mm: 259.603653
+  g_s: 0.389835
+  g_n: 2.143998
+  g_q: 0.996
+  g_r_lip_mm: 18.284822
+  g_wrap_deg: 86.087609
+  g_sf_m: 4
+  g_sf_n1: 1.8
+  g_sf_n2: 7.0
+  g_sf_ab: 0.847983
+  g_sf_amt: 0.5
+  g_sf_start: 0.25
+bounds:
+  g_a_h_deg:
+    lo: 36.388866
+    hi: 36.388866
+    search: false
+  g_a_v_deg:
+    lo: 22.707717
+    hi: 22.707717
+    search: false
+  g_k:
+    lo: 1.0
+    hi: 1.0
+    search: false
+  g_L_mm:
+    lo: 259.603653
+    hi: 259.603653
+    search: false
+  g_s:
+    lo: 0.389835
+    hi: 0.389835
+    search: false
+  g_n:
+    lo: 2.143998
+    hi: 2.143998
+    search: false
+  g_q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  g_r_lip_mm:
+    lo: 18.284822
+    hi: 18.284822
+    search: false
+  g_wrap_deg:
+    lo: 86.087609
+    hi: 86.087609
+    search: false
+  g_sf_m:
+    lo: 4
+    hi: 4
+    search: false
+  g_sf_n1:
+    lo: 1.8
+    hi: 1.8
+    search: false
+  g_sf_n2:
+    lo: 7.0
+    hi: 7.0
+    search: false
+  g_sf_ab:
+    lo: 0.847983
+    hi: 0.847983
+    search: false
+  g_sf_amt:
+    lo: 0.5
+    hi: 0.5
+    search: false
+  g_sf_start:
+    lo: 0.25
+    hi: 0.25
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 1234
+  budget: 1
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: graded
+  budget_counts: valid
+  max_attempts: 220
+  warm_start:
+    from_runs:
+    - runs/20261116T152544Z-screen-5f7d93
+    top_k: 10
+    sigma_from_spread: true
+description: 'HF-width mouth-law variant (2026-11-20, item 4 second factor): Crowe
+  X OSSE base 9b5428e6dec8, change = g_sf_amt'
+target:
+  coverage_h_deg: 80.0
+  coverage_v_deg: 50.0
+  band_lo_hz: 350.0
+  band_hi_hz: 8000.0
+  di_target_db: null
+  di_slope_target: 0.0
+  z_min: 0.5
+  f0_hz: 700.0
+  f0_v_hz: 700.0
+  loaded_hi_hz: 5600.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+weights:
+  cov: 1.0
+  rip: 1.0
+  di: 0.3
+  dislope: 1.0
+  flat: 0.5
+  load: 1.0
+  distd: 0.5
+  diag: 1.0
+  flat_cv: 1.0
+brief:
+  name: room_landscape_80x50_700_hf1440_v7
+  description: (objective v7) HOME living-room horn, LANDSCAPE 80H x 50V, vertical
+    half-weighted, no K-law mouth, pattern+loading from 700 Hz XO, HF1440 1.4-inch,
+    600W x 480H x 480D envelope, band 350-8000 Hz
+  driver:
+    exit_radius_mm: 18.0
+    exit_angle_deg: 2.0
+  envelope:
+    max_mouth_w_mm: 600.0
+    max_mouth_h_mm: 480.0
+    max_depth_mm: 480.0
+  symmetry: hv
+  source:
+    cap: auto
+  target:
+    coverage_h_deg: 80.0
+    coverage_v_deg: 50.0
+    band_lo_hz: 350.0
+    band_hi_hz: 8000.0
+    di_target_db: null
+    di_slope_target: 0.0
+    z_min: 0.5
+    f0_hz: 700.0
+    f0_v_hz: 700.0
+    loaded_hi_hz: 5600.0
+    freq_weights:
+      band_hz:
+      - - 2500.0
+        - 5500.0
+        - 2.0
+  weights:
+    cov: 1.0
+    rip: 1.0
+    di: 0.3
+    dislope: 1.0
+    flat: 0.5
+    load: 1.0
+    distd: 0.5
+    diag: 1.0
+    flat_cv: 1.0
+  grid:
+    verify_points_per_octave: 6
+    screen_extra_hz:
+    - 250
+    - 315
+    - 400
+    - 2573
+    - 3311
+    - 4260
+  objective:
+    version: 7
+    flat_band: scored
+    cov_v_weight: 0.5
+    tolerances:
+      cov: 3.0
+      rip: 1.0
+      di: 0.4
+      dislope: 9.0
+      flat: 1.5
+      load: 0.3
+      distd: 2.0
+      diag: 2.0
+      flat_cv: 1.5
+    cov_narrow_ratio: 2.0
+    cov_below_f0: mask
+    loaded_re_z: 0.5
+    lfp_re_z: 0.2
+    lfp_crossover_ratio: 1.6
+    bw8k_floor: 0.75
+objective:
+  version: 7
+  flat_band: scored
+  cov_v_weight: 0.5
+  tolerances:
+    cov: 3.0
+    rip: 1.0
+    di: 0.4
+    dislope: 9.0
+    flat: 1.5
+    load: 0.3
+    distd: 2.0
+    diag: 2.0
+    flat_cv: 1.5
+  cov_narrow_ratio: 2.0
+  cov_below_f0: mask
+  loaded_re_z: 0.5
+  lfp_re_z: 0.2
+  lfp_crossover_ratio: 1.6
+  bw8k_floor: 0.75
+grid:
+  verify_points_per_octave: 6
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+feasibility:
+  rule: d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)
+  f0_hz: 700.0
+  required_mouth_w_mm: 453.57142857142856
+  required_mouth_h_mm: 725.7142857142857
+  envelope_mouth_w_mm: 600.0
+  envelope_mouth_h_mm: 480.0
+  held_coverage_w_deg: 60.476190476190474
+  held_coverage_v_deg: 75.5952380952381
+  feasible_w: true
+  feasible_v: false
+  f0_v_hz: 700.0
+  screen_freqs_below_f0: 2
+  screen_freqs_total: 12
+  verify_freqs_below_f0: 7
+  verify_freqs_total: 25
+  derivation:
+  - knob: '-'
+    note: 'seed_policy explicit: derivation skipped'

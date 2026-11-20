@@ -195,6 +195,8 @@
 
 - **CORPUS HYGIENE + CORRECTION (later 2026-11-20):** the sweep now dedupes by `design_hash` (748 runs hold 545 unique designs) and groups by `(brief, objective version)`, not brief name alone. Corrected numbers: pooled rho 0.662; **21 of 24 identities below 0.8**; only `v7_smooth` 0.929 (n=52), `native_ath_core_2in` 0.893 (n=7) and `b1w_hifi_90x60_850_wide` 0.881 (n=8) reach 0.8. The `organic_rollback_1in` -0.871 is **RETRACTED**: it mixed five Oct-25 runs with no declared objective version (salmon/iwata/lecleach rows, J 45-86) with five Nov-13 v3 runs (salmon, J ~40); split by version it reads -0.500 and +0.300 on n=5 each. The second-axis conclusion stands; the anti-correlated identity was era, not acoustics.
 
+- **ITEM 4 SECOND FACTOR - mouth law is envelope-bound too (2026-11-20):** three one-knob mouth-law variants of the Crowe X OSSE base through `shape_check` before any solve: `g_sf_amt` 0 -> 610 mm (OVER 600) and `g_s` 0.55 -> 663 mm (OVER), both refused and deleted; `g_sf_amt` 0.5 -> 596 mm fits and is staged as `docs/queue/hf_width2_2026-11-20.yaml` (1 job, NOT launched - another lane's search resume owns the GPU lane). Conclusion so far: **neither wall angle nor mouth law can widen HF inside the 600 mm home envelope**; a wider horn needs a bigger envelope or a different construction.
+
 ## 2026-11-20 - Ripple audit grid test RUN: PASS (rho 0.964) + DENSE verdict: the B3 feature is broad, not a resonance
 
 - **Launched (owner: "Launch"):** `ripple_audit_2026-11-20`, detached pid 2900 at 08:34 local,

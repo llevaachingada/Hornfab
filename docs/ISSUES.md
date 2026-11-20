@@ -108,6 +108,8 @@
 - **RESULT (2026-11-20, re-run with the knob live):** grid route - 8 kHz width <=0.2 deg and +25 deg level <=0.05 dB across auto/150/60; 10 kHz 3.1-3.5 deg; **12 kHz H width -10.1 deg, +25 deg level +1.2 dB**. Conditionality starts near 10 kHz, not at 8. Any report above ~10 kHz must state its cap.
 - **OPEN (native route):** `source.cap` is still inert for OSSE/FREEFORM configs (they bypass `grid_build`): OSSE morph produced three byte-identical meshes with three different `mesh_hash` values. Either wire the cap in that spec path or refuse a cap on a native brief - do not let the recorded hash keep claiming a change that did not happen.
 
+- **STAGED (2026-11-20):** `docs/queue/hf_width2_2026-11-20.yaml`, one job (`hf_crowex_sf5`, `g_sf_amt` 0.239 -> 0.5, mouth 596 mm) - the only legal mouth-law variant of three that shape-check accepted. Not launched: a concurrent GPU night resumed a search. Readout rule is in the file and in `docs/evidence/ripple_program_2026-11-20/README.md` sec. 3b.
+
 ## 2026-11-20 - Ripple audit grid test RUN (PASS) + OPEN: bridge cells cannot be verified from the plain CLI
 
 - DONE: `ripple_audit_2026-11-20` launched (detached, 08:34 local) and finished 08:48 **exit 0**;
