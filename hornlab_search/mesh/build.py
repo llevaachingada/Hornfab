@@ -380,6 +380,18 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
     res = res_mm_for_spec(mesh, cfg)
     out_path = out_dir / "mesh.msh"
     mcfg = families.to_mesher_config(design, mesh, res, out_path, mounting=mounting)
+    # NATIVE route (OSSE / R-OSSE / ICW / FREEFORM formulas): the mesher's config path reads an
+    # explicit cap radius from its top-level ``source`` section
+    # (hornlab_mesher/config_builder.py:807 ``source = _section(config, "source", "Source")`` ->
+    # :1028 ``sourceRadius`` -> :2247 ``source_radius_mm`` on the PointGridHornGeometry). Pass the
+    # brief's explicit ``source.cap`` the same way ``grid_build`` passes ``source_radius_mm``: an
+    # explicit radius wins, the a0-derived auto angle stays set in both cases. ``auto``/absent
+    # adds NOTHING, so the mesher keeps its -1.0 default and every stored native mesh/hash is
+    # byte-identical. ``config.mesh_spec`` already folds the same value into the mesh identity.
+    from .grid_build import source_cap_radius_mm
+    source_radius_mm = source_cap_radius_mm(cfg)
+    if source_radius_mm is not None:
+        mcfg.setdefault("source", {})["source_radius_mm"] = source_radius_mm
     # Copy-pasteable at 2 a.m.: paste into a REPL and call hornlab_mesher.build_from_config.
     log.debug("mesher config for %s: %r", design.hash(), mcfg)
 

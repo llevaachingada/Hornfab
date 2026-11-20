@@ -1,0 +1,45 @@
+# NATIVE-ROUTE source sensitivity (2026-11-20, after the native cap fix). 3 jobs.
+#
+# The v2 morph jobs were invalid: the native (OSSE/FREEFORM) route ignored `source.cap` and built three
+# byte-identical meshes while recording three different mesh hashes. `hornlab_search/mesh/build.py`
+# now forwards the brief's numeric cap as the mesher config's `source.source_radius_mm`, so the same
+# three solves are re-run here into fresh dirs.
+#
+# Expected signatures (checked before queuing, `tests/test_mesh_source_cap_native.py`):
+#   auto   -> .msh sha256 c59ec195933a (unchanged, byte-identical to the pre-fix mesh)
+#   cap 60 -> a different .msh (5e908a347567 in the test fixture)
+#
+# Pre-declared reading (same as v1/v2 so the three anchors stay comparable):
+#   * report beamwidth H/V at 8, 10, 12 kHz and the +25/+35 V level re 0 deg at 8 and 12 kHz;
+#   * <=0.3 deg / <=0.3 dB at 8-12 kHz = the native route's source assumption does not decide the HF
+#     comparison either; >=1 deg / >=1 dB at 12 kHz = it does, and the anchor must carry its cap.
+night: source_sensitivity3_2026-11-20
+lane: gpu
+jobs:
+- id: ss_morph_auto
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T081214Z-screen-8470bd,
+         --designs, cf716e738ef8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_auto.yaml,
+         --verify-dir, runs/source_sensitivity3/ss_morph_auto]
+- id: ss_morph_cap150
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T081214Z-screen-8470bd,
+         --designs, cf716e738ef8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_cap150.yaml,
+         --verify-dir, runs/source_sensitivity3/ss_morph_cap150]
+- id: ss_morph_cap60
+  kind: command
+  timeout_s: 2400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T081214Z-screen-8470bd,
+         --designs, cf716e738ef8, --brief,
+         examples/briefs/source_sensitivity_2026-11-20/room_landscape_80x50_700_hf1440_v7_12k_cap60.yaml,
+         --verify-dir, runs/source_sensitivity3/ss_morph_cap60]
