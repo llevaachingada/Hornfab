@@ -88,7 +88,7 @@
   60) to the tail of `fav_crowe_2026-11-20` (now 9 jobs), so they are deferred, not dropped. The chained
   queue.ps1 (pid 52188) starts the favorite night as soon as runner 26752 exits.
 
-## 2026-11-20 - GUI senior-review pass (steps 1-14, in progress)
+## 2026-11-20 - GUI senior-review pass (steps 1-14)
 
 - **Mandate:** `docs/research/system_woofer_2026-11-18/GUI_SENIOR_REVIEW_2026-11-20.md` §4 steps 1-14,
   in order, staging only this lane's hunks; stop at owner gates G and H. Companion handoff:
@@ -99,27 +99,34 @@
   with /XJ, sha256 manifest of source and destination must match, after the CPU lane lock is
   released). Quote this answer in CONTINUITY."
   (The review has no §8.3; the written method in the answer was followed exactly.)
+- **Owner gate H (verbatim answer):** "Approve the 11 README-covered". Applied: the 11
+  README-covered evidence entries are `status: approved`, `approved_by: owner 2026-11-20`; the 2 WP3
+  assembled real-motor cases and 3 mesh-refinement controls remain `proposed` (greyed + chip).
+  Committed-registry test: 20 approved / 5 proposed.
 - **Executed:** `git worktree lock --reason "holds system_runs evidence store; do not remove"
   C:/Users/hunte/Hrns/hornlab-woofer-system-wt`; `robocopy "…\hornlab-woofer-system-wt\system_runs"
   "E:\hornlab-system-evidence-backup-2026-11-20" /E /XJ /COPY:DAT`; **1,424/1,424 files**;
   source and destination sha256 manifests both
   `06d1e55a2155c72528deb3e33e8dee0b07de322ddc9c7c273c7ac30b79d6fd02` (`ok: true`, 0 missing/extra/diffs).
   No CPU-lane lock and no solve process was live at the copy.
-- **Committed so far:** `9b90e25` HEAD consistency, `01a67b3` hermetic hw tests, `b6c9ccc` registry v2,
+- **Committed:** `9b90e25` HEAD consistency, `01a67b3` hermetic hw tests, `b6c9ccc` registry v2,
   `05af010` control links, `aa71c68` clearance removal, `ef415fa` CPU-lane lock for evidence solves,
   `be05284` compare grid tolerance + README acceptance, `61582c6` overview next-step + dialog routes,
   `5ab291e` locked DSP preview, `99358c2` P5 study identity, `71da083` shortlist table,
   `337feaf` shortlist follow-ups, `6f488b7` Overview + menu, `8fe7fa4` project-registry v2,
-  `fe868d2` wizard/Quick launch, `405d741` P6 dialogs + overview polish.
-- **Tests so far:** §9 command 1 **1,116 tests / 1 failure (pre-existing B8 host-cleanup, introduced
-  in `b019623`; review §1 recorded it) / 0 errors / 7 skipped**; full profile **5,586 / 7 failures
+  `fe868d2` wizard/Quick launch, `405d741` P6 dialogs + overview polish, `909181c` Compare +
+  Crossover pages, `cfa7846` lifecycle harness + gate-H approvals, plus the final `docs(gui)`
+  handback commit. `GUI_HANDBACK_2026-11-20.md` is the packet.
+- **Tests:** §9 command 1 **1,117 tests / 1 failure (pre-existing B8 host-cleanup, introduced in
+  `b019623`; review §1 recorded it) / 0 errors / 7 skipped**; full profile **5,586 / 7 failures
   (1 pre-existing B8 + 6 other-lane: v11 registration, score_identities, scout40 queue, preflight) /
-  29 skipped**; real-BL staging `tests/system/test_bl_stage.py` **11 passed**; hw browser sweep
-  **72/72 combinations, 0 failures**.
+  29 skipped**; real-BL staging `tests/system/test_bl_stage.py` **11 passed**; final hw browser
+  sweep **104/104 combinations, 0 failures**; keyboard-only story **14/14 steps, 0 console errors**;
+  hw lifecycle harness `node …` exit 0 + pytest 1 passed.
 - **Store state:** `system_runs` remains the junctioned worktree store; the worktree is locked and
   the E: copy is verified. No GPU lock or `gpu-clean` was touched by this pass.
-- **Pending:** compare/crossover pages, final browser sweep, keyboard-only story, hw lifecycle
-  harness, gate H approval of the proposed registry entries, handback file.
+- **Done:** steps 1-14 of the senior review. Gates: B/C yes (2026-11-19), D/E open, G/H answered
+  above. Handback: `docs/research/system_woofer_2026-11-18/GUI_HANDBACK_2026-11-20.md`.
 
 ## 2026-11-20 - System evidence queue ran (CPU only, no GPU)
 

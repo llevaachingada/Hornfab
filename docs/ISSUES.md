@@ -1,5 +1,27 @@
 ﻿# ISSUES
 
+## 2026-11-20 - GUI senior-review pass complete (steps 1-14; gates G/H answered)
+
+- DONE: registry v2 (`cases.d/`) with 20 approved / 5 proposed entries; validated control links
+  (lf/wide/dense/farfield/mesh_refine) + LF/wide two-series payload; hermetic F2 tests; F5
+  `clearance_m` removal; F6 CPU-lane lock for manual evidence solves; readable shortlist table;
+  Overview + five-item menu; New system wizard + Quick launch; P6 stage/validate/solve dialogs
+  (solve disabled, decision 6); Compare page with the four README maxima + 2x2 matrix; locked
+  Crossover page; final browser sweep 104/104; keyboard story 14/14; hw lifecycle harness.
+  Handback: `docs/research/system_woofer_2026-11-18/GUI_HANDBACK_2026-11-20.md`.
+- OWNER: gate G yes — woofer worktree locked, `system_runs` copied from the physical path with
+  `robocopy /E /XJ` to `E:\hornlab-system-evidence-backup-2026-11-20`, 1,424/1,424 files, identical
+  sha256 manifests (`06d1e55a…`). Gate H: "Approve the 11 README-covered" — those entries are
+  approved; the 2 WP3 assembled real-motor cases and 3 mesh-refinement controls stay proposed.
+- OPEN: decision 6 (GUI solves disabled), decision 3 (crossover sum locked), the 5 proposed
+  registry entries until their readouts, `tools/data/system_cases.py` still validates
+  `hw_readiness_v1` (census export needs the v2 loader), the CPU evidence README F8 contradiction
+  (owned by that lane), the empty `ev_mesh_refine/…52652` dir, the pre-existing B8 host-cleanup
+  failure, and the six other-lane full-profile failures (v11 registration, score_identities,
+  scout40 queue, search_preflight). No real GUI stage/solve was launched; backend + real-BL staging
+  tests cover staging.
+- NOTE: this pass did not touch the GPU lock, `gpu-clean`, or any other lane's uncommitted files.
+
 ## 2026-11-20 - Rolled H terminal/rollback: width-500 size win, C look not accepted
 
 - DONE (size): width-500 neutral `20261120T165651Z-screen-6a36c3` J 9.0033, H 111.0/90.5/67.2/49.2,

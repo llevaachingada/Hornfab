@@ -3,8 +3,8 @@
 **This is a pointer, not authority.** It names where current state lives and what was verified when
 it was last written. If it disagrees with the tools below, the tools win.
 
-Last verified: **2026-11-20** against HEAD `1dd8053` (+ local commits ahead of origin). The GPU lock
-was stale-held (holder pid gone) at this check; run `gpu-clean` before any solve.
+Last verified: **2026-11-20** against HEAD `cfa7846` (+ the docs/handback commit). The GPU lock was
+stale-held (holder pid gone) at this check; run `gpu-clean` before any solve.
 
 ## Verify first (never trust this file alone)
 
@@ -59,8 +59,12 @@ git log --oneline -5; git status --porcelain
   cases are 5 solved + 2 staged + 1 refused + the 62864 clearance case). The pilot fidelity/Pareto
   contract is fixed and tested (`pilot --geometry` now works; `score.validate_axes` rejects nested
   axes/list feasibility). Full `tests/system` passes with 7 real-BL env gates.
-- **GUI:** Overview is the landing page; P2/P3 views exist (some modules still untracked); P4/P5/P6/P8
-  are backend-only; P7/P9 absent. Do not commit another lane's untracked GUI work blindly.
+- **GUI:** Horn + woofer complete through the 2026-11-20 senior review: Overview landing,
+  wizard/Quick launch, screens + readable shortlist, cases + 3D, compare + 2x2, locked crossover,
+  stage/validate/solve dialogs (solve disabled, decision 6), readiness. Registry v2: 20 approved /
+  5 proposed. Tests 1,117 / 1 pre-existing failure; final browser sweep 104/104; keyboard 14/14;
+  handback `docs/research/system_woofer_2026-11-18/GUI_HANDBACK_2026-11-20.md`. Other lanes'
+  uncommitted edits still exist; stage only your own hunks.
 - **Objective versions:** never rank J across versions; v7 = nights' default (R1), v10 = shipped
   second score and OPT-IN ONLY (this night runs it by owner handoff), v10_slope5 = its own identity
   (floor 0.486 J published; diagnostic). Never edit `hornlab_search/objective/scalar_v9.py`.

@@ -9,7 +9,8 @@ format in `GUI_COMPLETION_HANDOFF_2026-11-19.md` still applies.
 ## 1. State
 
 - **Branch:** `hornfab-all-2026-11-18`.
-- **HEAD at handback:** `<pending-final-sha>`.
+- **HEAD at handback:** branch `6531663` plus this docs commit (other lanes' commits interleave);
+  this lane's code HEAD was `cfa7846`.
 - **Commits since the reviewed HEAD `279b072` (this lane only; other lanes' commits interleave):**
   - `9b90e25` feat(gui): horn+woofer stage/validate/solve bridge, screen and 3D views (F1)
   - `01a67b3` test(gui): make hw replay and solve-preset tests hermetic (F2)
@@ -27,14 +28,17 @@ format in `GUI_COMPLETION_HANDOFF_2026-11-19.md` still applies.
   - `8fe7fa4` fix(gui): project readiness loader accepts hw_readiness_v2
   - `fe868d2` feat(gui): New system wizard and Quick launch (P5/step 11)
   - `405d741` feat(gui): P6 stage/validate/solve dialogs + overview readability (step 12)
-  - `<pending>` feat(gui): Compare page + matrix (step 10)
-  - `<pending>` feat(gui): locked Crossover page (step 13)
-  - `<pending>` test(gui): hw lifecycle harness + final QA/docs/handback
+  - `909181c` feat(gui): Compare page + matrix and locked Crossover page (steps 10/13)
+  - `cfa7846` test(gui): hw lifecycle harness + gate-H registry approvals
+  - this docs commit → the handback + gate-H quote + continuity/issues/index/code-map/active-state
 - **Worktree:** not clean by design. This lane committed its own GUI/system paths; the canonical
   checkout still carries other lanes' uncommitted work (`hornlab_search/config.py`,
   `objective/versions.py`, `search/evaluate.py`, `objective/scalar_v11.py`, cd_v11 evidence/queues,
-  scratch JSONs) and the other-lane hunks in `app.js` (`sortRunsForTable`, beamwidth height) and
-  `docs/INDEX.md`/`CODE_MAP.md` (cd_v11/system-evidence lines). None of those were staged.
+  scratch JSONs) and the other-lane hunks in `app.js` (`sortRunsForTable`, beamwidth height).
+  None of those were staged. Other lanes advanced the branch during the pass (`22ae1f7` v11;
+  `243136d` merge; `f460398` GUI evidence/research; `6531663` source.cap evidence); `f460398`
+  swept an in-flight copy of this handback and some evidence, so this final docs commit supersedes
+  that draft.
 - **Store:** `system_runs` is still the junction to
   `C:/Users/hunte/Hrns/hornlab-woofer-system-wt/system_runs`. The worktree is **locked**
   (`holds system_runs evidence store; do not remove`) and a verified copy is at
@@ -47,7 +51,7 @@ format in `GUI_COMPLETION_HANDOFF_2026-11-19.md` still applies.
 ### Command 1 — system + all `tests/test_gui*.py` + B8 GUI (`-n 6 --dist loadscope`)
 
 ```
-tests=1116 failures=1 errors=0 skipped=7 time=<pending-final-rerun>
+tests=1117 failures=1 errors=0 skipped=7 time=681.745
 FAILED tests/test_b8_lanes_bounded_gui.py::test_study_modules_have_no_host_cleanup_or_process_kill_paths
 ```
 
@@ -93,9 +97,13 @@ B8 exception.
 - Dialogs (step 12): independent Playwright check exit 0 (dialog semantics, preview, 20-Tab trap,
   Esc/focus return, 375 fit, Solve disabled + decision-6 + real lowband12 estimate, 0 job POSTs,
   0 console errors); screenshots in `dialogs/`.
-- First full sweep of the wired pages: 72/72 combinations, 0 failures (`sweep1/`, superseded by
-  the final sweep — see §8).
-- Final sweep (all routes incl. compare/crossover): `<pending>`.
+- Final sweep (all routes incl. compare/crossover): **104/104 combinations, 0 failures, 0 console
+  errors**; `full/browser_report.json`. One intermediate run hit a transient
+  `ERR_CONNECTION_FAILED` on the matrix page at 768 dark; that combination passed on a single rerun
+  and the entire sweep then passed cleanly.
+- Keyboard-only story: **14/14 steps**, 0 console errors; `keyboard/keyboard_report.json`.
+- Lifecycle harness: `node tests/gui_hw_lifecycle.mjs` → `hw GUI lifecycle ok`, exit 0;
+  `pytest tests/test_gui_hw_lifecycle.py -q` → 1 passed.
 
 Note: the venv lacks `playwright`; browser checks use
 `C:\Users\hunte\AppData\Local\Programs\Python\Python313\python.exe tools\gui\browser_check.py`.
@@ -138,7 +146,11 @@ The GUI itself runs under `.venv\Scripts\python.exe`.
    server-computed next step (R3 bassbox audit links to Readiness), recents and readiness summary;
    five-item menu; route/nav wired. Overview review defects (KPI slab, table clipping, label wrap,
    copy) fixed and re-checked.
-10. **P4 Compare page** — `<pending>` (backend + README matrix acceptance committed in `be05284`).
+10. **P4 Compare page** — DONE. `hw_compare.js`: solved-case pickers + Swap, the five quick-pick
+    pairs (four README matrix pairs + G6), verbatim refusal tokens with no charts, on-axis
+    whole-grid maxima, what-changed, per-probe/excitation ratio + Δphase charts, band tables and
+    the 2×2 matrix with cells/edges. DOM check confirms the four README values (8.58@1641,
+    22.25@1641, 23.64@1823, 21.28@1641) and the matrix; backend acceptance in `be05284`.
 11. **P5 wizard + Quick launch** — DONE. `hw_new.js` + routes; 4-step Guided and Quick launch;
     initial inventory limit 40 (1.4 s) + user-triggered limit 200 load-all; identity test pins
     `27616eedee09009f` from the committed spec + asset + 4 drivers (and `DEFAULT_LIMIT_BOXES` is 8
@@ -146,9 +158,14 @@ The GUI itself runs under `.venv\Scripts\python.exe`.
 12. **P6 dialogs** — DONE. Stage (shortlist/case, preview, clearance verdict), Validate, disabled
     Solve with decision-6 reason and real presets, live “Check in Boundary Lab…”; independent
     Playwright check exit 0; no real job launched.
-13. **P7 Crossover (locked)** — `<pending>` (backend + no-combine test committed in `5ab291e`).
-14. **QA + handback** — `<pending>`: final browser sweep, keyboard-only story, lifecycle harness,
-    this file, gate H.
+13. **P7 Crossover (locked)** — DONE. `hw_dsp.js` + `POST /api/hw/dsp-preview`: disabled
+    spec-default controls, per-channel filtered SPL/phase curves (never summed), wrapped/unwrapped
+    toggle, verdicts, locked System sum panel with decision-3/R1, permanent captions; a woofer-only
+    run shows one channel and says the other is absent. Backend/no-combine test in `5ab291e`.
+14. **QA + handback** — DONE. Final browser sweep **104/104** (13 routes × 4 widths × dark/light),
+    keyboard-only story **14/14 steps** with 0 console errors, hw lifecycle harness
+    (`tests/gui_hw_lifecycle.mjs` + pytest wrapper) green, this file and the docs/CONTINUITY/ISSUES
+    updates committed.
 
 ## 4. Owner gates
 
@@ -171,7 +188,12 @@ The GUI itself runs under `.venv\Scripts\python.exe`.
   and destination sha256 manifests both
   `06d1e55a2155c72528deb3e33e8dee0b07de322ddc9c7c273c7ac30b79d6fd02`. The review has no §8.3;
   the written method in the answer was followed exactly.
-- **H (proposed registry entries):** `<pending answer>`.
+- **H (proposed registry entries):** answered 2026-11-20, exact:
+  > "Approve the 11 README-covered".
+
+  Applied: those 11 entries are `status: approved`, `approved_by: owner 2026-11-20`; the 2 WP3
+  assembled real-motor cases and 3 mesh-refinement controls remain `proposed` (greyed + chip).
+  The committed-registry test now expects 20 approved / 5 proposed.
 
 ## 5. Deviations from the handoff/review
 
@@ -216,6 +238,11 @@ The GUI itself runs under `.venv\Scripts\python.exe`.
 - `POST /api/hw/dsp-preview` validates a DSP point against the committed example spec's ranges, then
   returns per-channel filtered arrays + `validate_dsp_point` verdicts + a locked-sum panel. It never
   imports or calls `combine`; the test monkeypatches `combine()`/`recombine_with_dsp()` to raise.
+- `GET /api/hw/compare` still has no top-level `frequencies_hz`; the Compare page reads the grid
+  from `/api/hw/basis/<a>?domain=<probe>` (one extra GET) and degrades to the maxima/band tables if
+  that call fails. `compare-matrix` returns the three consecutive 2×2 edges; the page fetches the
+  closing box pair from `/api/hw/compare` separately. Both are candidates for a future API fold-in,
+  not correctness gaps.
 - `POST /api/hw/spec/save` was already present; the misleading “no writes” comment was corrected.
   It is the only GUI-written file (`examples/systems/user/`), parser-validated, name-regex +
   containment + overwrite-guarded.
@@ -271,9 +298,13 @@ The GUI itself runs under `.venv\Scripts\python.exe`.
   argv validation, backend tests and the real-BL staging suite are green; a live GUI stage is the
   remaining acceptance (handoff §6 P6).
 - The P5 Launch button was not used against the live store (the wizard preview/identity is tested).
-- The 3D tab was reviewed at G0/review time; the new lifecycle harness (`tests/gui_hw_lifecycle.mjs`
-  + `tests/test_gui_hw_lifecycle.py`) is the route mount/unmount check. `<pending>`
-- Light/dark and 375/768/1009/1280 sweeps cover every page (final sweep `<pending>`).
+- The 3D tab was reviewed at G0/review time; the new lifecycle harness
+  (`tests/gui_hw_lifecycle.mjs` + `tests/test_gui_hw_lifecycle.py`) now mounts every hw view,
+  exercises the real 3D 2-D fallback, runs the `[data-v3d]` dispose sweep, and checks 10
+  mount→dispose cycles for listener/observer/timer growth. It does not measure WebGL
+  `renderer.info` (the browser has no 3D context in the harness); the Three.js viewer is unchanged
+  from the reviewed G0/P3 build.
+- Light/dark and 375/768/1009/1280 sweeps cover every page: final **104/104**, 0 failures.
 
 ### Step 1 hunk decisions
 
@@ -313,6 +344,10 @@ solves referenced here are CPU (`beat_cpu`) or already-recorded GPU evidence rea
   search_preflight) are listed in §2 with ownership; this pass did not touch those files.
 - `docs/INDEX.md` / `CODE_MAP.md` other-lane hunks remain unstaged; this pass adds its own lines in
   the handback commit.
+- Gate H approved the 11 README-covered evidence entries; the 2 WP3 assembled real-motor cases and
+  3 mesh-refinement controls intentionally remain `proposed` (greyed + chip) until their readouts.
+- The Compare page makes two extra GETs (the grid basis + the closing 2×2 pair); the data is the
+  same API data, not a second computation.
 
 ## 8. Evidence index
 
@@ -323,9 +358,16 @@ solves referenced here are CPU (`beat_cpu`) or already-recorded GPU evidence rea
 - `docs/evidence/hw_gui_2026-11-20/dialogs/` — stage/solve dialogs (7 screenshots + Playwright
   check output in the session log; the script lives in the temp workspace).
 - `docs/evidence/hw_gui_2026-11-20/sweep1/` — first full sweep (72/72, superseded).
-- `docs/evidence/hw_gui_2026-11-20/<final-sweep>/` — `<pending>`.
+- `docs/evidence/hw_gui_2026-11-20/full/` — final sweep: 13 routes × 4 widths × dark/light
+  (104 screenshots + `browser_report.json`, 0 failures).
+- `docs/evidence/hw_gui_2026-11-20/keyboard/` — keyboard-only story report (14 steps, 0 console
+  errors) + final Overview screenshot.
+- `docs/evidence/hw_gui_2026-11-20/compare/`, `.../crossover/` — DOM-check screenshots of the
+  Compare maxima/matrix and the locked Crossover page.
 - JUnit XML: `C:\Users\hunte\AppData\Local\Temp\opencode\hw_final1b.xml` (command 1),
   `C:\Users\hunte\AppData\Local\Temp\opencode\hw_full.xml` (command 2). These are temp paths; the
   counters are pasted in §2.
 
-**Handback ready for the senior review session:** `<path>` at `<commit>`.
+**Handback ready for the senior review session:**
+`docs/research/system_woofer_2026-11-18/GUI_HANDBACK_2026-11-20.md` at the commit that adds this
+file.
