@@ -283,9 +283,9 @@ export function findingsTabHtml(fd, state) {
   // so the strip, the counter and the groups always add up.
   const matchCounts = {};
   for (const sv of SEV) matchCounts[sv] = list.filter(f => sevName(f) === sv).length;
-  const kpis = `<div class="ovf-kpihead"><span class="eyebrow">Matching</span><span class="muted">of ${int(all.length)} in payload</span></div>
-    <div class="kpis ovf-kpis">${SEV.map(sv =>
-      `<div class="kpi"><span>${esc(SEV_LABEL[sv])}</span><b class="${SEV_CLASS[sv]}" data-ovf-sev="${sv}">${int(matchCounts[sv])}</b></div>`).join("")}</div>`;
+  const kpis = `<div class="kpis ovf-kpis">${SEV.map(sv =>
+      `<div class="kpi"><span>${esc(SEV_LABEL[sv])}</span><b class="${SEV_CLASS[sv]}" data-ovf-sev="${sv}">${int(matchCounts[sv])}</b></div>`).join("")}</div>
+    <p class="muted" style="font-size:.74rem;margin:4px 0 0">Severity tiles count the findings that match the filters below; the payload holds ${int(all.length)}.</p>`;
   if (!all.length) {
     return `${head}${kpis}<p class="muted ovf-empty">${s.status === "open"
       ? "Nothing open — every line has room to run" : "No findings match"}</p>`;

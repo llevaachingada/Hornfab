@@ -82,6 +82,14 @@ def _is_stale(last: str | None, now: datetime) -> bool:
     return bool(t is not None and (now - t) > STALE_AFTER)
 
 
+def _fmt(v) -> str:
+    """Four decimals for a J value in evidence; none of these numbers are meaningful below that."""
+    try:
+        return "-" if v is None else f"{float(v):.4f}"
+    except (TypeError, ValueError):
+        return "-"
+
+
 def _first_seen(ident: dict, ln: dict | None) -> str | None:
     """Deterministic stand-in for the phase-3.4 state file: the earliest row time the evidence
     already carries. (The state file will supply the real first-seen once it exists.)"""
@@ -252,9 +260,12 @@ def _rule_tie_verify(ident: dict, now: datetime) -> list[dict]:
     currency, why_cur = _currency(ident, ident.get("last"), now)
     n_ok = sum(int(l.get("valid") or 0) for l in ident.get("lines") or [])
     names = ", ".join(str(l.get("construction")) for l in tied)
-    evidence = [f"{n_tied} lines inside floor_j {ident.get('floor_j')}",
-                f"leader_j {ident.get('leader_j')}, tied: {names}"]
-    evidence += [f"{l.get('construction')}: best_j {l.get('best_j')}, gap {l.get('gap')}"
+    floor_j = ident.get("floor_j")
+    leader_j = ident.get("leader_j")
+    evidence = [f"{n_tied} lines inside the published floor (J {_fmt(floor_j)})",
+                f"leader J {_fmt(leader_j)}; tied: {names}"]
+    evidence += [f"{l.get('construction')}: best J {_fmt(l.get('best_j'))}, "
+                 f"gap +{_fmt(l.get('gap'))}"
                  for l in tied]
     return [_make("tie_verify", ident, None, severity, currency, why_cur, n_ok,
                   f"{n_tied} lines inside one floor",
