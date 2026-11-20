@@ -133,6 +133,33 @@ and one mesh. The native spec path needs the same wiring, or an explicit refusal
 sets a cap.
 
 
+## 2c. Native route wired - and a poisoned cache entry caught in the act
+
+`hornlab_search/mesh/build.py` now forwards the brief's numeric cap into the mesher config's
+`source.source_radius_mm` for the formula route (OSSE / R-OSSE / ICW / FREEFORM). Evidence it works,
+from a direct `build_mesh` call on the morph design (CPU only):
+
+| cap | `MeshSpec.source_cap_mm` | triangles | `.msh` sha256 |
+|---|---:|---:|---|
+| auto | 0.0 | 16,062 | `04fe395f3fa5` |
+| 150 | 150.0 | 16,062 | `148dcbd015f3` |
+
+`auto` is byte-identical to the pre-fix meshes (screen `ababdbae8fea`, 12 kHz `c59ec195933a`).
+
+**But the first re-run (`source_sensitivity3`) did not measure anything.** `ss_morph_cap150` came back
+`cached: true, solve 0.0 s` with the **auto** mesh copied into its directory, under the *correct*
+cap-aware key `cf716e738ef8-bcf9a8cec98b-d0fa0a468ff5`. Cause: the pre-fix `source_sensitivity2`
+run had already recorded that same cap-aware `mesh_hash` while the native builder ignored the cap, so
+its auto-mesh response was cached under a key that only became meaningful after the fix. The cache
+entry is poisoned, and re-running with the fix silently returns it.
+
+This is a general hazard, not a one-off: **a cache key is only as honest as the hash recorded at
+solve time.** Any run produced while a knob was silently inert can poison every later run of the same
+identity. The clean re-run therefore passes a fresh `--cache-dir`:
+`docs/queue/source_sensitivity4_2026-11-20.yaml` (3 jobs) - **staged, not yet run**: a concurrent
+`fav_crowe` search and its Julia host held the GPU lane for the whole afternoon window, and this
+workstream does not start a second solve.
+
 ## 3. HF width — one knob at a time, and an envelope that binds
 
 Night `hf_width_2026-11-20`, base = Crowe X OSSE best `9b5428e6dec8` (wall H 36.39° / V 22.71°, lip

@@ -122,6 +122,8 @@
 - **FIXED (2026-11-20, native route):** `mesh/build.py` now forwards the brief's numeric `source.cap` into the mesher config's `source.source_radius_mm` for OSSE/R-OSSE/ICW/FREEFORM formulas (`auto` adds nothing -> byte-identical: screen `ababdbae8fea`, 12 kHz `c59ec195933a`). `cap: 60` now builds a different mesh (`5e908a347567`) with the auto angle still set. 13 tests in `tests/test_mesh_source_cap{,_native}.py`, 36 in `test_mesh_build.py` + `test_mesh_grid_build.py`. The three morph solves are being re-run (night `source_sensitivity3_2026-11-20`).
 - **OPEN (small, out of that lane's scope):** `mesh/build.py::export_step` also calls `families.to_mesher_config` for the formula path and still ignores an explicit cap, so a STEP export of a cap-variant design would not match its meshed sound-radiating surface. Same one-line injection as the mesh route.
 
+- **FOUND (2026-11-20): a silently-inert knob can POISON the solve cache.** `source_sensitivity2` ran the native route before the fix: it recorded a cap-aware `mesh_hash` (`bcf9a8cec98b`) while the builder ignored the cap, caching an auto-mesh response under a key that became correct only after the fix. `source_sensitivity3` then hit that entry (`cached: true, solve 0.0 s`, auto mesh in the cap-150 dir). Clean re-run staged with a fresh `--cache-dir`: `docs/queue/source_sensitivity4_2026-11-20.yaml` (not run - another lane held the GPU). Rule worth adopting: after fixing an inert knob, purge or bypass the cache for the affected identities.
+
 ## 2026-11-20 - Ripple audit grid test RUN (PASS) + OPEN: bridge cells cannot be verified from the plain CLI
 
 - DONE: `ripple_audit_2026-11-20` launched (detached, 08:34 local) and finished 08:48 **exit 0**;
