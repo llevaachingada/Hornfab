@@ -45,6 +45,44 @@
   cutoff 23:30. Jobs: k3/k2/k4 hold-mouth, k-home CMA 60, c500_xo900 CMA 60, verify top 3 of both.
 - **Not done:** no objective change (v11 frozen); GUI favorite star and score-breakdown fix are proposals.
   Committed in this commit (not pushed).
+- **Re-order 15:08 (owner: "run some more solves on this improved design" now):** `STOP` placed in
+  `runs/nights/cd_v11_verify_and_expand_2026-11-20/` so that night ends cleanly after `xr__x_s2b_ext`; its three
+  unstarted jobs `xr__x_s2c_morph/fold/twinray` were appended VERBATIM (same `--resume` dirs, cumulative budget
+  60) to the tail of `fav_crowe_2026-11-20` (now 9 jobs), so they are deferred, not dropped. The chained
+  queue.ps1 (pid 52188) starts the favorite night as soon as runner 26752 exits.
+
+## 2026-11-20 - GUI senior-review pass (steps 1-14, in progress)
+
+- **Mandate:** `docs/research/system_woofer_2026-11-18/GUI_SENIOR_REVIEW_2026-11-20.md` §4 steps 1-14,
+  in order, staging only this lane's hunks; stop at owner gates G and H. Companion handoff:
+  `GUI_COMPLETION_HANDOFF_2026-11-19.md` (rules/UX/handback format).
+- **Owner gate G (verbatim answer):** "Gate G: yes to both. Lock the woofer worktree and back up
+  system_runs to E:\hornlab-system-evidence-backup-2026-11-20, following
+  GUI_SENIOR_REVIEW_2026-11-20.md section 8.3 (copy from the physical path, robocopy /E not /MIR
+  with /XJ, sha256 manifest of source and destination must match, after the CPU lane lock is
+  released). Quote this answer in CONTINUITY."
+  (The review has no §8.3; the written method in the answer was followed exactly.)
+- **Executed:** `git worktree lock --reason "holds system_runs evidence store; do not remove"
+  C:/Users/hunte/Hrns/hornlab-woofer-system-wt`; `robocopy "…\hornlab-woofer-system-wt\system_runs"
+  "E:\hornlab-system-evidence-backup-2026-11-20" /E /XJ /COPY:DAT`; **1,424/1,424 files**;
+  source and destination sha256 manifests both
+  `06d1e55a2155c72528deb3e33e8dee0b07de322ddc9c7c273c7ac30b79d6fd02` (`ok: true`, 0 missing/extra/diffs).
+  No CPU-lane lock and no solve process was live at the copy.
+- **Committed so far:** `9b90e25` HEAD consistency, `01a67b3` hermetic hw tests, `b6c9ccc` registry v2,
+  `05af010` control links, `aa71c68` clearance removal, `ef415fa` CPU-lane lock for evidence solves,
+  `be05284` compare grid tolerance + README acceptance, `61582c6` overview next-step + dialog routes,
+  `5ab291e` locked DSP preview, `99358c2` P5 study identity, `71da083` shortlist table,
+  `337feaf` shortlist follow-ups, `6f488b7` Overview + menu, `8fe7fa4` project-registry v2,
+  `fe868d2` wizard/Quick launch, `405d741` P6 dialogs + overview polish.
+- **Tests so far:** §9 command 1 **1,116 tests / 1 failure (pre-existing B8 host-cleanup, introduced
+  in `b019623`; review §1 recorded it) / 0 errors / 7 skipped**; full profile **5,586 / 7 failures
+  (1 pre-existing B8 + 6 other-lane: v11 registration, score_identities, scout40 queue, preflight) /
+  29 skipped**; real-BL staging `tests/system/test_bl_stage.py` **11 passed**; hw browser sweep
+  **72/72 combinations, 0 failures**.
+- **Store state:** `system_runs` remains the junctioned worktree store; the worktree is locked and
+  the E: copy is verified. No GPU lock or `gpu-clean` was touched by this pass.
+- **Pending:** compare/crossover pages, final browser sweep, keyboard-only story, hw lifecycle
+  harness, gate H approval of the proposed registry entries, handback file.
 
 ## 2026-11-20 - System evidence queue ran (CPU only, no GPU)
 
@@ -154,6 +192,8 @@
 
 - **source.cap RESULT (re-run with the knob live, 6 jobs):** for the grid route the wavefront assumption is irrelevant where the handoff compared and decisive where it warned - **8 kHz: width moves <=0.2 deg and the +25 deg level <=0.05 dB** across cap auto -> 60 mm (0.31 -> 2.73 mm dome); 10 kHz: up to 3.1/3.5 deg; **12 kHz: H width 65.7 -> 55.6 deg (-10.1) and +25 deg level -5.11 -> -3.89 dB (+1.2)**. So "8-16 kHz is source-conditional" is right in substance, wrong in scope: the conditionality starts near 10 kHz. Meshes now differ (`884b6eef` / `f3cb5316` / `d59e8c75`).
 - **NEW GAP (native route):** OSSE/FREEFORM configs do not go through `grid_build`, so `source.cap` still does nothing there - OSSE morph built three **byte-identical** meshes (`c59ec195`) while the recorded `mesh_hash` differed, because `MeshSpec` now carries the cap on every route. Safe for the response, misleading for provenance; the native spec path needs the same wiring or an explicit refusal.
+
+- **CORPUS HYGIENE + CORRECTION (later 2026-11-20):** the sweep now dedupes by `design_hash` (748 runs hold 545 unique designs) and groups by `(brief, objective version)`, not brief name alone. Corrected numbers: pooled rho 0.662; **21 of 24 identities below 0.8**; only `v7_smooth` 0.929 (n=52), `native_ath_core_2in` 0.893 (n=7) and `b1w_hifi_90x60_850_wide` 0.881 (n=8) reach 0.8. The `organic_rollback_1in` -0.871 is **RETRACTED**: it mixed five Oct-25 runs with no declared objective version (salmon/iwata/lecleach rows, J 45-86) with five Nov-13 v3 runs (salmon, J ~40); split by version it reads -0.500 and +0.300 on n=5 each. The second-axis conclusion stands; the anti-correlated identity was era, not acoustics.
 
 ## 2026-11-20 - Ripple audit grid test RUN: PASS (rho 0.964) + DENSE verdict: the B3 feature is broad, not a resonance
 

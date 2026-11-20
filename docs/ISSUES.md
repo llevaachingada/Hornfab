@@ -79,8 +79,8 @@
 
 ## 2026-11-20 - Ripple program: corpus sweep done, `source.cap` INERT (fix in flight), HF width envelope-bound
 
-- DONE: `tools/analysis/spectral_corpus_sweep.py` + tests (4 passed); 730-design sweep (0 refusals):
-  pooled rho(rip, V+35) 0.615, 25/28 identities below 0.8 -> the "redundant" verdict from the 24-design
+- DONE: `tools/analysis/spectral_corpus_sweep.py` + tests (5 passed); 748-run sweep (545 unique designs,
+  0 refusals): pooled rho(rip, V+35) 0.662, **21 of 24 identities below 0.8** -> the "redundant" verdict from the 24-design
   sample is **overturned**. Report-only `--compare A B` in the audit tool. `verify` refuses bridge-cell
   runs before any GPU work with the exact `tools/geometry/<cell>_cli.py` command.
 - **OPEN (bug, fix in flight):** `source.cap` in a brief never reaches the mesher for grid families —
@@ -89,8 +89,10 @@
   `7abdb66729…` and identical responses; 4 of 6 source-sensitivity jobs were cache hits. **Every stored
   grid-family solve uses the auto cap (~513 mm curvature at a 1.4-inch throat: a nearly flat piston).**
   Mandate item 5 must not be attempted until this lands; then re-run `docs/queue/source_sensitivity_2026-11-20.yaml`.
-- OPEN (analysis, cheap): `organic_rollback_1in` has rho(rip, V+35) = **-0.871** (n=29) — a real design
-  trade-off or a metric pathology? One stored-data pass settles it.
+- RESOLVED (2026-11-20): `organic_rollback_1in` was **era mixing**, not a trade-off - five Oct-25 runs with
+  no declared objective version (rows salmon_elliptical/iwata_ar/lecleach_asym, J 45-86) plus five Nov-13
+  v3 runs (all salmon, J ~40). Split by version: -0.500 (v3, n=5) and +0.300 (v?, n=5). The sweep now
+  groups by (brief, objective version) and dedupes by design_hash for exactly this reason.
 - OPEN (owner): the HOME 600 x 480 mm envelope is the binding constraint on HF width — the Crowe X OSSE
   base sits at 593 mm mouth, so wider-than-74 deg at 8 kHz needs a larger envelope or a different mouth
   law, not a knob.

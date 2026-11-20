@@ -166,14 +166,43 @@ def _median(values):
 
 # ----------------------------------------------------------------------------- per-run row
 
+def _version_and_rows_type(config):
+    """(objective version as str, generator rows type) from a run's config, best-effort."""
+    if not isinstance(config, dict):
+        return "?", None
+    version = None
+    objective = config.get("objective")
+    if isinstance(objective, dict):
+        version = objective.get("version")
+    if version is None:
+        brief = config.get("brief")
+        if isinstance(brief, dict) and isinstance(brief.get("objective"), dict):
+            version = brief["objective"].get("version")
+    generator = config.get("generator")
+    rows_type = None
+    if isinstance(generator, dict):
+        rows = generator.get("rows")
+        if isinstance(rows, dict):
+            rows_type = rows.get("type")
+    return (str(version) if version is not None else "?", rows_type)
+
+
 def compute_run_row(run_dir, band_hz=DEFAULT_BAND_HZ) -> dict:
     """Compute one row for a run directory. Never raises for malformed stored data."""
     run_dir = Path(run_dir)
     config = _load_yaml(run_dir / "config.yaml")
+    objective_version, rows_type = _version_and_rows_type(config)
+    brief = _identity(run_dir, config)
     row = {
         "run": run_dir.name,
         "run_dir": run_dir.as_posix(),
-        "identity": _identity(run_dir, config),
+        "identity": brief,
+        "brief": brief,
+        "objective_version": objective_version,
+        "rows_type": rows_type,
+        # The grouping key: a brief name alone mixes objective eras and constructions (measured
+        # 2026-11-20 on organic_rollback_1in). Never pool across versions - same rule as J.
+        "identity_key": f"{brief} @ v{objective_version}",
         "design_hash": None,
         "family": None,
         "J": None,
@@ -297,9 +326,28 @@ def discover_runs(runs_root) -> tuple[list[Path], int]:
 
 # ----------------------------------------------------------------------------- stats
 
-def identity_stats(identity: str, rows) -> dict:
-    """Aggregate a list of rows (one identity, or the pooled diagnostic) into one record."""
+def identity_stats(identity: str, rows, dedupe: bool = True) -> dict:
+    """Aggregate a list of rows (one identity, or the pooled diagnostic) into one record.
+
+    The SAME design is often solved into several run dirs (resumes, re-runs, mirrored studies), so
+    correlations are computed over UNIQUE ``design_hash`` values by default: a duplicate row carries
+    the same numbers and would inflate n without adding information (measured 2026-11-20: 730 rows
+    are 535 unique designs, a 1.36 factor; ``organic_rollback_1in`` is 29 rows of 10 designs, and its
+    -0.87 rho is a two-cluster artefact either way). ``n_rows`` keeps the raw count so a reader can
+    see the duplication; ``--no-dedupe`` restores the raw-row behaviour.
+    """
     usable = [r for r in rows if not r["refused"]]
+    n_rows = len(usable)
+    if dedupe:
+        seen: set = set()
+        unique = []
+        for r in usable:
+            dh = r.get("design_hash")
+            if dh in seen:
+                continue
+            seen.add(dh)
+            unique.append(r)
+        usable = unique
     v35 = [r["metrics"][PRIMARY]["trend"] for r in usable]
     v35_bm = [r["metrics"][PRIMARY].get("band_mean") for r in usable]
     v25 = [r["metrics"]["V+25"]["trend"] for r in usable]
@@ -308,6 +356,8 @@ def identity_stats(identity: str, rows) -> dict:
     return {
         "identity": identity,
         "n": len(usable),
+        "n_rows": n_rows,
+        "n_unique": len(usable),
         "median_v35_trend": _median(v35),
         "p90_v35_trend": _percentile(v35, 90.0),
         "median_v35_band_mean": _median(v35_bm),
@@ -345,7 +395,7 @@ def _rho_cell(stat):
 
 def _md_table(stats) -> str:
     header = [
-        "identity", "n", "median V+35 trend (dB)", "p90 V+35 trend (dB)",
+        "identity", "n (unique)", "rows", "median V+35 trend (dB)", "p90 V+35 trend (dB)",
         "median V+35 band_mean (dB)", "rho(rip, V+35)", "rho(V+25, V+35)",
         "rho(V+35 trend, band_mean)", "rho(J, V+35)",
     ]
@@ -354,6 +404,7 @@ def _md_table(stats) -> str:
         cells = [
             str(s["identity"]),
             str(s["n"]),
+            str(s.get("n_rows", s["n"])),
             _fmt(s["median_v35_trend"]),
             _fmt(s["p90_v35_trend"]),
             _fmt(s["median_v35_band_mean"]),
@@ -383,6 +434,10 @@ def _write_markdown(out: Path, stats, pooled, pooled_excluded, counts, refusal_c
         "",
         "`J` is printed for context only. It is **NEVER compared or ranked across identities**; "
         "identities are different briefs, so their `J` values are not on a common scale.",
+        "",
+        "`n (unique)` counts distinct `design_hash` values and is what the correlations use; `rows` is "
+        "the raw run count (a design solved into several run dirs appears once in the statistics). "
+        "`--no-dedupe` restores raw rows.",
         "",
         f"Runs scanned: {counts['scanned']}; usable: {counts['usable']}; "
         f"refused: {counts['refused']}; skipped (no resolvable design): "
@@ -493,6 +548,8 @@ def main(argv=None) -> int:
                     help="comma-separated identity allow-list (exact match)")
     ap.add_argument("--limit", type=int, default=None,
                     help="only the first N runs in deterministic run-dir-name order")
+    ap.add_argument("--no-dedupe", action="store_true",
+                    help="correlate raw rows instead of unique design_hash values")
     ap.add_argument("--band-hz", nargs=2, type=float, default=list(DEFAULT_BAND_HZ),
                     metavar=("LO", "HI"))
     a = ap.parse_args(argv)
@@ -526,14 +583,15 @@ def main(argv=None) -> int:
 
     by_identity: dict[str, list] = {}
     for r in rows:
-        by_identity.setdefault(r["identity"], []).append(r)
-    all_stats = [identity_stats(name, group) for name, group in by_identity.items()]
+        by_identity.setdefault(r.get("identity_key") or r["identity"], []).append(r)
+    all_stats = [identity_stats(name, group, dedupe=not a.no_dedupe)
+                 for name, group in by_identity.items()]
     all_stats.sort(key=lambda s: s["identity"])
     stats = [s for s in all_stats if s["n"] >= int(a.identity_min)]
     below_min = [s for s in all_stats if s["n"] < int(a.identity_min)]
     below_min_runs = sum(s["n"] for s in below_min)
 
-    pooled = identity_stats("__pooled__", usable)
+    pooled = identity_stats("__pooled__", usable, dedupe=not a.no_dedupe)
     pooled_excluded = {"refused": len(refused), "below_identity_min": below_min_runs}
 
     refusal_counts = _count_codes(r["refusal_code"] for r in refused)

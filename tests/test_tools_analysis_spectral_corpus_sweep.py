@@ -18,15 +18,21 @@ ANGLES = np.array([-35.0, -25.0, 0.0, 25.0, 35.0])
 H_ANGLES = np.array([-35.0, -25.0, 0.0, 25.0, 35.0])
 
 
-def _write_run(root, name, identity, amp, rip, j, *, brief=True, zero_degree=True):
-    """Write one synthetic run dir: config.yaml, best.json, designs/h/response.npz."""
+def _write_run(root, name, identity, amp, rip, j, *, brief=True, zero_degree=True,
+               design_hash=None):
+    """Write one synthetic run dir: config.yaml, best.json, designs/<hash>/response.npz.
+
+    ``design_hash`` defaults to a per-run value: real run dirs normally hold different best
+    designs, and the sweep correlates on unique hashes (2026-11-20 dedupe).
+    """
+    design_hash = design_hash or ("h" + name)
     run = root / name
-    (run / "designs" / "h").mkdir(parents=True)
+    (run / "designs" / design_hash).mkdir(parents=True)
     config = {"name": identity}
     if brief:
         config["brief"] = {"name": identity}
     (run / "config.yaml").write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
-    best = {"design_hash": "h", "family": "FREEFORM", "objective": j,
+    best = {"design_hash": design_hash, "family": "FREEFORM", "objective": j,
             "terms": {"rip": rip}}
     (run / "best.json").write_text(json.dumps(best), encoding="utf-8")
 
@@ -43,7 +49,7 @@ def _write_run(root, name, identity, amp, rip, j, *, brief=True, zero_degree=Tru
         if angle != 0.0:
             spl_h[:, jj] = 0.6 * ripple
 
-    np.savez(run / "designs" / "h" / "response.npz",
+    np.savez(run / "designs" / design_hash / "response.npz",
              freqs_hz=FREQS, v_angles_deg=angles, spl_v_db=spl_v,
              h_angles_deg=H_ANGLES, spl_h_db=spl_h)
     return run
@@ -72,17 +78,17 @@ def test_grouping_constant_null_and_missing_zero_degree(tmp_path):
     assert payload["counts"]["refused"] == 1
 
     stats = {s["identity"]: s for s in payload["identity_stats"]}
-    assert set(stats) == {"ident_a", "ident_b"}
-    assert stats["ident_a"]["n"] == 6
-    assert stats["ident_b"]["n"] == 5
-    assert stats["ident_a"]["median_v35_trend"] is not None
-    assert stats["ident_a"]["median_v35_band_mean"] is not None
+    assert set(stats) == {"ident_a @ v?", "ident_b @ v?"}
+    assert stats["ident_a @ v?"]["n"] == 6
+    assert stats["ident_b @ v?"]["n"] == 5
+    assert stats["ident_a @ v?"]["median_v35_trend"] is not None
+    assert stats["ident_a @ v?"]["median_v35_band_mean"] is not None
 
-    rho_a = stats["ident_a"]["spearman_rip_v35"]
+    rho_a = stats["ident_a @ v?"]["spearman_rip_v35"]
     assert rho_a["rho"] == pytest.approx(1.0)
     assert rho_a["reason"] is None
 
-    rho_b = stats["ident_b"]["spearman_rip_v35"]
+    rho_b = stats["ident_b @ v?"]["spearman_rip_v35"]
     assert rho_b["rho"] is None
     assert "constant vector" in rho_b["reason"]
 
@@ -133,3 +139,21 @@ def test_cli_smoke_with_limit(tmp_path):
     assert payload["counts"]["scanned"] == 2
     assert [r["run"] for r in payload["rows"]] == ["r00", "r01"]
     assert (out / "sweep.md").is_file()
+
+
+def test_duplicate_designs_are_counted_but_deduped_in_the_statistics(tmp_path):
+    """The same design solved into several run dirs must not inflate n (2026-11-20)."""
+    runs = tmp_path / "runs"
+    for i in range(6):
+        _write_run(runs, f"d{i:02d}", "ident_dup", 0.2 + 0.1 * i, 0.5 + i, 10.0 - i,
+                   design_hash="samehash")
+    out = tmp_path / "out"
+    assert S.main(["--runs-root", str(runs), "--out", str(out)]) == 0
+    payload = json.loads((out / "sweep.json").read_text(encoding="utf-8"))
+    # identity is below --identity-min on UNIQUE designs (1 < 5), so it is not tabulated ...
+    assert payload["identity_stats"] == []
+    assert payload["counts"]["usable"] == 6
+    # ... and the pooled row keeps both the raw count and the unique count.
+    pooled = payload["pooled"]
+    assert pooled["n_rows"] == 6
+    assert pooled["n"] == 1

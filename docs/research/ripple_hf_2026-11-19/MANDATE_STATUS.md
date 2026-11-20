@@ -10,7 +10,7 @@ handoff itself is preserved verbatim and must not be edited. Update this file, n
 | 3 | Validate the B3 2.3-3.0 kHz anomaly with a densely sampled re-solve | **DONE** - dense B3 at epw 6/9 on 91 freqs (1.8-3.6 kHz @25 Hz): a smooth 2.1 dB dip at 2800 Hz, epw6-vs-epw9 max|d| 0.01 dB -> physical, not a grid artifact | [`evidence/runs/expand_2026-11-19`](../../evidence/runs/expand_2026-11-19/README.md) |
 | 4 | Controlled HF-width experiment (Crowe X OSSE / R-OSSE rect / OSSE morph) | **FIRST PASS DONE** - one knob at a time on the Crowe X OSSE base; wall angle moves 8 kHz width (-11.8 H / -6.7 V deg) and costs +1.37 J, lip radius is inert (+0.2 deg); the 600 mm envelope makes the space one-sided (two wider variants refused by shape_check and deleted) | [`evidence/ripple_program_2026-11-20`](../../evidence/ripple_program_2026-11-20/README.md) |
 | 5 | Check installed-source validity above the first transverse mode | **DONE for the grid route, and the answer is frequency-dependent** - after fixing an inert cap knob, 8 kHz is source-insensitive (<=0.2 deg, <=0.05 dB) while 12 kHz is not (H width -10.1 deg, +25 deg level +1.2 dB); the native OSSE/FREEFORM route still ignores the cap (byte-identical meshes) | [`evidence/ripple_program_2026-11-20`](../../evidence/ripple_program_2026-11-20/README.md) sec. 2b |
-| 6 | Then revise scoring if justified | **DEFERRED, but no longer on redundancy grounds** - the corpus sweep shows the fixed-angle residual is a second axis on 25/28 identities (pooled rho 0.615, per identity -0.87..+0.93), so the 24-design 0.885 was a family artefact; the remaining gate is acoustic, not statistical | sec. 1 and 4 of the program evidence |
+| 6 | Then revise scoring if justified | **DEFERRED, but no longer on redundancy grounds** - the corpus sweep shows the fixed-angle residual is a second axis on **21 of 24 identities** (pooled rho 0.662 over 545 unique designs; only v7_smooth, ath_core_2in and b1w_v3 reach 0.8+), so the 24-design 0.885 was a v7_smooth family artefact; the remaining gate is acoustic, not statistical | sec. 1 and 4 of the program evidence |
 
 ## Results, 2026-11-20 (after the first pass of items 1-5)
 
@@ -19,9 +19,13 @@ experiments run after this file's first version, and they revise two of its conc
 
 1. **The redundancy verdict is overturned.** The 24-hours-earlier audit found rho(rip, V+35) = 0.885 on
    the 24 SCOUT40 bests and called the fixed-angle residual "largely redundant". Across 730 stored
-   designs the pooled rho is **0.615** and **25 of 28 identities sit below 0.8**, several near zero or
-   negative (`organic_rollback_1in` -0.871, `axi_90x90_1in` 0.050, `freeform_sculpt` 0.014). The 0.885
-   sample was the v7_smooth family, which is the identity where the two numbers agree.
+   unique designs the pooled rho is **0.662** and **21 of 24 identities sit below 0.8**, several near zero or
+   negative (`axi_90x90_1in` -0.161 on 38 designs, `freeform_sculpt` -0.120 on 33, `compact400` 0.061 on 21).
+   Only `v7_smooth` (0.929, n=52), `native_ath_core_2in` (0.893, n=7) and `b1w_hifi_90x60_850_wide`
+   (0.881, n=8) reach 0.8. The 0.885 sample was v7_smooth, the identity where the two numbers agree.
+   **Correction:** the earlier "`organic_rollback_1in` -0.871" was era mixing (five Oct-25 runs with no
+   declared objective version and three different rows types, plus five Nov-13 v3 runs); split by version
+   it reads -0.500 (v3, n=5) and +0.300 (v?, n=5).
 2. **Item 5 has no lever yet.** Three briefs differing only in `source.cap` produced identical mesh
    hashes and identical responses: `mesh/grid_build.py` hardcodes the auto cap and never passes
    `source_radius_mm`. Every grid-family solve we have stored uses the auto cap (~513 mm curvature at
