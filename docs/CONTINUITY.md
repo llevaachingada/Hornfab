@@ -244,6 +244,18 @@
   hornlab_search/metrics/spectral.py, its two tests, tools/analysis/spectral_ripple_audit.py). They were in the git
   index when this lane committed; no work was lost or modified. Recorded for the log.
 
+## 2026-11-19 23:40 - Full-polar DI results: compact trio separated (local orchestrator)
+
+- The 181-angle / 2048-point verify DI pass (same grid for all three) gives the compact400 trio:
+  **morph 1.1692 < fold 1.2558 < twinray 1.3591**. Gaps 0.087 / 0.103 sit inside the compact floor
+  0.1293, so it is still a 3-way tie by the floor, but morph leads at both resolutions (p12 73/1024:
+  1.1864/1.2763/1.3734) - the ranker has a consistent ordering and the data now covers both
+  resolutions.
+- The v7 leaders got the same pass (petal 4.8991, tritonia v9 6.8367, v8 5.5564). Those are 29-freq
+  verify-grid J; they are NOT comparable to the 18-freq screen J (4.1202 / 4.878 / 4.7503) - recorded so no
+  cross-grid ranking happens.
+- SeedB expansion running (morph seedB 1.7219 at 38 evals - an independent exploration, not a winner).
+
 ## 2026-11-19 23:27 - Expansion night LAUNCHED (local orchestrator)
 
 - The other queue did not appear after ~15 min of polling and the GPU had been idle since p12; launched
