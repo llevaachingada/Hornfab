@@ -1,5 +1,12 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 ~18:30 - 9-deg driver exit-angle brief + lanes queued
+
+- Owner: try the 9-deg throat angle (some drivers exit at ~9 deg). Brief `examples/briefs/a9_2026-11-20/` (only
+  `driver.exit_angle_deg` 9; own identity). Lanes `favA9s__fav_plain/_p1/_core` singles + `favA9__core_fav` CMA +
+  verify, queued after `favSC_verify_top3` in the live fav8. shape_check 4/4, preflight no HARD. Record:
+  `docs/research/typologies/FAV_SPLIT_PLANE_PROPOSALS_2026-11-20.md` s7.
+
 ## 2026-11-20 ~18:27 - SplitCore variant (owner fixture) built as optional osse_rollback knobs and queued
 
 - **Owner:** try the ideas of `HornFab_SplitCore_Analytic_Reference_Fixture.py` as a geometry variant, without

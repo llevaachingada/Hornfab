@@ -150,3 +150,15 @@ Lanes `examples/typologies/favSC_2026-11-20/` (writer `cpu/write_favSC.py`):
 - `favSC__core_fav` and `favSC__core_polish` (CMA 80 valid; `v_exp_mm` searched in [10, 90]).
 - `favSC_verify_top3`.
 Queued after `favP1_verify_top3`. shape_check 3/3 fit; preflight no HARD (valid 40 %).
+
+## 7. 9° driver exit angle (owner, 2026-11-20 ~18:28)
+
+The owner is not fixed on a 2° driver; some 1.4" drivers exit at ~9°, the fixture's default. New brief
+`examples/briefs/a9_2026-11-20/room_landscape_80x50_700_hf1440a9_v11cd.yaml`: the v11 home brief with only
+`driver.exit_angle_deg` 2 → 9 (OS a0; source cap auto follows). **Own J identity.** Lanes
+`examples/typologies/favA9_2026-11-20/` (writer `cpu/write_favA9.py`):
+- Singles: FAV-001 plain, P1 (k_v 3, s_v 0.4975), SplitCore (log k_v 3, V exp 50 mm, s_v 0.4975).
+- `favA9__core_fav` CMA 80 valid, + verify.
+The a0 = 9° mouth is 593 × 450 mm (fits 600). shape_check 4/4; preflight no HARD (valid 31 %). Queued after
+`favSC_verify_top3`. Expectation [inferred]: a 9° start flares faster at the throat (slightly less loading on its
+own), but the exponential term grows with tan a0, so the SplitCore throat is stronger at 9°. The solves decide.
