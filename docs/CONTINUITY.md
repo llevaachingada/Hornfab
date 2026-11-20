@@ -278,6 +278,21 @@
   hornlab_search/metrics/spectral.py, its two tests, tools/analysis/spectral_ripple_audit.py). They were in the git
   index when this lane committed; no work was lost or modified. Recorded for the log.
 
+## 2026-11-20 00:50 - Expansion night 16/16 done; item 3 grid bug found + re-queued (local orchestrator)
+
+- All 16 expansion jobs completed. The other agent then appended 8 `cd11__*` jobs to the LIVE
+  `runs/nights/fable_expand_2026-11-19.yaml`; the same runner picked them up - their queue ran after
+  mine, no interruption (the owner's intended flow).
+- **SeedB (independent CMA seed 2027):** morph 1.7219, fold 1.4425, twinray 1.4873, petal 1.5941,
+  ext 1.8320. **SeedC (seed 2028):** morph 1.6143, fold 1.2144, twinray 1.6883. None beats the warm
+  winners (intended dataset growth); note seedC fold 1.2144 confirms the fold basin is reachable cold.
+- **BUG: ripple item 3 first attempt invalid.** A config-level top-level `grid:` block is IGNORED; the
+  runner uses `brief.grid` only. Both dense runs came back n=18 (the v7 screen grid) with identical
+  spectra. Fix: new brief `room_landscape_80x50_700_hf1440_v7_smooth_dense.yaml` (screen_extra_hz =
+  the 6 v7 extras + 73 dense 1.8-3.6 kHz @25 Hz = 79 extras), both configs re-pointed at it, and
+  `x_r3_b3_dense2_epw6/9` appended to the live night (26 jobs). They run after the other agent's 8;
+  the item-3 criterion is not yet tested.
+
 ## 2026-11-19 23:40 - Full-polar DI results: compact trio separated (local orchestrator)
 
 - The 181-angle / 2048-point verify DI pass (same grid for all three) gives the compact400 trio:

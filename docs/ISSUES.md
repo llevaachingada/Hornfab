@@ -186,6 +186,13 @@
   Use `score_config_sha`/`target_sha` or `--group-by score-config` for strict same-brief cohorts;
   raw complex pressure is not in the NPZ (local `runs/.../response.npz` remains the source).
 
+## 2026-11-20 - Expansion results + item 3 requeued
+
+- Expansion night 16/16: DI morph 1.1692 / fold 1.2558 / twinray 1.3591 (same 181-angle grid);
+  seedB/seedC no winners (data growth); seedC fold 1.2144 reachable cold.
+- Ripple item 3 first attempt INVALID (config-level grid ignored; n=18). Dense brief made; dense2
+  jobs appended to the live night and running after the other agent's 8 jobs.
+
 ## 2026-11-19 - Expansion night staged (16 jobs, 3-4 h), waiting for the other queue
 
 - STAGED: fable_expand_2026-11-19 (configs examples/typologies/expand_2026-11-19/) - full-polar DI on
