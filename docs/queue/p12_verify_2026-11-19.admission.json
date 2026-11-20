@@ -1,0 +1,15 @@
+{
+  "night": "p12_verify_2026-11-19",
+  "allowed_job_ids": [
+    "p12__verify_morph_cont",
+    "p12__verify_fold_cont",
+    "p12__verify_twinray_cont",
+    "p12__verify_fold_s2w",
+    "p12__verify_fold_pub",
+    "p12__ext_throat_s2w_fallback"
+  ],
+  "objective": "verify-grid replays; compact400 trio shares the v10xo identity (mesh normalized rear_res_factor 1.5), home fold pair shares the home v10 identity - the two groups are never ranked against each other or against screen J",
+  "dedupe": "1-solve replays of stored screen bests (no search); ext fallback = p11 ext s2w config, dedupe-checked against the compact night's 10-valid ext s2w (superseding run)",
+  "chained": "launched with queue.ps1 -WaitPid on the compact400_next10_2026-11-19 runner; never concurrent",
+  "planned_by": "local orchestrator, 2026-11-19"
+}

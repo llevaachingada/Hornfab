@@ -1,0 +1,56 @@
+# P12 VERIFY night (2026-11-19, local orchestrator; owner-approved: appended behind the live
+# compact400 night WITHOUT touching it - launched with queue.ps1 -WaitPid on that runner's PID).
+#
+# Purpose: the v10 side of the leaderboard is a tie cluster that screen evals can no longer separate
+# (compact400 trio 1.2271 / 1.3147 / 1.4351 inside the 0.1293 compact floor; home-v10 fold pair
+# 1.3738 vs published 1.4214 inside the 0.4677 floor). Each job below is ONE verify-grid solve of a
+# stored screen best (config seed = that design's params, budget 1, mode verify). Verify J is
+# comparable ONLY within its group:
+#   compact400 v10xo trio: morph_cont 11870ed193af, fold_cont d805f33c65b2, twinray_cont d0743978d68d
+#     (mesh normalized: rear_res_factor 1.5 in all three - the only knob that differed)
+#   home v10 fold pair: fold_s2w winner 56203404ce56 vs the PUBLISHED best 00826f071b24
+# Plus the ext-throat fallback: the compact lane's ext s2w closed at 10 valid (inconclusive), so the
+# prepared p11 ext s2w (narrower az_a_cos_pow lo 0.75, seeded at the published best, refusal-tolerant
+# watchdog) runs its 80 valid here - dedupe-checked, no other queued run covers it.
+# Estimated GPU: 5 verify solves ~2-5 min each + one 80-valid screen ~30-60 min.
+night: p12_verify_2026-11-19
+lane: gpu
+jobs:
+  - id: p12__verify_morph_cont
+    kind: command
+    timeout_s: 1800
+    env: {HORNLAB_GPU_LOCK: refuse}
+    argv: [.venv/Scripts/hornlab-search.exe, run, --config,
+           examples/typologies/priority10_2026-11-19/p12__verify_morph_cont_c4x01.yaml, --mode, verify]
+  - id: p12__verify_fold_cont
+    kind: command
+    timeout_s: 1800
+    env: {HORNLAB_GPU_LOCK: refuse}
+    argv: [.venv/Scripts/hornlab-search.exe, run, --config,
+           examples/typologies/priority10_2026-11-19/p12__verify_fold_cont_c4x03.yaml, --mode, verify]
+  - id: p12__verify_twinray_cont
+    kind: command
+    timeout_s: 1800
+    env: {HORNLAB_GPU_LOCK: refuse}
+    argv: [.venv/Scripts/hornlab-search.exe, run, --config,
+           examples/typologies/priority10_2026-11-19/p12__verify_twinray_cont_c4x02.yaml, --mode, verify]
+  - id: p12__verify_fold_s2w
+    kind: command
+    timeout_s: 1800
+    env: {HORNLAB_GPU_LOCK: refuse}
+    argv: [.venv/Scripts/hornlab-search.exe, run, --config,
+           examples/typologies/priority10_2026-11-19/p12__verify_fold_s2w_56203404.yaml, --mode, verify]
+  - id: p12__verify_fold_pub
+    kind: command
+    timeout_s: 1800
+    env: {HORNLAB_GPU_LOCK: refuse}
+    argv: [.venv/Scripts/hornlab-search.exe, run, --config,
+           examples/typologies/priority10_2026-11-19/p12__verify_fold_pub_00826f07.yaml, --mode, verify]
+  - id: p12__ext_throat_s2w_fallback
+    kind: search
+    mode: screen
+    budget: 80
+    timeout_s: 7200
+    env: {HORNLAB_GPU_LOCK: refuse}
+    config: examples/typologies/priority10_2026-11-19/hl__ext_throat_hvlaw_v7__p11_v10_s2w.yaml
+    watchdog: {refusal_max: 0.65}
