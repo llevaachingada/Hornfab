@@ -122,6 +122,13 @@ def _design_row(design_dir: Path, run_dir: Path | None, band_hz, detrend_orders,
     objective_version = summary.get("objective_version")
     if objective_version is None:
         objective_version = best.get("objective_version")
+    if objective_version is None:
+        # A `verify --verify-dir` directory has run.json (mode "verify") and no summary.json.
+        run_meta = _read_json(run_dir / "run.json", {}) if run_dir else {}
+        raw = (run_meta or {}).get("config") if isinstance(run_meta, dict) else None
+        obj = (raw or {}).get("brief", {}).get("objective") if isinstance(raw, dict) else None
+        if isinstance(obj, dict):
+            objective_version = obj.get("version")
 
     best_is_this_design = best.get("design_hash") == design_hash
     terms = best.get("terms")

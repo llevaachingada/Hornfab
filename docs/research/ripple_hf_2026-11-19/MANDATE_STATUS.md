@@ -7,7 +7,7 @@ handoff itself is preserved verbatim and must not be edited. Update this file, n
 |---|---|---|---|
 | 1 | Reproduce and check the data audit (read-only, no BEM) | **DONE** — report-only tool + verified table | `hornlab_search/metrics/spectral.py`, `tools/analysis/spectral_ripple_audit.py`, [`evidence/spectral_ripple_audit_2026-11-19`](../../evidence/spectral_ripple_audit_2026-11-19/README.md) |
 | 2 | Build a rigorous measurement taxonomy before writing weighted terms | **DONE (documents only)** | [`MEASUREMENT_TAXONOMY.md`](MEASUREMENT_TAXONOMY.md) |
-| 3 | Validate the B3 2.3–3.0 kHz anomaly with a densely sampled re-solve | **NOT STARTED — owner GPU gate** | plan below |
+| 3 | Validate the B3 2.3–3.0 kHz anomaly with a densely sampled re-solve | **STAGED, NOT LAUNCHED** — dense B3 at epw 6/9 in `docs/queue/fable_expand_2026-11-19.yaml`; the audit-stability night in `docs/queue/ripple_audit_2026-11-20.yaml` | §"Staged nights" below |
 | 4 | Controlled HF-width experiment (Crowe X OSSE / R-OSSE rect / OSSE morph) | **NOT STARTED — owner GPU gate + new configs** | plan below |
 | 5 | Check installed-source validity above the first transverse mode | **NOT STARTED — needs real-driver data or a modelled wavefront** | plan below |
 | 6 | Then revise scoring if justified | **DELIBERATELY DEFERRED** — nothing to score until 1–3 produce rank reversals | — |
@@ -50,6 +50,26 @@ not expect, and they are the reason nothing is promoted to a score term:
 Detail, tables and provenance: [`evidence/spectral_ripple_audit_2026-11-19`](../../evidence/spectral_ripple_audit_2026-11-19/README.md).
 
 ## Items 3–5 — staged plans (each needs an owner decision before any GPU time)
+
+### Staged nights (2026-11-20) — nothing here has been launched
+
+- **`docs/queue/fable_expand_2026-11-19.yaml` (ids `x_r3_b3_dense_epw6` / `epw9`)** — item 3's dense
+  re-solve of `ee85bcd2ad67` on 1.8–3.6 kHz at 25 Hz steps (73 extra frequencies), at `epw` 6.0 and
+  9.0 to test convergence rather than interpolation. Configs in
+  `examples/typologies/expand_2026-11-19/`, `budget: 1`, report-only.
+- **`docs/queue/ripple_audit_2026-11-20.yaml` (new, 11 jobs, ~15–20 min GPU)** — tests the *audit*
+  rather than the anomaly: ten already-solved bests spanning the measured range (B3 current/previous,
+  C200, OSSE morph, ext-throat, R-OSSE rect, Crowe X OSSE, Tritonia v8, Lame, Le Cléac'h) are
+  re-solved at **verify fidelity** (25 log frequencies instead of 18, balloon 1024) with
+  `hornlab-search verify --designs <hash> --verify-dir runs/ripple_audit/<id>` — the source run's own
+  config and brief are reused, so no config is authored and no brief is edited. The last job runs
+  `tools/analysis/spectral_ripple_audit.py` over the ten verify responses.
+  **Predeclared criterion**: Spearman(screen V+35, verify V+35) ≥ 0.8 over the ten designs, no design
+  moving more than 0.5 dB, and the B3 notch still present once 25 frequencies sample it. A failure is
+  the useful outcome: it would mean the 10-sample number is grid-limited and must never be quoted as
+  a design property — and item 6 stays closed.
+  Not launched: it is `lane: gpu`, and its per-job `gpu-clean --lane gpu` must not run beside another
+  GPU night. Chain it behind the live runner (`-WaitPid`), never beside it.
 
 **Item 3 — dense-frequency validation of the B3 vertical feature.** Re-solve one design
 (`ee85bcd2ad67`, Klangfilm B3 current, `docs/evidence/runs/scout40_2026-11-19/20261119T073330Z-screen-723756/`)

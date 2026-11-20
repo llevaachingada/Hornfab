@@ -1,0 +1,121 @@
+# RIPPLE AUDIT test night (2026-11-20). STAGED - NOT LAUNCHED.
+#
+# Purpose: test the report-only fixed-angle spectral audit
+# (hornlab_search/metrics/spectral.py, tools/analysis/spectral_ripple_audit.py,
+# docs/evidence/spectral_ripple_audit_2026-11-19/) by asking the ONE question the committed
+# audit cannot answer from stored data:
+#
+#   Is the fixed-angle residual a property of the horn, or of the 18-point screen grid?
+#
+# Each job re-solves ONE already-solved SCOUT40 best design at VERIFY fidelity (25 log freqs
+# instead of 12+6 extras, balloon 1024 instead of 512, same mesh) with `hornlab-search verify`,
+# which re-uses the source run's own config/brief - no new config is authored and no brief is
+# edited. The last job then runs the audit over the verify responses.
+#
+# Predeclared success criterion (write the verdict in docs/evidence BEFORE reading the numbers):
+#   * the audit's verdict on each design must not flip: Spearman(screen V+35, verify V+35) >= 0.8
+#     over the 10 designs, and no design may move more than 0.5 dB;
+#   * the B3 band (2.27-3.31 kHz) must keep its notch once 25 frequencies sample it.
+# A failure is informative: it means the 10-sample screen number is grid-limited and must never
+# be quoted as a design property (and item 6 - scoring - stays closed).
+#
+# Cost: 10 verify solves, ~10-20 min GPU total (verify ~1.4x the screen frequency count), plus a
+# ~2 s CPU audit. NOT a search; no CMA, no new geometry.
+#
+# GPU discipline: this night is lane gpu and its pre-hygiene runs `gpu-clean --lane gpu`, which
+# kills this lane's BEAT hosts. DO NOT launch or chain it while any other lane:gpu night is live
+# (check `Get-CimInstance Win32_Process | ? { $_.CommandLine -match 'run_campaign_night' }` and
+# `runs/.gpu.lock` first). Chain it behind the live night with -WaitPid, never beside it.
+#
+# Ripple mandate item 3 (the dense 1.8-3.6 kHz B3 re-solve at epw 6/9) is ALREADY staged in
+# docs/queue/fable_expand_2026-11-19.yaml (ids x_r3_b3_dense_epw6 / epw9) and is NOT duplicated
+# here. This night tests the audit; that night tests the anomaly.
+night: ripple_audit_2026-11-20
+lane: gpu
+jobs:
+# --- designs chosen to span the measured range (screen V+35 dB in brackets), both families and
+# --- both SCOUT40 briefs. One design per run dir; verify keeps each run's own brief, so this is a
+# --- within-design stability test, NOT a cross-brief leaderboard.
+- id: ra_b3_current       # 1.441
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T073330Z-screen-723756,
+         --designs, ee85bcd2ad67, --verify-dir, runs/ripple_audit/ra_b3_current]
+- id: ra_b3_previous      # 1.947
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T051630Z-screen-ce7a3f,
+         --designs, e4d38596e2a8, --verify-dir, runs/ripple_audit/ra_b3_previous]
+- id: ra_c200             # 2.247 (worst of the loaded group)
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T051833Z-screen-64eea7,
+         --designs, 14e53020adbe, --verify-dir, runs/ripple_audit/ra_c200]
+- id: ra_morph            # 0.822
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T081214Z-screen-8470bd,
+         --designs, cf716e738ef8, --verify-dir, runs/ripple_audit/ra_morph]
+- id: ra_ext_throat       # 0.774
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T075629Z-screen-015bfc,
+         --designs, c1d088b8b92f, --verify-dir, runs/ripple_audit/ra_ext_throat]
+- id: ra_rosse_rect       # 0.596
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T085256Z-screen-c2203f,
+         --designs, efe4a8959d85, --verify-dir, runs/ripple_audit/ra_rosse_rect]
+- id: ra_crowe_x          # 0.351 (the handoff's HF direction)
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T090559Z-screen-9b8767,
+         --designs, 9b5428e6dec8, --verify-dir, runs/ripple_audit/ra_crowe_x]
+- id: ra_tritonia_v8      # 0.342
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T083421Z-screen-ab2159,
+         --designs, 2979e2d125ce, --verify-dir, runs/ripple_audit/ra_tritonia_v8]
+- id: ra_lame             # 0.117
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T053037Z-screen-394fb1,
+         --designs, f2054faaa9d4, --verify-dir, runs/ripple_audit/ra_lame]
+- id: ra_lecleach         # 0.058 (the smoothest design; the negative control)
+  kind: command
+  timeout_s: 1800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/hornlab-search.exe, verify, --run, runs/20261119T050354Z-screen-7ebf9c,
+         --designs, 5381c9cea1ec, --verify-dir, runs/ripple_audit/ra_lecleach]
+# --- the audit itself (CPU, seconds). The tool refuses a non-empty --out: delete or rename
+# --- runs/ripple_audit/report_verify_2026-11-20 before re-running this night.
+- id: ra_audit_verify
+  kind: command
+  timeout_s: 600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv: [.venv/Scripts/python.exe, tools/analysis/spectral_ripple_audit.py,
+         runs/ripple_audit/ra_b3_current, runs/ripple_audit/ra_b3_previous, runs/ripple_audit/ra_c200,
+         runs/ripple_audit/ra_morph, runs/ripple_audit/ra_ext_throat, runs/ripple_audit/ra_rosse_rect,
+         runs/ripple_audit/ra_crowe_x, runs/ripple_audit/ra_tritonia_v8, runs/ripple_audit/ra_lame,
+         runs/ripple_audit/ra_lecleach,
+         --out, runs/ripple_audit/report_verify_2026-11-20]

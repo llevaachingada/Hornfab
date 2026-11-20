@@ -41,6 +41,21 @@
   tie. Then the promotion gate (real-driver gaps: 12PR300 geometry, calibration, panel fit) before any
   assembled BL test.
 
+## 2026-11-20 - Ripple audit test night staged (11 jobs; NOT launched)
+
+- STAGED: `docs/queue/ripple_audit_2026-11-20.yaml` (launch-ready copy in `runs/nights/`, dry-run
+  clean). Ten SCOUT40 bests re-solved at verify fidelity (25 freqs vs 18) via
+  `hornlab-search verify --designs <hash> --verify-dir runs/ripple_audit/<id>` + one audit job. No
+  new configs, no brief edits, no new geometry.
+- OPEN (owner): launch authorisation. The night is `lane: gpu` and its per-job `gpu-clean --lane gpu`
+  must not run beside another GPU night - chain with `-WaitPid <live runner pid>`, never beside.
+  Predeclared criterion: Spearman(screen V+35, verify V+35) >= 0.8 and no design moving > 0.5 dB.
+- OPEN (owner, item 3): `docs/queue/fable_expand_2026-11-19.yaml` ids `x_r3_b3_dense_epw6`/`epw9`
+  still need their own go-ahead; they are the dense-grid B3 anomaly test, not a metric test.
+- NOTE: the concurrently live `fable_expand_2026-11-19` night recorded `watchdog` status on five
+  consecutive `x_s2b_*` jobs. Not investigated here; that lane's owner should look before the tail
+  (`x_s2c_*`, `x_r3_*`) is trusted.
+
 ## 2026-11-20 - Fixed-angle spectral ripple audit (item 1 done) + mandate items 3-6 open
 
 - DONE: handoff moved to `docs/research/ripple_hf_2026-11-19/` (verbatim) with `MANDATE_STATUS.md`

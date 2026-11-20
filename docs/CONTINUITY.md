@@ -54,6 +54,31 @@
   chained behind `compact400_next10_2026-11-19` with `-WaitPid` (that night was never touched).
   Evidence: `docs/evidence/P12_VERIFY_2026-11-19.md`; queue `docs/queue/p12_verify_2026-11-19.yaml`.
 
+## 2026-11-20 - Ripple audit test night staged (11 jobs, ~15-20 min GPU; NOT launched)
+
+- **Owner ask:** add queue items that test the fixed-angle spectral audit. Staged, nothing launched.
+- **New night `docs/queue/ripple_audit_2026-11-20.yaml`** (+ launch-ready copy in `runs/nights/`,
+  `--dry-run` clean, 11 jobs, `lane: gpu`): ten SCOUT40 bests that span the measured range (B3
+  current/previous, C200, OSSE morph, ext-throat, R-OSSE rect, Crowe X OSSE, Tritonia v8, Lame,
+  Le Cleac'h) are re-solved at **verify fidelity** via `hornlab-search verify --designs <hash>
+  --verify-dir runs/ripple_audit/<id>` - 25 log frequencies + balloon 1024 instead of 18/512, same
+  mesh, reusing each source run's own config/brief (no new config, no brief edited) - then one CPU
+  job runs `tools/analysis/spectral_ripple_audit.py` over the ten verify responses.
+- **Predeclared test (written before any number):** is the residual a property of the horn or of the
+  18-point screen grid? Pass = Spearman(screen V+35, verify V+35) >= 0.8, no design moving > 0.5 dB,
+  B3 notch still present at 25 frequencies. Fail is informative: the 10-sample number is grid-limited
+  and must not be quoted as a design property (item 6 stays closed).
+- **Why this and not item 3 twice:** item 3's dense 1.8-3.6 kHz B3 re-solve at epw 6/9 is already
+  staged by the concurrent lane in `docs/queue/fable_expand_2026-11-19.yaml` (x_r3_b3_dense_*); not
+  duplicated. This night tests the metric, that one tests the anomaly.
+- **Tooling:** the audit now falls back to `run.json` for `objective_version`, because a
+  `verify --verify-dir` output has no `summary.json` (verified end-to-end on an existing verify run
+  dir: 29 frequencies, `v7` recovered, 14 tests still pass).
+- **State:** GPU untouched by me - `fable_expand_2026-11-19` (gpu) and `system_evidence_2026-11-19`
+  (cpu) were live at write time; its x_s2b_* tail recorded `watchdog` status on 5 consecutive jobs
+  (not investigated - that lane's). Launch only after a `gpu-clean` and with `-WaitPid` behind the
+  live runner.
+
 ## 2026-11-20 - Fixed-angle spectral ripple audit (handoff item 1 done; report-only, no GPU)
 
 - **Owner ask:** move `HornFab_Data_Backed_Ripple_and_HF_Handoff_2026-11-19.md` into the repo and
