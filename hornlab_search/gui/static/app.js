@@ -21,6 +21,8 @@ import { viewHwCases, viewHwCase, viewHwReadiness, viewHwOverview } from "./hw.j
 import { viewOverview } from "./overview.js";
 import { viewHwScreens, viewHwScreen } from "./hw_screen.js";
 import { viewHwNew, viewHwLaunch } from "./hw_new.js";
+import { viewHwCompare } from "./hw_compare.js";
+import { viewHwDsp } from "./hw_dsp.js";
 
 // ── XSS helper ─────────────────────────────────────────────────────
 function esc(s) {
@@ -259,6 +261,9 @@ const ROUTES = [
   { re: /^#\/hw$/,                       fn: () => viewHwOverview(ROOT) },
   { re: /^#\/hw\/new(?:\?(.*))?$/,      query: true, fn: m => viewHwNew(ROOT, m[1] || "") },
   { re: /^#\/hw\/launch(?:\?(.*))?$/,   query: true, fn: m => viewHwLaunch(ROOT, m[1] || "") },
+  { re: /^#\/hw\/compare(?:\?(.*))?$/,  query: true, fn: m => viewHwCompare(ROOT, m[1] || "") },
+  { re: /^#\/hw\/case\/([^\/?#]+)\/([^\/?#]+)\/crossover(?:\?(.*))?$/, query: true,
+    fn: m => viewHwDsp(ROOT, decodeURIComponent(m[1]), decodeURIComponent(m[2]), m[3] || "") },
   { re: /^#\/hw\/cases(?:\?(.*))?$/,     query: true, fn: m => viewHwCases(ROOT, m[1] || "") },
   { re: /^#\/hw\/screens(?:\?(.*))?$/,   query: true, fn: m => viewHwScreens(ROOT, m[1] || "") },
   { re: /^#\/hw\/screen\/([0-9a-f]{16})(?:\?(.*))?$/, query: true,

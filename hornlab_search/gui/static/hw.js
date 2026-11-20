@@ -1292,6 +1292,11 @@ export async function viewHwCase(root, key) {
           title="Run Boundary Lab's own validate on this staged case (CPU, seconds)">Validate</button>` : ""}
         ${(r.state === "staged" || r.state === "solved") ? `<button class="btn btn-sm" type="button" data-hw-solve
           title="Open the solve dialog; running is disabled until owner decision 6 is recorded">Solve…</button>` : ""}
+        <a class="btn btn-sm" href="#/hw/compare?a=${encodeURIComponent(r.key)}${r.pair_with ? `&b=${encodeURIComponent(r.pair_with)}` : ""}"
+          title="Compare this case with another solved case (per probe, per excitation; never summed)">Compare…</a>
+        <a class="btn btn-sm" href="${caseHref(r.key)}/crossover"
+          title="Crossover preview is locked until the channel calibration policy is answered (owner decision 3, risk R1)">Crossover…
+          <span class="pill warn" style="font-size:0.62rem">locked</span></a>
         <a class="btn btn-sm" href="#/hw/cases">← All cases</a>
       </div>
     </div>
