@@ -680,6 +680,11 @@ class App:
                 payload = body or {}
                 return NEW.save_spec(self.root, str(payload.get("name") or ""),
                                      payload.get("spec") or {}, replace=bool(payload.get("replace")))
+            if len(parts) == 2 and parts[1] == "dsp-preview":
+                from . import data_hw_dsp as DSP
+                payload = body or {}
+                return DSP.hw_dsp_preview(self.root, self.system_store,
+                                          str(payload.get("case") or ""), payload)
             raise FileNotFoundError(path)
         if head == "studies":
             from hornlab_search.studies.schema import StudyError

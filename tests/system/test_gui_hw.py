@@ -302,6 +302,10 @@ def test_server_dispatch(env) -> None:
     assert [p["id"] for p in presets["presets"]] == ["smoke3", "wide25", "lowband12"]
     auth = app.get("/api/hw/authorization", {})
     assert auth["allowed"] is False and "decision 6" in auth["reason"]
+    # P7: per-channel filtered preview; no summed field.
+    dsp = app.post("/api/hw/dsp-preview", {"case": "bl_motor/20261119T000000Z-solved-1-aaaa"})
+    assert dsp["ok"] is True and len(dsp["channels"]) == 2
+    assert not any("sum" in k.lower() or "combined" in k.lower() for k in dsp)
     # P2: screens list/detail and the pure panel-fit recompute are wired.
     screens = app.get("/api/hw/screens", {})
     assert screens["studies"] == [] and "store" in screens          # fixture store has no studies
