@@ -48,6 +48,7 @@ __all__ = [
     "render_report",
     "flag_off_axis_cancellation",
     "dominates",
+    "validate_axes",
 ]
 
 _NUMERIC_ALIASES = ("numeric_axes", "dominance_axes")
@@ -134,6 +135,32 @@ def _bool_or_none(value: Any) -> bool | None:
     if isinstance(value, (bool, np.bool_)):
         return bool(value)
     return None
+
+
+def validate_axes(rows: Sequence[Mapping[str, Any]]) -> None:
+    """Reject a row schema that dominance cannot interpret.
+
+    The canonical contract is scalar ``numeric_axes`` values plus boolean ``feasibility``
+    columns. Nested ``{value, direction, ...}`` axes or list-valued feasibility columns are a
+    schema error, not silently unorderable rows: a report must never look Pareto-clean because
+    every pair was quietly discarded. Missing/NaN numeric axes remain allowed (they make a pair
+    unorderable, by design).
+    """
+    for index, row in enumerate(rows):
+        row_id = str(row.get("row_id", row.get("id", f"row-{index}")))
+        for key, value in _numeric_axes(row).items():
+            if value is None:
+                continue
+            if isinstance(value, bool) or not isinstance(
+                    value, (int, float, np.integer, np.floating)):
+                raise contracts.SchemaError(
+                    f"row {row_id!r}: numeric axis {key!r} must be a scalar number or None, "
+                    f"got {type(value).__name__}")
+        for key, value in _feasibility_axes(row).items():
+            if value is not None and not isinstance(value, (bool, np.bool_)):
+                raise contracts.SchemaError(
+                    f"row {row_id!r}: feasibility column {key!r} must be bool or None, "
+                    f"got {type(value).__name__}")
 
 
 def dominates(a: Mapping[str, Any], b: Mapping[str, Any],
@@ -292,6 +319,7 @@ def render_report(rows: list[dict],
     """
     axes = tuple(str(a) for a in axes)
     raw_rows = [dict(r) for r in rows]
+    validate_axes(raw_rows)
     ids = [str(r.get("row_id", r.get("id", f"row-{i}"))) for i, r in enumerate(raw_rows)]
     if len(set(ids)) != len(ids):
         raise contracts.SchemaError("report rows must have unique row_id values")
