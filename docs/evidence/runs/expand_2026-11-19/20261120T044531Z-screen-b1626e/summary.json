@@ -1,0 +1,111 @@
+{
+  "run": "20261120T044531Z-screen-b1626e",
+  "config_name": "x_s2b_twinray",
+  "family": "OSSE",
+  "objective_version": 10,
+  "brief_file": "../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml",
+  "seed_params": {
+    "L_mm": 162.2924982406,
+    "a0_deg": 1.0043392643,
+    "a_deg": 49.8299449213,
+    "aspect_ratio": 1.0,
+    "exponent": 2.0,
+    "k": 1.2483494835,
+    "az_fold_v_deg": -6.522833029,
+    "az_fold_v_width_deg": 23.8515938098,
+    "az_fold_h_deg": 0.0,
+    "az_fold_h_width_deg": 20.0,
+    "az_a_cos2p_amp": 0.0,
+    "az_a_cos2p_pow": 1.0,
+    "az_s_cos2_amp": 0.0,
+    "morph_allow_shrinkage": 1,
+    "morph_corner_mm": 13.1670952763,
+    "morph_exponent": 4.0,
+    "morph_fixed": 0.0,
+    "morph_height_mm": 376.9570521011,
+    "morph_rate": 2.0619107391,
+    "morph_target": 1,
+    "morph_width_mm": 366.3441707535,
+    "n": 7.9695115337,
+    "q": 0.9955771976,
+    "r0_mm": 18.0,
+    "s": 0.6349478125,
+    "s1": 1.14,
+    "s2": 0.025
+  },
+  "bounds": {
+    "L_mm": {
+      "lo": 150.0,
+      "hi": 300.0
+    },
+    "a0_deg": {
+      "lo": 1.0,
+      "hi": 5.0
+    },
+    "a_deg": {
+      "lo": 38.0,
+      "hi": 52.0
+    },
+    "k": {
+      "lo": 0.6,
+      "hi": 1.6
+    },
+    "az_fold_v_deg": {
+      "lo": -11.0,
+      "hi": -6.0
+    },
+    "az_fold_v_width_deg": {
+      "lo": 18.0,
+      "hi": 24.0
+    },
+    "morph_corner_mm": {
+      "lo": 8.0,
+      "hi": 46.0
+    },
+    "morph_height_mm": {
+      "lo": 240.0,
+      "hi": 392.0
+    },
+    "morph_rate": {
+      "lo": 1.2,
+      "hi": 3.5
+    },
+    "morph_width_mm": {
+      "lo": 300.0,
+      "hi": 392.0
+    },
+    "n": {
+      "lo": 5.0,
+      "hi": 9.0
+    },
+    "q": {
+      "lo": 0.98,
+      "hi": 1.0
+    },
+    "s": {
+      "lo": 0.35,
+      "hi": 1.0
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "budget": 60,
+    "infeasible_penalty": "resample_strict",
+    "popsize": null,
+    "seed": 2027,
+    "sigma0": 0.2,
+    "tolfun": 0.001,
+    "budget_counts": "valid",
+    "max_attempts": 108,
+    "error_policy": "retry_same_then_stop"
+  },
+  "warm_start_config": null,
+  "warm_start_run": null,
+  "rows": 32,
+  "valid": 31,
+  "best_n": 31,
+  "best_J": 1.4873480122812304,
+  "best_design_hash": "16a98c33481a",
+  "best_json_hash": "16a98c33481a",
+  "missing": []
+}

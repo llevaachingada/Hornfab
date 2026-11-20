@@ -1,0 +1,33 @@
+{
+ "design_hash": "16a98c33481a",
+ "family": "OSSE",
+ "params": {
+  "L_mm": 192.758150842,
+  "a0_deg": 2.0111851591,
+  "a_deg": 45.6404837448,
+  "aspect_ratio": 1.0,
+  "az_a_cos2p_amp": 0.0,
+  "az_a_cos2p_pow": 1.0,
+  "az_fold_h_deg": 0.0,
+  "az_fold_h_width_deg": 20.0,
+  "az_fold_v_deg": -7.3761105007,
+  "az_fold_v_width_deg": 22.6955465005,
+  "az_s_cos2_amp": 0.0,
+  "exponent": 2.0,
+  "k": 1.2672455603,
+  "morph_allow_shrinkage": 1,
+  "morph_corner_mm": 20.2846835857,
+  "morph_exponent": 4.0,
+  "morph_fixed": 0.0,
+  "morph_height_mm": 391.9968590831,
+  "morph_rate": 1.8678999455,
+  "morph_target": 1,
+  "morph_width_mm": 359.2963808753,
+  "n": 8.4415131673,
+  "q": 0.9890963472,
+  "r0_mm": 18.0,
+  "s": 0.7183444567,
+  "s1": 1.14,
+  "s2": 0.025
+ }
+}

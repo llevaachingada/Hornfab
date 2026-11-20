@@ -1,0 +1,527 @@
+{
+ "backend": "beat_cuda",
+ "cma_seed": 2028,
+ "command": "hornlab-search search --config examples/typologies/expand_2026-11-19/x_s2c_fold.yaml --budget 60 --mode screen",
+ "config": {
+  "bounds": {
+   "L_mm": {
+    "hi": 300.0,
+    "lo": 150.0
+   },
+   "a0_deg": {
+    "hi": 2.4866,
+    "lo": 2.0066,
+    "search": false
+   },
+   "a_deg": {
+    "hi": 40.0,
+    "lo": 36.3038
+   },
+   "aspect_ratio": {
+    "hi": 1.0,
+    "lo": 1.0,
+    "search": false
+   },
+   "az_a_cos_amp": {
+    "hi": 11.73355,
+    "lo": 8.13355
+   },
+   "az_a_cos_pow": {
+    "hi": 2.43779,
+    "lo": 1.23779
+   },
+   "az_a_sf_amp": {
+    "hi": 0.0,
+    "lo": 0.0,
+    "search": false
+   },
+   "az_fold_h_deg": {
+    "hi": 0.0,
+    "lo": -15.0
+   },
+   "az_fold_h_width_deg": {
+    "hi": 40.0,
+    "lo": 8.0
+   },
+   "az_fold_v_deg": {
+    "hi": 10.0,
+    "lo": -25.0
+   },
+   "az_fold_v_width_deg": {
+    "hi": 40.0,
+    "lo": 8.0
+   },
+   "az_n_cos2_amp": {
+    "hi": 0.0,
+    "lo": 0.0,
+    "search": false
+   },
+   "az_s_cos2_amp": {
+    "hi": -0.122676,
+    "lo": -0.25
+   },
+   "az_sf_a": {
+    "hi": 1.0,
+    "lo": 1.0,
+    "search": false
+   },
+   "az_sf_b": {
+    "hi": 0.8569,
+    "lo": 0.8569,
+    "search": false
+   },
+   "az_sf_m": {
+    "hi": 4.0,
+    "lo": 4.0,
+    "search": false
+   },
+   "az_sf_n1": {
+    "hi": 7.4958,
+    "lo": 7.4958,
+    "search": false
+   },
+   "az_sf_n2": {
+    "hi": 12.4449,
+    "lo": 12.4449,
+    "search": false
+   },
+   "az_sf_n3": {
+    "hi": 13.4442,
+    "lo": 13.4442,
+    "search": false
+   },
+   "exponent": {
+    "hi": 2.0,
+    "lo": 2.0,
+    "search": false
+   },
+   "k": {
+    "hi": 2.81254,
+    "lo": 2.16454
+   },
+   "morph_allow_shrinkage": {
+    "hi": 1,
+    "lo": 1,
+    "search": false
+   },
+   "morph_corner_mm": {
+    "hi": 46.0,
+    "lo": 8.0
+   },
+   "morph_exponent": {
+    "hi": 4.0,
+    "lo": 4.0,
+    "search": false
+   },
+   "morph_fixed": {
+    "hi": 0.0,
+    "lo": 0.0,
+    "search": false
+   },
+   "morph_height_mm": {
+    "hi": 392.0,
+    "lo": 240.0
+   },
+   "morph_rate": {
+    "hi": 4.34408,
+    "lo": 3.14408
+   },
+   "morph_target": {
+    "hi": 1,
+    "lo": 1,
+    "search": false
+   },
+   "morph_width_mm": {
+    "hi": 392.0,
+    "lo": 300.0
+   },
+   "n": {
+    "hi": 6.56958,
+    "lo": 4.64958
+   },
+   "q": {
+    "hi": 0.974949,
+    "lo": 0.950949
+   },
+   "r0_mm": {
+    "hi": 18.0,
+    "lo": 18.0,
+    "search": false
+   },
+   "s": {
+    "hi": 1.009626,
+    "lo": 0.769626
+   },
+   "s1": {
+    "hi": 1.1799,
+    "lo": 1.1799,
+    "search": false
+   },
+   "s2": {
+    "hi": 0.0286,
+    "lo": 0.0286,
+    "search": false
+   }
+  },
+  "brief": {
+   "description": "(objective v10 target-variant; NEW compact 400 mm-cube identity) F_X 1000 Hz, corridor H 60-100 (pref 80) and V 40-75 (pref 50) from 1000 Hz, held from 1400 Hz; band 350-8000 Hz; HF1440; envelope 400x400 mouth, depth 385 (+15 gate = 400). NOT objective v11; NEVER rankable against v7/v10/compact_xo900.",
+   "driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "envelope": {
+    "max_depth_mm": 385.0,
+    "max_mouth_h_mm": 400.0,
+    "max_mouth_w_mm": 400.0
+   },
+   "grid": {
+    "screen_extra_hz": [
+     250,
+     315,
+     400,
+     2573,
+     3311,
+     4260
+    ],
+    "verify_points_per_octave": 6
+   },
+   "name": "compact400_xo1000_1400_hf1440_v10xo",
+   "objective": {
+    "cov_below_f0": "one_sided",
+    "cov_narrow_ratio": 2.0,
+    "cov_v_weight": 0.5,
+    "flat_band": "scored",
+    "lfp_crossover_ratio": 1.6,
+    "lfp_re_z": 0.2,
+    "loaded_re_z": 0.5,
+    "ripple_region": "preferred_edge",
+    "tolerances": {
+     "cov_profile": 3.0,
+     "di_roughness": 1.0,
+     "dislope": 9.0,
+     "flat": 1.5,
+     "flat_cv": 1.5,
+     "load": 0.3,
+     "rip": 1.0
+    },
+    "version": 10
+   },
+   "source": {
+    "cap": "auto"
+   },
+   "symmetry": "hv",
+   "target": {
+    "band_hi_hz": 8000.0,
+    "band_lo_hz": 350.0,
+    "coverage_h_deg": 80.0,
+    "coverage_profile": {
+     "h": [
+      {
+       "hz": 1000,
+       "max_deg": 100,
+       "min_deg": 60,
+       "preferred_deg": 80
+      },
+      {
+       "hz": 1400,
+       "max_deg": 100,
+       "min_deg": 60,
+       "preferred_deg": 80
+      }
+     ],
+     "interpolation": "log_frequency",
+     "mode": "corridor",
+     "v": [
+      {
+       "hz": 1000,
+       "max_deg": 75,
+       "min_deg": 40,
+       "preferred_deg": 50
+      },
+      {
+       "hz": 1400,
+       "max_deg": 75,
+       "min_deg": 40,
+       "preferred_deg": 50
+      }
+     ]
+    },
+    "coverage_v_deg": 50.0,
+    "coverage_v_down_deg": null,
+    "coverage_v_up_deg": null,
+    "di_slope_target": 0.0,
+    "di_target_db": null,
+    "driver_exit_radius_mm": null,
+    "f0_hz": 1000.0,
+    "f0_v_hz": 1000.0,
+    "freq_weights": {
+     "band_hz": [
+      [
+       2500.0,
+       5500.0,
+       2.0
+      ]
+     ]
+    },
+    "loaded_hi_hz": 5600.0,
+    "z_min": 0.5
+   },
+   "weights": {
+    "cov_profile": 1.0,
+    "di_roughness": 1.0,
+    "dislope": 1.0,
+    "flat": 0.5,
+    "flat_cv": 1.0,
+    "load": 1.0,
+    "rip": 1.0
+   }
+  },
+  "brief_file": "../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml",
+  "description": "v10 leader family (fold_warm, published v10 1.4214) shrunk into the cube. Generated by scratch/fable_architecture/compact400_2026-11-19/make_configs.py from examples/typologies/b6_2026-11-19/hl__osse_rrect_fold_warm_v7__b6_v10_s1.yaml; compact400 identity (400 mm cube, F_X 1 kHz); 60 VALID evals, CMA; size knobs re-bounded to the cube, every other knob inherited",
+  "family": "OSSE",
+  "feasibility": {
+   "derivation": [
+    {
+     "knob": "-",
+     "note": "no generator block in this config"
+    }
+   ],
+   "envelope_mouth_h_mm": 400.0,
+   "envelope_mouth_w_mm": 400.0,
+   "f0_hz": 1000.0,
+   "f0_v_hz": 1000.0,
+   "feasible_v": false,
+   "feasible_w": true,
+   "held_coverage_v_deg": 63.5,
+   "held_coverage_w_deg": 63.5,
+   "required_mouth_h_mm": 508.0,
+   "required_mouth_w_mm": 317.5,
+   "rule": "d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)",
+   "screen_freqs_below_f0": 3,
+   "screen_freqs_total": 12,
+   "verify_freqs_below_f0": 9,
+   "verify_freqs_total": 25
+  },
+  "grid": {
+   "screen_extra_hz": [
+    250,
+    315,
+    400,
+    2573,
+    3311,
+    4260
+   ],
+   "verify_points_per_octave": 6
+  },
+  "mesh": {
+   "dof_cap_final": 24000,
+   "dof_cap_screen": 24000,
+   "dof_cap_verify": 24000,
+   "dof_per_triangle": 0.51,
+   "epw": 6.0,
+   "quadrants": "1",
+   "rear_res_factor": 1.5
+  },
+  "name": "x_s2c_fold",
+  "objective": {
+   "cov_below_f0": "one_sided",
+   "cov_narrow_ratio": 2.0,
+   "cov_v_weight": 0.5,
+   "flat_band": "scored",
+   "lfp_crossover_ratio": 1.6,
+   "lfp_re_z": 0.2,
+   "loaded_re_z": 0.5,
+   "ripple_region": "preferred_edge",
+   "tolerances": {
+    "cov_profile": 3.0,
+    "di_roughness": 1.0,
+    "dislope": 9.0,
+    "flat": 1.5,
+    "flat_cv": 1.5,
+    "load": 0.3,
+    "rip": 1.0
+   },
+   "version": 10
+  },
+  "search": {
+   "algorithm": "cma",
+   "budget": 60,
+   "budget_counts": "valid",
+   "error_policy": "retry_same_then_stop",
+   "infeasible_penalty": "resample_strict",
+   "max_attempts": 108,
+   "popsize": null,
+   "seed": 2028,
+   "sigma0": 0.2,
+   "tolfun": 0.001
+  },
+  "seed_params": {
+   "L_mm": 260.0,
+   "a0_deg": 2.0066,
+   "a_deg": 39.3836351902,
+   "aspect_ratio": 1.0,
+   "az_a_cos_amp": 8.3841356673,
+   "az_a_cos_pow": 1.9315476444,
+   "az_a_sf_amp": 0.0,
+   "az_fold_h_deg": -0.4228900082,
+   "az_fold_h_width_deg": 28.7941015593,
+   "az_fold_v_deg": -2.5163609994,
+   "az_fold_v_width_deg": 19.2852338159,
+   "az_n_cos2_amp": 0.0,
+   "az_s_cos2_amp": -0.174143732,
+   "az_sf_a": 1.0,
+   "az_sf_b": 0.8569,
+   "az_sf_m": 4.0,
+   "az_sf_n1": 7.4958,
+   "az_sf_n2": 12.4449,
+   "az_sf_n3": 13.4442,
+   "exponent": 2.0,
+   "k": 2.8096679426,
+   "morph_allow_shrinkage": 1,
+   "morph_corner_mm": 39.4914986248,
+   "morph_exponent": 4.0,
+   "morph_fixed": 0.0,
+   "morph_height_mm": 330.0,
+   "morph_rate": 3.8881970245,
+   "morph_target": 1,
+   "morph_width_mm": 380.0,
+   "n": 4.8530018524,
+   "q": 0.9748993774,
+   "r0_mm": 18.0,
+   "s": 0.9978802741,
+   "s1": 1.1799,
+   "s2": 0.0286
+  },
+  "solve": {
+   "angle_count": 73,
+   "backend": "beat_cuda",
+   "balloon": true,
+   "balloon_points_screen": 512,
+   "balloon_points_verify": 1024,
+   "cuda_fused": true,
+   "distance_m": 10.0,
+   "gmres_tol": 1e-05,
+   "timeout_s": 900
+  },
+  "target": {
+   "band_hi_hz": 8000.0,
+   "band_lo_hz": 350.0,
+   "coverage_h_deg": 80.0,
+   "coverage_profile": {
+    "h": [
+     {
+      "hz": 1000,
+      "max_deg": 100,
+      "min_deg": 60,
+      "preferred_deg": 80
+     },
+     {
+      "hz": 1400,
+      "max_deg": 100,
+      "min_deg": 60,
+      "preferred_deg": 80
+     }
+    ],
+    "interpolation": "log_frequency",
+    "mode": "corridor",
+    "v": [
+     {
+      "hz": 1000,
+      "max_deg": 75,
+      "min_deg": 40,
+      "preferred_deg": 50
+     },
+     {
+      "hz": 1400,
+      "max_deg": 75,
+      "min_deg": 40,
+      "preferred_deg": 50
+     }
+    ]
+   },
+   "coverage_v_deg": 50.0,
+   "coverage_v_down_deg": null,
+   "coverage_v_up_deg": null,
+   "di_slope_target": 0.0,
+   "di_target_db": null,
+   "driver_exit_radius_mm": null,
+   "f0_hz": 1000.0,
+   "f0_v_hz": 1000.0,
+   "freq_weights": {
+    "band_hz": [
+     [
+      2500.0,
+      5500.0,
+      2.0
+     ]
+    ]
+   },
+   "loaded_hi_hz": 5600.0,
+   "z_min": 0.5
+  },
+  "weights": {
+   "cov_profile": 1.0,
+   "di_roughness": 1.0,
+   "dislope": 1.0,
+   "flat": 0.5,
+   "flat_cv": 1.0,
+   "load": 1.0,
+   "rip": 1.0
+  }
+ },
+ "config_name": "x_s2c_fold",
+ "config_path": "examples/typologies/expand_2026-11-19/x_s2c_fold.yaml",
+ "config_sha": "6626717bde82",
+ "created_utc": "2026-11-20T05:22:37Z",
+ "dataset_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\dataset",
+ "family": "OSSE",
+ "lib_shas": {
+  "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+  "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+  "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+  "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+  "hornlab_search": "5b40fa6526a7b756fc8ac03d50fcb997d3904e48"
+ },
+ "mode": "screen",
+ "objective_version": 10,
+ "run_id": "20261120T052219Z-screen-c1c895",
+ "runtime": {
+  "gpu": [
+   "NVIDIA GeForce RTX 4060 Laptop GPU, 610.62, 8188 MiB"
+  ],
+  "julia": "julia version 1.12.7",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10",
+  "sources": [
+   {
+    "module": "hornlab_beat_bem",
+    "n_files": 111,
+    "sha256": "2fb5ad6c0f0900ef68c2a79761208474815a583d4b6c782bb8c08486561e5543"
+   },
+   {
+    "module": "hornlab_mesher",
+    "n_files": 66,
+    "sha256": "47d00e50f8d7cb8de813b3dcb41d1bcdf893d404424a7689d70f2ca5792949da"
+   },
+   {
+    "module": "hornlab_bempp_bem",
+    "n_files": 21,
+    "sha256": "08f71637ae90cc4900971b15b043320ef4e0a26a3fe884aaacecb35b5c8fc794"
+   }
+  ]
+ },
+ "started_utc": "2026-11-20T05:22:37Z",
+ "status": "running",
+ "toolchain": {
+  "beat_status": "`{'available': True, 'reason': 'NVIDIA GPU detected and Julia CUDA.functional() confirmed a usable device', 'state': 'ready', 'version': '0.2.0', 'backend': 'cuda'}`",
+  "cpu": "Intel(R) Core(TM) i7-14650HX, 16 cores / 24 threads",
+  "driver": "610.62; CUDA UMD version 13.3",
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop, 8 GB (8188 MiB)",
+  "os": "Microsoft Windows 11 Pro 10.0.26200, build 26200",
+  "present": true,
+  "python": "`C:\\Users\\hunte\\Hrns\\hornlab-search\\.venv\\Scripts\\python.exe` 3.12.10",
+  "ram": "31.7 GB",
+  "sha256": "7e829ed0af8ece14"
+ },
+ "trace_fraction": 0.05
+}

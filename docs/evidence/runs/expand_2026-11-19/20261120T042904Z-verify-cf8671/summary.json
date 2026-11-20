@@ -1,0 +1,118 @@
+{
+  "run": "20261120T042904Z-verify-cf8671",
+  "config_name": "x_di_twinray",
+  "family": "OSSE",
+  "objective_version": 10,
+  "brief_file": "../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml",
+  "seed_params": {
+    "L_mm": 205.4295423193,
+    "a0_deg": 1.1714790676,
+    "a_deg": 45.0890250214,
+    "aspect_ratio": 1.0,
+    "exponent": 2.0,
+    "k": 1.552670442,
+    "az_fold_v_deg": -8.4897062306,
+    "az_fold_v_width_deg": 23.7274490331,
+    "az_fold_h_deg": 0.0,
+    "az_fold_h_width_deg": 20.0,
+    "az_a_cos2p_amp": 0.0,
+    "az_a_cos2p_pow": 1.0,
+    "az_s_cos2_amp": 0.0,
+    "morph_allow_shrinkage": 1.0,
+    "morph_corner_mm": 8.5503412693,
+    "morph_exponent": 4.0,
+    "morph_fixed": 0.0,
+    "morph_height_mm": 391.94458206,
+    "morph_rate": 1.6005237298,
+    "morph_target": 1.0,
+    "morph_width_mm": 378.4694456608,
+    "n": 8.9691651521,
+    "q": 0.9958687651,
+    "r0_mm": 18.0,
+    "s": 0.5785589985,
+    "s1": 1.14,
+    "s2": 0.025
+  },
+  "bounds": {
+    "L_mm": {
+      "lo": 150.0,
+      "hi": 300.0
+    },
+    "a0_deg": {
+      "lo": 1.0,
+      "hi": 5.0
+    },
+    "a_deg": {
+      "lo": 38.0,
+      "hi": 52.0
+    },
+    "k": {
+      "lo": 0.6,
+      "hi": 2.5,
+      "search": true
+    },
+    "az_fold_v_deg": {
+      "lo": -11.0,
+      "hi": -6.0
+    },
+    "az_fold_v_width_deg": {
+      "lo": 18.0,
+      "hi": 24.0
+    },
+    "morph_corner_mm": {
+      "lo": 8.0,
+      "hi": 46.0
+    },
+    "morph_height_mm": {
+      "lo": 240.0,
+      "hi": 392.0
+    },
+    "morph_rate": {
+      "lo": 1.2,
+      "hi": 3.5
+    },
+    "morph_width_mm": {
+      "lo": 300.0,
+      "hi": 392.0
+    },
+    "n": {
+      "lo": 5.0,
+      "hi": 9.0
+    },
+    "q": {
+      "lo": 0.98,
+      "hi": 1.0
+    },
+    "s": {
+      "lo": 0.35,
+      "hi": 1.0
+    }
+  },
+  "search": {
+    "algorithm": "cma",
+    "budget": 1,
+    "infeasible_penalty": "resample_strict",
+    "popsize": null,
+    "seed": 40006,
+    "sigma0": 0.2,
+    "tolfun": 0.001,
+    "budget_counts": "valid",
+    "max_attempts": 108,
+    "error_policy": "retry_same_then_stop"
+  },
+  "warm_start_config": {
+    "from_runs": [
+      "runs/20261119T224511Z-screen-38efad"
+    ],
+    "top_k": 10,
+    "sigma_from_spread": false
+  },
+  "warm_start_run": null,
+  "rows": 1,
+  "valid": 1,
+  "best_n": 0,
+  "best_J": 1.359125779973423,
+  "best_design_hash": "d0743978d68d",
+  "best_json_hash": "d0743978d68d",
+  "missing": []
+}

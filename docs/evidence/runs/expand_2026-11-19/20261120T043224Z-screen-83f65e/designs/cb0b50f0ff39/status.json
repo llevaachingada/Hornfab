@@ -1,0 +1,38 @@
+{
+ "cached": false,
+ "error": "",
+ "key": "cb0b50f0ff39-8e789cd0deef-94eb7eb4369d",
+ "kind": "",
+ "mode": "screen",
+ "objective": 1.721879039538654,
+ "ok": true,
+ "seconds": {
+  "mesh": 1.6181485999841243,
+  "solve": 10.541803100029938,
+  "total": 12.397311800043099
+ },
+ "terms": {
+  "constancy": 0.0,
+  "cov_profile": 0.23445904516665161,
+  "di_estimated": 0.0,
+  "di_roughness": 0.7613417623355889,
+  "diag": 7.324413761467779,
+  "dislope": 0.01213921493556163,
+  "distd": 0.7658110626628643,
+  "f11_hz": 5600.0,
+  "flat": 0.4184806716264126,
+  "flat_cv": 0.24175317852186376,
+  "hf_floor": 0.0,
+  "lfp20_hz": 366.72594501876347,
+  "lfp50_hz": 528.5927358576217,
+  "load": 0.0,
+  "loaded_hi_hz": 5600.0,
+  "n_in_band": 16,
+  "n_nan": 0,
+  "oa_excess_raw": 30.0,
+  "penalty": 0.0,
+  "rez_min_from_fx": 1.0013081488436197,
+  "rip": 0.2629455027657819,
+  "total": 1.721879039538654
+ }
+}
