@@ -183,6 +183,8 @@ const modelOf = id => {
 };
 const shortIdOf = r => String(r.candidate_id == null ? "" : r.candidate_id).slice(0, 8);
 const dzMmOf = r => r.placement && r.placement.dz_mm != null ? num(r.placement.dz_mm, 0) : "–";
+/** Driver meta line shared by the table and the 375 px cards: wraps between items, no dangling dot. */
+const driverMetaHtml = r => `<span class="hw-driver-meta mono muted"><span>dz ${esc(dzMmOf(r))} mm</span><span>${esc(shortIdOf(r))}</span></span>`;
 const xoBandOf = r => (Array.isArray(r.xo_band_hz) && r.xo_band_hz.length >= 2)
   ? [Math.min(...r.xo_band_hz), Math.max(...r.xo_band_hz)] : null;
 
@@ -218,6 +220,8 @@ const SCREEN_CSS = `
 #hw-shortlist { font-size:0.82rem; }
 #hw-shortlist th, #hw-shortlist td { padding:5px 8px; vertical-align:middle; }
 #hw-shortlist thead th { background:var(--surface); font-size:0.74rem; white-space:nowrap; }
+/* Units keep their real casing under the page's uppercase th treatment (Hz, dB², cm²). */
+#hw-shortlist .hw-unit { text-transform:none; }
 #hw-shortlist thead tr.hw-groups th.hw-group {
   font-size:0.66rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--label);
   font-weight:600; text-align:left; padding:6px 8px 2px; border-bottom:1px solid var(--rule); }
@@ -233,11 +237,27 @@ const SCREEN_CSS = `
 #hw-shortlist th[data-col="why"] { min-width:8rem; }
 #hw-shortlist th[data-col="box"] { min-width:10.5rem; }
 #hw-shortlist th[data-col="lowend"] { min-width:7.5rem; }
+/* Driver meta (dz + id): wraps between items, never leaves a dangling separator. */
+.hw-driver-meta { display:inline-flex; flex-wrap:wrap; gap:0 6px; max-width:100%;
+  font-size:0.68rem; line-height:1.35; }
+.hw-driver-meta > span { white-space:nowrap; }
 #hw-shortlist input[type="radio"], .hw-card input[type="radio"] {
   width:15px; height:15px; margin:0; accent-color:var(--accent); }
 #hw-shortlist tbody tr[aria-selected="true"] {
   background:color-mix(in srgb, var(--accent) 10%, var(--surface)); }
 #hw-shortlist tbody tr:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+/* Sticky Driver column (table mode only): row identity survives a sideways scroll. */
+@media (min-width:701px) {
+  #hw-shortlist th[data-col="driver"],
+  #hw-shortlist td[data-col="driver"] {
+    position:sticky; left:0; background:var(--surface);
+    box-shadow:1px 0 0 var(--rule); }
+  #hw-shortlist th[data-col="driver"] { z-index:3; }
+  #hw-shortlist td[data-col="driver"] { z-index:1; }
+  #hw-shortlist tbody tr:hover td[data-col="driver"] { background:var(--accent-soft); }
+  #hw-shortlist tbody tr[aria-selected="true"] td[data-col="driver"] {
+    background:color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+}
 
 /* Column chooser: a native <details> popover that never widens the page. */
 #hw-shortlist-card .hw-cols { position:relative; }
@@ -273,8 +293,13 @@ const SCREEN_CSS = `
   text-decoration:underline; text-underline-offset:2px; }
 #hw-screens .hw-open:hover { color:var(--ink); }
 
-#hw-screens-scroll .tbl-scroll-hint,
-#hw-shortlist-scroll .tbl-scroll-hint { font-size:0.8rem; color:var(--label); }
+#hw-screens-scroll .tbl-scroll-hint { font-size:0.8rem; color:var(--label); }
+/* Shortlist: when the wrap really overflows, the cue is a visible banner, not a whisper. */
+#hw-shortlist-scroll.is-scrollable .tbl-scroll-hint {
+  display:block; margin:0 0 6px; padding:4px 10px; text-align:left;
+  border:1px solid var(--accent); border-radius:6px; background:var(--accent-soft);
+  color:var(--accent); font-family:var(--f-body); font-size:0.78rem; font-weight:600;
+  letter-spacing:0; }
 
 /* At desktop width the screens list fits; let the page be the scroll container so the
    sticky header really sticks. The shortlist keeps its own .tbl-wrap scroll at every
@@ -288,9 +313,12 @@ const SCREEN_CSS = `
 }
 
 .hw-cards { display:none; }
+/* The card mode is the whole table there; say so, so the hidden chooser is not a dead end. */
+.hw-card-note { display:none; }
 @media (max-width:700px) {
   .hw-table-view { display:none !important; }
   .hw-cards { display:grid; gap:10px; }
+  .hw-card-note { display:block; }
   /* The card layout carries every field, so the table's column chooser would be a dead control. */
   #hw-shortlist-card .hw-cols { display:none; }
 }
@@ -579,6 +607,8 @@ export async function viewHwScreen(root, studyId, query = "") {
 
   /** The seven reading columns, plus every remaining recorded field behind the chooser. */
   function columnDefs() {
+    // Units keep their real case under the page's uppercase th treatment.
+    const u = t => `<span class="hw-unit">${t}</span>`;
     const whyCell = r => {
       const raw = r.shortlist_reason == null ? "" : String(r.shortlist_reason);
       if (!raw) return `<td class="hw-wrap"><span class="muted">–</span></td>`;
@@ -639,49 +669,49 @@ export async function viewHwScreen(root, studyId, query = "") {
     return [
       { key: "driver", group: null, name: "Driver", sort: "driver", title: "Woofer driver",
         head: () => "Driver",
-        cell: r => `<td class="hw-wrap"><b title="${esc(r.driver_name || r.driver_id || "")}">${esc(modelOf(r.driver_id) || r.driver_name || "–")}</b><br>
-          <span class="mono muted" style="font-size:0.68rem">dz ${esc(dzMmOf(r))} mm · ${esc(shortIdOf(r))}</span></td>` },
+        cell: r => `<td class="hw-wrap"><b title="${esc(r.driver_name || r.driver_id || "")}">${esc(r.driver_name || r.driver_id || "–")}</b><br>
+          ${driverMetaHtml(r)}</td>` },
       { key: "why", group: "Screen", name: "Why shortlisted", sort: "why", title: "Why the screen kept this row",
         head: () => "Why shortlisted", cell: whyCell },
       { key: "box", group: "Box", name: "Box (W×H×D, L)", sort: "box",
         title: "External width × height × depth (mm) and net volume (L)",
-        head: () => "Box (W×H×D, L)", cell: boxCell },
+        head: () => `Box (W×H×D, ${u("L")})`, cell: boxCell },
       { key: "net", group: "Box", name: "Net volume (L)", sort: "net", title: "Net internal volume (L)",
-        head: () => "Net volume (L)",
+        head: () => `Net volume (${u("L")})`,
         cell: r => numTd(r.box && r.box.net_volume_l, 1) },
       { key: "foot", group: "Box", name: "Cabinet footprint (m²)", sort: "foot",
-        title: "Cabinet footprint (m²)", head: () => "Cabinet footprint (m²)",
+        title: "Cabinet footprint (m²)", head: () => `Cabinet footprint (${u("m²")})`,
         cell: r => numTd(r.numeric_axes && r.numeric_axes.cabinet_footprint_m2, 3) },
       { key: "lowend", group: "Low end", name: "Tuning / F3 (Hz)", sort: "tuning",
         title: "Ported-box tuning and the box model's F3 (Hz)",
-        head: () => `${tip("fb_tuning", "Tuning")} / ${tip("f3", "F3")} (Hz)`, cell: lowendCell },
+        head: () => `${tip("fb_tuning", "Tuning")} / ${tip("f3", "F3")} (${u("Hz")})`, cell: lowendCell },
       { key: "f3", group: "Low end", name: "F3 (Hz)", sort: "f3", axisKey: "lf_f3_hz",
-        title: "F3 (Hz)", head: () => `${tip("f3", "F3")} (Hz)`,
+        title: "F3 (Hz)", head: () => `${tip("f3", "F3")} (${u("Hz")})`,
         cell: r => numTd(r.box && r.box.f3_hz, 1) },
       { key: "port", group: "Low end", name: "Port area (cm²)", sort: "port",
-        title: "Port throat area (cm²)", head: () => "Port area (cm²)",
+        title: "Port throat area (cm²)", head: () => `Port area (${u("cm²")})`,
         cell: r => numTd(r.box && r.box.port_throat_area_cm2, 0) },
       { key: "exc", group: "Low end", name: "Excursion margin (dB)", sort: "exc",
         axisKey: "excursion_margin_db", title: "Excursion margin (dB)",
-        head: () => `${tip("excursion_margin", "Excursion margin")} (dB)`,
+        head: () => `${tip("excursion_margin", "Excursion margin")} (${u("dB")})`,
         cell: r => numTd(r.numeric_axes && r.numeric_axes.excursion_margin_db, 1) },
       { key: "pv", group: "Low end", name: "Port velocity (× limit)", sort: "pv",
         axisKey: "port_velocity_ratio", title: "Port velocity as a ratio of the limit",
-        head: () => `${tip("port_velocity", "Port velocity")} (× limit)`,
+        head: () => `${tip("port_velocity", "Port velocity")} (${u("× limit")})`,
         cell: r => numTd(r.numeric_axes && r.numeric_axes.port_velocity_ratio, 2) },
       { key: "xo", group: "Crossover", name: "Crossover (Hz)", sort: "xo",
         title: "Crossover frequency and overlap band (Hz)",
-        head: () => `${tip("xo_band", "Crossover")} (Hz)`, cell: xoCell },
+        head: () => `${tip("xo_band", "Crossover")} (${u("Hz")})`, cell: xoCell },
       { key: "match", group: "Match", name: "Match error H / V (dB²)", sort: "mr_h",
         axisKey: "match_error_h_db2", title: "Shape match error H and V (dB²)",
-        head: () => `${tip("e_shape", "Match H / V")} (dB²)`, cell: matchCell },
+        head: () => `${tip("e_shape", "Match H / V")} (${u("dB²")})`, cell: matchCell },
       { key: "matchh", group: "Match", name: "Match error H (dB²)", sort: "mr_h",
         axisKey: "match_error_h_db2", title: "Shape match error H (dB²)",
-        head: () => `${tip("e_shape", "Match error H")} (dB²)`,
+        head: () => `${tip("e_shape", "Match error H")} (${u("dB²")})`,
         cell: r => fmtTd(r.numeric_axes && r.numeric_axes.match_error_h_db2, "match_error_h_db2") },
       { key: "matchv", group: "Match", name: "Match error V (dB²)", sort: "mr_v",
         axisKey: "match_error_v_db2", title: "Shape match error V (dB²)",
-        head: () => `${tip("e_shape", "Match error V")} (dB²)`,
+        head: () => `${tip("e_shape", "Match error V")} (${u("dB²")})`,
         cell: r => fmtTd(r.numeric_axes && r.numeric_axes.match_error_v_db2, "match_error_v_db2") },
       { key: "feasible", group: "Build", name: "Feasible", sort: "feasible",
         title: "Every recorded feasibility gate", head: () => "Feasible", cell: gatesCell },
@@ -748,7 +778,7 @@ export async function viewHwScreen(root, studyId, query = "") {
             aria-label="Select ${esc(r.driver_name || r.driver_id || "row")} ${esc(cid)}">
           <div>
             <b>${esc(r.driver_name || r.driver_id || "–")}</b>
-            <span class="mono muted">dz ${esc(dzMmOf(r))} mm · ${esc(shortIdOf(r))}</span>
+            ${driverMetaHtml(r)}
             <div class="muted" style="font-size:0.76rem;white-space:normal;overflow-wrap:break-word">
               <code>${esc(r.shortlist_reason || "–")}</code></div>
           </div>
@@ -772,11 +802,12 @@ export async function viewHwScreen(root, studyId, query = "") {
 
     const headInner = d => {
       const active = sort && d.sort && sort.key === d.sort;
-      const arrow = d.axisKey ? dirArrow(d.axisKey, axisDirs) : "";
       const dirText = d.axisKey ? dirWord(d.axisKey, axisDirs) : "";
       const ind = active ? (sort.dir > 0 ? "▲" : "▼") : "↕";
       const title = d.title || d.name;
-      return `${d.head()}${arrow ? ` <span class="muted" aria-hidden="true" title="${esc(dirText)}">${arrow}</span>` : ""}${d.sort
+      // One glyph per header: the sort control. The study's direction stays in the control's
+      // tooltip and accessible name, so Match no longer shows two arrows side by side.
+      return `${d.head()}${d.sort
         ? ` <button type="button" class="linkish" data-sort="${esc(d.sort)}"
             title="Sort by ${esc(title)}${dirText ? " (" + esc(dirText) + ")" : ""}"
             aria-label="Sort by ${esc(title)}${dirText ? ", " + esc(dirText) : ""}">${ind}</button>` : ""}`;
@@ -807,7 +838,9 @@ export async function viewHwScreen(root, studyId, query = "") {
       }
       const rowsHtml = list.map(r => {
         const cid = String(r.candidate_id);
-        return `<tr class="clickable" data-cid="${esc(cid)}" tabindex="0" aria-selected="${cid === selected}">${vis.map(d => d.cell(r)).join("")}</tr>`;
+        // Tag each cell with its column key so the Driver cell can stay sticky while scrolling.
+        const cells = vis.map(d => d.cell(r).replace(/^<td/, `<td data-col="${esc(d.key)}"`)).join("");
+        return `<tr class="clickable" data-cid="${esc(cid)}" tabindex="0" aria-selected="${cid === selected}">${cells}</tr>`;
       }).join("");
       return `<table id="hw-shortlist" aria-label="Shortlist rows">
         <thead><tr class="hw-groups">${groupRow}</tr><tr class="hw-head">${headRow}</tr></thead>
@@ -891,16 +924,18 @@ export async function viewHwScreen(root, studyId, query = "") {
         </details>
       </div>
       <p class="hint" role="status" id="hw-pick-status" style="font-size:0.8rem">${esc(shortlistStatus())}</p>
+      <p class="hint hw-card-note" style="font-size:0.8rem">Cards show every recorded field; the table's
+        column chooser is not needed here.</p>
       <div class="tbl-scroll hw-table-view" id="hw-shortlist-scroll">
-        <div class="tbl-scroll-hint" aria-hidden="true">scroll for all columns →</div>
+        <div class="tbl-scroll-hint" aria-hidden="true">More columns → scroll this table sideways</div>
         <div class="tbl-wrap" id="hw-shortlist-wrap"></div>
       </div>
       <div class="hw-cards">${shortlist.map(cardHtml).join("")}</div>
       <p class="cap" style="font-size:0.78rem">The header groups the columns
-        (Box | Low end | Crossover | Match | Build); hover any label for its definition. Arrows are the
-        study's own <code>axis_directions</code>: ↓ lower is better, ↑ higher is better. Sort with the
-        header control; use <b>Columns</b> to show more fields. The radio (or Enter on a row) picks the
-        row the Panel fit tab pre-checks. Below 700 px each row becomes a card.</p>
+        (Box | Low end | Crossover | Match | Build); hover any label for its definition. Sort with the
+        header control; its tooltip gives the study's own direction (lower is better / higher is better).
+        Use <b>Columns</b> to show more fields. The radio (or Enter on a row) picks the row the Panel fit
+        tab pre-checks. Below 700 px each row becomes a card that lists every recorded field.</p>
     </section>`;
 
     const colsBox = body.querySelector("#hw-cols");
