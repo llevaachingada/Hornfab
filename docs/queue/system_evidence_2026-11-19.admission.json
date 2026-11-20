@@ -1,0 +1,21 @@
+{
+  "night": "system_evidence_2026-11-19",
+  "lane": "cpu",
+  "allowed_job_ids": [
+    "ev_lf_motor_real",
+    "ev_lf_demo_twin",
+    "ev_lf_default_real",
+    "ev_lf_default_demo",
+    "ev_lf_assembled_demo",
+    "ev_wide_default_real",
+    "ev_wide_default_demo",
+    "ev_farfield_g4_10m",
+    "ev_dense_g4_49",
+    "ev_screen_variety",
+    "ev_export_system_data"
+  ],
+  "objective": "Produce the missing system evidence (LF 20-200 Hz, 2x2 motor x box, assembled LF, 10 m vs 2 m observation, 25 vs 49 frequency sampling) as CPU beat_cpu runs on existing immutable projects; no GPU, no scoring change, no system ranking.",
+  "dedupe": "All derived cases are new experiment ids and fresh case dirs; sources are #4/#5/#6/R0/#2 and the saved screen asset. No source case is rewritten.",
+  "authorization": "PENDING OWNER GO: set HORNLAB_EVIDENCE_AUTHORIZED_BY to the owner's exact record before launch; without it every --solve job refuses before writing a case.",
+  "planned_by": "Fable senior, 2026-11-19; staged, not launched"
+}

@@ -1,5 +1,22 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 - System evidence queue staged (CPU only, not launched)
+
+- **Owner ask:** queue a variety of runs whose data will guide the open system questions.
+- **Queue:** `docs/queue/system_evidence_2026-11-19.yaml` (11 CPU-lane `command` jobs) + runbook
+  `...md` + admission `...admission.json` + six request overlays under `requests/`.
+- **Jobs:** LF 20-200 Hz on #4 real motor, #5 demo twin, #6 real/default box, R0 demo/default box,
+  and the assembled #2 project; 2x2 wide-grid cells (real/demo x default box); 10 m vs 2 m
+  observation; 25 vs 49 frequency sampling on #2; a CPU screen replay; and a census re-export.
+- **Tool:** `tools/system/evidence_case.py` copies an existing `case.blab.json` + `bl_output/` into
+  a fresh case, copies/validates the request, writes a self-checksummed source/project/request/BL
+  manifest, then calls the existing authorized `reference.solve`. `--dry-run` writes nothing;
+  `--solve` refuses without `HORNLAB_EVIDENCE_AUTHORIZED_BY` or `--authorized-by`.
+- **Tests:** `tests/system/test_evidence_case.py` **6 passed**; per-job dry-runs 9/9; night dry-run
+  reports 11 jobs, lane=cpu. No solve and no GPU job was started; the queue is staged for owner go.
+- **Not in this queue:** real-motor assembled WP3, mesh-refinement convergence, real-driver shape,
+  calibration/system ranking. Those need separate work/owner gates.
+
 ## 2026-11-20 - Senior engineering decision + pilot Pareto/fidelity repair (CPU only, no GPU)
 
 - **Mandate:** adversarial reconciliation of the horn + woofer stack, a fidelity/source-

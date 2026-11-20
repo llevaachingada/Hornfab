@@ -1,5 +1,18 @@
 ﻿# ISSUES
 
+## 2026-11-20 - System evidence queue staged (owner go required)
+
+- STAGED (no run): `docs/queue/system_evidence_2026-11-19.yaml`, 11 CPU-lane jobs (LF 20-200 Hz,
+  2x2 wide matrix, 10 m observation, 49-freq sampling, screen replay, census export); runbook and
+  admission in the same folder. `tools/system/evidence_case.py` derives fresh cases from existing
+  projects; tests 6 passed. Night dry-run: 11 jobs, lane=cpu.
+- OPEN (owner): set `HORNLAB_EVIDENCE_AUTHORIZED_BY` to the exact authorization record and launch;
+  without it every `--solve` job refuses before writing a case. CPU only; no GPU lock.
+- OPEN (not in queue): real-motor assembled WP3, mesh-refinement convergence, real 12PR300 shape/
+  panel fit, calibration/decision 3, solve authorization shape/decision 6.
+- NOTE: the queue does not rank systems or change scoring; it produces LF/matrix/observation/
+  sampling evidence for the decision report.
+
 ## 2026-11-20 - Pilot contracts repaired; system fidelity/normalization decision recorded
 
 - DONE: pilot `--geometry` fidelity fix; scalar Pareto axes + F3 minimise; boolean feasibility;

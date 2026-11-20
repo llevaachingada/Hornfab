@@ -46,6 +46,9 @@ git log --oneline -5; git status --porcelain
 - **CPU lane:** free. Compact-horn candidate register (10 rows, measured geometry/config_sha) is in
   `docs/research/compact_horn_system_2026-11-19/`; its one conditional GPU ask FAILED its own gate
   (A1 v10 1.9858 vs 1.4214+0.4677), so no GPU was authorised.
+- **System evidence queue:** staged, not launched — `docs/queue/system_evidence_2026-11-19.yaml`
+  (11 CPU jobs: LF 20-200 Hz, 2x2 matrix, 10 m observation, 49-freq sampling, screen/census). Set
+  `HORNLAB_EVIDENCE_AUTHORIZED_BY` for owner go; no GPU lock.
 - **System layer:** 37 case dirs = **5 solved / 27 staged / 3 refused / 2 invalid** (the 9 readiness
   cases are 5 solved + 2 staged + 1 refused + the 62864 clearance case). The pilot fidelity/Pareto
   contract is fixed and tested (`pilot --geometry` now works; `score.validate_axes` rejects nested

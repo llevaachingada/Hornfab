@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "frequencies_hz": [
+    200.0,
+    222.1952,
+    246.8534,
+    274.2482,
+    304.6831,
+    338.4955,
+    376.0603,
+    417.7939,
+    464.1589,
+    515.6693,
+    572.8961,
+    636.4736,
+    707.1068,
+    785.5785,
+    872.7587,
+    969.6137,
+    1077.2173,
+    1196.7624,
+    1329.574,
+    1477.1245,
+    1641.0495,
+    1823.1662,
+    2025.4934,
+    2250.2741,
+    2500.0
+  ],
+  "excitation_port_ids": [
+    "vented/voltage",
+    "excitation:horn"
+  ],
+  "probes": [
+    {
+      "id": "on_axis_10m",
+      "coordinate_frame": "project",
+      "points_m": [
+        [
+          0,
+          0,
+          10
+        ]
+      ]
+    },
+    {
+      "id": "up30_10m",
+      "coordinate_frame": "project",
+      "points_m": [
+        [
+          0,
+          5,
+          8.660254
+        ]
+      ]
+    },
+    {
+      "id": "down30_10m",
+      "coordinate_frame": "project",
+      "points_m": [
+        [
+          0,
+          -5,
+          8.660254
+        ]
+      ]
+    },
+    {
+      "id": "horz_right_10m",
+      "coordinate_frame": "project",
+      "points_m": [
+        [
+          5,
+          0,
+          8.660254
+        ]
+      ]
+    },
+    {
+      "id": "horz_left_10m",
+      "coordinate_frame": "project",
+      "points_m": [
+        [
+          -5,
+          0,
+          8.660254
+        ]
+      ]
+    }
+  ],
+  "include_project_observations": true
+}

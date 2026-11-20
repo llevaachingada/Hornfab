@@ -1,0 +1,131 @@
+# System evidence queue (2026-11-19) - CPU lane, Boundary Lab `beat_cpu`, no GPU.
+#
+# Purpose: produce the missing *physical* evidence identified by the senior reconciliation, not
+# another horn search. Every solve is a CPU `beat_cpu` run on an existing immutable project,
+# derived into a fresh case by `tools/system/evidence_case.py` (project + request + bl_output
+# copied, hashes recorded). The queue deliberately carries NO standing authorization: export
+# `HORNLAB_EVIDENCE_AUTHORIZED_BY` with the owner's exact record before launching, otherwise every
+# solve job refuses before writing a case.
+#
+# Launch (after the owner authorizes CPU solves):
+#   $env:HORNLAB_EVIDENCE_AUTHORIZED_BY = "owner <date>: bounded system evidence queue (CPU only)"
+#   .venv\Scripts\python.exe tools\run_campaign_night.py `
+#     --night docs\queue\system_evidence_2026-11-19.yaml --dry-run
+#   .venv\Scripts\python.exe tools\run_campaign_night.py `
+#     --night docs\queue\system_evidence_2026-11-19.yaml
+#
+# The queue is CPU-lane only: it takes `runs/.cpu.lane.lock`, never `.gpu.lock`, and never starts
+# a hornlab Julia/CUDA host. Do not launch it while the CPU lane is live.
+night: system_evidence_2026-11-19
+lane: cpu
+
+jobs:
+  # ---- LF band: 20-200 Hz, 12 log frequencies, 5 probes at 2 m ----
+  # Compare with bassbox F3/Fb/port velocity; this is the evidence that does not exist today.
+  - id: ev_lf_motor_real
+    kind: command
+    timeout_s: 1800
+    argv: [.venv/Scripts/python.exe, tools/system/evidence_case.py,
+           --source-case, system_runs/system/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e,
+           --experiment-id, ev_lf_motor_real, --tag, lf_20_200,
+           --request, docs/queue/system_evidence_2026-11-19/requests/lf_vented_20_200.json,
+           --notes, "LF overlay: real 12PR300 T/S, seed box 115 L / 45 cm2 / Fb ~30 Hz",
+           --solve]
+
+  - id: ev_lf_demo_twin
+    kind: command
+    timeout_s: 1800
+    argv: [.venv/Scripts/python.exe, tools/system/evidence_case.py,
+           --source-case, system_runs/system/bl_motor12pr_demo_twin/20261119T013209Z-ref_case-11372-452574f9,
+           --experiment-id, ev_lf_demo_twin, --tag, lf_20_200,
+           --request, docs/queue/system_evidence_2026-11-19/requests/lf_vented_20_200.json,
+           --notes, "LF overlay: BL demo motor twin, identical geometry to #4",
+           --solve]
+
+  - id: ev_lf_default_real
+    kind: command
+    timeout_s: 1800
+    argv: [.venv/Scripts/python.exe, tools/system/evidence_case.py,
+           --source-case, system_runs/system/bl_motor12pr/20261119T010537Z-real_driver-48792-9d89b3df,
+           --experiment-id, ev_lf_default_real, --tag, lf_20_200,
+           --request, docs/queue/system_evidence_2026-11-19/requests/lf_vented_20_200.json,
+           --notes, "LF overlay: real motor, default 0.32x0.50x0.36 box",
+           --solve]
+
+  - id: ev_lf_default_demo
+    kind: command
+    timeout_s: 1800
+    argv: [.venv/Scripts/python.exe, tools/system/evidence_case.py,
+           --source-case, system_runs/system/bl_ref_case/20261118T223335Z-ref_case-61644-32976a2a,
+           --experiment-id, ev_lf_default_demo, --tag, lf_20_200,
+           --request, docs/queue/system_evidence_2026-11-19/requests/lf_vented_20_200.json,
+           --notes, "LF overlay: demo motor, default box (R0 control)",
+           --solve]
+
+  - id: ev_lf_assembled_demo
+    kind: command
+    timeout_s: 2400
+    argv: [.venv/Scripts/python.exe, tools/system/evidence_case.py,
+           --source-case, system_runs/system/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a,
+           --experiment-id, ev_lf_assembled_demo, --tag, lf_20_200,
+           --request, docs/queue/system_evidence_2026-11-19/requests/lf_assembled_20_200.json,
+           --notes, "LF overlay on the assembled horn+woofer project (demo motor, demo shape)",
+           --solve]
+
+  # ---- Complete the 2x2 motor x box matrix on the wide grid (200-2500 Hz, 25 freqs) ----
+  - id: ev_wide_default_real
+    kind: command
+    timeout_s: 2400
+    argv: [.venv/Scripts/python.exe, tools/system/evidence_case.py,
+           --source-case, system_runs/system/bl_motor12pr/20261119T010537Z-real_driver-48792-9d89b3df,
+           --experiment-id, ev_wide_default_real, --tag, wide_200_2500,
+           --request, docs/queue/system_evidence_2026-11-19/requests/wide_vented_200_2500.json,
+           --notes, "2x2 cell: real motor x default box, same 25-freq grid as #4/#5",
+           --solve]
+
+  - id: ev_wide_default_demo
+    kind: command
+    timeout_s: 2400
+    argv: [.venv/Scripts/python.exe, tools/system/evidence_case.py,
+           --source-case, system_runs/system/bl_ref_case/20261118T223335Z-ref_case-61644-32976a2a,
+           --experiment-id, ev_wide_default_demo, --tag, wide_200_2500,
+           --request, docs/queue/system_evidence_2026-11-19/requests/wide_vented_200_2500.json,
+           --notes, "2x2 cell: demo motor x default box, same 25-freq grid as #4/#5",
+           --solve]
+
+  # ---- Observation / frequency-sampling controls ----
+  - id: ev_farfield_g4_10m
+    kind: command
+    timeout_s: 3000
+    argv: [.venv/Scripts/python.exe, tools/system/evidence_case.py,
+           --source-case, system_runs/system/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a,
+           --experiment-id, ev_farfield_g4_10m, --tag, farfield_10m,
+           --request, docs/queue/system_evidence_2026-11-19/requests/farfield_assembled_10m_200_2500.json,
+           --notes, "Observation-distance control: 10 m probes, same 25-freq assembled grid",
+           --solve]
+
+  - id: ev_dense_g4_49
+    kind: command
+    timeout_s: 3600
+    argv: [.venv/Scripts/python.exe, tools/system/evidence_case.py,
+           --source-case, system_runs/system/bl_smoke_wide/20261118T231115Z-g4wide-56836-b5d6490a,
+           --experiment-id, ev_dense_g4_49, --tag, dense_49,
+           --request, docs/queue/system_evidence_2026-11-19/requests/dense_assembled_49_200_2500.json,
+           --notes, "Frequency-densification control: 49 log freqs on the same assembled mesh",
+           --solve]
+
+  # ---- Screen variety: no solver, no authorization ----
+  - id: ev_screen_variety
+    kind: command
+    timeout_s: 900
+    argv: [.venv/Scripts/python.exe, -m, hornlab_search.system.woofer_seed,
+           --asset-id, 0062fb59fbf63eae,
+           --out, system_runs/screens/system_evidence_2026-11-19,
+           --limit-boxes, 8, --shortlist-size, 6]
+
+  # ---- Refresh the reviewable system census after the solves (gitignored output) ----
+  - id: ev_export_system_data
+    kind: command
+    timeout_s: 600
+    argv: [.venv/Scripts/python.exe, tools/data/system_cases.py,
+           --root, ., --out, system_runs/evidence_export_2026-11-19, --pretty]
