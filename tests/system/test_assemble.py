@@ -126,6 +126,23 @@ def _fake_box() -> C.BoxPoint:
                       derived_tuning_hz=35.0)
 
 
+def test_box_to_vented_source_passes_physical_total_port_length() -> None:
+    """R17: BL's ``port_length_m`` is total incl. lips, not the lumped effective length."""
+    box = _fake_box()
+    assert box.derived_effective_port_length_m is not None
+    source = assemble._box_to_vented_source(box)
+    r_eq_m = np.sqrt(box.port_throat_area_cm2 * 1e-4 / np.pi)
+    neck_m = box.derived_effective_port_length_m - 2.0 * 0.85 * r_eq_m
+    assert source["port_length_m"] == pytest.approx(neck_m + 2.0 * 0.008)
+    assert source["port_length_m"] < box.derived_effective_port_length_m
+    # a box without a derived length keeps the documented zero fallback
+    no_length = C.BoxPoint(kind="vented", external_width_mm=320.0, external_height_mm=500.0,
+                           external_depth_mm=360.0, net_volume_l=42.169, wall_mm=18.0,
+                           port_type="round_flared", port_throat_area_cm2=28.274,
+                           port_nfr=0.12, requested_tuning_hz=30.0)
+    assert assemble._box_to_vented_source(no_length)["port_length_m"] == 0.0
+
+
 def test_plan_assembly_records_bl_validate_gaps_not_guesses(tmp_path: Path) -> None:
     pts, tris = _closed_box_m()
     _write_surface_mesh(tmp_path / "horn.msh", closed=True, points_m=pts, tris=tris,

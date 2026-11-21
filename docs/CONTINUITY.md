@@ -1,5 +1,12 @@
 ﻿# CONTINUITY
 
+## 2026-11-21 - System readiness R17 port mapping + R12 evidence byte-check
+
+- **R17 fixed:** `assemble._box_to_vented_source` now inverts bassbox's effective length to the physical neck and adds both 8 mm BL provider lips before writing BL's `port_length_m` (total incl. lips). It previously passed the effective length through, lengthening the BL port by the end correction. Regression test `test_box_to_vented_source_passes_physical_total_port_length`; `tests/system/test_assemble.py` 8 passed. Existing seed-box cases were staged through `motor_map.vented_source` and already used the correct physical length; no stored case was changed.
+- **R12 closed:** new `tools/system/verify_evidence_quotes.py` + `tests/system/test_verify_evidence_quotes.py` (8 passed). The three sourced blocks in `FIRST_BEM_EVIDENCE.md` are annotated; the tool reports `annotated=3 passed=3 failed=0 skipped=2 result=PASS`. The two reconstructed invocation blocks remain deliberately unannotated (no source file).
+- **R9 measured (evidence pending commit):** float64 CPU control on the real-motor assembled #2 mesh, 6 frequencies incl. the 1641/1823/2025 Hz nulls: 948 compared complex points, max |ΔdB| 0.0029, max |Δphase| 0.012°, null depths identical to ≤0.001 dB. `precision=float64`, `lu_float64`; case `system_runs/system/ev_precision_f64/20261121T084807Z-f64_6f-33768-3be6fcf6`. Float32 is not precision-limiting this mesh.
+- Open readiness work: R3 bassbox audit, R11 real-BL lane, v2 census loader, R6/R7/R10/R16 status updates. No GPU was used; the live favourite queue held the GPU lane.
+
 ## 2026-11-20 — Home 900 Hz engineering decision
 
 - Replayed the existing named home-900 v11 identity. FAV-001 2.607618 leads the five archived finalists. The k-home verify design is effectively tied at 2.604181 with earlier loading and weaker off-axis smoothness. Same-design 900 screen/verify replay shifts reached 0.359 J.

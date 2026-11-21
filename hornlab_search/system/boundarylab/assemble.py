@@ -26,7 +26,7 @@ from typing import Any, Mapping
 
 import numpy as np
 
-from hornlab_search.system import contracts as C, provenance
+from hornlab_search.system import bass_reference, contracts as C, provenance
 from hornlab_search.system.boundarylab import run as bl_run
 from hornlab_search.system.boundarylab.probe import BLRoot, BLCapabilityError
 
@@ -230,18 +230,36 @@ def plan_assembly(
                         blockers=tuple(blockers), transform_m=transform, payload=payload)
 
 
+#: BL provider default ``port_roundover_m`` (``enclosure/parameters.py``), i.e. the lip added
+#: at each port end. It is a Boundary Lab default, not a horn number; ``woofer_seed`` records
+#: the same value as ``BL_DEMO_PORT_ROUNDOVER_M``. Keep the two in step.
+_BL_PORT_ROUNDOVER_M = 0.008
+
+
 def _box_to_vented_source(box: C.BoxPoint) -> dict[str, float]:
     """Map a verified BoxPoint onto BL's exact vented-source keys (verified units, mm→m).
 
     The vented plugin takes external W/H/D and wall; the internal air volume BL meshes is
     reported in ``mesh_info`` at generation time — the mapping here is geometry-level only.
+
+    BL's ``port_length_m`` is the *total physical length including both lips*, while
+    :class:`contracts.BoxPoint.derived_effective_port_length_m` is the lumped effective length
+    (neck + bassbox's ``N_END * 0.85 * r_eq``). Passing the effective length through as the
+    total length silently lengthened the BL port by the end correction; invert the bassbox
+    derivation first and add the two provider-default lips (risk R17).
     """
+    effective = box.derived_effective_port_length_m
+    if effective is None:
+        port_length_m = 0.0
+    else:
+        neck_m = bass_reference.port_neck_length_mm(box) * 1e-3
+        port_length_m = neck_m + 2.0 * _BL_PORT_ROUNDOVER_M
     return {
         "width_m": box.external_width_mm / 1000.0,
         "height_m": box.external_height_mm / 1000.0,
         "depth_m": box.external_depth_mm / 1000.0,
         "wall_m": box.wall_mm / 1000.0,
-        "port_length_m": (box.derived_effective_port_length_m or 0.0),
+        "port_length_m": port_length_m,
         "port_area_m2": box.port_throat_area_cm2 * 1e-4,
         "port_nfr": box.port_nfr,
     }

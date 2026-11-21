@@ -31,6 +31,7 @@ Saved verbatim with `Tee-Object` (UTF-16 on disk; decoded copy not needed — qu
 re-read programmatically from the file bytes). Excerpt (fields quoted from
 `blab_validate.json`, the full 16-line assumptions list elided here):
 
+<!-- evidence-quote: source=system_runs/system/bl_smoke/20261118T225108Z-smoke-42536-01d15001/blab_validate.json mode=lines decode=auto note=hand_elided_field_excerpt -->
 ```json
   "backend_id": "beat_cpu",
   "backend_requested": "beat_cpu",
@@ -61,6 +62,7 @@ RECONSTRUCTED invocation:
 Console stream captured to `blab_solve.log.txt` (PowerShell `Tee-Object`, UTF-16 on disk; quoting
 uses the decoded `blab_solve.log.utf8.txt` copy, byte-identity verified by re-decoding). Verbatim:
 
+<!-- evidence-quote: source=system_runs/system/bl_smoke/20261118T225108Z-smoke-42536-01d15001/blab_solve.log.txt mode=exact decode=utf-16 -->
 ```
 {"event":"started","output":"C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\bl_smoke\\20261118T225108Z-smoke-42536-01d15001\\run","backend_id":"beat_cpu","frequency_count":3}
 {"event":"status","message":"Initializing BEAT Engine"}
@@ -97,6 +99,7 @@ every array shape `[2, N]`: **axis 0 is the excitation port = the two independen
 
 Verbatim checks block:
 
+<!-- evidence-quote: source=system_runs/system/bl_smoke/20261118T225108Z-smoke-42536-01d15001/checks_output.txt mode=exact decode=utf-16 -->
 ```
 --- checks (complex arithmetic, no new solve) ---
 f=   250: polarity-flip residual |(h+w)-(h-w)-2w|/|2w| = 0.00e+00 | total(h+w) recomposition residual 0.00e+00 Pa | 0.1ms delay rotation on woofer =  -9.00 deg (expected  -9.00)
