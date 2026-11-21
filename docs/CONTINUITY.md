@@ -8,6 +8,7 @@
 - **R10 closed** as the recorded policy (pins in every manifest; record, don't upgrade mid-study). **R15 closed:** [10-inch catalog re-verification](evidence/system_evidence_2026-11-19/DRIVER_CATALOG_REVERIFY_2026-11-21.md) against live FaitalPRO pages; every numeric field matches, no YAML edited. **R16 closed:** clearance gate + tests; the real two-body stage case records PASS at 0.017 m aabb gap.
 - **R11 closed:** [one-command real-BL lane](evidence/system_evidence_2026-11-19/REAL_BL_LANE_2026-11-21.md) (`tools/system/real_bl_lane.py`) exercised probe + stage + BL validate + 3-freq CPU solve (3/3 complete, 08:56–08:57 UTC); 8 hermetic tests.
 - Readiness registry: 26 declared cases (20 approved / 6 proposed; the new R9 precision case is proposed), R3/R6/R9/R10/R11/R12/R15/R16/R17 closed, R7 in progress, R1/R2/R5/R8/R13/R14 open. Focused suite 94 passed, 3 real-BL skips. No GPU was touched.
+- Census cleanup: removed the three empty aborted-case dirs (`ev_mesh_refine/...52652` and two `bl_ref_case` empties; no manifest, no project, no evidence). `docs/system_data` now exports 53 cases / 26 declared / 1 diagnostic (the pre-existing `two_way_80x50_700_pilot` manifest-payload mismatch). Full offline profile ran: **7 failures, all pre-existing other-lane items** (v11 registration/score_identities/dataset manifest, v8 registration, preflight history, B8 study_jobs Popen, scout40 queue count); no failure in a file this pass touched.
 
 ## 2026-11-21 - System readiness R17 port mapping + R12 evidence byte-check
 

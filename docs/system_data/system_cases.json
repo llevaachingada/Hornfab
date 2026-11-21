@@ -1,7 +1,7 @@
 {
   "tool": "system_cases",
   "schema_version": 1,
-  "generated_utc": "2026-11-21T09:02:13.552875Z",
+  "generated_utc": "2026-11-21T09:04:29.587730Z",
   "source": {
     "root": ".",
     "system_runs": "system_runs",
@@ -19,56 +19,45 @@
     "error": null
   },
   "census": {
-    "scanned": 55,
-    "included": 55,
+    "scanned": 53,
+    "included": 53,
     "by_status": {
-      "invalid": 2,
       "refused": 3,
       "solved": 21,
       "staged": 29
     },
     "by_fidelity": {
       "COUPLED_VENTED_FEM_BEM_LEM": 24,
-      "UNDECLARED": 31
+      "UNDECLARED": 29
     },
     "by_clearance": {
       "not_recorded": 51,
-      "pass": 2,
-      "unknown": 2
+      "pass": 2
     },
     "experiments": 28,
     "solved": 21,
     "declared": 26,
     "declared_missing_on_disk": 0,
-    "on_disk_not_declared": 29,
+    "on_disk_not_declared": 27,
     "manifest_integrity": {
       "mismatch": 1,
-      "unknown": 2,
       "verified": 52
     },
     "run_manifest_integrity": {
-      "unknown": 53,
+      "unknown": 51,
       "verified": 2
     },
     "project_integrity": {
-      "unknown": 40,
+      "unknown": 38,
       "verified": 15
     },
     "request_integrity": {
-      "unknown": 38,
+      "unknown": 36,
       "verified": 17
     },
-    "diagnostics": 3
+    "diagnostics": 1
   },
   "diagnostics": [
-    {
-      "case_key": "bl_ref_case/20261118T231036Z-assembly-63032-0e3cc92a",
-      "reason": "missing manifest.json"
-    },
-    {
-      "case_key": "bl_ref_case/20261118T231745Z-assembly-06644-76fd5431",
-      "reason": "missing manifest.json"
-    },
     {
       "case_key": "two_way_80x50_700_pilot/20261118T210236Z-pilot-55256-d701a1e0",
       "reason": "manifest payload sha256 mismatch (recorded 7f6e6a1b38ca, computed 61dfc522d8ba)"
@@ -1468,80 +1457,6 @@
     },
     {
       "experiment": "bl_ref_case",
-      "case": "20261118T231036Z-assembly-63032-0e3cc92a",
-      "case_key": "bl_ref_case/20261118T231036Z-assembly-63032-0e3cc92a",
-      "created_utc": null,
-      "kind": null,
-      "gate": null,
-      "gate_source": null,
-      "ref": null,
-      "status": "invalid",
-      "solved": false,
-      "n_frequencies": null,
-      "freq_min_hz": null,
-      "freq_max_hz": null,
-      "backend_id": null,
-      "solve_kind": null,
-      "phasor_convention": null,
-      "completion": null,
-      "authorized_by": null,
-      "fidelity": "UNDECLARED",
-      "motor": "UNDECLARED",
-      "motor_source": null,
-      "transducer_shape": "UNDECLARED",
-      "horn_source": null,
-      "pair_with": null,
-      "project_sha256": null,
-      "project_integrity": "unknown",
-      "run_manifest_sha256": null,
-      "run_manifest_integrity": "unknown",
-      "request_sha256": null,
-      "request_integrity": "unknown",
-      "manifest_payload_sha256": null,
-      "manifest_integrity": "unknown",
-      "box_width_mm": null,
-      "box_height_mm": null,
-      "box_depth_mm": null,
-      "net_volume_l": null,
-      "net_volume_source": null,
-      "port_area_cm2": null,
-      "tuning_hz": null,
-      "horn_mesh": null,
-      "horn_mesh_sha256": null,
-      "horn_offset_mm": null,
-      "horn_offset_mm_xyz": null,
-      "clearance_status": "unknown",
-      "clearance_min_mm": null,
-      "driver_name": null,
-      "evidence": null,
-      "notes": null,
-      "declared": false,
-      "run_status": null,
-      "stage_ok": null,
-      "stage_error": null,
-      "source_path": "system_runs/system/bl_ref_case/20261118T231036Z-assembly-63032-0e3cc92a",
-      "run": {
-        "present": false,
-        "status": null,
-        "frequencies_hz": null,
-        "excitation_port_ids": null,
-        "schema": null,
-        "schema_version": null,
-        "started_at_utc": null,
-        "finished_at_utc": null,
-        "solver_options": null,
-        "engine_runs": [],
-        "meshes": [],
-        "completion_mask": null
-      },
-      "metadata": {
-        "box_source": null,
-        "clearance_source": null,
-        "sources": []
-      }
-    },
-    {
-      "experiment": "bl_ref_case",
       "case": "20261118T231100Z-assembly-62864-f62bf799",
       "case_key": "bl_ref_case/20261118T231100Z-assembly-62864-f62bf799",
       "created_utc": "2026-11-18T23:11:08.051375+00:00",
@@ -1621,80 +1536,6 @@
           "stage_report.json",
           "manifest.payload"
         ]
-      }
-    },
-    {
-      "experiment": "bl_ref_case",
-      "case": "20261118T231745Z-assembly-06644-76fd5431",
-      "case_key": "bl_ref_case/20261118T231745Z-assembly-06644-76fd5431",
-      "created_utc": null,
-      "kind": null,
-      "gate": null,
-      "gate_source": null,
-      "ref": null,
-      "status": "invalid",
-      "solved": false,
-      "n_frequencies": null,
-      "freq_min_hz": null,
-      "freq_max_hz": null,
-      "backend_id": null,
-      "solve_kind": null,
-      "phasor_convention": null,
-      "completion": null,
-      "authorized_by": null,
-      "fidelity": "UNDECLARED",
-      "motor": "UNDECLARED",
-      "motor_source": null,
-      "transducer_shape": "UNDECLARED",
-      "horn_source": null,
-      "pair_with": null,
-      "project_sha256": null,
-      "project_integrity": "unknown",
-      "run_manifest_sha256": null,
-      "run_manifest_integrity": "unknown",
-      "request_sha256": null,
-      "request_integrity": "unknown",
-      "manifest_payload_sha256": null,
-      "manifest_integrity": "unknown",
-      "box_width_mm": null,
-      "box_height_mm": null,
-      "box_depth_mm": null,
-      "net_volume_l": null,
-      "net_volume_source": null,
-      "port_area_cm2": null,
-      "tuning_hz": null,
-      "horn_mesh": null,
-      "horn_mesh_sha256": null,
-      "horn_offset_mm": null,
-      "horn_offset_mm_xyz": null,
-      "clearance_status": "unknown",
-      "clearance_min_mm": null,
-      "driver_name": null,
-      "evidence": null,
-      "notes": null,
-      "declared": false,
-      "run_status": null,
-      "stage_ok": null,
-      "stage_error": null,
-      "source_path": "system_runs/system/bl_ref_case/20261118T231745Z-assembly-06644-76fd5431",
-      "run": {
-        "present": false,
-        "status": null,
-        "frequencies_hz": null,
-        "excitation_port_ids": null,
-        "schema": null,
-        "schema_version": null,
-        "started_at_utc": null,
-        "finished_at_utc": null,
-        "solver_options": null,
-        "engine_runs": [],
-        "meshes": [],
-        "completion_mask": null
-      },
-      "metadata": {
-        "box_source": null,
-        "clearance_source": null,
-        "sources": []
       }
     },
     {
