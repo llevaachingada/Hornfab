@@ -1,0 +1,977 @@
+{
+  "schema": "sculpted-mesh-fidelity-v1",
+  "manifest": "scratch\\sculpted_meridians\\study\\manifest.json",
+  "units": "mm",
+  "vtk_version": "9.7.2",
+  "method": "nearest physical tag 1 triangle; discrete saved sheet samples; either sheet may be nearest",
+  "limitations": "one-sided and unsigned; no sampling between nodes; no topology or acoustic convergence claim",
+  "cases": [
+    {
+      "id": "R0",
+      "surface": "scratch/sculpted_meridians/study/R0/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\R0\\mesh.msh",
+          "mesh_sha256": "8e2491a2ce45d78a32e7f743e88843e89521218cca797700fc3b1e1b51d768a0",
+          "wall_triangles": 12488,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 1225,
+                "median_mm": 0.017564066513100912,
+                "p95_mm": 0.20144399723492795,
+                "max_mm": 0.6212690430412823,
+                "worst_grid_index": [
+                  20,
+                  43
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.13689752353628842,
+                "p95_mm": 0.44520142063975354,
+                "max_mm": 0.6212690430412823,
+                "worst_grid_index": [
+                  20,
+                  43
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 1225,
+                "median_mm": 0.03910540487350368,
+                "p95_mm": 0.44970139825951716,
+                "max_mm": 1.1864606140932439,
+                "worst_grid_index": [
+                  24,
+                  43
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.3357184420874476,
+                "p95_mm": 0.7536266100001946,
+                "max_mm": 1.1864606140932439,
+                "worst_grid_index": [
+                  24,
+                  43
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        },
+        "fine_mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\R0\\mesh_8epw.msh",
+          "mesh_sha256": "a72fe315b491fdb6a50d96ff52a1b369a43e76a1ab27288f44848d2bcbfd3176",
+          "wall_triangles": 21806,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 1225,
+                "median_mm": 0.009970561843322082,
+                "p95_mm": 0.11698071494533842,
+                "max_mm": 0.4674944579599179,
+                "worst_grid_index": [
+                  15,
+                  44
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.07103355687078651,
+                "p95_mm": 0.2519754267880323,
+                "max_mm": 0.4674944579599179,
+                "worst_grid_index": [
+                  15,
+                  44
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 1225,
+                "median_mm": 0.03370395313326866,
+                "p95_mm": 0.3455259622838653,
+                "max_mm": 0.9779540293973107,
+                "worst_grid_index": [
+                  18,
+                  44
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.2356471620345692,
+                "p95_mm": 0.6336251476069195,
+                "max_mm": 0.9779540293973107,
+                "worst_grid_index": [
+                  18,
+                  44
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "R1",
+      "surface": "scratch/sculpted_meridians/study/R1/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\R1\\mesh.msh",
+          "mesh_sha256": "cf3691a989d7dba042067ed5125ca01ad31d5f24fd71e7aea7b37b72fbf3f921",
+          "wall_triangles": 9730,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.015468686345571138,
+                "p95_mm": 0.19938471378421857,
+                "max_mm": 0.48419546259883833,
+                "worst_grid_index": [
+                  48,
+                  90
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.1869841582675173,
+                "p95_mm": 0.3552128769815145,
+                "max_mm": 0.4332151820014848,
+                "worst_grid_index": [
+                  20,
+                  92
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.02245618251885372,
+                "p95_mm": 0.25551142767159224,
+                "max_mm": 0.8808971660940064,
+                "worst_grid_index": [
+                  31,
+                  88
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.2286648314312088,
+                "p95_mm": 0.35961954053734435,
+                "max_mm": 0.559467513522749,
+                "worst_grid_index": [
+                  0,
+                  93
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "R2",
+      "surface": "scratch/sculpted_meridians/study/R2/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\R2\\mesh.msh",
+          "mesh_sha256": "2cde6e8dea45dc8019fcb8c65737aaf0cf3768e00fa2e6b590059aeff7cca9ca",
+          "wall_triangles": 10493,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.015030309121414728,
+                "p95_mm": 0.20579134529004608,
+                "max_mm": 0.55205264260551,
+                "worst_grid_index": [
+                  40,
+                  87
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.16680597680228795,
+                "p95_mm": 0.35407831239129584,
+                "max_mm": 0.46113144954961954,
+                "worst_grid_index": [
+                  22,
+                  91
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.021370804968219158,
+                "p95_mm": 0.2747116922203639,
+                "max_mm": 0.785260492835493,
+                "worst_grid_index": [
+                  41,
+                  89
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.21860725101728817,
+                "p95_mm": 0.503652335599693,
+                "max_mm": 0.7670901534539079,
+                "worst_grid_index": [
+                  20,
+                  91
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        },
+        "fine_mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\R2\\mesh_8epw.msh",
+          "mesh_sha256": "ebcca42640326dfcd3a1acd67c0aafbe3ca61bb025590fba9c30b63fc73dbaa1",
+          "wall_triangles": 18481,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.00830288600448566,
+                "p95_mm": 0.11885381383917104,
+                "max_mm": 0.294704336867583,
+                "worst_grid_index": [
+                  42,
+                  89
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.0938957032125265,
+                "p95_mm": 0.1885654144493791,
+                "max_mm": 0.25138747670980116,
+                "worst_grid_index": [
+                  18,
+                  92
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.013682167368281196,
+                "p95_mm": 0.17324499800844687,
+                "max_mm": 0.5572879339671564,
+                "worst_grid_index": [
+                  21,
+                  91
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.13276555651787947,
+                "p95_mm": 0.28677399752844573,
+                "max_mm": 0.5572879339671564,
+                "worst_grid_index": [
+                  21,
+                  91
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "R3",
+      "surface": "scratch/sculpted_meridians/study/R3/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\R3\\mesh.msh",
+          "mesh_sha256": "f05ac529111db377b56453f50c32e615022f2b2027564f830eb8532d61199a00",
+          "wall_triangles": 11421,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.016148374479909123,
+                "p95_mm": 0.2094442749680323,
+                "max_mm": 0.6785045361686548,
+                "worst_grid_index": [
+                  30,
+                  86
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.16357970728389104,
+                "p95_mm": 0.3430082616218324,
+                "max_mm": 0.4816014641762299,
+                "worst_grid_index": [
+                  21,
+                  91
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.024629527241177857,
+                "p95_mm": 0.3041128595378857,
+                "max_mm": 1.1820607957284854,
+                "worst_grid_index": [
+                  45,
+                  86
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.21722398208575125,
+                "p95_mm": 0.5133122134093042,
+                "max_mm": 0.7949160010079411,
+                "worst_grid_index": [
+                  45,
+                  93
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        },
+        "fine_mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\R3\\mesh_8epw.msh",
+          "mesh_sha256": "2e0e98fcaec63765666f40da766280dae3237052a1df501cb5027307adf538c2",
+          "wall_triangles": 20072,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.008973127031091313,
+                "p95_mm": 0.11667462673456692,
+                "max_mm": 0.4495388474430391,
+                "worst_grid_index": [
+                  30,
+                  89
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.07866923158036673,
+                "p95_mm": 0.1807557243407889,
+                "max_mm": 0.2640761014397002,
+                "worst_grid_index": [
+                  19,
+                  92
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.016079673319335904,
+                "p95_mm": 0.18434107762213794,
+                "max_mm": 0.7079490796402902,
+                "worst_grid_index": [
+                  37,
+                  88
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.12837773963188057,
+                "p95_mm": 0.26523074836358673,
+                "max_mm": 0.41270197860998914,
+                "worst_grid_index": [
+                  23,
+                  92
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "R4",
+      "surface": "scratch/sculpted_meridians/study/R4/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\R4\\mesh.msh",
+          "mesh_sha256": "06fe3e9d4976f0ec9c916664131647669cbfdd81d83cccbcaa425d43fd9fda8f",
+          "wall_triangles": 12243,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.017966707244277604,
+                "p95_mm": 0.2063240860444132,
+                "max_mm": 0.5631897911647924,
+                "worst_grid_index": [
+                  45,
+                  84
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.15431541082926353,
+                "p95_mm": 0.37842218163404334,
+                "max_mm": 0.5240401711733462,
+                "worst_grid_index": [
+                  19,
+                  94
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.027855769983731675,
+                "p95_mm": 0.3169466090926904,
+                "max_mm": 1.5774113534175083,
+                "worst_grid_index": [
+                  36,
+                  88
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.222191196191091,
+                "p95_mm": 0.5825019020060367,
+                "max_mm": 1.0502582189951486,
+                "worst_grid_index": [
+                  37,
+                  91
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "K1",
+      "surface": "scratch/sculpted_meridians/study/K1/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\K1\\mesh.msh",
+          "mesh_sha256": "71126d07db0a5f729df237ee26b44382a6c2d033e786fb4a908b524b9501c22b",
+          "wall_triangles": 9343,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.02108218312537997,
+                "p95_mm": 0.2476203019143238,
+                "max_mm": 0.7457647958789546,
+                "worst_grid_index": [
+                  26,
+                  88
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.2105364270354413,
+                "p95_mm": 0.47148166526351537,
+                "max_mm": 0.644882644087947,
+                "worst_grid_index": [
+                  30,
+                  93
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.03266884961394573,
+                "p95_mm": 0.3585654273496463,
+                "max_mm": 1.0844834645862307,
+                "worst_grid_index": [
+                  32,
+                  92
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.2560876284932133,
+                "p95_mm": 0.5546420237214587,
+                "max_mm": 1.0844834645862307,
+                "worst_grid_index": [
+                  32,
+                  92
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        },
+        "fine_mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\K1\\mesh_8epw.msh",
+          "mesh_sha256": "b03fa09723e91c2bf3575a9c4466c78425b447238dcf506f5ff28169ba44195e",
+          "wall_triangles": 16567,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.011394632447215967,
+                "p95_mm": 0.13690101345960354,
+                "max_mm": 0.4022710082233982,
+                "worst_grid_index": [
+                  30,
+                  87
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.10893550749819128,
+                "p95_mm": 0.259529317201717,
+                "max_mm": 0.37341891585660586,
+                "worst_grid_index": [
+                  32,
+                  91
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.019495904348921726,
+                "p95_mm": 0.20936564174291158,
+                "max_mm": 0.6211248331467997,
+                "worst_grid_index": [
+                  25,
+                  90
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.17738300119524983,
+                "p95_mm": 0.37708255195894846,
+                "max_mm": 0.5259606150631799,
+                "worst_grid_index": [
+                  25,
+                  91
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "K2",
+      "surface": "scratch/sculpted_meridians/study/K2/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\K2\\mesh.msh",
+          "mesh_sha256": "c6261f2fdc6931cd37ede6ac83e9d35b09ab9acde46189ac8cd18ab6e936e949",
+          "wall_triangles": 9267,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.020250604796303754,
+                "p95_mm": 0.23261976336369714,
+                "max_mm": 0.6125775956689382,
+                "worst_grid_index": [
+                  46,
+                  84
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.18562724094579175,
+                "p95_mm": 0.39692243905799446,
+                "max_mm": 0.5734053627737488,
+                "worst_grid_index": [
+                  9,
+                  94
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 4753,
+                "median_mm": 0.031320946835836805,
+                "p95_mm": 0.3518253797940971,
+                "max_mm": 1.0605802091578507,
+                "worst_grid_index": [
+                  27,
+                  87
+                ]
+              },
+              "near_lip": {
+                "n": 294,
+                "median_mm": 0.28078392345933273,
+                "p95_mm": 0.5787858211553752,
+                "max_mm": 1.02716032486406,
+                "worst_grid_index": [
+                  34,
+                  93
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "C0",
+      "surface": "scratch/sculpted_meridians/study/C0/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\C0\\mesh.msh",
+          "mesh_sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+          "wall_triangles": 8646,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.01270180380216685,
+                "p95_mm": 0.08209357173618716,
+                "max_mm": 0.4122369062228367,
+                "worst_grid_index": [
+                  12,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.04009565623760382,
+                "p95_mm": 0.2648727589623749,
+                "max_mm": 0.4122369062228367,
+                "worst_grid_index": [
+                  12,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.033135806469254944,
+                "p95_mm": 1.2192646014479487,
+                "max_mm": 2.7966003933613828,
+                "worst_grid_index": [
+                  9,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.6267662005913469,
+                "p95_mm": 2.713165647373762,
+                "max_mm": 2.7966003933613828,
+                "worst_grid_index": [
+                  9,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        },
+        "fine_mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\C0\\mesh_8epw.msh",
+          "mesh_sha256": "8967cbd1b4c01182eccc746e8576090a1b00d005297148344665e7871b4af6fe",
+          "wall_triangles": 15305,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.007386485072974378,
+                "p95_mm": 0.04569321898047352,
+                "max_mm": 0.25749604651671487,
+                "worst_grid_index": [
+                  14,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.02208895515859435,
+                "p95_mm": 0.16323323939696396,
+                "max_mm": 0.25749604651671487,
+                "worst_grid_index": [
+                  14,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.03019102878978081,
+                "p95_mm": 1.1065549776370338,
+                "max_mm": 2.7618648673880655,
+                "worst_grid_index": [
+                  10,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.5762074197087983,
+                "p95_mm": 2.6453458056060795,
+                "max_mm": 2.7618648673880655,
+                "worst_grid_index": [
+                  10,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "C1",
+      "surface": "scratch/sculpted_meridians/study/C1/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\C1\\mesh.msh",
+          "mesh_sha256": "7156125b92b54c83e1582ca16b2bb4953cfb93724a0d99dd8d0fcde606a7fd9e",
+          "wall_triangles": 9152,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.016353447750616645,
+                "p95_mm": 0.0767954339420585,
+                "max_mm": 0.5624678475365716,
+                "worst_grid_index": [
+                  15,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.036758425571166126,
+                "p95_mm": 0.2952009308018836,
+                "max_mm": 0.5624678475365716,
+                "worst_grid_index": [
+                  15,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.04662852840067835,
+                "p95_mm": 1.1607356195755696,
+                "max_mm": 2.7736537059355806,
+                "worst_grid_index": [
+                  8,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.5725646597335127,
+                "p95_mm": 2.7096222399908823,
+                "max_mm": 2.7736537059355806,
+                "worst_grid_index": [
+                  8,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        },
+        "fine_mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\C1\\mesh_8epw.msh",
+          "mesh_sha256": "3ba66f8974ebacf2d685617762b158150579c8a87d6ae16cffad32a90d6e0e2d",
+          "wall_triangles": 16108,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.009494561516632031,
+                "p95_mm": 0.046974215835355784,
+                "max_mm": 0.2963565356279073,
+                "worst_grid_index": [
+                  14,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.02294865694729919,
+                "p95_mm": 0.16866296165240777,
+                "max_mm": 0.2963565356279073,
+                "worst_grid_index": [
+                  14,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.04216960413848891,
+                "p95_mm": 1.102415406905122,
+                "max_mm": 2.7163665955462823,
+                "worst_grid_index": [
+                  10,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.5688394329908073,
+                "p95_mm": 2.6458860235097186,
+                "max_mm": 2.7163665955462823,
+                "worst_grid_index": [
+                  10,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "C2",
+      "surface": "scratch/sculpted_meridians/study/C2/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\C2\\mesh.msh",
+          "mesh_sha256": "8d2ab9d79d10bddb5349c33ff88bdbd2ccd289d0c43f5110818d3c94e7dc4e28",
+          "wall_triangles": 9620,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.017263910864372588,
+                "p95_mm": 0.0908201929713399,
+                "max_mm": 0.4500658382914439,
+                "worst_grid_index": [
+                  11,
+                  39
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.0410522849216671,
+                "p95_mm": 0.33995811930403896,
+                "max_mm": 0.4500658382914439,
+                "worst_grid_index": [
+                  11,
+                  39
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.06298220122323454,
+                "p95_mm": 1.2326102722469372,
+                "max_mm": 2.596117698839722,
+                "worst_grid_index": [
+                  10,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.5622032940022007,
+                "p95_mm": 2.4726201797980307,
+                "max_mm": 2.596117698839722,
+                "worst_grid_index": [
+                  10,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "C3",
+      "surface": "scratch/sculpted_meridians/study/C3/surfaces.npz",
+      "meshes": {
+        "mesh": {
+          "mesh": "scratch\\sculpted_meridians\\study\\C3\\mesh.msh",
+          "mesh_sha256": "df25a408f0fa8a143b245b2fbb4d40c5929d6d08b059500ea68a881ca9c57133",
+          "wall_triangles": 8668,
+          "sheets": {
+            "inner": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.013216418439993223,
+                "p95_mm": 0.09510165271351133,
+                "max_mm": 0.4625519575089517,
+                "worst_grid_index": [
+                  22,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.043377728896410866,
+                "p95_mm": 0.31663605601818917,
+                "max_mm": 0.4625519575089517,
+                "worst_grid_index": [
+                  22,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            },
+            "outer": {
+              "all": {
+                "n": 1025,
+                "median_mm": 0.03377615092276,
+                "p95_mm": 1.1909378401987678,
+                "max_mm": 2.7503277617934856,
+                "worst_grid_index": [
+                  9,
+                  38
+                ]
+              },
+              "near_lip": {
+                "n": 150,
+                "median_mm": 0.5849262808735746,
+                "p95_mm": 2.6001366094936773,
+                "max_mm": 2.7503277617934856,
+                "worst_grid_index": [
+                  9,
+                  38
+                ]
+              },
+              "lip_station_count": 6
+            }
+          }
+        }
+      }
+    }
+  ]
+}

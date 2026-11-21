@@ -1,0 +1,26 @@
+{
+  "ext": {
+    "sha256": "11ff33d80ce2ab0d0d111804c78a009deff2b25f3a860a64d58fa4de85c68273",
+    "bytes_equal": true,
+    "triangles": 8195
+  },
+  "fold": {
+    "sha256": "ac3422f4381c5e7168805acf21b30d9a50d915437f9060d032bc27c476f3aebc",
+    "bytes_equal": false,
+    "triangles": 7387
+  },
+  "crowe_epw8": {
+    "zero": {
+      "nodes": 7878,
+      "triangles": 15400,
+      "source_triangles": 95,
+      "max_mesh_edge_mm": 9.282706845170994
+    },
+    "h5": {
+      "nodes": 7827,
+      "triangles": 15298,
+      "source_triangles": 95,
+      "max_mesh_edge_mm": 7.547631631770492
+    }
+  }
+}

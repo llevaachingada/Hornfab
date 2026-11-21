@@ -1,5 +1,11 @@
 # Docs index
 
+[Home 900 Hz engineering decision](evidence/home_xo900_2026-11-20/README.md) — saved v11 replays, staged coverage, preferred-pattern and impedance diagnostics, and sculpted BEM admission.
+
+[Sculpted H/V meridians and returning mouths](evidence/sculpted_meridians_2026-11-20/README.md) — exact R-OSSE and Crowe controls, CPU geometry, actual meshed views, per-azimuth plots and exported-facet/source evidence.
+
+[Archived-host axial termination overlay review](evidence/termination_overlay_2026-11-20/README.md) — exact control replay, geometry preflight, source-patch comparisons and CPU renders for Crowe-X and OSSE.
+
 [Acoustic knowledge hub](knowledge/README.md) — canonical navigation and typology
 applicability rules; compact family cards, [source catalog](knowledge/SOURCES.md),
 [seed metadata](knowledge/sources.yaml), [Keele claim](knowledge/claims/KH-001_keele_mouth_heuristic.md),

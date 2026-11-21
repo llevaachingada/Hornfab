@@ -1,0 +1,79 @@
+{
+  "R0": {
+    "reference": "R0",
+    "same_oriented_facets": true,
+    "candidate_triangle_count": 58,
+    "reference_triangle_count": 58,
+    "node_hausdorff_mm": 0.0
+  },
+  "R1": {
+    "reference": "R0",
+    "same_oriented_facets": false,
+    "candidate_triangle_count": 58,
+    "reference_triangle_count": 58,
+    "node_hausdorff_mm": 2.182359182330764e-05
+  },
+  "R2": {
+    "reference": "R0",
+    "same_oriented_facets": false,
+    "candidate_triangle_count": 58,
+    "reference_triangle_count": 58,
+    "node_hausdorff_mm": 0.00013999296964453757
+  },
+  "R3": {
+    "reference": "R0",
+    "same_oriented_facets": false,
+    "candidate_triangle_count": 58,
+    "reference_triangle_count": 58,
+    "node_hausdorff_mm": 0.00019567810954765653
+  },
+  "R4": {
+    "reference": "R0",
+    "same_oriented_facets": false,
+    "candidate_triangle_count": 56,
+    "reference_triangle_count": 58,
+    "node_hausdorff_mm": 1.4594915294626005
+  },
+  "K1": {
+    "reference": "R0",
+    "same_oriented_facets": false,
+    "candidate_triangle_count": 58,
+    "reference_triangle_count": 58,
+    "node_hausdorff_mm": 0.00013054691013702347
+  },
+  "K2": {
+    "reference": "R0",
+    "same_oriented_facets": false,
+    "candidate_triangle_count": 58,
+    "reference_triangle_count": 58,
+    "node_hausdorff_mm": 0.00013732209738109984
+  },
+  "C0": {
+    "reference": "C0",
+    "same_oriented_facets": true,
+    "candidate_triangle_count": 56,
+    "reference_triangle_count": 56,
+    "node_hausdorff_mm": 0.0
+  },
+  "C1": {
+    "reference": "C0",
+    "same_oriented_facets": false,
+    "candidate_triangle_count": 56,
+    "reference_triangle_count": 56,
+    "node_hausdorff_mm": 1.7497883430881789
+  },
+  "C2": {
+    "reference": "C0",
+    "same_oriented_facets": false,
+    "candidate_triangle_count": 56,
+    "reference_triangle_count": 56,
+    "node_hausdorff_mm": 1.7497895327968722
+  },
+  "C3": {
+    "reference": "C0",
+    "same_oriented_facets": false,
+    "candidate_triangle_count": 56,
+    "reference_triangle_count": 56,
+    "node_hausdorff_mm": 1.0176038671583437e-06
+  }
+}

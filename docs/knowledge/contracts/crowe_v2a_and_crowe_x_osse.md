@@ -1,5 +1,7 @@
 # Construction contracts: Crowe V2A area/aspect law and Crowe-X on OS-SE CD
 
+2026-11-20 Crowe-X follow-up. FAV-001 `4140768780f0` reproduced its archived 6 epw mesh byte-for-byte. The local `osse_rollback` signed beak changes the march before the tangent lip is regenerated. The native-sample final-surface axial experiment kept the upstream inner sheet and aperture projection exact. Its exterior onset and source tessellation changed, so it remains at the geometry gate. [Matched CPU evidence](../../evidence/termination_overlay_2026-11-20/README.md).
+
 Drafted 2026-11-18 against HornFab main @1d6ebc8. Read-only review; no solves, meshes, BEM or tests run (`scipy` and `hornlab_mesher` are not importable here). Labels: [published] [derived] [reconstruction] [original-hypothesis] [code-verified] [unverified]. Paths relative to repo root. Two independent contracts; claims do not transfer between them.
 
 ---

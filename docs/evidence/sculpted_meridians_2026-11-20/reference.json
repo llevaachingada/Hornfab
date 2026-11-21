@@ -1,0 +1,247 @@
+{
+  "run": "runs\\20261117T053153Z-screen-15f0e4",
+  "design_hash": "823dc1721a76",
+  "family": "FREEFORM",
+  "grid_recipe": {
+    "knobs": {
+      "g_a_diag_deg": 0.0,
+      "g_a_h_deg": 37.8124106366,
+      "g_a_v_deg": 17.0756829176,
+      "g_b": 0.0002388511,
+      "g_height_mm": 442.9517420413,
+      "g_k": 2.4794610419,
+      "g_m": 0.85,
+      "g_q": 3.0,
+      "g_r": 0.2820232949,
+      "g_rect_exponent": 6.9356460581,
+      "g_tmax": 0.9669894771,
+      "g_width_mm": 575.4637409703
+    },
+    "n_phi": 25,
+    "n_s": 48,
+    "rows": {
+      "driver": {
+        "exit_angle_deg": 2.0,
+        "exit_radius_mm": 18.0
+      },
+      "implementation_sha256": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+      "schema": "rosse-rect-v1",
+      "type": "rosse_rect"
+    },
+    "wall_thickness_mm": 3.0
+  },
+  "bridge_sha256": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f",
+  "geometry": {
+    "units": "mm",
+    "array_shape": [
+      25,
+      49,
+      3
+    ],
+    "arrays": "R0.npz: inner, outer",
+    "metadata": {
+      "quarter": true,
+      "row_span": "quarter",
+      "symmetry_plane": "yz+xz",
+      "source_auto_angle_deg": 2.0,
+      "construction_label": "rosse-rect-v1: ATH R-OSSE (Batik) per azimuth via hornlab_mesher; ours, not ATH's rectangular designs or Crowe ES",
+      "shape": {
+        "m": 0.85,
+        "height_mm": 442.9517420413,
+        "k": 2.4794610419,
+        "a_v_deg": 17.0756829176,
+        "a_h_deg": 37.8124106366,
+        "r": 0.2820232949,
+        "rect_exponent": 6.9356460581,
+        "q": 3.0,
+        "b": 0.0002388511,
+        "width_mm": 575.4637409703,
+        "a_diag_deg": 0.0,
+        "tmax": 0.9669894771,
+        "n_phi": 25,
+        "n_s": 48,
+        "wall_thickness_mm": 3.0
+      },
+      "mouth_w_mm": 573.2959190288676,
+      "mouth_h_mm": 441.3926819045683,
+      "x_span_mm": 477.62776534634236,
+      "implementation_sha256": "601056d0d18f5ba0f699d93ae0e497f48f483f80f1a93640b4db13f74a746b9f"
+    }
+  },
+  "mesh": {
+    "archived_path": "runs\\20261117T053153Z-screen-15f0e4\\verify\\designs\\823dc1721a76\\mesh.msh",
+    "remesh_path": "scratch\\sculpted_meridians\\reference\\remesh\\mesh.msh",
+    "archived_sha256": "8e2491a2ce45d78a32e7f743e88843e89521218cca797700fc3b1e1b51d768a0",
+    "remesh_sha256": "8e2491a2ce45d78a32e7f743e88843e89521218cca797700fc3b1e1b51d768a0",
+    "byte_equal": true,
+    "archived_summary": {
+      "n_triangles": 12546,
+      "n_nodes": 6443,
+      "n_nodes_used": 6443,
+      "bbox_m": [
+        0.0,
+        0.0,
+        -0.003,
+        0.28664834702525216,
+        0.22069634095228421,
+        0.4770661531777681
+      ],
+      "area_m2": 0.21910973390469068,
+      "tags": {
+        "1": 12488,
+        "2": 58
+      },
+      "tag_names": {
+        "1": "SD1G0",
+        "2": "SD1D1001"
+      },
+      "format": "2.2 0 8"
+    },
+    "remesh_summary": {
+      "n_triangles": 12546,
+      "n_nodes": 6443,
+      "n_nodes_used": 6443,
+      "bbox_m": [
+        0.0,
+        0.0,
+        -0.003,
+        0.28664834702525216,
+        0.22069634095228421,
+        0.4770661531777681
+      ],
+      "area_m2": 0.21910973390469068,
+      "tags": {
+        "1": 12488,
+        "2": 58
+      },
+      "tag_names": {
+        "1": "SD1G0",
+        "2": "SD1D1001"
+      },
+      "format": "2.2 0 8"
+    },
+    "nodes_equal": true,
+    "triangles_equal": true
+  },
+  "source": {
+    "driver": {
+      "exit_angle_deg": 2.0,
+      "exit_radius_mm": 18.0
+    },
+    "source_cap": "auto",
+    "source_tag": 2
+  },
+  "response": {
+    "screen": "runs\\20261117T053153Z-screen-15f0e4\\designs\\823dc1721a76\\response.npz",
+    "verify": "runs\\20261117T053153Z-screen-15f0e4\\verify\\designs\\823dc1721a76\\response.npz",
+    "screen_status": {
+      "cached": false,
+      "error": "",
+      "key": "823dc1721a76-8e789cd0deef-ca3243f60c10",
+      "kind": "",
+      "mode": "screen",
+      "objective": 3.4910677068462976,
+      "ok": true,
+      "seconds": {
+        "mesh": 1.7094356000307016,
+        "solve": 45.38444840000011,
+        "total": 47.6350633999682
+      },
+      "terms": {
+        "cov": 0.3364127885437495,
+        "di": 1.469747173123855,
+        "di_estimated": 0.0,
+        "diag": 0.0,
+        "dislope": 0.3715369469983495,
+        "distd": 0.3059887338840208,
+        "f11_hz": 5600.0,
+        "flat": 0.5823256245525902,
+        "flat_cv": 0.6574092153156508,
+        "lfp20_hz": 540.0040707270135,
+        "lfp50_hz": 729.1165796078448,
+        "load": 1.0122908862614513,
+        "loaded_hi_hz": 5600.0,
+        "n_in_band": 13,
+        "n_nan": 0,
+        "penalty": 0.0,
+        "rez_min_from_fx": 0.6316161436062703,
+        "rip": 0.22833653857163466,
+        "total": 3.4910677068462976
+      }
+    },
+    "verify_status": {
+      "cached": false,
+      "error": "",
+      "key": "823dc1721a76-8e789cd0deef-20797f2ac2d7",
+      "kind": "",
+      "mode": "verify",
+      "objective": 3.75208496258515,
+      "ok": true,
+      "seconds": {
+        "mesh": 1.6816054999944754,
+        "solve": 66.00523260002956,
+        "total": 69.43006050004624
+      },
+      "terms": {
+        "cov": 0.4258204774832082,
+        "di": 1.3901410952272992,
+        "di_estimated": 0.0,
+        "diag": 0.0,
+        "dislope": 0.3542732504133536,
+        "distd": 0.33027671123959496,
+        "f11_hz": 5600.0,
+        "flat": 0.6599424998807831,
+        "flat_cv": 0.8042791349411506,
+        "lfp20_hz": 543.8508425348415,
+        "lfp50_hz": 750.438230950324,
+        "load": 1.046426709209917,
+        "loaded_hi_hz": 5600.0,
+        "n_in_band": 22,
+        "n_nan": 0,
+        "oa_excess_raw": 0.0,
+        "penalty": 0.0,
+        "rez_min_from_fx": 0.5389167423775134,
+        "rip": 0.20913345640914152,
+        "total": 3.75208496258515
+      }
+    }
+  },
+  "primary_example": {
+    "parameters": {
+      "type": "R-OSSE",
+      "R": 200.0,
+      "a": 35.0,
+      "r0": 12.7,
+      "a0": 5.0,
+      "k": 1.5,
+      "r": 0.35,
+      "m": 0.75,
+      "q": 3.8,
+      "b": 0.0,
+      "tmax": 1.0
+    },
+    "stations_5_z_radius_mm": [
+      [
+        0.0,
+        12.699999999999998
+      ],
+      [
+        63.035731737608664,
+        50.64530044703411
+      ],
+      [
+        115.30791874620927,
+        105.27728880869128
+      ],
+      [
+        138.5464573257081,
+        164.95145060299302
+      ],
+      [
+        115.30791874620927,
+        200.0
+      ]
+    ],
+    "comparison": "Installed evaluator output only; no independent primary-equation calculation performed."
+  }
+}

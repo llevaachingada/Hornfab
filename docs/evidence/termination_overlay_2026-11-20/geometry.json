@@ -1,0 +1,1310 @@
+{
+  "crowe": {
+    "design": "4140768780f0",
+    "new_design_hash": "4140768780f0",
+    "mesh_hash": [
+      "8e789cd0deef",
+      "8e789cd0deef"
+    ],
+    "solve_hash": [
+      "20797f2ac2d7",
+      "20797f2ac2d7"
+    ],
+    "source": {
+      "cap": "auto"
+    },
+    "epw": 6.0,
+    "route": "FREEFORM",
+    "archive": {
+      "sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+      "archive_sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+      "byte_equal": true,
+      "nodes_equal": true,
+      "triangles_equal": true,
+      "tags": {
+        "1": 8646,
+        "2": 56
+      },
+      "archive_tags": {
+        "1": 8646,
+        "2": 56
+      },
+      "bbox_m": [
+        0.0,
+        0.0,
+        -0.003,
+        0.2936757291383537,
+        0.22513095336130762,
+        0.2604741693644191
+      ],
+      "throat": [
+        true,
+        "round, matches the exit"
+      ],
+      "triangles": 8702,
+      "nodes": 4487
+    },
+    "replay": {
+      "status": "exact_complete",
+      "parity_delta": 0.0,
+      "objective_version": 11,
+      "j": 4.993881286003633,
+      "stored_j": 4.993881286003633,
+      "score_id": "df74ee8ba64bff5bad93b54461e40a778967adf5365ad009e0a25631dee55ee9",
+      "physical_id": "7cd41499abb004d69b20d14543017ef22067a2fd87c947446324b1a1225398a2",
+      "metric_id": "ceaa91b68abf99a5105a3c0593a7a085472a1dbf700dc3f8fa17bdf0fcfea133"
+    },
+    "frequency_grid_hz": [
+      300.0,
+      343.98,
+      394.41,
+      452.24,
+      518.54,
+      594.56,
+      681.73,
+      781.68,
+      896.28,
+      1027.68,
+      1178.35,
+      1351.11,
+      1549.19,
+      1776.32,
+      2036.74,
+      2335.35,
+      2677.73,
+      3070.31,
+      3520.45,
+      4036.58,
+      4628.37,
+      5000.0,
+      5306.94,
+      5623.41,
+      6084.98,
+      6324.56,
+      6977.09,
+      7113.12,
+      8000.0
+    ],
+    "response_arrays": {
+      "freqs_hz": [
+        29
+      ],
+      "h_angles_deg": [
+        73
+      ],
+      "v_angles_deg": [
+        73
+      ],
+      "spl_h_db": [
+        29,
+        73
+      ],
+      "spl_v_db": [
+        29,
+        73
+      ],
+      "balloon_dirs": [
+        1035,
+        3
+      ],
+      "spl_balloon_db": [
+        29,
+        1035
+      ],
+      "z_throat": [
+        29
+      ],
+      "p_h": [
+        29,
+        73
+      ],
+      "p_v": [
+        29,
+        73
+      ],
+      "p_balloon": [
+        29,
+        1035
+      ],
+      "channel_pressure": [],
+      "channel_sphere_pressure": [],
+      "impedance_matrix": [],
+      "channel_tags": [],
+      "tag_areas_m2": [],
+      "backend": [],
+      "n_dof": [],
+      "meta": []
+    },
+    "original_route_remesh": {
+      "sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+      "archive_sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+      "byte_equal": true,
+      "nodes_equal": true,
+      "triangles_equal": true,
+      "tags": {
+        "1": 8646,
+        "2": 56
+      },
+      "archive_tags": {
+        "1": 8646,
+        "2": 56
+      },
+      "bbox_m": [
+        0.0,
+        0.0,
+        -0.003,
+        0.2936757291383537,
+        0.22513095336130762,
+        0.2604741693644191
+      ],
+      "throat": [
+        true,
+        "round, matches the exit"
+      ],
+      "triangles": 8702,
+      "nodes": 4487
+    },
+    "shape": [
+      25,
+      41,
+      3
+    ],
+    "canonical_shape": [
+      61,
+      65,
+      3
+    ],
+    "canonical_samples_equal": false,
+    "zero": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "segment_stretch": [
+        1.0,
+        1.0
+      ],
+      "max_k_mm_inv": [
+        0.05567832301278339,
+        0.05567832301278339
+      ],
+      "z_step_sign_changes": 0,
+      "outer_equal": true,
+      "outer_max_delta_mm": 0.0,
+      "outer_upstream_changed_points": 0,
+      "design_hash": "ae43fbe8f91f",
+      "mesh": {
+        "sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+        "archive_sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+        "byte_equal": true,
+        "nodes_equal": true,
+        "triangles_equal": true,
+        "tags": {
+          "1": 8646,
+          "2": 56
+        },
+        "archive_tags": {
+          "1": 8646,
+          "2": 56
+        },
+        "bbox_m": [
+          0.0,
+          0.0,
+          -0.003,
+          0.2936757291383537,
+          0.22513095336130762,
+          0.2604741693644191
+        ],
+        "throat": [
+          true,
+          "round, matches the exit"
+        ],
+        "triangles": 8702,
+        "nodes": 4487
+      }
+    },
+    "h5": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        -5.0,
+        -4.97861215343454,
+        -4.914814565722679,
+        -4.809698831278212,
+        -4.665063509461106,
+        -4.483383350728104,
+        -4.267766952966383,
+        -4.021903572521808,
+        -3.75,
+        -3.456708580912732,
+        -3.147047612756296,
+        -2.826315480550136,
+        -2.5,
+        -2.173684519449864,
+        -1.852952387243704,
+        -1.543291419087268,
+        -1.25,
+        -0.9780964274781923,
+        -0.7322330470336453,
+        -0.5166166492719242,
+        -0.33493649053889385,
+        -0.19030116872178837,
+        -0.08518543427732084,
+        -0.021387846565460222,
+        0.0
+      ],
+      "segment_stretch": [
+        0.9692807247748975,
+        1.0064485497705267
+      ],
+      "max_k_mm_inv": [
+        0.05567832301278339,
+        0.05545868138629725
+      ],
+      "z_step_sign_changes": 1,
+      "outer_equal": false,
+      "outer_max_delta_mm": 4.9966122827587744,
+      "outer_upstream_changed_points": 24,
+      "design_hash": "a2246bb6c602",
+      "mesh": {
+        "sha256": "1812e5ca75d297d01bfb0f01bca75642485204ebe0286c6edea56eae256edbed",
+        "archive_sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+        "byte_equal": false,
+        "nodes_equal": false,
+        "triangles_equal": false,
+        "tags": {
+          "1": 8594,
+          "2": 56
+        },
+        "archive_tags": {
+          "1": 8646,
+          "2": 56
+        },
+        "bbox_m": [
+          0.0,
+          0.0,
+          -0.003,
+          0.2936757291383537,
+          0.22513095336130762,
+          0.2604222149107958
+        ],
+        "throat": [
+          true,
+          "round, matches the exit"
+        ],
+        "triangles": 8650,
+        "nodes": 4461
+      }
+    },
+    "h10": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        -10.0,
+        -9.957224306869051,
+        -9.829629131445358,
+        -9.619397662556452,
+        -9.330127018922212,
+        -8.96676670145618,
+        -8.535533905932738,
+        -8.043807145043615,
+        -7.5,
+        -6.913417161825464,
+        -6.294095225512621,
+        -5.652630961100272,
+        -5.0,
+        -4.347369038899757,
+        -3.705904774487408,
+        -3.0865828381745644,
+        -2.5,
+        -1.956192854956413,
+        -1.4644660940672622,
+        -1.03323329854382,
+        -0.6698729810778161,
+        -0.38060233744357674,
+        -0.1703708685546701,
+        -0.042775693130948866,
+        0.0
+      ],
+      "segment_stretch": [
+        0.9425271532781996,
+        1.0130732851140476
+      ],
+      "max_k_mm_inv": [
+        0.05567832301278339,
+        0.05545868138629725
+      ],
+      "z_step_sign_changes": 7,
+      "outer_equal": false,
+      "outer_max_delta_mm": 9.993235658938342,
+      "outer_upstream_changed_points": 24,
+      "design_hash": "74425435119c",
+      "mesh": {
+        "sha256": "6d491e29d909b25c1e5db3e2a379bd3a512b59d63839fda92678f94bb262f2a3",
+        "archive_sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+        "byte_equal": false,
+        "nodes_equal": false,
+        "triangles_equal": false,
+        "tags": {
+          "1": 8570,
+          "2": 58
+        },
+        "archive_tags": {
+          "1": 8646,
+          "2": 56
+        },
+        "bbox_m": [
+          0.0,
+          0.0,
+          -0.003,
+          0.2936757291383537,
+          0.22513095336130762,
+          0.26041803917862144
+        ],
+        "throat": [
+          true,
+          "round, matches the exit"
+        ],
+        "triangles": 8628,
+        "nodes": 4449
+      }
+    },
+    "h20": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        -20.0,
+        -19.91444861373813,
+        -19.65925826289069,
+        -19.238795325112875,
+        -18.660254037844396,
+        -17.93353340291236,
+        -17.071067811865476,
+        -16.08761429008723,
+        -15.0,
+        -13.8268343236509,
+        -12.588190451025213,
+        -11.305261922200515,
+        -10.0,
+        -8.694738077799485,
+        -7.411809548974787,
+        -6.1731656763491,
+        -5.0,
+        -3.9123857099127974,
+        -2.9289321881345245,
+        -2.06646659708764,
+        -1.3397459621556038,
+        -0.7612046748871251,
+        -0.34074173710931177,
+        -0.08555138626189773,
+        0.0
+      ],
+      "segment_stretch": [
+        0.9022769090689488,
+        1.0268375817961874
+      ],
+      "max_k_mm_inv": [
+        0.05567832301278339,
+        0.05545868138629725
+      ],
+      "z_step_sign_changes": 17,
+      "outer_equal": false,
+      "outer_max_delta_mm": 19.98651556147878,
+      "outer_upstream_changed_points": 24
+    },
+    "v5": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        0.0,
+        0.021387846565460222,
+        0.08518543427732084,
+        0.19030116872178837,
+        0.33493649053889385,
+        0.5166166492719242,
+        0.7322330470336453,
+        0.9780964274781923,
+        1.25,
+        1.543291419087268,
+        1.852952387243704,
+        2.173684519449864,
+        2.5,
+        2.826315480550136,
+        3.147047612756296,
+        3.456708580912732,
+        3.75,
+        4.021903572521808,
+        4.267766952966383,
+        4.483383350728104,
+        4.665063509461106,
+        4.809698831278212,
+        4.914814565722679,
+        4.97861215343454,
+        5.0
+      ],
+      "segment_stretch": [
+        0.9918695534373398,
+        1.045943207166351
+      ],
+      "max_k_mm_inv": [
+        0.05567832301278339,
+        0.057942836322127066
+      ],
+      "z_step_sign_changes": 8,
+      "outer_equal": false,
+      "outer_max_delta_mm": 4.996198271181989,
+      "outer_upstream_changed_points": 24,
+      "design_hash": "98608d2e25e1",
+      "mesh": {
+        "sha256": "ebf0be037ac6973d8ba56795ef838753e5a62abac3d3f8d612758a0165b6ec56",
+        "archive_sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+        "byte_equal": false,
+        "nodes_equal": false,
+        "triangles_equal": false,
+        "tags": {
+          "1": 8735,
+          "2": 58
+        },
+        "archive_tags": {
+          "1": 8646,
+          "2": 56
+        },
+        "bbox_m": [
+          0.0,
+          0.0,
+          -0.003000000000000001,
+          0.2936757291383537,
+          0.22513095336130762,
+          0.2651445710278234
+        ],
+        "throat": [
+          true,
+          "round, matches the exit"
+        ],
+        "triangles": 8793,
+        "nodes": 4533
+      }
+    },
+    "v10": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        0.0,
+        0.042775693130948866,
+        0.1703708685546701,
+        0.38060233744357674,
+        0.6698729810778161,
+        1.03323329854382,
+        1.4644660940672622,
+        1.9561928549563845,
+        2.5,
+        3.0865828381745644,
+        3.705904774487408,
+        4.347369038899757,
+        5.0,
+        5.652630961100272,
+        6.294095225512621,
+        6.913417161825464,
+        7.5,
+        8.043807145043615,
+        8.535533905932766,
+        8.966766701456152,
+        9.330127018922184,
+        9.619397662556423,
+        9.82962913144533,
+        9.95722430686908,
+        10.0
+      ],
+      "segment_stretch": [
+        0.9839568355031807,
+        1.0967018065990137
+      ],
+      "max_k_mm_inv": [
+        0.05567832301278339,
+        0.06070867022313593
+      ],
+      "z_step_sign_changes": 8,
+      "outer_equal": false,
+      "outer_max_delta_mm": 9.992382177286688,
+      "outer_upstream_changed_points": 24
+    },
+    "v20": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        0.0,
+        0.08555138626189773,
+        0.34074173710931177,
+        0.7612046748871251,
+        1.3397459621556038,
+        2.06646659708764,
+        2.9289321881345245,
+        3.9123857099127974,
+        5.0,
+        6.1731656763491,
+        7.411809548974787,
+        8.694738077799514,
+        10.000000000000028,
+        11.305261922200543,
+        12.588190451025241,
+        13.8268343236509,
+        15.000000000000028,
+        16.08761429008723,
+        17.071067811865476,
+        17.93353340291236,
+        18.660254037844396,
+        19.238795325112903,
+        19.65925826289069,
+        19.914448613738102,
+        20.0
+      ],
+      "segment_stretch": [
+        0.9688057785297995,
+        1.2101865867071027
+      ],
+      "max_k_mm_inv": [
+        0.05567832301278339,
+        0.06599318164029153
+      ],
+      "z_step_sign_changes": 8,
+      "outer_equal": false,
+      "outer_max_delta_mm": 19.98470669443767,
+      "outer_upstream_changed_points": 24
+    },
+    "d-5": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        0.0,
+        -0.08518543427732084,
+        -0.33493649053889385,
+        -0.7322330470336453,
+        -1.25,
+        -1.852952387243704,
+        -2.5,
+        -3.147047612756296,
+        -3.75,
+        -4.267766952966383,
+        -4.665063509461106,
+        -4.914814565722679,
+        -5.0,
+        -4.914814565722679,
+        -4.665063509461106,
+        -4.267766952966383,
+        -3.75,
+        -3.147047612756296,
+        -2.5,
+        -1.852952387243704,
+        -1.25,
+        -0.7322330470336453,
+        -0.33493649053889385,
+        -0.08518543427732084,
+        0.0
+      ],
+      "segment_stretch": [
+        0.9706090994881488,
+        1.0066487132905209
+      ],
+      "max_k_mm_inv": [
+        0.05567832301278339,
+        0.05560672247150955
+      ],
+      "z_step_sign_changes": 3,
+      "outer_equal": false,
+      "outer_max_delta_mm": 4.9966908476771215,
+      "outer_upstream_changed_points": 23
+    },
+    "d5": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        0.0,
+        0.08518543427732084,
+        0.33493649053889385,
+        0.7322330470336453,
+        1.25,
+        1.852952387243704,
+        2.5,
+        3.147047612756296,
+        3.75,
+        4.267766952966383,
+        4.665063509461106,
+        4.914814565722679,
+        5.0,
+        4.914814565722679,
+        4.665063509461106,
+        4.267766952966383,
+        3.75,
+        3.147047612756296,
+        2.5,
+        1.852952387243704,
+        1.25,
+        0.7322330470336453,
+        0.33493649053889385,
+        0.08518543427732084,
+        0.0
+      ],
+      "segment_stretch": [
+        0.9935216544542828,
+        1.0330425602376796
+      ],
+      "max_k_mm_inv": [
+        0.05567832301278339,
+        0.057056127950834944
+      ],
+      "z_step_sign_changes": 2,
+      "outer_equal": false,
+      "outer_max_delta_mm": 4.996679961331482,
+      "outer_upstream_changed_points": 23,
+      "design_hash": "021445297471",
+      "mesh": {
+        "sha256": "e3ca428f361e1b72794e2f99ce292381fd76ba1540c78befcf9a50ffaa4a7768",
+        "archive_sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+        "byte_equal": false,
+        "nodes_equal": false,
+        "triangles_equal": false,
+        "tags": {
+          "1": 8703,
+          "2": 58
+        },
+        "archive_tags": {
+          "1": 8646,
+          "2": 56
+        },
+        "bbox_m": [
+          0.0,
+          0.0,
+          -0.003,
+          0.2936757291383537,
+          0.22513095336130762,
+          0.265206682938383
+        ],
+        "throat": [
+          true,
+          "round, matches the exit"
+        ],
+        "triangles": 8761,
+        "nodes": 4517
+      }
+    },
+    "archive_artifact_sha256": {
+      "config.yaml": "424d6d4d04016c446bfd1844f6ddcafa5cc0fb428aaf39abb0e7c9f91ad93ff5",
+      "run.json": "0ddcb27a13be56f979d05f2b83bea8256fdf2c7822bebbbf857709cb536e05c3",
+      "design.json": "2b0afb967880e125181c0eccb7243907187c80056599f46058843c43cfdfeb10",
+      "mesh.msh": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+      "response.npz": "f563934774210f414781a943347371c2d072f84f0994260ffb3a0a5086ace27a"
+    }
+  },
+  "ext": {
+    "design": "e85cdd7c61f6",
+    "new_design_hash": "e85cdd7c61f6",
+    "mesh_hash": [
+      "8e789cd0deef",
+      "8e789cd0deef"
+    ],
+    "solve_hash": [
+      "20797f2ac2d7",
+      "20797f2ac2d7"
+    ],
+    "source": {
+      "cap": "auto"
+    },
+    "epw": 6.0,
+    "route": "OSSE",
+    "archive": {
+      "sha256": "11ff33d80ce2ab0d0d111804c78a009deff2b25f3a860a64d58fa4de85c68273",
+      "archive_sha256": "11ff33d80ce2ab0d0d111804c78a009deff2b25f3a860a64d58fa4de85c68273",
+      "byte_equal": true,
+      "nodes_equal": true,
+      "triangles_equal": true,
+      "tags": {
+        "1": 8137,
+        "2": 58
+      },
+      "archive_tags": {
+        "1": 8137,
+        "2": 58
+      },
+      "bbox_m": [
+        0.0,
+        0.0,
+        -0.005000000000000001,
+        0.2893463674324142,
+        0.2055048319890616,
+        0.3484081191587001
+      ],
+      "throat": [
+        true,
+        "round, matches the exit"
+      ],
+      "triangles": 8195,
+      "nodes": 4259
+    },
+    "replay": {
+      "status": "exact_complete",
+      "parity_delta": 0.0,
+      "objective_version": 11,
+      "j": 3.3405686204251346,
+      "stored_j": 3.3405686204251346,
+      "score_id": "07af2bd1f8a6d26940ff092d549a6f792f66fbe7f92cd11fbdd962fd9681e2ef",
+      "physical_id": "29500b36133759ae523da6f7a6ef6427bc29a20a92a4d8631946fe12685b04c3",
+      "metric_id": "ed753f26dce1adbcffdbb06f0d10400931d329a25b0dbca628899530c6b10030"
+    },
+    "frequency_grid_hz": [
+      300.0,
+      343.98,
+      394.41,
+      452.24,
+      518.54,
+      594.56,
+      681.73,
+      781.68,
+      896.28,
+      1027.68,
+      1178.35,
+      1351.11,
+      1549.19,
+      1776.32,
+      2036.74,
+      2335.35,
+      2677.73,
+      3070.31,
+      3520.45,
+      4036.58,
+      4628.37,
+      5000.0,
+      5306.94,
+      5623.41,
+      6084.98,
+      6324.56,
+      6977.09,
+      7113.12,
+      8000.0
+    ],
+    "response_arrays": {
+      "freqs_hz": [
+        29
+      ],
+      "h_angles_deg": [
+        73
+      ],
+      "v_angles_deg": [
+        73
+      ],
+      "spl_h_db": [
+        29,
+        73
+      ],
+      "spl_v_db": [
+        29,
+        73
+      ],
+      "balloon_dirs": [
+        1035,
+        3
+      ],
+      "spl_balloon_db": [
+        29,
+        1035
+      ],
+      "z_throat": [
+        29
+      ],
+      "p_h": [
+        29,
+        73
+      ],
+      "p_v": [
+        29,
+        73
+      ],
+      "p_balloon": [
+        29,
+        1035
+      ],
+      "channel_pressure": [],
+      "channel_sphere_pressure": [],
+      "impedance_matrix": [],
+      "channel_tags": [],
+      "tag_areas_m2": [],
+      "backend": [],
+      "n_dof": [],
+      "meta": []
+    },
+    "original_route_remesh": {
+      "sha256": "11ff33d80ce2ab0d0d111804c78a009deff2b25f3a860a64d58fa4de85c68273",
+      "archive_sha256": "11ff33d80ce2ab0d0d111804c78a009deff2b25f3a860a64d58fa4de85c68273",
+      "byte_equal": true,
+      "nodes_equal": true,
+      "triangles_equal": true,
+      "tags": {
+        "1": 8137,
+        "2": 58
+      },
+      "archive_tags": {
+        "1": 8137,
+        "2": 58
+      },
+      "bbox_m": [
+        0.0,
+        0.0,
+        -0.005000000000000001,
+        0.2893463674324142,
+        0.2055048319890616,
+        0.3484081191587001
+      ],
+      "throat": [
+        true,
+        "round, matches the exit"
+      ],
+      "triangles": 8195,
+      "nodes": 4259
+    },
+    "native_geometry": {
+      "topology": "acoustic",
+      "fit": "interpolate",
+      "shape": 1,
+      "interface_offset_mm": 0.0,
+      "closed": false,
+      "interface_count": 0,
+      "angle": 4.0857943821,
+      "wall": 5.0
+    },
+    "shape": [
+      41,
+      318,
+      3
+    ],
+    "canonical_shape": [
+      61,
+      65,
+      3
+    ],
+    "canonical_samples_equal": false,
+    "zero": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "segment_stretch": [
+        1.0,
+        1.0
+      ],
+      "max_k_mm_inv": [
+        0.023955325043414393,
+        0.023955325043414393
+      ],
+      "z_step_sign_changes": 0,
+      "outer_equal": false,
+      "outer_max_delta_mm": 1.6295616855075117,
+      "outer_upstream_changed_points": 8779,
+      "design_hash": "ff6366fdb26f",
+      "mesh": {
+        "sha256": "9db5bf5af9ccabc372282eedbdb3c4202cb681797791391eac53c88345fb8d75",
+        "archive_sha256": "11ff33d80ce2ab0d0d111804c78a009deff2b25f3a860a64d58fa4de85c68273",
+        "byte_equal": false,
+        "nodes_equal": false,
+        "triangles_equal": false,
+        "tags": {
+          "1": 8113,
+          "2": 58
+        },
+        "archive_tags": {
+          "1": 8137,
+          "2": 58
+        },
+        "bbox_m": [
+          0.0,
+          0.0,
+          -0.005000000000000001,
+          0.2893463674324142,
+          0.2055048319890616,
+          0.3484081191587001
+        ],
+        "throat": [
+          true,
+          "round, matches the exit"
+        ],
+        "triangles": 8171,
+        "nodes": 4247
+      }
+    },
+    "archive_artifact_sha256": {
+      "config.yaml": "532970577e9e6594b70ba704186c6d9dce8e887c7d0da66840a7855643909ffc",
+      "run.json": "9e2ff3aac78b6f1c1d84b821af9b2727898c8e905acb3a958a81efacd393f673",
+      "design.json": "3b8543677c197cfd954bed584d9bb09482d51f84edc346b2547756796a762afb",
+      "mesh.msh": "11ff33d80ce2ab0d0d111804c78a009deff2b25f3a860a64d58fa4de85c68273",
+      "response.npz": "150338413b5f64d19b576631ce43491fdb39e5ad662d08bfc1b9940830427075"
+    }
+  },
+  "fold": {
+    "design": "68001408e339",
+    "new_design_hash": "68001408e339",
+    "mesh_hash": [
+      "8e789cd0deef",
+      "8e789cd0deef"
+    ],
+    "solve_hash": [
+      "35a2c89d3a47",
+      "35a2c89d3a47"
+    ],
+    "source": {
+      "cap": "auto"
+    },
+    "epw": 6.0,
+    "route": "OSSE",
+    "archive": {
+      "sha256": "708db2af43fb9f9c01b4cd32992463266b20cbfd54bf5372e6f97e04d6422a6b",
+      "archive_sha256": "708db2af43fb9f9c01b4cd32992463266b20cbfd54bf5372e6f97e04d6422a6b",
+      "byte_equal": true,
+      "nodes_equal": true,
+      "triangles_equal": true,
+      "tags": {
+        "1": 7331,
+        "2": 56
+      },
+      "archive_tags": {
+        "1": 7331,
+        "2": 56
+      },
+      "bbox_m": [
+        0.0,
+        0.0,
+        -0.006000000000000001,
+        0.2828599601453931,
+        0.2059300975639381,
+        0.3694433903201797
+      ],
+      "throat": [
+        true,
+        "round, matches the exit"
+      ],
+      "triangles": 7387,
+      "nodes": 3836
+    },
+    "replay": {
+      "status": "exact_complete",
+      "parity_delta": 0.0,
+      "objective_version": 11,
+      "j": 3.6146314312259817,
+      "stored_j": 3.6146314312259817,
+      "score_id": "bf80ed8eada615c2f1026f42a3242de52c2d8b82e31a28c82941715396cd4cb4",
+      "physical_id": "0123d94a29944945b93f8f5344a0e804d9efbf608fb8ad21a8709cfdaef1a2ec",
+      "metric_id": "fe89b20652cd7a47761572f2205d7331882b28da0617257cdeec83a81cffa3d2"
+    },
+    "frequency_grid_hz": [
+      300.0,
+      343.98,
+      394.41,
+      452.24,
+      518.54,
+      594.56,
+      681.73,
+      781.68,
+      896.28,
+      1027.68,
+      1178.35,
+      1351.11,
+      1549.19,
+      1776.32,
+      2036.74,
+      2335.35,
+      2677.73,
+      3070.31,
+      3520.45,
+      4036.58,
+      4628.37,
+      5000.0,
+      5306.94,
+      5623.41,
+      6084.98,
+      6324.56,
+      6977.09,
+      7113.12,
+      8000.0
+    ],
+    "response_arrays": {
+      "freqs_hz": [
+        29
+      ],
+      "h_angles_deg": [
+        73
+      ],
+      "v_angles_deg": [
+        73
+      ],
+      "spl_h_db": [
+        29,
+        73
+      ],
+      "spl_v_db": [
+        29,
+        73
+      ],
+      "balloon_dirs": [
+        1035,
+        3
+      ],
+      "spl_balloon_db": [
+        29,
+        1035
+      ],
+      "z_throat": [
+        29
+      ],
+      "p_h": [
+        29,
+        73
+      ],
+      "p_v": [
+        29,
+        73
+      ],
+      "p_balloon": [
+        29,
+        1035
+      ],
+      "channel_pressure": [],
+      "channel_sphere_pressure": [],
+      "impedance_matrix": [],
+      "channel_tags": [],
+      "tag_areas_m2": [],
+      "backend": [],
+      "n_dof": [],
+      "meta": []
+    },
+    "original_route_remesh": {
+      "sha256": "708db2af43fb9f9c01b4cd32992463266b20cbfd54bf5372e6f97e04d6422a6b",
+      "archive_sha256": "708db2af43fb9f9c01b4cd32992463266b20cbfd54bf5372e6f97e04d6422a6b",
+      "byte_equal": true,
+      "nodes_equal": true,
+      "triangles_equal": true,
+      "tags": {
+        "1": 7331,
+        "2": 56
+      },
+      "archive_tags": {
+        "1": 7331,
+        "2": 56
+      },
+      "bbox_m": [
+        0.0,
+        0.0,
+        -0.006000000000000001,
+        0.2828599601453931,
+        0.2059300975639381,
+        0.3694433903201797
+      ],
+      "throat": [
+        true,
+        "round, matches the exit"
+      ],
+      "triangles": 7387,
+      "nodes": 3836
+    },
+    "native_geometry": {
+      "topology": "acoustic",
+      "fit": "interpolate",
+      "shape": 1,
+      "interface_offset_mm": 0.0,
+      "closed": false,
+      "interface_count": 0,
+      "angle": 2.0766663785,
+      "wall": 6.0
+    },
+    "shape": [
+      62,
+      297,
+      3
+    ],
+    "canonical_shape": [
+      61,
+      65,
+      3
+    ],
+    "canonical_samples_equal": false,
+    "zero": {
+      "xy_equal": true,
+      "upstream_equal": true,
+      "rim_dz_mm": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "segment_stretch": [
+        1.0,
+        1.0
+      ],
+      "max_k_mm_inv": [
+        0.011015188653598606,
+        0.011015188653598606
+      ],
+      "z_step_sign_changes": 0,
+      "outer_equal": false,
+      "outer_max_delta_mm": 2.9454187242151884,
+      "outer_upstream_changed_points": 11411,
+      "design_hash": "ced8f7e0ec63",
+      "mesh": {
+        "sha256": "4dca7d8dae31322bd5ad28fbf290b572bade222b3bff39eedc5623d2cbd3a3d5",
+        "archive_sha256": "708db2af43fb9f9c01b4cd32992463266b20cbfd54bf5372e6f97e04d6422a6b",
+        "byte_equal": false,
+        "nodes_equal": false,
+        "triangles_equal": false,
+        "tags": {
+          "1": 7297,
+          "2": 56
+        },
+        "archive_tags": {
+          "1": 7331,
+          "2": 56
+        },
+        "bbox_m": [
+          0.0,
+          0.0,
+          -0.006,
+          0.2828604157172312,
+          0.20543187159522489,
+          0.3694433903201797
+        ],
+        "throat": [
+          true,
+          "round, matches the exit"
+        ],
+        "triangles": 7353,
+        "nodes": 3819
+      }
+    },
+    "archive_artifact_sha256": {
+      "config.yaml": "0fdbd5b0fd85a628b0a1c70a879146477b907362f8ac5ebaef2e3509344a7349",
+      "run.json": "18bfe38dfc20e25a65a7abf79c3d31b85565ccdbd8c197e1303939d695c40bb0",
+      "design.json": "17b0bb052902e0647ad3b4a5d31c906ba8f16ad8b2557fdbff804e16ed4e7189",
+      "mesh.msh": "708db2af43fb9f9c01b4cd32992463266b20cbfd54bf5372e6f97e04d6422a6b",
+      "response.npz": "34674075cc5e958f8d2a8fd34a4da244da981e66911512645a19c5c758119e78"
+    }
+  }
+}

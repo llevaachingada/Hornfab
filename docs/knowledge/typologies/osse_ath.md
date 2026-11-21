@@ -1,5 +1,7 @@
 # OS-SE / ATH
 
+- **Sculpted meridians.** The exact R-OSSE reference `823dc1721a76` replays through the digest-pinned bridge. The separate CPU research family varied native R-OSSE parameters by physical azimuth and produced 29–215 mm of forward H/V sweep at fixed projected footprint. [Construction and test evidence](../../evidence/sculpted_meridians_2026-11-20/README.md).
+- **Archived geometry.** Extended-throat OSSE `e85cdd7c61f6` reproduced its 6 epw verify mesh after transfer to GRID with both native sheets and its original source angle. Rebuilding the shell from the inner sheet changes the neutral mesh. Fold-warm requires a separate route audit. The axial overlay remains at the geometry gate. [CPU checkpoint](../../evidence/termination_overlay_2026-11-20/README.md).
 - **Principle:** An oblique spherical surface element profile controls the expanding guide, with optional azimuth-dependent parameters and a mouth morph. R-OSSE is a distinct rollback construction for a freestanding termination.
 - **Useful objectives:** Evaluate the intended coverage and its frequency variation, response smoothness, loading, and physical envelope for the actual mounting and source.
 - **Limits / wrong assumptions:** A rounded rectangular mouth alone does not establish the internal wavefront or performance. Morphing and termination choices affect geometry; do not confuse radial ATH variation with an axial displacement. No universal Keele or constant-directivity targets apply to every family or brief.

@@ -38,3 +38,144 @@ favorites:
     configs: examples/typologies/fav_crowe_2026-11-20/
     variants: [favk__k2_hold_mouth, favk__k3_hold_mouth, favk__k4_hold_mouth, fav__crowe_k_home, fav__crowe_c500_xo900]
   status: active
+- id: FAV-002
+  added: '2026-11-21'
+  added_by: owner (GUI star)
+  title: favL__2in_home (7d60f705c030)
+  owner_note: Looking really good here We should look at modeling it with different compression drivers at different
+    throat exit angles
+  design_hash: 7d60f705c030
+  family: FREEFORM
+  generator: grid / rows.type osse_rollback
+  config: examples/typologies/favL_2026-11-20/favL__2in_home.yaml
+  brief: examples/briefs/hf2in_2026-11-20/room_landscape_80x50_700_hf2in_v11cd.yaml
+  objective: v11
+  runs:
+    screen:
+      run_dir: runs/20261120T225416Z-screen-bdadec
+      eval_no: 101
+      J: 2.850520060339017
+  gui: http://127.0.0.1:8765/#/run/20261120T225416Z-screen-bdadec
+  knobs:
+    g_L_mm: 246.995319
+    g_a_h_deg: 32.968421
+    g_a_v_deg: 28.405813
+    g_k: 1.011947
+    g_n: 2.90613
+    g_q: 0.996
+    g_r_lip_mm: 22.385284
+    g_s: 0.441696
+    g_sf_ab: 0.895962
+    g_sf_amt: 0.175548
+    g_sf_m: 4.0
+    g_sf_n1: 1.8
+    g_sf_n2: 7.0
+    g_sf_start: 0.25
+    g_throat_hv_ratio: 1.363614
+    g_wrap_deg: 98.862697
+  status: active
+- id: FAV-003
+  added: '2026-11-21'
+  added_by: owner (GUI star)
+  title: fav__crowe_c500_xo900 (c6f0d22ff2b0)
+  owner_note: Relatively compact 900 crossover
+  design_hash: c6f0d22ff2b0
+  family: FREEFORM
+  generator: grid / rows.type osse_rollback
+  config: examples/typologies/fav_crowe_2026-11-20/fav__crowe_c500_xo900.yaml
+  brief: examples/briefs/compact500_xo900_2026-11-20/compact500_xo900_80x50_hf1440_v11cd.yaml
+  objective: v11
+  runs:
+    screen:
+      run_dir: runs/20261120T205235Z-screen-f96805
+      eval_no: 75
+      J: 2.990066745479525
+  gui: http://127.0.0.1:8765/#/run/20261120T205235Z-screen-f96805
+  knobs:
+    g_L_mm: 258.656618
+    g_a_h_deg: 32.788736
+    g_a_v_deg: 29.52279
+    g_k: 1.915673
+    g_n: 2.67185
+    g_q: 0.996
+    g_r_lip_mm: 18.590339
+    g_s: 0.362278
+    g_sf_ab: 0.874862
+    g_sf_amt: 0.185897
+    g_sf_m: 4.0
+    g_sf_n1: 1.8
+    g_sf_n2: 7.0
+    g_sf_start: 0.25
+    g_wrap_deg: 111.238428
+  status: active
+- id: FAV-004
+  added: '2026-11-21'
+  added_by: owner (GUI star)
+  title: favL__2in_c500 (d5667867185e)
+  owner_note: G
+  design_hash: d5667867185e
+  family: FREEFORM
+  generator: grid / rows.type osse_rollback
+  config: examples/typologies/favL_2026-11-20/favL__2in_c500.yaml
+  brief: examples/briefs/hf2in_2026-11-20/compact500_xo900_80x50_hf2in_v11cd.yaml
+  objective: v11
+  runs:
+    screen:
+      run_dir: runs/20261121T003823Z-screen-75c147
+      eval_no: 88
+      J: 1.8933344018208915
+  gui: http://127.0.0.1:8765/#/run/20261121T003823Z-screen-75c147
+  knobs:
+    g_L_mm: 255.110221
+    g_a_h_deg: 32.892022
+    g_a_v_deg: 30.965658
+    g_k: 1.078093
+    g_n: 2.878239
+    g_q: 0.996
+    g_r_lip_mm: 18.405426
+    g_s: 0.332648
+    g_sf_ab: 0.891348
+    g_sf_amt: 0.208424
+    g_sf_m: 4.0
+    g_sf_n1: 1.8
+    g_sf_n2: 7.0
+    g_sf_start: 0.25
+    g_throat_hv_ratio: 1.014726
+    g_wrap_deg: 95.064132
+  status: active
+- id: FAV-005
+  added: '2026-11-21'
+  added_by: owner (GUI star)
+  title: favP1__split_2in (bd66cfff0b40)
+  owner_note: 2IN
+  design_hash: bd66cfff0b40
+  family: FREEFORM
+  generator: grid / rows.type osse_rollback
+  config: examples/typologies/favP1_2026-11-20/favP1__split_2in.yaml
+  brief: examples/briefs/hf2in_2026-11-20/room_landscape_80x50_700_hf2in_v11cd.yaml
+  objective: v11
+  runs:
+    screen:
+      run_dir: runs/20261121T011049Z-screen-0bc5aa
+      eval_no: 100
+      J: 2.786330155708329
+  gui: http://127.0.0.1:8765/#/run/20261121T011049Z-screen-0bc5aa
+  knobs:
+    g_L_mm: 263.927506
+    g_a_h_deg: 33.507474
+    g_a_v_deg: 28.943032
+    g_k: 1.0
+    g_k_v: 1.377953
+    g_n: 2.817471
+    g_q: 0.996
+    g_r_lip_mm: 20.422734
+    g_s: 0.405047
+    g_s_v: 0.409615
+    g_sf_ab: 0.899618
+    g_sf_amt: 0.228281
+    g_sf_m: 4.0
+    g_sf_n1: 1.8
+    g_sf_n2: 7.0
+    g_sf_start: 0.25
+    g_wrap_deg: 94.422715
+  status: active

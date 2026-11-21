@@ -1,0 +1,90 @@
+[
+  {
+    "parent": "R0",
+    "derivative": "R2",
+    "parent_sha256": "8e2491a2ce45d78a32e7f743e88843e89521218cca797700fc3b1e1b51d768a0",
+    "derivative_sha256": "2cde6e8dea45dc8019fcb8c65737aaf0cf3768e00fa2e6b590059aeff7cca9ca",
+    "parent_source_faces": 58,
+    "derivative_source_faces": 58,
+    "source_node_hausdorff_mm": 0.00013999296964453757,
+    "source_connectivity_same_after_nearest_remap": true,
+    "parent_dimensions_mm": [
+      573.2966940505044,
+      441.3926819045684,
+      480.0661531777681
+    ],
+    "derivative_dimensions_mm": [
+      575.4637410283846,
+      442.9517420413002,
+      360.3244227449427
+    ],
+    "forward_sweep_delta_mm": -136.8772904068045,
+    "derivative_outer_lip_max_sample_distance_mm": 0.7670901534539079
+  },
+  {
+    "parent": "R2",
+    "derivative": "R3",
+    "parent_sha256": "2cde6e8dea45dc8019fcb8c65737aaf0cf3768e00fa2e6b590059aeff7cca9ca",
+    "derivative_sha256": "f05ac529111db377b56453f50c32e615022f2b2027564f830eb8532d61199a00",
+    "parent_source_faces": 58,
+    "derivative_source_faces": 58,
+    "source_node_hausdorff_mm": 5.569206464603187e-05,
+    "source_connectivity_same_after_nearest_remap": true,
+    "parent_dimensions_mm": [
+      575.4637410283846,
+      442.9517420413002,
+      360.3244227449427
+    ],
+    "derivative_dimensions_mm": [
+      575.4637410651698,
+      442.9517420413002,
+      408.49363658024276
+    ],
+    "forward_sweep_delta_mm": 61.423883357350746,
+    "derivative_outer_lip_max_sample_distance_mm": 0.7949160010079411
+  },
+  {
+    "parent": "K1",
+    "derivative": "K2",
+    "parent_sha256": "71126d07db0a5f729df237ee26b44382a6c2d033e786fb4a908b524b9501c22b",
+    "derivative_sha256": "c6261f2fdc6931cd37ede6ac83e9d35b09ab9acde46189ac8cd18ab6e936e949",
+    "parent_source_faces": 58,
+    "derivative_source_faces": 58,
+    "source_node_hausdorff_mm": 6.813323851139564e-06,
+    "source_connectivity_same_after_nearest_remap": true,
+    "parent_dimensions_mm": [
+      579.0,
+      401.0,
+      389.9032975189221
+    ],
+    "derivative_dimensions_mm": [
+      571.0005728686738,
+      399.0,
+      395.0396229274273
+    ],
+    "forward_sweep_delta_mm": 12.927158428179979,
+    "derivative_outer_lip_max_sample_distance_mm": 1.02716032486406
+  },
+  {
+    "parent": "C0",
+    "derivative": "C2",
+    "parent_sha256": "a43303ad7b08076ec375b546fe86ce8d4f24073752979d5a91691e3c547fb03c",
+    "derivative_sha256": "8d2ab9d79d10bddb5349c33ff88bdbd2ccd289d0c43f5110818d3c94e7dc4e28",
+    "parent_source_faces": 56,
+    "derivative_source_faces": 56,
+    "source_node_hausdorff_mm": 1.7497895327968722,
+    "source_connectivity_same_after_nearest_remap": false,
+    "parent_dimensions_mm": [
+      587.3514582767074,
+      450.2619067226152,
+      263.4741693644191
+    ],
+    "derivative_dimensions_mm": [
+      581.3514582767074,
+      450.2619067226154,
+      327.1044499051638
+    ],
+    "forward_sweep_delta_mm": 121.26576306026013,
+    "derivative_outer_lip_max_sample_distance_mm": 2.596117698839722
+  }
+]

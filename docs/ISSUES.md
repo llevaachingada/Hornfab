@@ -1,5 +1,20 @@
 ﻿# ISSUES
 
+## 2026-11-20 — Home 900 Hz acoustic admission
+
+- OPEN. Quantify the 900 Hz same-grid repeat and mesh floor. After the favorite queue, use paired fixed candidates to test meridian development and termination. Hold the full optimizer campaign and Crowe C2 pending source and surface checks.
+- OPEN. Translate the staged low-band corridors to the actual woofer/enclosure at 900 Hz and verify the measured filter-skirt impedance excursions. [Decision and measured evidence](evidence/home_xo900_2026-11-20/README.md).
+
+## 2026-11-20 — Sculpted meridians
+
+- OPEN. Review the R3/R4 and K1/K2 sculpture first. Verify actual source-patch parity or a bounded source residual before matched v11 BEM. Crowe C1/C2 still need exterior-to-mesh and normal-thickness review. GRID STEP fidelity remains open.
+- CPU evidence includes the exact R-OSSE and FAV-001 controls, 11 meshes and 6 finer remeshes. [Sculpted meridians checkpoint](evidence/sculpted_meridians_2026-11-20/README.md).
+
+## 2026-11-20 — Archived-host axial termination overlay gate
+
+- OPEN. Preserve the frozen upstream exterior and matched source discretization on FAV-001 before any H-only v11 A/B. Use extended-throat OSSE as the second exact mesh-parity host. Fold-warm still differs with explicit original sheets.
+- OPEN. Share explicit-shell resolution with the GUI preview, audit continuous clearance and fitted-surface mesh error, and establish GRID manufacturing export parity before any CAD release. Native STEP still omits the explicit cap configuration used for the native solver mesh. [CPU evidence and scope](evidence/termination_overlay_2026-11-20/README.md).
+
 ## 2026-11-20 evening - FAV split-plane P1 + throat-loading follow-ups
 
 - DONE: P1 split-plane knobs `g_k_v` / `g_s_v` on `osse_rollback` (tests 198/0); lanes queued in `fav8_2026-11-20`.

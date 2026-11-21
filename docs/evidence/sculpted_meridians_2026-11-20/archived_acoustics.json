@@ -1,0 +1,206 @@
+{
+  "archived_verify_replay": {
+    "status": "exact_complete",
+    "complete": true,
+    "reasons": [],
+    "physical_id": "5e402ee645b3431a34833cb335d54f216c84e1332b26dc5058f14a43caf77c46",
+    "metric_id": "7d18f7c6199a5ee6a87eb63365c7b61620826f89fefc3eeee106a5f14b541346",
+    "score_id": "6d8dd4bec7f2380871e030b49082fa2105ae270eadd1b279162376d9caeed1b5",
+    "objective_version": 7,
+    "metric_source": "stored",
+    "design_hash": "823dc1721a76",
+    "j": 3.75208496258515,
+    "terms": {
+      "cov": 0.4258204774832082,
+      "rip": 0.20913345640914152,
+      "di": 1.3901410952272992,
+      "dislope": 0.3542732504133536,
+      "flat": 0.6599424998807831,
+      "load": 1.046426709209917,
+      "distd": 0.33027671123959496,
+      "diag": 0.0,
+      "flat_cv": 0.8042791349411506,
+      "penalty": 0.0,
+      "total": 3.75208496258515,
+      "n_nan": 0,
+      "n_in_band": 22,
+      "di_estimated": 0.0,
+      "lfp20_hz": 543.8508425348415,
+      "lfp50_hz": 750.438230950324,
+      "rez_min_from_fx": 0.5389167423775134,
+      "f11_hz": 5600.0,
+      "loaded_hi_hz": 5600.0,
+      "oa_excess_raw": 0.0
+    },
+    "stored_j": 3.75208496258515,
+    "parity_delta": 0.0,
+    "target": {
+      "coverage_h_deg": 80.0,
+      "coverage_v_deg": 50.0,
+      "band_lo_hz": 350.0,
+      "band_hi_hz": 8000.0,
+      "di_target_db": null,
+      "di_slope_target": 0.0,
+      "z_min": 0.5,
+      "freq_weights": {
+        "band_hz": [
+          [
+            2500.0,
+            5500.0,
+            2.0
+          ]
+        ]
+      },
+      "f0_hz": 700.0,
+      "f0_v_hz": 1000.0,
+      "coverage_v_up_deg": null,
+      "coverage_v_down_deg": null,
+      "loaded_hi_hz": 5600.0,
+      "driver_exit_radius_mm": 18.0,
+      "coverage_profile_mode": null,
+      "coverage_profile_interpolation": null,
+      "coverage_profile_h": null,
+      "coverage_profile_v": null
+    },
+    "weights": {
+      "cov": 1.0,
+      "rip": 1.0,
+      "di": 0.3,
+      "dislope": 1.0,
+      "flat": 0.5,
+      "load": 1.0,
+      "distd": 0.5,
+      "diag": 0.0,
+      "flat_cv": 1.0
+    },
+    "diagnostics": {
+      "target_changed": false,
+      "stored_target_verified": true,
+      "ripple_used_response": true,
+      "flat_used_response": true,
+      "diag_active": false,
+      "diag_available": null,
+      "stored_metrics_used": true,
+      "band_bins": 27,
+      "f0_score_bins": 22
+    }
+  },
+  "v11_rescore_archived_response": {
+    "status": "exact_complete",
+    "complete": true,
+    "reasons": [],
+    "physical_id": "5e402ee645b3431a34833cb335d54f216c84e1332b26dc5058f14a43caf77c46",
+    "metric_id": "dcb9197b372b5711d5be7534a096d7ab3796957b2b20f67f405be75dd4c7642c",
+    "score_id": "1dc36b21d4798ccae3ff77e3060a4f6ffe791ea25d57c1e0257cc66acc975f3c",
+    "objective_version": 11,
+    "metric_source": "regenerated",
+    "design_hash": "823dc1721a76",
+    "j": 4.779948718044434,
+    "terms": {
+      "cov_profile": 4.086114605447399e-05,
+      "rip": 0.20913345640914152,
+      "flat": 0.6599424998807831,
+      "load": 1.046426709209917,
+      "dislope": 0.3542732504133536,
+      "di_roughness": 0.34493727344919967,
+      "flat_cv": 0.8042791349411506,
+      "hf_floor": 0.0,
+      "constancy": 0.0,
+      "diag": 2.785084399653363,
+      "distd": 0.6605534224791899,
+      "penalty": 0.0,
+      "total": 4.779948718044434,
+      "n_nan": 0,
+      "n_in_band": 27,
+      "di_estimated": 0.0,
+      "lfp20_hz": 543.8508425348415,
+      "lfp50_hz": 750.438230950324,
+      "rez_min_from_fx": 0.5389167423775134,
+      "f11_hz": 5600.0,
+      "loaded_hi_hz": 5600.0,
+      "oa_excess_raw": 30.0,
+      "cd_lw": 0.41590696227793084,
+      "cd_di_std": 0.5766366035927457,
+      "cd_nacc": 0.5990360165334996,
+      "offaxis_smooth": 1.0415834316300674,
+      "cd_omega_2pi": 0.67595770241,
+      "cd_status_code": 0.0
+    },
+    "stored_j": 3.75208496258515,
+    "parity_delta": null,
+    "target": {
+      "coverage_h_deg": 80.0,
+      "coverage_v_deg": 50.0,
+      "band_lo_hz": 350.0,
+      "band_hi_hz": 8000.0,
+      "di_target_db": null,
+      "di_slope_target": 0.0,
+      "z_min": 0.5,
+      "freq_weights": {
+        "band_hz": [
+          [
+            2500.0,
+            5500.0,
+            2.0
+          ]
+        ]
+      },
+      "f0_hz": 700.0,
+      "f0_v_hz": 700.0,
+      "coverage_v_up_deg": null,
+      "coverage_v_down_deg": null,
+      "loaded_hi_hz": 5600.0,
+      "driver_exit_radius_mm": null,
+      "coverage_profile_mode": "corridor",
+      "coverage_profile_interpolation": "log_frequency",
+      "coverage_profile_h": [
+        [
+          700.0,
+          80.0,
+          60.0,
+          90.0
+        ],
+        [
+          8000.0,
+          80.0,
+          60.0,
+          90.0
+        ]
+      ],
+      "coverage_profile_v": [
+        [
+          1000.0,
+          50.0,
+          40.0,
+          60.0
+        ],
+        [
+          8000.0,
+          50.0,
+          40.0,
+          60.0
+        ]
+      ]
+    },
+    "weights": {
+      "cov_profile": 1.0,
+      "di_roughness": 0.5,
+      "dislope": 0.5,
+      "flat": 0.5,
+      "flat_cv": 0.5,
+      "load": 1.0,
+      "rip": 0.5
+    },
+    "diagnostics": {
+      "target_changed": true,
+      "stored_target_verified": true,
+      "ripple_used_response": true,
+      "flat_used_response": true,
+      "diag_active": false,
+      "diag_available": null,
+      "stored_metrics_used": false,
+      "band_bins": 27,
+      "f0_score_bins": 22
+    }
+  }
+}

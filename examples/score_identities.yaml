@@ -12,7 +12,7 @@
 #   legacy      - superseded; hidden unless "show legacy" is on
 # A (brief, version) pair NOT listed here is "unregistered" when version >= 7, "legacy" below that.
 schema: score_identities_v1
-updated: 2026-11-19
+updated: 2026-11-20
 defaults:
   min_valid_for_leader: 10      # runs with fewer valid evaluations are probes, not leaderboard rows
   legacy_below_version: 7
@@ -32,6 +32,34 @@ identities:
     bar_j: 1.7302
     status: current
     source: docs/research/compact400_2026-11-19/README.md
+  - id: room_landscape_hf1440_v11cd
+    label: "Room landscape 80x50 · v11 CD (hf1440, 700 Hz)"
+    brief: room_landscape_80x50_700_hf1440_v11cd
+    objective_version: 11
+    floor_j: null
+    status: current
+    source: examples/briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd.yaml ; docs/queue/cd_v11_2026-11-20.yaml ; docs/research/typologies/ROLLED_CD_WALL_ANGLE_RESEARCH_2026-11-20.md
+  - id: room_landscape_hf2in_v11cd
+    label: "Room landscape 80x50 · v11 CD, 2-inch exit (driver-size study)"
+    brief: room_landscape_80x50_700_hf2in_v11cd
+    objective_version: 11
+    floor_j: null
+    status: current
+    source: examples/briefs/hf2in_2026-11-20/room_landscape_80x50_700_hf2in_v11cd.yaml ; docs/queue/source_sensitivity4_2026-11-20.yaml
+  - id: compact500_xo900_v11cd
+    label: "Compact 500 mm cube, XO 900 Hz · v11 CD"
+    brief: compact500_xo900_80x50_hf1440_v11cd
+    objective_version: 11
+    floor_j: null
+    status: current
+    source: examples/briefs/compact500_xo900_2026-11-20/compact500_xo900_80x50_hf1440_v11cd.yaml ; docs/queue/fav8_2026-11-20.yaml
+  - id: compact500_xo900_hf2in_v11cd
+    label: "Compact 500 mm cube, XO 900 Hz, 2-inch exit · v11 CD"
+    brief: compact500_xo900_80x50_hf2in_v11cd
+    objective_version: 11
+    floor_j: null
+    status: current
+    source: examples/briefs/hf2in_2026-11-20/compact500_xo900_80x50_hf2in_v11cd.yaml ; docs/queue/fav8_2026-11-20.yaml
   - id: home_landscape_v7
     label: "Home landscape 80x50 · v7 (nights default)"
     brief: room_landscape_80x50_700_hf1440_v7

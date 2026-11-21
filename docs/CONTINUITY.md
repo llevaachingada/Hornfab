@@ -1,5 +1,24 @@
 ﻿# CONTINUITY
 
+## 2026-11-20 — Home 900 Hz engineering decision
+
+- Replayed the existing named home-900 v11 identity. FAV-001 2.607618 leads the five archived finalists. The k-home verify design is effectively tied at 2.604181 with earlier loading and weaker off-axis smoothness. Same-design 900 screen/verify replay shifts reached 0.359 J.
+- Added a separate experimental staged brief and report-only pattern and impedance diagnostics. The compact 500 mm envelope remains a separate identity.
+- Rechecked actual sculpted mesh and source pairs. R2/R3 and K1/K2 are the initial matched comparisons. C2 source and exterior fidelity remain open. The live favorite queue owns the GPU. [Senior decision and evidence](evidence/home_xo900_2026-11-20/README.md).
+
+## 2026-11-20 — Sculpted H/V returning meridians
+
+- Exact R-OSSE R0 `823dc1721a76` and FAV-001 C0 `4140768780f0` remeshed byte-for-byte. R0 archive v7 replay exact. Archived-field v11 rescore 4.77995.
+- Nine derivatives built at 6 epw. Same-opening R-series forward sweep spans 29–215 mm. Landscape K1/K2 span 136–149 mm. Crowe C1/C2 reach 64/121 mm.
+- CPU preflight and lossless triangulated export passed. The source tessellation and Crowe exterior fidelity remain open before BEM. Geometry review and same-scale views are in [the sculpted meridians checkpoint](evidence/sculpted_meridians_2026-11-20/README.md).
+
+## 2026-11-20 — Archived-host axial termination overlay review
+
+- CPU rebuilds matched the original Crowe-X, extended-throat OSSE and fold-warm verify meshes byte-for-byte. All three stored v11 scores replayed exactly.
+- Retaining both native sheets reproduced the extended-throat mesh through GRID. The existing record wrapper rebuilds the shell and changes its zero-arm mesh. Crowe's untouched native sheets reproduced its mesh but its wrapper acquired a different design ID.
+- Hold the overlay at the geometry gate. Matched 6 epw Crowe H/V/diagonal probes moved upstream outer samples and altered the discretized source patch. The archived rolled soft-bend config reproduced its 0.932237 mm clearance failure at 5.9 epw. The 6 epw build completed, so the clearance rejection stands independently of mesh completion.
+- 57 focused tests passed with pytest capture disabled. The live favorite lane held the GPU. Review, machine-readable CPU evidence and plots are in [the overlay checkpoint](evidence/termination_overlay_2026-11-20/README.md).
+
 ## 2026-11-20 ~18:50 - ATH-style diagonal ridge + H/V beak knobs on osse_rollback; lanes at the end of fav8
 
 - Owner: ATH-style ridges for diagonal dispersion + beak on H and V. Optional knobs `g_a_d_deg` (radial diagonal angle,
