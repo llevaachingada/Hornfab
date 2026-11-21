@@ -82,6 +82,39 @@ def _readiness(root: Path, cases: list[dict]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _readiness_v2(
+    root: Path,
+    files: dict[str, list[dict]],
+    *,
+    case_files: list[str] | None = None,
+) -> Path:
+    """Write a v2 registry plus its ``cases.d`` files (JSON scalars are valid YAML)."""
+    path = root / READINESS_REL
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = [
+        "schema: hw_readiness_v2",
+        "updated: 2026-11-20",
+        "fidelity_note: synthetic v2 fixture",
+    ]
+    if case_files is not None:
+        lines.append("case_files:")
+        for pattern in case_files:
+            lines.append(f"  - {json.dumps(pattern)}")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    for name, cases in files.items():
+        case_path = path.parent / name
+        case_path.parent.mkdir(parents=True, exist_ok=True)
+        body = ["cases: []"] if not cases else ["cases:"]
+        for entry in cases:
+            first = True
+            for key, value in entry.items():
+                prefix = "  - " if first else "    "
+                body.append(f"{prefix}{key}: {json.dumps(value)}")
+                first = False
+        case_path.write_text("\n".join(body) + "\n", encoding="utf-8")
+    return path
+
+
 def _payload(
     *,
     project_sha: str | None = "proj",
@@ -332,6 +365,125 @@ def test_missing_registry_degrades_to_undeclared(tmp_path):
     assert row["motor"] == "UNDECLARED"
     assert document["readiness"]["found"] is False
     assert any("readiness" in item["reason"] for item in document["diagnostics"])
+
+
+# --------------------------------------------------------------------------- readiness v2
+
+
+def test_readiness_v2_merges_case_files(tmp_path):
+    """v2 rows from every ``cases.d/*.yaml`` file merge into one declaration map."""
+    _readiness_v2(
+        tmp_path,
+        {
+            "cases.d/00_a.yaml": [
+                {"key": "exp/a", "ref": "#1", "fidelity": "COUPLED_VENTED_FEM_BEM_LEM"},
+            ],
+            "cases.d/10_b.yaml": [
+                {"key": "exp/b", "ref": "#2", "fidelity": "COUPLED_VENTED_FEM_BEM_LEM"},
+                {"key": "exp/c", "ref": "#3", "gate": "G4 wide basis"},
+            ],
+        },
+    )
+    block = system_cases.load_readiness(tmp_path)
+    assert block["schema"] == "hw_readiness_v2"
+    assert block["error"] is None
+    assert block["declared_cases"] == 3
+    assert set(block["cases"]) == {"exp/a", "exp/b", "exp/c"}
+    assert block["cases"]["exp/a"]["declared_in"] == "cases.d/00_a.yaml"
+    assert block["cases"]["exp/b"]["declared_in"] == "cases.d/10_b.yaml"
+    assert block["cases"]["exp/c"]["gate"] == "G4 wide basis"
+    json.dumps(block)  # JSON-safe: no Path/date objects leak out
+    assert str(tmp_path) not in json.dumps(block)
+
+
+def test_readiness_v2_duplicate_key_is_reported_and_excluded(tmp_path):
+    """A key declared in two files is ambiguous: reported, and left out of the map."""
+    _readiness_v2(
+        tmp_path,
+        {
+            "cases.d/00_a.yaml": [
+                {"key": "exp/dup", "ref": "#1"},
+                {"key": "exp/only-once", "ref": "#9"},
+            ],
+            "cases.d/10_b.yaml": [{"key": "exp/dup", "ref": "#2"}],
+        },
+    )
+    block = system_cases.load_readiness(tmp_path)
+    assert "duplicate case key" in (block["error"] or "")
+    assert "exp/dup" in (block["error"] or "")
+    assert "exp/dup" not in block["cases"]
+    assert "exp/only-once" in block["cases"]
+    assert block["declared_cases"] == 1
+
+
+@pytest.mark.parametrize(
+    "pattern",
+    [
+        "../escape.yaml",
+        "cases.d/../../readiness.yaml",
+        "not_cases.d/*.yaml",
+        "/absolute/cases.d/*.yaml",
+    ],
+)
+def test_readiness_v2_rejects_unsafe_case_files(tmp_path, pattern):
+    _readiness_v2(
+        tmp_path,
+        {"cases.d/00_a.yaml": [{"key": "exp/a", "ref": "#1"}]},
+        case_files=[pattern],
+    )
+    block = system_cases.load_readiness(tmp_path)
+    assert block["error"] and "cases.d/" in block["error"]
+    assert block["cases"] == {}
+    assert block["declared_cases"] == 0
+
+
+def test_readiness_v2_missing_cases_d_reports_error(tmp_path):
+    _readiness_v2(tmp_path, {})
+    assert not (tmp_path / READINESS_REL).parent.joinpath("cases.d").exists()
+    block = system_cases.load_readiness(tmp_path)
+    assert block["schema"] == "hw_readiness_v2"
+    assert block["error"] and "cases.d" in block["error"]
+    assert block["cases"] == {}
+    assert block["declared_cases"] == 0
+
+
+def test_readiness_v2_joins_cases_to_export(tmp_path):
+    """The export reads the v2 map, so ``declared``/``fidelity`` come through on the row."""
+    _readiness_v2(
+        tmp_path,
+        {
+            "cases.d/00_a.yaml": [
+                {
+                    "key": "exp/20261118T225108Z-declared",
+                    "ref": "#1",
+                    "fidelity": "COUPLED_VENTED_FEM_BEM_LEM",
+                    "motor": "demo",
+                },
+            ],
+        },
+    )
+    _write_case(tmp_path, "exp", "20261118T225108Z-declared", payload=_payload(), run_manifest=RUN_MANIFEST)
+    document, _screens, _written, _ok, _out = _run(tmp_path)
+    row = _rows(document)["exp/20261118T225108Z-declared"]
+    assert row["declared"] is True
+    assert row["fidelity"] == "COUPLED_VENTED_FEM_BEM_LEM"
+    assert row["motor"] == "demo"
+    assert document["readiness"]["schema"] == "hw_readiness_v2"
+    assert document["readiness"]["error"] is None
+
+
+def test_live_readiness_registry_loads_current_schema():
+    """The committed registry must load with the v2 loader (skipped in a bare checkout)."""
+    registry = REPO / READINESS_REL
+    if not registry.is_file():
+        pytest.skip("live readiness registry not present in this checkout")
+    block = system_cases.load_readiness(REPO)
+    assert block["schema"] == "hw_readiness_v2"
+    assert block["error"] is None, block["error"]
+    assert block["declared_cases"] > 0
+    assert len(block["cases"]) == block["declared_cases"]
+    json.dumps(block)
+    assert str(REPO) not in json.dumps(block)
 
 
 # --------------------------------------------------------------------------- integrity

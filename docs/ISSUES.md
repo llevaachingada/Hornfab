@@ -5,7 +5,8 @@
 - DONE (R17): `assemble._box_to_vented_source` now writes BL's physical total port length (neck + two provider lips), not the lumped effective length; regression test added. Existing seed-box staging was already correct via `motor_map.vented_source`.
 - DONE (R12): `tools/system/verify_evidence_quotes.py` scripted byte-check; `FIRST_BEM_EVIDENCE.md` 3/3 sourced blocks PASS; 8 focused tests.
 - MEASURED (R9): float64 vs float32 on the same assembled #2 mesh, 948 points, max 0.0029 dB / 0.012°, null depths equal to ≤0.001 dB; float32 is not precision-limiting this mesh. Evidence doc pending.
-- OPEN: R3 bassbox model-difference audit; R11 one-command real-BL lane; `tools/data/system_cases.py` v2 loader (in progress); R6/R7/R10/R16 status updates; R1/R2/R5/R8/R13/R14 remain owner-decision or R1/R2-blocked.
+- DONE (v2 census loader): `tools/data/system_cases.py` now joins `hw_readiness_v2` `cases.d/` declarations (confined globs, duplicate keys reported/excluded); live export 55 on disk / 25 declared / 0 missing; `docs/system_data` regenerated; 25 focused tests.
+- OPEN: R3 bassbox model-difference audit; R11 one-command real-BL lane; R6/R7/R10/R16 status updates; R1/R2/R5/R8/R13/R14 remain owner-decision or R1/R2-blocked.
 
 ## 2026-11-20 — Home 900 Hz acoustic admission
 

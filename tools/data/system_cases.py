@@ -74,6 +74,12 @@ SCHEMA_VERSION = 1
 #: The committed readiness registry (declarations only; status facts never come from here).
 READINESS_REL = Path("docs/research/system_woofer_2026-11-18/readiness.yaml")
 
+#: Registry schemas this loader understands: v1 inline ``cases``, v2 ``cases.d/*.yaml``.
+REGISTRY_SCHEMAS = ("hw_readiness_v1", "hw_readiness_v2")
+
+#: v2 case declarations live in this folder beside the registry, never anywhere else.
+CASE_FILES_DIR = "cases.d"
+
 #: A case directory is a UTC timestamp prefix (``20261118T225108Z-...``).
 CASE_DIR_RE = re.compile(r"^\d{8}T\d{6}Z")
 
@@ -973,8 +979,86 @@ def _yaml_scalar(value: object) -> str | None:
     return text or None
 
 
+def _case_files(reg_dir: Path, patterns: object) -> list[Path]:
+    """The v2 case files a registry declares; only globs confined under ``cases.d/``.
+
+    A ``case_files`` entry may name a narrower glob under ``cases.d/`` but can never point
+    outside it: the registry is committed, yet a typo must not send the loader at an arbitrary
+    file.  Mirrors ``hornlab_search/gui/data_hw.py::_case_files``.
+    """
+    chosen = list(patterns or [f"{CASE_FILES_DIR}/*.yaml"])  # type: ignore[arg-type]
+    out: list[Path] = []
+    for pattern in chosen:
+        rel = Path(str(pattern))
+        if (
+            rel.is_absolute()
+            or ".." in rel.parts
+            or not rel.parts
+            or rel.parts[0] != CASE_FILES_DIR
+        ):
+            raise ValueError(
+                f"case_files entry {pattern!r} must be a relative glob under {CASE_FILES_DIR}/"
+            )
+        out.extend(sorted(item for item in reg_dir.glob(str(rel)) if item.is_file()))
+    return sorted(set(out))
+
+
+def _v2_cases(reg_dir: Path, data: dict, yaml: Any, errors: list[str]) -> dict[str, dict]:
+    """Merge every ``cases.d`` row; drop (and report) keys declared more than once.
+
+    Same policy as the GUI loader (senior review 2026-11-20 §3.1): an ambiguous key is reported
+    in ``error`` and left out of the declaration map, never resolved last-wins.
+    """
+    try:
+        files = _case_files(reg_dir, data.get("case_files"))
+    except ValueError as exc:
+        files = []
+        errors.append(str(exc))
+    if not files and not errors:
+        errors.append(f"cases.d: no case files under {CASE_FILES_DIR}/")
+
+    merged: list[dict] = []
+    for case_file in files:
+        rel = case_file.relative_to(reg_dir).as_posix()
+        try:
+            doc = yaml.safe_load(case_file.read_text(encoding="utf-8")) or {}
+        except (OSError, yaml.YAMLError) as exc:
+            errors.append(f"{rel}: {type(exc).__name__}: {exc}")
+            continue
+        rows = doc.get("cases") if isinstance(doc, dict) else doc
+        if not isinstance(rows, list):
+            errors.append(f"{rel}: expected a 'cases:' list")
+            continue
+        for row in rows:
+            if not isinstance(row, dict) or not _text(row.get("key")).strip():
+                errors.append(f"{rel}: case entry without a key")
+                continue
+            entry = dict(row)
+            entry.setdefault("declared_in", rel)
+            merged.append(entry)
+
+    counts: dict[str, int] = {}
+    for entry in merged:
+        key = _text(entry.get("key")).strip()
+        counts[key] = counts.get(key, 0) + 1
+    duplicates = sorted(key for key, count in counts.items() if count > 1)
+    if duplicates:
+        errors.append("duplicate case key(s) across registry files: " + ", ".join(duplicates))
+
+    cases: dict[str, dict] = {}
+    for entry in merged:
+        key = _text(entry.get("key")).strip()
+        if key and counts[key] == 1:
+            cases[key] = _clean(entry)
+    return cases
+
+
 def load_readiness(root: Path) -> dict:
-    """The declared cases, mapped by ``<experiment>/<case>``.  Declarations only."""
+    """The declared cases, mapped by ``<experiment>/<case>``.  Declarations only.
+
+    Accepts both registry schemas: v1 declares its rows inline under ``cases``; v2 declares them
+    in ``cases.d/*.yaml`` (or the globs a ``case_files`` list names under ``cases.d/``).
+    """
     path = root / READINESS_REL
     block: dict = {
         "path": READINESS_REL.as_posix(),
@@ -1002,26 +1086,38 @@ def load_readiness(root: Path) -> dict:
     if not isinstance(data, dict):
         block["error"] = "registry root is not a mapping"
         return block
-    if data.get("schema") != "hw_readiness_v1":
-        block["error"] = f"unexpected schema {data.get('schema')!r} (expected hw_readiness_v1)"
+    schema = data.get("schema")
+    if schema not in REGISTRY_SCHEMAS:
+        block["error"] = (
+            f"unexpected schema {schema!r} (expected one of {', '.join(REGISTRY_SCHEMAS)})"
+        )
         return block
-    cases: dict[str, dict] = {}
-    for entry in data.get("cases") or []:
-        if not isinstance(entry, dict):
-            continue
-        key = _text(entry.get("key")).strip()
-        if key:
-            cases[key] = _clean(entry)
+
+    errors: list[str] = []
+    if schema == "hw_readiness_v1":
+        # v1 is unchanged: rows are inline and a repeated key keeps its last row.
+        cases: dict[str, dict] = {}
+        for entry in data.get("cases") or []:
+            if not isinstance(entry, dict):
+                continue
+            key = _text(entry.get("key")).strip()
+            if key:
+                cases[key] = _clean(entry)
+    else:
+        cases = _v2_cases(path.parent, data, yaml, errors)
+
     block.update(
         {
-            "schema": data.get("schema"),
+            "schema": schema,
             "updated": _yaml_scalar(data.get("updated")),
             "fidelity_note": _text(data.get("fidelity_note")) or None,
             "declared_cases": len(cases),
             "cases": cases,
         }
     )
-    if not cases:
+    if errors:
+        block["error"] = "; ".join(errors).strip("; ")
+    elif not cases:
         block["error"] = "registry declares no cases"
     return block
 
