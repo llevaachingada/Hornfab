@@ -1,5 +1,14 @@
 ﻿# ISSUES
 
+## 2026-11-21 - System readiness audit batch
+
+- DONE (R3/R17): bassbox model-difference audit complete; seed-box offset attributed to demo-shape Sd deficit 4.59 dB, default-box 30 Hz peak to lossless port vs Ql/Qp; NFR/end-correction Fb range 27.99–30.14 Hz. Bassbox remains a screen. [Audit](evidence/system_evidence_2026-11-19/BASSBOX_MODEL_AUDIT_2026-11-21.md).
+- DONE (R6): mesh-refinement readout documented; convergence NOT established (nulls move 9.75–15.99 dB); R9 float64 control bounds precision at 0.0029 dB / 0.012°.
+- OPEN (R7): screen E_shape is optimistic on the box axis (0.024/0.0017 vs BEM 1.61/17.84 dB² on the common grid); confounded by the demo shape (R2), so the 9 dB² label stays heuristic. [Check](evidence/system_evidence_2026-11-19/SCREEN_ESHAPE_CALIBRATION_2026-11-21.md).
+- DONE (R10/R15/R16): upstream-drift policy recorded; live 10-inch vendor re-verification (all numeric fields match); clearance gate + tests + real PASS case.
+- DONE (R11): one-command real-BL lane exercised stage+validate+3-freq CPU solve (3/3 complete); 8 tests. [Evidence](evidence/system_evidence_2026-11-19/REAL_BL_LANE_2026-11-21.md).
+- OPEN: owner decisions 1–6; R1/R2/R5/R8/R13/R14 remain owner- or R1/R2-blocked. R7 needs a real-shape case and finer angular grid before recalibration.
+
 ## 2026-11-21 - System readiness R17/R12/R9
 
 - DONE (R17): `assemble._box_to_vented_source` now writes BL's physical total port length (neck + two provider lips), not the lumped effective length; regression test added. Existing seed-box staging was already correct via `motor_map.vented_source`.

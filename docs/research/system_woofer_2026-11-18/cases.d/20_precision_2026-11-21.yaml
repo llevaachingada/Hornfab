@@ -1,0 +1,21 @@
+# R9 float64 precision-control case (2026-11-21), registry v2.
+#
+# This is a precision control, not a new system result: the project and mesh are byte-identical
+# to ev_assembled_motor_real/20261120T150709Z-wide_assembled-01612-383da940 (project
+# 5b2e0b83de1d6c1ed6cc0a156f5bd5beaa3e6730fcadd422ba6d5bf688bd631d).  The run uses
+# solver_options.precision = float64 (lu_float64) at 6 frequencies around the 1641/1823/2025 Hz
+# nulls.  Proposed only; owner/senior approval follows the normal gate.
+cases:
+  - key: ev_precision_f64/20261121T084807Z-f64_6f-33768-3be6fcf6
+    ref: "R9-F64"
+    gate: R9 float32 vs float64 precision control (assembled #2, 6 frequencies)
+    evidence: system_evidence_2026-11-19/PRECISION_FLOAT64_2026-11-21.md
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-21 (readiness R9)
+    note: >-
+      Same project/mesh as ev_assembled_motor_real/20261120T150709Z-wide_assembled-01612-383da940;
+      float64 solve, 6/6 complete.  Precision control only; do not rank it against acoustic cases.

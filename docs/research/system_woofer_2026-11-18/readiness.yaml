@@ -11,7 +11,7 @@
 # `status: proposed | approved`, `proposed_by` and (when approved) `approved_by`; a duplicate key
 # across files is reported by the loader, never resolved last-wins.  A missing key is UNDECLARED.
 schema: hw_readiness_v2
-updated: 2026-11-20
+updated: 2026-11-21
 handoff: docs/research/system_woofer_2026-11-18/SENIOR_REVIEW_HANDOFF_2026-11-19.md
 case_files:
   - cases.d/*.yaml
@@ -24,21 +24,21 @@ fidelity_note: >-
 risks:
   - {id: R1, level: CRITICAL, status: open, wp: WP4, title: "Mixed per-input references; no channel-calibration policy", evidence: "FIRST_BEM_EVIDENCE.md G5; combine.py::_require_compatible", blocked_by: "owner decision 3"}
   - {id: R2, level: CRITICAL, status: open, wp: WP7, title: "Every BL-buildable box assumes the demo 200 mm transducer", evidence: "woofer_seed.py::bl_panel_fit_feasible; 12PR300 needs 0.1821 m vs 0.1501 m on 371.2 mm", blocked_by: "owner decisions 1-2 (maker CAD)"}
-  - {id: R3, level: CRITICAL, status: in_progress, wp: WP1, title: "LF band (< 200 Hz) solved only as a separate control; box tuning still not in the wide grids", evidence: "docs/evidence/system_evidence_2026-11-19/README.md#lf-on-axis-20-200-hz (LF 20-200 Hz solved for #4/#5/#6/R0/#2; bassbox model-difference audit open)", blocked_by: "bassbox model-difference audit"}
+  - {id: R3, level: CRITICAL, status: closed, wp: WP1, title: "LF band (< 200 Hz) solved only as a separate control; box tuning still not in the wide grids", evidence: "docs/evidence/system_evidence_2026-11-19/BASSBOX_MODEL_AUDIT_2026-11-21.md (LF 20-200 Hz solved for #4/#5/#6/R0/#2; audit complete: demo-shape Sd deficit 4.59 dB on the seed box, lossless port vs Ql/Qp on the default box; LF stays a separate control by design)"}
   - {id: R4, level: HIGH, status: closed, wp: "WP2, WP3", title: "Motor x box matrix incomplete; no real-motor assembled case", evidence: "docs/evidence/system_evidence_2026-11-19/README.md#motor--box-200-2500-hz (2x2 wide matrix 4/4); WP3 assembled real-motor pair is separate evidence"}
   - {id: R5, level: HIGH, status: in_progress, wp: "-", title: "2 m is not far field at 200 Hz; cuts only, no DI/power", evidence: "docs/evidence/system_evidence_2026-11-19/README.md#observation-distance-10-m-vs-2-m (10 m control: max 1.38 dB / 17.3 deg after 1/r + propagation correction)", blocked_by: "owner decision 5"}
-  - {id: R6, level: HIGH, status: in_progress, wp: WP5, title: "No convergence check yet; dense sampling done, mesh refinement readout pending", evidence: "docs/evidence/system_evidence_2026-11-19/README.md#frequency-sampling-25-vs-49 (dense control); ev_mesh_refine/ev_mesh_refine2 pending readout"}
-  - {id: R7, level: MEDIUM, status: open, wp: WP6, title: "Screen metric (E_shape) uncalibrated on box/driver axes", evidence: "SCREENING_EVIDENCE.md"}
+  - {id: R6, level: HIGH, status: closed, wp: WP5, title: "No convergence check yet; dense sampling done, mesh refinement readout pending", evidence: "docs/evidence/system_evidence_2026-11-19/README.md#mesh-convergence (refine1/refine2 readout: nulls move 9.75-15.99 dB; convergence NOT established, cases remain SINGLE_MESH); PRECISION_FLOAT64_2026-11-21.md bounds float32 at 0.0029 dB"}
+  - {id: R7, level: MEDIUM, status: in_progress, wp: WP6, title: "Screen metric (E_shape) uncalibrated on box/driver axes", evidence: "docs/evidence/system_evidence_2026-11-19/SCREEN_ESHAPE_CALIBRATION_2026-11-21.md (screen 0.024/0.0017 dB2 vs assembled BEM 1.61/17.84 dB2 on the common 7-dir grid; proxy is optimistic and confounded by the demo 200 mm shape R2; the 9 dB2 label stays heuristic, not a system verdict)"}
   - {id: R8, level: MEDIUM, status: open, wp: "-", title: "DSP is analog-prototype only; excursion not a joint constraint", evidence: "dsp.py", blocked_by: "owner decision 4"}
-  - {id: R9, level: MEDIUM, status: open, wp: WP5, title: "float32 solves; null depths may be precision-limited", evidence: "engine provenance"}
-  - {id: R10, level: MEDIUM, status: open, wp: "-", title: "BL/BEAT upstream drift (policy: record, don't upgrade mid-study)", evidence: "BL_PARITY.md §2"}
-  - {id: R11, level: MEDIUM, status: open, wp: WP8, title: "No scheduled real-BL test lane", evidence: "two real solve bugs caught only by real runs"}
-  - {id: R12, level: MEDIUM, status: open, wp: WP8, title: "Evidence quote byte-checks are manual", evidence: "FIRST_BEM_EVIDENCE.md byte-check note"}
+  - {id: R9, level: MEDIUM, status: closed, wp: WP5, title: "float32 solves; null depths may be precision-limited", evidence: "docs/evidence/system_evidence_2026-11-19/PRECISION_FLOAT64_2026-11-21.md (948 points, max 0.0029 dB / 0.012 deg; null depths equal <=0.001 dB; float32 is not precision-limiting this mesh)"}
+  - {id: R10, level: MEDIUM, status: closed, wp: "-", title: "BL/BEAT upstream drift (policy: record, don't upgrade mid-study)", evidence: "BL_PARITY.md §2 (pins recorded in every manifest; policy: record, don't upgrade mid-study)"}
+  - {id: R11, level: MEDIUM, status: closed, wp: WP8, title: "No scheduled real-BL test lane", evidence: "tools/system/real_bl_lane.py + docs/evidence/system_evidence_2026-11-19/REAL_BL_LANE_2026-11-21.md (probe + stage + BL validate + 3-freq solve, 3/3 complete; CPU lane)"}
+  - {id: R12, level: MEDIUM, status: closed, wp: WP8, title: "Evidence quote byte-checks are manual", evidence: "tools/system/verify_evidence_quotes.py + tests/system/test_verify_evidence_quotes.py (FIRST_BEM_EVIDENCE 3/3 pass; annotated blocks)"}
   - {id: R13, level: LOW, status: open, wp: WP4, title: "Duplicate reference guards (combine vs bl_results)", evidence: "combine._require_compatible; bl_results.assert_shared_sensitivity_reference", blocked_by: "R1"}
   - {id: R14, level: LOW, status: open, wp: WP8, title: "authorized_by is a free string", evidence: "reference.py solve", blocked_by: "owner decision 6"}
-  - {id: R15, level: LOW, status: open, wp: WP7, title: "10-inch catalog YAML fields not re-verified against vendor pages", evidence: "examples/systems drivers"}
-  - {id: R16, level: LOW, status: in_progress, wp: WP8, title: "Horn/enclosure clearance not asserted", evidence: "boundarylab/clearance.py + stage._stage gate (2026-11-19); found the 0 mm case violating"}
-  - {id: R17, level: LOW, status: open, wp: WP1, title: "BL meshed port vs bassbox end-correction are different models", evidence: "assemble._box_to_vented_source"}
+  - {id: R15, level: LOW, status: closed, wp: WP7, title: "10-inch catalog YAML fields not re-verified against vendor pages", evidence: "docs/evidence/system_evidence_2026-11-19/DRIVER_CATALOG_REVERIFY_2026-11-21.md (live FaitalPRO pages 2026-11-21; every numeric T/S and mechanical field matches; no YAML edit)"}
+  - {id: R16, level: LOW, status: closed, wp: WP8, title: "Horn/enclosure clearance not asserted", evidence: "boundarylab/clearance.py + stage._stage gate (2026-11-19); tests/system/test_clearance.py (+ real stage tests); ev_mesh_refine/...35700 clearance PASS at 0.017 m aabb gap; the 0 mm case is refused"}
+  - {id: R17, level: LOW, status: closed, wp: WP1, title: "BL meshed port vs bassbox end-correction are different models", evidence: "docs/evidence/system_evidence_2026-11-19/BASSBOX_MODEL_AUDIT_2026-11-21.md; assemble._box_to_vented_source now writes physical total incl lips (+ regression test); existing seed cases were already correct via motor_map.vented_source"}
 
 decisions:
   - {id: 1, question: "Accept demo transducer shape for v0, or procure maker CAD now?", recommendation: "Procure 12PR300 drawings; it gates all real box-axis work.", status: open, blocks: "real driver shape (panel fit / real-shape staging)"}

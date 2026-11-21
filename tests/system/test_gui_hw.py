@@ -417,9 +417,9 @@ def test_committed_registry_parses_and_names_real_cases() -> None:
         assert c.get("status") in ("approved", "proposed")
         assert c.get("declared_in", "").startswith("cases.d/")
     # The 2026-11-19 handoff entries (9) are approved; gate H (2026-11-20) approved the 11
-    # README-covered evidence entries; the 5 post-readout controls (2 WP3 + 3 mesh refinement)
-    # stay proposed.
+    # README-covered evidence entries; the 6 post-readout controls (2 WP3 + 3 mesh refinement +
+    # the R9 float64 precision case) stay proposed.
     assert sum(1 for c in reg["cases"] if c["status"] == "approved") == 20
-    assert sum(1 for c in reg["cases"] if c["status"] == "proposed") == 5
+    assert sum(1 for c in reg["cases"] if c["status"] == "proposed") == 6
     assert all(c.get("approved_by") for c in reg["cases"] if c["status"] == "approved")
     assert all(c.get("proposed_by") for c in reg["cases"] if c["status"] == "proposed")

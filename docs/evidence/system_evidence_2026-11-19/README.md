@@ -94,6 +94,10 @@ The committed `bassbox` model was evaluated on the same 20–200 Hz grid for the
 (115 L, 45 cm², Fb 30 Hz, effective port length 0.129569 m) and the R0 default box
 (0.04216945 m³, 28.274 cm², 0.22 m, derived Fb 30.14 Hz), using the real 12PR300 T/S. Curves are
 dB relative to the 200 Hz value, model output at 2 m (1 m half-space minus 6.02 dB), `[model]`.
+**Mapping note (2026-11-21):** BL's default-box source uses a 0.22 m port **total incl. lips**;
+the table's 0.22 m effective length is the old mapping. The physical mapping (0.22 − two 8 mm lips,
+then + bassbox's end correction) gives Fb 27.99 Hz; the NFR 0.12 flare makes the true Fb a range,
+not a single number. See the audit below.
 
 | f Hz | bassbox seed | bassbox R0 default |
 |---:|---:|---:|
@@ -120,8 +124,11 @@ BL shape:
   and **−1.2 to −2.3 dB above 70 Hz** relative to the model; the shapes differ, not just the
   level. (The demo default #R0 is not a clean motor comparison; use #6 for the real-motor cell.)
 - **Conclusion:** `bassbox` remains the fast box-feasibility/F3/port-velocity screen, but it is not
-  a drop-in installed-LF reference for this cabinet. The next LF work is a model-difference audit
-  (finite baffle/cabinet, port end correction/NFR, losses), not another blind F3 comparison.
+  a drop-in installed-LF reference for this cabinet. The model-difference audit is now complete:
+  [BASSBOX_MODEL_AUDIT_2026-11-21.md](BASSBOX_MODEL_AUDIT_2026-11-21.md) attributes the seed-box
+  offset to the demo-shape Sd deficit (4.59 dB) and the default-box 30 Hz peak to the lossless BL
+  port vs the damped lumped port, and records the port-length mapping fix (R17). Do not run another
+  blind F3 comparison.
 
 ## Motor × box, 200–2500 Hz wide grid
 
@@ -222,10 +229,14 @@ Not established:
 
 - No calibration of the two channel references; no complete-system SPL or system score.
 - No real transducer shape (BL demo shape in every case); #4/#6 use real T/S, #5/R0/#2 use demo.
-- No convergence (mesh unchanged between 25 and 49), no `float64` control, no full sphere.
-- No bassbox-vs-BL conclusion yet; the LF curves above are BL only. The next readout must compare
-  these curves with the committed `bassbox` F3/Fb/port-velocity predictions and state the model
-  differences (port end correction, NFR, lumped assumptions).
+- Mesh/frequency convergence is **not** established: the two refined meshes move nulls by up to
+  ~16 dB (see Mesh convergence); the 25 vs 49 control tests frequency sampling only, not mesh
+  convergence. A `float64` control now exists (R9, [PRECISION_FLOAT64_2026-11-21.md](PRECISION_FLOAT64_2026-11-21.md)):
+  on the assembled #2 mesh it bounds the float32 error at 0.0029 dB / 0.012° and leaves null
+  depths unchanged, so the null movement is a mesh/sampling effect. No full sphere.
+- The bassbox-vs-BL audit is complete ([BASSBOX_MODEL_AUDIT_2026-11-21.md](BASSBOX_MODEL_AUDIT_2026-11-21.md));
+  the LF curves above are BL only, and the differences are the declared model differences (demo
+  shape/Sd, port end correction/NFR, losses, finite baffle), not a solver defect.
 
 ## Recompute recipe
 

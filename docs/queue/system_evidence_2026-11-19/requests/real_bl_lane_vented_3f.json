@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "frequencies_hz": [
+    250.0,
+    700.0,
+    1100.0
+  ],
+  "excitation_port_ids": [
+    "vented/voltage"
+  ],
+  "probes": [
+    {
+      "id": "on_axis_2m",
+      "coordinate_frame": "project",
+      "points_m": [
+        [
+          0,
+          0,
+          2
+        ]
+      ]
+    }
+  ],
+  "include_project_observations": true
+}

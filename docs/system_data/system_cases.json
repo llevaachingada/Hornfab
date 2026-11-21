@@ -1,7 +1,7 @@
 {
   "tool": "system_cases",
   "schema_version": 1,
-  "generated_utc": "2026-11-21T08:53:02.445969Z",
+  "generated_utc": "2026-11-21T09:02:13.552875Z",
   "source": {
     "root": ".",
     "system_runs": "system_runs",
@@ -13,52 +13,52 @@
     "path": "docs/research/system_woofer_2026-11-18/readiness.yaml",
     "found": true,
     "schema": "hw_readiness_v2",
-    "updated": "2026-11-20",
+    "updated": "2026-11-21",
     "fidelity_note": "Coupled cases are declared COUPLED_VENTED_FEM_BEM_LEM with the FIRST_REFERENCE_CASE fidelity policy attached: the horn channel is an ideal normal-velocity source (no compression-driver absolute SPL), and every case uses BL's provider-default transducer SHAPE.",
-    "declared_cases": 25,
+    "declared_cases": 26,
     "error": null
   },
   "census": {
     "scanned": 55,
     "included": 55,
     "by_status": {
-      "invalid": 3,
+      "invalid": 2,
       "refused": 3,
-      "solved": 20,
+      "solved": 21,
       "staged": 29
     },
     "by_fidelity": {
-      "COUPLED_VENTED_FEM_BEM_LEM": 23,
-      "UNDECLARED": 32
+      "COUPLED_VENTED_FEM_BEM_LEM": 24,
+      "UNDECLARED": 31
     },
     "by_clearance": {
-      "not_recorded": 50,
+      "not_recorded": 51,
       "pass": 2,
-      "unknown": 3
+      "unknown": 2
     },
-    "experiments": 27,
-    "solved": 20,
-    "declared": 25,
+    "experiments": 28,
+    "solved": 21,
+    "declared": 26,
     "declared_missing_on_disk": 0,
-    "on_disk_not_declared": 30,
+    "on_disk_not_declared": 29,
     "manifest_integrity": {
       "mismatch": 1,
-      "unknown": 3,
-      "verified": 51
+      "unknown": 2,
+      "verified": 52
     },
     "run_manifest_integrity": {
       "unknown": 53,
       "verified": 2
     },
     "project_integrity": {
-      "unknown": 41,
-      "verified": 14
+      "unknown": 40,
+      "verified": 15
     },
     "request_integrity": {
       "unknown": 38,
       "verified": 17
     },
-    "diagnostics": 4
+    "diagnostics": 3
   },
   "diagnostics": [
     {
@@ -67,10 +67,6 @@
     },
     {
       "case_key": "bl_ref_case/20261118T231745Z-assembly-06644-76fd5431",
-      "reason": "missing manifest.json"
-    },
-    {
-      "case_key": "ev_mesh_refine/20261120T145909Z-assembly-52652-a14fe6ac",
       "reason": "missing manifest.json"
     },
     {
@@ -3781,80 +3777,6 @@
     },
     {
       "experiment": "ev_mesh_refine",
-      "case": "20261120T145909Z-assembly-52652-a14fe6ac",
-      "case_key": "ev_mesh_refine/20261120T145909Z-assembly-52652-a14fe6ac",
-      "created_utc": null,
-      "kind": null,
-      "gate": null,
-      "gate_source": null,
-      "ref": null,
-      "status": "invalid",
-      "solved": false,
-      "n_frequencies": null,
-      "freq_min_hz": null,
-      "freq_max_hz": null,
-      "backend_id": null,
-      "solve_kind": null,
-      "phasor_convention": null,
-      "completion": null,
-      "authorized_by": null,
-      "fidelity": "UNDECLARED",
-      "motor": "UNDECLARED",
-      "motor_source": null,
-      "transducer_shape": "UNDECLARED",
-      "horn_source": null,
-      "pair_with": null,
-      "project_sha256": null,
-      "project_integrity": "unknown",
-      "run_manifest_sha256": null,
-      "run_manifest_integrity": "unknown",
-      "request_sha256": null,
-      "request_integrity": "unknown",
-      "manifest_payload_sha256": null,
-      "manifest_integrity": "unknown",
-      "box_width_mm": null,
-      "box_height_mm": null,
-      "box_depth_mm": null,
-      "net_volume_l": null,
-      "net_volume_source": null,
-      "port_area_cm2": null,
-      "tuning_hz": null,
-      "horn_mesh": null,
-      "horn_mesh_sha256": null,
-      "horn_offset_mm": null,
-      "horn_offset_mm_xyz": null,
-      "clearance_status": "unknown",
-      "clearance_min_mm": null,
-      "driver_name": null,
-      "evidence": null,
-      "notes": null,
-      "declared": false,
-      "run_status": null,
-      "stage_ok": null,
-      "stage_error": null,
-      "source_path": "system_runs/system/ev_mesh_refine/20261120T145909Z-assembly-52652-a14fe6ac",
-      "run": {
-        "present": false,
-        "status": null,
-        "frequencies_hz": null,
-        "excitation_port_ids": null,
-        "schema": null,
-        "schema_version": null,
-        "started_at_utc": null,
-        "finished_at_utc": null,
-        "solver_options": null,
-        "engine_runs": [],
-        "meshes": [],
-        "completion_mask": null
-      },
-      "metadata": {
-        "box_source": null,
-        "clearance_source": null,
-        "sources": []
-      }
-    },
-    {
-      "experiment": "ev_mesh_refine",
       "case": "20261120T145915Z-assembly-35700-6860289b",
       "case_key": "ev_mesh_refine/20261120T145915Z-assembly-35700-6860289b",
       "created_utc": "2026-11-20T14:59:28.569778+00:00",
@@ -4343,9 +4265,9 @@
       "case_key": "ev_precision_f64/20261121T084807Z-f64_6f-33768-3be6fcf6",
       "created_utc": "2026-11-21T08:48:07.273520+00:00",
       "kind": "bl_derived_request_case",
-      "gate": null,
-      "gate_source": null,
-      "ref": null,
+      "gate": "R9 float32 vs float64 precision control (assembled",
+      "gate_source": "readiness",
+      "ref": "R9-F64",
       "status": "solved",
       "solved": true,
       "n_frequencies": 6,
@@ -4356,11 +4278,11 @@
       "phasor_convention": "exp(+i omega t)",
       "completion": "6/6",
       "authorized_by": "readiness R9 2026-11-21: CPU float64 precision control (no owner decision required)",
-      "fidelity": "UNDECLARED",
-      "motor": "UNDECLARED",
-      "motor_source": null,
-      "transducer_shape": "UNDECLARED",
-      "horn_source": null,
+      "fidelity": "COUPLED_VENTED_FEM_BEM_LEM",
+      "motor": "real",
+      "motor_source": "readiness",
+      "transducer_shape": "demo",
+      "horn_source": "ideal_velocity",
       "pair_with": null,
       "project_sha256": null,
       "project_integrity": "unknown",
@@ -4384,9 +4306,9 @@
       "clearance_status": "not_recorded",
       "clearance_min_mm": null,
       "driver_name": null,
-      "evidence": null,
-      "notes": null,
-      "declared": false,
+      "evidence": "system_evidence_2026-11-19/PRECISION_FLOAT64_2026-11-21.md",
+      "notes": "Same project/mesh as ev_assembled_motor_real/20261120T150709Z-wide_assembled-01612-383da940; float64 solve, 6/6 complete.  Precision control only; do not rank it against acoustic cases.",
+      "declared": true,
       "run_status": "complete",
       "stage_ok": null,
       "stage_error": null,
@@ -5033,6 +4955,121 @@
         "box_source": null,
         "clearance_source": null,
         "sources": [
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "real_bl_lane",
+      "case": "20261121T085619Z-ref_case-48668-1a90d92d",
+      "case_key": "real_bl_lane/20261121T085619Z-ref_case-48668-1a90d92d",
+      "created_utc": "2026-11-21T08:56:28.469741+00:00",
+      "kind": "bl_stage_reference_project",
+      "gate": null,
+      "gate_source": null,
+      "ref": null,
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 3,
+      "freq_min_hz": 250.0,
+      "freq_max_hz": 1100.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "3/3",
+      "authorized_by": null,
+      "fidelity": "UNDECLARED",
+      "motor": "UNDECLARED",
+      "motor_source": null,
+      "transducer_shape": "UNDECLARED",
+      "horn_source": null,
+      "pair_with": null,
+      "project_sha256": "bd2908ff8ec1e8951a03ecfaba6a69fc37b14d42b5298841c70f42ebe18dc03a",
+      "project_integrity": "verified",
+      "run_manifest_sha256": "e3262bcff5531c87444cb62eddfec8cdc85db34f5973db48e508f9dca2abe825",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": null,
+      "request_integrity": "unknown",
+      "manifest_payload_sha256": "b6921d25f1600636b8c29f349157858db08a6f3fa1e680e5e2afba27918817ec",
+      "manifest_integrity": "verified",
+      "box_width_mm": 320.0,
+      "box_height_mm": 500.0,
+      "box_depth_mm": 360.0,
+      "net_volume_l": 42.169,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 28.274,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": null,
+      "notes": null,
+      "declared": false,
+      "run_status": "complete",
+      "stage_ok": true,
+      "stage_error": null,
+      "source_path": "system_runs/system/real_bl_lane/20261121T085619Z-ref_case-48668-1a90d92d",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          250.0,
+          700.0,
+          1100.0
+        ],
+        "excitation_port_ids": [
+          "vented/voltage"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-21T08:56:29.996247+00:00",
+        "finished_at_utc": "2026-11-21T08:56:41.633179+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "vented/mesh/interior",
+            "name": "vented__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "vented/mesh/exterior",
+            "name": "vented__exterior",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 3,
+          "total": 3,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "adapter_spec.json",
+          "case.blab.json",
+          "stage_report.json",
           "manifest.payload"
         ]
       }

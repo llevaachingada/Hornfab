@@ -1,5 +1,14 @@
 ﻿# CONTINUITY
 
+## 2026-11-21 - System readiness audit batch: R3/R6/R10/R11/R15/R16/R17 closed, R7 quantified
+
+- **R3/R17:** [bassbox model-difference audit](evidence/system_evidence_2026-11-19/BASSBOX_MODEL_AUDIT_2026-11-21.md) complete (CPU recompute, no new solve). Seed box is the clean comparison: BL real is −3.5…−5.4 dB vs bassbox over 46–132 Hz (mean −4.75), matching the declared demo-shape Sd deficit 4.59 dB; the 162 Hz null is a BL interference feature. Default box: +7.4 dB at 30.4 Hz vs the damped lumped port, −1.1…−2.3 dB above 70 Hz; the NFR/end-correction mapping gives Fb 27.99–30.14 Hz, not one number. Bassbox stays a feasibility/F3/port-velocity screen. R17 port mapping fixed in the earlier commit.
+- **R6 closed:** the mesh-refinement readout is in the evidence README (refine1/refine2, nulls move 9.75–15.99 dB; refine1 vs refine2 not monotonic). Convergence is **not** established; every current case is `SINGLE_MESH`. R9's float64 control rules out precision as the cause.
+- **R7 quantified, stays in_progress:** [screen E_shape box-axis check](evidence/system_evidence_2026-11-19/SCREEN_ESHAPE_CALIBRATION_2026-11-21.md): screen 0.024/0.0017 dB² vs assembled BEM 1.61/17.84 dB² on the common 7-dir/3-freq grid. The proxy is optimistic and confounded by the demo 200 mm shape (R2); the 9 dB² label stays heuristic, not a system verdict.
+- **R10 closed** as the recorded policy (pins in every manifest; record, don't upgrade mid-study). **R15 closed:** [10-inch catalog re-verification](evidence/system_evidence_2026-11-19/DRIVER_CATALOG_REVERIFY_2026-11-21.md) against live FaitalPRO pages; every numeric field matches, no YAML edited. **R16 closed:** clearance gate + tests; the real two-body stage case records PASS at 0.017 m aabb gap.
+- **R11 closed:** [one-command real-BL lane](evidence/system_evidence_2026-11-19/REAL_BL_LANE_2026-11-21.md) (`tools/system/real_bl_lane.py`) exercised probe + stage + BL validate + 3-freq CPU solve (3/3 complete, 08:56–08:57 UTC); 8 hermetic tests.
+- Readiness registry: 26 declared cases (20 approved / 6 proposed; the new R9 precision case is proposed), R3/R6/R9/R10/R11/R12/R15/R16/R17 closed, R7 in progress, R1/R2/R5/R8/R13/R14 open. Focused suite 94 passed, 3 real-BL skips. No GPU was touched.
+
 ## 2026-11-21 - System readiness R17 port mapping + R12 evidence byte-check
 
 - **R17 fixed:** `assemble._box_to_vented_source` now inverts bassbox's effective length to the physical neck and adds both 8 mm BL provider lips before writing BL's `port_length_m` (total incl. lips). It previously passed the effective length through, lengthening the BL port by the end correction. Regression test `test_box_to_vented_source_passes_physical_total_port_length`; `tests/system/test_assemble.py` 8 passed. Existing seed-box cases were staged through `motor_map.vented_source` and already used the correct physical length; no stored case was changed.
