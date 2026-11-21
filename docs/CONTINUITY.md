@@ -1,5 +1,11 @@
 ﻿# CONTINUITY
 
+## 2026-11-21 — Eight-hour GPU validation queue
+
+- Launched `hornfab_gpu8_2026-11-21` at 04:21 EST via detached controller PID 16772. Structural dry-run accepted seven blocks. The canonical GPU lock showed the first `R2_6` arm running. Its repeat completed at J 3.10632665 versus 3.10632670 in the first campaign, and R3 followed.
+- Six hours are reserved for sculpted R-OSSE, landscape K returns, Klangfilm B3 and Crowe P1 ridge/beak. Two hours are reserved for home-900 v11 benchmarks, Compact500 v11 and the v10 follow-ups. The local night YAML, paired response diffs and readout index are under `runs/nights/`. CPU admission and scripts are under `scratch/hornfab_gpu8_2026-11-21/`.
+- Matched R2/R3 refinement uses 7 epw under the local node cap. R4 uses 7 epw because its 6 epw source patch differed. K1/K2 refinement uses 8 epw. B3 H +2° and +4° exceed the frozen 60° limit. Crowe P1's effective refinement is 7 epw due to 8 epw patch drift. The verified 2-inch compact result is reused. Crowe C1/C2 and the rolled C-return remain held.
+
 ## 2026-11-21 - System readiness audit batch: R3/R6/R10/R11/R15/R16/R17 closed, R7 quantified
 
 - **R3/R17:** [bassbox model-difference audit](evidence/system_evidence_2026-11-19/BASSBOX_MODEL_AUDIT_2026-11-21.md) complete (CPU recompute, no new solve). Seed box is the clean comparison: BL real is −3.5…−5.4 dB vs bassbox over 46–132 Hz (mean −4.75), matching the declared demo-shape Sd deficit 4.59 dB; the 162 Hz null is a BL interference feature. Default box: +7.4 dB at 30.4 Hz vs the damped lumped port, −1.1…−2.3 dB above 70 Hz; the NFR/end-correction mapping gives Fb 27.99–30.14 Hz, not one number. Bassbox stays a feasibility/F3/port-velocity screen. R17 port mapping fixed in the earlier commit.
@@ -8,7 +14,7 @@
 - **R10 closed** as the recorded policy (pins in every manifest; record, don't upgrade mid-study). **R15 closed:** [10-inch catalog re-verification](evidence/system_evidence_2026-11-19/DRIVER_CATALOG_REVERIFY_2026-11-21.md) against live FaitalPRO pages; every numeric field matches, no YAML edited. **R16 closed:** clearance gate + tests; the real two-body stage case records PASS at 0.017 m aabb gap.
 - **R11 closed:** [one-command real-BL lane](evidence/system_evidence_2026-11-19/REAL_BL_LANE_2026-11-21.md) (`tools/system/real_bl_lane.py`) exercised probe + stage + BL validate + 3-freq CPU solve (3/3 complete, 08:56–08:57 UTC); 8 hermetic tests.
 - Readiness registry: 26 declared cases (20 approved / 6 proposed; the new R9 precision case is proposed), R3/R6/R9/R10/R11/R12/R15/R16/R17 closed, R7 in progress, R1/R2/R5/R8/R13/R14 open. Focused suite 94 passed, 3 real-BL skips. No GPU was touched.
-- Census cleanup: removed the three empty aborted-case dirs (`ev_mesh_refine/...52652` and two `bl_ref_case` empties; no manifest, no project, no evidence). `docs/system_data` now exports 53 cases / 26 declared / 1 diagnostic (the pre-existing `two_way_80x50_700_pilot` manifest-payload mismatch). Full offline profile ran: **7 failures, all pre-existing other-lane items** (v11 registration/score_identities/dataset manifest, v8 registration, preflight history, B8 study_jobs Popen, scout40 queue count); no failure in a file this pass touched.
+- Census cleanup: removed the three empty aborted-case dirs (`ev_mesh_refine/...52652` and two `bl_ref_case` empties; no manifest, no project, no evidence). `docs/system_data` now exports 53 cases / 26 declared / 1 diagnostic (the pre-existing `two_way_80x50_700_pilot` manifest-payload mismatch); its README/INDEX snapshot (53 × 53; 21 solved / 29 staged / 3 refused / 0 invalid) was refreshed. Full offline profile ran: **7 failures, all pre-existing other-lane items** (v11 registration/score_identities/dataset manifest, v8 registration, preflight history, B8 study_jobs Popen, scout40 queue count); no failure in a file this pass touched.
 
 ## 2026-11-21 - System readiness R17 port mapping + R12 evidence byte-check
 

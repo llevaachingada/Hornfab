@@ -7,7 +7,7 @@
 - OPEN (R7): screen E_shape is optimistic on the box axis (0.024/0.0017 vs BEM 1.61/17.84 dB² on the common grid); confounded by the demo shape (R2), so the 9 dB² label stays heuristic. [Check](evidence/system_evidence_2026-11-19/SCREEN_ESHAPE_CALIBRATION_2026-11-21.md).
 - DONE (R10/R15/R16): upstream-drift policy recorded; live 10-inch vendor re-verification (all numeric fields match); clearance gate + tests + real PASS case.
 - DONE (R11): one-command real-BL lane exercised stage+validate+3-freq CPU solve (3/3 complete); 8 tests. [Evidence](evidence/system_evidence_2026-11-19/REAL_BL_LANE_2026-11-21.md).
-- DONE (census cleanup): removed three empty aborted-case dirs; export now 53 cases / 26 declared / 1 diagnostic (pre-existing `two_way_80x50_700_pilot` manifest mismatch). Full offline profile: 7 failures, all pre-existing other-lane items (v11 registration/score_identities/dataset manifest, v8 registration, preflight history, B8 `study_jobs` Popen, scout40 count); none in this pass's files.
+- DONE (census cleanup): removed three empty aborted-case dirs; export/README/INDEX now 53 cases / 26 declared / 21 solved / 29 staged / 3 refused / 0 invalid / 1 pre-existing pilot manifest mismatch. Full offline profile: 7 failures, all pre-existing other-lane items (v11 registration/score_identities/dataset manifest, v8 registration, preflight history, B8 `study_jobs` Popen, scout40 count); none in this pass's files.
 - OPEN: owner decisions 1–6; R1/R2/R5/R8/R13/R14 remain owner- or R1/R2-blocked. R7 needs a real-shape case and finer angular grid before recalibration.
 
 ## 2026-11-21 - System readiness R17/R12/R9

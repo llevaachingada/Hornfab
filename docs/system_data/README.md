@@ -150,8 +150,9 @@ Each study: `study_id`, `path` (repo-relative), `created_utc` (if the file recor
 * **Declared fidelity.** `COUPLED_VENTED_FEM_BEM_LEM` means the horn channel is an ideal
   normal-velocity source (no compression-driver absolute SPL) and the transducer shape is BL's
   provider default. Do not present these as absolute system SPL.
-* **Frequency coverage.** Solved runs start at 200 Hz (the short W3 smoke run at 250 Hz); nothing
-  below that is solved, so box tuning is not visible in the responses (`freq_min_hz` says so).
+* **Frequency coverage.** The wide grids start at 200 Hz (the short W3 smoke run at 250 Hz); the
+  separate LF overlay runs 20–200 Hz. Box tuning is visible only in the LF overlay, not in the
+  wide-grid responses (`freq_min_hz` says which band a row carries).
 * **Clearance is a recorded verdict, not a replay.** This tool never imports the Boundary Lab
   clearance module, so `clearance_status` is `not_recorded` unless a case wrote an explicit
   clearance block. In particular the 0 mm horn-offset staging case
@@ -159,15 +160,15 @@ Each study: `study_id`, `path` (repo-relative), `created_utc` (if the file recor
   the R16 "horn rear inside the enclosure front plane" finding lives in the readiness note/handoff,
   so the export reports `staged` + `not_recorded` rather than asserting a violation. The GUI can
   replay the geometry check; this portable export cannot and must not guess.
-* **Invalid rows are data.** Two `bl_ref_case` timestamped directories have no `manifest.json`; one
-  `two_way_80x50_700_pilot` manifest fails its recorded payload hash. They are exported as
-  `invalid` / `mismatch` with diagnostics so the gap is visible, not hidden.
-* **Snapshot census (regenerated on every run).** At the last generation (after the 2026-11-19
-  system-evidence queue plus the real-motor assembled and two refined-mesh cases):
-  **54 timestamped case dirs in 26 experiments** (51 with a manifest), `solved 19`, `staged 29`,
-  `refused 3`, `invalid 3`; readiness still declares 9 of the original cases; 6 screens in 6 files
-  over 2 study ids with 36 shortlist rows. The new `ev_*` experiments are `UNDECLARED` by design
-  (they are evidence runs, not readiness-registry cases).
+* **Invalid rows are data.** One `two_way_80x50_700_pilot` manifest fails its recorded payload
+  hash; it is exported as `mismatch` with a diagnostic so the gap is visible, not hidden. The
+  empty aborted-case directories were removed on 2026-11-21, so the bundle has no `invalid` rows.
+* **Snapshot census (regenerated on every run).** At the last generation (2026-11-21, after the
+  R9 float64 precision case and the empty-dir cleanup): **53 timestamped case dirs in 28
+  experiments** (all with a manifest; one payload hash mismatch), `solved 21`, `staged 29`,
+  `refused 3`, `invalid 0`; the readiness registry declares 26 of them (20 approved / 6 proposed),
+  27 are `UNDECLARED` by design; 6 screens in 6 files over 2 study ids with 36 shortlist rows.
+  The `ev_*` experiments are declared where read out and otherwise `UNDECLARED`.
 
 ## Determinism and safety
 
