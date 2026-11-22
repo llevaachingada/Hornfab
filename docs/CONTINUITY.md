@@ -1,5 +1,14 @@
 ﻿# CONTINUITY
 
+## 2026-11-21 - System closeout: R5a, R7a, WP6 ledger, backend hardening
+
+- **R5a done:** CPU `beat_cpu` 10 m / 5 deg equal-area Fibonacci balloon on assembled #2 (1650 points, 200/1000/2500 Hz), BL validate rc 0, solve 3/3 complete. Per-excitation DI: horn 1.86/7.46/12.12 dB, woofer 2.41/2.87/7.20 dB. R5b (declared observation standard) stays owner decision 5. [Evidence](evidence/system_evidence_2026-11-19/BALLOON_DI_POWER_2026-11-21.md).
+- **R7a done:** machine record reproduces screen 0.035843/0.035833 dB2 vs BEM 1.607249/17.837761 dB2 (factors 44.84x/497.80x), stamps `DEMO_SHAPE_CONFOUNDED_R2` and `THRESHOLD_UNCHANGED_9DB2`; R7b needs the real shape plus a 5 deg or finer grid. [Record](evidence/system_evidence_2026-11-19/SCREEN_ESHAPE_CALIBRATION_RECORD_2026-11-21.json).
+- **WP6 ledger:** deterministic screen->case join reports 54 cases / 22 solved, 3 matched shortlist rows, 0 solved two-channel pairs, and emits `FALSE_NEGATIVE_AUDIT_INSUFFICIENT_PAIRS`. [Evidence](evidence/system_evidence_2026-11-19/FUNNEL_LEDGER_2026-11-21.md).
+- **Backend:** B22/B26/B30 and F19 fixed; B18/B19/B28/B29 verified fixed; B20/B25/B27 accepted/documented; B21/B23/B24/F4 deferred to a design/owner pass. [Evidence](evidence/system_evidence_2026-11-19/BACKEND_CLOSEOUT_2026-11-21.md).
+- **Verification:** `tests/system` **512 passed, 7 skipped**; GUI/export neighbours **42 passed**; compileall OK; real BL CPU balloon solve 3/3. The full offline profile reached 99% with the same seven documented pre-existing failures before a 20-minute shell timeout; no scoped failure.
+- **State:** `docs/system_data` regenerated to 54 cases / 22 solved / 29 staged / 3 refused, 27 declared; readiness R5/R7 record R5a/R7a done with R5b/R7b still blocked. No GPU was used for this pass.
+
 ## 2026-11-21 — Sculpted home-900 V11 CMA pilot
 
 - `sculpted_xo900_cma_pilot_2026-11-21` launched detached at 08:57 EST. R3, K axial and Crowe k-home get up to 30 valid screen solves initially. Each may reach 60 after a matched finalist check and evidence of gains continuing after call 20. Verify admission requires at least 0.08 J gain, source-patch parity, and bounded loading and preferred-width regressions.

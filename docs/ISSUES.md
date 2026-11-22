@@ -1,5 +1,14 @@
 ﻿# ISSUES
 
+## 2026-11-21 - System closeout: R5a/R7a/WP6/backend
+
+- DONE (R5a): CPU 10 m / 5 deg equal-area balloon on assembled #2, 1650 points, 200/1000/2500 Hz, BL validate rc 0, solve 3/3; per-excitation DI horn 1.86/7.46/12.12 dB, woofer 2.41/2.87/7.20 dB. [Evidence](evidence/system_evidence_2026-11-19/BALLOON_DI_POWER_2026-11-21.md). R5b remains owner decision 5.
+- DONE (R7a): screen-vs-BEM E_shape machine record; screen 0.035843/0.035833 vs BEM 1.607249/17.837761 dB2, factors 44.84x/497.80x, threshold unchanged; R7b needs real shape (R2) plus a 5 deg grid. [Record](evidence/system_evidence_2026-11-19/SCREEN_ESHAPE_CALIBRATION_RECORD_2026-11-21.json).
+- DONE (WP6 ledger): deterministic screen->case join; 54 cases / 22 solved, 3 matched shortlist rows, 33 missing-case rows, 0 solved two-channel pairs; `FALSE_NEGATIVE_AUDIT_INSUFFICIENT_PAIRS`. [Evidence](evidence/system_evidence_2026-11-19/FUNNEL_LEDGER_2026-11-21.md).
+- DONE (B22/B26/B30/F19): stage overrides, optional DSP range check, dead stub removal, guarded meshio; B18/B19/B28/B29 verified fixed; B20/B25/B27 accepted/documented. [Evidence](evidence/system_evidence_2026-11-19/BACKEND_CLOSEOUT_2026-11-21.md).
+- OPEN (deferred): R5b/R7b/R1/R2/R8/R13/R14 and B21/B23/B24/F4 need owner decisions or a design/acoustic pass.
+- VERIFY: `tests/system` 512 passed / 7 skipped; GUI/export neighbours 42 passed; compileall OK; full profile reached 99% with the documented seven pre-existing failures before a 20-minute timeout, no scoped failure.
+
 ## 2026-11-21 - System readiness audit batch
 
 - DONE (R3/R17): bassbox model-difference audit complete; seed-box offset attributed to demo-shape Sd deficit 4.59 dB, default-box 30 Hz peak to lossless port vs Ql/Qp; NFR/end-correction Fb range 27.99–30.14 Hz. Bassbox remains a screen. [Audit](evidence/system_evidence_2026-11-19/BASSBOX_MODEL_AUDIT_2026-11-21.md).
