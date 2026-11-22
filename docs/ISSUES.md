@@ -1,5 +1,18 @@
 ﻿# ISSUES
 
+## 2026-11-22 - Metric-composite BO Pass 1 (feature branch, not merged)
+
+- DONE (Pass 1): isolated worktree `C:/Users/hunte/Hrns/hornfab-metric-bo-wt` on `feat/metric-aware-bo`, based on committed `a30f2de9`; canonical checkout untouched. ADR `docs/research/metric_bo_2026-11-22/ADR_metric_composite_v1.md`.
+- DONE: v10/v11 contribution extractors in canonical J units with schema hashes, canonical-scorer parity, optional-term inclusion, penalty/missing/NAN-fill/CD-status refusals, and no residual-derived component.
+- DONE: whole-corpus cohort selection (identity enforcement, physical/cache dedup, exact X validation, 64 lowest-J + deterministic maximin under `n_max=256`), immutable `metric-training-v1` artifact with checksum; `study_cohort` limit-before-selection defect fixed; `build_native_training_set` limit is now a selection cap.
+- DONE: independent-output `ModelListGP`, composite `qLogNEI` over `-sum(component samples)`, and q=1 finite-pool proposal with prediction/provenance recording. Synthetic CPU float64 fit/proposal evidence recorded in CONTINUITY.
+- OPEN (Pass 2): wire the five frozen interfaces into a production study worker; register/add a production policy only after that review. No production policy or worker is added in Pass 1.
+- OPEN (Pass 2): physical-metric research model and real-corpus `study_cohort`/GP fit. These require a separately authorized pass; Pass 1 ran no historical replay/rescore, real-data fit, full-dataset cohort, or BEM/GPU solve.
+- OPEN (model limitation): independent outputs do not model inter-component correlation; `j_sd=sqrt(sum(var))` is an independence assumption. Constant outputs are parked flat and add no directional signal.
+- OPEN (provenance): a standard `CandidatePool` carries no `bounds_hash`; the proposal policy records the explicit value (or empty). Pass 2 should supply the artifact/pool bounds identity end to end.
+- OPEN (merge): branch is pushed as a feature branch only; no merge into `main` or the canonical checkout. The worktree is the owner-authorized exception, not a new default workflow.
+- NOTE: full offline profile was not run in this pass; the focused BO regression in the canonical `.venv` was 216 passed / 26 skipped, and the isolated bayes-venv focused suite was 81 passed / 3 skipped (pre-existing missing native archive artifacts).
+
 ## 2026-11-21 - System closeout: R5a/R7a/WP6/backend
 
 - DONE (R5a): CPU 10 m / 5 deg equal-area balloon on assembled #2, 1650 points, 200/1000/2500 Hz, BL validate rc 0, solve 3/3; per-excitation DI horn 1.86/7.46/12.12 dB, woofer 2.41/2.87/7.20 dB. [Evidence](evidence/system_evidence_2026-11-19/BALLOON_DI_POWER_2026-11-21.md). R5b remains owner decision 5.

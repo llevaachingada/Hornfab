@@ -62,6 +62,8 @@ per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 freq
 
 [FAV split-plane proposals (2026-11-20)](research/typologies/FAV_SPLIT_PLANE_PROPOSALS_2026-11-20.md): proposal dossier from today's measured findings: P1 split-plane OS-SE (`g_k_v`, `g_s_v`, H kept pure OS), P2 Keele-in-V exponential-throat hybrid (gated), P3 mouth termination, P4 2-inch + mild k_V; combination lanes `favM_*` queued.
 
+[Metric-composite BO Pass 1 ADR (2026-11-22)](research/metric_bo_2026-11-22/ADR_metric_composite_v1.md): frozen `metric-training-v1` artifact and `metric_composite_v1` policy; v10/v11 contribution schemas in `J` units, whole-corpus 64-lowest-J + maximin selection under the 256 training cap, independent-output `ModelListGP`, and composite `qLogNEI` over `-sum(component samples)`. Pass 1 only: synthetic fixtures, no historical rescore/replay, no BEM, no production wiring.
+
 [B1 readiness + zero-dimension truth fix (2026-11-18, WP 2.2/D7)](evidence/b1_readiness_2026-11-18/README.md):
 B1/B1f lines checked (kind: command, safe), search/CLI/night dry-run now refuse a zero-free-dimension
 search, the feasibility table, the ext-throat exclusion finding and the queue-ready batches for GPU approval.

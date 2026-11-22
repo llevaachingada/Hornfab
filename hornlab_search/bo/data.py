@@ -491,7 +491,9 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
 
     payload = json.loads(Path(scores_json).read_text(encoding="utf-8"))
     all_rows = list(payload.get("rows") or [])
-    rows = all_rows if limit is None else all_rows[:int(limit)]
+    # ``limit`` is a training-selection cap, never a raw-discovery cap: every scored row is
+    # validated/deduplicated before :func:`build_training_set` applies it as ``n_max``.
+    rows = all_rows
     expected_config = str((payload.get("cohort") or {}).get("native_config")
                           or config_path.stem)
     brief_block = payload.get("brief") if isinstance(payload.get("brief"), Mapping) else {}
@@ -768,7 +770,8 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
                  "independent re-derivation of their source files."),
     }
 
-    ts = build_training_set(observations, encoding=projection)
+    ts = build_training_set(observations, encoding=projection,
+                            n_max=DEFAULT_N_MAX if limit is None else int(limit))
     if policy_status == "incompatible":
         ts = replace(ts, status="incompatible_cohort")
     elif policy_status == "capability_missing":
@@ -799,8 +802,8 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
             "n_min": ts.n_min,
             "n_max": ts.n_max,
             "elite_n": DEFAULT_ELITE_N,
-            "cap": DEFAULT_N_MAX,
-            "rule": "64 lowest-J + 192 deterministic maximin when above the cap; "
+            "cap": ts.n_max,
+            "rule": "64 lowest-J + deterministic maximin when above the cap; "
                     "ties by observation/design ID",
         },
     }
