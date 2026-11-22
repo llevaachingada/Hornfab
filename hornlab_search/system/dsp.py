@@ -63,16 +63,20 @@ def _frequency_axis(freqs_hz) -> np.ndarray:
 
 
 def filter_bank(point: contracts.DspPoint,
-                freqs_hz) -> dict[str, np.ndarray]:
+                freqs_hz,
+                ranges: contracts.DspRanges | None = None) -> dict[str, np.ndarray]:
     """Return the complex drive filters for one :class:`contracts.DspPoint`.
 
     ``{"horn": H_horn, "woofer": H_woofer}`` with each value a ``(nf,)`` ``complex128`` array
     at ``freqs_hz``. Both channels are assembled exclusively from :mod:`hornlab_search.meh.dsp`;
     this function adds no phase, delay or propagation of its own.
 
-    The point is NOT range-checked here because :class:`contracts.DspPoint` carries no ranges;
-    callers validate a candidate point with :func:`validate_dsp_point` before assembly.
+    :class:`contracts.DspPoint` carries no ranges of its own. Pass ``ranges`` to have the point
+    range-checked with :func:`validate_dsp_point` before assembly; the default ``None`` keeps the
+    historical contract (callers validate candidates themselves).
     """
+    if ranges is not None:
+        validate_dsp_point(point, ranges)
     f = _frequency_axis(freqs_hz)
     order = _order(point.crossover_type)
     fc = float(point.xo_hz)

@@ -1127,6 +1127,9 @@ class SeedResult:
 def _nondominated(rows: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
     from hornlab_search.system import score
 
+    # O(n^2) by design: the screen's kept set is bounded (<= ~126 rows on the recorded
+    # studies). A dominance tree/sort is only worth the extra semantics risk if that breadth
+    # grows by an order of magnitude; the front set is what callers consume.
     directions = dict(SEED_AXIS_DIRECTIONS)
     front: list[dict[str, Any]] = []
     for row in rows:

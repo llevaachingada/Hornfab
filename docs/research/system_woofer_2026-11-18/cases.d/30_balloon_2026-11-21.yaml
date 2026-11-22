@@ -1,0 +1,22 @@
+# R5a 10 m equal-area balloon DI/power control (2026-11-21), registry v2.
+#
+# This is a diagnostic observation of the assembled #2 source, not a new acoustic ranking.
+# The project is the real-motor assembled #2 project (real 12PR300 T/S, BL demo transducer
+# shape) with project_preferences enabling the sphere at 10 m / 5 deg.  Per-excitation DI and
+# power are reported; the two channel references are never summed (R1/decision 3) and this is
+# not a declared far-field/listening-window standard (R5b/decision 5).
+cases:
+  - key: ev_balloon_di/20261121T140048Z-balloon-62680-49358be1
+    ref: "R5A-BALLOON"
+    gate: R5a 10 m equal-area balloon DI/power (200/1000/2500 Hz)
+    evidence: system_evidence_2026-11-19/BALLOON_DI_POWER_2026-11-21.md
+    fidelity: COUPLED_VENTED_FEM_BEM_LEM
+    motor: real
+    transducer_shape: demo
+    horn_source: ideal_velocity
+    status: proposed
+    proposed_by: orchestrator 2026-11-21 (readiness R5a)
+    note: >-
+      10 m sphere, 5 deg (1650 equal-area Fibonacci points), three frequencies; BL validate
+      rc 0, solve 3/3 complete. Per-excitation DI/power only; single mesh, demo shape, no
+      declared far-field standard.

@@ -106,6 +106,40 @@ def test_build_stage_spec_uses_provider_defaults_and_off_symmetry(tmp_path: Path
     assert "horn" not in spec
 
 
+def test_build_stage_spec_records_the_numeric_overrides(tmp_path: Path) -> None:
+    root = fake_bl_root(tmp_path)
+    overrides = {"width_m": 0.30, "height_m": 0.44}
+    spec = S.build_stage_spec(root, overrides, case_dir=tmp_path / "case")
+    # ``source`` stays the merged view; ``overrides`` is the explicit caller request (B22).
+    assert spec["overrides"] == overrides
+    assert spec["source"]["width_m"] == 0.30 and spec["source"]["height_m"] == 0.44
+    assert spec["source"]["port_nfr"] == _DEFAULTS["port_nfr"]
+
+
+def test_staged_manifest_detail_records_the_overrides(tmp_path: Path,
+                                                      monkeypatch: pytest.MonkeyPatch) -> None:
+    """The staged manifest detail must carry the same overrides as the spec (B22).
+
+    The BL-side runner is mocked out: this exercises ``_stage``'s manifest assembly only.
+    """
+    root = fake_bl_root(tmp_path)
+    seen: dict[str, Any] = {}
+
+    def fake_execute(argv, timeout_s, cancel_path):  # noqa: ANN001 - mirrors _execute
+        seen["argv"] = list(argv)
+        return 1, ["[adapter] mocked runner refusal"]
+
+    monkeypatch.setattr(S, "_execute", fake_execute)
+    result = S.stage_reference_project(root, {"height_m": 0.44}, store_root=tmp_path)
+    assert result.ok is False and result.manifest_path is not None
+    assert seen["argv"] and "runner_stage.py" in seen["argv"][-2]
+    payload = provenance.load_manifest(result.manifest_path)["payload"]
+    assert payload["spec"]["overrides"] == {"height_m": 0.44}
+    assert payload["detail"]["overrides"] == {"height_m": 0.44}
+    assert payload["detail"]["overrides"] == payload["spec"]["overrides"]
+    assert payload["spec"]["source"]["height_m"] == 0.44
+
+
 def test_stage_reference_dry_run_returns_spec_without_executing(tmp_path: Path) -> None:
     root = fake_bl_root(tmp_path)
     result = S.stage_reference_project(root, {"height_m": 0.44}, store_root=tmp_path, run_now=False)

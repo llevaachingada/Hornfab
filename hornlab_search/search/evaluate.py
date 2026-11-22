@@ -57,7 +57,7 @@ from ..objective.scalar_v6 import V6Params, objective_v6
 from ..objective.scalar_v7 import V7Params, objective_v7
 from ..objective.scalar_v9 import V9Params, objective_v9
 from ..objective.scalar_v10 import V10Params, objective_v10
-from ..objective.scalar_v11 import V11Params, objective_v11
+from ..objective.scalar_v11 import CD_STATUS_BALLOON, V11_CD_TERM_KEYS, V11Params, objective_v11
 from ..objective.versions import SUPPORTED_OBJECTIVE_VERSIONS
 from ..solve import cache as solve_cache
 from ..solve.base import stack_responses, theta_deg_from_dirs
@@ -1005,6 +1005,18 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
         st["kind"], st["err"] = KIND_EXC, f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
         log.error("evaluation %s raised: %s", dh, st["err"][:2000])
 
+    gates = (getattr(cfg, "brief", None) or {}).get("gates") or {}
+    if not st["kind"] and gates.get("v11_full_balloon"):
+        terms = st["terms"]
+        response = st["resp"]
+        if (ctx.objective_version != 11 or not np.isfinite(st["J"]) or st["metrics"].di_source != "balloon"
+                or terms.get("cd_status_code") != CD_STATUS_BALLOON
+                or not all(np.isfinite(terms.get(key, np.nan)) for key in V11_CD_TERM_KEYS)
+                or any(getattr(response, key) is None for key in ("p_h", "p_v", "p_balloon", "z_throat"))):
+            st["kind"] = KIND_METRICS
+            st["err"] = ("required complete complex V11 full-balloon response "
+                         f"(version={ctx.objective_version}, CD status={terms.get('cd_status_code')}, "
+                         f"DI source={st['metrics'].di_source})")
     kind = st["kind"]
     if kind in DETERMINISTIC_KINDS and not st.get("fail_cached") and not st.get("no_marker"):
         marker = _failure_marker(ctx, key)

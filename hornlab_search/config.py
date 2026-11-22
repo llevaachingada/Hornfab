@@ -315,7 +315,7 @@ class ConfigError(ValueError):
 #: B.5 (day 2026-11-12): brief ``gates:`` block. ``round_throat`` (default false) opts every
 #: objective version into the C4 round-throat refusal that v7 always applies; v7 itself never
 #: needs the key. Extendable later with more gate names; unknown names are refused.
-GATE_KEYS = ("round_throat",)
+GATE_KEYS = ("round_throat", "v11_full_balloon")
 
 
 def _validate_gates_block(block, where: str) -> dict:
@@ -326,9 +326,9 @@ def _validate_gates_block(block, where: str) -> dict:
     if unknown:
         raise ConfigError(f"{where}: gates unknown key(s) {sorted(unknown)} "
                           f"(allowed: {list(GATE_KEYS)})")
-    if "round_throat" in block and not isinstance(block["round_throat"], bool):
-        raise ConfigError(f"{where}: gates.round_throat must be true or false, "
-                          f"got {block['round_throat']!r}")
+    for key, value in block.items():
+        if not isinstance(value, bool):
+            raise ConfigError(f"{where}: gates.{key} must be true or false, got {value!r}")
     return block
 
 

@@ -12,6 +12,10 @@ This tool is the narrow, auditable bridge for that:
   hash, Boundary Lab root and authorization record;
 * optional ``--motor-patch`` applies the same ``component_parameters`` fields used by the sanctioned
   motor staging path to the copied project, then runs BL validate before solving;
+* optional ``--project-preferences`` / ``--balloon-deg`` merge keys into the copied project's
+  top-level ``project_preferences`` block (other keys are preserved), write the copied project
+  deterministically and record the applied patch plus its sha256 in the derived manifest; BL's own
+  validate runs before any ``--solve``;
 * with ``--solve`` it invokes the existing authorized ``reference.solve`` path on the new case.
 
 It owns no acoustics and no solver logic.  ``--dry-run`` prints the exact plan and writes nothing.
@@ -44,6 +48,13 @@ if str(ROOT) not in sys.path:
 
 from hornlab_search.system import provenance  # noqa: E402
 from hornlab_search.system import reference  # noqa: E402
+from hornlab_search.system.contracts import canonical_json  # noqa: E402
+
+#: Boundary Lab 0.5.0 clamps the balloon sampling resolution to this inclusive range
+#: (project preferences: ``balloon_angle_precision_deg``). Outside it BL silently clamps;
+#: record the refusal here instead of reporting a precision the solve did not use.
+BALLOON_DEG_MIN = 0.5
+BALLOON_DEG_MAX = 15.0
 
 
 def _sha256(path: Path) -> str:
@@ -113,6 +124,42 @@ def _bl_root(payload: Mapping[str, Any]) -> str | None:
     return str(parsed) if parsed else None
 
 
+def _project_preferences_patch(args: argparse.Namespace) -> tuple[dict[str, Any] | None,
+                                                                  str | None, str | None]:
+    """Build the ``project_preferences`` merge patch from the CLI options.
+
+    Returns ``(patch, patch_file, patch_file_sha256)``. ``--project-preferences`` supplies a
+    JSON object of keys; ``--balloon-deg`` is a convenience that adds BL's two balloon keys
+    (and wins if the file also sets them). ``None`` means "copy the project byte-identically".
+    """
+    if args.balloon_deg is not None:
+        value = float(args.balloon_deg)
+        if not (BALLOON_DEG_MIN <= value <= BALLOON_DEG_MAX):
+            raise SystemExit(
+                f"--balloon-deg {value:g} is outside Boundary Lab's "
+                f"{BALLOON_DEG_MIN:g}-{BALLOON_DEG_MAX:g} deg clamp")
+    patch: dict[str, Any] = {}
+    patch_file: str | None = None
+    patch_file_sha256: str | None = None
+    if args.project_preferences:
+        path = Path(args.project_preferences).resolve()
+        if not path.is_file():
+            raise SystemExit(f"project preferences patch not found: {path}")
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except ValueError as exc:
+            raise SystemExit(f"project preferences patch is not valid JSON: {exc}") from None
+        if not isinstance(payload, Mapping):
+            raise SystemExit("project preferences patch must be a JSON object")
+        patch.update(dict(payload))
+        patch_file = str(path)
+        patch_file_sha256 = _sha256(path)
+    if args.balloon_deg is not None:
+        patch["spherical_sampling_enabled"] = True
+        patch["balloon_angle_precision_deg"] = float(args.balloon_deg)
+    return (patch or None), patch_file, patch_file_sha256
+
+
 def _plan(args: argparse.Namespace) -> dict[str, Any]:
     store = Path(args.store).resolve()
     source = _resolve_source(args.source_case, store)
@@ -131,6 +178,7 @@ def _plan(args: argparse.Namespace) -> dict[str, Any]:
         if not isinstance(patch_payload, Mapping) or not isinstance(
                 patch_payload.get("component_parameters"), Mapping):
             raise SystemExit("motor patch must contain a 'component_parameters' object")
+    preferences_patch, preferences_file, preferences_file_sha = _project_preferences_patch(args)
     return {
         "source_case": str(source),
         "source_manifest_sha256": _sha256(source / "manifest.json"),
@@ -143,6 +191,13 @@ def _plan(args: argparse.Namespace) -> dict[str, Any]:
         "excitation_port_ids": list(loaded.excitation_port_ids),
         "motor_patch": None if motor_patch is None else str(motor_patch),
         "motor_patch_sha256": None if motor_patch is None else _sha256(motor_patch),
+        "project_preferences_patch": preferences_patch,
+        "project_preferences_patch_file": preferences_file,
+        "project_preferences_patch_file_sha256": preferences_file_sha,
+        "project_preferences_patch_sha256": (
+            None if preferences_patch is None
+            else hashlib.sha256(canonical_json(preferences_patch).encode()).hexdigest()),
+        "balloon_deg": None if args.balloon_deg is None else float(args.balloon_deg),
         "experiment_id": args.experiment_id,
         "tag": args.tag,
         "solve": bool(args.solve),
@@ -177,6 +232,15 @@ def main(argv: list[str] | None = None) -> int:
                         help="optional {component_parameters: {id: {...}}} patch applied to the "
                              "copied project (the same fields BL's component_parameters patch uses); "
                              "the derived case is validated before solving")
+    parser.add_argument("--project-preferences", default=None, metavar="JSON",
+                        help="optional JSON object merged into the copied project's top-level "
+                             "project_preferences block (other keys preserved); the project is "
+                             "rewritten deterministically and the derived case is validated before "
+                             "solving")
+    parser.add_argument("--balloon-deg", type=float, default=None, metavar="FLOAT",
+                        help="convenience for --project-preferences "
+                             "{spherical_sampling_enabled: true, balloon_angle_precision_deg: "
+                             "FLOAT}; refused outside 0.5-15 deg (BL's clamp)")
     parser.add_argument("--dry-run", action="store_true", help="print the plan; write nothing")
     args = parser.parse_args(argv)
     # The queue file deliberately carries no standing authorization.  The owner/operator sets
@@ -217,27 +281,46 @@ def main(argv: list[str] | None = None) -> int:
     shutil.copyfile(request, case / "request.json")
 
     patched_components: list[str] = []
-    if args.motor_patch:
-        patch_path = Path(plan["motor_patch"])
-        patch_payload = json.loads(patch_path.read_text(encoding="utf-8"))
+    preferences_patch = plan["project_preferences_patch"]
+    project_rewritten = bool(args.motor_patch) or preferences_patch is not None
+    if project_rewritten:
         case_project = json.loads((case / "case.blab.json").read_text(encoding="utf-8"))
-        components = (case_project.get("physical_system") or {}).get("components") or []
-        by_id = {str(c.get("id")): c for c in components if isinstance(c, Mapping)}
-        for component_id, values in patch_payload["component_parameters"].items():
-            component = by_id.get(str(component_id))
-            if component is None:
+        if args.motor_patch:
+            patch_path = Path(plan["motor_patch"])
+            patch_payload = json.loads(patch_path.read_text(encoding="utf-8"))
+            components = (case_project.get("physical_system") or {}).get("components") or []
+            by_id = {str(c.get("id")): c for c in components if isinstance(c, Mapping)}
+            for component_id, values in patch_payload["component_parameters"].items():
+                component = by_id.get(str(component_id))
+                if component is None:
+                    raise SystemExit(
+                        f"motor patch component {component_id!r} is not in the copied project; "
+                        f"available: {sorted(by_id)}")
+                params = component.setdefault("parameters", {})
+                if not isinstance(params, dict):
+                    raise SystemExit(f"component {component_id!r} parameters are not an object")
+                params.update(dict(values))
+                patched_components.append(str(component_id))
+            shutil.copyfile(patch_path, case / "motor_patch.json")
+        if preferences_patch is not None:
+            existing = case_project.get("project_preferences", {})
+            if existing is None:
+                existing = {}
+            if not isinstance(existing, Mapping):
                 raise SystemExit(
-                    f"motor patch component {component_id!r} is not in the copied project; "
-                    f"available: {sorted(by_id)}")
-            params = component.setdefault("parameters", {})
-            if not isinstance(params, dict):
-                raise SystemExit(f"component {component_id!r} parameters are not an object")
-            params.update(dict(values))
-            patched_components.append(str(component_id))
+                    "copied project's project_preferences is not a JSON object; refusing to "
+                    "overwrite it with a merge patch")
+            merged = dict(existing)
+            merged.update(dict(preferences_patch))
+            case_project["project_preferences"] = merged
+            if plan["project_preferences_patch_file"]:
+                shutil.copyfile(Path(plan["project_preferences_patch_file"]),
+                                case / "project_preferences_patch.json")
+        # deterministic write: sorted keys, two-space indent, LF, one trailing newline
         (case / "case.blab.json").write_text(
             json.dumps(case_project, indent=2, sort_keys=True) + "\n",
             encoding="utf-8", newline="\n")
-        shutil.copyfile(patch_path, case / "motor_patch.json")
+    derived_project_sha256 = _sha256(case / "case.blab.json")
     # BL generator documents store mesh paths RELATIVE to the project's directory.  A byte copy
     # of only the project would leave those paths dangling in the new case, so copy the
     # project's bl_output tree when present.  Imported absolute horn meshes are read-only and
@@ -262,11 +345,21 @@ def main(argv: list[str] | None = None) -> int:
         "excitation_port_ids": plan["excitation_port_ids"],
         "authorized_by": plan["authorized_by"],
         "notes": args.notes,
-        "derivation": "project and request copied byte-identically; source hashes recorded",
+        "derivation": ("project and request copied byte-identically; source hashes recorded"
+                       if not project_rewritten else
+                       "project copied then rewritten deterministically after the recorded "
+                       "patches; source hashes recorded"),
         "copied_artifacts": copied_artifacts,
-        "motor_patch_file": None if args.motor_patch else None,
+        "derived_project_sha256": derived_project_sha256,
+        "motor_patch_file": "motor_patch.json" if args.motor_patch else None,
         "motor_patch_sha256": plan["motor_patch_sha256"],
         "motor_patch_component_ids": patched_components,
+        "project_preferences_patch_file": plan["project_preferences_patch_file"],
+        "project_preferences_patch_file_sha256":
+            plan["project_preferences_patch_file_sha256"],
+        "project_preferences_patch": plan["project_preferences_patch"],
+        "project_preferences_patch_sha256": plan["project_preferences_patch_sha256"],
+        "balloon_deg": plan["balloon_deg"],
     }
     provenance.write_manifest(case, payload)
     print(f"evidence_case: prepared {case}")
@@ -275,7 +368,7 @@ def main(argv: list[str] | None = None) -> int:
     if not args.solve:
         return 0
 
-    if args.motor_patch:
+    if project_rewritten:
         # The copied project was edited, so BL's own validate is the authority before any solve.
         try:
             validation = reference.validate(case, case / "request.json")
@@ -286,7 +379,7 @@ def main(argv: list[str] | None = None) -> int:
             json.dumps(validation.as_dict(), indent=2, sort_keys=True) + "\n",
             encoding="utf-8", newline="\n")
         if not validation.valid:
-            print("evidence_case: BL validate refused the motor-patched project", file=sys.stderr)
+            print("evidence_case: BL validate refused the patched project", file=sys.stderr)
             return 1
 
     from hornlab_search.search.gpulock import GpuBusyError, cpu_lane_lock

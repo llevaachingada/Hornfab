@@ -1,0 +1,83 @@
+name: sculpted900_r3
+family: FREEFORM
+brief_file: ../../briefs/home_xo900_2026-11-20/room_landscape_80x50_900_hf1440_v11cd_sculpted_cma.yaml
+generator:
+  name: grid
+  rows:
+    type: sculpted_rosse_meridians_v1
+    body:
+      width_mm: 575.4637409703
+      height_mm: 442.9517420413
+      exponent: 6.9356460581
+      angle_deg:
+        h: 37.5
+        d: 28.0
+        v: 20.0
+      apex_shift:
+        h: 0.85
+        d: 0.85
+        v: 0.85
+      apex_radius:
+        h: 0.2820232949
+        d: 0.2820232949
+        v: 0.2820232949
+      bend:
+        h: 0.0002388511
+        d: 0.0002388511
+        v: 0.0002388511
+      tmax: 0.9669894771
+      k: 2.4794610419
+      q: 3.0
+    finish_start:
+      h: 0.76
+      d: 0.76
+      v: 0.76
+  n_phi: 49
+  n_s: 96
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+  size_policy: report_only
+seed_params:
+  g_sweep: 0.0
+  g_diagonal_delta_deg: 0.0
+  g_aperture_scale: 1.0
+bounds:
+  g_sweep:
+    lo: -1.0
+    hi: 1.5
+  g_diagonal_delta_deg:
+    lo: -2.0
+    hi: 2.0
+  g_aperture_scale:
+    lo: 0.9
+    hi: 1.1
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 8900
+  dof_cap_verify: 8900
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 1024
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.12
+  seed: 1234
+  budget: 60
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 120
+  error_policy: retry_same_then_stop
+description: 60 valid home-900 V11 exploratory evaluations. 30-valid first checkpoint.

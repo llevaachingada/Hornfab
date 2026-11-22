@@ -7,6 +7,7 @@ and drives ``gui/data_hw.hw_mesh``. Nothing here touches the network, a solver o
 from __future__ import annotations
 
 import json
+import logging
 import sys
 from pathlib import Path
 
@@ -226,3 +227,34 @@ def test_mesh_payload_is_json_serialisable(env) -> None:
         assert out["tris"] and all(isinstance(i, int) for i in out["tris"])
         assert isinstance(out["triangle_count"], int) and isinstance(out["decimated"], bool)
         assert out["units"] == "mm"
+
+
+def test_mesh_reader_without_meshio_raises_a_clear_error(
+        env, monkeypatch: pytest.MonkeyPatch) -> None:
+    """No meshio must refuse by name, never return an empty mesh (F19)."""
+    root, store = env
+    case = store / "system" / "bl_horn" / KEY.split("/")[1]
+    exterior = case / "bl_output" / "vented_x" / "exterior.msh"
+    HW._CACHE.clear()
+    monkeypatch.setitem(sys.modules, "meshio", None)   # makes ``import meshio`` raise ImportError
+
+    with pytest.raises(RuntimeError) as excinfo:
+        HW._mesh_arrays(exterior)
+    assert "meshio" in str(excinfo.value) and "exterior.msh" in str(excinfo.value)
+    # The endpoint-facing reader refuses the same way instead of crashing obscurely.
+    with pytest.raises(RuntimeError) as excinfo:
+        HW.hw_mesh(root, store, KEY, "box")
+    assert "meshio" in str(excinfo.value)
+
+
+def test_geometry_without_meshio_degrades_to_none_with_a_reason(
+        env, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture) -> None:
+    """A missing meshio must not crash the case endpoint; 2-D geometry degrades to None (F19)."""
+    root, store = env
+    case = store / "system" / "bl_horn" / KEY.split("/")[1]
+    monkeypatch.setitem(sys.modules, "meshio", None)
+
+    with caplog.at_level(logging.WARNING, logger=HW.__name__):
+        assert HW._geometry(store, case, {"parent": None}, None) is None
+    assert any("meshio" in record.getMessage() for record in caplog.records)
+

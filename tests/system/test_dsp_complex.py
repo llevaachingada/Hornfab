@@ -120,6 +120,22 @@ def test_delay_convention_is_exp_minus_j_omega_tau_on_the_horn_path() -> None:
     assert np.all(np.isfinite(bank["woofer"]))
 
 
+def test_filter_bank_validates_the_point_when_ranges_are_given() -> None:
+    # An out-of-range point is refused by the explicit ranges gate (B26)...
+    with pytest.raises(C.SchemaError, match="xo_hz"):
+        sys_dsp.filter_bank(_point(xo_hz=2000.0), FREQS, ranges=C.DspRanges())
+    # ...while the same point still assembles without ranges (the historical contract).
+    bank = sys_dsp.filter_bank(_point(xo_hz=2000.0), FREQS)
+    assert set(bank) == {"horn", "woofer"}
+    assert np.all(np.isfinite(bank["horn"])) and np.all(np.isfinite(bank["woofer"]))
+
+
+def test_filter_bank_accepts_an_in_range_point_with_ranges() -> None:
+    bank = sys_dsp.filter_bank(_point(), FREQS, ranges=C.DspRanges())
+    assert set(bank) == {"horn", "woofer"}
+    assert bank["horn"].dtype == np.complex128 and bank["woofer"].dtype == np.complex128
+
+
 def test_unknown_crossover_type_raises_schema_error() -> None:
     with pytest.raises(C.SchemaError, match="crossover_type"):
         sys_dsp.filter_bank(_point(crossover_type="LR6"), FREQS)

@@ -1,0 +1,35 @@
+# CPU registration reuses measured BEM responses. Only the admitted native probe starts a solve.
+night: sculpted_xo900_acoustic_discovery_2026-11-21
+lane: gpu
+watchdog: false
+jobs:
+- id: register_R2_6
+  kind: command
+  timeout_s: 120
+  argv: [.venv/Scripts/python.exe, -u, tools/geometry/solve_sculpted_v11.py, R2_6, --import-measured]
+- id: register_R3_6
+  kind: command
+  timeout_s: 120
+  argv: [.venv/Scripts/python.exe, -u, tools/geometry/solve_sculpted_v11.py, R3_6, --import-measured]
+- id: register_K1_6
+  kind: command
+  timeout_s: 120
+  argv: [.venv/Scripts/python.exe, -u, tools/geometry/solve_sculpted_v11.py, K1_6, --import-measured]
+- id: register_K2_6
+  kind: command
+  timeout_s: 120
+  argv: [.venv/Scripts/python.exe, -u, tools/geometry/solve_sculpted_v11.py, K2_6, --import-measured]
+- id: register_R1_6
+  kind: command
+  timeout_s: 120
+  argv: [.venv/Scripts/python.exe, -u, tools/geometry/solve_sculpted_v11.py, R1_6, --import-measured]
+- id: register_FAV
+  kind: command
+  timeout_s: 120
+  argv: [.venv/Scripts/python.exe, -u, tools/geometry/solve_sculpted_v11.py, FAV, --import-measured]
+- id: native_r2_tmax_096
+  kind: command
+  timeout_s: 1800
+  env: {HORNLAB_GPU_LOCK: refuse}
+  argv: [.venv/Scripts/python.exe, -u, tools/geometry/solve_sculpted_v11.py, R2_tmax_0.96, --solve, --native-manifest, scratch/sculpted_v11_roll/manifest.json]
+

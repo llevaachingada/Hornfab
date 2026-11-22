@@ -2,6 +2,9 @@
 // Three.js r160 mesh viewer for quarter/half-model horn meshes.
 // Mirrors quarter models across x=0 and y=0, half models ('14' x-half / '12' y-half) across their
 // one symmetry plane, to reconstruct the full horn.
+// Draws two line overlays over the shaded surface: the sparse dihedral ridgelines (default on) and,
+// on request, every triangle edge of the tessellation itself (buildMeshEdgeGeometry, default off —
+// the same toggle is persisted for every 3D surface and read back by hw3d.js and sandbox.js).
 // Falls back to a 2D wall-profile SVG if the CDN import fails.
 
 let THREE, OrbitControls;
@@ -80,6 +83,20 @@ const WIRE_COLOR = 0xf4f7f9;        // near-white ridgelines
 const HEMI_GROUND_COLOR = 0x8fa3ad; // hemisphere shadow-side tint
 const LIGHT_COLOR = 0xffffff;
 
+// Mesh-net styles: one enum shared by every 3D horn surface via the look-extra key. "off" = solid
+// only; every colour turns the net on. These are deliberate LITERAL colours, not theme tokens:
+// the net must read the same in the light and dark themes (theme tokens made "black" render
+// near-white on dark). Opacities keep the net behind the topography — a quiet background texture.
+const MESH_NET_MODES = ["off", "white", "black", "gray"];
+const MESH_NET_LINE_WIDTH = 1.0;    // CSS pixels (LineMaterial worldUnits:false)
+const MESH_NET_FADE_MIN = 1.5;      // projected segment length (CSS px) at/below which the net fades out
+const MESH_NET_FADE_MAX = 5.0;      // at/above which it draws at full colour
+const MESH_NET_STYLES = {
+  white: { hex: WIRE_COLOR,  opacity: 0.22 },                        // 0xf4f7f9
+  black: { hex: 0x14181b,    opacity: 0.22 },
+  gray:  { hex: 0x8a949a,    opacity: 0.28 },
+};
+
 // Per-surface material + rig mix. `wireOpacity` is the "on" opacity *before* RIDGE_OPACITY_GAIN
 // (matte is deliberately "off-ish": calmer lines); "thin" starts at 0.12 and takes the same gain,
 // "off" removes the LineSegments.
@@ -98,10 +115,14 @@ const RENDER_PRESETS = {
               light: { hemi: 0.16, key: 1.9, fill: 0.12, rim: 0.45 } },
 };
 
-// ── Look extras (contours + light angle) ─────────────────────────────────────
+// ── Look extras (contours + light angle + mesh edges) ────────────────────────
 // Kept in their OWN storage key so the three-field render prefs above stay byte-identical for
 // every existing capture/test. contours: "off"|"on" (iso-depth lines, readable slope for gentle
-// changes); angle: 0..345 deg, spins the key/fill/rim rig about the horn axis (raking light).
+// changes); angle: 0..345 deg, spins the key/fill/rim rig about the horn axis (raking light);
+// mesh: "off"|"white"|"black"|"gray" (every triangle edge of the shaded mesh, in that colour,
+// drawn over the surface — the tessellation the material would otherwise hide; legacy "on" reads
+// as "gray"). The key is shared by every 3D horn surface (init3d, init3dFrames, sandbox.js), so
+// the mesh toggle reads the same everywhere.
 const LOOK_EXTRA_KEY = "hl-v3d-look";
 const KEY_BASE = [1.6, 2.2, 1.8], FILL_BASE = [-1.8, 0.6, 1.2], RIM_BASE = [-1.2, -1.0, -2.2];
 
@@ -110,31 +131,34 @@ export function normalizeLookExtras(raw) {
   if (typeof o === "string") { try { o = JSON.parse(o); } catch (e) { o = null; } }
   if (!o || typeof o !== "object" || Array.isArray(o)) o = {};
   const contours = o.contours === "on" ? "on" : "off";
+  const mesh = MESH_NET_MODES.indexOf(o.mesh) >= 0 ? o.mesh : (o.mesh === "on" ? "gray" : "off");
   let angle = typeof o.angle === "number" ? o.angle : Number(o.angle);
   if (!isFinite(angle)) angle = 0;
   angle = ((Math.round(angle / 15) * 15) % 360 + 360) % 360;
-  return { contours, angle };
+  return { contours, angle, mesh };
 }
-function loadLookExtras() {
+export function loadLookExtras() {
   try { return normalizeLookExtras(localStorage.getItem(LOOK_EXTRA_KEY)); }
   catch (e) { return normalizeLookExtras(null); }
 }
-function saveLookExtras(x) {
+export function saveLookExtras(x) {
   const p = normalizeLookExtras(x);
   try { localStorage.setItem(LOOK_EXTRA_KEY, JSON.stringify(p)); } catch (e) { /* private mode */ }
   return p;
 }
 
-/** 1/2/5 x 10^n contour spacing (metres) giving roughly 12-16 lines over the depth range. */
+/** 1/2/5 x 10^n contour spacing (metres) targeting ~28 intervals over the depth range — twice the
+ *  old density (the 1/2/5 rounding lands the actual count between ~24 and ~40 lines). */
 export function niceContourStep(rangeM) {
-  const raw = Math.max(1e-6, rangeM) / 14;
+  const raw = Math.max(1e-6, rangeM) / 28;
   const pow = Math.pow(10, Math.floor(Math.log10(raw)));
   const f = raw / pow;
   return (f < 1.5 ? 1 : f < 3.5 ? 2 : f < 7.5 ? 5 : 10) * pow;
 }
 
 /** Iso-depth contour lines drawn in the fragment shader (object-space z, metres). Returns the
- *  uniform; value 0 = off. Lines fade where they would alias (grazing / far away). */
+ *  uniform; value 0 = off. Lines fade where they would alias (grazing / far away). Soft neutral
+ *  grey at low mix strength: readable on the lit wall and the shadow side without reading as ink. */
 function installContours(mat) {
   const u = { value: 0 };
   mat.onBeforeCompile = shader => {
@@ -150,10 +174,10 @@ function installContours(mat) {
         "  float d = vContourZ / uContour; float w = fwidth(d);\n" +
         "  float g = abs(fract(d - 0.5) - 0.5) / max(w, 1e-5);\n" +
         "  float ln = (1.0 - smoothstep(0.5, 1.5, g)) * (1.0 - smoothstep(0.35, 0.6, w));\n" +
-        "  gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.04, 0.10, 0.14), ln * 0.6);\n" +
+        "  gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(0.38, 0.41, 0.43), ln * 0.42);\n" +
         "}");
   };
-  mat.customProgramCacheKey = () => "hl-contour-v1";
+  mat.customProgramCacheKey = () => "hl-contour-v3";
   return u;
 }
 
@@ -262,6 +286,7 @@ const RIDGE_TIE_OVERFLOW = 1.5;         // include a tie-group up to 1.5x the bu
 const RIDGE_BOUNDARY_FRACTION = 0.35;   // above this, unmatched edges are soup artefacts, not a rim
 const RIDGE_OPACITY_GAIN = 2.0;         // 0.28 -> ~0.56: sparse creases need more ink than a full net
 const ridgeCache = new WeakMap();       // BufferGeometry -> ridge line geometry (built once per mesh)
+const meshEdgeCache = new WeakMap();    // BufferGeometry -> full triangle-edge line geometry
 
 /** Pure normalizer for the persisted render settings (node-testable, never throws).
  *  Accepts the parsed object, the raw localStorage string, or junk; returns a fresh,
@@ -415,6 +440,208 @@ function buildRidgeGeometry(geo) {
   return ridge;
 }
 
+/**
+ * Build the FULL triangle-edge line geometry for one mesh, cached on that geometry object.
+ *
+ * The ridge overlay above deliberately keeps only dihedral creases, so on a smooth horn wall it is
+ * nearly empty. This one is the tessellation itself: weld coincident positions exactly like the
+ * ridge pass (same 0.01 mm rounding, so the mirrored seams collapse), then emit every unique
+ * triangle edge once — no dihedral filter, no segment cap. Degenerate triangles are skipped, so
+ * no zero-length line ever lands in the buffer.
+ *
+ * Draw it depth-tested with a small renderOrder (after the opaque surface): the edges are coincident
+ * with the shaded triangles, and the surface material carries a polygonOffset so the coincident
+ * lines win the depth test. That keeps the solid readable and paints the tessellation only over the
+ * faces you can actually see (not as an x-ray through the far wall).
+ * Shared by init3d, init3dFrames, hw3d.js and sandbox.js; `THREE` comes from loadThree().
+ */
+export function buildMeshEdgeGeometry(geo) {
+  const cached = meshEdgeCache.get(geo);
+  if (cached) return cached;
+
+  const pos = geo.getAttribute("position");
+  const index = geo.getIndex();
+  if (!pos || !index) {
+    const empty = new THREE.BufferGeometry();
+    meshEdgeCache.set(geo, empty);
+    return empty;
+  }
+  const P = pos.array, I = index.array;
+  const nTri = Math.floor(I.length / 3);
+  const Q = 1e5;                                   // 0.01 mm in metres — the payload's own rounding
+  const keyToUid = new Map();
+  const vx = [], vy = [], vz = [];
+  const weld = new Int32Array(pos.count);
+  for (let i = 0; i < pos.count; i++) {
+    const x = P[i * 3], y = P[i * 3 + 1], z = P[i * 3 + 2];
+    const key = `${Math.round(x * Q)},${Math.round(y * Q)},${Math.round(z * Q)}`;
+    let uid = keyToUid.get(key);
+    if (uid === undefined) {
+      uid = vx.length;
+      keyToUid.set(key, uid);
+      vx.push(x); vy.push(y); vz.push(z);
+    }
+    weld[i] = uid;
+  }
+  const U = Math.max(1, vx.length);
+
+  const seen = new Set();                          // min*U+max -> already emitted (double lines impossible)
+  const edgeA = [], edgeB = [];
+  for (let t = 0; t < nTri; t++) {
+    const a = weld[I[t * 3]], b = weld[I[t * 3 + 1]], c = weld[I[t * 3 + 2]];
+    if (a === b || b === c || c === a) continue;   // degenerate after welding
+    const corners = [a, b, c];
+    for (let j = 0; j < 3; j++) {
+      const p = corners[j], q = corners[(j + 1) % 3];
+      const key = p < q ? p * U + q : q * U + p;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      edgeA.push(p); edgeB.push(q);
+    }
+  }
+
+  const out = new Float32Array(edgeA.length * 6);
+  let o = 0;
+  for (let e = 0; e < edgeA.length; e++) {
+    const a = edgeA[e], b = edgeB[e];
+    out[o++] = vx[a]; out[o++] = vy[a]; out[o++] = vz[a];
+    out[o++] = vx[b]; out[o++] = vy[b]; out[o++] = vz[b];
+  }
+  const edges = new THREE.BufferGeometry();
+  edges.setAttribute("position", new THREE.BufferAttribute(out, 3));
+  // Honest per-geometry fact for debugging/inspection; no rendering depends on it.
+  edges.userData.edgeSegments = edgeA.length;
+  meshEdgeCache.set(geo, edges);
+  return edges;
+}
+
+/** Drop one cached triangle-edge geometry (callers disposing its source geometry pair this with
+ *  meshEdgeGeo.dispose(), exactly like ridgeCache.delete(geo) pairs with wireGeo.dispose()). */
+export function releaseMeshEdgeGeometry(geo) {
+  meshEdgeCache.delete(geo);
+}
+
+/** Resolve one mesh-net mode to { color: THREE.Color, opacity } — literal, theme-independent
+ *  values (a theme token made "black" render near-white on the dark theme). Returns null for
+ *  "off". Callers copy the colour and opacity onto the net material in place. */
+export function meshNetLook(mode) {
+  const s = MESH_NET_STYLES[mode];
+  if (!s) return null;
+  let color;
+  try { color = new THREE.Color(s.hex); } catch (e) { color = new THREE.Color(0x8a949a); }
+  return { color, opacity: s.opacity };
+}
+
+/**
+ * Shared, anti-aliased mesh net over the shaded horn (one factory for every 3D surface).
+ *
+ * Preferred: three.js fat lines (LineSegmentsGeometry + LineSegments2 + LineMaterial), which draw
+ * an anti-aliased ~1 px screen-space ribbon instead of a hard aliased GL line. The addons are
+ * dynamic imports so a CDN/offline failure degrades silently to a plain LineSegments with the same
+ * colour/opacity — never a blank panel and never a thrown error.
+ *
+ * Screen-space density fade (fat path only): the LineMaterial shaders are patched in
+ * onBeforeCompile to compute each segment's projected length in CSS pixels and multiply the line's
+ * alpha by smoothstep(1.5, 5.0, px). Where neighbouring edges compress (grazing walls, throat, far
+ * side) or the segment projects shorter than ~1.5 px, the net quietly fades out; it also doubles as
+ * a depth cue. The patch is applied only when every expected r160 shader substring is present, and
+ * the plain LineBasicMaterial fallback has no per-segment data, so it stays unfaded.
+ *
+ * Returns { object, material, setPositions(Float32Array), setSize(w, h), dispose() }:
+ *  - setPositions takes the flat xyz,xyz pairs of buildMeshEdgeGeometry's position array;
+ *  - setSize must be called with the renderer's CSS-pixel size (LineMaterial.resolution is what
+ *    turns linewidth into pixels AND feeds the fade) and again on every resize;
+ *  - the caller sets material.color/opacity in place (meshNetLook) and adds/removes object.
+ *
+ * depthTest stays ON: with the horn surface pushed back by polygonOffset 2/2 the net is a
+ * depth-tested decal on the visible solid (solid + mesh), never an x-ray through the far wall.
+ */
+export async function createMeshNet(opts = {}) {
+  const T = THREE;                                   // set by loadThree() before any scene builds
+  const color = opts.color != null ? opts.color : WIRE_COLOR;
+  const opacity = opts.opacity != null ? opts.opacity : 0.22;
+  const linewidth = opts.linewidth != null ? opts.linewidth : MESH_NET_LINE_WIDTH;
+
+  let object = null, material = null, geometry = null, fat = false;
+  try {
+    const [gMod, oMod, mMod] = await Promise.all([
+      import("three/addons/lines/LineSegmentsGeometry.js"),
+      import("three/addons/lines/LineSegments2.js"),
+      import("three/addons/lines/LineMaterial.js"),
+    ]);
+    geometry = new gMod.LineSegmentsGeometry();
+    material = new mMod.LineMaterial({
+      color, linewidth, worldUnits: false,
+      transparent: true, opacity, depthTest: true, depthWrite: false,
+    });
+    // ── Screen-space density fade, patched into the pinned r160 LineMaterial shaders ──
+    // Vertex: every segment already has clipStart/clipEnd right after the NDC lines; the
+    // projected length in CSS pixels is |Δndc * resolution / 2|.
+    // Fragment: alpha is the variable actually written into gl_FragColor.a, so attenuate it just
+    // before diffuseColor/gl_FragColor are built. Only patch when ALL four substrings match —
+    // never leave a fragment varying that the vertex stage does not declare.
+    material.onBeforeCompile = shader => {
+      const V_RES = "uniform vec2 resolution;";
+      const V_NDC = "vec3 ndcEnd = clipEnd.xyz / clipEnd.w;";
+      const F_DECL = "uniform float linewidth;";
+      const F_DIFF = "vec4 diffuseColor = vec4( diffuse, alpha );";
+      if (!(shader.vertexShader.includes(V_RES) && shader.vertexShader.includes(V_NDC) &&
+            shader.fragmentShader.includes(F_DECL) && shader.fragmentShader.includes(F_DIFF))) {
+        return;                                      // unknown shader: leave the net exactly as built
+      }
+      shader.uniforms.uNetFadeMin = { value: MESH_NET_FADE_MIN };
+      shader.uniforms.uNetFadeMax = { value: MESH_NET_FADE_MAX };
+      shader.vertexShader = shader.vertexShader
+        .replace(V_RES, "uniform vec2 resolution;\nvarying float vNetSegPx;")
+        .replace(V_NDC, "vec3 ndcEnd = clipEnd.xyz / clipEnd.w;\n" +
+          "vNetSegPx = length((clipEnd.xy / clipEnd.w - clipStart.xy / clipStart.w) * resolution * 0.5);");
+      shader.fragmentShader = shader.fragmentShader
+        .replace(F_DECL, "uniform float linewidth;\nvarying float vNetSegPx;\n" +
+          "uniform float uNetFadeMin;\nuniform float uNetFadeMax;")
+        .replace(F_DIFF, "alpha *= smoothstep( uNetFadeMin, uNetFadeMax, vNetSegPx );\n" +
+          "vec4 diffuseColor = vec4( diffuse, alpha );");
+    };
+    material.customProgramCacheKey = () => "hl-mesh-net-fade-v1";
+    object = new oMod.LineSegments2(geometry, material);
+    fat = true;
+  } catch (e) {
+    // No per-segment data here: the 1 px LineBasicMaterial net is left unfaded (and still correct).
+    geometry = new T.BufferGeometry();
+    material = new T.LineBasicMaterial({
+      color, transparent: true, opacity, depthTest: true, depthWrite: false,
+    });
+    object = new T.LineSegments(geometry, material);
+  }
+  object.frustumCulled = false;                      // empty/instanced bounds are not worth trusting
+  object.renderOrder = 3;                            // after the opaque surface
+
+  return {
+    object,
+    material,
+    fat,
+    setPositions(arr) {
+      const data = (arr && arr.length >= 6) ? arr : new Float32Array(0);
+      if (fat) {
+        // Free the previous frame's GPU buffers before replacing the instanced attributes.
+        try { geometry.dispose(); } catch (e) { /* never rendered yet */ }
+        geometry.setPositions(data);
+      } else {
+        geometry.setAttribute("position", new T.BufferAttribute(data, 3));
+        geometry.computeBoundingSphere();
+      }
+    },
+    setSize(w, h) {
+      if (fat && material.resolution) {
+        material.resolution.set(Math.max(1, w || 1), Math.max(1, h || 1));
+      }
+    },
+    dispose() {
+      try { geometry.dispose(); } catch (e) { /* already gone */ }
+      try { material.dispose(); } catch (e) { /* already gone */ }
+    },
+  };
+}
+
 /** Apply a preset in place — material, ridgeline opacity/visibility and the four-light rig.
  *  No scene rebuild: the same objects are mutated so orbit camera/state stay live. */
 function applyRenderLook(ctx, prefs) {
@@ -443,6 +670,19 @@ function applyRenderLook(ctx, prefs) {
     put(lights.key, KEY_BASE); put(lights.fill, FILL_BASE); put(lights.rim, RIM_BASE);
   }
   if (ctx.contourU) ctx.contourU.value = x.contours === "on" ? (ctx.contourStep || 0) : 0;
+
+  // Triangle-edge net: colour/opacity and visibility are mutated in place, never rebuilt. Any
+  // colour mode turns the net on; "off" leaves the solid on its own.
+  if (ctx.meshNet) {
+    const look = meshNetLook(x.mesh);
+    if (!look) {
+      scene.remove(ctx.meshNet.object);
+    } else {
+      ctx.meshNet.material.color.copy(look.color);
+      ctx.meshNet.material.opacity = look.opacity;
+      scene.add(ctx.meshNet.object);
+    }
+  }
 }
 
 /** Minimal HTML escaper for the control labels (same contract as app.js::esc). */
@@ -479,6 +719,9 @@ function applyRenderControls(container, onChange) {
     `<label style="${lblStyle}">ridges<select data-v3d-pref="ridges" style="${selStyle}">` +
       RENDER_RIDGES.map(s => opt(s, prefs.ridges, s === "on" ? "on (default)" : s)).join("") +
     `</select></label>` +
+    `<label style="${lblStyle}" title="draw every triangle edge over the surface in white, black or gray: see the tessellation the shading covers">mesh<select data-v3d-pref="mesh" style="${selStyle}">` +
+      MESH_NET_MODES.map(m => opt(m, prefs.mesh, m === "off" ? "off (default)" : m)).join("") +
+    `</select></label>` +
     `<label style="${lblStyle}" title="iso-depth lines: make slow curvature and slope readable">depth lines<select data-v3d-pref="contours" style="${selStyle}">` +
       opt("off", prefs.contours, "off") + opt("on", prefs.contours, "on") +
     `</select></label>` +
@@ -499,6 +742,7 @@ function applyRenderControls(container, onChange) {
   const lightRange = chip.querySelector('[data-v3d-pref="light"]');
   const lightVal = chip.querySelector("[data-v3d-light-val]");
   const contourSel = chip.querySelector('[data-v3d-pref="contours"]');
+  const meshSel = chip.querySelector('[data-v3d-pref="mesh"]');
   const angleRange = chip.querySelector('[data-v3d-pref="angle"]');
   const angleVal = chip.querySelector("[data-v3d-angle-val]");
   const commit = () => {
@@ -507,7 +751,11 @@ function applyRenderControls(container, onChange) {
       ridges: ridgeSel.value,
       light: Number(lightRange.value),
     });
-    const extra = saveLookExtras({ contours: contourSel.value, angle: Number(angleRange.value) });
+    const extra = saveLookExtras({
+      contours: contourSel.value,
+      angle: Number(angleRange.value),
+      mesh: meshSel.value,
+    });
     lightVal.textContent = `${next.light}×`;
     angleVal.textContent = `${extra.angle}°`;
     onChange(Object.assign(next, extra));
@@ -515,6 +763,7 @@ function applyRenderControls(container, onChange) {
   surfaceSel.addEventListener("change", commit);
   ridgeSel.addEventListener("change", commit);
   contourSel.addEventListener("change", commit);
+  meshSel.addEventListener("change", commit);
   lightRange.addEventListener("input", commit);
   angleRange.addEventListener("input", commit);
   return chip;
@@ -690,13 +939,14 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   }
 
   // Solid mesh — light neutral grey (form over decoration), opaque.
-  // polygonOffset nudges the surface a hair back so the ridge lines at identical coordinates win
-  // the depth test; the line material itself does not write depth (an overlay).
+  // polygonOffset nudges the surface a hair back so the coincident ridge/mesh-edge lines win the
+  // depth test while the surface still hides the far wall (no x-ray); the line materials do not
+  // write depth (they are overlays).
   const mat = new THREE.MeshStandardMaterial({
     color: HORN_BASE_COLOR, roughness: 0.55, metalness: 0.05,
     side: THREE.DoubleSide,   // interior visibility of the open mouth (mirror windings are already consistent)
     transparent: false,
-    polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+    polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2,
   });
   const contourU = installContours(mat);
   const mesh = new THREE.Mesh(geo, mat);
@@ -713,6 +963,15 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   const wire = new THREE.LineSegments(wireGeo, wireMat);
   scene.add(wire);
 
+  // Triangle-edge net: the tessellation itself, every unique edge once, drawn as anti-aliased fat
+  // lines (falling back to plain 1 px lines offline). Off by default; the chip's "mesh" select
+  // sets the colour (white/black/gray) and adds/removes it in place. Depth-tested, with the
+  // surface's polygonOffset 2/2 pushing the coincident triangles a hair back, so the lines land ON
+  // the visible solid — solid + mesh, never an x-ray.
+  const meshEdgeGeo = buildMeshEdgeGeometry(geo);
+  const meshNet = await createMeshNet();
+  meshNet.setPositions(meshEdgeGeo.getAttribute("position").array);
+
   // Lighting rig: hemisphere keeps the shadow side readable, key models the form,
   // fill lifts the dark flank, rim traces the far silhouette against the canvas
   const hemi = new THREE.HemisphereLight(LIGHT_COLOR, HEMI_GROUND_COLOR, 0.45);
@@ -727,7 +986,7 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
 
   // Apply the persisted preset in place (satin + on + 1.0x reproduces the pre-settings look).
   const lights = { hemi, key, fill: fillL, rim };
-  const lookCtx = { mat, wire, wireMat, scene, lights, center, maxDim, contourU,
+  const lookCtx = { mat, wire, wireMat, meshNet, scene, lights, center, maxDim, contourU,
                     contourStep: niceContourStep(size.z) };
   applyRenderLook(lookCtx, renderPrefs);
 
@@ -759,6 +1018,7 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(w, h);
+  meshNet.setSize(w, h);                 // LineMaterial.linewidth is in CSS pixels
   if (shadows) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; }
   container.appendChild(renderer.domElement);
 
@@ -790,6 +1050,7 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
     for (const e of entries) {
       const { width, height } = e.contentRect;
       renderer.setSize(width, height);
+      meshNet.setSize(width, height);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     }
@@ -812,6 +1073,9 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
     geo.dispose(); mat.dispose();
     ridgeCache.delete(geo);
     wireGeo.dispose(); wireMat.dispose();
+    releaseMeshEdgeGeometry(geo);
+    meshEdgeGeo.dispose();
+    meshNet.dispose();
     if (mountEdges) mountEdges.dispose();
     if (mountLineMat) mountLineMat.dispose();
     hemi.dispose(); key.dispose(); fillL.dispose(); rim.dispose();
@@ -865,9 +1129,9 @@ function unionBounds(list) {
 /**
  * 3D time-lapse player (evolution's 3D mode): ONE scene, fixed camera and lights sized from the
  * UNION of every frame's mirrored bounds, geometry hot-swapped per frame index. Each frame's
- * BufferGeometry and wireframe ridgelines are built lazily on first show; decimated frames get an
- * on-screen "mesh decimated to N tris" disclosure. On CDN failure the 2D wall-profile fallback
- * renders and the promise resolves to null (callers stay honestly on 2D).
+ * BufferGeometry, ridge lines and (opt-in) full triangle-edge lines are built lazily on first show;
+ * decimated frames get an on-screen "mesh decimated to N tris" disclosure. On CDN failure the 2D
+ * wall-profile fallback renders and the promise resolves to null (callers stay honestly on 2D).
  * opts: { shadows = true, profile, seedProfile, emptyMessage }.
  * Returns { show(i), frames (prepared), dispose } — or null when 3D is unavailable.
  */
@@ -909,7 +1173,7 @@ export async function init3dFrames(container, frames, opts = {}) {
   const mat = new THREE.MeshStandardMaterial({
     color: HORN_BASE_COLOR, roughness: 0.55, metalness: 0.05,
     side: THREE.DoubleSide, transparent: false,
-    polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+    polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2,
   });
   const contourU = installContours(mat);
   const wireMat = new THREE.LineBasicMaterial({
@@ -919,7 +1183,10 @@ export async function init3dFrames(container, frames, opts = {}) {
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);          // geometry swapped per frame
   const wire = new THREE.LineSegments(new THREE.BufferGeometry(), wireMat);
   mesh.castShadow = mesh.receiveShadow = shadows;
-  scene.add(mesh, wire);
+
+  // Triangle-edge net, same anti-aliased factory as init3d; positions swapped per frame by show().
+  const meshNet = await createMeshNet();
+  scene.add(mesh, wire, meshNet.object);
 
   const hemi = new THREE.HemisphereLight(LIGHT_COLOR, HEMI_GROUND_COLOR, 0.45);
   scene.add(hemi);
@@ -933,7 +1200,7 @@ export async function init3dFrames(container, frames, opts = {}) {
 
   // Same persisted preset as the single-mesh viewer (satin default keeps the pre-settings look).
   const lights = { hemi, key, fill: fillL, rim };
-  const lookCtx = { mat, wire, wireMat, scene, lights, center, maxDim, contourU,
+  const lookCtx = { mat, wire, wireMat, meshNet, scene, lights, center, maxDim, contourU,
                     contourStep: niceContourStep((u.z1 - u.z0) * CENTRE_SCALE) };
   applyRenderLook(lookCtx, renderPrefs);
 
@@ -964,6 +1231,7 @@ export async function init3dFrames(container, frames, opts = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(w, h);
+  meshNet.setSize(w, h);                 // LineMaterial.linewidth is in CSS pixels
   if (shadows) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; }
   container.appendChild(renderer.domElement);
 
@@ -986,16 +1254,18 @@ export async function init3dFrames(container, frames, opts = {}) {
     for (const e of entries) {
       const { width, height } = e.contentRect;
       renderer.setSize(width, height);
+      meshNet.setSize(width, height);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
     }
   });
   ro.observe(container);
 
-  // Lazy per-frame geometry: BufferGeometry + normals + ridge lines are built on FIRST show and
-  // cached for the rest of the playback (the mirrored arrays themselves come from prepareFrames).
-  // The ridge set is built from the frame's own dihedral angles (buildRidgeGeometry), so the
-  // stride-decimated frame meshes get creases rather than a full-screen edge net.
+  // Lazy per-frame geometry: BufferGeometry + normals + ridge/edge lines are built on FIRST show
+  // and cached for the rest of the playback (the mirrored arrays themselves come from
+  // prepareFrames). The ridge set is built from the frame's own dihedral angles
+  // (buildRidgeGeometry), so the stride-decimated frame meshes get creases rather than a
+  // full-screen edge net; the triangle-edge set is the full tessellation, opt-in.
   const cache = new Map();
   function buildGeo(i) {
     if (cache.has(i)) return cache.get(i);
@@ -1003,7 +1273,8 @@ export async function init3dFrames(container, frames, opts = {}) {
     const geo = buildSmoothGeometry(THREE, p.verts, p.tris);
     geo.scale(0.001, 0.001, 0.001);                    // verts are mm; the stage is metres
     const wireGeo = buildRidgeGeometry(geo);
-    const built = { geo, wireGeo };
+    const meshEdgeGeo = buildMeshEdgeGeometry(geo);
+    const built = { geo, wireGeo, meshEdgeGeo };
     cache.set(i, built);
     return built;
   }
@@ -1016,6 +1287,7 @@ export async function init3dFrames(container, frames, opts = {}) {
     const built = buildGeo(j);
     mesh.geometry = built.geo;
     wire.geometry = built.wireGeo;
+    meshNet.setPositions(built.meshEdgeGeo.getAttribute("position").array);
     frameNote.textContent = prepared[j].decimated
       ? `mesh decimated to ${prepared[j].tris.length / 3} tris` : "";
   }
@@ -1031,9 +1303,12 @@ export async function init3dFrames(container, frames, opts = {}) {
   function dispose() {
     cancelAnimationFrame(raf);
     ro.disconnect();
-    for (const { geo, wireGeo } of cache.values()) { ridgeCache.delete(geo); geo.dispose(); wireGeo.dispose(); }
+    for (const { geo, wireGeo, meshEdgeGeo } of cache.values()) {
+      ridgeCache.delete(geo); releaseMeshEdgeGeometry(geo);
+      geo.dispose(); wireGeo.dispose(); meshEdgeGeo.dispose();
+    }
     cache.clear();
-    renderer.dispose(); mat.dispose(); wireMat.dispose();
+    renderer.dispose(); mat.dispose(); wireMat.dispose(); meshNet.dispose();
     hemi.dispose(); key.dispose(); fillL.dispose(); rim.dispose();
     if (groundGeo) groundGeo.dispose();
     if (groundMat) groundMat.dispose();

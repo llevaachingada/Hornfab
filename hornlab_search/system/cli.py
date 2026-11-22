@@ -211,6 +211,64 @@ def _cmd_reference_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_funnel(args: argparse.Namespace) -> int:
+    from hornlab_search.system import funnel
+
+    ledger = funnel.build_ledger(
+        Path(args.root),
+        screens_root=args.screens_root,
+        system_root=args.system_root,
+    )
+    if args.out:
+        written = funnel.write_ledger(ledger, args.out)
+        print(json.dumps({
+            "schema": funnel.SCHEMA,
+            "tokens": ledger["tokens"],
+            "join_counts": ledger["join"]["counts"],
+            "false_negative_audit": ledger["false_negative_audit"],
+            "written": written,
+        }, indent=2, sort_keys=True))
+    elif args.json:
+        print(json.dumps(ledger, indent=2, sort_keys=True))
+    else:
+        print(funnel.render_markdown(ledger))
+    return 0
+
+
+def _cmd_screen_calibration(args: argparse.Namespace) -> int:
+    from hornlab_search.system import screen_calibration
+
+    try:
+        record = screen_calibration.build_calibration_record(
+            args.screen_json,
+            args.bem_run_dir,
+            rel_tol=args.rel_tol,
+            max_deg=args.max_deg,
+            driver_id=args.driver_id,
+            generated_utc=args.generated_utc,
+        )
+    except screen_calibration.CalibrationRecordError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    screen_calibration.write_calibration_record(record, args.out)
+    print(json.dumps({
+        "schema": record["schema"],
+        "status": record.get("status"),
+        "tokens": record.get("tokens"),
+        "axes": {
+            axis: {
+                "screen_e_shape_db2": data.get("screen_e_shape_db2"),
+                "bem_e_shape_db2": data.get("bem_e_shape_db2"),
+                "screen_to_bem_factor": data.get("screen_to_bem_factor"),
+            }
+            for axis, data in (record.get("axes") or {}).items()
+        },
+        "threshold": record.get("threshold"),
+        "out": str(args.out),
+    }, indent=2, sort_keys=True))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="hornlab_search.system.cli",
@@ -262,6 +320,37 @@ def main(argv: list[str] | None = None) -> int:
     p_assets.add_argument("--runs-root", default=None)
     p_assets.add_argument("--limit", type=int, default=40)
     p_assets.set_defaults(func=_cmd_list_assets)
+
+    p_funnel = sub.add_parser(
+        "funnel", help="read-only screen -> BEM case funnel ledger (no solve, no DSP sum)")
+    p_funnel.add_argument("--root", default=".", metavar="DIR",
+                          help="repository/store root (default: current directory)")
+    p_funnel.add_argument("--screens-root", default=None, metavar="DIR",
+                          help="tree containing woofer_seed.json files (default <root>/system_runs)")
+    p_funnel.add_argument("--system-root", default=None, metavar="DIR",
+                          help="tree containing BEM case dirs (default <root>/system_runs/system)")
+    p_funnel.add_argument("--out", default=None, metavar="DIR",
+                          help="write funnel_ledger.json + funnel_ledger.md under DIR")
+    p_funnel.add_argument("--json", action="store_true",
+                          help="print the full ledger as JSON (no markdown)")
+    p_funnel.set_defaults(func=_cmd_funnel)
+
+    p_cal = sub.add_parser(
+        "screen-calibration",
+        help="read-only R7a screen-vs-installed-BEM E_shape calibration record")
+    p_cal.add_argument("screen_json", help="stored screen study JSON (e.g. woofer_seed.json)")
+    p_cal.add_argument("bem_run_dir", help="BL headless result directory or its case directory")
+    p_cal.add_argument("--out", required=True, metavar="JSON",
+                       help="output calibration record path")
+    p_cal.add_argument("--rel-tol", type=float, default=0.02,
+                       help="nearest-frequency relative tolerance (default 0.02)")
+    p_cal.add_argument("--max-deg", type=float, default=30.0,
+                       help="maximum absolute front angle in the common grid (default 30)")
+    p_cal.add_argument("--driver-id", default=None,
+                       help="override the screen piston driver id (default: infer from the case)")
+    p_cal.add_argument("--generated-utc", default=None,
+                       help="pin the generated timestamp for byte-identical reruns")
+    p_cal.set_defaults(func=_cmd_screen_calibration)
 
     # ---- reference: no-GUI Boundary Lab reference case (prepare/validate/solve/report)
     p_reference = sub.add_parser(

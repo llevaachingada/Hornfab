@@ -1,0 +1,605 @@
+{
+  "asset_id": "0062fb59fbf63eae",
+  "axes": {
+    "H": {
+      "bem_domain": "observation:horizontal-polar",
+      "bem_e_shape_db2": 1.6072493475319274,
+      "bem_e_shape_spread": {
+        "max": 3.7358112105803585,
+        "min": 0.05364039583485873,
+        "per_freq_db2": [
+          1.032296436180565,
+          0.05364039583485873,
+          3.7358112105803585
+        ],
+        "range": 3.6821708147454997,
+        "std_population": 1.5572462050993392
+      },
+      "bem_freqs_hz": [
+        785.5785,
+        969.6137,
+        1196.7624
+      ],
+      "bem_horn_rel_db": [
+        [
+          -2.1457751751475094,
+          -0.9564768996656099,
+          -0.23987953958243047,
+          0.0,
+          -0.23990554408702813,
+          -0.9565114108907311,
+          -2.145976968551013
+        ],
+        [
+          -1.5292199119002454,
+          -0.6464391704061274,
+          -0.1553713752751431,
+          0.0,
+          -0.1549029203293948,
+          -0.6455917908549118,
+          -1.5282020150239468
+        ],
+        [
+          -0.19710362999868547,
+          -0.06596709038841997,
+          -0.0248040269031371,
+          0.0,
+          -0.025115370089952904,
+          -0.06624514229290401,
+          -0.19711307309537496
+        ]
+      ],
+      "bem_woofer_rel_db": [
+        [
+          -3.8812900414276745,
+          -1.7138041402211446,
+          -0.42501471780466155,
+          0.0,
+          -0.4242567240041918,
+          -1.7120924357096388,
+          -3.8784190530313043
+        ],
+        [
+          -1.7240485984367346,
+          -1.0086985965986743,
+          -0.28679366723737054,
+          0.0,
+          -0.28739767809793193,
+          -1.0098292093750123,
+          -1.7251717720177275
+        ],
+        [
+          -3.4068102669761577,
+          -1.6850855305016759,
+          -0.4405267236275743,
+          0.0,
+          -0.4396153249343755,
+          -1.6827152141139066,
+          -3.401688893583888
+        ]
+      ],
+      "factor_defined": true,
+      "factor_is_ratio_of_db2": true,
+      "factor_spread": {
+        "max": 11977.168941944363,
+        "min": 1.5840667196575327,
+        "n_defined": 3,
+        "per_freq_factors": [
+          14.072299419462722,
+          1.5840667196575327,
+          11977.168941944363
+        ],
+        "range": 11975.584875224706,
+        "std_population": 5642.403647954549
+      },
+      "formula": "mean_f mean_dir (L_a,rel - L_b,rel)^2; each channel normalised at 0 deg; uniform weights; no dB-power averaging",
+      "n_dirs": 7,
+      "n_freqs": 3,
+      "per_freq": [
+        {
+          "bem_e_shape_db2": 1.032296436180565,
+          "bem_hz": 785.5785,
+          "screen_e_shape_db2": 0.07335662818208981,
+          "screen_hz": 773.24,
+          "screen_to_bem_factor": 14.072299419462722
+        },
+        {
+          "bem_e_shape_db2": 0.05364039583485873,
+          "bem_hz": 969.6137,
+          "screen_e_shape_db2": 0.03386245993884369,
+          "screen_hz": 961.58,
+          "screen_to_bem_factor": 1.5840667196575327
+        },
+        {
+          "bem_e_shape_db2": 3.7358112105803585,
+          "bem_hz": 1196.7624,
+          "screen_e_shape_db2": 0.0003119110391352541,
+          "screen_hz": 1195.8,
+          "screen_to_bem_factor": 11977.168941944363
+        }
+      ],
+      "piston_rel_db": [
+        [
+          -0.9409226415588126,
+          -0.43596681485013455,
+          -0.11167961251568188,
+          0.0,
+          -0.11167961251568188,
+          -0.43596681485013455,
+          -0.9409226415588126
+        ],
+        [
+          -1.4703160601281806,
+          -0.6773746864743244,
+          -0.17291305793906286,
+          0.0,
+          -0.17291305793906286,
+          -0.6773746864743244,
+          -1.4703160601281806
+        ],
+        [
+          -2.312229011974275,
+          -1.0553033424708773,
+          -0.26789767067364123,
+          0.0,
+          -0.26789767067364123,
+          -1.0553033424708773,
+          -2.312229011974275
+        ]
+      ],
+      "plane": "H",
+      "ratio": 44.84053975373383,
+      "screen_e_shape_db2": 0.035843666386689586,
+      "screen_e_shape_spread": {
+        "max": 0.07335662818208981,
+        "min": 0.0003119110391352541,
+        "per_freq_db2": [
+          0.07335662818208981,
+          0.03386245993884369,
+          0.0003119110391352541
+        ],
+        "range": 0.07304471714295456,
+        "std_population": 0.029853269612839163
+      },
+      "screen_freqs_hz": [
+        773.24,
+        961.58,
+        1195.8
+      ],
+      "screen_rel_db": [
+        [
+          -1.4019339607726593,
+          -0.6399857305359724,
+          -0.16259818863476383,
+          0.0,
+          -0.16259818863476383,
+          -0.6399845991970388,
+          -1.4019352051141922
+        ],
+        [
+          -1.7836579798739045,
+          -0.8157226987591066,
+          -0.2074829975516579,
+          0.0,
+          -0.2074829975516579,
+          -0.8157241291159458,
+          -1.7836579798739045
+        ],
+        [
+          -2.2806012840622074,
+          -1.0458579318850951,
+          -0.26642702949935426,
+          0.0,
+          -0.2664268564175174,
+          -1.0458579318850951,
+          -2.28060139020533
+        ]
+      ],
+      "screen_to_bem_factor": 44.84053975373383,
+      "units": "dB^2"
+    },
+    "V": {
+      "bem_domain": "observation:vertical-polar",
+      "bem_e_shape_db2": 17.837760657066706,
+      "bem_e_shape_spread": {
+        "max": 18.33023954079763,
+        "min": 17.142881171784182,
+        "per_freq_db2": [
+          18.33023954079763,
+          17.142881171784182,
+          18.04016125861832
+        ],
+        "range": 1.1873583690134488,
+        "std_population": 0.5054235693936384
+      },
+      "bem_freqs_hz": [
+        785.5785,
+        969.6137,
+        1196.7624
+      ],
+      "bem_horn_rel_db": [
+        [
+          -3.009864081490875,
+          -1.599790216158194,
+          -0.5497871296157717,
+          0.0,
+          -0.04555342134083684,
+          -0.7521653317313319,
+          -2.172046277870489
+        ],
+        [
+          -2.676625202295586,
+          -1.207341691191532,
+          -0.3511224227476628,
+          0.0,
+          -0.08591159975655671,
+          -0.6446643801634764,
+          -1.751787533587633
+        ],
+        [
+          2.518075344388035,
+          1.866633777498003,
+          0.7308164363800005,
+          0.0,
+          0.19391923277673317,
+          1.0779915469572154,
+          1.777657667563834
+        ]
+      ],
+      "bem_woofer_rel_db": [
+        [
+          -0.6666590325873627,
+          0.5710902344579533,
+          0.8216906006703052,
+          0.0,
+          -2.0917723494056073,
+          -5.875943434379667,
+          -11.434188570131463
+        ],
+        [
+          4.210407048956352,
+          3.4773731115348046,
+          1.4904321219280385,
+          0.0,
+          1.195994107635932,
+          2.9787420848264077,
+          3.9454681562713025
+        ],
+        [
+          -3.2983059032924182,
+          -3.5964187572756257,
+          -1.4714589219697798,
+          0.0,
+          -0.5366831937437371,
+          -2.7802555694648508,
+          -4.728956469085995
+        ]
+      ],
+      "factor_defined": true,
+      "factor_is_ratio_of_db2": true,
+      "factor_spread": {
+        "max": 57432.41974945204,
+        "min": 249.9338850435214,
+        "n_defined": 3,
+        "per_freq_factors": [
+          249.9338850435214,
+          506.50483315798,
+          57432.41974945204
+        ],
+        "range": 57182.48586440852,
+        "std_population": 26895.811956804
+      },
+      "formula": "mean_f mean_dir (L_a,rel - L_b,rel)^2; each channel normalised at 0 deg; uniform weights; no dB-power averaging",
+      "n_dirs": 7,
+      "n_freqs": 3,
+      "per_freq": [
+        {
+          "bem_e_shape_db2": 18.33023954079763,
+          "bem_hz": 785.5785,
+          "screen_e_shape_db2": 0.0733403537403732,
+          "screen_hz": 773.24,
+          "screen_to_bem_factor": 249.9338850435214
+        },
+        {
+          "bem_e_shape_db2": 17.142881171784182,
+          "bem_hz": 969.6137,
+          "screen_e_shape_db2": 0.033845444405536954,
+          "screen_hz": 961.58,
+          "screen_to_bem_factor": 506.50483315798
+        },
+        {
+          "bem_e_shape_db2": 18.04016125861832,
+          "bem_hz": 1196.7624,
+          "screen_e_shape_db2": 0.000314111112457358,
+          "screen_hz": 1195.8,
+          "screen_to_bem_factor": 57432.41974945204
+        }
+      ],
+      "piston_rel_db": [
+        [
+          -0.9409226415588126,
+          -0.43596681485013455,
+          -0.11167961251568188,
+          0.0,
+          -0.11167961251568188,
+          -0.43596681485013455,
+          -0.9409226415588126
+        ],
+        [
+          -1.4703160601281806,
+          -0.6773746864743244,
+          -0.17291305793906286,
+          0.0,
+          -0.17291305793906286,
+          -0.6773746864743244,
+          -1.4703160601281806
+        ],
+        [
+          -2.312229011974275,
+          -1.0553033424708773,
+          -0.26789767067364123,
+          0.0,
+          -0.26789767067364123,
+          -1.0553033424708773,
+          -2.312229011974275
+        ]
+      ],
+      "plane": "V",
+      "ratio": 497.79839202082655,
+      "screen_e_shape_db2": 0.03583330308612251,
+      "screen_e_shape_spread": {
+        "max": 0.0733403537403732,
+        "min": 0.000314111112457358,
+        "per_freq_db2": [
+          0.0733403537403732,
+          0.033845444405536954,
+          0.000314111112457358
+        ],
+        "range": 0.07302624262791585,
+        "std_population": 0.029845956897468183
+      },
+      "screen_freqs_hz": [
+        773.24,
+        961.58,
+        1195.8
+      ],
+      "screen_rel_db": [
+        [
+          -1.4018865642514449,
+          -0.6399531568330374,
+          -0.1625978830347954,
+          0.0,
+          -0.1625979401135602,
+          -0.6399537225005751,
+          -1.4018871798825927
+        ],
+        [
+          -1.7835797134294396,
+          -0.8156896644324085,
+          -0.20746600010297556,
+          0.0,
+          -0.20746600010297556,
+          -0.8156896644324085,
+          -1.7835797134294396
+        ],
+        [
+          -2.2804944449486264,
+          -1.0458101112498284,
+          -0.2664195075885232,
+          0.0,
+          -0.26641968066964594,
+          -1.0458101112498284,
+          -2.2804944449486264
+        ]
+      ],
+      "screen_to_bem_factor": 497.79839202082655,
+      "units": "dB^2"
+    }
+  },
+  "bem": {
+    "case_dir": "system_runs/system/ev_assembled_motor_real/20261120T150709Z-wide_assembled-01612-383da940",
+    "horn_excitation": "excitation:horn",
+    "per_input": {
+      "excitation:horn": "normal_velocity_mps",
+      "vented/voltage": "V_rms"
+    },
+    "planes": {
+      "H": "observation:horizontal-polar",
+      "V": "observation:vertical-polar"
+    },
+    "result_dir": "system_runs/system/ev_assembled_motor_real/20261120T150709Z-wide_assembled-01612-383da940/run",
+    "source_geometry_hash": "dd8fb812fc1cad8f",
+    "status": "complete",
+    "woofer_excitation": "vented/voltage"
+  },
+  "claim": "screen E_shape is optimistic on the installed-BEM box axis; the factor is confounded by R2 and a real-shape/denser-grid case is required before any recalibration. No recalibration is claimed here.",
+  "common_grid": {
+    "angles_deg": [
+      -30.0,
+      -20.0,
+      -10.0,
+      0.0,
+      10.0,
+      20.0,
+      30.0
+    ],
+    "match_tol_deg": 1e-06,
+    "max_deg": 30.0,
+    "n_dirs": 7,
+    "no_interpolation": true,
+    "source": "exact intersection of the stored screen H/V and BEM H/V direction grids",
+    "stored_grid_counts": [
+      73,
+      73,
+      37,
+      37
+    ]
+  },
+  "confound_tokens": [
+    "DEMO_SHAPE_CONFOUNDED_R2"
+  ],
+  "confounds": {
+    "DEMO_SHAPE_CONFOUNDED_R2": {
+      "bem_woofer_shape": "R2 demo 200 mm transducer shape",
+      "detail": "the installed BEM woofer uses the R2 demo 200 mm transducer shape while the screen piston uses the selected real driver's effective area; the screen->BEM factor is confounded and is not a calibrated correction",
+      "present": true,
+      "screen_piston_shape": "selected real driver 'faitalpro_12pr300' effective area"
+    }
+  },
+  "data_quality": "READ-ONLY calibration check on the exact common stored grid; no solve, filter, sum, score or recalibration; the screen->BEM factors are confounded by R2 and must not be used as a correction",
+  "frequency_map": {
+    "bem_freqs_hz": [
+      200.0,
+      222.1952,
+      246.8534,
+      274.2482,
+      304.6831,
+      338.4955,
+      376.0603,
+      417.7939,
+      464.1589,
+      515.6693,
+      572.8961,
+      636.4736,
+      707.1068,
+      785.5785,
+      872.7587,
+      969.6137,
+      1077.2173,
+      1196.7624,
+      1329.574,
+      1477.1245,
+      1641.0495,
+      1823.1662,
+      2025.4934,
+      2250.2741,
+      2500.0
+    ],
+    "mapped_bem_freqs_hz": [
+      785.5785,
+      969.6137,
+      1196.7624
+    ],
+    "mapping": [
+      {
+        "bem_hz": 785.5785,
+        "relative_error": 0.01595688272722564,
+        "screen_hz": 773.24
+      },
+      {
+        "bem_hz": 969.6137,
+        "relative_error": 0.008354687077518203,
+        "screen_hz": 961.58
+      },
+      {
+        "bem_hz": 1196.7624,
+        "relative_error": 0.0008048168590066199,
+        "screen_hz": 1195.8
+      }
+    ],
+    "max_relative_error": 0.01595688272722564,
+    "no_interpolation": true,
+    "rel_tol": 0.02,
+    "relative_errors": [
+      0.01595688272722564,
+      0.008354687077518203,
+      0.0008048168590066199
+    ],
+    "screen_freqs_hz": [
+      773.24,
+      961.58,
+      1195.8
+    ],
+    "selection": "nearest stored BEM frequency within rel_tol; no interpolation"
+  },
+  "generated_utc": "2026-11-21T13:56:19Z",
+  "recalibrated": false,
+  "schema": "hornlab.system.screen_eshape_calibration.v1",
+  "screen_study": {
+    "asset_id": "0062fb59fbf63eae",
+    "asset_quality": "MAGNITUDE_ONLY",
+    "brief_id": "lecleach_rollback_1in_v6",
+    "design_hash": "9e02db06ecc3",
+    "driver": {
+      "driver_id": "faitalpro_12pr300",
+      "effective_piston_radius_m": 0.130253279934,
+      "name": "FaitalPRO 12PR300",
+      "radius_source": "catalog effective_piston_radius_m",
+      "sd_cm2": 533.0,
+      "selection": {
+        "driver_id": "faitalpro_12pr300",
+        "matched_patch_fields": [
+          "bl_n_per_a",
+          "cms_m_per_n",
+          "le_h",
+          "mmd_kg",
+          "re_ohm",
+          "rms_n_s_per_m"
+        ],
+        "method": "motor_patch_ts_match"
+      }
+    },
+    "family": "FREEFORM",
+    "frequency_band": {
+      "band_hz": [
+        763.206551775967,
+        1211.5148831576323
+      ],
+      "f_x_hz": 961.58,
+      "freqs_hz": [
+        773.24,
+        961.58,
+        1195.8
+      ],
+      "half_octaves": 0.333333333333,
+      "selection": "compatibility.select_overlap_band on stored screen frequencies"
+    },
+    "path": "system_runs/screens/system_evidence_2026-11-19/woofer_seed.json",
+    "published_as_stored": {
+      "H": {
+        "band_freqs_hz": [
+          773.24,
+          961.58,
+          1195.8
+        ],
+        "e_shape_db2": 0.024212553522,
+        "n_dirs": 25,
+        "n_freqs": 3
+      },
+      "V": {
+        "band_freqs_hz": [
+          773.24,
+          961.58,
+          1195.8
+        ],
+        "e_shape_db2": 0.001727582018,
+        "n_dirs": 13,
+        "n_freqs": 3
+      },
+      "f_x_hz": 961.58,
+      "source": "stored screen xo_screens block"
+    },
+    "response": {
+      "resolution": "design_hash scan of the runs root",
+      "response_path": "runs/20261118T200653Z-screen-31495a/designs/9e02db06ecc3/response.npz",
+      "response_sha256": "d97b633c6147d67e3ea972acbe7d5e0f1a204ddc8063d9a3dd85c55f052c8360",
+      "response_sha256_declared": "d97b633c6147d67e3ea972acbe7d5e0f1a204ddc8063d9a3dd85c55f052c8360",
+      "response_sha256_verified": true
+    },
+    "study_id": "27616eedee09009f"
+  },
+  "status": "QUANTIFIED_NOT_RECALIBRATED",
+  "study_id": "27616eedee09009f",
+  "threshold": {
+    "changed": false,
+    "detail": "the provisional 9.0 dB^2 good-match label is unchanged; this record quantifies the box-axis gap and does not recalibrate the threshold",
+    "name": "good_match_db2",
+    "recalibrated": false,
+    "token": "THRESHOLD_UNCHANGED_9DB2",
+    "value_db2": 9.0
+  },
+  "tokens": [
+    "DEMO_SHAPE_CONFOUNDED_R2",
+    "THRESHOLD_UNCHANGED_9DB2"
+  ]
+}

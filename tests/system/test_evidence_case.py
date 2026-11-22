@@ -34,7 +34,11 @@ def _source(tmp_path: Path) -> tuple[Path, Path, Path]:
     ], "physical_system": {"components": [
         {"id": "vented/driver", "kind": "electrodynamic_transducer",
          "parameters": {"re_ohm": 5.8, "bl_n_per_a": 8.0}}
-    ]}}
+    ]}, "project_preferences": {
+        "freq_min_hz": 20.0, "freq_max_hz": 200.0,
+        "spherical_sampling_enabled": False,
+        "keep_me": "preserved",
+    }}
     (case / "case.blab.json").write_text(json.dumps(project), encoding="utf-8")
     mesh = case / "bl_output" / "x" / "interior.msh"
     mesh.parent.mkdir(parents=True)
@@ -192,3 +196,107 @@ def test_invalid_request_is_refused(tmp_path: Path, capsys) -> None:
     rc = evidence_case.main(_base_args(store, case, bad))
     assert rc == 2
     assert "frequencies_hz" in capsys.readouterr().err
+
+
+# --------------------------------------------------------------------------- project preferences
+
+
+def _sha256(path: Path) -> str:
+    import hashlib
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_project_preferences_and_balloon_deg_merge_preserve_and_record(
+        tmp_path: Path, capsys) -> None:
+    store, case, request = _source(tmp_path)
+    patch = tmp_path / "prefs.json"
+    patch.write_text(json.dumps({
+        "polar_observation_distance_m": 2.0,
+        "spherical_sampling_enabled": False,   # --balloon-deg must win this convenience key
+    }), encoding="utf-8")
+    rc = evidence_case.main(_base_args(store, case, request)
+                            + ["--project-preferences", str(patch),
+                               "--balloon-deg", "5.0", "--prepare-only"])
+    assert rc == 0
+    new_case = next((store / "system" / "ev_test").iterdir())
+
+    project = json.loads((new_case / "case.blab.json").read_text(encoding="utf-8"))
+    prefs = project["project_preferences"]
+    # patched keys
+    assert prefs["polar_observation_distance_m"] == 2.0
+    assert prefs["spherical_sampling_enabled"] is True
+    assert prefs["balloon_angle_precision_deg"] == 5.0
+    # untouched keys from the source block survive the merge
+    assert prefs["freq_min_hz"] == 20.0
+    assert prefs["freq_max_hz"] == 200.0
+    assert prefs["keep_me"] == "preserved"
+    # deterministic write
+    assert (new_case / "case.blab.json").read_text(encoding="utf-8") == (
+        json.dumps(project, indent=2, sort_keys=True) + "\n")
+    assert (new_case / "project_preferences_patch.json").read_bytes() == patch.read_bytes()
+
+    payload = provenance.load_manifest(new_case / "manifest.json")["payload"]
+    assert payload["balloon_deg"] == 5.0
+    assert payload["project_preferences_patch"] == {
+        "polar_observation_distance_m": 2.0,
+        "spherical_sampling_enabled": True,
+        "balloon_angle_precision_deg": 5.0,
+    }
+    assert payload["project_preferences_patch_sha256"]
+    assert payload["project_preferences_patch_file"] == str(patch.resolve())
+    assert payload["project_preferences_patch_file_sha256"] == _sha256(patch)
+    assert payload["source_project_sha256"] == _sha256(case / "case.blab.json")
+    assert payload["derived_project_sha256"] == _sha256(new_case / "case.blab.json")
+    assert payload["derived_project_sha256"] != payload["source_project_sha256"]
+
+
+def test_project_preferences_validate_runs_before_solve(
+        tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys) -> None:
+    store, case, request = _source(tmp_path)
+    calls: list[str] = []
+    seen: dict[str, Path] = {}
+
+    def fake_validate(case_dir, request_path):
+        calls.append("validate")
+        seen["case"] = Path(case_dir)
+        return SimpleNamespace(valid=True, as_dict=lambda: {"valid": True})
+
+    def fake_solve(case_dir, request_path, *, backend, authorized_by, timeout_s=None):
+        calls.append("solve")
+        return SimpleNamespace(run_dir=Path(case_dir) / "run", status="complete",
+                               returncode=0, record_path=Path(case_dir) / "reference_solve.json")
+
+    monkeypatch.setattr(evidence_case.reference, "validate", fake_validate)
+    monkeypatch.setattr(evidence_case.reference, "solve", fake_solve)
+    rc = evidence_case.main(_base_args(store, case, request)
+                            + ["--balloon-deg", "5", "--solve",
+                               "--authorized-by", "owner test"])
+    assert rc == 0
+    assert calls == ["validate", "solve"]
+    new_case = seen["case"]
+    assert (new_case / "reference_validate.json").is_file()
+    project = json.loads((new_case / "case.blab.json").read_text(encoding="utf-8"))
+    assert project["project_preferences"]["balloon_angle_precision_deg"] == 5.0
+
+
+@pytest.mark.parametrize("degrees", ["0.4", "15.1"])
+def test_balloon_deg_outside_bl_clamp_is_refused(
+        tmp_path: Path, capsys, degrees: str) -> None:
+    store, case, request = _source(tmp_path)
+    rc = evidence_case.main(_base_args(store, case, request)
+                            + ["--balloon-deg", degrees, "--prepare-only"])
+    assert rc == 2
+    assert not (store / "system" / "ev_test").exists()
+    err = capsys.readouterr().err
+    assert "0.5" in err and "15" in err
+
+
+def test_project_preferences_must_be_a_json_object(tmp_path: Path, capsys) -> None:
+    store, case, request = _source(tmp_path)
+    patch = tmp_path / "prefs.json"
+    patch.write_text(json.dumps([1, 2, 3]), encoding="utf-8")
+    rc = evidence_case.main(_base_args(store, case, request)
+                            + ["--project-preferences", str(patch), "--prepare-only"])
+    assert rc == 2
+    assert not (store / "system" / "ev_test").exists()
+    assert "JSON object" in capsys.readouterr().err

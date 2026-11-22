@@ -1,0 +1,45 @@
+# First tranche per lane, then a matched verification and conditional extension.
+night: sculpted_xo900_cma_pilot_2026-11-21
+lane: gpu
+watchdog: false
+jobs:
+- id: r3_30
+  kind: search
+  mode: screen
+  budget: 30
+  timeout_s: 5400
+  config: examples/typologies/sculpted_xo900_cma_2026-11-21/r3.yaml
+  cache_dir: scratch/sculpted_xo900_cma_cache
+  env: {HORNLAB_GPU_LOCK: refuse}
+- id: k1_30
+  kind: search
+  mode: screen
+  budget: 30
+  timeout_s: 5400
+  config: examples/typologies/sculpted_xo900_cma_2026-11-21/k1.yaml
+  cache_dir: scratch/sculpted_xo900_cma_cache
+  env: {HORNLAB_GPU_LOCK: refuse}
+- id: crowe_30
+  kind: search
+  mode: screen
+  budget: 30
+  timeout_s: 5400
+  config: examples/typologies/sculpted_xo900_cma_2026-11-21/crowe.yaml
+  cache_dir: scratch/sculpted_xo900_cma_cache
+  env: {HORNLAB_GPU_LOCK: refuse}
+- id: r3_verify_and_continue
+  kind: command
+  timeout_s: 6000
+  env: {HORNLAB_GPU_LOCK: refuse}
+  argv: [.venv/Scripts/python.exe, -u, tools/night_queue/sculpted_cma_continue.py, r3]
+- id: k1_verify_and_continue
+  kind: command
+  timeout_s: 6000
+  env: {HORNLAB_GPU_LOCK: refuse}
+  argv: [.venv/Scripts/python.exe, -u, tools/night_queue/sculpted_cma_continue.py, k1]
+- id: crowe_verify_and_continue
+  kind: command
+  timeout_s: 6000
+  env: {HORNLAB_GPU_LOCK: refuse}
+  argv: [.venv/Scripts/python.exe, -u, tools/night_queue/sculpted_cma_continue.py, crowe]
+

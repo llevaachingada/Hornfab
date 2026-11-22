@@ -60,6 +60,19 @@ piston does not produce. The horn V pattern is smooth over the same grid.
   then can the threshold be recalibrated.
 - No code or data change is made by this audit.
 
+## 2026-11-21 addendum — R7a machine record
+
+The comparison above is now reproducible as a machine record:
+[`SCREEN_ESHAPE_CALIBRATION_RECORD_2026-11-21.json`](SCREEN_ESHAPE_CALIBRATION_RECORD_2026-11-21.json),
+built by `hornlab_search.system.screen_calibration` from the same screen study and assembled
+case. It records the exact common grid, the nearest-frequency map, per-frequency/per-axis
+E_shape values, the screen→BEM factors (H 44.84×, V 497.80×), `DEMO_SHAPE_CONFOUNDED_R2`, and
+`THRESHOLD_UNCHANGED_9DB2` with `recalibrated: false`. R7a (record/quantification) is done;
+R7b (threshold recalibration) remains blocked on the real transducer shape and a 5° or finer
+grid. The false-negative audit in [`FUNNEL_LEDGER_2026-11-21.md`](FUNNEL_LEDGER_2026-11-21.md)
+finds zero solved two-channel screen pairs, so it cannot rank the screen on this store.
+
+
 ## Recompute recipe
 
 ```python

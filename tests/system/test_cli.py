@@ -22,6 +22,27 @@ def test_help_is_available(capsys) -> None:
     assert exc.value.code == 0
     out = capsys.readouterr().out
     assert "pilot" in out and "list-drivers" in out and "list-assets" in out
+    assert "funnel" in out
+    assert "screen-calibration" in out
+
+
+def test_screen_calibration_help_is_available(capsys) -> None:
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["screen-calibration", "--help"])
+    assert exc.value.code == 0
+    out = capsys.readouterr().out
+    for flag in ("--out", "--rel-tol", "--max-deg", "--driver-id", "--generated-utc"):
+        assert flag in out
+
+
+def test_funnel_help_and_empty_store_smoke(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["funnel", "--help"])
+    assert exc.value.code == 0
+    out_dir = tmp_path / "funnel"
+    assert cli.main(["funnel", "--root", str(tmp_path), "--out", str(out_dir)]) == 0
+    assert (out_dir / "funnel_ledger.json").is_file()
+    assert (out_dir / "funnel_ledger.md").is_file()
 
 
 def test_pilot_help_documents_new_flags(capsys) -> None:

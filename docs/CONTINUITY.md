@@ -1,10 +1,27 @@
 ﻿# CONTINUITY
 
+## 2026-11-21 — Sculpted home-900 V11 CMA pilot
+
+- `sculpted_xo900_cma_pilot_2026-11-21` launched detached at 08:57 EST. R3, K axial and Crowe k-home get up to 30 valid screen solves initially. Each may reach 60 after a matched finalist check and evidence of gains continuing after call 20. Verify admission requires at least 0.08 J gain, source-patch parity, and bounded loading and preferred-width regressions.
+- Normal GRID meshing reproduced the three seed meshes byte-for-byte. Each box passed 64 CPU mesh samples. A final check with the 8,900 DOF cap also passed all 20 corners. The common pilot brief keeps packaging advisory and requires complete complex full-balloon V11 results. [Queue](queue/sculpted_xo900_cma_pilot_2026-11-21.yaml).
+- The first R3 screen row in `20261121T135752Z-screen-8c15a8` completed with J 2.11985792, objective 11, full-balloon CD and 41.44 seconds of GPU solve time.
+- R3 exposes body sweep, diagonal opening and aperture scale. K exposes H setback and V projection, with diagonal finish coupled to H and neutral K1 reachable. Crowe retains the verified k-home seed and varies depth, H opening and core expansion. Physical roundover and protected-host C1/C2 remain in geometry validation. Focused CPU tests: 34 passed.
+
+## 2026-11-21 — Sculpted V11 acceptance and native rollback probe
+
+- R2 passed the fixed-mesh V11 acceptance gate with its actual CUDA response, full-balloon CD and J 3.10632665. Normal Runs shows the reused measurement with objective version 11. Packaging-advisory and primary replay matched exactly. The R0 archived field has its own offline V11 rescore and the staged coverage result remains separate.
+- The dedicated discovery queue finished 7/7 at 08:30 EST. It reused six measured controls and ran one fresh GPU solve at the locked mesh and observation tier. Native R2 truncation gave J 3.12889124, +0.02256 versus R2. Source connectivity matched with about 0.00000114 mm drift. Truncation also refits the body, so an isolated physical roundover remains open. No CMA started.
+- The matched R3 gain held at −0.406 J at 7 epw. K2’s finish gained −0.056 J at 8 epw while changing the projected opening. The V11 readout retains raw H/V patterns, all weighted terms, complex impedance and provenance. [Evidence](evidence/sculpted_xo900_v11_2026-11-21/README.md).
+
 ## 2026-11-21 — Eight-hour GPU validation queue
 
 - Launched `hornfab_gpu8_2026-11-21` at 04:21 EST via detached controller PID 16772. Structural dry-run accepted seven blocks. The canonical GPU lock showed the first `R2_6` arm running. Its repeat completed at J 3.10632665 versus 3.10632670 in the first campaign, and R3 followed.
+- R3 repeated at J 2.69395123. A concurrent docs-only commit changed the checkout SHA and initially stopped the comparison. A CPU replay confirmed the paired delta of −0.41237542 after checking the changed paths. The live queue file schedules the R refinement immediately after K, reusing the completed 6 epw responses.
 - Six hours are reserved for sculpted R-OSSE, landscape K returns, Klangfilm B3 and Crowe P1 ridge/beak. Two hours are reserved for home-900 v11 benchmarks, Compact500 v11 and the v10 follow-ups. The local night YAML, paired response diffs and readout index are under `runs/nights/`. CPU admission and scripts are under `scratch/hornfab_gpu8_2026-11-21/`.
 - Matched R2/R3 refinement uses 7 epw under the local node cap. R4 uses 7 epw because its 6 epw source patch differed. K1/K2 refinement uses 8 epw. B3 H +2° and +4° exceed the frozen 60° limit. Crowe P1's effective refinement is 7 epw due to 8 epw patch drift. The verified 2-inch compact result is reused. Crowe C1/C2 and the rolled C-return remain held.
+- The original Compact500 continuation box incurred 43 envelope refusals in 64 CPU samples. The queued follow-up passed 64/64 samples with narrower depth, H angle and expansion bounds around the same verified seed. Both that search and the optional Crowe search require 64/64 clean real-mesh CPU samples immediately before admission, and each is capped at 40 attempts for 30 valid solves.
+- Owner then removed packaging-size admission for this campaign. Pending CLI blocks use local brief copies with nonbinding numeric maxima because the brief schema requires three limits. Fixed-mesh admission reports dimensions without rejecting on packaging. The original Compact500 parameter bounds are back in use with the same verified seed and 30-valid budget. Source, shell, mesh and generator validity still gate admission.
+- The restored Compact500 range passed 64/64 CPU mesh samples. A 528.6 mm-wide probe failed the original 500 mm packaging limit and passed under the campaign brief with a round driver interface and 4,456 DOFs. The five brief copies resolved to the same target, score, seed/bounds and mesh/solve settings before any intentional search-range change.
 
 ## 2026-11-21 - System readiness audit batch: R3/R6/R10/R11/R15/R16/R17 closed, R7 quantified
 

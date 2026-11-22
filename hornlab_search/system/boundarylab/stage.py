@@ -164,6 +164,9 @@ def build_stage_spec(
         "provider_root": _provider_root(root),
         "provider_id": manifest.get("id"),
         "source": _build_source(root, dict(overrides or {})),
+        # The numeric overrides that produced ``source``, recorded explicitly so the case
+        # manifest can show what the caller asked for (``source`` is the merged result).
+        "overrides": dict(overrides or {}),
         "document_id": document_id,
         "document_name": document_name,
         "mesh_name": mesh_name,

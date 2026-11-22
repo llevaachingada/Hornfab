@@ -164,11 +164,12 @@ Each study: `study_id`, `path` (repo-relative), `created_utc` (if the file recor
   hash; it is exported as `mismatch` with a diagnostic so the gap is visible, not hidden. The
   empty aborted-case directories were removed on 2026-11-21, so the bundle has no `invalid` rows.
 * **Snapshot census (regenerated on every run).** At the last generation (2026-11-21, after the
-  R9 float64 precision case and the empty-dir cleanup): **53 timestamped case dirs in 28
-  experiments** (all with a manifest; one payload hash mismatch), `solved 21`, `staged 29`,
-  `refused 3`, `invalid 0`; the readiness registry declares 26 of them (20 approved / 6 proposed),
-  27 are `UNDECLARED` by design; 6 screens in 6 files over 2 study ids with 36 shortlist rows.
-  The `ev_*` experiments are declared where read out and otherwise `UNDECLARED`.
+  R5a balloon control, the R9 float64 precision case and the empty-dir cleanup): **54 timestamped
+  case dirs in 29 experiments** (all with a manifest; one payload hash mismatch), `solved 22`,
+  `staged 29`, `refused 3`, `invalid 0`; the readiness registry declares 27 of them
+  (20 approved / 7 proposed), 27 are `UNDECLARED` by design; 6 screens in 6 files over 2 study ids
+  with 36 shortlist rows. The `ev_*` experiments are declared where read out and otherwise
+  `UNDECLARED`.
 
 ## Determinism and safety
 

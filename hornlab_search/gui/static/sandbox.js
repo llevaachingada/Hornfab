@@ -26,7 +26,9 @@
 // sentence are never invented here, and a missing catalog degrades to the raw key site-wide.
 
 import { css, niceTicks, el, fmt, measuredWidth, wallSection, mirrorRing } from "./charts.js";
-import { mirrorMesh, loadThree, normalizeRenderPrefs, buildSmoothGeometry } from "./view3d.js";
+import { mirrorMesh, loadThree, normalizeRenderPrefs, normalizeLookExtras, buildSmoothGeometry,
+         buildMeshEdgeGeometry, releaseMeshEdgeGeometry, loadLookExtras, saveLookExtras,
+         createMeshNet, meshNetLook } from "./view3d.js";
 import { loadParamCatalog, formatParamTitle, formatSearchRange, docFor } from "./paramtips.js";
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => (
@@ -577,7 +579,8 @@ export function mouthBandPath(mouth, X, Y) {
 // file), so the sandbox mirrors that scene's exact shape — same tokens, same material recipe,
 // same light rig, same persisted render-prefs key through view3d.js's exported
 // normalizeRenderPrefs — so the owner's saved prefs apply here AND edits made here persist to
-// every other 3D surface.
+// every other 3D surface. The triangle-edge overlay and the look-extras store (depth lines /
+// light angle / mesh edges) are imported from view3d.js rather than mirrored here.
 const RENDER_KEY = "hl-v3d-render";       // view3d.js::RENDER_PREF_KEY (shared key, same meaning)
 const SHADOW_KEY = "hl-v3d-shadows";      // the existing wall-shadows toggle the 3D pages persist
 // Existing named colours of view3d.js (module-private there), mirrored by value: the sandbox's
@@ -719,11 +722,13 @@ function savePrefs3d(prefs) {
   return p;
 }
 
-/** The persisted render-settings chip (surface / ridges / light) for the sandbox's hot-swap
- *  scene: same control set, same storage key, same in-place application as
- *  view3d.js::applyRenderControls — which is module-private there and cannot be imported. */
+/** The persisted render-settings chip (surface / ridges / mesh / light) for the sandbox's hot-swap
+ *  scene: same control set, same storage keys, same in-place application as
+ *  view3d.js::applyRenderControls — which is module-private there and cannot be imported. The
+ *  surface/ridges/light trio persists to RENDER_KEY; the mesh-edge toggle joins the shared
+ *  look-extras key (hl-v3d-look) so all three 3D horn surfaces agree. */
 function renderControlsChip(container, onChange) {
-  const prefs = loadPrefs3d();
+  const prefs = Object.assign(loadPrefs3d(), loadLookExtras());
   if (getComputedStyle(container).position === "static") container.style.position = "relative";
   const chip = document.createElement("div");
   chip.style.cssText = "position:absolute;top:8px;right:8px;z-index:2;display:flex;" +
@@ -742,21 +747,27 @@ function renderControlsChip(container, onChange) {
     `<label style="${lblStyle}">ridges<select data-sbox-pref="ridges" style="${selStyle}">` +
       ["on", "thin", "off"].map(s => opt(s, prefs.ridges, s === "on" ? "on (default)" : s)).join("") +
     `</select></label>` +
+    `<label style="${lblStyle}" title="draw every triangle edge over the surface in white, black or gray: see the tessellation the shading covers">mesh<select data-sbox-pref="mesh" style="${selStyle}">` +
+      ["off", "white", "black", "gray"].map(m => opt(m, prefs.mesh, m === "off" ? "off (default)" : m)).join("") +
+    `</select></label>` +
     `<label style="${lblStyle}">light` +
       `<input type="range" data-sbox-pref="light" min="0.5" max="2" step="0.1" value="${esc(prefs.light)}" aria-label="light intensity multiplier" style="width:72px;accent-color:var(--accent)">` +
       `<span data-sbox-light-val>${esc(prefs.light)}×</span></label>`;
   container.appendChild(chip);
   const surf = chip.querySelector('[data-sbox-pref="surface"]');
   const rid = chip.querySelector('[data-sbox-pref="ridges"]');
+  const meshSel = chip.querySelector('[data-sbox-pref="mesh"]');
   const lit = chip.querySelector('[data-sbox-pref="light"]');
   const val = chip.querySelector("[data-sbox-light-val]");
   const commit = () => {
     const next = savePrefs3d({ surface: surf.value, ridges: rid.value, light: Number(lit.value) });
+    const extra = saveLookExtras(Object.assign(loadLookExtras(), { mesh: meshSel.value }));
     val.textContent = `${next.light}×`;
-    onChange(next);
+    onChange(Object.assign(next, extra));
   };
   surf.addEventListener("change", commit);
   rid.addEventListener("change", commit);
+  meshSel.addEventListener("change", commit);
   lit.addEventListener("input", commit);
   return chip;
 }
@@ -789,7 +800,7 @@ export async function initSandbox3d(container, first, opts = {}) {
   const mat = new THREE.MeshStandardMaterial({
     color: HORN_BODY, roughness: 0.55, metalness: 0.05,
     side: THREE.DoubleSide, transparent: false,
-    polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+    polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2,
   });
   const wireMat = new THREE.LineBasicMaterial({
     color: WIRE_COLOR, transparent: true, opacity: 0.28,
@@ -797,7 +808,12 @@ export async function initSandbox3d(container, first, opts = {}) {
   });
   const mesh = new THREE.Mesh(new THREE.BufferGeometry(), mat);
   const wire = new THREE.LineSegments(new THREE.BufferGeometry(), wireMat);
-  scene.add(mesh, wire);
+  // Triangle-edge net (view3d.js::buildMeshEdgeGeometry + createMeshNet): full tessellation,
+  // anti-aliased fat lines (plain 1 px lines if the addons fail), depth-tested so it paints the
+  // visible solid's faces only — the surface's polygonOffset lets the coincident lines win the
+  // depth test (solid + mesh, not an x-ray). Colour comes from the shared look-extra mode.
+  const meshNet = await createMeshNet();
+  scene.add(mesh, wire, meshNet.object);
   const shadows = (typeof opts.shadows === "boolean") ? opts.shadows : true;
   mesh.castShadow = mesh.receiveShadow = shadows;
 
@@ -821,12 +837,22 @@ export async function initSandbox3d(container, first, opts = {}) {
     wireMat.opacity = ridgeOpacity * RIDGE_OPACITY_GAIN;
     if (p.ridges === "off") scene.remove(wire);
     else scene.add(wire);
+    // Mesh net follows the shared look-extra ("hl-v3d-look") mode: off, or a colour that turns it on.
+    const look = normalizeLookExtras(prefs);
+    const net = meshNetLook(look.mesh);
+    if (!net) {
+      scene.remove(meshNet.object);
+    } else {
+      meshNet.material.color.copy(net.color);
+      meshNet.material.opacity = net.opacity;
+      scene.add(meshNet.object);
+    }
     lights.key.intensity = preset.light.key * p.light;
     lights.fill.intensity = preset.light.fill * p.light;
     lights.rim.intensity = preset.light.rim * p.light;
     lights.hemi.intensity = preset.light.hemi;
   }
-  applyLook(loadPrefs3d());
+  applyLook(Object.assign(loadPrefs3d(), loadLookExtras()));
 
   let groundGeo = null, groundMat = null;
   function buildGround(dim) {
@@ -851,11 +877,12 @@ export async function initSandbox3d(container, first, opts = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(w, h);
+  meshNet.setSize(w, h);                 // LineMaterial.linewidth is in CSS pixels
   if (shadows) { renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; }
   container.appendChild(renderer.domElement);
 
   const { OrbitControls: OC } = await import("three/addons/controls/OrbitControls.js");
-  if (!container.isConnected) return null;             // navigated away mid-load: build nothing
+  if (!container.isConnected) { meshNet.dispose(); return null; }   // navigated away mid-load: build nothing
   const controls = new OC(camera, renderer.domElement);
   controls.update();
 
@@ -863,6 +890,7 @@ export async function initSandbox3d(container, first, opts = {}) {
     for (const e of entries) {
       if (!(e.contentRect.width > 0 && e.contentRect.height > 0)) continue;
       renderer.setSize(e.contentRect.width, e.contentRect.height);
+      meshNet.setSize(e.contentRect.width, e.contentRect.height);
       camera.aspect = e.contentRect.width / e.contentRect.height;
       camera.updateProjectionMatrix();
     }
@@ -871,7 +899,7 @@ export async function initSandbox3d(container, first, opts = {}) {
 
   renderControlsChip(container, applyLook);
 
-  let curGeo = null, curWireGeo = null, fitDim = 0;
+  let curGeo = null, curWireGeo = null, curEdgeGeo = null, fitDim = 0;
   /** Hot-swap: mirror the quarter payload, build fresh geometry, dispose the old. */
   function applyMesh(verts, tris, quadrants) {
     const m = mirrorMesh(verts, tris, quadrants ?? "1");
@@ -885,12 +913,16 @@ export async function initSandbox3d(container, first, opts = {}) {
     const maxDim = Math.max(size.x, size.y, size.z);
     if (!isFinite(maxDim) || maxDim <= 0) { geo.dispose(); return; }
     const wireGeo = buildRidgeGeometry(THREE, geo);
+    const meshEdgeGeo = buildMeshEdgeGeometry(geo);
     if (curGeo) { ridgeCache.delete(curGeo); curGeo.dispose(); }
     if (curWireGeo) curWireGeo.dispose();
+    if (curEdgeGeo) { releaseMeshEdgeGeometry(curGeo); curEdgeGeo.dispose(); }
     curGeo = geo;
     curWireGeo = wireGeo;
+    curEdgeGeo = meshEdgeGeo;
     mesh.geometry = geo;
     wire.geometry = wireGeo;
+    meshNet.setPositions(meshEdgeGeo.getAttribute("position").array);
     // First geometry fits the camera; later swaps keep the orbit — dolly OUT only when the
     // horn outgrew the fit (the frame-player's "one camera" rule, with an honest escape hatch).
     if (fitDim === 0) {
@@ -927,8 +959,10 @@ export async function initSandbox3d(container, first, opts = {}) {
     renderer.dispose();
     if (curGeo) { ridgeCache.delete(curGeo); curGeo.dispose(); }
     if (curWireGeo) curWireGeo.dispose();
+    if (curEdgeGeo) { releaseMeshEdgeGeometry(curGeo); curEdgeGeo.dispose(); }
     mat.dispose();
     wireMat.dispose();
+    meshNet.dispose();
     hemi.dispose();
     key2.dispose();
     fill.dispose();

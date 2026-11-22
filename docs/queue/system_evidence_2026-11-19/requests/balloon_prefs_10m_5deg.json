@@ -1,0 +1,5 @@
+{
+  "polar_observation_distance_m": 10.0,
+  "spherical_sampling_enabled": true,
+  "balloon_angle_precision_deg": 5.0
+}

@@ -7,6 +7,11 @@
 // The clearance record from /api/hw/case is drawn as a coloured measurement line; a violation
 // also gets a red intersection plane/outline so the overlap is visible.
 //
+// A "Mesh" select (next to "Horn") draws every triangle edge of the horn over the surface in
+// white, black or gray, using view3d.js::buildMeshEdgeGeometry + createMeshNet — the same
+// anti-aliased net the horn 3D views offer. Its initial state follows the shared look-extra
+// setting (hl-v3d-look); changing it affects this scene only, without writing that preference.
+//
 // UNITS: every mesh coordinate, bbox, camera distance, grid and scale bar is in MILLIMETRES.
 // The API returns mm and we do not rescale: three.js is unitless, so the whole scene stays in one
 // unit (mm) and the 100 mm bar is literally 100 scene units long.
@@ -16,7 +21,8 @@
 // same dispose function for callers that need it explicitly.
 
 import { css } from "./charts.js";
-import { loadThree } from "./view3d.js";
+import { loadThree, buildMeshEdgeGeometry, releaseMeshEdgeGeometry, loadLookExtras,
+         createMeshNet, meshNetLook } from "./view3d.js";
 
 const encKey = key => String(key).split("/").map(encodeURIComponent).join("/");
 const esc = s => (s == null ? "" : String(s))
@@ -130,7 +136,8 @@ async function build3d(host, key, opts, isDisposed) {
   stage.setAttribute("role", "img");
   stage.setAttribute("aria-label",
     "3-D view of the staged box and horn in millimetres. Drag to orbit, scroll to zoom. " +
-    "The clearance measurement is drawn as a coloured line.");
+    "The clearance measurement is drawn as a coloured line. Buttons set box opacity, horn " +
+    "visibility and the starting camera; a menu sets the mesh net colour.");
   const decimated = [box.decimated && "box", horn.decimated && "horn"].filter(Boolean);
   host.innerHTML = `
     <div class="hw3d-controls" role="group" aria-label="3-D view controls">
@@ -140,6 +147,15 @@ async function build3d(host, key, opts, isDisposed) {
           aria-label="Box opacity ${Math.round(o * 100)} percent">${Math.round(o * 100)}%</button>`).join("")}
       <button type="button" class="btn btn-sm" data-hw3d-horn aria-pressed="true"
         title="Show or hide the horn mesh">Horn</button>
+      <label class="hw3d-control-label" for="hw3d-mesh-sel">Mesh</label>
+      <select id="hw3d-mesh-sel" data-hw3d-mesh aria-label="Mesh net colour"
+        title="Triangle net over the horn: off, white, black or gray"
+        style="font-family:var(--f-mono);font-size:0.78rem;background:var(--surface,#fff);color:var(--ink,#222);border:1px solid var(--rule,#ccc);border-radius:4px;padding:1px 4px">
+        <option value="off">off</option>
+        <option value="white">white</option>
+        <option value="black">black</option>
+        <option value="gray">gray</option>
+      </select>
       <button type="button" class="btn btn-sm" data-hw3d-reset
         title="Restore the starting camera">Reset view</button>
       <button type="button" class="btn btn-sm" disabled
@@ -172,11 +188,34 @@ async function build3d(host, key, opts, isDisposed) {
   const hornMat = new THREE.MeshStandardMaterial({
     color: tokenColor(THREE, "--accent", "#0d6e7a"), roughness: 0.45, metalness: 0.04,
     side: THREE.DoubleSide,
+    // Pushed a hair back (depth only, no visual shift) so the coincident mesh-edge lines win the
+    // depth test and the shaded surface still reads as one solid body under them.
+    polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2,
   });
   const boxMesh = new THREE.Mesh(boxGeo, boxMat);
   const hornMesh = new THREE.Mesh(hornGeo, hornMat);
   boxMesh.renderOrder = 1;
   scene.add(boxMesh, hornMesh);
+
+  // Triangle net of the horn: depth-tested (so it lies on the visible teal solid, not through it),
+  // anti-aliased fat lines from the shared factory, colour/opacity from the shared look-extra mode.
+  // The surface's polygonOffset makes the coincident lines win; renderOrder 3 draws them after the
+  // surface and the translucent box. This scene's copy only — no preference is written here.
+  const meshEdgeGeo = buildMeshEdgeGeometry(hornGeo);
+  const meshNet = await createMeshNet();
+  meshNet.setPositions(meshEdgeGeo.getAttribute("position").array);
+  scene.add(meshNet.object);
+  const meshSel = host.querySelector("select[data-hw3d-mesh]");
+  meshSel.value = loadLookExtras().mesh;              // initial state follows the shared setting
+  const applyMeshNet = () => {
+    const look = meshNetLook(meshSel.value);
+    meshNet.object.visible = !!look;
+    if (look) {
+      meshNet.material.color.copy(look.color);
+      meshNet.material.opacity = look.opacity;
+    }
+  };
+  applyMeshNet();
 
   // Lights: a hemisphere for the shadow side plus key/fill/rim, all scaled to the union.
   const center = new THREE.Vector3((u.lo[0] + u.hi[0]) / 2, (u.lo[1] + u.hi[1]) / 2, (u.lo[2] + u.hi[2]) / 2);
@@ -297,10 +336,11 @@ async function build3d(host, key, opts, isDisposed) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "low-power" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(w, h);
+  meshNet.setSize(w, h);                 // LineMaterial.linewidth is in CSS pixels
   renderer.domElement.tabIndex = 0;
   renderer.domElement.setAttribute("role", "img");
   renderer.domElement.setAttribute("aria-label",
-    "Interactive 3-D view of the box and horn in millimetres. Use the buttons above for box opacity, horn visibility and reset.");
+    "Interactive 3-D view of the box and horn in millimetres. Use the controls above for box opacity, horn visibility, mesh net colour and reset.");
   stage.appendChild(renderer.domElement);
 
   const camera = new THREE.PerspectiveCamera(45, w / h, Math.max(0.1, maxDim / 1000), maxDim * 100);
@@ -353,6 +393,7 @@ async function build3d(host, key, opts, isDisposed) {
       const nw = Math.max(1, Math.round(e.contentRect.width));
       const nh = Math.max(1, Math.round(e.contentRect.height));
       renderer.setSize(nw, nh);
+      meshNet.setSize(nw, nh);
       camera.aspect = nw / nh;
       camera.updateProjectionMatrix();
       updateLabels();
@@ -373,6 +414,7 @@ async function build3d(host, key, opts, isDisposed) {
     hornMesh.visible = !hornMesh.visible;
     e.currentTarget.setAttribute("aria-pressed", String(hornMesh.visible));
   });
+  meshSel.addEventListener("change", applyMeshNet);    // this scene only, no persistence
   host.querySelector("button[data-hw3d-reset]").addEventListener("click", () => {
     camera.position.copy(home);
     controls.target.copy(center);
@@ -392,6 +434,7 @@ async function build3d(host, key, opts, isDisposed) {
     const nw = Math.max(1, Math.round(stage.clientWidth || w));
     const nh = Math.max(1, Math.round(stage.clientHeight || h));
     renderer.setSize(nw, nh);
+    meshNet.setSize(nw, nh);
     camera.aspect = nw / nh;
     camera.updateProjectionMatrix();
   };
@@ -417,6 +460,8 @@ async function build3d(host, key, opts, isDisposed) {
         m.dispose();
       }
     });
+    releaseMeshEdgeGeometry(hornGeo);       // the positions source is not a scene child
+    meshEdgeGeo.dispose();
     renderer.dispose();
     if (renderer.forceContextLoss) renderer.forceContextLoss();
     if (renderer.domElement && renderer.domElement.parentNode) {

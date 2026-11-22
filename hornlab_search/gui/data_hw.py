@@ -18,12 +18,15 @@ resolve inside the store, so a manifest cannot point the GUI at an arbitrary fil
 from __future__ import annotations
 
 import json
+import logging
 import math
 import re
 from pathlib import Path
 from typing import Any
 
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 REGISTRY_REL = Path("docs/research/system_woofer_2026-11-18/readiness.yaml")
 CASE_FILES_DIR = "cases.d"
@@ -723,7 +726,11 @@ def _geometry(store: Path, case: Path, row: dict, horn: dict | None) -> dict | N
     exteriors = sorted(owner.glob("bl_output/*/exterior.msh"))
     if not exteriors:
         return None
-    import meshio
+    try:
+        import meshio
+    except ImportError as exc:  # optional GUI dependency: degrade, never crash the endpoint
+        log.warning("3-D geometry unavailable: meshio is not installed (%s)", exc)
+        return None
 
     def read(p: Path) -> np.ndarray:
         return _cached(("pts",) + _stamp(p), lambda: np.asarray(meshio.read(p).points, dtype=np.float64))
@@ -768,7 +775,11 @@ def _mesh_arrays(path: Path) -> tuple[np.ndarray, np.ndarray]:
     A mesh with no triangle cells is refused by name, never silently returned empty.
     """
     def read():
-        import meshio
+        try:
+            import meshio
+        except ImportError as exc:  # optional GUI dependency: refuse by name, never empty
+            raise RuntimeError(
+                f"{Path(path).name}: cannot read mesh; missing dependency 'meshio'") from exc
         mesh = meshio.read(path)
         found: dict[str, int] = {}
         for cell in mesh.cells:

@@ -3566,6 +3566,10 @@ Local-only, added 2026-11-02 (no GitHub issue state changed): GUI frequency-axis
 Local-only, added 2026-11-02 (no GitHub issue state changed): **P11 HF data sync DONE** - public dataset repo <https://huggingface.co/datasets/chingadalleva/hornlab-search-data> (7 tar shards, 10.77 GB packed: text/solve/dataset; meshes not uploaded), `tools/hf_sync.py` corrected to `hf upload`. Owner-machine finding: Xet uploads stall here; upload with `HF_HUB_DISABLE_XET=1`. Still open in P11: merge to `main` (which branches) and the two v4 re-runs.
 # ISSUES
 
+## 2026-11-21 — Sculpted V11 termination
+
+- OPEN. The freestanding GRID builder joins the inner and outer lip rings with a straight ruled end face. A physical roundover needs a versioned explicit transition, tangent and clearance checks, and measured mesh/source parity before BEM. Crowe C1/C2 remain held on source and shell fidelity. The native R2 truncation returned an unfavorable single-tier delta. [Measured V11 evidence](evidence/sculpted_xo900_v11_2026-11-21/README.md).
+
 ## 2026-11-16 (20:10) - P0 non-CD scoring truth LANDED; P1 awaits owner gates
 
 - DONE: `targets/scoring_view.py` + additive run/campaign/compare/report payloads; web GUI scored-range targets,

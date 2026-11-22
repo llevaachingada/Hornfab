@@ -233,7 +233,9 @@ Not established:
   ~16 dB (see Mesh convergence); the 25 vs 49 control tests frequency sampling only, not mesh
   convergence. A `float64` control now exists (R9, [PRECISION_FLOAT64_2026-11-21.md](PRECISION_FLOAT64_2026-11-21.md)):
   on the assembled #2 mesh it bounds the float32 error at 0.0029 dB / 0.012° and leaves null
-  depths unchanged, so the null movement is a mesh/sampling effect. No full sphere.
+  depths unchanged, so the null movement is a mesh/sampling effect. No full sphere in this
+  queue; the 2026-11-21 R5a addendum below adds one 10 m equal-area balloon as a diagnostic,
+  not a convergence or declared-standard claim.
 - The bassbox-vs-BL audit is complete ([BASSBOX_MODEL_AUDIT_2026-11-21.md](BASSBOX_MODEL_AUDIT_2026-11-21.md));
   the LF curves above are BL only, and the differences are the declared model differences (demo
   shape/Sd, port end correction/NFR, losses, finite baffle), not a solver defect.
@@ -254,3 +256,21 @@ p = field.p_pa[:, 0]
 ```
 
 Raw `run/*.npz` remain local; this document is the committed text evidence.
+
+## 2026-11-21 closeout addendum
+
+- **R5a balloon DI/power:** one CPU `beat_cpu` solve of the assembled #2 source with BL's
+  equal-area Fibonacci sphere enabled at 10 m / 5° (1650 points), 200/1000/2500 Hz. Per-excitation
+  DI and power are in [BALLOON_DI_POWER_2026-11-21.md](BALLOON_DI_POWER_2026-11-21.md); the
+  observation-standard half (R5b) remains blocked by owner decision 5.
+- **WP6 funnel ledger:** a deterministic read-only join of the screen shortlist to BEM case dirs
+  now reports gate losses and the honest audit status
+  ([FUNNEL_LEDGER_2026-11-21.md](FUNNEL_LEDGER_2026-11-21.md)). No shortlist candidate reaches a
+  solved two-channel case, so the false-negative audit is explicitly `INSUFFICIENT_PAIRS`.
+- **R7a screen calibration record:** the screen-vs-installed-BEM E_shape comparison is now a
+  machine record ([JSON](SCREEN_ESHAPE_CALIBRATION_RECORD_2026-11-21.json)); threshold recalibration
+  (R7b) still needs the real transducer shape and a 5° or finer grid.
+- **Backend closeout:** B22/B26/B30 and the F19 meshio guard are fixed; the remaining B-items are
+  either already fixed or explicitly deferred to a design/owner decision
+  ([BACKEND_CLOSEOUT_2026-11-21.md](BACKEND_CLOSEOUT_2026-11-21.md)).
+

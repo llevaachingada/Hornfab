@@ -341,7 +341,3 @@ def asdict_safe(spec: C.SystemSpecV1) -> dict[str, Any]:
     import dataclasses
 
     return dataclasses.asdict(spec)
-
-
-def _unused(x: Any) -> None:  # keep typing.Any import used on module level for annotations
-    return None

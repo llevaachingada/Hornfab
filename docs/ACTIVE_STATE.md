@@ -32,6 +32,12 @@ git log --oneline -5; git status --porcelain
 
 ## State, at write time
 
+- **2026-11-21 08:57 EST:** `sculpted_xo900_cma_pilot_2026-11-21` launched as detached controller PID 12984. Three V11 screen tranches precede matched verification and conditional 60-valid extensions. Read `runs/nights/sculpted_xo900_cma_pilot_2026-11-21/queue_state.json` for live state. [Queue recipe](queue/sculpted_xo900_cma_pilot_2026-11-21.yaml).
+
+- **2026-11-21 08:30 EST:** `sculpted_xo900_acoustic_discovery_2026-11-21` finished 7/7. The queue registered six existing observations and measured one new native R2 truncation probe under home-900 V11. The GPU lock was free at close. [Matched acoustic readout](evidence/sculpted_xo900_v11_2026-11-21/README.md).
+
+- **2026-11-21 04:21 EST:** `hornfab_gpu8_2026-11-21` launched detached as controller PID 16772. Seven sequential blocks reserve six hours for new geometry and two for proven-horn follow-up. Pending jobs use nonbinding packaging limits by owner direction. Live state is `runs/nights/hornfab_gpu8_2026-11-21/queue_state.json`; per-block results are indexed in its `readout.json`. Wall-clock admission closes about 12:21 EST and the queue can finish earlier. Recheck the live GPU lock before any solve.
+
 - **2026-11-20 afternoon:** night `fav_crowe_2026-11-20` queued behind `cd_v11_verify_and_expand_2026-11-20`
   (FAV-001 k-variants + compact500_xo900); see CONTINUITY.
 

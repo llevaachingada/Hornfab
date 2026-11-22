@@ -1,0 +1,89 @@
+{
+  "axis_probe_id": "observation:probe:on_axis_10m",
+  "case_dir": "system/ev_balloon_di/20261121T140048Z-balloon-62680-49358be1",
+  "claim": "Per-excitation DI and power from one equal-area Fibonacci balloon at 10 m, three frequencies, on one mesh with BL's demo transducer shape. This is a balloon diagnostic, not a declared far-field/listening-window standard and not a combined system DI.",
+  "excitations": {
+    "excitation:horn": {
+      "axis_probe_id": "observation:probe:on_axis_10m",
+      "axis_source": "on_axis_probe",
+      "di_db": [
+        1.8630206813254035,
+        7.463739308687963,
+        12.119238187033998
+      ],
+      "di_source": "balloon",
+      "distance_m": 10.0,
+      "domain_id": "observation:sphere",
+      "frequencies_hz": [
+        200.0,
+        1000.0,
+        2500.0
+      ],
+      "per_input": "normal_velocity_mps",
+      "power_pa2": [
+        4.989266470599883e-05,
+        0.06185443636503309,
+        0.06639661238294292
+      ],
+      "quadrature": "equal_area_fibonacci"
+    },
+    "vented/voltage": {
+      "axis_probe_id": "observation:probe:on_axis_10m",
+      "axis_source": "on_axis_probe",
+      "di_db": [
+        2.4069521394960236,
+        2.867904480834309,
+        7.195447341299394
+      ],
+      "di_source": "balloon",
+      "distance_m": 10.0,
+      "domain_id": "observation:sphere",
+      "frequencies_hz": [
+        200.0,
+        1000.0,
+        2500.0
+      ],
+      "per_input": "V_rms",
+      "power_pa2": [
+        0.0034001015030661282,
+        0.005624680472531532,
+        0.0002232208068986659
+      ],
+      "quadrature": "equal_area_fibonacci"
+    }
+  },
+  "fidelity": {
+    "band": "200, 1000, 2500 Hz (three frequencies)",
+    "distance": "10 m equal-area Fibonacci balloon",
+    "mesh": "single mesh, default refinement",
+    "motor": "real 12PR300 T/S (assembled #2 source case)",
+    "transducer_shape": "BL demo 200 mm shape (R2 confound)"
+  },
+  "project_preferences": {
+    "balloon_angle_precision_deg": 5.0,
+    "polar_observation_distance_m": 10.0,
+    "spherical_sampling_enabled": true
+  },
+  "refusals": [
+    "FAR_FIELD_STANDARD_NOT_DECLARED_OWNER_DECISION_5",
+    "COMBINED_EXCITATION_DI_REFUSED_MIXED_REFERENCES",
+    "MESH_CONVERGENCE_NOT_ESTABLISHED_R6",
+    "DEMO_TRANSDUCER_SHAPE_R2"
+  ],
+  "request": "docs/queue/system_evidence_2026-11-19/requests/balloon_di_10m_3f.json",
+  "run_dir": "system/ev_balloon_di/20261121T140048Z-balloon-62680-49358be1/run",
+  "schema": "hornlab.system.balloon_di_power.v1",
+  "source_case": "system/ev_assembled_motor_real/20261120T150709Z-wide_assembled-01612-383da940",
+  "sphere": {
+    "distance_m": 10.0,
+    "domain_id": "observation:sphere",
+    "exact_plus_z_sample": false,
+    "expected_points": 1650,
+    "kind": "spherical_observation",
+    "max_z_unit": 0.9993939393939393,
+    "points": 1650,
+    "quadrature": "equal_area_fibonacci",
+    "radius_max_m": 10.000000000000002,
+    "radius_min_m": 9.999999999999998
+  }
+}

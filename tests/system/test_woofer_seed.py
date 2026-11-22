@@ -373,3 +373,32 @@ def json_text(result: W.SeedResult) -> str:
     import json
 
     return json.dumps(result.to_payload(), sort_keys=True)
+
+
+def _pareto_row(row_id: str, **overrides: float) -> dict:
+    axes = {
+        "match_error_h_db2": 1.0,
+        "match_error_v_db2": 1.0,
+        "lf_f3_hz": 40.0,
+        "port_velocity_ratio": 0.5,
+        "excursion_margin_db": 3.0,
+        "cabinet_footprint_m2": 0.2,
+        "mounting_distance_mm": 30.0,
+    }
+    axes.update(overrides)
+    return {"row_id": row_id, "numeric_axes": axes, "feasibility": {}}
+
+
+def test_nondominated_front_is_strict_and_keeps_ties() -> None:
+    # ``good`` is better on one axis and equal elsewhere -> strict domination.
+    good = _pareto_row("good", match_error_h_db2=0.5)
+    worse = _pareto_row("worse", match_error_h_db2=1.5)
+    # ``tradeoff`` is better on H but worse on V -> incomparable, both stay.
+    tradeoff = _pareto_row("tradeoff", match_error_h_db2=0.4, match_error_v_db2=2.0)
+    # ``tie`` equals ``good`` -> no strict improvement either way, both stay.
+    tie = _pareto_row("tie", match_error_h_db2=0.5)
+
+    front = W._nondominated([good, worse, tradeoff, tie])
+    ids = {row["row_id"] for row in front}
+    assert ids == {"good", "tradeoff", "tie"}
+    assert "worse" not in ids

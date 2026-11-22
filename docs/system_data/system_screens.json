@@ -1,7 +1,7 @@
 {
   "tool": "system_cases",
   "schema_version": 1,
-  "generated_utc": "2026-11-21T09:04:29.632621Z",
+  "generated_utc": "2026-11-21T14:28:01.128305Z",
   "source": {
     "root": ".",
     "system_runs": "system_runs"

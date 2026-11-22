@@ -1,0 +1,119 @@
+name: sculpted900_crowe_k_home
+family: FREEFORM
+brief_file: ../../briefs/home_xo900_2026-11-20/room_landscape_80x50_900_hf1440_v11cd_sculpted_cma.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_L_mm: 296.6766717865
+  g_a_h_deg: 33.8087137539
+  g_a_v_deg: 28.2302464599
+  g_k: 1.9263996374
+  g_n: 2.7291425895
+  g_q: 0.996
+  g_r_lip_mm: 18.7764417313
+  g_s: 0.4000940039
+  g_sf_ab: 0.8262828207
+  g_sf_amt: 0.2092203489
+  g_sf_m: 4.0
+  g_sf_n1: 1.8
+  g_sf_n2: 7.0
+  g_sf_start: 0.25
+  g_wrap_deg: 52.5262665629
+bounds:
+  g_L_mm:
+    lo: 271.6766717865
+    hi: 321.6766717865
+    search: true
+  g_a_h_deg:
+    lo: 31.8087137539
+    hi: 35.8087137539
+    search: true
+  g_a_v_deg:
+    lo: 28.2302464599
+    hi: 28.2302464599
+    search: false
+  g_k:
+    lo: 1.1263996374
+    hi: 2.7263996374
+    search: true
+  g_n:
+    lo: 2.7291425895
+    hi: 2.7291425895
+    search: false
+  g_q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  g_r_lip_mm:
+    lo: 18.7764417313
+    hi: 18.7764417313
+    search: false
+  g_s:
+    lo: 0.4000940039
+    hi: 0.4000940039
+    search: false
+  g_sf_ab:
+    lo: 0.8262828207
+    hi: 0.8262828207
+    search: false
+  g_sf_amt:
+    lo: 0.2092203489
+    hi: 0.2092203489
+    search: false
+  g_sf_m:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  g_sf_n1:
+    lo: 1.8
+    hi: 1.8
+    search: false
+  g_sf_n2:
+    lo: 7.0
+    hi: 7.0
+    search: false
+  g_sf_start:
+    lo: 0.25
+    hi: 0.25
+    search: false
+  g_wrap_deg:
+    lo: 52.5262665629
+    hi: 52.5262665629
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 8900
+  dof_cap_verify: 8900
+  dof_cap_final: 8900
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 1024
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.12
+  seed: 1234
+  budget: 60
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 120
+  error_policy: retry_same_then_stop
+description: Protected k-home derivative. Search depth, H opening and k with report-only
+  packaging.

@@ -1,7 +1,7 @@
 {
   "tool": "system_cases",
   "schema_version": 1,
-  "generated_utc": "2026-11-21T09:04:29.587730Z",
+  "generated_utc": "2026-11-21T14:28:01.030487Z",
   "source": {
     "root": ".",
     "system_runs": "system_runs",
@@ -15,45 +15,45 @@
     "schema": "hw_readiness_v2",
     "updated": "2026-11-21",
     "fidelity_note": "Coupled cases are declared COUPLED_VENTED_FEM_BEM_LEM with the FIRST_REFERENCE_CASE fidelity policy attached: the horn channel is an ideal normal-velocity source (no compression-driver absolute SPL), and every case uses BL's provider-default transducer SHAPE.",
-    "declared_cases": 26,
+    "declared_cases": 27,
     "error": null
   },
   "census": {
-    "scanned": 53,
-    "included": 53,
+    "scanned": 54,
+    "included": 54,
     "by_status": {
       "refused": 3,
-      "solved": 21,
+      "solved": 22,
       "staged": 29
     },
     "by_fidelity": {
-      "COUPLED_VENTED_FEM_BEM_LEM": 24,
+      "COUPLED_VENTED_FEM_BEM_LEM": 25,
       "UNDECLARED": 29
     },
     "by_clearance": {
-      "not_recorded": 51,
+      "not_recorded": 52,
       "pass": 2
     },
-    "experiments": 28,
-    "solved": 21,
-    "declared": 26,
+    "experiments": 29,
+    "solved": 22,
+    "declared": 27,
     "declared_missing_on_disk": 0,
     "on_disk_not_declared": 27,
     "manifest_integrity": {
       "mismatch": 1,
-      "verified": 52
+      "verified": 53
     },
     "run_manifest_integrity": {
-      "unknown": 51,
+      "unknown": 52,
       "verified": 2
     },
     "project_integrity": {
-      "unknown": 38,
+      "unknown": 39,
       "verified": 15
     },
     "request_integrity": {
       "unknown": 36,
-      "verified": 17
+      "verified": 18
     },
     "diagnostics": 1
   },
@@ -2515,6 +2515,126 @@
         "completion_mask": {
           "done": 12,
           "total": 12,
+          "complete": true
+        }
+      },
+      "metadata": {
+        "box_source": "run/project.snapshot.blab.json",
+        "clearance_source": null,
+        "sources": [
+          "request.json",
+          "run/request.json",
+          "run/compiled-system.json",
+          "run/project.snapshot.blab.json",
+          "case.blab.json",
+          "manifest.payload"
+        ]
+      }
+    },
+    {
+      "experiment": "ev_balloon_di",
+      "case": "20261121T140048Z-balloon-62680-49358be1",
+      "case_key": "ev_balloon_di/20261121T140048Z-balloon-62680-49358be1",
+      "created_utc": "2026-11-21T14:00:48.330568+00:00",
+      "kind": "bl_derived_request_case",
+      "gate": "R5a 10 m equal-area balloon DI/power (200/1000/2500 Hz)",
+      "gate_source": "readiness",
+      "ref": "R5A-BALLOON",
+      "status": "solved",
+      "solved": true,
+      "n_frequencies": 3,
+      "freq_min_hz": 200.0,
+      "freq_max_hz": 2500.0,
+      "backend_id": "beat_cpu",
+      "solve_kind": "coupled_bem_fem",
+      "phasor_convention": "exp(+i omega t)",
+      "completion": "3/3",
+      "authorized_by": "system-evidence-r5-2026-11-21",
+      "fidelity": "COUPLED_VENTED_FEM_BEM_LEM",
+      "motor": "real",
+      "motor_source": "readiness",
+      "transducer_shape": "demo",
+      "horn_source": "ideal_velocity",
+      "pair_with": null,
+      "project_sha256": null,
+      "project_integrity": "unknown",
+      "run_manifest_sha256": "c50e065fb94e8e3c21ad670ddbbe42706d1b76d74c9f483ed2490205f38cb93c",
+      "run_manifest_integrity": "unknown",
+      "request_sha256": "8b4e11567f327596bc0708b49512cd10154cd6f757854b6a0e957c0c08ac32ab",
+      "request_integrity": "verified",
+      "manifest_payload_sha256": "8efbb00e47ef0d8b70a317847f784d21376dfb52bba4aab015734d4aac2fcb10",
+      "manifest_integrity": "verified",
+      "box_width_mm": 320.0,
+      "box_height_mm": 500.0,
+      "box_depth_mm": 360.0,
+      "net_volume_l": 42.169,
+      "net_volume_source": "air_volume_m3",
+      "port_area_cm2": 28.274,
+      "tuning_hz": null,
+      "horn_mesh": null,
+      "horn_mesh_sha256": null,
+      "horn_offset_mm": null,
+      "horn_offset_mm_xyz": null,
+      "clearance_status": "not_recorded",
+      "clearance_min_mm": null,
+      "driver_name": null,
+      "evidence": "system_evidence_2026-11-19/BALLOON_DI_POWER_2026-11-21.md",
+      "notes": "10 m sphere, 5 deg (1650 equal-area Fibonacci points), three frequencies; BL validate rc 0, solve 3/3 complete. Per-excitation DI/power only; single mesh, demo shape, no declared far-field standard.",
+      "declared": true,
+      "run_status": "complete",
+      "stage_ok": null,
+      "stage_error": null,
+      "source_path": "system_runs/system/ev_balloon_di/20261121T140048Z-balloon-62680-49358be1",
+      "run": {
+        "present": true,
+        "status": "complete",
+        "frequencies_hz": [
+          200.0,
+          1000.0,
+          2500.0
+        ],
+        "excitation_port_ids": [
+          "vented/voltage",
+          "excitation:horn"
+        ],
+        "schema": "boundary-lab-headless-result",
+        "schema_version": 2,
+        "started_at_utc": "2026-11-21T14:00:58.442162+00:00",
+        "finished_at_utc": "2026-11-21T14:01:49.169049+00:00",
+        "solver_options": {
+          "cache_frequency_invariant": true,
+          "quadrature_order": 2,
+          "singular_order": 2,
+          "static_condensation": true,
+          "symmetry": "off",
+          "validation_diagnostics": false
+        },
+        "engine_runs": [
+          {
+            "name": "BEAT Engine",
+            "backend": "cpu"
+          }
+        ],
+        "meshes": [
+          {
+            "id": "vented/mesh/interior",
+            "name": "vented__interior",
+            "purpose": "fem_volume"
+          },
+          {
+            "id": "vented/mesh/exterior",
+            "name": "vented__exterior",
+            "purpose": "bem_surface"
+          },
+          {
+            "id": "mesh:horn",
+            "name": "horn",
+            "purpose": "bem_surface"
+          }
+        ],
+        "completion_mask": {
+          "done": 3,
+          "total": 3,
           "complete": true
         }
       },
