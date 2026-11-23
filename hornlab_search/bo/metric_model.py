@@ -28,6 +28,7 @@ from typing import Any
 
 import numpy as np
 
+from .metric_artifact import validate_metric_training_artifact
 from .metric_contracts import (
     METRIC_COMPOSITE_POLICY,
     MetricModelFitResult,
@@ -431,6 +432,15 @@ def fit_metric_model(artifact, *, seed: int = 0, max_iters: int = FIT_MAX_ITERS
             return _fail(f"{REASON_NONFINITE_TRAINING_DATA}:{name}",
                          f"component output {name!r} contains NaN/Inf", d=d, n=n,
                          names=names)
+    # Artifact integrity gate: checksum (when present) + arrays + per-row J reconstruction +
+    # component schema + recorded bounds/score payloads.  Runs before any Torch import/fit, so a
+    # corrupt artifact can never be fitted; a mismatch is a tagged refusal, never repaired.
+    artifact_check = validate_metric_training_artifact(artifact)
+    if not artifact_check.ok:
+        return _fail(artifact_check.reason or REASON_INVALID_ARTIFACT,
+                     f"artifact integrity check failed: {artifact_check.reason}"
+                     + (f": {artifact_check.detail}" if artifact_check.detail else ""),
+                     d=d, n=n, names=names)
     overall_hash = _model_hash(X, J_col, Y, component_names_=names, seed=seed)
     checksum = str(getattr(artifact, "checksum", "") or "")
     train_ids = tuple(str(v) for v in (getattr(artifact, "observation_ids", ()) or ()))

@@ -64,6 +64,8 @@ per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 freq
 
 [Metric-composite BO Pass 1 ADR (2026-11-22)](research/metric_bo_2026-11-22/ADR_metric_composite_v1.md): frozen `metric-training-v1` artifact and `metric_composite_v1` policy; v10/v11 contribution schemas in `J` units, whole-corpus 64-lowest-J + maximin selection under the 256 training cap, independent-output `ModelListGP`, and composite `qLogNEI` over `-sum(component samples)`. Pass 1 only: synthetic fixtures, no historical rescore/replay, no BEM, no production wiring.
 
+[Metric-composite BO Pass 2 integration (2026-11-22)](research/metric_bo_2026-11-22/09_IMPLEMENTATION_STATUS.md): opt-in `metric_composite_v1` policy and synthetic-only study integration behind strict bounds/score identity and the deterministic `metric-training-npz-v1` artifact; durable-journal proposal/recovery path; research-only physical composite, signed constraints and synthetic diagnostics; deferred [real-data plan](research/metric_bo_2026-11-22/07_DEFERRED_REAL_DATA_PLAN.md) and [GPU pilot](research/metric_bo_2026-11-22/08_DEFERRED_GPU_PILOT.md). No real-data fit, no rescore/replay, no BEM/GPU, canonical checkout unchanged.
+
 [B1 readiness + zero-dimension truth fix (2026-11-18, WP 2.2/D7)](evidence/b1_readiness_2026-11-18/README.md):
 B1/B1f lines checked (kind: command, safe), search/CLI/night dry-run now refuse a zero-free-dimension
 search, the feasibility table, the ext-throat exclusion finding and the queue-ready batches for GPU approval.

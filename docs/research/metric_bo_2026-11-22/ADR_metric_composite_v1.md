@@ -227,3 +227,39 @@ Pass 2 consumes:
 5. `propose_metric_candidate(model_result, candidate_pool, ...) -> MetricProposalResult`
 
 No Pass 2 caller is added in this pass. The artifact and result dataclasses are the contract.
+
+## 10. Pass 2 integration decisions (2026-11-22)
+
+Pass 2 did not change the scientific decision in §1–§7. It added the frozen study boundary:
+
+1. **Identity authority.** `bo/metric_identity.py` owns the bounds and score identity contracts.
+   The bounds payload records the projection version, ordered active keys, per-key physical
+   `lo`/`hi`, log flag, transform kind and fixed values; the score payload records objective
+   version, brief hash, catalog score identity and score module. A caller-declared hash is accepted
+   only when it equals a recomputed hash and every other frozen source agrees. Missing or
+   inconsistent identity is a typed refusal.
+2. **Artifact format.** `bo/metric_artifact.py` freezes `metric-training-npz-v1`: deterministic
+   ZIP_STORED NPZ (fixed order, fixed timestamps), canonical-JSON manifest, per-array sha256,
+   no pickle, `allow_pickle=False` on read. Reload revalidates arrays, IDs, component order/schema,
+   per-row `J == sum(components)`, bounds/score payloads and task identities.
+3. **Policy.** `metric_composite_v1` is appended to `PROPOSAL_POLICIES` and `ENGINE_POLICIES`; it
+   is not the default and not in `PRODUCTION_POLICIES`. The capability and dispatch branches
+   require the strict binding and never fall back to scalar, maximin or a fabricated proposal.
+4. **Study integration.** `studies/metric_study.py` extends the existing builders/service with
+   `metric_training` + `metric_training_manifest` + a model manifest (deterministic reconstruction,
+   no pickled model) + the existing pool + a `proposal` artifact + an additive synthetic `package`
+   block. `metric_bindings` re-reads and revalidates stored bytes.
+5. **Execution boundary.** `metric_execution_gate` refuses real solver execution even with
+   `allow_real_solver=True`; only an injected synthetic evaluator is accepted. The synthetic
+   evaluator implements the existing `studies/runner.py` protocol over the real durable journal, so
+   recovery/idempotency is the established mechanism, not a parallel one.
+6. **Research-only modules.** `physical_composite.py` (canonical v11 CD arithmetic, partial-J
+   honesty), `metric_constraints.py` (signed `g(x) <= 0` hard-feasibility qLogNEI) and
+   `metric_diagnostics.py` (synthetic arm comparison) are not registrable policies. The optimizer
+   advisory is read-only and never switches a running optimizer.
+7. **Scientific limits remain.** Synthetic evidence only; no real-data fit, no calibrated
+   uncertainty, no acoustic improvement claim. Real-data validation and the matched BEM pilot are
+   prepared in docs 07/08 and require separate owner authorization.
+
+See docs 02–09 in this directory for the contracts, validation record, deferred plans and
+implementation status.

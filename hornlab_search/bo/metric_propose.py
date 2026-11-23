@@ -32,6 +32,10 @@ from .metric_contracts import (
     METRIC_COMPOSITE_POLICY,
     MetricProposalResult,
 )
+from .metric_identity import (
+    REASON_BOUNDS_MISSING,
+    check_bounds_identity,
+)
 from .metric_model import (
     REASON_CAPABILITY_MISSING,
     REASON_INSUFFICIENT_DATA,
@@ -174,9 +178,11 @@ def _candidate_dict(candidate) -> dict:
 
 def _unavailable(reason: str, detail: str | None, *, counts=None, policy=None,
                  history=None, versions=None, started=None, model_result=None,
-                 candidate_pool=None) -> MetricProposalResult:
+                 candidate_pool=None, bounds_hash: str | None = None) -> MetricProposalResult:
     policy_obj = policy if isinstance(policy, MetricProposalPolicy) else MetricProposalPolicy()
     hist = history if isinstance(history, MetricProposalHistory) else MetricProposalHistory()
+    resolved_bounds = (str(bounds_hash) if bounds_hash is not None
+                       else _resolve_bounds_hash(policy_obj, candidate_pool, model_result))
     return MetricProposalResult(
         status=STATUS_UNAVAILABLE, reason=reason, detail=detail,
         candidate=None, candidate_id=None, geometry_hash=None, design_hash=None,
@@ -186,7 +192,7 @@ def _unavailable(reason: str, detail: str | None, *, counts=None, policy=None,
         total_sd=None, model_hash=str(getattr(model_result, "model_hash", "") or ""),
         data_hash=str(getattr(model_result, "artifact_checksum", "") or ""),
         policy=METRIC_COMPOSITE_POLICY,
-        bounds_hash=str(_resolve_bounds_hash(policy_obj, candidate_pool, model_result)),
+        bounds_hash=resolved_bounds,
         acq_seed=int(policy_obj.acq_seed), proposal_seed=int(policy_obj.proposal_seed),
         fit_s=getattr(model_result, "timing_s", None), acquisition_s=None,
         counts=dict(counts or {}),
@@ -202,6 +208,22 @@ def _resolve_bounds_hash(policy: MetricProposalPolicy, candidate_pool, model_res
         if value:
             return str(value)
     return ""
+
+
+def _bounds_sources(policy: MetricProposalPolicy, candidate_pool, model_result) -> dict[str, str]:
+    """Every policy/pool/model object that actually exposes a ``bounds_hash`` source."""
+    sources: dict[str, str] = {}
+    for name, obj in (("policy", policy), ("pool", candidate_pool), ("model", model_result)):
+        if obj is None:
+            continue
+        if isinstance(obj, Mapping):
+            if "bounds_hash" in obj:
+                value = obj.get("bounds_hash")
+                sources[name] = "" if value is None else str(value)
+        elif hasattr(obj, "bounds_hash"):
+            value = getattr(obj, "bounds_hash", None)
+            sources[name] = "" if value is None else str(value)
+    return sources
 
 
 def _filter_legal(candidate_pool, history: MetricProposalHistory, model_result,
@@ -282,18 +304,40 @@ def _filter_legal(candidate_pool, history: MetricProposalHistory, model_result,
     return legal, reference, pending_matrix, counts
 
 
-def propose_metric_candidate(model_result, candidate_pool, *, policy=None, history=None
+def propose_metric_candidate(model_result, candidate_pool, *, policy=None, history=None,
+                             require_identity: bool = False,
+                             expected_bounds_hash: str | None = None
                              ) -> MetricProposalResult:
     """Choose one candidate with the composite qLogNEI acquisition.
 
     ``candidate_pool`` may be the standard B2 pool or a caller-restricted pool (for example a
     TuRBO local box); the engine never resamples.  Predictions in the result are model posterior
     summaries, not measured/solved acoustic results.
+
+    ``require_identity=True`` additionally requires the proposal's box identity: every available
+    policy/pool/model ``bounds_hash`` source must be non-empty and equal to
+    ``expected_bounds_hash`` (recomputed by the caller from a live projection).  An ok result then
+    can never carry ``bounds_hash=""``.  The default (``False``) preserves Pass 1 behaviour exactly.
     """
     started = time.perf_counter()
     policy_obj = _coerce_policy(policy)
     hist = _coerce_history(history)
     versions = library_versions()
+
+    identity_bounds: str | None = None
+    if require_identity:
+        expected = "" if expected_bounds_hash is None else str(expected_bounds_hash).strip()
+        sources = _bounds_sources(policy_obj, candidate_pool, model_result)
+        identity = check_bounds_identity(expected_hash=expected, sources=sources,
+                                         required=tuple(sources))
+        if not identity.ok:
+            return _unavailable(
+                identity.reason or REASON_BOUNDS_MISSING,
+                identity.detail or "a recomputed bounds identity is required for this proposal",
+                policy=policy_obj, history=hist, versions=versions, started=started,
+                model_result=model_result, candidate_pool=candidate_pool,
+                bounds_hash=expected)
+        identity_bounds = identity.expected
 
     if candidate_pool is None or getattr(candidate_pool, "status", None) != STATUS_OK \
             or not getattr(candidate_pool, "candidates", ()):
@@ -391,7 +435,8 @@ def propose_metric_candidate(model_result, candidate_pool, *, policy=None, histo
         model_hash=str(getattr(model_result, "model_hash", "") or ""),
         data_hash=str(getattr(model_result, "artifact_checksum", "") or ""),
         policy=METRIC_COMPOSITE_POLICY,
-        bounds_hash=_resolve_bounds_hash(policy_obj, candidate_pool, model_result),
+        bounds_hash=(identity_bounds if identity_bounds is not None
+                     else _resolve_bounds_hash(policy_obj, candidate_pool, model_result)),
         acq_seed=int(policy_obj.acq_seed), proposal_seed=int(policy_obj.proposal_seed),
         fit_s=getattr(model_result, "timing_s", None),
         acquisition_s=getattr(acq, "timing_s", None),

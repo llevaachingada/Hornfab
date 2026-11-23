@@ -233,6 +233,21 @@ def verify_package(package):
             raise StudyError('package carries an unsupported proposal policy')
         if proposal_policy.get('verification_mode') != policy_mod.verification_mode(policy):
             raise StudyError('package verification_mode disagrees with the proposal policy')
+    metric = package.get('metric')
+    if metric is not None:
+        # Additive Pass-2 metric block: a metric package is synthetic-only and can never
+        # authorize a real solver run.  Existing scalar/turbo/pareto bodies have no block.
+        if not isinstance(metric, dict):
+            raise StudyError('package metric block must be an object')
+        if metric.get('policy') != 'metric_composite_v1':
+            raise StudyError('package metric block policy must be metric_composite_v1')
+        if metric.get('synthetic') is not True:
+            raise StudyError('package metric block must declare synthetic provenance')
+        if metric.get('real_solver_allowed') is not False:
+            raise StudyError('metric packages may not authorize a real solver')
+        if not isinstance(metric.get('training_artifact_sha256'), str) or \
+                not metric['training_artifact_sha256']:
+            raise StudyError('package metric block needs the training artifact hash')
     return package
 
 
@@ -295,13 +310,19 @@ def _pins(explicit, spec, key):
 
 def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu',
                         deadline=None, idempotency_key=None, code_pins=None,
-                        dependency_pins=None, resolved_config=None, budget_profile='baseline'):
+                        dependency_pins=None, resolved_config=None, budget_profile='baseline',
+                        metric=None):
     """Bind the current study revision and artifacts into an immutable package.
 
     ``expected_revision`` defaults to the current revision.  A concurrent manual
     edit raises ``Conflict`` at publication time.  ``idempotency_key`` follows
     the service rule: the same key and payload returns the original package;
     the same key with different inputs fails.
+
+    ``metric`` is an optional, additive Pass-2 block (metric-composite training artifact hash +
+    identity pins + synthetic flag).  When absent, the body and identity are exactly the historical
+    scalar/turbo/pareto package; when present, the block is validated as synthetic-only and can
+    never authorize a real solver run.
     """
     if lane not in ('cpu', 'gpu'):
         raise StudyError('lane must be cpu or gpu')
@@ -357,6 +378,12 @@ def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu'
     }
     if budget_profile != 'baseline':     # baseline packages keep their exact historical body
         body['budget_profile'] = budget_profile
+    if metric is not None:
+        # Additive only: the metric block is part of the body/hash for metric packages and is
+        # absent for every existing scalar/turbo/pareto package.
+        if not isinstance(metric, dict):
+            raise StudyError('metric block must be an object')
+        body['metric'] = dict(metric)
     if not isinstance(body['resolved_config'], dict):
         raise StudyError('resolved_config must be an object')
 

@@ -124,11 +124,13 @@ def test_export_surface_is_complete():
         assert hasattr(bo, name), name
     assert PARETO_POLICY == "pareto_pool_v1"
     assert TrustRegion is bo.TrustRegion
-    assert PROPOSAL_POLICIES == ("scalar", "pareto", "cma_seed", "exploration", "turbo")
+    assert PROPOSAL_POLICIES == ("scalar", "pareto", "cma_seed", "exploration", "turbo",
+                                  "metric_composite_v1")
     assert set(PROPOSAL_POLICY_LABELS) == set(PROPOSAL_POLICIES)
     assert "trade-off" in PROPOSAL_POLICY_LABELS["pareto"]
     assert "seed" in PROPOSAL_POLICY_LABELS["cma_seed"].lower()
     assert PROPOSAL_POLICY_LABELS["exploration"] == "fixed exploration"
+    assert "metric" in PROPOSAL_POLICY_LABELS["metric_composite_v1"].lower()
 
 
 def test_policy_turbo_is_exported_and_registered():
@@ -139,7 +141,8 @@ def test_policy_turbo_is_exported_and_registered():
 
 def test_verification_modes_are_frozen():
     assert verification_mode("pareto") == "pareto"
-    for policy in ("scalar", "cma_seed", "exploration"):
+    for policy in ("scalar", "cma_seed", "exploration", "turbo",
+                   "metric_composite_v1"):
         assert verification_mode(policy) == "scalar"
     with pytest.raises(ValueError):
         verification_mode("not-a-policy")

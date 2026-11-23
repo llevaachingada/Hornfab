@@ -38,6 +38,14 @@ from .metric_contracts import (
     sha256_json,
     validate_components,
 )
+from .metric_identity import (
+    bounds_identity as _strict_bounds_identity,
+    bounds_payload,
+    recompute_bounds_hash,
+    recompute_score_hash,
+    score_identity as _score_identity,
+    score_payload,
+)
 
 _ELIGIBLE_STATUS = frozenset({"ok", "complete", "success", "valid"})
 _IDENTITY_FIELDS = (
@@ -75,19 +83,11 @@ _V10_PRIMARY = frozenset({"load", "cov_profile", "rip"})
 def bounds_identity(encoding) -> str:
     """Stable identity of an :class:`ActiveProjection`'s bounds/active-key box.
 
-    A caller that encoded observations through this projection records this hash on every
-    candidate; the selector refuses any candidate whose value disagrees (changed bounds).
+    Delegates to :func:`hornlab_search.bo.metric_identity.bounds_identity` with ``strict=True`` so
+    the hash covers the per-key physical lo/hi, transform kind, active-key order, projection
+    version and fixed values.  Two boxes with the same dimension are not the same box.
     """
-    active = tuple(str(k) for k in getattr(encoding, "active_keys", ()) or ())
-    version = getattr(encoding, "version", None)
-    payload: dict[str, Any] = {"active_keys": list(active), "version": version}
-    try:
-        transforms = encoding.key_transforms()
-    except Exception:  # noqa: BLE001 - a minimal test double may not expose transforms
-        transforms = None
-    if transforms:
-        payload["transforms"] = transforms
-    return sha256_json(payload)
+    return _strict_bounds_identity(encoding, strict=True)
 
 
 def _base_tolerance(params_v9, key: str) -> float:
@@ -802,9 +802,101 @@ def _array_digest(array: np.ndarray) -> dict:
     }
 
 
+def _resolve_identity_stamp(identity_metadata: Mapping[str, Any] | None, version: int,
+                            *, require_identity: bool) -> tuple[dict, list[str]]:
+    """Validate/stamp frozen bounds+score identity into artifact metadata.
+
+    Returns ``(metadata, reasons)``.  ``require_identity=True`` demands a recomputable bounds
+    payload and the full score identity; ``require_identity=False`` validates whatever payload the
+    caller supplied (Pass 1 synthetic callers stay working) and never invents identity.
+    """
+    meta = dict(identity_metadata or {})
+    reasons: list[str] = []
+
+    raw_version = meta.get("objective_version")
+    declared_version = None
+    if raw_version is not None:
+        try:
+            declared_version = int(raw_version)
+        except (TypeError, ValueError):
+            declared_version = None
+    if require_identity and declared_version is None:
+        reasons.append("identity:objective_version_missing")
+    elif declared_version is not None and declared_version != int(version):
+        reasons.append(
+            f"identity:objective_version_mismatch:{declared_version}!={int(version)}")
+
+    # Bounds identity: an explicit payload, or a live encoding supplied by the caller.
+    payload = meta.get("bounds_identity_payload")
+    encoding = meta.get("encoding")
+    recomputed_bounds = ""
+    stamped_payload = None
+    if payload is not None:
+        try:
+            recomputed_bounds = recompute_bounds_hash(payload)
+            stamped_payload = dict(payload)
+        except ValueError as exc:
+            reasons.append(f"identity:bounds_payload_invalid:{exc}")
+    elif encoding is not None:
+        try:
+            recomputed_bounds = _strict_bounds_identity(encoding, strict=True)
+            stamped_payload = bounds_payload(encoding, strict=True)
+        except ValueError as exc:
+            reasons.append(f"identity:bounds_payload_invalid:{exc}")
+    if recomputed_bounds:
+        declared_bounds = str(meta.get("bounds_hash") or "").strip()
+        if declared_bounds and declared_bounds != recomputed_bounds:
+            reasons.append("identity:bounds_hash_mismatch")
+        if stamped_payload is not None:
+            meta["bounds_identity_payload"] = stamped_payload
+        meta["bounds_hash"] = recomputed_bounds
+        meta.pop("encoding", None)
+    elif require_identity:
+        reasons.append("identity:bounds_payload_missing")
+
+    # Score identity: only attempted when required or when the caller already supplied one.
+    brief_hash = str(meta.get("brief_hash") or "").strip()
+    score_hash = str(meta.get("score_hash") or "").strip()
+    declared_score = str(meta.get("score_identity") or "").strip()
+    supplied_payload = meta.get("score_identity_payload")
+    wants_score = require_identity or bool(declared_score) or supplied_payload is not None
+    if wants_score:
+        missing = [name for name, value in (("brief_hash", brief_hash),
+                                            ("score_hash", score_hash)) if not value]
+        if missing:
+            if require_identity:
+                reasons.extend(f"identity:{name}_missing" for name in missing)
+        else:
+            try:
+                expected_payload = score_payload(
+                    objective_version=int(version), brief_hash=brief_hash,
+                    score_hash=score_hash)
+                expected_score = _score_identity(
+                    objective_version=int(version), brief_hash=brief_hash,
+                    score_hash=score_hash)
+            except ValueError as exc:
+                reasons.append(f"identity:score_payload_invalid:{exc}")
+            else:
+                if supplied_payload is not None:
+                    try:
+                        recomputed_score = recompute_score_hash(supplied_payload)
+                    except ValueError as exc:
+                        reasons.append(f"identity:score_payload_invalid:{exc}")
+                    else:
+                        if recomputed_score != expected_score:
+                            reasons.append("identity:score_identity_mismatch")
+                if declared_score and declared_score != expected_score:
+                    reasons.append("identity:score_identity_mismatch")
+                if require_identity:
+                    meta["score_identity_payload"] = expected_payload
+                    meta["score_identity"] = expected_score
+    return meta, reasons
+
+
 def build_metric_training_artifact(selection, *, identity_metadata: Mapping[str, Any],
                                    y_phys=None, G=None,
-                                   feature_names: tuple[str, ...] | None = None
+                                   feature_names: tuple[str, ...] | None = None,
+                                   require_identity: bool = False
                                    ) -> MetricTrainingArtifact:
     """Assemble an immutable ``metric-training-v1`` payload from a successful selection.
 
@@ -817,10 +909,16 @@ def build_metric_training_artifact(selection, *, identity_metadata: Mapping[str,
     if names and version in (10, 11):
         names = tuple(component_names(version))
 
+    stamped_metadata, identity_reasons = _resolve_identity_stamp(
+        identity_metadata, version, require_identity=bool(require_identity))
+
     def _refused(reasons: tuple[str, ...]):
         return MetricTrainingArtifact(
             status="refused", objective_version=version, feature_names=tuple(feature_names or ()),
-            component_names=names, metadata=dict(identity_metadata or {}), reasons=reasons)
+            component_names=names, metadata=dict(stamped_metadata), reasons=reasons)
+
+    if identity_reasons:
+        return _refused(tuple(identity_reasons))
 
     if not isinstance(selection, SelectionResult):
         return _refused(("selection must be a SelectionResult",))
@@ -888,7 +986,7 @@ def build_metric_training_artifact(selection, *, identity_metadata: Mapping[str,
     Y_ro = read_only_array(Y_components)
     schema = component_schema(version)
     schema_hash = component_schema_hash(version)
-    metadata: dict[str, Any] = dict(identity_metadata or {})
+    metadata: dict[str, Any] = dict(stamped_metadata)
     metadata.update({
         "version": METRIC_TRAINING_VERSION,
         "objective_version": version,

@@ -24,7 +24,7 @@ import importlib.metadata
 import importlib.util
 import json
 from dataclasses import dataclass, field, replace
-from typing import Any
+from typing import Any, Mapping
 
 import numpy as np
 
@@ -45,10 +45,15 @@ POLICY_PARETO = "pareto"
 POLICY_CMA_SEED = "cma_seed"
 POLICY_EXPLORATION = "exploration"
 POLICY_TURBO = "turbo"
+#: Pass 2 metric-composite engine (``metric-training-v1`` artifact + multi-output GP +
+#: composite qLogNEI).  Opt-in only; never a default.  The finalist selection rule is the
+#: scalar one because the composite utility still ranks the scalar ``J`` identity.
+POLICY_METRIC_COMPOSITE = "metric_composite_v1"
 
-#: Frozen order for GUI/runner menus.
+#: Frozen order for GUI/runner menus.  ``metric_composite_v1`` is appended last so every
+#: earlier policy keeps its position and meaning.
 PROPOSAL_POLICIES = (POLICY_SCALAR, POLICY_PARETO, POLICY_CMA_SEED, POLICY_EXPLORATION,
-                     POLICY_TURBO)
+                     POLICY_TURBO, POLICY_METRIC_COMPOSITE)
 
 #: User-facing meanings.  Acquisition values and seed picks are technical rankings, not
 #: acoustic quality and not a claim about a horn.
@@ -58,13 +63,15 @@ PROPOSAL_POLICY_LABELS = {
     POLICY_CMA_SEED: "CMA archive seed pack",
     POLICY_EXPLORATION: "fixed exploration",
     POLICY_TURBO: "scalar Bayesian, trust region",
+    POLICY_METRIC_COMPOSITE: "metric-composite Bayesian (per-term contributions)",
 }
 
 STATUS_CAPABILITY_MISSING = "capability_missing"
 STATUS_POOL_EXHAUSTED = "pool_exhausted"
 
 #: Engine-dependent policies.  ``cma_seed``/``exploration`` are explicitly non-BO.
-ENGINE_POLICIES = frozenset({POLICY_SCALAR, POLICY_PARETO, POLICY_TURBO})
+ENGINE_POLICIES = frozenset({POLICY_SCALAR, POLICY_PARETO, POLICY_TURBO,
+                             POLICY_METRIC_COMPOSITE})
 
 REASON_UNSUPPORTED_POLICY = "unsupported_policy"
 REASON_TRAINING_SET_REQUIRED = "training_set_required"
@@ -81,6 +88,19 @@ REASON_DUPLICATE_SEED = "duplicate_seed_identity"
 REASON_INVALID_SEED = "invalid_seed_candidate"
 REASON_NO_ELIGIBLE_SEED = "no_eligible_seed"
 REASON_VALIDATION_FAILED = "proposal_validation_failed"
+
+# --- Pass 2 metric-composite refusals (appended; existing constants keep their meaning) ---
+REASON_METRIC_TRAINING_REQUIRED = "metric_training_artifact_required"
+REASON_METRIC_TRAINING_INVALID = "metric_training_artifact_invalid"
+REASON_METRIC_TRAINING_VERSION = "metric_training_version_unsupported"
+REASON_METRIC_OBJECTIVE_VERSION = "metric_objective_version_unsupported"
+REASON_METRIC_COMPONENT_SCHEMA = "metric_component_schema_mismatch"
+REASON_METRIC_ARRAY_INVALID = "metric_training_array_invalid"
+REASON_METRIC_BOUNDS_IDENTITY = "metric_bounds_identity_mismatch"
+REASON_METRIC_SCORE_IDENTITY = "metric_score_identity_mismatch"
+REASON_METRIC_TASK_IDENTITY = "metric_task_identity_mismatch"
+REASON_METRIC_ENGINE_MISSING = "metric_engine_unavailable"
+REASON_METRIC_ARTIFACT_MODULE_MISSING = "metric_artifact_module_unavailable"
 
 
 # --------------------------------------------------------------------------- outcome
@@ -142,14 +162,297 @@ class ProposalOutcome:
 def verification_mode(policy: str) -> str:
     """Return the frozen verification mode for a policy name.
 
-    Scalar and both non-BO arms use the scalar verification selection; only ``pareto`` changes
-    the fixed finalist selection rule.
+    Scalar, metric-composite and both non-BO arms use the scalar verification selection; only
+    ``pareto`` changes the fixed finalist selection rule.  ``metric_composite_v1`` ranks by the
+    same scalar ``J`` decision quantity (composite utility is ``-sum(components)``), so finalists
+    are selected exactly as for the scalar arm.
     """
     if policy == POLICY_PARETO:
         return "pareto"
-    if policy in (POLICY_SCALAR, POLICY_CMA_SEED, POLICY_EXPLORATION, POLICY_TURBO):
+    if policy in (POLICY_SCALAR, POLICY_CMA_SEED, POLICY_EXPLORATION, POLICY_TURBO,
+                  POLICY_METRIC_COMPOSITE):
         return "scalar"
     raise ValueError(f"unknown proposal policy {policy!r}")
+
+
+# --------------------------------------------------------------------------- metric binding
+
+
+@dataclass(frozen=True)
+class MetricTrainingBinding:
+    """The frozen ``metric-training-v1`` artifact plus the caller's frozen identities.
+
+    A raw artifact is never sufficient: the study must prove that the box, score, task,
+    backend, fidelity, grid and dependency identities it intends to optimize are the ones the
+    artifact was built from.  ``encoding`` is the live :class:`~.encoding.ActiveProjection`; its
+    recomputed bounds hash is the only accepted box identity.
+    """
+
+    artifact: Any
+    encoding: Any = None
+    expected_bounds_hash: str = ""
+    #: ``objective_version``/``brief_hash``/``score_hash`` (+ optional ``score_module``).
+    expected_score: dict = field(default_factory=dict)
+    #: ``task_identity``/``backend``/``fidelity``/``grid_hash``/``dependency_hash``.
+    expected_task: dict = field(default_factory=dict)
+    component_schema: str = ""
+
+
+def _binding_get(binding, name, default=None):
+    if isinstance(binding, Mapping):
+        return binding.get(name, default)
+    return getattr(binding, name, default)
+
+
+def _coerce_metric_binding(metric_training) -> MetricTrainingBinding | None:
+    """Accept a binding, a ``{artifact, ...}`` mapping, or a bare artifact (last with no pins)."""
+    if metric_training is None:
+        return None
+    artifact = _binding_get(metric_training, "artifact")
+    if artifact is not None or isinstance(metric_training, Mapping) and "artifact" in metric_training:
+        return MetricTrainingBinding(
+            artifact=artifact,
+            encoding=_binding_get(metric_training, "encoding"),
+            expected_bounds_hash=str(_binding_get(metric_training, "expected_bounds_hash") or ""),
+            expected_score=dict(_binding_get(metric_training, "expected_score") or {}),
+            expected_task=dict(_binding_get(metric_training, "expected_task") or {}),
+            component_schema=str(_binding_get(metric_training, "component_schema") or ""),
+        )
+    # A bare artifact carries no caller identity: fail closed in validation rather than pretend.
+    return MetricTrainingBinding(artifact=metric_training)
+
+
+def _reason_from_artifact_check(reason: str | None) -> str:
+    text = str(reason or "").lower()
+    if "bounds" in text or "transform" in text or "active" in text or "projection" in text:
+        return REASON_METRIC_BOUNDS_IDENTITY
+    if "score" in text or "brief" in text or "objective" in text or "module" in text:
+        return REASON_METRIC_SCORE_IDENTITY
+    if "component" in text or "schema" in text:
+        return REASON_METRIC_COMPONENT_SCHEMA
+    if "task" in text or "backend" in text or "fidelity" in text or "grid" in text \
+            or "depend" in text or "mesh" in text:
+        return REASON_METRIC_TASK_IDENTITY
+    if "array" in text or "shape" in text or "finite" in text or "parity" in text \
+            or "nan" in text:
+        return REASON_METRIC_ARRAY_INVALID
+    return REASON_METRIC_TRAINING_INVALID
+
+
+def _validate_metric_training(binding: MetricTrainingBinding) -> dict:
+    """Strict, side-effect-free validation of a metric-training binding.
+
+    Returns ``_data(...)`` including the validated artifact on success.  Validation is an
+    independent superset check on top of Lane B's artifact validator: version, schema hash,
+    objective version, component order, array shapes/finiteness, per-row ``J == sum(Y)``,
+    checksum/manifest agreement, bounds identity, score identity and task identities.
+    """
+    try:
+        from . import metric_artifact as _metric_artifact
+        from . import metric_contracts as _metric_contracts
+        from . import metric_identity as _metric_identity
+    except Exception as exc:  # noqa: BLE001 - a missing lane module is a capability gap
+        return _data(STATUS_CAPABILITY_MISSING, REASON_METRIC_ARTIFACT_MODULE_MISSING,
+                     f"metric artifact module is unavailable: {type(exc).__name__}: {exc}")
+    artifact = binding.artifact
+    if artifact is None:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_TRAINING_REQUIRED,
+                     "a metric-training-v1 artifact is required")
+    if getattr(artifact, "status", None) != STATUS_OK:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_TRAINING_INVALID,
+                     f"artifact status is {getattr(artifact, 'status', None)!r}")
+
+    # Lane B's validator is the frozen contract; run it first and map its typed reason.
+    expected_score = dict(binding.expected_score or {})
+    expected_task = dict(binding.expected_task or {})
+    expected_bounds = str(binding.expected_bounds_hash or "").strip()
+    try:
+        check = _metric_artifact.validate_metric_training_artifact(
+            artifact, encoding=binding.encoding,
+            expected_bounds_hash=(expected_bounds or None),
+            expected_score=(expected_score or None),
+            expected_task=(expected_task or None))
+    except TypeError:
+        # Older validator signature: still perform the independent checks below.
+        check = None
+    except Exception as exc:  # noqa: BLE001 - validator failure is a refusal
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_TRAINING_INVALID,
+                     f"artifact validation failed: {type(exc).__name__}: {exc}")
+    if check is not None and not getattr(check, "ok", False):
+        reason = _reason_from_artifact_check(getattr(check, "reason", None))
+        detail = str(getattr(check, "detail", None)
+                     or "; ".join(getattr(check, "reasons", ()) or ())
+                     or getattr(check, "reason", None))
+        return _data(STATUS_UNAVAILABLE, reason,
+                     f"artifact validation failed: {detail}",
+                     artifact_checks=False)
+
+    version = getattr(artifact, "version", None)
+    if version != _metric_contracts.METRIC_TRAINING_VERSION:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_TRAINING_VERSION,
+                     f"artifact version {version!r} != "
+                     f"{_metric_contracts.METRIC_TRAINING_VERSION!r}")
+    try:
+        objective_version = int(getattr(artifact, "objective_version"))
+    except (TypeError, ValueError):
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_OBJECTIVE_VERSION,
+                     "artifact objective version is missing/not an integer")
+    if objective_version not in (10, 11):
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_OBJECTIVE_VERSION,
+                     f"objective version {objective_version!r} is not 10/11")
+
+    expected_names = tuple(_metric_contracts.component_names(objective_version))
+    names = tuple(getattr(artifact, "component_names", ()) or ())
+    if names != expected_names:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_COMPONENT_SCHEMA,
+                     f"component names/order {names!r} != {expected_names!r}")
+    metadata = dict(getattr(artifact, "metadata", {}) or {})
+    schema_hash = _metric_contracts.component_schema_hash(objective_version)
+    recorded_schema = str(metadata.get("component_schema_hash") or "")
+    if recorded_schema and recorded_schema != schema_hash:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_COMPONENT_SCHEMA,
+                     f"recorded component schema hash {recorded_schema!r} != {schema_hash!r}")
+    schema_id = str(metadata.get("component_schema") or "")
+    if schema_id and schema_id != _metric_contracts.component_schema(objective_version)["schema_id"]:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_COMPONENT_SCHEMA,
+                     f"recorded component schema {schema_id!r} is not the v{objective_version} "
+                     "schema")
+    if binding.component_schema and binding.component_schema not in (schema_id, schema_hash):
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_COMPONENT_SCHEMA,
+                     f"caller component schema {binding.component_schema!r} does not match the "
+                     "artifact schema")
+
+    checksum = str(getattr(artifact, "checksum", "") or "")
+    manifest_checksum = str(metadata.get("manifest_checksum") or "")
+    if not checksum:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_TRAINING_INVALID,
+                     "artifact checksum is missing")
+    if manifest_checksum and manifest_checksum != checksum:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_TRAINING_INVALID,
+                     "artifact checksum disagrees with the recorded manifest checksum")
+
+    X = getattr(artifact, "X", None)
+    J = getattr(artifact, "J", None)
+    Y = getattr(artifact, "Y_components", None)
+    if X is None or J is None or Y is None:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_ARRAY_INVALID,
+                     "artifact is missing X/J/Y_components arrays")
+    try:
+        X = np.asarray(X, dtype=np.float64)
+        J = np.asarray(J, dtype=np.float64)
+        Y = np.asarray(Y, dtype=np.float64)
+    except (TypeError, ValueError) as exc:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_ARRAY_INVALID,
+                     f"artifact arrays are not numeric: {exc}")
+    if X.ndim != 2 or Y.ndim != 2 or X.shape[0] != Y.shape[0] or Y.shape[1] != len(names):
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_ARRAY_INVALID,
+                     f"array shapes X{X.shape} J{J.shape} Y{Y.shape} do not match m={len(names)}")
+    if J.size != X.shape[0]:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_ARRAY_INVALID,
+                     f"J has {J.size} rows, expected {X.shape[0]}")
+    if X.shape[0] < 2:
+        return _data(STATUS_UNAVAILABLE, REASON_INSUFFICIENT_TRAINING_DATA,
+                     f"at least two observations are required, got {X.shape[0]}")
+    if not (np.all(np.isfinite(X)) and np.all(np.isfinite(J)) and np.all(np.isfinite(Y))):
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_ARRAY_INVALID,
+                     "artifact arrays contain NaN/Inf")
+    if np.any((X < 0.0) | (X > 1.0)):
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_ARRAY_INVALID,
+                     "artifact X contains values outside [0,1]")
+    for index in range(X.shape[0]):
+        ok, _reconstructed, why = _metric_contracts.validate_components(
+            objective_version, Y[index], float(J.reshape(-1)[index]), names=names)
+        if not ok:
+            return _data(STATUS_UNAVAILABLE, REASON_METRIC_ARRAY_INVALID,
+                         f"row {index} component reconstruction failed: {'; '.join(why)}")
+
+    # Bounds identity: the caller's live projection is the only accepted box identity.
+    if not expected_bounds:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_BOUNDS_IDENTITY,
+                     "caller bounds identity is missing")
+    observed_bounds = str(metadata.get("bounds_hash") or "")
+    sources = {"artifact": observed_bounds, "caller": expected_bounds}
+    if binding.encoding is not None:
+        try:
+            sources["encoding"] = _metric_identity.bounds_identity(binding.encoding, strict=True)
+        except (TypeError, ValueError) as exc:
+            return _data(STATUS_UNAVAILABLE, REASON_METRIC_BOUNDS_IDENTITY,
+                         f"live encoding does not yield a bounds identity: {exc}")
+    bounds_check = _metric_identity.check_bounds_identity(
+        expected_hash=expected_bounds, sources=sources,
+        expected_payload=metadata.get("bounds_identity_payload"))
+    if not bounds_check.ok:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_BOUNDS_IDENTITY, bounds_check.detail)
+
+    # Score identity is recomputed from the caller's frozen config identity, never trusted.
+    if not expected_score:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_SCORE_IDENTITY,
+                     "caller score identity is missing")
+    try:
+        score_check = _metric_identity.check_score_identity(
+            metadata=metadata,
+            objective_version=expected_score.get("objective_version", objective_version),
+            brief_hash=str(expected_score.get("brief_hash") or ""),
+            score_hash=str(expected_score.get("score_hash") or ""),
+            score_module=expected_score.get("score_module"))
+    except (TypeError, ValueError) as exc:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_SCORE_IDENTITY, str(exc))
+    if not score_check.ok:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_SCORE_IDENTITY, score_check.detail)
+    try:
+        expected_objective = int(expected_score.get("objective_version", objective_version))
+    except (TypeError, ValueError):
+        expected_objective = objective_version
+    if expected_objective != objective_version:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_SCORE_IDENTITY,
+                     f"caller objective version {expected_objective!r} != artifact "
+                     f"{objective_version!r}")
+
+    # Task/backend/fidelity/grid/dependency identity must match the caller's frozen dict.
+    fields = ("task_identity", "backend", "fidelity", "grid_hash", "dependency_hash")
+    if not expected_task:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_TASK_IDENTITY,
+                     "caller task identity block is missing")
+    observed_task = {}
+    for field_name in fields:
+        value = metadata.get(field_name)
+        if value is None and field_name == "task_identity":
+            value = metadata.get("task")
+        observed_task[field_name] = value
+    task_check = _metric_identity.check_identity_fields(
+        expected=expected_task, observed=observed_task, fields=fields,
+        reason=REASON_METRIC_TASK_IDENTITY, missing_reason=REASON_METRIC_TASK_IDENTITY)
+    if not task_check.ok:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_TASK_IDENTITY, task_check.detail)
+
+    return _data(STATUS_OK, REASON_OK, None, artifact=artifact,
+                 artifact_checksum=checksum, objective_version=objective_version,
+                 component_names=list(names), component_schema_hash=schema_hash,
+                 bounds_hash=expected_bounds, n=int(X.shape[0]), d=int(X.shape[1]),
+                 m=len(names), score_identity=score_check.expected)
+
+
+def _metric_composite_data_status(binding: MetricTrainingBinding | None, pool) -> dict:
+    if binding is None:
+        return _data(STATUS_UNAVAILABLE, REASON_METRIC_TRAINING_REQUIRED,
+                     "a metric-training-v1 artifact binding is required")
+    validated = _validate_metric_training(binding)
+    if validated["status"] != STATUS_OK:
+        return validated
+    pool_state = _pool_data_status(pool)
+    if pool_state["status"] != STATUS_OK:
+        return pool_state
+    return _data(STATUS_OK, REASON_OK, None,
+                 artifact=validated["artifact"],
+                 artifact_checksum=validated["artifact_checksum"],
+                 objective_version=validated["objective_version"],
+                 component_names=validated["component_names"],
+                 component_schema_hash=validated["component_schema_hash"],
+                 bounds_hash=validated["bounds_hash"],
+                 n=validated["n"], d=validated["d"], m=validated["m"],
+                 score_identity=validated["score_identity"],
+                 pool_n=pool_state.get("n"))
+
 
 
 # --------------------------------------------------------------------------- capability
@@ -438,7 +741,7 @@ def _select_seed(entries) -> dict:
 
 def capability_status(policy: str, *, training_set=None, cohort=None,
                       metric_observations=None, pool=None, seeds=None,
-                      pareto_training=None) -> dict:
+                      pareto_training=None, metric_training=None) -> dict:
     """Explicit preflight for a proposal policy.
 
     Returns ``status``/``reason``/``detail``/``required_inputs`` plus the data gate
@@ -466,6 +769,9 @@ def capability_status(policy: str, *, training_set=None, cohort=None,
             if pool_state["status"] != STATUS_OK:
                 data = pool_state
         required = ["training_set", "pool"]
+    elif policy == POLICY_METRIC_COMPOSITE:
+        data = _metric_composite_data_status(_coerce_metric_binding(metric_training), pool)
+        required = ["metric_training", "pool"]
     elif policy == POLICY_PARETO and pareto_training is not None:
         data = _pareto_training_status(pareto_training)
         required = ["pareto_training"]
@@ -492,9 +798,13 @@ def capability_status(policy: str, *, training_set=None, cohort=None,
 
     if data["status"] != STATUS_OK:
         overall, reason, detail = data["status"], data["reason"], data.get("detail")
+        if policy == POLICY_METRIC_COMPOSITE and data["status"] == STATUS_CAPABILITY_MISSING:
+            # Never silently fall back to the scalar arm; keep the typed metric refusal.
+            overall, reason = STATUS_CAPABILITY_MISSING, data["reason"]
     elif needs_engine and not engine_ok:
         overall = STATUS_CAPABILITY_MISSING
-        reason = REASON_CAPABILITY_MISSING
+        reason = (REASON_METRIC_ENGINE_MISSING if policy == POLICY_METRIC_COMPOSITE
+                  else REASON_CAPABILITY_MISSING)
         detail = ("optional BoTorch/GPyTorch/Torch engine is unavailable; lazy import keeps "
                   "this a tagged refusal, not a fabricated proposal")
     else:
@@ -513,7 +823,9 @@ def capability_status(policy: str, *, training_set=None, cohort=None,
         "required_inputs": list(required),
         "library_versions": _engine_versions(),
     }
-    for key in ("frozen_reference", "n", "n_min", "metric_spec_hash", "counts"):
+    for key in ("frozen_reference", "n", "n_min", "metric_spec_hash", "counts",
+                "artifact_checksum", "objective_version", "component_names",
+                "component_schema_hash", "bounds_hash", "m", "score_identity", "pool_n", "d"):
         if key in data:
             out[key] = data[key]
     return out
@@ -598,13 +910,17 @@ def fit_and_propose(policy: str, *, training_set=None, cohort=None,
                     metric_observations=None, pool=None, history=None, seed: int = 0,
                     encoding=None, config=None, cma_seed_candidates=None,
                     resolution_mm: float = 30.0, turbo_state=None,
-                    pareto_training=None) -> ProposalOutcome:
+                    pareto_training=None, metric_training=None, metric_policy=None,
+                    metric_history=None, metric_evaluation=None) -> ProposalOutcome:
     """Fit (when required) and select one proposal for ``policy``.
 
     Scalar calls the locked ``fit_model`` + ``propose_one``; Pareto calls ``fit_pareto`` +
-    ``propose_pareto``; ``cma_seed`` selects deterministically from the caller's explicit seed
-    list with no score math; ``exploration`` uses the existing legal-pool maximin selection and
-    is labelled non-BO.  Tagged failures are propagated without fabricated values.
+    ``propose_pareto``; ``metric_composite_v1`` validates the frozen training artifact strictly,
+    fits the multi-output component model and proposes from the composite qLogNEI acquisition;
+    ``cma_seed`` selects deterministically from the caller's explicit seed list with no score
+    math; ``exploration`` uses the existing legal-pool maximin selection and is labelled non-BO.
+    Tagged failures are propagated without fabricated values, and the metric arm never falls
+    back to the scalar arm.
     """
     if policy not in PROPOSAL_POLICIES:
         return ProposalOutcome(
@@ -658,6 +974,79 @@ def fit_and_propose(policy: str, *, training_set=None, cohort=None,
         return _replace(_outcome_from_proposal_result(POLICY_TURBO, result),
                         trust_region=record,
                         model_hyperparameters=dict(getattr(fitted, "hyperparameters", {}) or {}))
+
+    if policy == POLICY_METRIC_COMPOSITE:
+        # ``metric_evaluation`` is accepted for forward-compatible callers (a prebuilt
+        # acquisition is never trusted in re-validation); the proposal is always rebuilt from
+        # the frozen artifact + pool under the caller's identity pins.
+        _ = metric_evaluation
+        binding = _coerce_metric_binding(metric_training)
+        data = _metric_composite_data_status(binding, pool)
+        if data["status"] != STATUS_OK or binding is None:
+            return _failure(POLICY_METRIC_COMPOSITE, data["reason"], data.get("detail"),
+                            status=data["status"])
+        if not _engine_available():
+            return _failure(POLICY_METRIC_COMPOSITE, REASON_METRIC_ENGINE_MISSING,
+                            "optional BoTorch/GPyTorch/Torch engine is unavailable",
+                            status=STATUS_CAPABILITY_MISSING)
+        from .metric_model import fit_metric_model
+        from .metric_propose import MetricProposalPolicy, propose_metric_candidate
+
+        artifact = data["artifact"]
+        expected_bounds = str(binding.expected_bounds_hash or "")
+        if metric_policy is None:
+            metric_policy = MetricProposalPolicy(bounds_hash=expected_bounds)
+        elif isinstance(metric_policy, MetricProposalPolicy):
+            metric_policy = replace(metric_policy, bounds_hash=expected_bounds)
+        elif isinstance(metric_policy, Mapping):
+            metric_policy = {**dict(metric_policy), "bounds_hash": expected_bounds}
+        fitted = fit_metric_model(artifact, seed=int(seed))
+        if getattr(fitted, "status", None) != STATUS_OK:
+            reason = getattr(fitted, "reason", None) or "model_unavailable"
+            status = (STATUS_CAPABILITY_MISSING if reason == "capability_missing"
+                      else STATUS_UNAVAILABLE)
+            return _failure(POLICY_METRIC_COMPOSITE, reason, getattr(fitted, "detail", None),
+                            status=status,
+                            library_versions=getattr(fitted, "library_versions", None))
+        result = propose_metric_candidate(
+            fitted, pool, policy=metric_policy, history=metric_history,
+            require_identity=True,
+            expected_bounds_hash=str(binding.expected_bounds_hash or ""))
+        if getattr(result, "status", None) != STATUS_OK:
+            reason = getattr(result, "reason", None) or "metric_proposal_unavailable"
+            status = _normalise_status(getattr(result, "status", STATUS_UNAVAILABLE), reason)
+            return _failure(
+                POLICY_METRIC_COMPOSITE, reason, getattr(result, "detail", None),
+                status=status,
+                counts=dict(getattr(result, "counts", {}) or {}),
+                library_versions=getattr(result, "library_versions", None))
+        predicted = {
+            "component_means": [float(v) for v in (result.component_means or ())],
+            "component_sds": [float(v) for v in (result.component_sds or ())],
+            "j_mean": (None if result.predicted_j is None else float(result.predicted_j)),
+            "total_sd": (None if result.total_sd is None else float(result.total_sd)),
+            "note": "model prediction, not a solved acoustic result",
+        }
+        acquisition = {
+            "value": result.acquisition_score,
+            "units": "qLogNEI (technical ranking only, not J and not a probability)",
+            "policy": result.policy,
+            "acq_seed": int(getattr(result, "acq_seed", 0) or 0),
+        }
+        return ProposalOutcome(
+            status=STATUS_OK, reason=REASON_OK, policy=POLICY_METRIC_COMPOSITE,
+            selection_reason=getattr(result, "selection_reason", None),
+            proposal=getattr(result, "candidate", None),
+            predicted=predicted, acquisition=acquisition, fallback=False,
+            verification_mode=verification_mode(POLICY_METRIC_COMPOSITE),
+            library_versions=dict(getattr(result, "library_versions", {}) or {}),
+            detail=getattr(result, "detail", None),
+            counts=dict(getattr(result, "counts", {}) or {}),
+            model_hyperparameters={
+                "outputs": [dict(item) for item in (getattr(fitted, "per_output", ()) or ())],
+                "model_hash": str(getattr(fitted, "model_hash", "") or ""),
+                "fit_s": getattr(fitted, "timing_s", None),
+            })
 
     if policy == POLICY_PARETO and pareto_training is not None:
         fitted = _pareto.fit_pareto_training(pareto_training, seed=int(seed))
@@ -767,11 +1156,39 @@ __all__ = [
     "POLICY_CMA_SEED",
     "POLICY_EXPLORATION",
     "POLICY_TURBO",
+    "POLICY_METRIC_COMPOSITE",
     "PROPOSAL_POLICIES",
     "PROPOSAL_POLICY_LABELS",
     "ENGINE_POLICIES",
     "STATUS_CAPABILITY_MISSING",
     "STATUS_POOL_EXHAUSTED",
+    "REASON_UNSUPPORTED_POLICY",
+    "REASON_TRAINING_SET_REQUIRED",
+    "REASON_INSUFFICIENT_TRAINING_DATA",
+    "REASON_VALIDATED_COHORT_REQUIRED",
+    "REASON_METRIC_BINDINGS_REQUIRED",
+    "REASON_METRIC_BINDING_MISMATCH",
+    "REASON_METRIC_POLICY_MISSING",
+    "REASON_METRIC_INCOMPLETE",
+    "REASON_LEGAL_POOL_REQUIRED",
+    "REASON_POOL_EXHAUSTED",
+    "REASON_SEEDS_REQUIRED",
+    "REASON_DUPLICATE_SEED",
+    "REASON_INVALID_SEED",
+    "REASON_NO_ELIGIBLE_SEED",
+    "REASON_VALIDATION_FAILED",
+    "REASON_METRIC_TRAINING_REQUIRED",
+    "REASON_METRIC_TRAINING_INVALID",
+    "REASON_METRIC_TRAINING_VERSION",
+    "REASON_METRIC_OBJECTIVE_VERSION",
+    "REASON_METRIC_COMPONENT_SCHEMA",
+    "REASON_METRIC_ARRAY_INVALID",
+    "REASON_METRIC_BOUNDS_IDENTITY",
+    "REASON_METRIC_SCORE_IDENTITY",
+    "REASON_METRIC_TASK_IDENTITY",
+    "REASON_METRIC_ENGINE_MISSING",
+    "REASON_METRIC_ARTIFACT_MODULE_MISSING",
+    "MetricTrainingBinding",
     "ProposalOutcome",
     "verification_mode",
     "capability_status",

@@ -1,5 +1,21 @@
 ﻿# ISSUES
 
+## 2026-11-22 - Metric-composite BO Pass 2 (feature branch, not merged)
+
+- DONE (Pass 2): strict bounds/score identity contract in `bo/metric_identity.py`; deterministic `metric-training-npz-v1` serializer/loader with tamper, dtype/shape/sha256, component-order, J-row and identity validation in `bo/metric_artifact.py`; `fit_metric_model` refuses corrupt artifacts before Torch. Missing/inconsistent identity is a typed refusal everywhere.
+- DONE: `study_cohort` no longer replays an entire v10/v11 group on selection failure; default `metric_selection_unavailable` refusal with counts/reasons and zero rows, explicit `--allow-unranked-replay` labelled `replay_authorized`; stored-J ranking requires catalog score identity + brief hash, otherwise `score_identity_unavailable`.
+- DONE: opt-in `metric_composite_v1` policy (appended sixth) with strict capability/dispatch gates, no scalar fallback; `PRODUCTION_POLICIES` unchanged; GUI real-run policy list unchanged.
+- DONE: synthetic-only study integration in `studies/metric_study.py` using the existing builders/service/journal: metric training + manifest, deterministic model manifest (no pickle), pool, proposal, additive synthetic package block, revalidating `metric_bindings`, `metric_execution_gate` that refuses real execution even with `allow_real_solver=True`, and a durable-journal synthetic evaluator/adapter with resume/idempotency tests.
+- DONE (research only, unregistered): `physical_composite.py` (canonical v11 CD contributions, partial-J honesty), `metric_constraints.py` (signed hard constraints on synthetic data), `metric_diagnostics.py` (synthetic arm comparison), `optimizer_switch.py` read-only advisory extension.
+- VERIFY: isolated interpreter **583 passed, 3 skipped** (pre-existing native archive fixtures), 131 warnings, 88.61 s; lane slices 74/33/31/60 passed; parent evidence run recorded in doc 06 (model hash `069cc06b…`, fit 2.17 s, 3 synthetic proposals, resume evaluated nothing twice).
+- OPEN (deferred, owner authorization required): bounded real-data validation per [07_DEFERRED_REAL_DATA_PLAN](research/metric_bo_2026-11-22/07_DEFERRED_REAL_DATA_PLAN.md) — census, scoped cohort, parity, CPU fits, holdouts. Not executed in Pass 2.
+- OPEN (deferred, owner authorization required): matched BEM pilot per [08_DEFERRED_GPU_PILOT](research/metric_bo_2026-11-22/08_DEFERRED_GPU_PILOT.md). Not launched; no GPU/BEM solve in Pass 2.
+- OPEN (limitations): independent outputs do not model inter-component correlation; `j_sd=sqrt(sum(var))` is an independence assumption; constant components add no directional signal; synthetic coverage is empirical and not calibrated.
+- OPEN (promotion gate): `metric_composite_v1` is not in `PRODUCTION_POLICIES` and not GUI-launchable. Promotion requires real-data validation, the matched pilot, and a separate owner decision. Real execution currently returns `metric_composite_real_execution_not_authorized`.
+- OPEN (future worker): the synthetic refit uses an in-memory augmented artifact; a real worker should publish an updated immutable artifact per accepted observation batch instead of relying on in-memory augmentation.
+- OPEN (optional research): correlated-output arm E is documented but not implemented; constrained BO remains a research interface, not a policy.
+- NOTE: branch is pushed as a feature branch only; no merge into `main` or the canonical checkout. Canonical checkout stayed at `a30f2de9` on `hornfab-all-2026-11-18` with 63 pre-existing dirty files untouched.
+
 ## 2026-11-22 - Metric-composite BO Pass 1 (feature branch, not merged)
 
 - DONE (Pass 1): isolated worktree `C:/Users/hunte/Hrns/hornfab-metric-bo-wt` on `feat/metric-aware-bo`, based on committed `a30f2de9`; canonical checkout untouched. ADR `docs/research/metric_bo_2026-11-22/ADR_metric_composite_v1.md`.
