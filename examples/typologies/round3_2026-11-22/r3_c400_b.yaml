@@ -1,0 +1,293 @@
+bounds:
+  L_mm:
+    hi: 320.0
+    lo: 170.0
+  a0_deg:
+    hi: 2.4866
+    lo: 2.0066
+    search: false
+  a_deg:
+    hi: 45.0
+    lo: 32.0
+  aspect_ratio:
+    hi: 1.0
+    lo: 1.0
+    search: false
+  az_a_cos_amp:
+    hi: 14.0
+    lo: 4.0
+  az_a_cos_pow:
+    hi: 3.0
+    lo: 1.0
+  az_a_sf_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_fold_h_deg:
+    hi: 0.0
+    lo: -15.0
+  az_fold_h_width_deg:
+    hi: 50.0
+    lo: 6.0
+  az_fold_v_deg:
+    hi: 20.0
+    lo: -25.0
+  az_fold_v_width_deg:
+    hi: 50.0
+    lo: 6.0
+  az_n_cos2_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_s_cos2_amp:
+    hi: -0.05
+    lo: -0.35
+  az_sf_a:
+    hi: 1.0
+    lo: 1.0
+    search: false
+  az_sf_b:
+    hi: 0.8569
+    lo: 0.8569
+    search: false
+  az_sf_m:
+    hi: 4.0
+    lo: 4.0
+    search: false
+  az_sf_n1:
+    hi: 7.4958
+    lo: 7.4958
+    search: false
+  az_sf_n2:
+    hi: 12.4449
+    lo: 12.4449
+    search: false
+  az_sf_n3:
+    hi: 13.4442
+    lo: 13.4442
+    search: false
+  exponent:
+    hi: 2.0
+    lo: 2.0
+    search: false
+  k:
+    hi: 3.3
+    lo: 1.6
+  morph_allow_shrinkage:
+    hi: 1
+    lo: 1
+    search: false
+  morph_corner_mm:
+    hi: 90.0
+    lo: 8.0
+  morph_exponent:
+    hi: 4.0
+    lo: 4.0
+    search: false
+  morph_fixed:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  morph_height_mm:
+    hi: 500.0
+    lo: 240.0
+  morph_rate:
+    hi: 6.0
+    lo: 2.4
+  morph_target:
+    hi: 1
+    lo: 1
+    search: false
+  morph_width_mm:
+    hi: 560.0
+    lo: 300.0
+  n:
+    hi: 8.0
+    lo: 3.5
+  q:
+    hi: 1.05
+    lo: 0.9
+  r0_mm:
+    hi: 18.0
+    lo: 18.0
+    search: false
+  s:
+    hi: 1.2
+    lo: 0.65
+  s1:
+    hi: 1.1799
+    lo: 1.1799
+    search: false
+  s2:
+    hi: 0.0286
+    lo: 0.0286
+    search: false
+brief_file: ../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo_open_2026-11-22.yaml
+description: 'ROUND 3 (2026-11-22, OPEN ENVELOPE): the brief no longer refuses on
+  the build box, only on a 1200 mm per-dimension sanity ceiling (owner decision).
+  Best-seeded from runs/20261122T161653Z-screen-c963ef (screen J 1.024312); the watchdog-pinned/near-limit
+  knobs were opened: L_mm, a_deg, az_a_cos_amp, az_a_cos_pow, az_fold_h_width_deg,
+  az_fold_v_deg, az_fold_v_width_deg, az_s_cos2_amp, k, morph_corner_mm, morph_height_mm,
+  morph_rate, morph_width_mm, n, q, s. Size is now a post-hoc filter, not a search
+  refusal.'
+family: OSSE
+feasibility:
+  derivation:
+  - knob: '-'
+    note: no generator block in this config
+  envelope_mouth_h_mm: 400.0
+  envelope_mouth_w_mm: 400.0
+  f0_hz: 1000.0
+  f0_v_hz: 1000.0
+  feasible_v: false
+  feasible_w: true
+  held_coverage_v_deg: 63.5
+  held_coverage_w_deg: 63.5
+  required_mouth_h_mm: 508.0
+  required_mouth_w_mm: 317.5
+  rule: d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)
+  screen_freqs_below_f0: 3
+  screen_freqs_total: 12
+  verify_freqs_below_f0: 9
+  verify_freqs_total: 25
+grid:
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+  verify_points_per_octave: 6
+mesh:
+  dof_cap_final: 24000
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_per_triangle: 0.51
+  epw: 6.0
+  quadrants: '1'
+  rear_res_factor: 1.5
+name: r3_c400_b
+objective:
+  cov_below_f0: one_sided
+  cov_narrow_ratio: 2.0
+  cov_v_weight: 0.5
+  flat_band: scored
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  ripple_region: preferred_edge
+  tolerances:
+    cov_profile: 3.0
+    di_roughness: 1.0
+    dislope: 9.0
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3
+    rip: 1.0
+  version: 10
+search:
+  algorithm: cma
+  budget: 120
+  budget_counts: valid
+  error_policy: retry_same_then_stop
+  infeasible_penalty: resample_strict
+  max_attempts: 480
+  popsize: null
+  seed: 62313
+  sigma0: 0.15
+  tolfun: 0.001
+seed_params:
+  L_mm: 200.1231825975
+  a0_deg: 2.0066
+  a_deg: 39.6687433909
+  aspect_ratio: 1.0
+  az_a_cos_amp: 9.7412541362
+  az_a_cos_pow: 1.560395594
+  az_a_sf_amp: 0.0
+  az_fold_h_deg: -3.416282324
+  az_fold_h_width_deg: 18.2392543526
+  az_fold_v_deg: 8.3170126357
+  az_fold_v_width_deg: 26.1276154484
+  az_n_cos2_amp: 0.0
+  az_s_cos2_amp: -0.1662163025
+  az_sf_a: 1.0
+  az_sf_b: 0.8569
+  az_sf_m: 4.0
+  az_sf_n1: 7.4958
+  az_sf_n2: 12.4449
+  az_sf_n3: 13.4442
+  exponent: 2.0
+  k: 2.5942337969
+  morph_allow_shrinkage: 1
+  morph_corner_mm: 26.2116012393
+  morph_exponent: 4.0
+  morph_fixed: 0.0
+  morph_height_mm: 349.1563221082
+  morph_rate: 3.1521490083
+  morph_target: 1
+  morph_width_mm: 386.1519975215
+  n: 4.6498414106
+  q: 0.9726026007
+  r0_mm: 18.0
+  s: 1.0056282766
+  s1: 1.1799
+  s2: 0.0286
+solve:
+  angle_count: 73
+  backend: beat_cuda
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  cuda_fused: true
+  distance_m: 10.0
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_profile:
+    h:
+    - hz: 1000
+      max_deg: 100
+      min_deg: 60
+      preferred_deg: 80
+    - hz: 1400
+      max_deg: 100
+      min_deg: 60
+      preferred_deg: 80
+    interpolation: log_frequency
+    mode: corridor
+    v:
+    - hz: 1000
+      max_deg: 75
+      min_deg: 40
+      preferred_deg: 50
+    - hz: 1400
+      max_deg: 75
+      min_deg: 40
+      preferred_deg: 50
+  coverage_v_deg: 50.0
+  coverage_v_down_deg: null
+  coverage_v_up_deg: null
+  di_slope_target: 0.0
+  di_target_db: null
+  driver_exit_radius_mm: null
+  f0_hz: 1000.0
+  f0_v_hz: 1000.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov_profile: 1.0
+  di_roughness: 1.0
+  dislope: 1.0
+  flat: 0.5
+  flat_cv: 1.0
+  load: 1.0
+  rip: 1.0

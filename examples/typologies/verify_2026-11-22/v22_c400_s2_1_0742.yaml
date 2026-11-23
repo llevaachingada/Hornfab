@@ -1,0 +1,381 @@
+bounds:
+  L_mm:
+    hi: 240.0
+    lo: 190.0
+  a0_deg:
+    hi: 2.4866
+    lo: 2.0066
+    search: false
+  a_deg:
+    hi: 40.0
+    lo: 36.3038
+  aspect_ratio:
+    hi: 1.0
+    lo: 1.0
+    search: false
+  az_a_cos_amp:
+    hi: 11.73355
+    lo: 8.13355
+  az_a_cos_pow:
+    hi: 2.43779
+    lo: 1.23779
+  az_a_sf_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_fold_h_deg:
+    hi: 0.0
+    lo: -15.0
+  az_fold_h_width_deg:
+    hi: 40.0
+    lo: 8.0
+  az_fold_v_deg:
+    hi: 10.0
+    lo: -25.0
+  az_fold_v_width_deg:
+    hi: 40.0
+    lo: 8.0
+  az_n_cos2_amp:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  az_s_cos2_amp:
+    hi: -0.122676
+    lo: -0.25
+  az_sf_a:
+    hi: 1.0
+    lo: 1.0
+    search: false
+  az_sf_b:
+    hi: 0.8569
+    lo: 0.8569
+    search: false
+  az_sf_m:
+    hi: 4.0
+    lo: 4.0
+    search: false
+  az_sf_n1:
+    hi: 7.4958
+    lo: 7.4958
+    search: false
+  az_sf_n2:
+    hi: 12.4449
+    lo: 12.4449
+    search: false
+  az_sf_n3:
+    hi: 13.4442
+    lo: 13.4442
+    search: false
+  exponent:
+    hi: 2.0
+    lo: 2.0
+    search: false
+  k:
+    hi: 2.81254
+    lo: 2.16454
+  morph_allow_shrinkage:
+    hi: 1
+    lo: 1
+    search: false
+  morph_corner_mm:
+    hi: 46.0
+    lo: 8.0
+  morph_exponent:
+    hi: 4.0
+    lo: 4.0
+    search: false
+  morph_fixed:
+    hi: 0.0
+    lo: 0.0
+    search: false
+  morph_height_mm:
+    hi: 392.0
+    lo: 240.0
+  morph_rate:
+    hi: 4.34408
+    lo: 3.14408
+  morph_target:
+    hi: 1
+    lo: 1
+    search: false
+  morph_width_mm:
+    hi: 392.0
+    lo: 300.0
+  n:
+    hi: 6.56958
+    lo: 4.64958
+  q:
+    hi: 0.974949
+    lo: 0.950949
+  r0_mm:
+    hi: 18.0
+    lo: 18.0
+    search: false
+  s:
+    hi: 1.009626
+    lo: 0.769626
+  s1:
+    hi: 1.1799
+    lo: 1.1799
+    search: false
+  s2:
+    hi: 0.0286
+    lo: 0.0286
+    search: false
+brief:
+  description: (objective v10 target-variant; NEW compact 400 mm-cube identity) F_X
+    1000 Hz, corridor H 60-100 (pref 80) and V 40-75 (pref 50) from 1000 Hz, held
+    from 1400 Hz; band 350-8000 Hz; HF1440; envelope 400x400 mouth, depth 385 (+15
+    gate = 400). NOT objective v11; NEVER rankable against v7/v10/compact_xo900.
+  driver:
+    exit_angle_deg: 2.0
+    exit_radius_mm: 18.0
+  envelope:
+    max_depth_mm: 385.0
+    max_mouth_h_mm: 400.0
+    max_mouth_w_mm: 400.0
+  grid:
+    screen_extra_hz:
+    - 250
+    - 315
+    - 400
+    - 2573
+    - 3311
+    - 4260
+    verify_points_per_octave: 6
+  name: compact400_xo1000_1400_hf1440_v10xo
+  objective:
+    cov_below_f0: one_sided
+    cov_narrow_ratio: 2.0
+    cov_v_weight: 0.5
+    flat_band: scored
+    lfp_crossover_ratio: 1.6
+    lfp_re_z: 0.2
+    loaded_re_z: 0.5
+    ripple_region: preferred_edge
+    tolerances:
+      cov_profile: 3.0
+      di_roughness: 1.0
+      dislope: 9.0
+      flat: 1.5
+      flat_cv: 1.5
+      load: 0.3
+      rip: 1.0
+    version: 10
+  source:
+    cap: auto
+  symmetry: hv
+  target:
+    band_hi_hz: 8000.0
+    band_lo_hz: 350.0
+    coverage_h_deg: 80.0
+    coverage_profile:
+      h:
+      - hz: 1000
+        max_deg: 100
+        min_deg: 60
+        preferred_deg: 80
+      - hz: 1400
+        max_deg: 100
+        min_deg: 60
+        preferred_deg: 80
+      interpolation: log_frequency
+      mode: corridor
+      v:
+      - hz: 1000
+        max_deg: 75
+        min_deg: 40
+        preferred_deg: 50
+      - hz: 1400
+        max_deg: 75
+        min_deg: 40
+        preferred_deg: 50
+    coverage_v_deg: 50.0
+    coverage_v_down_deg: null
+    coverage_v_up_deg: null
+    di_slope_target: 0.0
+    di_target_db: null
+    driver_exit_radius_mm: null
+    f0_hz: 1000.0
+    f0_v_hz: 1000.0
+    freq_weights:
+      band_hz:
+      - - 2500.0
+        - 5500.0
+        - 2.0
+    loaded_hi_hz: 5600.0
+    z_min: 0.5
+  weights:
+    cov_profile: 1.0
+    di_roughness: 1.0
+    dislope: 1.0
+    flat: 0.5
+    flat_cv: 1.0
+    load: 1.0
+    rip: 1.0
+brief_file: ../../briefs/compact400_2026-11-19/compact400_xo1000_1400_hf1440_v10xo.yaml
+description: 'VERIFY (2026-11-22): one verify-grid solve of the stored best design
+  of runs/20261122T091153Z-screen-f11759 (screen J 1.074150, eval 24, design 77fce0750b93).
+  Screen and verify J are never ranked together; verify J is comparable only within
+  this brief''s verify grid.'
+family: OSSE
+feasibility:
+  derivation:
+  - knob: '-'
+    note: no generator block in this config
+  envelope_mouth_h_mm: 400.0
+  envelope_mouth_w_mm: 400.0
+  f0_hz: 1000.0
+  f0_v_hz: 1000.0
+  feasible_v: false
+  feasible_w: true
+  held_coverage_v_deg: 63.5
+  held_coverage_w_deg: 63.5
+  required_mouth_h_mm: 508.0
+  required_mouth_w_mm: 317.5
+  rule: d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)
+  screen_freqs_below_f0: 3
+  screen_freqs_total: 12
+  verify_freqs_below_f0: 9
+  verify_freqs_total: 25
+grid:
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+  verify_points_per_octave: 6
+mesh:
+  dof_cap_final: 24000
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_per_triangle: 0.51
+  epw: 6.0
+  quadrants: '1'
+  rear_res_factor: 1.5
+name: v22_c400_s2_1_0742
+objective:
+  cov_below_f0: one_sided
+  cov_narrow_ratio: 2.0
+  cov_v_weight: 0.5
+  flat_band: scored
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  ripple_region: preferred_edge
+  tolerances:
+    cov_profile: 3.0
+    di_roughness: 1.0
+    dislope: 9.0
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3
+    rip: 1.0
+  version: 10
+search:
+  algorithm: cma
+  budget: 1
+  budget_counts: valid
+  error_policy: retry_same_then_stop
+  infeasible_penalty: resample_strict
+  max_attempts: 216
+  popsize: null
+  seed: 20273
+  sigma0: 0.2
+  tolfun: 0.001
+seed_params:
+  L_mm: 198.8732686068
+  a0_deg: 2.0066
+  a_deg: 38.4949187202
+  aspect_ratio: 1.0
+  az_a_cos_amp: 9.6778825668
+  az_a_cos_pow: 1.2390040537
+  az_a_sf_amp: 0.0
+  az_fold_h_deg: -4.0062489741
+  az_fold_h_width_deg: 9.4677097651
+  az_fold_v_deg: 7.4618725185
+  az_fold_v_width_deg: 16.9884476317
+  az_n_cos2_amp: 0.0
+  az_s_cos2_amp: -0.1926315538
+  az_sf_a: 1.0
+  az_sf_b: 0.8569
+  az_sf_m: 4.0
+  az_sf_n1: 7.4958
+  az_sf_n2: 12.4449
+  az_sf_n3: 13.4442
+  exponent: 2.0
+  k: 2.6297395726
+  morph_allow_shrinkage: 1
+  morph_corner_mm: 37.3380377973
+  morph_exponent: 4.0
+  morph_fixed: 0.0
+  morph_height_mm: 365.2410948093
+  morph_rate: 3.3973558132
+  morph_target: 1
+  morph_width_mm: 375.4517049346
+  n: 5.0413343045
+  q: 0.9742605329
+  r0_mm: 18.0
+  s: 0.9760597633
+  s1: 1.1799
+  s2: 0.0286
+solve:
+  angle_count: 73
+  backend: beat_cuda
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  cuda_fused: true
+  distance_m: 10.0
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_profile:
+    h:
+    - hz: 1000
+      max_deg: 100
+      min_deg: 60
+      preferred_deg: 80
+    - hz: 1400
+      max_deg: 100
+      min_deg: 60
+      preferred_deg: 80
+    interpolation: log_frequency
+    mode: corridor
+    v:
+    - hz: 1000
+      max_deg: 75
+      min_deg: 40
+      preferred_deg: 50
+    - hz: 1400
+      max_deg: 75
+      min_deg: 40
+      preferred_deg: 50
+  coverage_v_deg: 50.0
+  coverage_v_down_deg: null
+  coverage_v_up_deg: null
+  di_slope_target: 0.0
+  di_target_db: null
+  driver_exit_radius_mm: null
+  f0_hz: 1000.0
+  f0_v_hz: 1000.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov_profile: 1.0
+  di_roughness: 1.0
+  dislope: 1.0
+  flat: 0.5
+  flat_cv: 1.0
+  load: 1.0
+  rip: 1.0

@@ -32,6 +32,24 @@ git log --oneline -5; git status --porcelain
 
 ## State, at write time
 
+- **2026-11-22 20:10 EST (round 3 closed, open envelope):** `hornfab_round3_2026-11-22` 7/7 with
+  `envelope.enforce: false` (sanity 1200 mm). Screen bests: home Fold 1.3087 -> **1.1932** (k=3.36,
+  past the old 2.81 cap; still inside the old 600x480 box), compact400 1.0243 -> **0.9679**
+  (474x350 mm, outside the old 400 cube), compact500 Crowe 2.7579 -> **1.8150** (719x538x386; g_L
+  pinned at the new 400), FAV 4.1990 -> **3.3848** (730x577x403), v11 Fold no gain. Zero envelope
+  refusals; 0-37.5 % `invalid_geometry` at the opened extremes. None verify-grid confirmed.
+- **2026-11-22 (verify + round 2):** verify 8/8: home fold_s **1.4727**, fold_k 1.5551, morph 1.7484,
+  twinray 2.1593 (leader 1.4867, floor 0.4677 -> tie/worse); compact400 s2 **1.1532**, s1 1.2293
+  (best 1.1864, floor 0.1293 -> tie); c500 2.8570; FAV 4.5828. Round 2 lifted c400 1.0243, c500
+  2.7579, FAV 4.1990, v11 fold 3.6172.
+- **2026-11-22 (decision + renders):** owner: the brief envelope no longer refuses candidates;
+  `config.effective_envelope_limits` is the one source (default byte-identical) for the post-mesh
+  gate, both pre-mesh estimators and `tools/shape_check.py`; 84 focused tests. Eight leaders
+  rendered at 200 dpi: `docs/renders/2026-11-22-best-horns/` (gallery `index.html`, Pages).
+- **2026-11-22 (queue 1):** `hornfab_12h_2026-11-22` 10/10, all watchdog-stopped: TwinRay
+  2.5748->1.7356, Morph 1.5769->1.3973, c400 1.1891->1.0742, home Fold 1.3738->1.3176/1.3087,
+  c500 2.9901->2.8392, FAV 4.4527->4.4305; v11 Fold no gain.
+
 - **2026-11-21 08:57 EST:** `sculpted_xo900_cma_pilot_2026-11-21` launched as detached controller PID 12984. Three V11 screen tranches precede matched verification and conditional 60-valid extensions. Read `runs/nights/sculpted_xo900_cma_pilot_2026-11-21/queue_state.json` for live state. [Queue recipe](queue/sculpted_xo900_cma_pilot_2026-11-21.yaml).
 
 - **2026-11-21 08:30 EST:** `sculpted_xo900_acoustic_discovery_2026-11-21` finished 7/7. The queue registered six existing observations and measured one new native R2 truncation probe under home-900 V11. The GPU lock was free at close. [Matched acoustic readout](evidence/sculpted_xo900_v11_2026-11-21/README.md).

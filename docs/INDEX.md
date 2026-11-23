@@ -176,6 +176,9 @@ Verification: legacy `sp__strong_v7` is the canonical section family at axial 7/
 
 [CMA-ES vs TuRBO, matched configs (2026-11-19)](renders/2026-11-19-turbo-vs-cma/README.md): six same-config/brief pairs as design cards (views + H/V dispersion), overview sheet, `pairs.json` with all 14 BO pairings.
 [Last-24h solved horns, 61 designs in 21 contact sheets at 200 dpi](renders/2026-11-19-last-day-horns/README.md): isometric, top-skew, V/H cut sections, V/H dispersion per design; scripts alongside.
+[Best horns solved 2026-11-22](renders/2026-11-22-best-horns/README.md): eight family leaders at
+200 dpi in 3 contact sheets (isometric, top-skew, V/H section cuts, V/H dispersion, scores);
+[gallery](renders/2026-11-22-best-horns/index.html).
 
 [25x2 pilot: section home pucker vs square X](renders/2026-11-15-25x2/README.md): four 25-eval screen runs, seeds 1234/5678.
 Square X best J **8.20–8.82** vs section home **17.397–17.398**; the square X wants a gentler X (`sf_amt` 0.42–0.47 vs

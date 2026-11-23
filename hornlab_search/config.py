@@ -245,6 +245,27 @@ def _load_yaml_extends(path, _chain: tuple = ()):
     return _deep_merge(merged, raw)
 
 
+#: Owner decision 2026-11-22: with ``envelope.enforce: false`` the brief's build box stops being a
+#: search refusal; only this absolute per-dimension sanity ceiling remains so nothing grows to ~5 ft.
+DEFAULT_ENVELOPE_SANITY_MAX_MM = 1200.0
+
+
+def effective_envelope_limits(brief: dict | None) -> tuple[float, float, float, bool]:
+    """(max_w_mm, max_h_mm, max_depth_mm, enforced) after the brief's `envelope.enforce` flag.
+    enforce absent/true -> the brief's three maxima, enforced=True (historical behaviour,
+    byte for byte). enforce false -> one absolute sanity ceiling per dimension
+    (`envelope.sanity_max_mm`, default 1200.0), enforced=False: the build box stops being a
+    search refusal and size becomes a post-hoc filter. Owner decision 2026-11-22."""
+    env = (brief or {}).get("envelope") or {}
+    if env.get("enforce", True):
+        return (float(env.get("max_mouth_w_mm", 1e9)),
+                float(env.get("max_mouth_h_mm", 1e9)),
+                float(env.get("max_depth_mm", 1e9)),
+                True)
+    ceiling = float(env.get("sanity_max_mm", DEFAULT_ENVELOPE_SANITY_MAX_MM))
+    return ceiling, ceiling, ceiling, False
+
+
 def load_brief(path) -> dict:
     """A design brief: driver exit, size envelope, symmetry class, source cap, target and weights
     (docs/TYPOLOGY_PLAN.md s3). It makes J comparable across typologies. Raises ConfigError."""
@@ -284,6 +305,16 @@ def load_brief(path) -> dict:
     for k in ("max_mouth_w_mm", "max_mouth_h_mm", "max_depth_mm"):
         if not isinstance(env.get(k), (int, float)) or not float(env[k]) > 0:
             raise ConfigError(f"{where}: envelope.{k} must be a positive number")
+    # Owner decision 2026-11-22: envelope.enforce opts out of the build box as a refusal;
+    # envelope.sanity_max_mm sets the remaining absolute ceiling. Unknown envelope keys are
+    # left alone (today's behaviour: not rejected) so future additive keys stay readable.
+    if "enforce" in env and not isinstance(env["enforce"], bool):
+        raise ConfigError(f"{where}: envelope.enforce must be true or false")
+    if "sanity_max_mm" in env:
+        val = env["sanity_max_mm"]
+        if (not isinstance(val, (int, float)) or isinstance(val, bool)
+                or not math.isfinite(float(val)) or not float(val) > 0):
+            raise ConfigError(f"{where}: envelope.sanity_max_mm must be a positive finite number")
     if not isinstance(raw.get("verify_only", False), bool):
         raise ConfigError(f"{where}: verify_only must be true or false")
     if raw["symmetry"] not in BRIEF_SYMMETRY:

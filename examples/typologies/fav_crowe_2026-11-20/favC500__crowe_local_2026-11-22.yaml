@@ -1,0 +1,116 @@
+# Favorite follow-up (2026-11-20): Crowe-X on OS-SE CD, favorite 4140768780f0 from runs/20261120T084006Z-screen-fc4e18.
+# Research + rationale: docs/research/favorites_2026-11-20/CROWE_X_FAVORITE_RESEARCH.md; registry docs/favorites/FAVORITES.yaml.
+# LOCAL refinement (2026-11-22): same compact500_xo900 v11 brief and J identity, best-seeded from
+# runs/20261120T205235Z-screen-f96805 (J 2.9901, 60 valid). g_k box narrowed to 1.0-2.5 (winner 1.916),
+# g_sf_ab opened 0.7-0.93 (winner 0.8749); every other bound unchanged.
+name: favC500__crowe_local_v11
+family: FREEFORM
+brief_file: ../../briefs/compact500_xo900_2026-11-20/compact500_xo900_80x50_hf1440_v11cd.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_L_mm: 258.6566184368
+  g_a_h_deg: 32.7887357373
+  g_a_v_deg: 29.5227900235
+  g_k: 1.915672978
+  g_n: 2.6718501916
+  g_q: 0.996
+  g_r_lip_mm: 18.5903393042
+  g_s: 0.3622784594
+  g_sf_ab: 0.8748624424
+  g_sf_amt: 0.185896552
+  g_sf_m: 4.0
+  g_sf_n1: 1.8
+  g_sf_n2: 7.0
+  g_sf_start: 0.25
+  g_wrap_deg: 111.2384279426
+bounds:
+  g_L_mm:
+    lo: 190.0
+    hi: 330.0
+  g_a_h_deg:
+    lo: 32.0
+    hi: 39.0
+  g_a_v_deg:
+    lo: 20.0
+    hi: 32.0
+  g_k:
+    lo: 1.0
+    hi: 2.5
+  g_n:
+    lo: 1.8
+    hi: 3.2
+  g_q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  g_r_lip_mm:
+    lo: 8.0
+    hi: 30.0
+  g_s:
+    lo: 0.2
+    hi: 0.45
+  g_sf_ab:
+    lo: 0.7
+    hi: 0.93
+  g_sf_amt:
+    lo: 0.12
+    hi: 0.38
+  g_sf_m:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  g_sf_n1:
+    lo: 1.8
+    hi: 1.8
+    search: false
+  g_sf_n2:
+    lo: 7.0
+    hi: 7.0
+    search: false
+  g_sf_start:
+    lo: 0.25
+    hi: 0.25
+    search: false
+  g_wrap_deg:
+    lo: 50.0
+    hi: 160.0
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.1
+  seed: 22011
+  budget: 200
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 800
+  error_policy: retry_same_then_stop
+description: 'fav_crowe_2026-11-20 favourite 4140768780f0 best-seeded from run 20261120T205235Z-screen-f96805
+  (J 2.9900667455 at eval 75): 500 mm cube, XO 900, g_k box tightened to [1.0, 2.5] and g_sf_ab
+  widened to [0.7, 0.93] around the local best; 200 VALID evals, CMA (LABELED HYPOTHESIS-SHAPE
+  EXPERIMENT - searched box change, not a new typology)'

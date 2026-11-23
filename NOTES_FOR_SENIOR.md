@@ -1307,3 +1307,25 @@ Withdrawn from the audit: F6's inference, decision 4 (the six-design dense solve
   `BUDGET_DRIVER_SHORTLIST_AUDIT_2026-11-19.md` and its INDEX line.
 - **Applicability gap (recorded in the brief).** The population that motivates the 1 kHz onset is 2-inch.
   Whether the HF1440 throat holds it in this box is what the lanes measure. Ideal-source screens only.
+
+## 2026-11-22 - Local orchestrator: brief size envelope is switchable off (owner decision)
+
+- **Decision (owner, 2026-11-22).** The brief size envelope must not refuse a search candidate.
+  `envelope.enforce: false` replaces the brief's build box with one absolute `envelope.sanity_max_mm`
+  ceiling per dimension (default 1200 mm; nothing grows toward the 1524 mm example). Size becomes a
+  post-hoc filter on finalists, not a search refusal. `enforce` absent/true keeps the historical
+  limits and messages byte for byte, so every existing run, brief hash and floor stays valid.
+- **Implementation.** `config.effective_envelope_limits(brief) -> (w, h, depth, enforced)` is the one
+  source; used by `search/evaluate.envelope_violation` (post-mesh), both pre-mesh estimators in
+  `design/generators/registry.py`, and `tools/shape_check.py`. Refusal text says "sanity envelope"
+  when enforcement is off. New brief keys validated (`enforce` bool, `sanity_max_mm` finite > 0).
+  Tests: `tests/test_design_envelope_estimate.py` + `tests/test_config.py`
+  (`84 passed` with `test_config_grid.py`, 2026-11-22).
+- **Identity.** `*_open` briefs are NEW score identities (brief name + content changed); their J must
+  never be ranked against closed-envelope runs or the published floors.
+- **Measured background.** Every refusal in the 2026-11-22 queues was `invalid_envelope` from the
+  pre-mesh estimate with zero tolerance; `g_L_mm` was the driver (c500: 6 % refused below 260 mm,
+  50 % at 260-280, 100 % at >=280). Post-change 32-sample preflight on the opened boxes: no envelope
+  refusals at all; the remainder are `invalid_geometry` at the newly opened extremes (37.5 % home
+  Fold, 0-28 % elsewhere).
+- **Not changed.** No objective/scalar change, no default flip, no frozen contract edit, no run dir.

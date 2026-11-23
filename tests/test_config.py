@@ -407,3 +407,54 @@ def test_categorical_searched_keys_are_flagged_wp52():
          "morph_allow_shrinkage": {"lo": 0, "hi": 1, "search": False}, "s": {"lo": 0, "hi": 1}}
     assert categorical_searched_keys(b) == ["morph_target"]
     assert categorical_searched_keys(b, native=False) == []
+
+
+# ------------------------------------------------------------------ envelope.enforce (2026-11-22)
+
+_BRIEF_FIXTURE = REPO / "examples" / "briefs" / "ath_core_2in.yaml"
+
+
+def _brief_variant(tmp_path, mutate):
+    """Load the real ATH CORE brief, apply a mutation to its raw YAML and load it back."""
+    import yaml
+    from hornlab_search.config import load_brief
+    raw = yaml.safe_load(_BRIEF_FIXTURE.read_text(encoding="utf-8"))
+    mutate(raw)
+    p = tmp_path / "brief.yaml"
+    p.write_text(yaml.safe_dump(raw), encoding="utf-8")
+    return load_brief(p)
+
+
+class TestBriefEnvelopeEnforcement:
+    def test_enforce_absent_keeps_the_brief_maxima_and_enforcement(self):
+        from hornlab_search.config import effective_envelope_limits, load_brief
+        brief = load_brief(_BRIEF_FIXTURE)
+        assert "enforce" not in brief["envelope"]
+        assert effective_envelope_limits(brief) == (650.0, 650.0, 520.0, True)
+
+    def test_enforce_false_uses_the_default_1200_mm_sanity_ceiling(self, tmp_path):
+        from hornlab_search.config import effective_envelope_limits
+        brief = _brief_variant(tmp_path, lambda raw: raw["envelope"].update(enforce=False))
+        assert effective_envelope_limits(brief) == (1200.0, 1200.0, 1200.0, False)
+
+    def test_enforce_false_with_an_explicit_sanity_ceiling(self, tmp_path):
+        from hornlab_search.config import effective_envelope_limits
+        brief = _brief_variant(
+            tmp_path, lambda raw: raw["envelope"].update(enforce=False, sanity_max_mm=900))
+        assert effective_envelope_limits(brief) == (900.0, 900.0, 900.0, False)
+
+    @pytest.mark.parametrize("bad", [0, 1, 0.0, "false", None])
+    def test_enforce_must_be_a_bool(self, tmp_path, bad):
+        from hornlab_search.config import ConfigError
+        with pytest.raises(ConfigError, match=r"envelope\.enforce"):
+            _brief_variant(tmp_path, lambda raw, b=bad: raw["envelope"].update(enforce=b))
+
+    @pytest.mark.parametrize("bad", [0, -1, float("nan"), float("inf"), "1200", True, None])
+    def test_sanity_max_mm_must_be_a_positive_finite_number(self, tmp_path, bad):
+        from hornlab_search.config import ConfigError
+        with pytest.raises(ConfigError, match=r"envelope\.sanity_max_mm"):
+            _brief_variant(tmp_path, lambda raw, b=bad: raw["envelope"].update(sanity_max_mm=b))
+
+    def test_unknown_envelope_keys_are_still_accepted(self, tmp_path):
+        brief = _brief_variant(tmp_path, lambda raw: raw["envelope"].update(future_key=1))
+        assert brief["envelope"]["future_key"] == 1

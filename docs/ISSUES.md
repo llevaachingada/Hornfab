@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-22 - Open-envelope search and 2026-11-22 horn renders
+
+- DONE: the brief size envelope is switchable off per brief (`envelope.enforce: false`, `sanity_max_mm` default 1200 mm). One helper (`config.effective_envelope_limits`) feeds the post-mesh gate, both pre-mesh estimators and `tools/shape_check.py`; the default is byte-identical. Focused tests 84 passed.
+- DONE: 200 dpi contact sheets with V/H section cuts, V/H dispersion and scores for the eight family leaders at `docs/renders/2026-11-22-best-horns/`.
+- OPEN: the open-envelope winners are screen-grid only. None is verify-grid confirmed.
+- OPEN (size): compact400 474 mm, compact500 719 mm and FAV 730 mm exceed their old build cubes; decide the size filter/limit before any build or cross-run comparison. The `*_open` briefs are new identities, so their J must not be ranked against closed-envelope runs or the published floors.
+- OPEN (known, unchanged): full offline profile still carries the seven pre-existing other-lane failures recorded on 2026-11-21.
+
 ## 2026-11-21 - System closeout: R5a/R7a/WP6/backend
 
 - DONE (R5a): CPU 10 m / 5 deg equal-area balloon on assembled #2, 1650 points, 200/1000/2500 Hz, BL validate rc 0, solve 3/3; per-excitation DI horn 1.86/7.46/12.12 dB, woofer 2.41/2.87/7.20 dB. [Evidence](evidence/system_evidence_2026-11-19/BALLOON_DI_POWER_2026-11-21.md). R5b remains owner decision 5.

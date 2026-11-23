@@ -27,7 +27,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from hornlab_search.config import load_config, mesh_spec  # noqa: E402
+from hornlab_search.config import (  # noqa: E402
+    effective_envelope_limits,
+    load_config,
+    mesh_spec,
+)
 from hornlab_search.design.space import DesignSpace  # noqa: E402
 from hornlab_search.mesh import build  # noqa: E402
 from hornlab_search.mesh.throat_check import fits_exit, throat_shape  # noqa: E402
@@ -47,6 +51,7 @@ def check(path: str, brief: str | None, mode: str, save_dir: Path | None, geomet
         out["note"] = f"REFUSED by the generator: {err[:160]}"
         return out
     env = (cfg.brief or {}).get("envelope") or {}
+    max_w, max_h, max_depth, enforced = effective_envelope_limits(cfg.brief)
     exit_r = ((cfg.brief or {}).get("driver") or {}).get("exit_radius_mm")
     exit_d = 2.0 * float(exit_r) if exit_r else None
     if geometry_only:
@@ -87,10 +92,18 @@ def check(path: str, brief: str | None, mode: str, save_dir: Path | None, geomet
     finally:
         shutil.rmtree(work, ignore_errors=True)
     over = []
-    for key, lim in (("mouth_w", "max_mouth_w_mm"), ("mouth_h", "max_mouth_h_mm"), ("depth", "max_depth_mm")):
-        if env.get(lim) is not None and out[key] > float(env[lim]) + ENVELOPE_SLACK_MM:
-            over.append(f"{key} {out[key]:.0f} > {float(env[lim]):.0f}")
-    out["envelope"] = "fits" if not over else "OVER: " + ", ".join(over)
+    for key, lim_key, lim in (("mouth_w", "max_mouth_w_mm", max_w),
+                              ("mouth_h", "max_mouth_h_mm", max_h),
+                              ("depth", "max_depth_mm", max_depth)):
+        if out[key] > lim + ENVELOPE_SLACK_MM:
+            shown = env.get(lim_key, lim) if enforced else lim
+            over.append(f"{key} {out[key]:.0f} > {float(shown):.0f}")
+    if over:
+        out["envelope"] = ("OVER: " if enforced else "OVER sanity: ") + ", ".join(over)
+    else:
+        # Same historical word when the brief box is enforced; name the ceiling when it is not
+        # (owner decision 2026-11-22: the build box is a post-hoc filter, not a refusal).
+        out["envelope"] = "fits" if enforced else f"fits (sanity {max_w:g})"
     out["ok"] = out["dofs"] <= out["cap"] and not over and out["throat_ok"]
     return out
 

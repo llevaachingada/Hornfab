@@ -303,21 +303,37 @@ ENVELOPE_DEPTH_ALLOWANCE_MM = 15.0
 def envelope_violation(mesh: MeshResult, brief: dict | None) -> str:
     """'' if the meshed horn (outer envelope, shell included) fits the brief's size envelope,
     else a message. Applies to EVERY family, so typologies and Magnus's families compete inside
-    the same box (a bigger mouth controls directivity lower; comparing across sizes is unfair)."""
+    the same box (a bigger mouth controls directivity lower; comparing across sizes is unfair).
+
+    With ``envelope.enforce: false`` (owner decision 2026-11-22) the brief's build box is no
+    longer a refusal; the comparison is against ``effective_envelope_limits``' absolute sanity
+    ceiling and the message says "sanity envelope" so a refusal is never misread as a brief
+    refusal."""
     if not brief or mesh is None:
         return ""
     env = brief.get("envelope") or {}
+    max_w, max_h, max_depth, enforced = config_mod.effective_envelope_limits(brief)
     w, h = mouth_dims_m(mesh)
     b = mesh.bbox_m
     depth = (b[5] - b[2]) * 1000.0
     msgs = []
-    if w * 1000.0 > float(env.get("max_mouth_w_mm", 1e9)) + 0.5:
-        msgs.append(f"width {w * 1000:.0f} > {env['max_mouth_w_mm']} mm")
-    if h * 1000.0 > float(env.get("max_mouth_h_mm", 1e9)) + 0.5:
-        msgs.append(f"height {h * 1000:.0f} > {env['max_mouth_h_mm']} mm")
-    if depth > float(env.get("max_depth_mm", 1e9)) + ENVELOPE_DEPTH_ALLOWANCE_MM:
-        msgs.append(f"depth {depth:.0f} > {env['max_depth_mm']} + {ENVELOPE_DEPTH_ALLOWANCE_MM:.0f} mm")
-    return ("outside the brief envelope (" + ", ".join(msgs) + ")") if msgs else ""
+
+    def _limit(key: str, value: float):
+        # enforced: print the brief's own value (historical message bytes); otherwise the
+        # effective sanity ceiling.
+        return env.get(key, 1e9) if enforced else value
+
+    if w * 1000.0 > max_w + 0.5:
+        msgs.append(f"width {w * 1000:.0f} > {_limit('max_mouth_w_mm', max_w)} mm")
+    if h * 1000.0 > max_h + 0.5:
+        msgs.append(f"height {h * 1000:.0f} > {_limit('max_mouth_h_mm', max_h)} mm")
+    if depth > max_depth + ENVELOPE_DEPTH_ALLOWANCE_MM:
+        msgs.append(f"depth {depth:.0f} > {_limit('max_depth_mm', max_depth)} + "
+                    f"{ENVELOPE_DEPTH_ALLOWANCE_MM:.0f} mm")
+    if not msgs:
+        return ""
+    label = "brief envelope" if enforced else "sanity envelope"
+    return f"outside the {label} (" + ", ".join(msgs) + ")"
 
 
 def throat_radius_m(design: Design) -> float | None:

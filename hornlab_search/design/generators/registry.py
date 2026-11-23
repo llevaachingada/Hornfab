@@ -405,18 +405,23 @@ def _grid_overshoot_estimate(block: dict, brief: dict) -> float | None:
     """WP10/WP3: conservative pre-mesh envelope overshoot of a GRID design (no meshing).
 
     Same limits and tolerance as the FREEFORM branch below; the outer extents come from
-    ``generators.grid.envelope_extents`` (meridians + radius field + wall thickness). The estimate
-    is advisory: any failure returns ``None`` rather than turning a legal knob invalid.
+    ``generators.grid.envelope_extents`` (meridians + radius field + wall thickness). The limits
+    are ``config.effective_envelope_limits``: the brief's own maxima when ``envelope.enforce`` is
+    absent/true, or the absolute ``envelope.sanity_max_mm`` ceiling when enforcement is off
+    (owner decision 2026-11-22), so an opted-out brief is only refused for the sanity ceiling.
+    The estimate is advisory: any failure returns ``None`` rather than turning a legal knob invalid.
     """
     env = brief.get("envelope") or {}
     if not env:
         return 0.0
     try:
         from . import grid as grid_mod          # lazy: grid.py imports this module
-        lim_w = float(env.get("max_mouth_w_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
-        lim_h = float(env.get("max_mouth_h_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
+        from ...config import effective_envelope_limits
+        lim_w, lim_h, lim_d, _enforced = effective_envelope_limits(brief)
+        lim_w += _ENVELOPE_MOUTH_TOLERANCE_MM
+        lim_h += _ENVELOPE_MOUTH_TOLERANCE_MM
         from ...search.evaluate import ENVELOPE_DEPTH_ALLOWANCE_MM
-        lim_d = float(env.get("max_depth_mm", 1e9)) + float(ENVELOPE_DEPTH_ALLOWANCE_MM)
+        lim_d += float(ENVELOPE_DEPTH_ALLOWANCE_MM)
         if not (lim_w > 0.0 and lim_h > 0.0 and lim_d > 0.0):
             return None
         w_mm, h_mm, depth_mm = grid_mod.envelope_extents(block, block.get("knobs") or {}, brief)
@@ -439,10 +444,13 @@ def envelope_overshoot_estimate(params: dict, brief: dict | None) -> float | Non
     * depth        = anchor z span + ``wall_thickness_mm``
 
     The shell offset is included because the post-mesh bounding box includes the free-
-    standing outer shell.  The limits are the post-mesh ones: brief ``max_mouth_w_mm``/
-    ``max_mouth_h_mm`` plus the 0.5 mm meshing tolerance and ``max_depth_mm`` plus
-    ``ENVELOPE_DEPTH_ALLOWANCE_MM`` (imported lazily from evaluate to keep the design
-    layer import-free of the search layer at module load).
+    standing outer shell.  The limits are the post-mesh ones: the brief's
+    ``max_mouth_w_mm``/``max_mouth_h_mm`` plus the 0.5 mm meshing tolerance and
+    ``max_depth_mm`` plus ``ENVELOPE_DEPTH_ALLOWANCE_MM``, or — when ``envelope.enforce`` is
+    false (owner decision 2026-11-22) — ``config.effective_envelope_limits``' absolute
+    ``envelope.sanity_max_mm`` ceiling with the same tolerances. ``effective_envelope_limits``
+    and ``ENVELOPE_DEPTH_ALLOWANCE_MM`` are imported lazily to keep the design layer
+    import-free of the search layer at module load.
 
     Returns ``max(0, max(value/limit - 1))`` over the three dimensions: ``0.0`` when the
     estimate is inside, a positive relative overshoot when it is outside.  ``None`` when
@@ -463,10 +471,12 @@ def envelope_overshoot_estimate(params: dict, brief: dict | None) -> float | Non
         return 0.0
     try:
         wt = float(params.get("wall_thickness_mm", 3.0))
-        lim_w = float(env.get("max_mouth_w_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
-        lim_h = float(env.get("max_mouth_h_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
+        from ...config import effective_envelope_limits
+        lim_w, lim_h, lim_d, _enforced = effective_envelope_limits(brief)
+        lim_w += _ENVELOPE_MOUTH_TOLERANCE_MM
+        lim_h += _ENVELOPE_MOUTH_TOLERANCE_MM
         from ...search.evaluate import ENVELOPE_DEPTH_ALLOWANCE_MM
-        lim_d = float(env.get("max_depth_mm", 1e9)) + float(ENVELOPE_DEPTH_ALLOWANCE_MM)
+        lim_d += float(ENVELOPE_DEPTH_ALLOWANCE_MM)
     except (TypeError, ValueError):
         return None
     if not (math.isfinite(wt) and wt >= 0.0

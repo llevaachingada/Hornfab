@@ -136,6 +136,56 @@ class TestEnvelopeOvershootEstimate:
 
 
 # ---------------------------------------------------------------------------
+# envelope.enforce: false (owner decision 2026-11-22)
+# ---------------------------------------------------------------------------
+
+
+def _params_sized(w_mm: float, h_mm: float):
+    """Conical anchors scaled so the estimator's OUTER width/height equal the targets."""
+    params, brief = _conical_params()
+    wt = float(params["wall_thickness_mm"])
+
+    def _scaled(key: str, outer_mm: float) -> dict:
+        points = params[key]["points"]
+        max_r = max(float(row[1]) for row in points)
+        k = (outer_mm / 2.0 - wt) / max_r
+        return {**params[key], "points": [[z, r * k, a] for z, r, a in points]}
+
+    return {**params, "profileH": _scaled("profileH", w_mm),
+            "profileV": _scaled("profileV", h_mm)}, brief
+
+
+def _no_enforce(brief: dict) -> dict:
+    return {**brief, "envelope": {**brief["envelope"], "enforce": False}}
+
+
+class TestEnvelopeEnforcementOff:
+    def test_900_mm_wide_passes_the_sanity_ceiling_on_both_paths(self):
+        params, brief = _params_sized(900.0, 900.0)
+        off = _no_enforce(brief)
+        w, h, d = _outer_dims_mm(params)
+        assert w == pytest.approx(900.0)
+        assert registry.envelope_overshoot_estimate(params, off) == 0.0
+        assert envelope_violation(_mesh_from_dims(w, h, d), off) == ""
+
+    def test_1300_mm_wide_is_refused_by_both_paths_as_a_sanity_violation(self):
+        params, brief = _params_sized(1300.0, 1300.0)
+        off = _no_enforce(brief)
+        overshoot = registry.envelope_overshoot_estimate(params, off)
+        assert overshoot is not None and overshoot > 0.0
+        msg = envelope_violation(_mesh_from_dims(*_outer_dims_mm(params)), off)
+        assert msg.startswith("outside the sanity envelope")
+        assert "sanity" in msg and "width 1300" in msg
+
+    def test_an_enforced_brief_is_unchanged(self):
+        params, brief = _params_sized(1300.0, 1300.0)
+        overshoot = registry.envelope_overshoot_estimate(params, brief)
+        assert overshoot is not None and overshoot > 0.0
+        msg = envelope_violation(_mesh_from_dims(*_outer_dims_mm(params)), brief)
+        assert msg.startswith("outside the brief envelope") and "sanity" not in msg
+
+
+# ---------------------------------------------------------------------------
 # generated.py error channel
 # ---------------------------------------------------------------------------
 
