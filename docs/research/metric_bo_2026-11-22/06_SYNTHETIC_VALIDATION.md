@@ -144,7 +144,44 @@ Interpretation, with the limits stated:
 - Bitwise reproducibility across different Torch/BLAS platforms is not claimed. Reproducibility is
   from the same interpreter, seed, frozen arrays and recorded dependency versions.
 
-## 4. Reproduce
+## 4. Senior verification and hardening pass (2026-11-22, second review)
+
+An independent verification pass (read-only oracle review plus parent instrumentation) found and
+fixed one real defect and hardened the seams:
+
+1. **BLOCKER found and fixed — the refit loop never actually refit.** `MetricSyntheticEvaluator`
+   refit on a shallow `dataclasses.replace` of the frozen artifact with swapped arrays; the stale
+   serialized checksum was inherited, so the integrity gate refused every refit
+   (`artifact_checksum_mismatch`) and the old pause list silently continued on the initial model.
+   The recovery determinism test passed vacuously (two equally-stale models). Fix: every refit now
+   rebuilds a fresh, checksum-valid `metric-training-v1` artifact through the public
+   `build_metric_training_artifact` (identity metadata re-validated, stale serialized checksum
+   dropped), observation intake requires exact component parity (no unverified J becomes a label),
+   and a failed refit pauses the loop except for a missing optional engine. Tests now assert refits
+   are accepted, row counts grow, model hashes change, and the resumed model equals the
+   uninterrupted one *and differs from the frozen fit*.
+2. **Durable refit provenance.** Each refit records proposal index, training-row count, training-row
+   SHA-256, model hash and acceptance; after the run a content-addressed `metric_refit_state`
+   artifact (`metric-refit-state-v1`) is attached so the refit matrix is reconstructible without
+   journal replay. `restore_progress` now replays accepted observations and performs one
+   deterministic final refit (previously one redundant refit per replayed observation, including a
+   spurious one on a fresh start).
+3. **Hardening from review.** `policy._validate_metric_training` no longer swallows a `TypeError`
+   from the artifact validator (a validator failure is a typed refusal, never a bypass);
+   `metric_bindings` re-derives the bounds identity from the snapshot's live projection whenever
+   the frozen config file is readable (`metric_snapshot_bounds_mismatch` otherwise); the
+   `study_cohort --allow-unranked-replay` help text now states that authorization also covers
+   groups refused for missing/ambiguous score identity.
+4. **Optional correlated arm E implemented (research-only).** `metric_diagnostics` gains
+   `E_correlated_lmc_v1` (BoTorch `MultiTaskGP` stacked-task form, LMC rank `min(m,2)`), excluded
+   by default (`include_optional=False`), tagged-unavailable on failure, and explicitly not
+   validated on real data. On the additive landscape: MAE `0.000464`, Spearman `1.000`, fit+acq
+   `0.292 s` — synthetic numbers only, not an acoustic or superiority claim.
+5. **Regression after hardening:** same 61-file suite, **587 passed, 3 skipped, 202 warnings in
+   84.74 s** (the same three pre-existing native-archive skips). Oracle review verdict on the
+   pushed Pass 2 commit: `ship` (no blockers; its minor findings are fixed in this pass).
+
+## 5. Reproduce
 
 Everything above is reproducible from the branch with the isolated interpreter. The parent evidence
 script lives outside the repository (temp path) so no generated study data is committed; the

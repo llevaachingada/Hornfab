@@ -313,8 +313,9 @@ def main(argv=None):
     parser.add_argument('--run-id', action='append', default=None,
                         help='keep only records of this catalog run id (repeatable)')
     parser.add_argument('--allow-unranked-replay', action='store_true',
-                        help='explicitly authorise replaying a v10/v11 group with zero encodable '
-                             'candidates (recorded as status=replay_authorized)')
+                        help='explicitly authorise replaying a v10/v11 group that ranked '
+                             'selection refused (zero encodable candidates, or no established '
+                             'score identity; recorded as status=replay_authorized)')
     parser.add_argument('--expected-score-identity', default=None,
                         help='require this catalog score identity for every ranked record')
     parser.add_argument('--expected-brief-hash', default=None,

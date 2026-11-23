@@ -272,13 +272,10 @@ def _validate_metric_training(binding: MetricTrainingBinding) -> dict:
             expected_bounds_hash=(expected_bounds or None),
             expected_score=(expected_score or None),
             expected_task=(expected_task or None))
-    except TypeError:
-        # Older validator signature: still perform the independent checks below.
-        check = None
-    except Exception as exc:  # noqa: BLE001 - validator failure is a refusal
+    except Exception as exc:  # noqa: BLE001 - validator failure is a refusal, never a bypass
         return _data(STATUS_UNAVAILABLE, REASON_METRIC_TRAINING_INVALID,
                      f"artifact validation failed: {type(exc).__name__}: {exc}")
-    if check is not None and not getattr(check, "ok", False):
+    if not getattr(check, "ok", False):
         reason = _reason_from_artifact_check(getattr(check, "reason", None))
         detail = str(getattr(check, "detail", None)
                      or "; ".join(getattr(check, "reasons", ()) or ())

@@ -12,8 +12,8 @@
 
 ## 1. Synthetic model comparison
 
-`run_synthetic_model_comparison(...)` fits four arms to **identical** synthetic train/test data and
-the same seed:
+`run_synthetic_model_comparison(...)` fits four default arms to **identical** synthetic train/test
+data and the same seed, plus an optional fifth arm:
 
 | arm | components | meaning |
 |---|---:|---|
@@ -21,14 +21,20 @@ the same seed:
 | `B_two_component` | 2 | two-component composite |
 | `C_v10_four` | 4 | four-component v10-shaped composite |
 | `D_v11_six` | 6 | six-component v11-shaped composite |
+| `E_correlated_lmc_v1` (optional) | 6 | one correlated LMC multitask GP over all outputs |
 
-An optional correlated-output arm `E_correlated` is documented but **not implemented**
-(`OPTIONAL_ARM_NOT_IMPLEMENTED`). The module never claims to test it.
+Arm E is **research-only and optional**: `OPTIONAL_ARM_STATUS = "implemented_research_only"` and
+`include_optional=False` by default. It is never required for acceptance. When enabled, it fits one
+BoTorch 0.18.1 `MultiTaskGP` in the documented stacked-task form
+(`train_X = [[x_i, task_t], ...]`, `task_feature = d`, `rank = min(m, 2)`), rather than one
+independent `SingleTaskGP` per output. A failed optional fit (capability missing, API mismatch,
+numerical failure) is recorded as `E_correlated_lmc_v1: unavailable` with
+`numerical_failures=1`; it never crashes the comparison.
 
-The GP construction reuses the `bo.metric_model` helpers (`_import_engine`, `_fit_one_output`,
-per-output standardisation, fixed noise floor, `ModelListGP`, `predict_metric_components`). The
-synthetic arms do not build a `metric-training-v1` artifact because arm A (one scalar output) and
-arm B (two outputs) are not frozen component schemas.
+The default independent GP construction reuses the `bo.metric_model` helpers (`_import_engine`,
+`_fit_one_output`, per-output standardisation, fixed noise floor, `ModelListGP`,
+`predict_metric_components`). The synthetic arms do not build a `metric-training-v1` artifact
+because arm A (one scalar output) and arm B (two outputs) are not frozen component schemas.
 
 ### Landscapes
 
@@ -65,8 +71,8 @@ confidence guarantee.
 
 ### Actual outcome (recorded, not tuned)
 
-Run: `n_train=48`, `n_test=20`, `d=3`, `seed=7`, `max_iters=40`, all eight landscapes, total wall
-time ≈ 15.1 s on CPU.
+Run: `n_train=48`, `n_test=20`, `d=3`, `seed=7`, `max_iters=40`, all eight landscapes,
+`include_optional=False` (A–D), total wall time ≈ 15.1 s on CPU.
 
 | arm | MAE | RMSE | Spearman | top-decile recall | coverage (not calibrated) | bias | fit+acq time (s) | failures |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -75,11 +81,15 @@ time ≈ 15.1 s on CPU.
 | C_v10_four | 0.0122 | 0.0157 | 0.990 | 1.00 | 1.0000 | -0.00069 | 4.00 | 0 |
 | D_v11_six | 0.0109 | 0.0139 | 0.991 | 1.00 | 1.0000 | -0.00162 | 5.34 | 0 |
 
+Optional arm E on the approximately-additive landscape alone (`n_train=48`, `n_test=20`, `d=3`,
+`seed=7`, `max_iters=40`): MAE 0.000464, RMSE 0.000782, Spearman 1.000, top-decile recall 1.00,
+coverage 1.000, bias +0.0000822, fit+acq 0.292 s, 0 numerical failures, marker `LMC`.
+
 The composite arms won this synthetic comparison. **That is not evidence that a composite arm is
 superior on real acoustic data.** These landscapes are largely additive by construction, which is
 the regime where decomposing a sum helps; the comparison also costs roughly 1–2 extra GP fits for
-the four/six-component arms. A scalar win would have been reported just as plainly. The optional
-correlated-output arm is absent, so correlation between outputs is not tested.
+the four/six-component arms. A scalar win would have been reported just as plainly. The optional LMC
+arm models correlation between outputs but **does not validate that correlation on real data**.
 
 ## 2. Optimizer advisory
 
@@ -137,7 +147,9 @@ inputs, the research-only labelling, the bounds-review priority and unchanged ex
   synthetic data and are labelled not calibrated.
 - **No acoustic improvement claim.** Every number above is synthetic; no BEM/GPU/mesh/solver call
   was made.
-- The comparison does not implement correlated-output arm E and does not test real data.
+- The optional LMC arm models correlation between outputs but does not validate that correlation
+  on real data; arm E is research-only and excluded by default.
+- The comparison does not test real data.
 - The advisory switch consumes raw run metadata; it is not a statistical comparison and does not
   establish that any optimizer is better.
 - Metric-composite remains research-only and validation-required regardless of the switch output.

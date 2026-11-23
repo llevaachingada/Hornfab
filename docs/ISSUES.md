@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-22 - Metric-composite BO Pass 2 verification/hardening
+
+- FIXED (blocker, found by parent instrumentation): the synthetic refit loop never actually refit — a shallow artifact replace inherited a stale serialized checksum, the integrity gate refused every refit (`artifact_checksum_mismatch`), and the tolerated-reason list silently continued on a stale model; the recovery determinism test was vacuous. Refits now rebuild a fresh checksum-valid artifact through `build_metric_training_artifact(require_identity=True)`, observation intake requires exact component parity, and any refit failure except missing-optional-engine pauses the loop.
+- FIXED (hardening): `policy._validate_metric_training` no longer swallows validator `TypeError`s; `metric_bindings` re-derives bounds from the snapshot projection when the frozen config is readable; `--allow-unranked-replay` help covers identity-refused groups; `restore_progress` performs one deterministic final refit instead of one per replayed observation.
+- DONE (research-only): optional correlated-output arm `E_correlated_lmc_v1` (BoTorch `MultiTaskGP` LMC) implemented in `metric_diagnostics`, default-excluded, tagged-unavailable on failure; explicitly not validated on real data.
+- VERIFY: independent oracle review of `cffc0a4f` returned `ship` (fail-closed identity, synthetic isolation, crash windows, additive policy diff, canonical v11 arithmetic, advisory read-only all verified); post-hardening suite **587 passed, 3 skipped** (pre-existing native-archive skips), 84.74 s; refit functional evidence in doc 06 §4.
+- OPEN (unchanged): real-data validation (doc 07) and matched BEM pilot (doc 08) remain owner-gated and NOT EXECUTED; promotion to `PRODUCTION_POLICIES` remains a separate decision; uncertainty coverage remains not calibrated; `_load_pool_object`/`_json` helpers in `metric_study.py` mirror `production.py`/`builders.py` helpers (noted duplication, no behavior risk).
+
 ## 2026-11-22 - Metric-composite BO Pass 2 (feature branch, not merged)
 
 - DONE (Pass 2): strict bounds/score identity contract in `bo/metric_identity.py`; deterministic `metric-training-npz-v1` serializer/loader with tamper, dtype/shape/sha256, component-order, J-row and identity validation in `bo/metric_artifact.py`; `fit_metric_model` refuses corrupt artifacts before Torch. Missing/inconsistent identity is a typed refusal everywhere.

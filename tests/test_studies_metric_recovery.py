@@ -131,9 +131,14 @@ def test_rerun_after_limit_stop_evaluates_nothing_twice(tmp_path):
 def test_resumed_study_makes_the_same_next_proposal_as_an_uninterrupted_run(tmp_path):
     stages = _stages(tmp_path)
     package = stages["package"]
+    # The frozen pre-observation model hash: a resumed/uninterrupted evaluator must move off it
+    # (refits actually happen) and land on the same refit model deterministically.
+    artifact0, fitted0, _pool0, _bounds0 = _runtime(stages)
+    initial_hash = fitted0.model_hash
     uninterrupted = _evaluator(stages, limit=2)
     result = _run(stages, uninterrupted)
     assert result["status"] == "pool_exhausted"
+    assert uninterrupted.model_result.model_hash != initial_hash
 
     # The uninterrupted evaluator already holds the final two observations and refit model.
     uninterrupted.proposal_limit = None
@@ -144,12 +149,14 @@ def test_resumed_study_makes_the_same_next_proposal_as_an_uninterrupted_run(tmp_
     journal = ProductionJournal(stages["service"])
     assert resumed.restore_progress(journal.load_progress(package["package_id"]))
     resumed.proposal_limit = None
+    assert resumed.model_result.model_hash != initial_hash
     next_resumed = resumed.next_candidate({"screen_calls": 2})
     assert next_resumed is not None
     assert next_resumed["solve_id"] == next_uninterrupted["solve_id"]
 
     # Same frozen state -> same model hash, not just the same first candidate.
     assert resumed.model_result.model_hash == uninterrupted.model_result.model_hash
+    assert resumed.refit_log[-1]["rows_sha256"] == uninterrupted.refit_log[-1]["rows_sha256"]
 
 
 # --------------------------------------------------------------------------- gate + existing policies

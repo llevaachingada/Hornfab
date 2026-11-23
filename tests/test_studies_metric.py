@@ -267,6 +267,18 @@ def test_synthetic_adaptive_run_three_proposals(tmp_path):
     assert results["synthetic"] is True
     assert results["provenance"]["no_backend_calls"] is True
     assert results["progress"]["screen_calls"] == 3
+    # The learning loop must actually refit: every accepted observation produces a fresh,
+    # checksum-valid artifact and a changed model hash (a stale model would be a silent failure).
+    refits = results["refits"]
+    assert len(refits) == 3
+    assert all(item["accepted"] is True and item["status"] == "ok" for item in refits)
+    n0 = int(refits[0]["n_training_rows"]) - 1
+    assert [item["n_training_rows"] for item in refits] == [n0 + 1, n0 + 2, n0 + 3]
+    assert len({item["model_hash"] for item in refits}) == 3
+    refit_state = metric_study._json(service, sid, "metric_refit_state")
+    assert refit_state["format"] == metric_study.METRIC_REFIT_STATE_FORMAT
+    assert refit_state["rows_sha256"] == refits[-1]["rows_sha256"]
+    assert refit_state["model_hash"] == refits[-1]["model_hash"]
 
     # The next synthetic evaluator sees the durable observations and refits from them.
     artifact, fitted, pool, bounds = _runtime({"service": service, "sid": sid})

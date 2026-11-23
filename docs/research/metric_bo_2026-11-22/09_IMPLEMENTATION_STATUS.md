@@ -165,12 +165,20 @@ or ambiguous identity excludes the record. Legacy (non-v10/v11) behaviour is unc
    decision.
 7. **GUI exposure is unchanged.** The GUI real-run policy list still contains only
    scalar/turbo/pareto; the new policy is not launchable from the GUI.
-8. **Synthetic refit artifact is in-memory augmented.** Durable training is the frozen initial
-   artifact; new observations are journaled separately and replayed on restore. A future real
-   worker should persist an updated immutable artifact per accepted observation batch rather than
-   relying on in-memory augmentation.
+8. **Synthetic refit provenance is durable.** (Hardening pass) The original in-memory augmentation
+   was a real defect — the integrity gate refused every refit and the loop silently ran on a stale
+   model. Refits now rebuild a fresh checksum-valid artifact through the public builder, parity-gate
+   observation intake, and publish a content-addressed `metric_refit_state` artifact per package;
+   restore performs one deterministic final refit. A future real worker can reuse the same
+   mechanism per accepted observation batch.
 9. **Platform reproducibility.** Same interpreter/seed/versions is expected to reproduce
    `model_hash`; bitwise identity across different Torch/BLAS builds is not claimed.
+10. **Verification pass (2026-11-22, second review).** Independent read-only review (oracle) of the
+   pushed Pass 2 commit returned `ship`; its actionable findings (validator exception swallow,
+   advisory/help-text wording, restore refit waste) and the refit blocker found by parent
+   instrumentation are fixed in the hardening commit. Optional correlated-output arm E is now
+   implemented research-only in `metric_diagnostics`. Post-hardening regression: 587 passed /
+   3 pre-existing skips.
 
 ## Recommended next authorization
 

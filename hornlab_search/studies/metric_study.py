@@ -25,6 +25,7 @@ from contextlib import contextmanager
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any
 
 from hornlab_search.bo import metric_artifact, metric_contracts, metric_identity
 from hornlab_search.bo.data import CandidatePool, PoolCandidate
@@ -48,13 +49,15 @@ from .runner import (
     encode_proposal_history,
     run_package,
 )
-from .schema import PROTOCOL, Conflict, StudyError, Unavailable, canonical
+from .schema import PROTOCOL, Conflict, NotFound, StudyError, Unavailable, canonical
 from .service import DraftAttemptJournal, StudyService
 
 METRIC_POLICY = POLICY_METRIC_COMPOSITE
 METRIC_TRAINING_KIND = metric_artifact.ARTIFACT_KIND          # "metric_training"
 METRIC_TRAINING_MANIFEST_KIND = "metric_training_manifest"
 METRIC_TRAINING_MANIFEST_SCHEMA = "metric-training-manifest-v1"
+METRIC_REFIT_STATE_KIND = "metric_refit_state"
+METRIC_REFIT_STATE_FORMAT = "metric-refit-state-v1"
 METRIC_MODEL_SCHEMA = "study-model-manifest-v1"
 METRIC_PROPOSAL_SCHEMA = "study-proposal-v1"
 METRIC_POOL_SCHEMA = builders.POOL_MANIFEST_SCHEMA
@@ -668,6 +671,23 @@ def metric_bindings(service, sid, proposal=None):
     if str(artifact.objective_version) != str(binding.get("objective_version")):
         return {"status": "unavailable", "reason": "metric_identity_mismatch",
                 "detail": "artifact objective version differs from the proposal binding"}
+    # Snapshot re-derivation: when the frozen config file is actually readable, the box identity
+    # must be recomputed from the live projection rather than trusted from the proposal binding.
+    try:
+        snapshot = _json(service, sid, "snapshot")
+        live_encoding = _config_encoding(snapshot)
+    except (Unavailable, NotFound):
+        live_encoding = None
+    if live_encoding is not None:
+        try:
+            recomputed = metric_identity.bounds_identity(live_encoding, strict=True)
+        except (TypeError, ValueError) as exc:
+            return {"status": "unavailable", "reason": "metric_snapshot_bounds_invalid",
+                    "detail": f"snapshot encoding does not yield a bounds identity: {exc}"}
+        if str(bounds.get("hash") or "") != recomputed:
+            return {"status": "unavailable", "reason": "metric_snapshot_bounds_mismatch",
+                    "detail": f"proposal bounds hash {bounds.get('hash')!r} != snapshot-derived "
+                              f"{recomputed!r}"}
     return {
         "status": "ok",
         "reason": "ok",
@@ -819,10 +839,15 @@ class MetricSyntheticEvaluator:
         self.history = history if isinstance(history, ProposalHistory) else ProposalHistory()
         self._proposal_count = int(self.history.proposal_index)
         self._results = dict(initial_results or {})
-        self._X = [list(map(float, row)) for row in artifact.X]
-        self._J = list(map(float, artifact.J.reshape(-1)))
-        self._Y = [list(map(float, row)) for row in artifact.Y_components]
+        self._base_candidates = tuple(self._artifact_candidates(artifact))
+        self._accepted: list[Any] = []
         self._seen = set()
+        self._refits: list[dict] = []
+
+    @property
+    def refit_log(self) -> tuple[dict, ...]:
+        """Provenance of every in-memory refit (training-row checksum + model hash)."""
+        return tuple(self._refits)
 
     # -- capability
     def capability_status(self):
@@ -961,20 +986,94 @@ class MetricSyntheticEvaluator:
         return result
 
     # -- learning
-    def _augmented_artifact(self):
-        from dataclasses import replace as _replace
+    @staticmethod
+    def _artifact_candidates(artifact) -> tuple[Any, ...]:
+        """Reconstruct identity-stamped training candidates from a frozen artifact."""
         import numpy as np
-        return _replace(
-            self.artifact,
-            X=np.asarray(self._X, dtype=np.float64),
-            J=np.asarray(self._J, dtype=np.float64).reshape(-1, 1),
-            Y_components=np.asarray(self._Y, dtype=np.float64),
-            observation_ids=tuple(self.artifact.observation_ids)
-            + tuple(f"synthetic-{i}" for i in range(len(self._X) - len(self.artifact.observation_ids))),
-            selected_ids=tuple(self.artifact.selected_ids)
-            + tuple(f"synthetic-{i}" for i in range(len(self._X) - len(self.artifact.selected_ids))))
+        from hornlab_search.bo.metric_contracts import MetricTrainingCandidate
+
+        meta = dict(getattr(artifact, "metadata", {}) or {})
+        active_keys = tuple(str(k) for k in (meta.get("active_keys") or ()))
+        if not active_keys:
+            active_keys = tuple(str(k) for k in (artifact.feature_names or ()))
+        stamps = dict(
+            objective_version=int(artifact.objective_version),
+            brief_hash=str(meta.get("brief_hash") or ""),
+            score_hash=str(meta.get("score_hash") or ""),
+            task_identity=str(meta.get("task_identity") or ""),
+            backend=str(meta.get("backend") or ""),
+            fidelity=str(meta.get("fidelity") or ""),
+            grid_hash=str(meta.get("grid_hash") or ""),
+            dependency_hash=str(meta.get("dependency_hash") or ""),
+            mesh_hash=str(meta.get("mesh_hash") or ""),
+            active_keys=active_keys,
+            bounds_hash=str(meta.get("bounds_hash") or ""),
+            status="ok",
+            component_names=tuple(artifact.component_names),
+        )
+        X = np.asarray(artifact.X, dtype=np.float64)
+        J = np.asarray(artifact.J, dtype=np.float64).reshape(-1)
+        Y = np.asarray(artifact.Y_components, dtype=np.float64)
+        return tuple(
+            MetricTrainingCandidate(
+                observation_id=str(artifact.observation_ids[index]),
+                x=np.array(X[index], dtype=np.float64, copy=True),
+                J=float(J[index]),
+                components=np.array(Y[index], dtype=np.float64, copy=True),
+                **stamps,
+            )
+            for index in range(int(artifact.n))
+        )
+
+    def _rebuild_artifact(self):
+        """Fresh, checksum-valid ``metric-training-v1`` artifact over base + accepted rows.
+
+        The frozen artifact is never mutated: every refit trains on a rebuilt artifact that
+        passes the same integrity gate (parity, schema, identity payloads, new checksum).
+        """
+        from hornlab_search.bo.metric_contracts import SelectionResult
+        from hornlab_search.bo.metric_training import build_metric_training_artifact
+
+        selection = SelectionResult(
+            status="ok",
+            objective_version=int(self.artifact.objective_version),
+            component_names=tuple(self.artifact.component_names),
+            selected=tuple(self._base_candidates) + tuple(self._accepted),
+            policy={},
+            policy_hash="",
+        )
+        # The rebuilt artifact must not inherit the *serialized* checksum of the artifact it was
+        # derived from: the builder stamps a fresh manifest checksum, and the integrity gate
+        # re-verifies any inherited ``artifact_checksum`` against the new arrays.
+        identity_metadata = {k: v for k, v in dict(self.artifact.metadata).items()
+                             if k != "artifact_checksum"}
+        return build_metric_training_artifact(
+            selection, identity_metadata=identity_metadata, require_identity=True)
+
+    def _training_rows_sha256(self) -> str:
+        import hashlib
+
+        import numpy as np
+        from hornlab_search.bo.metric_contracts import MetricTrainingCandidate
+
+        rows = tuple(self._base_candidates) + tuple(self._accepted)
+        digest = hashlib.sha256()
+        for candidate in rows:
+            digest.update(np.ascontiguousarray(
+                np.asarray(candidate.x, dtype=np.float64)).tobytes())
+            digest.update(np.ascontiguousarray(
+                np.asarray([candidate.J], dtype=np.float64)).tobytes())
+            digest.update(np.ascontiguousarray(
+                np.asarray(candidate.components, dtype=np.float64)).tobytes())
+        return digest.hexdigest()
 
     def _add_observation(self, result):
+        import numpy as np
+        from hornlab_search.bo.metric_contracts import (
+            MetricTrainingCandidate,
+            validate_components,
+        )
+
         if result.get("kind") not in (None, "screen"):
             return False
         if result.get("outcome") not in ("success", "cached"):
@@ -998,30 +1097,65 @@ class MetricSyntheticEvaluator:
         if vector is None:
             return False
         try:
-            import numpy as np
             x = np.asarray(vector, dtype=float).reshape(-1)
             y = np.asarray(components, dtype=float).reshape(-1)
         except (TypeError, ValueError):
             return False
-        if x.size != len(self._X[0]) or y.size != len(self._Y[0]):
+        if x.size != int(self.artifact.d) or y.size != len(self.artifact.component_names):
             return False
-        self._X.append([float(v) for v in x])
-        self._J.append(j)
-        self._Y.append([float(v) for v in y])
+        # No unverified J becomes a training label: exact component parity is required here,
+        # exactly as it was for the frozen artifact's rows.
+        ok, _reconstructed, why = validate_components(
+            int(self.artifact.objective_version), y, j,
+            names=tuple(self.artifact.component_names))
+        if not ok:
+            return False
+        meta = dict(self.artifact.metadata or {})
+        self._accepted.append(MetricTrainingCandidate(
+            observation_id=f"synthetic:{solve_id}",
+            x=np.array(x, dtype=np.float64, copy=True),
+            J=j,
+            objective_version=int(self.artifact.objective_version),
+            brief_hash=str(meta.get("brief_hash") or ""),
+            score_hash=str(meta.get("score_hash") or ""),
+            task_identity=str(meta.get("task_identity") or ""),
+            backend=str(meta.get("backend") or ""),
+            fidelity=str(meta.get("fidelity") or ""),
+            grid_hash=str(meta.get("grid_hash") or ""),
+            dependency_hash=str(meta.get("dependency_hash") or ""),
+            mesh_hash=str(meta.get("mesh_hash") or ""),
+            active_keys=tuple(str(k) for k in (meta.get("active_keys") or ())),
+            bounds_hash=str(meta.get("bounds_hash") or ""),
+            status="ok",
+            components=np.array(y, dtype=np.float64, copy=True),
+            component_names=tuple(self.artifact.component_names),
+        ))
         self._seen.add(solve_id)
         return True
 
     def _refit(self):
         from hornlab_search.bo.metric_model import fit_metric_model
-        fitted = fit_metric_model(self._augmented_artifact(), seed=self.seed)
+        fitted = fit_metric_model(self._rebuild_artifact(), seed=self.seed)
+        record = {
+            "proposal_index": int(self._proposal_count),
+            "n_training_rows": int(len(self._base_candidates) + len(self._accepted)),
+            "seed": int(self.seed),
+            "status": str(getattr(fitted, "status", "") or ""),
+            "model_hash": str(getattr(fitted, "model_hash", "") or ""),
+            "rows_sha256": self._training_rows_sha256(),
+        }
         if getattr(fitted, "status", None) == "ok":
             self.model_result = fitted
+            record["accepted"] = True
+            self._refits.append(record)
             return True
+        record["accepted"] = False
         reason = str(getattr(fitted, "reason", "") or "")
-        if reason == "capability_missing":
-            return True
-        return reason not in ("model_unavailable", "nonfinite_training_data",
-                              "nonfinite_posterior")
+        record["reason"] = reason
+        self._refits.append(record)
+        # A refit that fails for any reason other than a missing optional engine pauses the
+        # adaptive loop: continuing on a stale model would be a silent fabrication.
+        return reason == "capability_missing"
 
     def observe(self, result):
         if not isinstance(result, dict):
@@ -1040,9 +1174,7 @@ class MetricSyntheticEvaluator:
         history = decode_proposal_history(stored, progress.get("proposal_index"))
         self.history = history
         self._proposal_count = int(history.proposal_index)
-        self._X = [list(map(float, row)) for row in self.artifact.X]
-        self._J = list(map(float, self.artifact.J.reshape(-1)))
-        self._Y = [list(map(float, row)) for row in self.artifact.Y_components]
+        self._accepted = []
         self._seen = set()
         self._results = {}
         for item in progress.get("observations") or ():
@@ -1051,8 +1183,13 @@ class MetricSyntheticEvaluator:
             if result.get("x") is None and candidate.get("x") is not None:
                 result["x"] = candidate.get("x")
             self._results[str(result.get("solve_id") or candidate.get("solve_id"))] = result
-            if self._add_observation(result):
-                self._refit()
+            # Replay adds observations without intermediate fits; one deterministic refit at the
+            # end restores the exact post-observation model (identical training rows + seed).
+            self._add_observation(result)
+        if not self._accepted:
+            # Fresh start: the constructed model already matches the frozen artifact.
+            return (self.model_result is not None
+                    and getattr(self.model_result, "status", None) == "ok")
         return self._refit()
 
     def proposal_rng_state(self):
@@ -1135,11 +1272,45 @@ def run_synthetic_metric_study(service, study_id, *, root, synthetic_evaluator,
         "artifact_bytes_sha256": training_meta["sha256"],
         "progress": journal.state(package["package_id"]),
         "observations": progress.get("observations") or (),
+        "refits": list(evaluator.refit_log),
         "provenance": dict(SYNTHETIC_PROVENANCE),
         "synthetic": True,
         "no_backend_calls": True,
         "real_solver_calls": 0,
     }
+    # Durable refit provenance: the frozen artifact stays immutable; the accepted-observation
+    # matrix behind every refit is published content-addressed so a reload can re-derive the
+    # exact refit without replaying the journal.
+    existing_refit_state = service.get_artifact_metadata(study_id, METRIC_REFIT_STATE_KIND)
+    if evaluator.refit_log and existing_refit_state.get("status") == "missing":
+        try:
+            refit_rows = {
+                "format": METRIC_REFIT_STATE_FORMAT,
+                "policy": METRIC_POLICY,
+                "package_id": package["package_id"],
+                "bounds_hash": (manifest.get("bounds") or {}).get("hash"),
+                "score_identity": (manifest.get("score") or {}).get("identity"),
+                "seed": int(seed),
+                "base_artifact_sha256": training_meta["sha256"],
+                "n_training_rows": int(evaluator.refit_log[-1]["n_training_rows"]),
+                "rows_sha256": evaluator.refit_log[-1]["rows_sha256"],
+                "model_hash": evaluator.refit_log[-1]["model_hash"],
+                "observation_ids": list(artifact.observation_ids)
+                + [f"synthetic-{i}" for i in range(
+                    int(evaluator.refit_log[-1]["n_training_rows"]) - len(artifact.observation_ids))],
+                "refits": [dict(item) for item in evaluator.refit_log],
+                "provenance": dict(SYNTHETIC_PROVENANCE),
+                "synthetic": True,
+                "no_backend_calls": True,
+            }
+            refit_rows["checksum"] = sha256_json(
+                {k: v for k, v in refit_rows.items() if k != "checksum"})
+            service.attach_artifact(
+                study_id, package["spec_revision"], METRIC_REFIT_STATE_KIND,
+                canonical(refit_rows).encode("utf-8"), {"package": package["package_id"]},
+                f"{METRIC_REFIT_STATE_KIND}:{package['package_id']}")
+        except (Conflict, Unavailable):
+            pass
     existing_results = service.get_artifact_metadata(study_id, "results")
     if existing_results.get("status") == "missing":
         try:
@@ -1159,6 +1330,8 @@ __all__ = [
     "METRIC_TRAINING_KIND",
     "METRIC_TRAINING_MANIFEST_KIND",
     "METRIC_TRAINING_MANIFEST_SCHEMA",
+    "METRIC_REFIT_STATE_KIND",
+    "METRIC_REFIT_STATE_FORMAT",
     "METRIC_MODEL_SCHEMA",
     "METRIC_PROPOSAL_SCHEMA",
     "SYNTHETIC_PROVENANCE",
