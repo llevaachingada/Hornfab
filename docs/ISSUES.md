@@ -1,4 +1,10 @@
-﻿# ISSUES
+# ISSUES
+
+## 2026-11-23 - Phase B/C handoff (BO go-live)
+
+- READY: six round3 open-envelope cohorts at 121-213 usable rows (verified from run manifests); all above the >=100 gate. Fleet best c400b 0.9679.
+- HANDOFF: doc 10 lists the assumptions to review (usable-count attrition through identity gates, lib_sha pooling across run dirs, seedspread dataset ingestion, CD balloon coverage) and the Phase B/C/D path.
+- OPEN: Phase B validation (CPU), Phase C production wiring (PRODUCTION_POLICIES + capability/worker/GUI), Phase D BO runs - each owner-visible and gated in order.
 
 ## 2026-11-22 - Metric-composite BO Pass 2 verification/hardening
 
@@ -3612,6 +3618,12 @@ Local-only, added 2026-11-02 (no GitHub issue state changed): GUI frequency-axis
 Local-only, added 2026-11-02 (no GitHub issue state changed): **P11 HF data sync DONE** - public dataset repo <https://huggingface.co/datasets/chingadalleva/hornlab-search-data> (7 tar shards, 10.77 GB packed: text/solve/dataset; meshes not uploaded), `tools/hf_sync.py` corrected to `hf upload`. Owner-machine finding: Xet uploads stall here; upload with `HF_HUB_DISABLE_XET=1`. Still open in P11: merge to `main` (which branches) and the two v4 re-runs.
 # ISSUES
 
+## 2026-11-23 - Phase B/C handoff (BO go-live)
+
+- READY: six round3 open-envelope cohorts at 121-213 usable rows (verified from run manifests); all above the >=100 gate. Fleet best c400b 0.9679.
+- HANDOFF: doc 10 lists the assumptions to review (usable-count attrition through identity gates, lib_sha pooling across run dirs, seedspread dataset ingestion, CD balloon coverage) and the Phase B/C/D path.
+- OPEN: Phase B validation (CPU), Phase C production wiring (PRODUCTION_POLICIES + capability/worker/GUI), Phase D BO runs - each owner-visible and gated in order.
+
 ## 2026-11-21 — Sculpted V11 termination
 
 - OPEN. The freestanding GRID builder joins the inner and outer lip rings with a straight ruled end face. A physical roundover needs a versioned explicit transition, tangent and clearance checks, and measured mesh/source parity before BEM. Crowe C1/C2 remain held on source and shell fidelity. The native R2 truncation returned an unfavorable single-tier delta. [Measured V11 evidence](evidence/sculpted_xo900_v11_2026-11-21/README.md).
@@ -4351,8 +4363,3 @@ Local-only, added 2026-11-13 (**bo-study-v1.1 pushed; cloud completion kickoff i
 - Open: B8 full adversarial loop (fake evaluator through service/CLI/API/GUI, crash/idempotency matrix).
 - Open: pyproject optional `bayes` extra registration (isolated `bayes-venv` remains the sanctioned engine env).
 - Data note: 3 native shard-57 rows (276-278) uncatalogued at the S0 snapshot; refused at join (`catalog_row_missing`), recoverable by a fresh catalog export.
-
-
-
-
-

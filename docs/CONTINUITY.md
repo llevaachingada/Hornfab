@@ -1,4 +1,9 @@
-﻿# CONTINUITY
+# CONTINUITY
+
+## 2026-11-23 - Senior handoff for Phase B/C (doc 10): review assumptions, wire production, run BO
+
+- **Handoff:** [10_SENIOR_HANDOFF_PHASE_B](research/metric_bo_2026-11-22/10_SENIOR_HANDOFF_PHASE_B.md) written for the senior agent taking over: two-checkout map, verified cohort table (six round3 identities at 121-213 usable rows, fleet best c400b 0.968), eight load-bearing assumptions to review (usable-count attrition, lib_sha pooling, a/b separateness, dataset ingestion of seedspread rows, CD balloon coverage, acquisition semantics, GP economics, refit design), Phase B/C/D plan with gates, and 48-hour first steps. Data collection is complete; nothing executed beyond the queued screens.
+- **Ops closed out:** topup1/topup2/topup2b/seedspread recorded with final usable counts; no queues live; GPU lane clean.
 
 ## 2026-11-22 - Metric-composite BO Pass 2 verification/hardening: refit-loop defect fixed, review hardening, arm E
 
@@ -10020,5 +10025,3 @@ PASS  round-trip        reserved for task 04
 - **Next (next agent):** The implementation plan's NON-OWNER-GATED work is COMPLETE as of M6/WP12: the machine carries the brief-agnostic shape surface (classical + splice/throat-blend/salmon + GRID + organic rows + rollback lecleach/iwata_ar/toroidal + saddle halves) + restarts schedules + the QD-atlas contract + the CADâ†’STEP multicell category + the enclosure-mounting route (measured: dofs +199 %/+107 %, both under the unchanged caps) + the WP16 source plug + WP17 fused-CUDA near correction (stage 1) on the hosted fork's pinned stack (`760a1ec`; installed == pinned â€” the mesh-pin tripwire is green). **Everything remaining needs the owner: [a] the brief-design consultation (deferred) â€” 2â€“4 real briefs turn the machinery from "calibrated" into "aimed"; [b] resume-or-park the deferred WP14 multicell PHYSICS (the fixture's mouth-topology defect + the full resume recipe live in `docs/ISSUES.md`'s deferred-WP14 block; WP17 stage 1 is ready for it); [c] P6a superformula campaign + P6b GSA-vs-CMA-ES bake-off (owner-gated); [d] the small parked proposals (W7 balloon density, the M3/5 calibration proposals); [e] WP17 stage 2 (fused + per-image symmetry near caches) only when symmetric-drive multicells need the GPU. WP13 axisymmetric backend = OWNER-DEFERRED ("don't know how necessary that is" 2026-10-25).** Nothing else runs without the owner.
 - **Open owner decisions:** v2 objective as brief DEFAULT (today opt-in); bound proposals (`docs/evidence/TYPOLOGY_COMPARE_2026-10-23.md`); mesher bump (post-beta); surrogate OSSE top-up; GUI contrast owner click-path check remains; **P6a/P6b + W7 + the brief-design consultation + resume-or-park the deferred WP14 multicell physics (all owner-gated â€” see Next). RESOLVED 2026-10-25: fork hosting + pin (hosted fork; `760a1ec` pinned; installed == pinned â€” tripwire green); WP13 = OWNER-DEFERRED.**
 - **Blockers:** none (owner gate on the pin hosting only).
-
-
