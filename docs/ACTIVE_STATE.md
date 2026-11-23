@@ -32,6 +32,14 @@ git log --oneline -5; git status --porcelain
 
 ## State, at write time
 
+- **2026-11-23 09:05 EST (overnight top-up closed):** `bo_data_topup_2026-11-22` (other lane)
+  6/6; it resumed the round-3 open run dirs in place. New screen bests: compact500 Crowe
+  **1.70512** (770x548x393, `138f09ce5472`), FAV **3.30792** (720x608x418, `5987a94e99c0`),
+  v11 Fold **3.42866** (522x445x423, `606abb301970`); the other five leaders unchanged. The
+  `docs/renders/2026-11-22-best-horns` gallery was re-rendered on 2026-11-23 and republished.
+  None verify-grid confirmed. Lane free.
+
+
 - **2026-11-22 20:10 EST (round 3 closed, open envelope):** `hornfab_round3_2026-11-22` 7/7 with
   `envelope.enforce: false` (sanity 1200 mm). Screen bests: home Fold 1.3087 -> **1.1932** (k=3.36,
   past the old 2.81 cap; still inside the old 600x480 box), compact400 1.0243 -> **0.9679**

@@ -1,5 +1,11 @@
 ﻿# CONTINUITY
 
+## 2026-11-23 - Overnight BO data top-up and updated horn sheets
+
+- **`bo_data_topup_2026-11-22`** (other lane, 22:25-00:19, 6/6) resumed the round-3 open-envelope run dirs in place to grow each cohort to BO training size while continuing CMA (dual use). Every job was stopped by the pin watchdog after 30-40 rows: `morph_corner_mm` low on c400a, `L_mm` low on c400b, and similar pins later.
+- **Three screen bests improved:** compact500 Crowe 1.8150 -> **1.70512** (770x548x393 mm, hash `138f09ce5472`), FAV 3.3848 -> **3.30792** (720x608x418, `5987a94e99c0`), v11 Fold 3.6172 -> **3.42866** (522x445x423, `606abb301970`). The other five family leaders are unchanged (home Fold 1.19315, Morph 1.39730, TwinRay 1.73558, compact400 0.96787, 2-inch 1.93303). All J are screen-grid; none is verify-grid confirmed.
+- **Gallery updated:** `docs/renders/2026-11-22-best-horns` re-rendered on 2026-11-23 (three 6000 px sheets, 200 dpi) with the new bests, table and README corrected, Pages republished.
+
 ## 2026-11-22 - Advisor 12-hour queue, common-grid verify, open-envelope decision, renders
 
 - **Queue 1 `hornfab_12h_2026-11-22`** (02:42-04:32, 10 jobs). Every job stopped by the watchdog after 25-204 evals, 110 min total. Screen bests: TwinRay 2.5748 -> 1.7356 (stopped at the brief envelope, morph_height 480), Morph 1.5769 -> 1.3973 (stalled 204/219), compact400 Fold s2 1.1891 -> 1.0742 and s1 1.1501, home Fold k 1.3738 -> 1.3176 (q pinned high) and s 1.3087 (k pinned high), compact500 Crowe 2.9901 -> 2.8392, FAV 4.4527 -> 4.4305; v11 Fold no gain (morph_corner pinned low); 2-inch 1.8705 -> 1.9330 (64 % refusal at 25 attempts). The advisor's job-8 resume was replaced by the pre-staged bounded 2-inch follow-up (75c147 resumes at a 43 % refusal window and three pinned knobs).

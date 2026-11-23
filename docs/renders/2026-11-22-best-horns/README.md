@@ -1,7 +1,7 @@
 # Best horns solved 2026-11-22
 
-The best screen design of each horn family solved on 2026-11-22, rendered at 200 dpi (6000 px wide)
-on three contact sheets. Each row: isometric, top-skew, V cut (x=0), H cut (y=0), V dispersion,
+The best screen design of each horn family solved on 2026-11-22, re-rendered on 2026-11-23 after the
+overnight data top-up, at 200 dpi (6000 px wide) on three contact sheets. Each row: isometric, top-skew, V cut (x=0), H cut (y=0), V dispersion,
 H dispersion and the score ledger.
 
 Open `index.html` for the gallery (served by GitHub Pages).
@@ -23,14 +23,21 @@ verify-grid confirmed.
 | design | run | hash | J | outer W×H×D mm |
 |---|---|---|---|---|
 | compact400 Fold | `20261122T221847Z-screen-5857d8` | `f4774d562aae` | 0.96787 | 474×350×303 |
-| compact500 Crowe | `20261122T223153Z-screen-98b41d` | `f05a5f9a2bbf` | 1.81498 | 719×538×386 |
+| compact500 Crowe | `20261122T223153Z-screen-98b41d` | `138f09ce5472` | 1.70512 | 770×548×393 |
 | compact500 2-inch | `20261122T092931Z-screen-6edb3a` | `b7ae23ef8caa` | 1.93303 | 484×447×257 |
 
 ### `best22_03.png` — v11 home
 | design | run | hash | J | outer W×H×D mm |
 |---|---|---|---|---|
-| FAV v11 | `20261122T232104Z-screen-2cc59b` | `02f00c0e5542` | 3.38481 | 730×577×403 |
-| v11 Fold | `20261122T162831Z-screen-8484dd` | `f5b191713dac` | 3.61720 | 564×411×370 |
+| FAV v11 | `20261122T232104Z-screen-2cc59b` | `5987a94e99c0` | 3.30792 | 720×608×418 |
+| v11 Fold | `20261123T001107Z-screen-c88c3d` | `606abb301970` | 3.42866 | 522×445×423 |
+
+## Overnight update (2026-11-23)
+
+The `bo_data_topup_2026-11-22` night resumed these run dirs in place to grow each cohort to BO
+training size. Three bests improved and are the designs on the sheets now: compact500 Crowe
+1.815 -> **1.705**, FAV 3.385 -> **3.308**, v11 Fold 3.617 -> **3.429**. The other five are unchanged.
+All J remain screen-grid.
 
 ## Read this correctly
 

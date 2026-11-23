@@ -1,5 +1,12 @@
 ﻿# ISSUES
 
+## 2026-11-23 - Overnight top-up and updated sheets
+
+- DONE: `bo_data_topup_2026-11-22` 6/6; new accepted screen rows pool into the BO cohorts and continue the CMA search.
+- CHANGED: three screen bests improved overnight — compact500 Crowe 1.70512, FAV 3.30792, v11 Fold 3.42866. The 2026-11-22 gallery was re-rendered and republished.
+- OPEN: none of the open-envelope winners is verify-grid confirmed.
+- OPEN (size): compact400 474 mm, compact500 770 mm and FAV 720 mm exceed their old build cubes; the size filter decision is still outstanding.
+
 ## 2026-11-22 - Open-envelope search and 2026-11-22 horn renders
 
 - DONE: the brief size envelope is switchable off per brief (`envelope.enforce: false`, `sanity_max_mm` default 1200 mm). One helper (`config.effective_envelope_limits`) feeds the post-mesh gate, both pre-mesh estimators and `tools/shape_check.py`; the default is byte-identical. Focused tests 84 passed.

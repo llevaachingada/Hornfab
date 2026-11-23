@@ -40,7 +40,7 @@ WINDOW = sys.argv[4]
 R = Path("scratch/best22/r")
 OUT = Path("scratch/best22/sheets")
 OUT.mkdir(parents=True, exist_ok=True)
-RENDERED = "2026-11-22"
+RENDERED = "2026-11-23"
 
 LABELS = {
     "6d9e8c874827": "home_fold",
@@ -48,9 +48,12 @@ LABELS = {
     "adf7e74388f0": "home_morph",
     "f4774d562aae": "c400_fold",
     "f05a5f9a2bbf": "c500_crowe",
+    "138f09ce5472": "c500_crowe",
     "b7ae23ef8caa": "c500_2in",
     "02f00c0e5542": "fav_v11",
+    "5987a94e99c0": "fav_v11",
     "f5b191713dac": "v11_fold",
+    "606abb301970": "v11_fold",
 }
 BRIEFS = {
     "6d9e8c874827": "home v10",
@@ -58,9 +61,12 @@ BRIEFS = {
     "adf7e74388f0": "home v10",
     "f4774d562aae": "compact400 v10xo",
     "f05a5f9a2bbf": "compact500 v11cd",
+    "138f09ce5472": "compact500 v11cd",
     "b7ae23ef8caa": "compact500 2-inch v11cd",
     "02f00c0e5542": "v11 home",
+    "5987a94e99c0": "v11 home",
     "f5b191713dac": "v11 home",
+    "606abb301970": "v11 home",
 }
 
 rows = [l.split() for l in TARGETS.read_text().splitlines() if l.strip()]
