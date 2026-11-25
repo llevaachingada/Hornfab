@@ -1,0 +1,3 @@
+night: favl_c500_continue_2026-11-25 lane=gpu (1 job(s))
+  1. favl_c500_open115_150 [search] timeout=14400s
+     argv: C:\Users\hunte\Hrns\hornlab-search\.venv\Scripts\hornlab-search.exe search --config examples/typologies/favL_2026-11-20/favL__2in_c500_open115.yaml --budget 150 --mode screen --cache-dir runs/favl_c500_continue_2026-11-25/cache --dataset-dir dataset

@@ -1,0 +1,87 @@
+{
+  "source": {
+    "scores_json": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\favl_c500_open115_smoke\\offline_scores.json",
+    "catalog_csv": "C:\\Users\\hunte\\Hrns\\hornlab-search\\scratch\\favl_c500_open115_smoke\\catalog.csv",
+    "dataset_root": "C:\\Users\\hunte\\Hrns\\hornlab-search\\dataset"
+  },
+  "counts": {
+    "exact_complete": 6
+  },
+  "selection": {
+    "group": [
+      "f4dcdca807bdfad0",
+      "c41ff9a7581ba429",
+      "6fe27f33fa2c",
+      "3506a5037438a1ad"
+    ],
+    "group_count": 1,
+    "dependency_pins": {
+      "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+      "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+      "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44"
+    },
+    "available": 6,
+    "limit": 256,
+    "selected_ids": [
+      "633bbef1522dc635",
+      "c61b995004d463f4",
+      "053cefe9df0dcd55",
+      "c0ac56773e3f7840",
+      "d1d9f5b3ebf7f5c5",
+      "72b0606b70672c52"
+    ],
+    "excluded_ids": [],
+    "excluded_reasons": [],
+    "metric_selection": {
+      "status": "needs_initial_data",
+      "reasons": [
+        "n_unique 6 < n_min 24"
+      ],
+      "d": 11,
+      "n_available": 6,
+      "n_compatible": 6,
+      "n_unique": 6,
+      "n_selected": 6,
+      "n_min": 24,
+      "n_max": 256,
+      "selected_ids": [
+        "633bbef1522dc635",
+        "c61b995004d463f4",
+        "053cefe9df0dcd55",
+        "c0ac56773e3f7840",
+        "d1d9f5b3ebf7f5c5",
+        "72b0606b70672c52"
+      ],
+      "excluded": [],
+      "objective_version": 11,
+      "component_names": [
+        "load_j",
+        "other_base_j",
+        "cd_lw_j",
+        "cd_di_std_j",
+        "cd_nacc_j",
+        "offaxis_smooth_j"
+      ],
+      "policy": {
+        "n_max": 256,
+        "elite_n": 64,
+        "n_min_floor": 16,
+        "seed": 0,
+        "near_duplicate_tol": 1e-06,
+        "require_single_backend": true,
+        "require_single_fidelity": true,
+        "require_single_mesh": true,
+        "require_single_dependency": true,
+        "allow_cd_cuts_fallback": false,
+        "allow_cuts_estimate_di": false
+      },
+      "policy_hash": "969f07055a0a7dee466cf4c6ca891e16cbb11cc565a5ea533276f9464c9065da",
+      "n_records_considered": 6,
+      "identity_excluded": []
+    },
+    "excluded": {
+      "other_dependency_grid_brief_groups": 0
+    },
+    "run_ids": null
+  }
+}

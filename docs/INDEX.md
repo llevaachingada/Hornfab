@@ -1,5 +1,7 @@
 # Docs index
 
+[favL 2-inch compact500 open115 continuation](evidence/favL_2in_c500_continue_2026-11-25/PREDECLARED.md) — wall-opened/narrowed box on the open 1.15 envelope, warm start from run 75c147, 150 valid for one new metric-BO identity; best 1.6915 by n=4.
+
 [CD backbone under a retained returned lip](research/typologies/RETURNED_LIP_CD_BACKBONE_RESEARCH_2026-11-25.md) — why the rolled and Lamé parents limit 6–8 kHz H, sourced literature (R-OSSE re-read), CPU backbone prototype and validation ladder; agent web report kept verbatim alongside.
 
 [Rolled and Lamé directivity attribution](evidence/directivity_attribution_2026-11-24/README.md) — predeclared H/V controls, early-wall levers that widen 6–8 kHz H, refined-mesh gate, 36 mm source-angle sensitivity and stated driver exit angles.

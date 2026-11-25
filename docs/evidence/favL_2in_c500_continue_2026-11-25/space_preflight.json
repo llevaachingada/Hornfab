@@ -1,0 +1,20 @@
+{
+ "encoding_dims": 11,
+ "seed_round_trip": true,
+ "admission": 1.0,
+ "draws": 128,
+ "counts": {},
+ "keys": [
+  "g_L_mm",
+  "g_a_h_deg",
+  "g_a_v_deg",
+  "g_k",
+  "g_n",
+  "g_r_lip_mm",
+  "g_s",
+  "g_sf_ab",
+  "g_sf_amt",
+  "g_throat_hv_ratio",
+  "g_wrap_deg"
+ ]
+}

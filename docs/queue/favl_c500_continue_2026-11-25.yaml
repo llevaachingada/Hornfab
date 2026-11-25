@@ -1,0 +1,35 @@
+# Queue recipe, 2026-11-25: favL__2in_c500 continuation, 150 valid screen solves on the
+# open115 brief. One frozen box + brief = one BO/metric-BO identity (>=100 usable rows, <256 cap).
+# ACTUALLY RAN as the first job of runs/nights/cd_bo_cohort_2026-11-25.yaml (owner choice); this
+# standalone file is the provenance copy and the relaunch fallback.
+# Evidence: docs/evidence/favL_2in_c500_continue_2026-11-25/PREDECLARED.md
+night: favl_c500_continue_2026-11-25
+lane: gpu
+jobs:
+- id: favl_c500_open115_150
+  kind: search
+  timeout_s: 14400
+  dataset_dir: dataset
+  cache_dir: runs/favl_c500_continue_2026-11-25/cache
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    min_attempts: 40
+    refusal_max: 0.40
+    no_gain_valid: 0
+    stall_valid: 0
+    pin_ignore:
+    - g_L_mm
+    - g_a_h_deg
+    - g_a_v_deg
+    - g_k
+    - g_n
+    - g_r_lip_mm
+    - g_s
+    - g_sf_ab
+    - g_sf_amt
+    - g_throat_hv_ratio
+    - g_wrap_deg
+  config: examples/typologies/favL_2026-11-20/favL__2in_c500_open115.yaml
+  budget: 150
+  mode: screen

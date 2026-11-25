@@ -1,0 +1,122 @@
+name: favL__2in_c500_open115
+family: FREEFORM
+brief_file: ../../briefs/hf2in_2026-11-20/compact500_xo900_80x50_hf2in_v11cd_open115.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_L_mm: 252.1465012403
+  g_a_h_deg: 33.0599344847
+  g_a_v_deg: 30.9999541934
+  g_k: 1.0011859329
+  g_n: 2.8543050896
+  g_q: 0.996
+  g_r_lip_mm: 17.7941953999
+  g_s: 0.3396638831
+  g_sf_ab: 0.8987713564
+  g_sf_amt: 0.2352754117
+  g_sf_m: 4.0
+  g_sf_n1: 1.8
+  g_sf_n2: 7.0
+  g_sf_start: 0.25
+  g_throat_hv_ratio: 1.1207256832
+  g_wrap_deg: 110.1759118831
+bounds:
+  g_k:
+    lo: 0.85
+    hi: 1.35
+  g_a_v_deg:
+    lo: 27.5
+    hi: 34.5
+  g_s:
+    lo: 0.3
+    hi: 0.4
+  g_throat_hv_ratio:
+    lo: 0.85
+    hi: 1.8
+  g_wrap_deg:
+    lo: 70.0
+    hi: 130.0
+  g_L_mm:
+    lo: 230.0
+    hi: 275.0
+  g_r_lip_mm:
+    lo: 13.0
+    hi: 23.0
+  g_a_h_deg:
+    lo: 32.2
+    hi: 34.5
+  g_n:
+    lo: 2.5
+    hi: 3.1
+  g_sf_ab:
+    lo: 0.86
+    hi: 0.91
+  g_sf_amt:
+    lo: 0.19
+    hi: 0.26
+  g_q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  g_sf_m:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  g_sf_n1:
+    lo: 1.8
+    hi: 1.8
+    search: false
+  g_sf_n2:
+    lo: 7.0
+    hi: 7.0
+    search: false
+  g_sf_start:
+    lo: 0.25
+    hi: 0.25
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.12
+  seed: 1234
+  budget: 150
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 450
+  error_policy: retry_same_then_stop
+  warm_start:
+    from_runs:
+    - C:\Users\hunte\Hrns\hornlab-search\runs\20261121T003823Z-screen-75c147
+    top_k: 10
+    sigma_from_spread: true
+    allow_cross_brief: true
+description: 'Continuation of favL__2in_c500 (run 20261121T003823Z-screen-75c147,
+  80 valid, best J 1.870458 at n=119, design 0ae816f04c06) on the open115 brief: g_k
+  low, g_a_v high and g_throat_hv_ratio low opened off their walls; inert g_sf_amt
+  / g_sf_ab / g_n / g_a_h tightened; 150 valid screen solves; one frozen BO identity
+  (no soft size term in J; size_feasibility is post-hoc).'

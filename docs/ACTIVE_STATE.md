@@ -3,8 +3,8 @@
 **This is a pointer, not authority.** It names where current state lives and what was verified when
 it was last written. If it disagrees with the tools below, the tools win.
 
-Last verified: **2026-11-20** against HEAD `cfa7846` (+ the docs/handback commit). The GPU lock was
-stale-held (holder pid gone) at this check; run `gpu-clean` before any solve.
+Last checked **2026-11-25** in the canonical checkout, branch `hornfab-all-2026-11-18` with local
+changes; newest state bullet below. Run live status before any solve.
 
 ## Verify first (never trust this file alone)
 
@@ -31,6 +31,18 @@ git log --oneline -5; git status --porcelain
   local execution state: `HANDOFF_2026-11-18.md` evening section.
 
 ## State, at write time
+
+- **2026-11-25 15:50 EST (favL__2in_c500 continuation live):** owner asked to open the wall-pinned
+  knobs, narrow the inert ones and continue the 2-inch compact500 run for 150 valid screens.
+  Built `examples/briefs/hf2in_2026-11-20/compact500_xo900_80x50_hf2in_v11cd_open115.yaml` (envelope
+  `enforce: false`, `max_utilization: 1.15`, no soft size term in J) and
+  `examples/typologies/favL_2026-11-20/favL__2in_c500_open115.yaml` (seed = parent best
+  `0ae816f04c06`, J 1.870458; g_k/a_v/throat opened off their walls; inert sf_amt/sf_ab/n/a_h/L/
+  wrap/r_lip narrowed; warm start from `runs/20261121T003823Z-screen-75c147`, sigma0 0.12).
+  Preflight: 64/64 meshed samples valid, shape check 4117 DOF, BO encoding d=11 round-trip, 6/6
+  dataset rows replay into one metric-cohort group. Job `favl_c500_open115_150` runs first in
+  `cd_bo_cohort_2026-11-25` (run `runs/20261125T204727Z-screen-02b4bf`); best 1.691470 by n=4.
+  Evidence `docs/evidence/favL_2in_c500_continue_2026-11-25/`.
 
 - **2026-11-23 09:05 EST (overnight top-up closed):** `bo_data_topup_2026-11-22` (other lane)
   6/6; it resumed the round-3 open run dirs in place. New screen bests: compact500 Crowe

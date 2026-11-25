@@ -1,0 +1,5 @@
+| config | ok | dofs / cap | mouth W x H mm | depth mm | envelope | driver coupling | note |
+|---|---|---|---|---|---|---|---|
+
+
+| favL__2in_c500_open115 | yes | 4117 / 24000 | 491 x 436 | 255 | fits (exploration) | round, matches the exit |  |

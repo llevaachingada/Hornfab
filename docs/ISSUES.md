@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-25 - favL__2in_c500 open115 continuation
+
+- DONE: open115 brief + wall-opened/inert-narrowed box; `shape_check` and `search_preflight` pass (64/64 meshed samples, 128/128 admission, d=11 BO round-trip). [Predeclaration](evidence/favL_2in_c500_continue_2026-11-25/PREDECLARED.md)
+- DONE: job `favl_c500_open115_150` launched first in `cd_bo_cohort_2026-11-25`; run `20261125T204727Z-screen-02b4bf`; best 1.691470 at n=4 vs parent 1.870458, 0 refusals.
+- OPEN: finish 150 valid; then strict metric-BO artifact + frozen holdout for the new identity (the 150 rows clear the >= 100 gate; cap 256).
+- OPEN: the parent 80-row closed identity is not pooled (brief + box changed = new identity); keep it archived, do not merge without acoustic-parity evidence.
+- OPEN: verify-grid confirmation of the finalist; size post-filter (1.0-1.15 is unpenalised in J) before any build.
+
 ## 2026-11-25 - CD wall-angle backbone (rolled, Lamé) and cross-family survey
 
 - DONE: `cd-backbone-v1` construction (`_cd_backbone_v1.py`, `cd_backbone_family.py`; kinds `rolled_family_rect_bb_v1`, `klangfilm_lame_hv_bb_v1`), 32 CPU tests, neutral controls byte-identical to saved meshes. [Evidence](evidence/cd_backbone_2026-11-25/README.md)
