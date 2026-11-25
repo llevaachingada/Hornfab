@@ -107,3 +107,38 @@ reason; the next lever is mouth or depth, which is a separate, labeled scale ste
 - `iwata_ar` `b01fcfa4b50a` (b3bt): H chord 33.7°, θc 28.2° — below the 32° floor; held unless `iwar` passes.
 - `klangfilm_lame*`: already tested (batch 6 of the backbone folder); the next Lamé lever is depth or mouth.
 - `toroidal_rollback`: low priority (J 53 on its own brief).
+
+## Addendum, written 2026-11-25T16:45Z after batch 1 and before any batch-2 solve
+
+**Batch 1 outcome (recorded in README):** no candidate passes. The three controls are far narrower than the
+rolled control at 6–8 kHz (8 kHz H 39.4–40.2° vs 54.8°) and already fail rule 2 at 3.5–4 kHz (54–61°). The
+backbone adds +11 to +17° at 8 kHz (full strength reaches 55.7–56.8°) and narrows 2–4 kHz (the Lamé waistband).
+CPU diagnostic `arc_diagnostic.py`: the 55–110 mm band sits at u 0.16–0.36 on every parent, as on the rolled body,
+and `lcl` at full strength has an H-row wall of 30.7 / 37.3 / 37.5° at 55 / 80 / 110 mm, comparable to the rolled
+keeper (28.8 / 33.2 / 36.8°), which reached 68.5° at 8 kHz where `lcl` reached 55.7°. So the H-row wall alone does
+not set HF H width on these parents.
+
+**Jobs (epw 6, same controls, same six rules):**
+
+| Job | Why | θc H (CPU) |
+|---|---|---:|
+| `lcar_bb_h100_v000_t25_r20` | predeclared contingency (roll-in 0.20) | 38.4° |
+| `lcl_bb_h100_v000_t25_r20` | predeclared contingency | 40.6° |
+| `iwar_bb_h100_v000_t25_r20` | predeclared contingency | 34.5° |
+| `lcar_bb_h100_v100_t25_r30` | **post-hoc arm**: section hypothesis | 35.3° H / 21.2° V |
+| `lcl_bb_h100_v100_t25_r30` | **post-hoc arm**: section hypothesis | 37.5° H / 15.0° V |
+
+**Section hypothesis (post-hoc, new arm, labeled as such):** on these elliptical/AR sections (unlike the rolled
+rectangle, whose H walls are flat sidewalls) the HF H width also depends on the off-H rows, which `bb_v` 0 changes
+by cos²ψ or less. Test: `bb_v` 1.0 with everything else equal to the batch-1 full-strength job.
+
+Predictions (stated in advance):
+
+- **Roll-in 0.20:** 8 kHz H rises by +1 to +5° over the matching roll-in 0.30 job; **no job reaches 62° at all five
+  6–8 kHz bins** and rule 2 still fails (the controls already fail it). Loading for `lcar` stays below its floor
+  (0.736).
+- **Section arm:** if the hypothesis holds, 8 kHz H rises by ≥ +4° over the `bb_v` 0 job and V at 6–8 kHz
+  widens by ≥ +3°; if 8 kHz H moves by < 2°, the hypothesis is rejected. No pass of all six rules is expected
+  (rule 2 and, for `lcar`, rule 5).
+- If none passes, the conclusion recorded is that on these parents the backbone body change is not enough and the
+  next lever is a separate, labeled mouth/rollback or section change; no further backbone knobs are tried here.
