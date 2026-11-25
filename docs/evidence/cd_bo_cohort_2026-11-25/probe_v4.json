@@ -1,0 +1,662 @@
+{
+ "rolled_v4": {
+  "g_axial_h_mm": {
+   "scan": [
+    -40,
+    40
+   ],
+   "legal_at_seed": [
+    -20.0,
+    20.0
+   ],
+   "legal_points": "16/30",
+   "seed": -16.2714493912
+  },
+  "g_axial_v_mm": {
+   "scan": [
+    -40,
+    40
+   ],
+   "legal_at_seed": [
+    -20.0,
+    20.0
+   ],
+   "legal_points": "16/30",
+   "seed": 13.8817753127,
+   "box_after_joint_law_split": [
+    2.0,
+    20.0
+   ]
+  },
+  "g_decay": {
+   "scan": [
+    0.3,
+    1.0
+   ],
+   "legal_at_seed": [
+    0.3,
+    1.0
+   ],
+   "legal_points": "30/30",
+   "seed": 0.8083878809
+  },
+  "g_depth_h_ratio": {
+   "scan": [
+    0.5,
+    1.2
+   ],
+   "legal_at_seed": [
+    0.625,
+    1.2
+   ],
+   "legal_points": "25/30",
+   "seed": 1.0248298539
+  },
+  "g_depth_mm": {
+   "scan": [
+    120,
+    420
+   ],
+   "legal_at_seed": [
+    162.857143,
+    420.0
+   ],
+   "legal_points": "26/30",
+   "seed": 203.9205538717
+  },
+  "g_height_mm": {
+   "scan": [
+    220,
+    560
+   ],
+   "legal_at_seed": [
+    220.0,
+    547.857143
+   ],
+   "legal_points": "29/30",
+   "seed": 382.2349164214
+  },
+  "g_inward_h_mm": {
+   "scan": [
+    0,
+    80
+   ],
+   "legal_at_seed": [
+    0.0,
+    57.142857
+   ],
+   "legal_points": "22/30",
+   "seed": 3.7771849279
+  },
+  "g_inward_v_mm": {
+   "scan": [
+    0,
+    80
+   ],
+   "legal_at_seed": [
+    0.0,
+    42.857143
+   ],
+   "legal_points": "17/30",
+   "seed": 5.0510772881
+  },
+  "g_rect_exponent": {
+   "scan": [
+    2,
+    20
+   ],
+   "legal_at_seed": [
+    2.0,
+    15.5
+   ],
+   "legal_points": "23/30",
+   "seed": 9.6983455583
+  },
+  "g_rect_turn_deg": {
+   "scan": [
+    30,
+    89
+   ],
+   "legal_at_seed": [
+    30.0,
+    89.0
+   ],
+   "legal_points": "30/30",
+   "seed": 62.9538177787
+  },
+  "g_terminal_deg": {
+   "scan": [
+    181,
+    280
+   ],
+   "legal_at_seed": [
+    181.0,
+    280.0
+   ],
+   "legal_points": "30/30",
+   "seed": 277.9381737242
+  },
+  "g_throat_turn_deg": {
+   "scan": [
+    4,
+    60
+   ],
+   "legal_at_seed": [
+    4.0,
+    50.0
+   ],
+   "legal_points": "25/30",
+   "seed": 17.1793767185
+  },
+  "g_width_mm": {
+   "scan": [
+    420,
+    700
+   ],
+   "legal_at_seed": [
+    420.0,
+    690.0
+   ],
+   "legal_points": "29/30",
+   "seed": 567.5450011403
+  },
+  "g_bb_h": {
+   "scan": [
+    0.3,
+    1.0
+   ],
+   "legal_at_seed": [
+    0.3,
+    1.0
+   ],
+   "legal_points": "30/30",
+   "seed": 0.6928528653
+  },
+  "g_bb_throat_frac": {
+   "scan": [
+    0.05,
+    0.3
+   ],
+   "legal_at_seed": [
+    0.05,
+    0.3
+   ],
+   "legal_points": "30/30",
+   "seed": 0.2457538191
+  },
+  "g_bb_rollin_frac": {
+   "scan": [
+    0.15,
+    0.45
+   ],
+   "legal_at_seed": [
+    0.15,
+    0.45
+   ],
+   "legal_points": "30/30",
+   "seed": 0.274448798
+  },
+  "g_relief_start_s": {
+   "scan": [
+    0.15,
+    0.8
+   ],
+   "legal_at_seed": [
+    0.219643,
+    0.707143
+   ],
+   "legal_points": "23/30",
+   "seed": 0.5,
+   "box_after_joint_law_split": [
+    0.219643,
+    0.55
+   ]
+  },
+  "g_relief_peak_s": {
+   "scan": [
+    0.25,
+    0.92
+   ],
+   "legal_at_seed": [
+    0.561071,
+    0.872143
+   ],
+   "legal_points": "15/30",
+   "seed": 0.8,
+   "box_after_joint_law_split": [
+    0.561071,
+    0.81
+   ]
+  },
+  "g_relief_end_s": {
+   "scan": [
+    0.4,
+    0.96
+   ],
+   "legal_at_seed": [
+    0.82,
+    0.96
+   ],
+   "legal_points": "8/29",
+   "seed": 0.96,
+   "box_after_joint_law_split": [
+    0.82,
+    0.96
+   ]
+  },
+  "g_throat_hv_ratio": {
+   "scan": [
+    0.4,
+    2.5
+   ],
+   "legal_at_seed": [
+    0.55,
+    1.225
+   ],
+   "legal_points": "10/29",
+   "seed": 1.0
+  }
+ },
+ "lcl_beak_v4": {
+  "g_T": {
+   "scan": [
+    0.1,
+    1.5
+   ],
+   "legal_at_seed": [
+    0.3,
+    1.5
+   ],
+   "legal_points": "26/30",
+   "seed": 0.6618721026
+  },
+  "g_fc_h_hz": {
+   "scan": [
+    150,
+    1200
+   ],
+   "legal_at_seed": [
+    225.0,
+    1200.0
+   ],
+   "legal_points": "28/30",
+   "seed": 356.4179493366
+  },
+  "g_fc_v_hz": {
+   "scan": [
+    200,
+    2000
+   ],
+   "legal_at_seed": [
+    328.571429,
+    1421.428571
+   ],
+   "legal_points": "19/30",
+   "seed": 504.1545152173
+  },
+  "g_stop_deg": {
+   "scan": [
+    60,
+    240
+   ],
+   "legal_at_seed": [
+    92.142857,
+    240.0
+   ],
+   "legal_points": "25/30",
+   "seed": 99.2294939165
+  },
+  "g_bb_throat_frac": {
+   "scan": [
+    0.05,
+    0.3
+   ],
+   "legal_at_seed": [
+    0.05,
+    0.3
+   ],
+   "legal_points": "30/30",
+   "seed": 0.2505017951
+  },
+  "g_bb_rollin_frac": {
+   "scan": [
+    0.15,
+    0.45
+   ],
+   "legal_at_seed": [
+    0.15,
+    0.45
+   ],
+   "legal_points": "30/30",
+   "seed": 0.2208623608
+  },
+  "g_rb_h_mm": {
+   "scan": [
+    -60,
+    60
+   ],
+   "legal_at_seed": [
+    -42.857143,
+    60.0
+   ],
+   "legal_points": "25/29",
+   "seed": 0.0
+  },
+  "g_rb_v_mm": {
+   "scan": [
+    -60,
+    60
+   ],
+   "legal_at_seed": [
+    -47.142857,
+    60.0
+   ],
+   "legal_points": "26/29",
+   "seed": 0.0
+  },
+  "g_rb_d_mm": {
+   "scan": [
+    -30,
+    30
+   ],
+   "legal_at_seed": [
+    -30.0,
+    30.0
+   ],
+   "legal_points": "29/29",
+   "seed": 0.0
+  },
+  "g_rb_start_frac": {
+   "scan": [
+    0.3,
+    0.9
+   ],
+   "legal_at_seed": [
+    0.3,
+    0.9
+   ],
+   "legal_points": "29/29",
+   "seed": 0.6
+  }
+ },
+ "iwar_beak_v4": {
+  "g_T": {
+   "scan": [
+    0.1,
+    1.5
+   ],
+   "legal_at_seed": [
+    0.3,
+    1.5
+   ],
+   "legal_points": "26/30",
+   "seed": 0.8419355667
+  },
+  "g_ar_m": {
+   "scan": [
+    0.5,
+    4.0
+   ],
+   "legal_at_seed": [
+    0.625,
+    2.75
+   ],
+   "legal_points": "19/30",
+   "seed": 1.3700453986
+  },
+  "g_ar_p": {
+   "scan": [
+    0.2,
+    8.0
+   ],
+   "legal_at_seed": [
+    0.478571,
+    8.0
+   ],
+   "legal_points": "29/30",
+   "seed": 1.2153831946
+  },
+  "g_fc_hz": {
+   "scan": [
+    150,
+    1200
+   ],
+   "legal_at_seed": [
+    300.0,
+    1200.0
+   ],
+   "legal_points": "26/30",
+   "seed": 391.6761378343
+  },
+  "g_stop_deg": {
+   "scan": [
+    60,
+    240
+   ],
+   "legal_at_seed": [
+    92.142857,
+    240.0
+   ],
+   "legal_points": "25/30",
+   "seed": 103.9253617763
+  },
+  "g_bb_throat_frac": {
+   "scan": [
+    0.05,
+    0.3
+   ],
+   "legal_at_seed": [
+    0.05,
+    0.3
+   ],
+   "legal_points": "30/30",
+   "seed": 0.2755798962
+  },
+  "g_bb_rollin_frac": {
+   "scan": [
+    0.15,
+    0.45
+   ],
+   "legal_at_seed": [
+    0.15,
+    0.45
+   ],
+   "legal_points": "30/30",
+   "seed": 0.1535311985
+  },
+  "g_rb_h_mm": {
+   "scan": [
+    -60,
+    60
+   ],
+   "legal_at_seed": [
+    -60.0,
+    60.0
+   ],
+   "legal_points": "29/29",
+   "seed": 0.0
+  },
+  "g_rb_v_mm": {
+   "scan": [
+    -60,
+    60
+   ],
+   "legal_at_seed": [
+    -47.142857,
+    60.0
+   ],
+   "legal_points": "26/29",
+   "seed": 0.0
+  },
+  "g_rb_d_mm": {
+   "scan": [
+    -30,
+    30
+   ],
+   "legal_at_seed": [
+    -30.0,
+    30.0
+   ],
+   "legal_points": "29/29",
+   "seed": 0.0
+  },
+  "g_rb_start_frac": {
+   "scan": [
+    0.3,
+    0.9
+   ],
+   "legal_at_seed": [
+    0.3,
+    0.9
+   ],
+   "legal_points": "29/29",
+   "seed": 0.6
+  }
+ },
+ "klangfilm_v4": {
+  "g_beak_h_setback_mm": {
+   "scan": [
+    0,
+    60
+   ],
+   "legal_at_seed": [
+    0.0,
+    12.857143
+   ],
+   "legal_points": "8/30",
+   "seed": 5.6338801538
+  },
+  "g_beak_v_projection_mm": {
+   "scan": [
+    0,
+    45
+   ],
+   "legal_at_seed": [
+    0.0,
+    45.0
+   ],
+   "legal_points": "30/30",
+   "seed": 0.0411280271
+  },
+  "g_beak_diagonal_mm": {
+   "scan": [
+    -20,
+    20
+   ],
+   "legal_at_seed": [
+    -20.0,
+    20.0
+   ],
+   "legal_points": "30/30",
+   "seed": 4.9607565704
+  },
+  "g_beak_start_frac": {
+   "scan": [
+    0.5,
+    0.99
+   ],
+   "legal_at_seed": [
+    0.5,
+    0.9725
+   ],
+   "legal_points": "29/30",
+   "seed": 0.9136465122
+  },
+  "g_core_length_mm": {
+   "scan": [
+    150,
+    500
+   ],
+   "legal_at_seed": [
+    150.0,
+    412.5
+   ],
+   "legal_points": "23/30",
+   "seed": 286.2249997897
+  },
+  "g_lame_end_frac": {
+   "scan": [
+    0.4,
+    0.99
+   ],
+   "legal_at_seed": [
+    0.4,
+    0.99
+   ],
+   "legal_points": "30/30",
+   "seed": 0.8311698305
+  },
+  "g_lame_p_mouth": {
+   "scan": [
+    2.0,
+    8.0
+   ],
+   "legal_at_seed": [
+    2.0,
+    8.0
+   ],
+   "legal_points": "30/30",
+   "seed": 3.6671527002
+  },
+  "g_lame_start_frac": {
+   "scan": [
+    0.05,
+    0.4
+   ],
+   "legal_at_seed": [
+    0.05,
+    0.4
+   ],
+   "legal_points": "30/30",
+   "seed": 0.1833990395
+  },
+  "g_theta_h0_deg": {
+   "scan": [
+    2,
+    15
+   ],
+   "legal_at_seed": [
+    2.0,
+    15.0
+   ],
+   "legal_points": "30/30",
+   "seed": 6.3494651596
+  },
+  "g_theta_h1_deg": {
+   "scan": [
+    20,
+    60
+   ],
+   "legal_at_seed": [
+    20.0,
+    60.0
+   ],
+   "legal_points": "30/30",
+   "seed": 59.4695591282
+  },
+  "g_theta_v0_deg": {
+   "scan": [
+    2,
+    15
+   ],
+   "legal_at_seed": [
+    2.0,
+    15.0
+   ],
+   "legal_points": "30/30",
+   "seed": 7.1832395228
+  },
+  "g_theta_v1_deg": {
+   "scan": [
+    10,
+    50
+   ],
+   "legal_at_seed": [
+    10.0,
+    50.0
+   ],
+   "legal_points": "30/30",
+   "seed": 37.9388894372
+  }
+ }
+}

@@ -348,5 +348,50 @@
     "top_median": 0.0178046028
    }
   }
+ },
+ "iwar_bb_cohort": {
+  "valid": 10,
+  "best_J": 5.394584928300613,
+  "pins": {
+   "g_bb_h": {
+    "box": [
+     0.6,
+     1.0
+    ],
+    "n_low": 0,
+    "n_high": 5,
+    "kernel": [
+     0.0,
+     1.0
+    ],
+    "top_median": 0.9981545198
+   },
+   "g_bb_rollin_frac": {
+    "box": [
+     0.15,
+     0.3
+    ],
+    "n_low": 1,
+    "n_high": 0,
+    "kernel": [
+     0.15,
+     0.45
+    ],
+    "top_median": 0.1867147691
+   },
+   "g_bb_v": {
+    "box": [
+     0.0,
+     0.5
+    ],
+    "n_low": 3,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     1.0
+    ],
+    "top_median": 0.0249005648
+   }
+  }
  }
 }

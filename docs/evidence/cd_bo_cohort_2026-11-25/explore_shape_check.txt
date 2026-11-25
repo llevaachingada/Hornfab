@@ -1,0 +1,113 @@
+[hornlab-mesher] outer wall clearance wants 0.362 mm on 53 of 257 rings, finer than the 3.573 mm this build requests anywhere; holding at 3.573 mm. The outer shell may still chord through its own wall there -- reduce the wall thickness or open the throat curvature. The acoustic (inner) surface is unaffected.
+| config | ok | dofs / cap | mouth W x H mm | depth mm | envelope | driver coupling | note |
+|---|---|---|---|---|---|---|---|
+
+
+| iwar_beak_r1 | yes | 2448 / 24000 | 479 x 350 | 281 | fits (exploration) | round, matches the exit |  |
+
+
+| iwar_beak_r2 | yes | 1397 / 24000 | 393 x 221 | 183 | fits (exploration) | round, matches the exit |  |
+
+
+| iwar_beak_r3 | yes | 3054 / 24000 | 618 x 399 | 354 | fits (exploration) | round, matches the exit |  |
+
+
+| iwar_beak_r4 | yes | 1738 / 24000 | 435 x 361 | 182 | fits (exploration) | round, matches the exit |  |
+
+
+| iwar_beak_r5 | yes | 979 / 24000 | 321 x 143 | 112 | fits (exploration) | round, matches the exit |  |
+
+
+| iwar_beak_r6 | yes | 780 / 24000 | 177 x 154 | 118 | fits (exploration) | round, matches the exit |  |
+
+
+| klangfilm_r1 | yes | 2972 / 24000 | 485 x 286 | 292 | fits (exploration) | round, matches the exit |  |
+
+
+| klangfilm_r2 | yes | 4173 / 24000 | 542 x 232 | 430 | fits (exploration) | round, matches the exit |  |
+
+
+| klangfilm_r3 | yes | 2070 / 24000 | 214 x 284 | 297 | fits (exploration) | round, matches the exit |  |
+
+
+| klangfilm_r4 | yes | 752 / 24000 | 130 x 141 | 161 | fits (exploration) | round, matches the exit |  |
+
+
+| klangfilm_r5 | yes | 3670 / 24000 | 478 x 270 | 337 | fits (exploration) | round, matches the exit |  |
+
+
+| klangfilm_r6 | yes | 2412 / 24000 | 280 x 199 | 365 | fits (exploration) | round, matches the exit |  |
+
+
+| lcl_beak_r1 | yes | 2094 / 24000 | 435 x 310 | 264 | fits (exploration) | round, matches the exit |  |
+
+
+| lcl_beak_r2 | yes | 2865 / 24000 | 429 x 522 | 338 | fits (exploration) | round, matches the exit |  |
+
+
+| lcl_beak_r3 | yes | 893 / 24000 | 282 x 193 | 166 | fits (exploration) | round, matches the exit |  |
+
+
+| lcl_beak_r4 | yes | 2036 / 24000 | 479 x 233 | 274 | fits (exploration) | round, matches the exit |  |
+
+
+| lcl_beak_r5 | yes | 586 / 24000 | 197 x 185 | 91 | fits (exploration) | round, matches the exit |  |
+
+
+| lcl_beak_r6 | yes | 1324 / 24000 | 242 x 389 | 156 | fits (exploration) | round, matches the exit |  |
+
+
+| osse_morph_r1 | yes | 4237 / 24000 | 571 x 429 | 406 | fits (exploration) | round, matches the exit |  |
+
+
+| osse_morph_r2 | NO | 4433 / 24000 | 643 x 351 | 460 | fits (exploration) | 43.5 x 36.0 mm vs 36.0 mm exit; not round (area 1.20x an ellipse of that size) |  |
+
+
+| osse_morph_r3 | NO | 3920 / 24000 | 472 x 444 | 278 | fits (exploration) | 40.4 x 36.0 mm vs 36.0 mm exit; not round (area 1.17x an ellipse of that size) |  |
+
+
+| osse_morph_r4 | NO | 4048 / 24000 | 582 x 409 | 351 | fits (exploration) | 57.5 x 36.0 mm vs 36.0 mm exit |  |
+
+
+| osse_morph_r5 | NO | 7100 / 24000 | 555 x 510 | 521 | fits (exploration) | 31.8 x 36.0 mm vs 36.0 mm exit; not round (area 1.21x an ellipse of that size) |  |
+
+
+| osse_morph_r6 | NO | 8264 / 24000 | 530 x 422 | 488 | fits (exploration) | 35.2 x 36.0 mm vs 36.0 mm exit; not round (area 1.15x an ellipse of that size) |  |
+
+
+| osse_morph_r7 | NO | 5333 / 24000 | 699 x 323 | 390 | outside the exploration envelope (width 699.380 > 690 mm) | 53.6 x 36.0 mm vs 36.0 mm exit; not round (area 1.18x an ellipse of that size) |  |
+
+
+| osse_morph_r8 | NO | 3560 / 24000 | 493 x 474 | 312 | fits (exploration) | 36.6 x 36.0 mm vs 36.0 mm exit; not round (area 1.22x an ellipse of that size) |  |
+| rolled_r1 | NO | - | - x - | - | - | - | CONFIG ERROR: GeneratorError: g_axial_v_mm: seed outside its declared bounds |
+| rolled_r2 | NO | - | - x - | - | - | - | CONFIG ERROR: GeneratorError: rolled-family shape: inward relief must be nonnegative and at most 15 percent of height |
+| rolled_r3 | NO | - | - x - | - | - | - | CONFIG ERROR: GeneratorError: rolled-family shape: inward relief must be nonnegative and at most 15 percent of height |
+| rolled_r4 | NO | - | - x - | - | - | - | CONFIG ERROR: GeneratorError: rolled-family shape: axial relief exceeds ten percent of depth |
+| rolled_r5 | NO | - | - x - | - | - | - | CONFIG ERROR: GeneratorError: rolled-family shape: axial relief exceeds ten percent of depth |
+| rolled_r6 | NO | - | - x - | - | - | - | CONFIG ERROR: GeneratorError: rolled-family shape: axial relief exceeds ten percent of depth |
+| rolled_r7 | NO | - | - x - | - | - | - | CONFIG ERROR: GeneratorError: rolled-family shape: axial relief exceeds ten percent of depth |
+| rolled_r8 | NO | - | - x - | - | - | - | CONFIG ERROR: GeneratorError: rolled-family shape: axial relief exceeds ten percent of depth |
+
+
+| sculpted_beak_r1 | yes | 5947 / 24000 | 575 x 443 | 416 | fits (exploration) | round, matches the exit |  |
+
+
+| sculpted_beak_r2 | yes | 5998 / 24000 | 575 x 443 | 425 | fits (exploration) | round, matches the exit |  |
+
+
+| sculpted_beak_r3 | yes | 6549 / 24000 | 575 x 443 | 473 | fits (exploration) | round, matches the exit |  |
+
+
+| sculpted_beak_r4 | yes | 5693 / 24000 | 575 x 443 | 375 | fits (exploration) | round, matches the exit |  |
+
+
+| sculpted_sweep_r1 | yes | 6143 / 24000 | 584 x 449 | 435 | fits (exploration) | round, matches the exit |  |
+
+
+| sculpted_sweep_r2 | yes | 6503 / 24000 | 593 x 456 | 446 | fits (exploration) | round, matches the exit |  |
+
+
+| sculpted_sweep_r3 | yes | 4259 / 24000 | 467 x 359 | 357 | fits (exploration) | round, matches the exit |  |
+
+
+| sculpted_sweep_r4 | yes | 5281 / 24000 | 534 x 411 | 388 | fits (exploration) | round, matches the exit |  |

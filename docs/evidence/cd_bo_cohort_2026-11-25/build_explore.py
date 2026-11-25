@@ -36,9 +36,17 @@ HERE = Path(__file__).resolve().parent
 SEARCH = {'algorithm': 'cma', 'budget_counts': 'valid', 'error_policy': 'retry_same_then_stop',
           'infeasible_penalty': 'resample_strict', 'popsize': None, 'tolfun': 0.001}
 
-ROLLED_OVERRIDE = {**V4.ROLLED_BOX_OVERRIDE,
-                   # landscape law: the height box must stay below the width box (height_hi < width_lo)
-                   'g_width_mm': (500.0, 690.0), 'g_height_mm': (220.0, 495.0)}
+# Rolled box must be JOINTLY legal at every start (the family checks each bound endpoint against each start):
+#   |axial| <= 10 % of depth -> axial +-16 with depth >= 160; inward <= 15 % of height -> inward 0-45 with
+#   height >= 300; landscape law height_hi < width_lo. Relief POSITION knobs stay locked: the family refuses a
+#   searched relief position while every relief strength can be zero (the best design has ~0 relief).
+ROLLED_OVERRIDE = {'g_axial_h_mm': (-16.0, 16.0), 'g_axial_v_mm': (-16.0, 16.0), 'g_depth_mm': (160.0, 420.0),
+                   'g_inward_h_mm': (0.0, 45.0), 'g_inward_v_mm': (0.0, 45.0),
+                   'g_width_mm': (500.0, 690.0), 'g_height_mm': (300.0, 495.0),
+                   # family box law (rolled_family.py:329): throat-turn box strictly below rect-turn box
+                   'g_throat_turn_deg': (4.0, 34.0), 'g_rect_turn_deg': (35.0, 89.0)}
+ROLLED_SCAN = {k: v for k, v in V4.ROLLED_SCAN.items()
+               if k not in ('g_relief_start_s', 'g_relief_peak_s', 'g_relief_end_s')}
 ROWS_BB = {'g_bb_h': (0.3, 1.0), 'g_bb_v': (0.0, 0.5)}       # reopened for attribution (were frozen at limits)
 SCULPT_SWEEP_SCAN = {'g_sweep': (-1.0, 1.5), 'g_diagonal_delta_deg': (-6.0, 6.0), 'g_aperture_scale': (0.75, 1.25)}
 SCULPT_BEAK_SCAN = {'g_h_setback_mm': (-40.0, 80.0), 'g_v_projection_mm': (-40.0, 80.0)}
@@ -46,8 +54,9 @@ OSSE_BOX = {'L_mm': (160.0, 420.0), 'a0_deg': (1.0, 3.0), 'a_deg': (18.0, 45.0),
             'az_a_cos_pow': (1.0, 6.0), 'az_s_cos2_amp': (-0.25, 0.5), 'k': (0.3, 4.0), 'morph_corner_mm': (20.0, 130.0),
             'morph_height_mm': (300.0, 520.0), 'morph_rate': (1.0, 8.0), 'morph_width_mm': (460.0, 660.0),
             'n': (2.0, 14.0), 'q': (0.9, 1.0), 's': (0.2, 1.2),
-            # opened (were inherited locks; ranges inside the family table, families.py:58-119)
-            'aspect_ratio': (0.8, 1.6), 'exponent': (2.0, 6.0), 'az_a_sf_amp': (-15.0, 15.0),
+            # opened (inherited locks; family-table ranges). aspect_ratio / exponent stay LOCKED: they reshape the
+            # throat away from the round 36 mm exit (shape_check driver-coupling failures, 2026-11-25 16:40)
+            'az_a_sf_amp': (-15.0, 15.0),
             'az_n_cos2_amp': (-4.0, 4.0), 'morph_fixed': (0.0, 0.5)}
 
 
@@ -145,8 +154,8 @@ def main():
         p, j, h, run = best_over(runs)
         print(f'rolled seed {h} J {j:.4f} ({run})')
         grid_cohort('rolled', load_template(SRC / 'rolled_v4_s1.yaml'),
-                    {**p['grid']['knobs'], 'g_bb_v': 0.0, 'g_throat_hv_ratio': 1.0}, V4.ROLLED_SCAN, ROLLED_OVERRIDE,
-                    8, 50, 'Rolled hybrid + CD backbone (20 live knobs; g_cd_* duplicate law and bb_v off)', report)
+                    {**p['grid']['knobs'], 'g_bb_v': 0.0, 'g_throat_hv_ratio': 1.0}, ROLLED_SCAN, ROLLED_OVERRIDE,
+                    8, 50, 'Rolled hybrid + CD backbone (17 live knobs; g_cd_* duplicate law, bb_v and relief position locked)', report)
     if want('lcl'):
         p, j, h = V4.run_best(V4.night_run('lcl_bb_cohort'))
         print(f'lcl seed {h} J {j:.4f}')
@@ -185,7 +194,7 @@ def main():
         seed = {k: p[k] for k in cfg['seed_params']}
         starts = [seed]
         for pt in sobol_points(OSSE_BOX, 16, seed=4242):
-            if len(starts) >= 8:
+            if len(starts) >= 12:   # surplus: only shape_check-passing starts are queued (max 8)
                 break
             starts.append({**seed, **pt})
         for i, s in enumerate(starts, start=1):

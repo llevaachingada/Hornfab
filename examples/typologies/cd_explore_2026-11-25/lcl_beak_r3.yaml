@@ -1,0 +1,374 @@
+bounds:
+  g_T:
+    lo: 0.3
+    hi: 1.5
+    search: true
+  g_fc_h_hz:
+    lo: 225.0
+    hi: 1200.0
+    search: true
+  g_fc_v_hz:
+    lo: 328.571429
+    hi: 1421.428571
+    search: true
+  g_r_lip_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_stop_deg:
+    lo: 92.142857
+    hi: 240.0
+    search: true
+  g_bb_h:
+    lo: 0.3
+    hi: 1.0
+    search: true
+  g_bb_v:
+    lo: 0.0
+    hi: 0.5
+    search: true
+  g_bb_throat_frac:
+    lo: 0.05
+    hi: 0.3
+    search: true
+  g_bb_rollin_frac:
+    lo: 0.15
+    hi: 0.45
+    search: true
+  g_rb_h_mm:
+    lo: -42.857143
+    hi: 60.0
+    search: true
+  g_rb_v_mm:
+    lo: -47.142857
+    hi: 60.0
+    search: true
+  g_rb_d_mm:
+    lo: -30.0
+    hi: 30.0
+    search: true
+  g_rb_start_frac:
+    lo: 0.3
+    hi: 0.9
+    search: true
+brief:
+  name: room_landscape_80x50_900_hf1440_v11cd_open115
+  description: '(objective v11) HOME XO900 CD identity (room_landscape_80x50_900_hf1440_v11cd)
+    with an OPEN size policy: envelope.enforce false, max_utilization 1.15 per axis
+    (candidate box 690 x 552 x 552 mm, product box 600 x 480 x 480 mm). Over-cap candidates
+    are refused pre-mesh; every row records size_feasibility (margins, max utilization)
+    for post-hoc and Pareto filtering. NEW J/BO IDENTITY: not rankable against the
+    closed v11cd brief.'
+  driver:
+    exit_angle_deg: 2.0
+    exit_radius_mm: 18.0
+  envelope:
+    max_depth_mm: 480.0
+    max_mouth_h_mm: 480.0
+    max_mouth_w_mm: 600.0
+    enforce: false
+    max_utilization: 1.15
+    sanity_max_mm: 1200.0
+  symmetry: hv
+  source:
+    cap: auto
+  target:
+    band_hi_hz: 8000.0
+    band_lo_hz: 350.0
+    coverage_h_deg: 80.0
+    coverage_profile:
+      h:
+      - hz: 900
+        max_deg: 90
+        min_deg: 60
+        preferred_deg: 80
+      - hz: 8000
+        max_deg: 90
+        min_deg: 60
+        preferred_deg: 80
+      interpolation: log_frequency
+      mode: corridor
+      v:
+      - hz: 1000
+        max_deg: 60
+        min_deg: 40
+        preferred_deg: 50
+      - hz: 8000
+        max_deg: 60
+        min_deg: 40
+        preferred_deg: 50
+    coverage_v_deg: 50.0
+    coverage_v_down_deg: null
+    coverage_v_up_deg: null
+    di_slope_target: 0.0
+    di_target_db: null
+    driver_exit_radius_mm: null
+    f0_hz: 900.0
+    f0_v_hz: 900.0
+    freq_weights:
+      band_hz:
+      - - 2500.0
+        - 5500.0
+        - 2.0
+    loaded_hi_hz: 5600.0
+    z_min: 0.5
+  weights:
+    cov_profile: 1.0
+    di_roughness: 0.5
+    dislope: 0.5
+    flat: 0.5
+    flat_cv: 0.5
+    load: 1.0
+    rip: 0.5
+  grid:
+    verify_points_per_octave: 6
+    screen_extra_hz:
+    - 250
+    - 315
+    - 400
+    - 2573
+    - 3311
+    - 4260
+  objective:
+    cov_below_f0: one_sided
+    cov_narrow_ratio: 2.0
+    cov_v_weight: 0.5
+    flat_band: scored
+    lfp_crossover_ratio: 1.6
+    lfp_re_z: 0.2
+    loaded_re_z: 0.5
+    tolerances:
+      cov_profile: 3.0
+      di_roughness: 1.0
+      dislope: 9.0
+      flat: 1.5
+      flat_cv: 1.5
+      load: 0.3
+      rip: 1.0
+    version: 11
+    ripple_region: preferred_edge
+    cd:
+      band_hz:
+      - 900.0
+      - 8000.0
+      window_h_deg: 30.0
+      window_v_deg: 10.0
+      lw:
+        weight: 1.5
+        tolerance_db: 1.5
+      di_std:
+        weight: 0.75
+        tolerance_db: 1.0
+      nacc:
+        weight: 0.75
+        tolerance: 0.02
+      offaxis:
+        weight: 1.0
+        tolerance_db: 1.0
+        reference: band_mean
+        band_hz:
+        - 2500.0
+        - 8000.0
+        angles_h_deg:
+        - -40
+        - -30
+        - 30
+        - 40
+        angles_v_deg:
+        - -25
+        - -10
+        - 10
+        - 25
+      report:
+        omega: true
+        contour: false
+brief_file: null
+description: 'LABELED HYPOTHESIS: Le Cleac''h H/V + CD backbone + rim beak. EXPLORATION
+  cohort member lcl_beak_r3 (2026-11-25): box = legal range, 12 active dims, shared
+  by every run of this family (one BO identity).'
+family: FREEFORM
+feasibility:
+  derivation:
+  - knob: '-'
+    note: 'seed_policy explicit: derivation skipped'
+  envelope_mouth_h_mm: 480.0
+  envelope_mouth_w_mm: 600.0
+  f0_hz: 900.0
+  f0_v_hz: 900.0
+  feasible_v: false
+  feasible_w: true
+  held_coverage_v_deg: 58.7962962962963
+  held_coverage_w_deg: 47.03703703703704
+  required_mouth_h_mm: 564.4444444444445
+  required_mouth_w_mm: 352.77777777777777
+  rule: d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)
+  screen_freqs_below_f0: 3
+  screen_freqs_total: 12
+  verify_freqs_below_f0: 9
+  verify_freqs_total: 25
+generator:
+  n_phi: 15
+  n_s: 32
+  wall_thickness_mm: 3.0
+  name: grid
+  rows:
+    type: beak_v1
+    parent_rows:
+      type: rows_bb_v1
+      parent_rows:
+        type: lecleach
+  seed_policy: explicit
+grid:
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+  verify_points_per_octave: 6
+mesh:
+  dof_cap_final: 24000
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_per_triangle: 0.51
+  epw: 6.0
+  quadrants: '1'
+  rear_res_factor: 1.5
+name: lcl_beak_r3
+objective:
+  cd:
+    band_hz:
+    - 900.0
+    - 8000.0
+    di_std:
+      tolerance_db: 1.0
+      weight: 0.75
+    lw:
+      tolerance_db: 1.5
+      weight: 1.5
+    nacc:
+      tolerance: 0.02
+      weight: 0.75
+    offaxis:
+      angles_h_deg:
+      - -40
+      - -30
+      - 30
+      - 40
+      angles_v_deg:
+      - -25
+      - -10
+      - 10
+      - 25
+      band_hz:
+      - 2500.0
+      - 8000.0
+      reference: band_mean
+      tolerance_db: 1.0
+      weight: 1.0
+    report:
+      contour: false
+      omega: true
+    window_h_deg: 30.0
+    window_v_deg: 10.0
+  cov_below_f0: one_sided
+  cov_narrow_ratio: 2.0
+  cov_v_weight: 0.5
+  flat_band: scored
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  ripple_region: preferred_edge
+  tolerances:
+    cov_profile: 3.0
+    di_roughness: 1.0
+    dislope: 9.0
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3
+    rip: 1.0
+  version: 11
+search:
+  algorithm: cma
+  budget_counts: valid
+  error_policy: retry_same_then_stop
+  infeasible_penalty: resample_strict
+  popsize: null
+  tolfun: 0.001
+  budget: 50
+  max_attempts: 400
+  sigma0: 0.25
+  seed: 97516
+seed_params:
+  g_T: 0.5278961610049009
+  g_fc_h_hz: 608.048927038908
+  g_fc_v_hz: 896.9049963728748
+  g_r_lip_mm: 0.0
+  g_stop_deg: 116.80874030643042
+  g_bb_h: 0.32792363995686175
+  g_bb_v: 0.1078777639195323
+  g_bb_throat_frac: 0.1625753850210458
+  g_bb_rollin_frac: 0.17405321421101688
+  g_rb_h_mm: 47.24364429004948
+  g_rb_v_mm: 14.065462169947516
+  g_rb_d_mm: -15.31750475987792
+  g_rb_start_frac: 0.3863681411370635
+solve:
+  angle_count: 73
+  backend: beat_cuda
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  cuda_fused: true
+  distance_m: 10.0
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_profile:
+    h:
+    - hz: 900
+      max_deg: 90
+      min_deg: 60
+      preferred_deg: 80
+    - hz: 8000
+      max_deg: 90
+      min_deg: 60
+      preferred_deg: 80
+    interpolation: log_frequency
+    mode: corridor
+    v:
+    - hz: 1000
+      max_deg: 60
+      min_deg: 40
+      preferred_deg: 50
+    - hz: 8000
+      max_deg: 60
+      min_deg: 40
+      preferred_deg: 50
+  coverage_v_deg: 50.0
+  coverage_v_down_deg: null
+  coverage_v_up_deg: null
+  di_slope_target: 0.0
+  di_target_db: null
+  driver_exit_radius_mm: null
+  f0_hz: 900.0
+  f0_v_hz: 900.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov_profile: 1.0
+  di_roughness: 0.5
+  dislope: 0.5
+  flat: 0.5
+  flat_cv: 0.5
+  load: 1.0
+  rip: 0.5

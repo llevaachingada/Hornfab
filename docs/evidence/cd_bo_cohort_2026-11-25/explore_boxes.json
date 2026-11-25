@@ -1,0 +1,1097 @@
+{
+ "rolled": {
+  "box": {
+   "g_axial_h_mm": [
+    -16.0,
+    16.0
+   ],
+   "g_axial_v_mm": [
+    -16.0,
+    16.0
+   ],
+   "g_decay": [
+    0.3,
+    1.0
+   ],
+   "g_depth_h_ratio": [
+    0.525,
+    1.2
+   ],
+   "g_depth_mm": [
+    160.0,
+    420.0
+   ],
+   "g_height_mm": [
+    300.0,
+    495.0
+   ],
+   "g_inward_h_mm": [
+    0.0,
+    45.0
+   ],
+   "g_inward_v_mm": [
+    0.0,
+    45.0
+   ],
+   "g_rect_exponent": [
+    2.0,
+    15.5
+   ],
+   "g_rect_turn_deg": [
+    35.0,
+    89.0
+   ],
+   "g_terminal_deg": [
+    181.0,
+    280.0
+   ],
+   "g_throat_turn_deg": [
+    4.0,
+    34.0
+   ],
+   "g_width_mm": [
+    500.0,
+    690.0
+   ],
+   "g_bb_h": [
+    0.3,
+    1.0
+   ],
+   "g_bb_throat_frac": [
+    0.05,
+    0.3
+   ],
+   "g_bb_rollin_frac": [
+    0.15,
+    0.45
+   ],
+   "g_throat_hv_ratio": [
+    0.7,
+    1.375
+   ]
+  },
+  "probe": {
+   "g_axial_h_mm": {
+    "scan": [
+     -40,
+     40
+    ],
+    "legal_at_seed": [
+     -20.0,
+     20.0
+    ],
+    "legal_points": "16/30",
+    "seed": -7.4474562849,
+    "box_after_joint_law": [
+     -16.0,
+     16.0
+    ]
+   },
+   "g_axial_v_mm": {
+    "scan": [
+     -40,
+     40
+    ],
+    "legal_at_seed": [
+     -20.0,
+     20.0
+    ],
+    "legal_points": "16/30",
+    "seed": -0.935545948,
+    "box_after_joint_law": [
+     -16.0,
+     16.0
+    ]
+   },
+   "g_decay": {
+    "scan": [
+     0.3,
+     1.0
+    ],
+    "legal_at_seed": [
+     0.3,
+     1.0
+    ],
+    "legal_points": "30/30",
+    "seed": 0.8757964596
+   },
+   "g_depth_h_ratio": {
+    "scan": [
+     0.5,
+     1.2
+    ],
+    "legal_at_seed": [
+     0.525,
+     1.2
+    ],
+    "legal_points": "29/30",
+    "seed": 1.1322714204
+   },
+   "g_depth_mm": {
+    "scan": [
+     120,
+     420
+    ],
+    "legal_at_seed": [
+     120.0,
+     420.0
+    ],
+    "legal_points": "30/30",
+    "seed": 223.4101787896,
+    "box_after_joint_law": [
+     160.0,
+     420.0
+    ]
+   },
+   "g_height_mm": {
+    "scan": [
+     220,
+     560
+    ],
+    "legal_at_seed": [
+     220.0,
+     547.857143
+    ],
+    "legal_points": "29/30",
+    "seed": 413.3473695385,
+    "box_after_joint_law": [
+     300.0,
+     495.0
+    ]
+   },
+   "g_inward_h_mm": {
+    "scan": [
+     0,
+     80
+    ],
+    "legal_at_seed": [
+     0.0,
+     60.0
+    ],
+    "legal_points": "23/30",
+    "seed": 6.0362505357,
+    "box_after_joint_law": [
+     0.0,
+     45.0
+    ]
+   },
+   "g_inward_v_mm": {
+    "scan": [
+     0,
+     80
+    ],
+    "legal_at_seed": [
+     0.0,
+     45.714286
+    ],
+    "legal_points": "18/30",
+    "seed": 0.0534470584,
+    "box_after_joint_law": [
+     0.0,
+     45.0
+    ]
+   },
+   "g_rect_exponent": {
+    "scan": [
+     2,
+     20
+    ],
+    "legal_at_seed": [
+     2.0,
+     15.5
+    ],
+    "legal_points": "23/30",
+    "seed": 10.0473212183
+   },
+   "g_rect_turn_deg": {
+    "scan": [
+     30,
+     89
+    ],
+    "legal_at_seed": [
+     30.0,
+     89.0
+    ],
+    "legal_points": "30/30",
+    "seed": 58.9285545111,
+    "box_after_joint_law": [
+     35.0,
+     89.0
+    ]
+   },
+   "g_terminal_deg": {
+    "scan": [
+     181,
+     280
+    ],
+    "legal_at_seed": [
+     181.0,
+     280.0
+    ],
+    "legal_points": "30/30",
+    "seed": 260.7510165046
+   },
+   "g_throat_turn_deg": {
+    "scan": [
+     4,
+     60
+    ],
+    "legal_at_seed": [
+     4.0,
+     46.0
+    ],
+    "legal_points": "23/30",
+    "seed": 15.2717656942,
+    "box_after_joint_law": [
+     4.0,
+     34.0
+    ]
+   },
+   "g_width_mm": {
+    "scan": [
+     420,
+     700
+    ],
+    "legal_at_seed": [
+     420.0,
+     690.0
+    ],
+    "legal_points": "29/30",
+    "seed": 597.9101797778,
+    "box_after_joint_law": [
+     500.0,
+     690.0
+    ]
+   },
+   "g_bb_h": {
+    "scan": [
+     0.3,
+     1.0
+    ],
+    "legal_at_seed": [
+     0.3,
+     1.0
+    ],
+    "legal_points": "30/30",
+    "seed": 0.6869986795
+   },
+   "g_bb_throat_frac": {
+    "scan": [
+     0.05,
+     0.3
+    ],
+    "legal_at_seed": [
+     0.05,
+     0.3
+    ],
+    "legal_points": "30/30",
+    "seed": 0.2484576878
+   },
+   "g_bb_rollin_frac": {
+    "scan": [
+     0.15,
+     0.45
+    ],
+    "legal_at_seed": [
+     0.15,
+     0.45
+    ],
+    "legal_points": "30/30",
+    "seed": 0.2030038
+   },
+   "g_throat_hv_ratio": {
+    "scan": [
+     0.4,
+     2.5
+    ],
+    "legal_at_seed": [
+     0.7,
+     1.375
+    ],
+    "legal_points": "10/29",
+    "seed": 1.0
+   }
+  },
+  "sobol_starts": "7 accepted of 12 tried"
+ },
+ "lcl_beak": {
+  "box": {
+   "g_T": [
+    0.3,
+    1.5
+   ],
+   "g_fc_h_hz": [
+    225.0,
+    1200.0
+   ],
+   "g_fc_v_hz": [
+    328.571429,
+    1421.428571
+   ],
+   "g_stop_deg": [
+    92.142857,
+    240.0
+   ],
+   "g_bb_throat_frac": [
+    0.05,
+    0.3
+   ],
+   "g_bb_rollin_frac": [
+    0.15,
+    0.45
+   ],
+   "g_rb_h_mm": [
+    -42.857143,
+    60.0
+   ],
+   "g_rb_v_mm": [
+    -47.142857,
+    60.0
+   ],
+   "g_rb_d_mm": [
+    -30.0,
+    30.0
+   ],
+   "g_rb_start_frac": [
+    0.3,
+    0.9
+   ],
+   "g_bb_h": [
+    0.3,
+    1.0
+   ],
+   "g_bb_v": [
+    0.0,
+    0.5
+   ]
+  },
+  "probe": {
+   "g_T": {
+    "scan": [
+     0.1,
+     1.5
+    ],
+    "legal_at_seed": [
+     0.3,
+     1.5
+    ],
+    "legal_points": "26/30",
+    "seed": 0.6618721026
+   },
+   "g_fc_h_hz": {
+    "scan": [
+     150,
+     1200
+    ],
+    "legal_at_seed": [
+     225.0,
+     1200.0
+    ],
+    "legal_points": "28/30",
+    "seed": 356.4179493366
+   },
+   "g_fc_v_hz": {
+    "scan": [
+     200,
+     2000
+    ],
+    "legal_at_seed": [
+     328.571429,
+     1421.428571
+    ],
+    "legal_points": "19/30",
+    "seed": 504.1545152173
+   },
+   "g_stop_deg": {
+    "scan": [
+     60,
+     240
+    ],
+    "legal_at_seed": [
+     92.142857,
+     240.0
+    ],
+    "legal_points": "25/30",
+    "seed": 99.2294939165
+   },
+   "g_bb_throat_frac": {
+    "scan": [
+     0.05,
+     0.3
+    ],
+    "legal_at_seed": [
+     0.05,
+     0.3
+    ],
+    "legal_points": "30/30",
+    "seed": 0.2505017951
+   },
+   "g_bb_rollin_frac": {
+    "scan": [
+     0.15,
+     0.45
+    ],
+    "legal_at_seed": [
+     0.15,
+     0.45
+    ],
+    "legal_points": "30/30",
+    "seed": 0.2208623608
+   },
+   "g_rb_h_mm": {
+    "scan": [
+     -60,
+     60
+    ],
+    "legal_at_seed": [
+     -42.857143,
+     60.0
+    ],
+    "legal_points": "25/29",
+    "seed": 0.0
+   },
+   "g_rb_v_mm": {
+    "scan": [
+     -60,
+     60
+    ],
+    "legal_at_seed": [
+     -47.142857,
+     60.0
+    ],
+    "legal_points": "26/29",
+    "seed": 0.0
+   },
+   "g_rb_d_mm": {
+    "scan": [
+     -30,
+     30
+    ],
+    "legal_at_seed": [
+     -30.0,
+     30.0
+    ],
+    "legal_points": "29/29",
+    "seed": 0.0
+   },
+   "g_rb_start_frac": {
+    "scan": [
+     0.3,
+     0.9
+    ],
+    "legal_at_seed": [
+     0.3,
+     0.9
+    ],
+    "legal_points": "29/29",
+    "seed": 0.6
+   },
+   "g_bb_h": {
+    "scan": [
+     0.3,
+     1.0
+    ],
+    "legal_at_seed": [
+     0.3,
+     1.0
+    ],
+    "legal_points": "30/30",
+    "seed": 0.9988479794
+   },
+   "g_bb_v": {
+    "scan": [
+     0.0,
+     0.5
+    ],
+    "legal_at_seed": [
+     0.0,
+     0.5
+    ],
+    "legal_points": "30/30",
+    "seed": 0.0002353961
+   }
+  },
+  "sobol_starts": "5 accepted of 7 tried"
+ },
+ "iwar_beak": {
+  "box": {
+   "g_T": [
+    0.3,
+    1.5
+   ],
+   "g_ar_m": [
+    0.625,
+    2.75
+   ],
+   "g_ar_p": [
+    0.478571,
+    8.0
+   ],
+   "g_fc_hz": [
+    300.0,
+    1200.0
+   ],
+   "g_stop_deg": [
+    92.142857,
+    240.0
+   ],
+   "g_bb_throat_frac": [
+    0.05,
+    0.3
+   ],
+   "g_bb_rollin_frac": [
+    0.15,
+    0.45
+   ],
+   "g_rb_h_mm": [
+    -60.0,
+    60.0
+   ],
+   "g_rb_v_mm": [
+    -51.428571,
+    60.0
+   ],
+   "g_rb_d_mm": [
+    -30.0,
+    30.0
+   ],
+   "g_rb_start_frac": [
+    0.3,
+    0.9
+   ],
+   "g_bb_h": [
+    0.3,
+    1.0
+   ],
+   "g_bb_v": [
+    0.0,
+    0.5
+   ]
+  },
+  "probe": {
+   "g_T": {
+    "scan": [
+     0.1,
+     1.5
+    ],
+    "legal_at_seed": [
+     0.3,
+     1.5
+    ],
+    "legal_points": "26/30",
+    "seed": 0.8419355667
+   },
+   "g_ar_m": {
+    "scan": [
+     0.5,
+     4.0
+    ],
+    "legal_at_seed": [
+     0.625,
+     2.75
+    ],
+    "legal_points": "19/30",
+    "seed": 1.3700453986
+   },
+   "g_ar_p": {
+    "scan": [
+     0.2,
+     8.0
+    ],
+    "legal_at_seed": [
+     0.478571,
+     8.0
+    ],
+    "legal_points": "29/30",
+    "seed": 1.2153831946
+   },
+   "g_fc_hz": {
+    "scan": [
+     150,
+     1200
+    ],
+    "legal_at_seed": [
+     300.0,
+     1200.0
+    ],
+    "legal_points": "26/30",
+    "seed": 391.6761378343
+   },
+   "g_stop_deg": {
+    "scan": [
+     60,
+     240
+    ],
+    "legal_at_seed": [
+     92.142857,
+     240.0
+    ],
+    "legal_points": "25/30",
+    "seed": 103.9253617763
+   },
+   "g_bb_throat_frac": {
+    "scan": [
+     0.05,
+     0.3
+    ],
+    "legal_at_seed": [
+     0.05,
+     0.3
+    ],
+    "legal_points": "30/30",
+    "seed": 0.2755798962
+   },
+   "g_bb_rollin_frac": {
+    "scan": [
+     0.15,
+     0.45
+    ],
+    "legal_at_seed": [
+     0.15,
+     0.45
+    ],
+    "legal_points": "30/30",
+    "seed": 0.1535311985
+   },
+   "g_rb_h_mm": {
+    "scan": [
+     -60,
+     60
+    ],
+    "legal_at_seed": [
+     -60.0,
+     60.0
+    ],
+    "legal_points": "29/29",
+    "seed": 0.0
+   },
+   "g_rb_v_mm": {
+    "scan": [
+     -60,
+     60
+    ],
+    "legal_at_seed": [
+     -51.428571,
+     60.0
+    ],
+    "legal_points": "27/29",
+    "seed": 0.0
+   },
+   "g_rb_d_mm": {
+    "scan": [
+     -30,
+     30
+    ],
+    "legal_at_seed": [
+     -30.0,
+     30.0
+    ],
+    "legal_points": "29/29",
+    "seed": 0.0
+   },
+   "g_rb_start_frac": {
+    "scan": [
+     0.3,
+     0.9
+    ],
+    "legal_at_seed": [
+     0.3,
+     0.9
+    ],
+    "legal_points": "29/29",
+    "seed": 0.6
+   },
+   "g_bb_h": {
+    "scan": [
+     0.3,
+     1.0
+    ],
+    "legal_at_seed": [
+     0.3,
+     1.0
+    ],
+    "legal_points": "30/30",
+    "seed": 0.9513938999
+   },
+   "g_bb_v": {
+    "scan": [
+     0.0,
+     0.5
+    ],
+    "legal_at_seed": [
+     0.0,
+     0.5
+    ],
+    "legal_points": "30/30",
+    "seed": 0.0381575186
+   }
+  },
+  "sobol_starts": "5 accepted of 7 tried"
+ },
+ "klangfilm": {
+  "box": {
+   "g_beak_h_setback_mm": [
+    0.0,
+    12.857143
+   ],
+   "g_beak_v_projection_mm": [
+    0.0,
+    45.0
+   ],
+   "g_beak_diagonal_mm": [
+    -20.0,
+    20.0
+   ],
+   "g_beak_start_frac": [
+    0.5,
+    0.9725
+   ],
+   "g_core_length_mm": [
+    150.0,
+    412.5
+   ],
+   "g_lame_end_frac": [
+    0.4,
+    0.99
+   ],
+   "g_lame_p_mouth": [
+    2.0,
+    8.0
+   ],
+   "g_lame_start_frac": [
+    0.05,
+    0.4
+   ],
+   "g_theta_h0_deg": [
+    2.0,
+    15.0
+   ],
+   "g_theta_h1_deg": [
+    20.0,
+    60.0
+   ],
+   "g_theta_v0_deg": [
+    2.0,
+    15.0
+   ],
+   "g_theta_v1_deg": [
+    10.0,
+    50.0
+   ]
+  },
+  "probe": {
+   "g_beak_h_setback_mm": {
+    "scan": [
+     0,
+     60
+    ],
+    "legal_at_seed": [
+     0.0,
+     12.857143
+    ],
+    "legal_points": "8/30",
+    "seed": 5.6338801538
+   },
+   "g_beak_v_projection_mm": {
+    "scan": [
+     0,
+     45
+    ],
+    "legal_at_seed": [
+     0.0,
+     45.0
+    ],
+    "legal_points": "30/30",
+    "seed": 0.0411280271
+   },
+   "g_beak_diagonal_mm": {
+    "scan": [
+     -20,
+     20
+    ],
+    "legal_at_seed": [
+     -20.0,
+     20.0
+    ],
+    "legal_points": "30/30",
+    "seed": 4.9607565704
+   },
+   "g_beak_start_frac": {
+    "scan": [
+     0.5,
+     0.99
+    ],
+    "legal_at_seed": [
+     0.5,
+     0.9725
+    ],
+    "legal_points": "29/30",
+    "seed": 0.9136465122
+   },
+   "g_core_length_mm": {
+    "scan": [
+     150,
+     500
+    ],
+    "legal_at_seed": [
+     150.0,
+     412.5
+    ],
+    "legal_points": "23/30",
+    "seed": 286.2249997897
+   },
+   "g_lame_end_frac": {
+    "scan": [
+     0.4,
+     0.99
+    ],
+    "legal_at_seed": [
+     0.4,
+     0.99
+    ],
+    "legal_points": "30/30",
+    "seed": 0.8311698305
+   },
+   "g_lame_p_mouth": {
+    "scan": [
+     2.0,
+     8.0
+    ],
+    "legal_at_seed": [
+     2.0,
+     8.0
+    ],
+    "legal_points": "30/30",
+    "seed": 3.6671527002
+   },
+   "g_lame_start_frac": {
+    "scan": [
+     0.05,
+     0.4
+    ],
+    "legal_at_seed": [
+     0.05,
+     0.4
+    ],
+    "legal_points": "30/30",
+    "seed": 0.1833990395
+   },
+   "g_theta_h0_deg": {
+    "scan": [
+     2,
+     15
+    ],
+    "legal_at_seed": [
+     2.0,
+     15.0
+    ],
+    "legal_points": "30/30",
+    "seed": 6.3494651596
+   },
+   "g_theta_h1_deg": {
+    "scan": [
+     20,
+     60
+    ],
+    "legal_at_seed": [
+     20.0,
+     60.0
+    ],
+    "legal_points": "30/30",
+    "seed": 59.4695591282
+   },
+   "g_theta_v0_deg": {
+    "scan": [
+     2,
+     15
+    ],
+    "legal_at_seed": [
+     2.0,
+     15.0
+    ],
+    "legal_points": "30/30",
+    "seed": 7.1832395228
+   },
+   "g_theta_v1_deg": {
+    "scan": [
+     10,
+     50
+    ],
+    "legal_at_seed": [
+     10.0,
+     50.0
+    ],
+    "legal_points": "30/30",
+    "seed": 37.9388894372
+   }
+  },
+  "sobol_starts": "5 accepted of 5 tried"
+ },
+ "sculpted_sweep": {
+  "box": {
+   "g_sweep": [
+    -1.0,
+    1.5
+   ],
+   "g_diagonal_delta_deg": [
+    -6.0,
+    6.0
+   ],
+   "g_aperture_scale": [
+    0.75,
+    1.25
+   ]
+  },
+  "probe": {
+   "g_sweep": {
+    "scan": [
+     -1.0,
+     1.5
+    ],
+    "legal_at_seed": [
+     -1.0,
+     1.5
+    ],
+    "legal_points": "30/30",
+    "seed": 0.3709212133
+   },
+   "g_diagonal_delta_deg": {
+    "scan": [
+     -6.0,
+     6.0
+    ],
+    "legal_at_seed": [
+     -6.0,
+     6.0
+    ],
+    "legal_points": "30/30",
+    "seed": 0.669305279
+   },
+   "g_aperture_scale": {
+    "scan": [
+     0.75,
+     1.25
+    ],
+    "legal_at_seed": [
+     0.75,
+     1.25
+    ],
+    "legal_points": "30/30",
+    "seed": 1.0143968695
+   }
+  },
+  "sobol_starts": "3 accepted of 3 tried"
+ },
+ "sculpted_beak": {
+  "box": {
+   "g_h_setback_mm": [
+    -40.0,
+    80.0
+   ],
+   "g_v_projection_mm": [
+    -40.0,
+    80.0
+   ]
+  },
+  "probe": {
+   "g_h_setback_mm": {
+    "scan": [
+     -40.0,
+     80.0
+    ],
+    "legal_at_seed": [
+     -40.0,
+     80.0
+    ],
+    "legal_points": "30/30",
+    "seed": 6.3323517845
+   },
+   "g_v_projection_mm": {
+    "scan": [
+     -40.0,
+     80.0
+    ],
+    "legal_at_seed": [
+     -40.0,
+     80.0
+    ],
+    "legal_points": "30/30",
+    "seed": 7.3722360704
+   }
+  },
+  "sobol_starts": "3 accepted of 3 tried"
+ },
+ "osse_morph": {
+  "box": {
+   "L_mm": [
+    160.0,
+    420.0
+   ],
+   "a0_deg": [
+    1.0,
+    3.0
+   ],
+   "a_deg": [
+    18.0,
+    45.0
+   ],
+   "az_a_cos_amp": [
+    0.0,
+    20.0
+   ],
+   "az_a_cos_pow": [
+    1.0,
+    6.0
+   ],
+   "az_s_cos2_amp": [
+    -0.25,
+    0.5
+   ],
+   "k": [
+    0.3,
+    4.0
+   ],
+   "morph_corner_mm": [
+    20.0,
+    130.0
+   ],
+   "morph_height_mm": [
+    300.0,
+    520.0
+   ],
+   "morph_rate": [
+    1.0,
+    8.0
+   ],
+   "morph_width_mm": [
+    460.0,
+    660.0
+   ],
+   "n": [
+    2.0,
+    14.0
+   ],
+   "q": [
+    0.9,
+    1.0
+   ],
+   "s": [
+    0.2,
+    1.2
+   ],
+   "az_a_sf_amp": [
+    -15.0,
+    15.0
+   ],
+   "az_n_cos2_amp": [
+    -4.0,
+    4.0
+   ],
+   "morph_fixed": [
+    0.0,
+    0.5
+   ]
+  },
+  "note": "formula family: documented ranges; mesh admission checked by shape_check"
+ }
+}
