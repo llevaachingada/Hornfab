@@ -237,6 +237,57 @@ jobs:
   - '81524'
   - --budget
   - '100'
+- id: iwar_v3
+  kind: command
+  timeout_s: 9000
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - g_bb_throat_frac
+    - g_bb_rollin_frac
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_bo_cohort_2026-11-25/iwar_v3.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_bo_cohort_2026-11-25/cache_iwar_v3
+  - --cma-seed
+  - '81525'
+  - --budget
+  - '100'
+- id: iwar_beak_v3
+  kind: command
+  timeout_s: 9000
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - g_bb_throat_frac
+    - g_bb_rollin_frac
+    - g_rb_h_mm
+    - g_rb_v_mm
+    - g_rb_d_mm
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_bo_cohort_2026-11-25/iwar_beak_v3.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_bo_cohort_2026-11-25/cache_iwar_beak_v3
+  - --cma-seed
+  - '81526'
+  - --budget
+  - '100'
 - id: klangfilm_core_beak_cohort
   kind: command
   timeout_s: 9000
