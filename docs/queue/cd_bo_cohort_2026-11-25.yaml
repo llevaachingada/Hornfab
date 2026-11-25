@@ -1,0 +1,84 @@
+# CD-backbone CMA cohort, 4 x 100 valid screen solves; predeclared in docs/evidence/cd_bo_cohort_2026-11-25/PREDECLARED.md
+night: cd_bo_cohort_2026-11-25
+lane: gpu
+jobs:
+- id: rolled_bb_cohort_s1
+  kind: command
+  timeout_s: 9000
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_bo_cohort_2026-11-25/rolled_bb_cohort_s1.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_bo_cohort_2026-11-25/cache_rolled_bb_cohort_s1
+  - --cma-seed
+  - '81501'
+  - --budget
+  - '100'
+- id: rolled_bb_cohort_s2
+  kind: command
+  timeout_s: 9000
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_bo_cohort_2026-11-25/rolled_bb_cohort_s2.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_bo_cohort_2026-11-25/cache_rolled_bb_cohort_s2
+  - --cma-seed
+  - '81502'
+  - --budget
+  - '100'
+- id: lcl_bb_cohort
+  kind: command
+  timeout_s: 9000
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_bo_cohort_2026-11-25/lcl_bb_cohort.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_bo_cohort_2026-11-25/cache_lcl_bb_cohort
+  - --cma-seed
+  - '81503'
+  - --budget
+  - '100'
+- id: iwar_bb_cohort
+  kind: command
+  timeout_s: 9000
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_bo_cohort_2026-11-25/iwar_bb_cohort.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_bo_cohort_2026-11-25/cache_iwar_bb_cohort
+  - --cma-seed
+  - '81504'
+  - --budget
+  - '100'

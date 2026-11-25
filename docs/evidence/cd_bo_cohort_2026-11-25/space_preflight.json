@@ -1,0 +1,26 @@
+{
+ "iwar_bb_cohort": {
+  "encoding_dims": 9,
+  "seed_round_trip": true,
+  "admission": 1.0,
+  "refusals": {}
+ },
+ "lcl_bb_cohort": {
+  "encoding_dims": 8,
+  "seed_round_trip": true,
+  "admission": 1.0,
+  "refusals": {}
+ },
+ "rolled_bb_cohort_s1": {
+  "encoding_dims": 17,
+  "seed_round_trip": true,
+  "admission": 1.0,
+  "refusals": {}
+ },
+ "rolled_bb_cohort_s2": {
+  "encoding_dims": 17,
+  "seed_round_trip": true,
+  "admission": 1.0,
+  "refusals": {}
+ }
+}
