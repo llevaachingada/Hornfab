@@ -89,6 +89,7 @@ def main():
                 out_bounds[k] = copy.deepcopy(cfg['bounds'][k])
             else:
                 out_bounds[k] = {'lo': float(v), 'hi': float(v), 'search': False}
+        cfg['mesh'] = {**cfg['mesh'], 'dof_cap_screen': 24000}   # 6000 refused ~30 % of wide rolled draws (preflight)
         cfg.update(name=name, brief=copy.deepcopy(brief), brief_file=None, bounds=out_bounds,
                    search={**SEARCH, 'seed': seed},
                    description=(f'{label}. CMA screen cohort, 100 valid solves, v11 CD XO900 OPEN (max_utilization '

@@ -212,7 +212,7 @@ grid:
   verify_points_per_octave: 6
 mesh:
   dof_cap_final: 24000
-  dof_cap_screen: 6000
+  dof_cap_screen: 24000
   dof_cap_verify: 24000
   dof_per_triangle: 0.51
   epw: 6.0
