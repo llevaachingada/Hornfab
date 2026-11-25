@@ -1,0 +1,9 @@
+| config | ok | dofs / cap | mouth W x H mm | depth mm | envelope | driver coupling | note |
+|---|---|---|---|---|---|---|---|
+| favl_pm5 | yes | 5228 / 24000 | 569 x 516 | 278 | fits (exploration) | round, matches the exit |  |
+| iwar_beak_pm5 | yes | 2448 / 24000 | 479 x 350 | 281 | fits (exploration) | round, matches the exit |  |
+| klangfilm_pm5 | yes | 2972 / 24000 | 485 x 286 | 292 | fits (exploration) | round, matches the exit |  |
+| lcl_beak_pm5 | yes | 2094 / 24000 | 435 x 310 | 264 | fits (exploration) | round, matches the exit |  |
+| rolled_pm5 | yes | 4616 / 24000 | 598 x 413 | 252 | fits (exploration) | round, matches the exit |  |
+| sculpted_beak_pm5 | yes | 5947 / 24000 | 575 x 443 | 416 | fits (exploration) | round, matches the exit |  |
+| sculpted_sweep_pm5 | yes | 6143 / 24000 | 584 x 449 | 435 | fits (exploration) | round, matches the exit |  |

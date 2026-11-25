@@ -1,0 +1,197 @@
+bounds:
+  g_axial_h_mm:
+    lo: -16.0
+    hi: 16.0
+    search: true
+  g_axial_v_mm:
+    lo: -16.0
+    hi: 16.0
+    search: true
+  g_decay:
+    lo: 0.3
+    hi: 1.0
+    search: true
+  g_depth_h_ratio:
+    lo: 0.525
+    hi: 1.2
+    search: true
+  g_depth_mm:
+    lo: 160.0
+    hi: 420.0
+    search: true
+  g_height_mm:
+    lo: 300.0
+    hi: 495.0
+    search: true
+  g_inward_h_mm:
+    lo: 0.0
+    hi: 45.0
+    search: true
+  g_inward_v_mm:
+    lo: 0.0
+    hi: 45.0
+    search: true
+  g_rect_exponent:
+    lo: 2.0
+    hi: 15.5
+    search: true
+  g_rect_turn_deg:
+    lo: 35.0
+    hi: 89.0
+    search: true
+  g_relief_end_s:
+    lo: 0.96
+    hi: 0.96
+    search: false
+  g_relief_peak_s:
+    lo: 0.8
+    hi: 0.8
+    search: false
+  g_relief_start_s:
+    lo: 0.5
+    hi: 0.5
+    search: false
+  g_terminal_deg:
+    lo: 181.0
+    hi: 280.0
+    search: true
+  g_throat_turn_deg:
+    lo: 4.0
+    hi: 34.0
+    search: true
+  g_width_mm:
+    lo: 500.0
+    hi: 690.0
+    search: true
+  g_cd_h_deg:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_cd_v_deg:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_cd_start_s:
+    lo: 0.3
+    hi: 0.3
+    search: false
+  g_cd_peak_s:
+    lo: 0.6
+    hi: 0.6
+    search: false
+  g_cd_end_s:
+    lo: 0.88
+    hi: 0.88
+    search: false
+  g_bb_h:
+    lo: 0.3
+    hi: 1.0
+    search: true
+  g_bb_v:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_bb_throat_frac:
+    lo: 0.05
+    hi: 0.3
+    search: true
+  g_bb_rollin_frac:
+    lo: 0.15
+    hi: 0.45
+    search: true
+  g_throat_hv_ratio:
+    lo: 0.7
+    hi: 1.375
+    search: true
+brief_file: ../../briefs/home_xo900_2026-11-20/room_landscape_80x50_900_hf1440_v11cd_open115_pm5const_2026-11-25.yaml
+description: rolled on the +-5 deg constant-directivity brief (owner 2026-11-25 17:43).
+  Box, seed and knobs = rolled_r1 (best known design of the family, exploration box);
+  only the brief changed. 100 valid screen solves. Judged on verify by the six CD
+  rules, not J alone.
+family: FREEFORM
+feasibility:
+  derivation:
+  - knob: '-'
+    note: 'seed_policy explicit: derivation skipped'
+  envelope_mouth_h_mm: 480.0
+  envelope_mouth_w_mm: 600.0
+  f0_hz: 900.0
+  f0_v_hz: 900.0
+  feasible_v: false
+  feasible_w: true
+  held_coverage_v_deg: 58.7962962962963
+  held_coverage_w_deg: 47.03703703703704
+  required_mouth_h_mm: 564.4444444444445
+  required_mouth_w_mm: 352.77777777777777
+  rule: d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)
+  screen_freqs_below_f0: 3
+  screen_freqs_total: 12
+  verify_freqs_below_f0: 9
+  verify_freqs_total: 25
+generator:
+  n_phi: 65
+  n_s: 128
+  span: quarter
+  wall_thickness_mm: 3.0
+  name: grid
+  rows:
+    type: rolled_family_rect_bb_v1
+    mode: hybrid
+  seed_policy: explicit
+mesh:
+  dof_cap_final: 24000
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_per_triangle: 0.51
+  epw: 6.0
+  quadrants: '1'
+  rear_res_factor: 1.5
+name: rolled_pm5
+search:
+  algorithm: cma
+  budget_counts: valid
+  error_policy: retry_same_then_stop
+  infeasible_penalty: resample_strict
+  popsize: null
+  tolfun: 0.001
+  budget: 100
+  max_attempts: 400
+  sigma0: 0.15
+  seed: 52500
+seed_params:
+  g_axial_h_mm: -7.4474562849
+  g_axial_v_mm: -0.935545948
+  g_decay: 0.8757964596
+  g_depth_h_ratio: 1.1322714204
+  g_depth_mm: 223.4101787896
+  g_height_mm: 413.3473695385
+  g_inward_h_mm: 6.0362505357
+  g_inward_v_mm: 0.0534470584
+  g_rect_exponent: 10.0473212183
+  g_rect_turn_deg: 58.9285545111
+  g_relief_end_s: 0.96
+  g_relief_peak_s: 0.8
+  g_relief_start_s: 0.5
+  g_terminal_deg: 260.7510165046
+  g_throat_turn_deg: 15.2717656942
+  g_width_mm: 597.9101797778
+  g_cd_h_deg: 0.0
+  g_cd_v_deg: 0.0
+  g_cd_start_s: 0.3
+  g_cd_peak_s: 0.6
+  g_cd_end_s: 0.88
+  g_bb_h: 0.6869986795
+  g_bb_v: 0.0
+  g_bb_throat_frac: 0.2484576878
+  g_bb_rollin_frac: 0.2030038
+  g_throat_hv_ratio: 1.0
+solve:
+  angle_count: 73
+  backend: beat_cuda
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  cuda_fused: true
+  distance_m: 10.0
+  gmres_tol: 1.0e-05
+  timeout_s: 900

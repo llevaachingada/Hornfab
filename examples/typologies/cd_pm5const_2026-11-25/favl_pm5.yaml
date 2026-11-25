@@ -1,0 +1,115 @@
+name: favL__2in_c500_pm5
+family: FREEFORM
+brief_file: ../../briefs/hf2in_2026-11-20/compact500_xo900_80x50_hf2in_v11cd_open115_pm5const_2026-11-25.yaml
+generator:
+  name: grid
+  rows:
+    type: osse_rollback
+  n_phi: 25
+  n_s: 40
+  wall_thickness_mm: 3.0
+  seed_policy: explicit
+  span: quarter
+seed_params:
+  g_L_mm: 274.4065494608
+  g_a_h_deg: 33.0314196812
+  g_a_v_deg: 32.8207248548
+  g_k: 1.0243510676
+  g_n: 2.6792564297
+  g_q: 0.996
+  g_r_lip_mm: 22.9999961112
+  g_s: 0.3884580245
+  g_sf_ab: 0.8944626763
+  g_sf_amt: 0.2460907722
+  g_sf_m: 4.0
+  g_sf_n1: 1.8
+  g_sf_n2: 7.0
+  g_sf_start: 0.25
+  g_throat_hv_ratio: 1.4400449358
+  g_wrap_deg: 89.8877865328
+bounds:
+  g_k:
+    lo: 0.85
+    hi: 1.35
+  g_a_v_deg:
+    lo: 27.5
+    hi: 34.5
+  g_s:
+    lo: 0.3
+    hi: 0.4
+  g_throat_hv_ratio:
+    lo: 0.85
+    hi: 1.8
+  g_wrap_deg:
+    lo: 70.0
+    hi: 130.0
+  g_L_mm:
+    lo: 230.0
+    hi: 275.0
+  g_r_lip_mm:
+    lo: 13.0
+    hi: 23.0
+  g_a_h_deg:
+    lo: 32.2
+    hi: 34.5
+  g_n:
+    lo: 2.5
+    hi: 3.1
+  g_sf_ab:
+    lo: 0.86
+    hi: 0.91
+  g_sf_amt:
+    lo: 0.19
+    hi: 0.26
+  g_q:
+    lo: 0.996
+    hi: 0.996
+    search: false
+  g_sf_m:
+    lo: 4.0
+    hi: 4.0
+    search: false
+  g_sf_n1:
+    lo: 1.8
+    hi: 1.8
+    search: false
+  g_sf_n2:
+    lo: 7.0
+    hi: 7.0
+    search: false
+  g_sf_start:
+    lo: 0.25
+    hi: 0.25
+    search: false
+mesh:
+  epw: 6.0
+  quadrants: '1'
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_cap_final: 24000
+  dof_per_triangle: 0.51
+solve:
+  backend: beat_cuda
+  distance_m: 10.0
+  angle_count: 73
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+  cuda_fused: true
+search:
+  algorithm: cma
+  sigma0: 0.2
+  seed: 52599
+  budget: 100
+  popsize: null
+  tolfun: 0.001
+  infeasible_penalty: resample_strict
+  budget_counts: valid
+  max_attempts: 450
+  error_policy: retry_same_then_stop
+description: favL__2in_c500 on the +-5 deg constant-directivity compact500 brief (owner
+  2026-11-25 17:43). Seed = best of 20261125T204727Z-screen-02b4bf (6552f5c8c536,
+  screen J 1.3882 on the open115 brief, ~66 H x 62 V); box unchanged; no warm start;
+  sigma0 0.2. 100 valid screen solves.

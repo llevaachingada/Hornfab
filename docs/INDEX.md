@@ -1,5 +1,9 @@
 # Docs index
 
+[+-5 deg constant-directivity briefs and jobs](evidence/cd_pm5const_2026-11-25/README.md) — corridor mode was zero-cost inside [min, max]; owner intent (any constant angle in a +-5 deg window) encoded with the opt-in `constancy` term; two new briefs, seven 100-valid jobs queued.
+
+[Repo findability handoff](handoffs/REPO_FINDABILITY_HANDOFF_2026-11-25.md) — senior plan for parallel sub-agents: inventories, family-law cards, scoring reference, tools catalog, skill updates, archive moves, log rotation; owner decisions listed.
+
 [favL 2-inch compact500 open115 continuation](evidence/favL_2in_c500_continue_2026-11-25/PREDECLARED.md) — wall-opened/narrowed box on the open 1.15 envelope, warm start from run 75c147, 150 valid for one new metric-BO identity; best 1.6915 by n=4.
 
 [CD backbone under a retained returned lip](research/typologies/RETURNED_LIP_CD_BACKBONE_RESEARCH_2026-11-25.md) — why the rolled and Lamé parents limit 6–8 kHz H, sourced literature (R-OSSE re-read), CPU backbone prototype and validation ladder; agent web report kept verbatim alongside.

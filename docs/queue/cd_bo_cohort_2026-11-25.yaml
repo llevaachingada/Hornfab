@@ -2,10 +2,41 @@
 # 12:45 EST: rolled_beak_* inserted after s1 was watchdog-stopped at the g_depth_h_ratio=1.0 box (kernel allows 1.2).
 # 12:55 EST: beak campaigns appended (owner request; addendum in PREDECLARED.md).
 # 13:40 EST: v3 after watchdog stops (owner: over-constrained); superseded lcl_beak/iwar_beak cohort jobs removed; iwar_v3 / iwar_beak_v3 added when iwar_bb_cohort finishes.
+# 15:35 EST 2026-11-25: owner continuation inserted at the front (works the 2-inch compact500
+# favourite while the cohort's 5 pending jobs stay queued behind it). Evidence:
+# docs/evidence/favL_2in_c500_continue_2026-11-25/PREDECLARED.md
 # 16:45 EST: exploration cohorts APPENDED (nothing removed); lcl_beak_cohort / iwar_beak_cohort re-added; verify + knob-effects analysis at the end.
+# 17:55 EST: +-5 deg constant-directivity jobs (owner 17:43) INSERTED before klangfilm_core_beak_cohort; nothing removed. docs/evidence/cd_pm5const_2026-11-25/
 night: cd_bo_cohort_2026-11-25
 lane: gpu
 jobs:
+- id: favl_c500_open115_150
+  kind: search
+  timeout_s: 14400
+  dataset_dir: dataset
+  cache_dir: runs/favl_c500_continue_2026-11-25/cache
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    min_attempts: 40
+    refusal_max: 0.4
+    no_gain_valid: 0
+    stall_valid: 0
+    pin_ignore:
+    - g_L_mm
+    - g_a_h_deg
+    - g_a_v_deg
+    - g_k
+    - g_n
+    - g_r_lip_mm
+    - g_s
+    - g_sf_ab
+    - g_sf_amt
+    - g_throat_hv_ratio
+    - g_wrap_deg
+  config: examples/typologies/favL_2026-11-20/favL__2in_c500_open115.yaml
+  budget: 150
+  mode: screen
 - id: rolled_bb_cohort_s1
   kind: command
   timeout_s: 9000
@@ -287,6 +318,244 @@ jobs:
   - runs/cd_bo_cohort_2026-11-25/cache_iwar_beak_v3
   - --cma-seed
   - '81526'
+  - --budget
+  - '100'
+- id: favl_pm5
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    min_attempts: 40
+    refusal_max: 0.4
+    no_gain_valid: 0
+    stall_valid: 0
+    pin_ignore:
+    - g_L_mm
+    - g_a_h_deg
+    - g_a_v_deg
+    - g_k
+    - g_n
+    - g_r_lip_mm
+    - g_s
+    - g_sf_ab
+    - g_sf_amt
+    - g_throat_hv_ratio
+    - g_wrap_deg
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_pm5const_2026-11-25/favl_pm5.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_pm5const_2026-11-25/cache_favl_pm5
+  - --budget
+  - '100'
+- id: rolled_pm5
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    min_attempts: 40
+    refusal_max: 0.4
+    no_gain_valid: 0
+    stall_valid: 0
+    pin_ignore:
+    - g_axial_h_mm
+    - g_axial_v_mm
+    - g_bb_h
+    - g_bb_rollin_frac
+    - g_bb_throat_frac
+    - g_decay
+    - g_depth_h_ratio
+    - g_depth_mm
+    - g_height_mm
+    - g_inward_h_mm
+    - g_inward_v_mm
+    - g_rect_exponent
+    - g_rect_turn_deg
+    - g_terminal_deg
+    - g_throat_hv_ratio
+    - g_throat_turn_deg
+    - g_width_mm
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_pm5const_2026-11-25/rolled_pm5.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_pm5const_2026-11-25/cache_rolled_pm5
+  - --budget
+  - '100'
+- id: lcl_beak_pm5
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    min_attempts: 40
+    refusal_max: 0.4
+    no_gain_valid: 0
+    stall_valid: 0
+    pin_ignore:
+    - g_T
+    - g_bb_h
+    - g_bb_rollin_frac
+    - g_bb_throat_frac
+    - g_bb_v
+    - g_fc_h_hz
+    - g_fc_v_hz
+    - g_rb_d_mm
+    - g_rb_h_mm
+    - g_rb_start_frac
+    - g_rb_v_mm
+    - g_stop_deg
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_pm5const_2026-11-25/lcl_beak_pm5.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_pm5const_2026-11-25/cache_lcl_beak_pm5
+  - --budget
+  - '100'
+- id: iwar_beak_pm5
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    min_attempts: 40
+    refusal_max: 0.4
+    no_gain_valid: 0
+    stall_valid: 0
+    pin_ignore:
+    - g_T
+    - g_ar_m
+    - g_ar_p
+    - g_bb_h
+    - g_bb_rollin_frac
+    - g_bb_throat_frac
+    - g_bb_v
+    - g_fc_hz
+    - g_rb_d_mm
+    - g_rb_h_mm
+    - g_rb_start_frac
+    - g_rb_v_mm
+    - g_stop_deg
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_pm5const_2026-11-25/iwar_beak_pm5.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_pm5const_2026-11-25/cache_iwar_beak_pm5
+  - --budget
+  - '100'
+- id: sculpted_beak_pm5
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    min_attempts: 40
+    refusal_max: 0.4
+    no_gain_valid: 0
+    stall_valid: 0
+    pin_ignore:
+    - g_h_setback_mm
+    - g_v_projection_mm
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_pm5const_2026-11-25/sculpted_beak_pm5.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_pm5const_2026-11-25/cache_sculpted_beak_pm5
+  - --budget
+  - '100'
+- id: sculpted_sweep_pm5
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    min_attempts: 40
+    refusal_max: 0.4
+    no_gain_valid: 0
+    stall_valid: 0
+    pin_ignore:
+    - g_aperture_scale
+    - g_diagonal_delta_deg
+    - g_sweep
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_pm5const_2026-11-25/sculpted_sweep_pm5.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_pm5const_2026-11-25/cache_sculpted_sweep_pm5
+  - --budget
+  - '100'
+- id: klangfilm_pm5
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    min_attempts: 40
+    refusal_max: 0.4
+    no_gain_valid: 0
+    stall_valid: 0
+    pin_ignore:
+    - g_beak_diagonal_mm
+    - g_beak_h_setback_mm
+    - g_beak_start_frac
+    - g_beak_v_projection_mm
+    - g_core_length_mm
+    - g_lame_end_frac
+    - g_lame_p_mouth
+    - g_lame_start_frac
+    - g_theta_h0_deg
+    - g_theta_h1_deg
+    - g_theta_v0_deg
+    - g_theta_v1_deg
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_pm5const_2026-11-25/klangfilm_pm5.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_pm5const_2026-11-25/cache_klangfilm_pm5
   - --budget
   - '100'
 - id: klangfilm_core_beak_cohort
