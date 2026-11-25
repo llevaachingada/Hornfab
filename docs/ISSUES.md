@@ -1,5 +1,13 @@
 ﻿# ISSUES
 
+## 2026-11-25 - CD wall-angle backbone (rolled, Lamé) and cross-family survey
+
+- DONE: `cd-backbone-v1` construction (`_cd_backbone_v1.py`, `cd_backbone_family.py`; kinds `rolled_family_rect_bb_v1`, `klangfilm_lame_hv_bb_v1`), 32 CPU tests, neutral controls byte-identical to saved meshes. [Evidence](evidence/cd_backbone_2026-11-25/README.md)
+- DONE: rolled recipe `bb_h` 0.65 / throat 0.25 passes all six predeclared rules and the epw-9 gate on two rolled bodies (8 kHz H 54.8 → 68.5°, 54.5 → 68.3°). Tool `tools/geometry/apply_cd_backbone.py`.
+- OPEN: Lamé CD variant fails (2.3–2.7 kHz waistband, loading 0.55–0.61 < 0.617); needs a mouth/rollback or depth change.
+- OPEN: labeled CD variants of non-CD families (Le Cléac'h AR/asym, Iwata AR, Salmon elliptical, Klangfilm parent) on the v11cd brief; needs a generic-rows parent path in the adapter.
+- OPEN: bempp cross-check of the rolled keeper; V lever (owner decision); 2-inch CP-850Nd outlet drawing.
+
 ## 2026-11-23 - Overnight top-up and updated sheets
 
 - DONE: `bo_data_topup_2026-11-22` 6/6; new accepted screen rows pool into the BO cohorts and continue the CMA search.

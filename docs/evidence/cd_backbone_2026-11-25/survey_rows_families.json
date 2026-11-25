@@ -1,0 +1,1199 @@
+{
+ "per_type_brief_mode": {
+  "canonical_record_v2 | room_landscape_80x50_900_hf1440_v11cd | screen": {
+   "J": 6.06951178591247,
+   "run": "runs/20261123T235233Z-screen-4d3d69",
+   "design": "cf3279721cb9",
+   "version": 11
+  },
+  "canonical_record_v2 | room_landscape_80x50_700_hf1440_v7 | screen": {
+   "J": 6.322089548414997,
+   "run": "runs/20261119T175753Z-screen-471446",
+   "design": "ed00e69fb0a6",
+   "version": 7
+  },
+  "canonical_record_v2 | room_landscape_80x50_700_hf1440_v7 | verify": {
+   "J": 6.335175693429941,
+   "run": "runs/20261119T000013Z-verify-85d3a2",
+   "design": "41356be7a7c6",
+   "version": 7
+  },
+  "canonical_record_v2 | room_landscape_80x50_700_hf1440_v7_smooth | screen": {
+   "J": 7.446632238976636,
+   "run": "runs/20261119T165650Z-screen-f30e50",
+   "design": "3c4aa3350077",
+   "version": 7
+  },
+  "canonical_record_v2 | room_landscape_80x50_700_hf1440_v10 | screen": {
+   "J": 8.391004491167408,
+   "run": "runs/20261119T165732Z-screen-3ebb94",
+   "design": "2edf3ea06d10",
+   "version": 10
+  },
+  "crowe_panel | room_landscape_80x50_700_hf1440_v7 | screen": {
+   "J": 16.91817613526687,
+   "run": "runs/20261115T205453Z-screen-32f7c4",
+   "design": "22365b569be9",
+   "version": 7
+  },
+  "iwata_ar | b3bt_pa_90x60_600_load_tall_rows_v4 | screen": {
+   "J": 5.45450800102387,
+   "run": "runs/20261027T085242Z-screen-c7d820",
+   "design": "b01fcfa4b50a",
+   "version": 4
+  },
+  "iwata_ar | b2t_pa_60x40_1200_tall_rows_v4 | screen": {
+   "J": 5.632873693462806,
+   "run": "runs/20261027T075151Z-screen-4b0492",
+   "design": "fd9846036c3a",
+   "version": 4
+  },
+  "iwata_ar | room_landscape_80x50_700_hf1440_v7_smooth | screen": {
+   "J": 6.671130953889615,
+   "run": "runs/20261119T062638Z-screen-03ae3c",
+   "design": "06a008612260",
+   "version": 7
+  },
+  "iwata_ar | compact400_xo1000_1400_hf1440_v10xo | screen": {
+   "J": 7.726065641636392,
+   "run": "runs/20261119T231724Z-screen-dbff3d",
+   "design": "77351bbb376c",
+   "version": 10
+  },
+  "iwata_ar | b2t_pa_60x40_1200_tall_rows | screen": {
+   "J": 8.546664927775062,
+   "run": "runs/20261027T011601Z-screen-15b372",
+   "design": "fbc30fb86951",
+   "version": 3
+  },
+  "iwata_ar | b1t_hifi_90x60_850_tall_rows_v4 | screen": {
+   "J": 12.24097312569639,
+   "run": "runs/20261027T061958Z-screen-c1c2d7",
+   "design": "06ab58a2447a",
+   "version": 4
+  },
+  "iwata_ar | b1t_hifi_90x60_850_tall_rows | screen": {
+   "J": 16.503050789628883,
+   "run": "runs/20261026T235338Z-screen-431016",
+   "design": "90431e266371",
+   "version": 3
+  },
+  "iwata_ar | room_landscape_80x50_700_hf1440_v7 | screen": {
+   "J": 19.038845650974586,
+   "run": "runs/20261115T162516Z-screen-e31b23",
+   "design": "1f0e3301c2c6",
+   "version": 7
+  },
+  "iwata_ar | b3bt_pa_90x60_600_load_tall_rows | screen": {
+   "J": 19.08374945927224,
+   "run": "runs/20261027T000628Z-screen-6bd7ba",
+   "design": "08162c85d98f",
+   "version": 3
+  },
+  "iwata_ar | axi_2in_large | screen": {
+   "J": 63.380215415758,
+   "run": "runs/20261025T181031Z-screen-49eb83",
+   "design": "0ccdaa42d53f",
+   "version": 3
+  },
+  "iwata_ar | organic_rollback_1in | screen": {
+   "J": 67.86054972124518,
+   "run": "runs/20261025T061505Z-screen-2c228d",
+   "design": "3a72cacd670d",
+   "version": null
+  },
+  "iwata_ar | 7040use | screen": {
+   "J": 113.23977642396324,
+   "run": "runs/20261025T203759Z-screen-07cd44",
+   "design": "6b7ba8f474c4",
+   "version": 3
+  },
+  "klangfilm_ellipse | home_hifi_range_60_90x40_60_v9_h12_pilot | screen": {
+   "J": 88.74863239908782,
+   "run": "runs/20261117T193931Z-screen-1f7a84",
+   "design": "451084c8981e",
+   "version": 9
+  },
+  "klangfilm_lame | room_landscape_80x50_700_hf1440_v7_smooth | screen": {
+   "J": 7.821271025843172,
+   "run": "runs/20261118T223405Z-screen-765760",
+   "design": "aae8e85a519a",
+   "version": 7
+  },
+  "klangfilm_lame_hv_bb_v1 | room_landscape_80x50_900_hf1440_v11cd | verify": {
+   "J": 6.850825519022198,
+   "run": "runs/20261125T155858Z-verify-cf126b",
+   "design": "164b08c52667",
+   "version": 11
+  },
+  "klangfilm_lame_hv_cd | room_landscape_80x50_700_hf1440_v7_smooth | screen": {
+   "J": 8.34952788464452,
+   "run": "runs/20261119T065506Z-screen-dab24f",
+   "design": "7be037ff53c5",
+   "version": 7
+  },
+  "klangfilm_lame_hv_cd | room_landscape_80x50_900_hf1440_v11cd | verify": {
+   "J": 9.059294449463296,
+   "run": "runs/20261125T000451Z-verify-c93e49",
+   "design": "69a8df8d79b4",
+   "version": 11
+  },
+  "klangfilm_lame_hv_core | room_landscape_80x50_700_hf1440_v7_smooth_dense | screen": {
+   "J": 2.0008662220427116,
+   "run": "runs/20261121T101433Z-screen-f5d556",
+   "design": "5ddcca9cfd8e",
+   "version": 7
+  },
+  "klangfilm_lame_hv_core | room_landscape_80x50_700_hf1440_v7_smooth | screen": {
+   "J": 2.80007113988437,
+   "run": "runs/20261120T053950Z-screen-3e2657",
+   "design": "ee85bcd2ad67",
+   "version": 7
+  },
+  "klangfilm_lame_hv_core | room_landscape_80x50_700_hf1440_v10 | screen": {
+   "J": 3.598841166985138,
+   "run": "runs/20261119T184606Z-screen-c6db2d",
+   "design": "3bfcc80b743a",
+   "version": 10
+  },
+  "klangfilm_lame_hv_core | room_landscape_80x50_700_hf1440_v11cd | screen": {
+   "J": 7.0483964791586775,
+   "run": "runs/20261120T085629Z-screen-90752f",
+   "design": "0e2cd51de51c",
+   "version": 11
+  },
+  "klangfilm_lame_v1 | room_landscape_80x50_700_hf1440_v7_smooth | screen": {
+   "J": 7.44577979665419,
+   "run": "runs/20261117T091346Z-screen-517217",
+   "design": "88973b1e44e9",
+   "version": 7
+  },
+  "klangfilm_lame_v1 | room_landscape_80x50_900_hf1440_v11cd | screen": {
+   "J": 11.589086025411234,
+   "run": "runs/20261123T235306Z-screen-0a4f8a",
+   "design": "0782945027ae",
+   "version": 11
+  },
+  "lecleach | lecleach_rollback_1in_v6 | screen": {
+   "J": 0.6686459498791066,
+   "run": "runs/20261118T195131Z-screen-8cd85f",
+   "design": "5a5fa1c976c2",
+   "version": 6
+  },
+  "lecleach | native_lecleach_1200_1in_v4 | screen": {
+   "J": 3.7883205095115113,
+   "run": "runs/20261027T063610Z-screen-057442",
+   "design": "e609384507f5",
+   "version": 4
+  },
+  "lecleach | native_lecleach_1200_1in | screen": {
+   "J": 5.588176571027422,
+   "run": "runs/20261027T012428Z-screen-301bf6",
+   "design": "bf998dd59815",
+   "version": 3
+  },
+  "lecleach | room_landscape_80x50_700_hf1440_v7_smooth | screen": {
+   "J": 6.5604014541692415,
+   "run": "runs/20261116T040157Z-screen-402831",
+   "design": "a85be6929ad5",
+   "version": 7
+  },
+  "lecleach | b3a_pa_90x90_400_square_rows_v4 | screen": {
+   "J": 12.378762494384995,
+   "run": "runs/20261027T102828Z-screen-f19c78",
+   "design": "de5ced788bb7",
+   "version": 4
+  },
+  "lecleach | b3a_pa_90x90_400_square_rows | screen": {
+   "J": 33.42702345398169,
+   "run": "runs/20261027T000353Z-screen-05871d",
+   "design": "20a8df84b027",
+   "version": 3
+  },
+  "lecleach | axi_90x90_1in | screen": {
+   "J": 43.900533249285,
+   "run": "runs/20261026T020452Z-screen-03ede0",
+   "design": "3ea9a79c48da",
+   "version": null
+  },
+  "lecleach | 7040 | screen": {
+   "J": 71.7031610301114,
+   "run": "runs/20261025T105416Z-screen-14aaea",
+   "design": "d1bb0c19e7c3",
+   "version": null
+  },
+  "lecleach_ar | room_landscape_80x50_700_hf1440_v7_smooth | screen": {
+   "J": 8.07911832041148,
+   "run": "runs/20261119T205130Z-screen-5dbd97",
+   "design": "5f7fbfc276b9",
+   "version": 7
+  },
+  "lecleach_asym | native_lecleach_1200_1in_v4 | screen": {
+   "J": 3.791203382076878,
+   "run": "runs/20261027T064411Z-screen-019599",
+   "design": "fd63b53adeaf",
+   "version": 4
+  },
+  "lecleach_asym | native_lecleach_1200_1in | screen": {
+   "J": 6.519237070670454,
+   "run": "runs/20261027T001337Z-screen-4cc8e8",
+   "design": "561c860a21d6",
+   "version": 3
+  },
+  "lecleach_asym | organic_rollback_1in | screen": {
+   "J": 60.14462922195785,
+   "run": "runs/20261025T182334Z-screen-dc8b5d",
+   "design": "9bf90df3290d",
+   "version": null
+  },
+  "osse_rollback | b3a_pa_90x90_400_square_v4 | screen": {
+   "J": 1.1131329875668101,
+   "run": "runs/20261028T160336Z-screen-b4a679",
+   "design": "b01af5f398e6",
+   "version": 4
+  },
+  "osse_rollback | compact500_xo900_80x50_hf1440_v11cd_open | screen": {
+   "J": 1.7051180234115726,
+   "run": "runs/20261122T223153Z-screen-98b41d",
+   "design": "138f09ce5472",
+   "version": 11
+  },
+  "osse_rollback | compact500_xo900_80x50_hf2in_v11cd | screen": {
+   "J": 1.870458095055536,
+   "run": "runs/20261121T003823Z-screen-75c147",
+   "design": "0ae816f04c06",
+   "version": 11
+  },
+  "osse_rollback | compact500_xo900_80x50_2in_half15_v11cd | screen": {
+   "J": 2.056546422845111,
+   "run": "runs/20261123T221417Z-screen-d5aabb",
+   "design": "8738fe2380b8",
+   "version": 11
+  },
+  "osse_rollback | compact500_xo900_80x50_hf1440_v11cd | screen": {
+   "J": 2.1593365246473892,
+   "run": "runs/20261121T104004Z-screen-0a4759",
+   "design": "76e7f306ec59",
+   "version": 11
+  },
+  "osse_rollback | room_landscape_80x50_900_hf1440_v11cd_sculpted_cma | screen": {
+   "J": 2.3027535543994166,
+   "run": "runs/20261121T143911Z-screen-2f8cd1",
+   "design": "2075dde9435e",
+   "version": 11
+  },
+  "osse_rollback | room_landscape_80x50_700_hf2in_v11cd | screen": {
+   "J": 2.786330155708329,
+   "run": "runs/20261121T011049Z-screen-0bc5aa",
+   "design": "bd66cfff0b40",
+   "version": 11
+  },
+  "osse_rollback | compact500_xo900_80x50_hf1440_v11cd | verify": {
+   "J": 2.8569537792586974,
+   "run": "runs/20261122T152202Z-verify-586306",
+   "design": "e71d5b278fb2",
+   "version": 11
+  },
+  "osse_rollback | compact400_xo1000_w90x50_hf1440_v11cd | screen": {
+   "J": 3.2949405451927394,
+   "run": "runs/20261121T041719Z-screen-071d1b",
+   "design": "1f7879f49e9c",
+   "version": 11
+  },
+  "osse_rollback | room_landscape_80x50_700_hf1440_v11cd_open | screen": {
+   "J": 3.3079239150110915,
+   "run": "runs/20261122T232104Z-screen-2cc59b",
+   "design": "5987a94e99c0",
+   "version": 11
+  },
+  "osse_rollback | room_landscape_80x50_700_hf1440_v11cd | screen": {
+   "J": 3.845525761583879,
+   "run": "runs/20261121T022620Z-screen-7d64e1",
+   "design": "48e2cbf33915",
+   "version": 11
+  },
+  "osse_rollback | room_landscape_80x50_700_hf1440_v11cd | verify": {
+   "J": 4.582751478750314,
+   "run": "runs/20261122T152250Z-verify-e446cf",
+   "design": "123960dea449",
+   "version": 11
+  },
+  "osse_rollback | room_landscape_80x50_700_hf1440a9_v11cd | screen": {
+   "J": 4.60947091404365,
+   "run": "runs/20261121T031453Z-screen-afb646",
+   "design": "9528b1737bd7",
+   "version": 11
+  },
+  "osse_rollback | room_w90x50_700_hf1440_v11cd_open | screen": {
+   "J": 4.762827112513002,
+   "run": "runs/20261123T184542Z-screen-02ea3e",
+   "design": "faa6128389f6",
+   "version": 11
+  },
+  "osse_rollback | room_landscape_80x50_700_hf1440_v7 | screen": {
+   "J": 5.3441625675651725,
+   "run": "runs/20261116T074832Z-screen-620f81",
+   "design": "77308ed8afa3",
+   "version": 7
+  },
+  "osse_rollback | room_w90x60_700_hf1440_v11cd | screen": {
+   "J": 5.3484668213008355,
+   "run": "runs/20261121T042940Z-screen-b51222",
+   "design": "25f4ac30462c",
+   "version": 11
+  },
+  "osse_rollback | room_w90x50_700_hf1440_v11cd | screen": {
+   "J": 5.353223958537155,
+   "run": "runs/20261121T035120Z-screen-7ff229",
+   "design": "5504ddab5e44",
+   "version": 11
+  },
+  "osse_rollback | b2t_pa_60x40_1200_tall_v4 | screen": {
+   "J": 11.887710635745272,
+   "run": "runs/20261028T184118Z-screen-16b2c8",
+   "design": "d1c3722236de",
+   "version": 4
+  },
+  "osse_rollback | b2t_pa_60x40_1200_tall_deep_v4 | screen": {
+   "J": 20.457586289559423,
+   "run": "runs/20261028T180335Z-screen-8b3964",
+   "design": "1096d1795b36",
+   "version": 4
+  },
+  "rolled_family_rect_bb_v1 | room_landscape_80x50_900_hf1440_v11cd | verify": {
+   "J": 4.348819331702018,
+   "run": "runs/20261125T154149Z-verify-d92d5e",
+   "design": "b4e499b42a45",
+   "version": 11
+  },
+  "rolled_family_rect_cd_v1 | room_landscape_80x50_900_hf1440_v11cd | verify": {
+   "J": 6.000648778594256,
+   "run": "runs/20261125T000116Z-verify-47bbc9",
+   "design": "41b907b78c40",
+   "version": 11
+  },
+  "rolled_family_rect_cd_v1 | room_landscape_80x50_700_hf1440_v10 | screen": {
+   "J": 8.326448003305746,
+   "run": "runs/20261120T162808Z-screen-accb39",
+   "design": "380c20e9bd2e",
+   "version": 10
+  },
+  "rolled_family_rect_term_v1 | room_landscape_80x50_700_hf1440_v10 | screen": {
+   "J": 9.5779942690587,
+   "run": "runs/20261120T182453Z-screen-63c7f7",
+   "design": "317f30fd98d3",
+   "version": 10
+  },
+  "rolled_family_rect_v1 | room_landscape_80x50_900_hf1440_v11cd | screen": {
+   "J": 7.942102643195616,
+   "run": "runs/20261123T221455Z-screen-a07561",
+   "design": "20874108fe25",
+   "version": 11
+  },
+  "rolled_family_rect_v1 | room_landscape_80x50_700_hf1440_v10 | screen": {
+   "J": 9.003285876309322,
+   "run": "runs/20261120T165651Z-screen-6a36c3",
+   "design": "c19c5c847395",
+   "version": 10
+  },
+  "rolled_family_rect_v1 | room_landscape_80x50_700_hf1440_v10 | verify": {
+   "J": 9.238022933667132,
+   "run": "runs/20261120T161330Z-verify-124fee",
+   "design": "96790c88352e",
+   "version": 10
+  },
+  "rolled_family_rect_v1 | room_landscape_80x50_700_hf1440_v7 | screen": {
+   "J": 19.706252895630566,
+   "run": "runs/20261119T094135Z-screen-382cb5",
+   "design": "9c39541262aa",
+   "version": 7
+  },
+  "rolled_family_rect_v1 | home_hifi_range_60_90x40_60_v9_h12_pilot | screen": {
+   "J": 92.61283589806568,
+   "run": "runs/20261117T190640Z-screen-643de7",
+   "design": "445dafb7e760",
+   "version": 9
+  },
+  "rolled_family_section_v1 | room_landscape_80x50_700_hf1440_v7_smooth | screen": {
+   "J": 6.722997374967079,
+   "run": "runs/20261116T043544Z-screen-dd15d8",
+   "design": "6f60c6180a27",
+   "version": 7
+  },
+  "rolled_family_section_v1 | room_landscape_80x50_700_hf1440_v7 | screen": {
+   "J": 17.397036998386138,
+   "run": "runs/20261116T020629Z-screen-0d29d7",
+   "design": "eb9cd62fbc3f",
+   "version": 7
+  },
+  "rolled_rect | room_landscape_80x50_700_hf1440_v7 | screen": {
+   "J": 29.422981398850794,
+   "run": "runs/20261115T163824Z-screen-d4a7c4",
+   "design": "dd23c8704459",
+   "version": 7
+  },
+  "rolled_rect_pucker | room_landscape_80x50_700_hf1440_v7 | screen": {
+   "J": 15.691632229511894,
+   "run": "runs/20261116T001222Z-screen-b25d61",
+   "design": "f33608ac93e6",
+   "version": 7
+  },
+  "rosse_rect | room_landscape_80x50_700_hf1440_rosse_rect_v7 | screen": {
+   "J": 3.31737134716092,
+   "run": "runs/20261117T070118Z-screen-8627f8",
+   "design": "3ba1f9bff270",
+   "version": 7
+  },
+  "rosse_rect | room_landscape_80x50_700_hf1440_v7 | screen": {
+   "J": 4.559601646366622,
+   "run": "runs/20261119T085256Z-screen-c2203f",
+   "design": "efe4a8959d85",
+   "version": 7
+  },
+  "salmon_elliptical | b3bt_pa_90x60_600_load_tall_rows_v4 | screen": {
+   "J": 4.021501931465124,
+   "run": "runs/20261027T083216Z-screen-23544f",
+   "design": "63034eff4baf",
+   "version": 4
+  },
+  "salmon_elliptical | b1t_hifi_90x60_850_tall_rows_v4 | screen": {
+   "J": 6.9873143965249955,
+   "run": "runs/20261027T062650Z-screen-36d858",
+   "design": "f6541d51e480",
+   "version": 4
+  },
+  "salmon_elliptical | b2t_pa_60x40_1200_tall_rows_v4 | screen": {
+   "J": 7.5568747486737955,
+   "run": "runs/20261027T075956Z-screen-85781b",
+   "design": "bd21d483281b",
+   "version": 4
+  },
+  "salmon_elliptical | b3a_pa_90x90_400_square_v4 | screen": {
+   "J": 9.279779900457232,
+   "run": "runs/20261028T190326Z-screen-afa825",
+   "design": "79674d205cde",
+   "version": 4
+  },
+  "salmon_elliptical | b1t_hifi_90x60_850_tall_rows_diag_v4 | screen": {
+   "J": 9.406924484585225,
+   "run": "runs/20261027T220716Z-screen-decadf",
+   "design": "7fff71bd61de",
+   "version": 4
+  },
+  "salmon_elliptical | b3bt_pa_90x60_600_load_tall_rows | screen": {
+   "J": 13.154213818977189,
+   "run": "runs/20261027T011917Z-screen-c49fb1",
+   "design": "9e87ed40669e",
+   "version": 3
+  },
+  "salmon_elliptical | b1t_hifi_90x60_850_tall_rows | screen": {
+   "J": 16.664022451301097,
+   "run": "runs/20261026T235458Z-screen-10583a",
+   "design": "761702fbb577",
+   "version": 3
+  },
+  "salmon_elliptical | b2t_pa_60x40_1200_tall_rows | screen": {
+   "J": 27.51449313778658,
+   "run": "runs/20261026T235849Z-screen-315037",
+   "design": "a832b80de02c",
+   "version": 3
+  },
+  "salmon_elliptical | organic_rollback_1in | verify": {
+   "J": 40.053819953756694,
+   "run": "runs/20261113T063805Z-verify-bd1e51",
+   "design": "8fd082b5828d",
+   "version": 3
+  },
+  "salmon_elliptical | organic_rollback_1in | screen": {
+   "J": 40.36353177460214,
+   "run": "runs/20261113T062813Z-screen-b1e46c",
+   "design": "15c2f35b4235",
+   "version": 3
+  },
+  "salmon_elliptical | 7040use | screen": {
+   "J": 63.959364840110354,
+   "run": "runs/20261025T200043Z-screen-65e4b9",
+   "design": "48ad5e9807ae",
+   "version": 3
+  },
+  "salmon_elliptical | 7040 | screen": {
+   "J": 74.27459649832761,
+   "run": "runs/20261025T105841Z-screen-7e8b47",
+   "design": "75afac11ac93",
+   "version": null
+  },
+  "salmon_elliptical | 75x35 | screen": {
+   "J": 89.7843912688028,
+   "run": "runs/20261025T142406Z-screen-9361bc",
+   "design": "e3061d51db1d",
+   "version": 2
+  },
+  "salmon_elliptical | samonrip | screen": {
+   "J": 1000.0,
+   "run": "runs/20261025T183505Z-screen-8e3d77",
+   "design": "94061c392275",
+   "version": 1
+  },
+  "sculpted_rosse_meridians_v1 | room_landscape_80x50_900_hf1440_v11cd_sculpted_cma | screen": {
+   "J": 2.0706721428533004,
+   "run": "runs/20261121T135752Z-screen-8c15a8",
+   "design": "b0b9c044e536",
+   "version": 11
+  },
+  "section_pucker | room_landscape_80x50_700_hf1440_v7 | screen": {
+   "J": 22.7651703799414,
+   "run": "runs/20261115T180109Z-screen-0f2ab5",
+   "design": "75a489825a07",
+   "version": 7
+  },
+  "toroidal_rollback | axi_90x90_1in | screen": {
+   "J": 53.45907928298128,
+   "run": "runs/20261025T061536Z-screen-6641c3",
+   "design": "537b30e3d1c1",
+   "version": null
+  }
+ },
+ "geometry_of_best_per_type": {
+  "canonical_record_v2": {
+   "brief": "room_landscape_80x50_900_hf1440_v11cd",
+   "mode": "screen",
+   "J": 6.06951178591247,
+   "version": 11,
+   "run": "runs/20261123T235233Z-screen-4d3d69",
+   "design": "cf3279721cb9",
+   "error": "KeyError: 'knobs'"
+  },
+  "crowe_panel": {
+   "brief": "room_landscape_80x50_700_hf1440_v7",
+   "mode": "screen",
+   "J": 16.91817613526687,
+   "version": 7,
+   "run": "runs/20261115T205453Z-screen-32f7c4",
+   "design": "22365b569be9",
+   "error": "GeneratorError: grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']"
+  },
+  "iwata_ar": {
+   "brief": "b3bt_pa_90x60_600_load_tall_rows_v4",
+   "mode": "screen",
+   "J": 5.45450800102387,
+   "version": 4,
+   "run": "runs/20261027T085242Z-screen-c7d820",
+   "design": "b01fcfa4b50a",
+   "H": {
+    "forward_station": 28,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 33.7,
+    "wall_deg": [
+     10.8,
+     13.8,
+     17.4,
+     24.5
+    ],
+    "gap_at_30pct_deg": 16.2
+   },
+   "V": {
+    "forward_station": 28,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 31.5,
+    "wall_deg": [
+     10.3,
+     13.0,
+     16.2,
+     22.5
+    ],
+    "gap_at_30pct_deg": 15.3
+   },
+   "rows": 15
+  },
+  "klangfilm_ellipse": {
+   "brief": "home_hifi_range_60_90x40_60_v9_h12_pilot",
+   "mode": "screen",
+   "J": 88.74863239908782,
+   "version": 9,
+   "run": "runs/20261117T193931Z-screen-1f7a84",
+   "design": "451084c8981e",
+   "error": "GeneratorError: grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']"
+  },
+  "klangfilm_lame": {
+   "brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+   "mode": "screen",
+   "J": 7.821271025843172,
+   "version": 7,
+   "run": "runs/20261118T223405Z-screen-765760",
+   "design": "aae8e85a519a",
+   "error": "GeneratorError: grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']"
+  },
+  "klangfilm_lame_hv_bb_v1": {
+   "brief": "room_landscape_80x50_900_hf1440_v11cd",
+   "mode": "verify",
+   "J": 6.850825519022198,
+   "version": 11,
+   "run": "runs/20261125T155858Z-verify-cf126b",
+   "design": "164b08c52667",
+   "H": {
+    "forward_station": 40,
+    "n": 65,
+    "has_return": true,
+    "chord_deg": 38.5,
+    "wall_deg": [
+     17.4,
+     31.2,
+     34.3,
+     35.7
+    ],
+    "gap_at_30pct_deg": 4.2
+   },
+   "V": {
+    "forward_station": 38,
+    "n": 65,
+    "has_return": true,
+    "chord_deg": 24.8,
+    "wall_deg": [
+     9.9,
+     8.3,
+     7.8,
+     11.9
+    ],
+    "gap_at_30pct_deg": 17.0
+   },
+   "rows": 19
+  },
+  "klangfilm_lame_hv_cd": {
+   "brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+   "mode": "screen",
+   "J": 8.34952788464452,
+   "version": 7,
+   "run": "runs/20261119T065506Z-screen-dab24f",
+   "design": "7be037ff53c5",
+   "H": {
+    "forward_station": 29,
+    "n": 65,
+    "has_return": true,
+    "chord_deg": 43.3,
+    "wall_deg": [
+     14.0,
+     25.3,
+     31.9,
+     33.9
+    ],
+    "gap_at_30pct_deg": 11.4
+   },
+   "V": {
+    "forward_station": 29,
+    "n": 65,
+    "has_return": true,
+    "chord_deg": 21.8,
+    "wall_deg": [
+     7.1,
+     5.0,
+     4.0,
+     11.6
+    ],
+    "gap_at_30pct_deg": 17.9
+   },
+   "rows": 19
+  },
+  "klangfilm_lame_hv_core": {
+   "brief": "room_landscape_80x50_700_hf1440_v7_smooth_dense",
+   "mode": "screen",
+   "J": 2.0008662220427116,
+   "version": 7,
+   "run": "runs/20261121T101433Z-screen-f5d556",
+   "design": "5ddcca9cfd8e",
+   "H": {
+    "forward_station": 64,
+    "n": 65,
+    "has_return": false,
+    "chord_deg": 39.3,
+    "wall_deg": [
+     7.8,
+     13.3,
+     23.3,
+     40.1
+    ],
+    "gap_at_30pct_deg": 16.0
+   },
+   "V": {
+    "forward_station": 64,
+    "n": 65,
+    "has_return": false,
+    "chord_deg": 25.5,
+    "wall_deg": [
+     7.3,
+     9.6,
+     14.3,
+     24.0
+    ],
+    "gap_at_30pct_deg": 11.2
+   },
+   "rows": 19
+  },
+  "klangfilm_lame_v1": {
+   "brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+   "mode": "screen",
+   "J": 7.44577979665419,
+   "version": 7,
+   "run": "runs/20261117T091346Z-screen-517217",
+   "design": "88973b1e44e9",
+   "H": {
+    "forward_station": 34,
+    "n": 65,
+    "has_return": true,
+    "chord_deg": 43.2,
+    "wall_deg": [
+     13.6,
+     22.9,
+     32.3,
+     37.5
+    ],
+    "gap_at_30pct_deg": 10.8
+   },
+   "V": {
+    "forward_station": 34,
+    "n": 65,
+    "has_return": true,
+    "chord_deg": 19.6,
+    "wall_deg": [
+     7.9,
+     4.5,
+     3.2,
+     8.1
+    ],
+    "gap_at_30pct_deg": 16.4
+   },
+   "rows": 19
+  },
+  "lecleach": {
+   "brief": "lecleach_rollback_1in_v6",
+   "mode": "screen",
+   "J": 0.6686459498791066,
+   "version": 6,
+   "run": "runs/20261118T195131Z-screen-8cd85f",
+   "design": "5a5fa1c976c2",
+   "H": {
+    "forward_station": 30,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 30.0,
+    "wall_deg": [
+     7.3,
+     10.0,
+     13.5,
+     20.4
+    ],
+    "gap_at_30pct_deg": 16.5
+   },
+   "V": {
+    "forward_station": 30,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 30.0,
+    "wall_deg": [
+     7.3,
+     10.0,
+     13.5,
+     20.4
+    ],
+    "gap_at_30pct_deg": 16.5
+   },
+   "rows": 15
+  },
+  "lecleach_ar": {
+   "brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+   "mode": "screen",
+   "J": 8.07911832041148,
+   "version": 7,
+   "run": "runs/20261119T205130Z-screen-5dbd97",
+   "design": "5f7fbfc276b9",
+   "H": {
+    "forward_station": 25,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 39.4,
+    "wall_deg": [
+     13.4,
+     17.3,
+     22.0,
+     31.0
+    ],
+    "gap_at_30pct_deg": 17.4
+   },
+   "V": {
+    "forward_station": 26,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 27.6,
+    "wall_deg": [
+     9.4,
+     11.8,
+     14.4,
+     19.4
+    ],
+    "gap_at_30pct_deg": 13.2
+   },
+   "rows": 15
+  },
+  "lecleach_asym": {
+   "brief": "native_lecleach_1200_1in_v4",
+   "mode": "screen",
+   "J": 3.791203382076878,
+   "version": 4,
+   "run": "runs/20261027T064411Z-screen-019599",
+   "design": "fd63b53adeaf",
+   "H": {
+    "forward_station": 26,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 33.8,
+    "wall_deg": [
+     10.4,
+     13.3,
+     16.8,
+     23.9
+    ],
+    "gap_at_30pct_deg": 17.0
+   },
+   "V": {
+    "forward_station": 26,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 33.8,
+    "wall_deg": [
+     10.4,
+     13.3,
+     16.8,
+     23.9
+    ],
+    "gap_at_30pct_deg": 17.0
+   },
+   "rows": 25
+  },
+  "osse_rollback": {
+   "brief": "b3a_pa_90x90_400_square_v4",
+   "mode": "screen",
+   "J": 1.1131329875668101,
+   "version": 4,
+   "run": "runs/20261028T160336Z-screen-b4a679",
+   "design": "b01af5f398e6",
+   "H": {
+    "forward_station": 33,
+    "n": 41,
+    "has_return": true,
+    "chord_deg": 54.4,
+    "wall_deg": [
+     40.2,
+     44.2,
+     45.9,
+     49.5
+    ],
+    "gap_at_30pct_deg": 8.6
+   },
+   "V": {
+    "forward_station": 33,
+    "n": 41,
+    "has_return": true,
+    "chord_deg": 54.3,
+    "wall_deg": [
+     39.9,
+     43.9,
+     45.6,
+     49.3
+    ],
+    "gap_at_30pct_deg": 8.7
+   },
+   "rows": 25
+  },
+  "rolled_family_rect_bb_v1": {
+   "brief": "room_landscape_80x50_900_hf1440_v11cd",
+   "mode": "verify",
+   "J": 4.348819331702018,
+   "version": 11,
+   "run": "runs/20261125T154149Z-verify-d92d5e",
+   "design": "b4e499b42a45",
+   "H": {
+    "forward_station": 87,
+    "n": 129,
+    "has_return": true,
+    "chord_deg": 41.5,
+    "wall_deg": [
+     22.4,
+     29.8,
+     33.4,
+     38.2
+    ],
+    "gap_at_30pct_deg": 8.1
+   },
+   "V": {
+    "forward_station": 96,
+    "n": 129,
+    "has_return": true,
+    "chord_deg": 27.5,
+    "wall_deg": [
+     4.7,
+     6.8,
+     13.3,
+     21.7
+    ],
+    "gap_at_30pct_deg": 14.2
+   },
+   "rows": 65
+  },
+  "rolled_family_rect_cd_v1": {
+   "brief": "room_landscape_80x50_900_hf1440_v11cd",
+   "mode": "verify",
+   "J": 6.000648778594256,
+   "version": 11,
+   "run": "runs/20261125T000116Z-verify-47bbc9",
+   "design": "41b907b78c40",
+   "H": {
+    "forward_station": 87,
+    "n": 129,
+    "has_return": true,
+    "chord_deg": 41.5,
+    "wall_deg": [
+     7.6,
+     24.8,
+     38.9,
+     27.3
+    ],
+    "gap_at_30pct_deg": 2.6
+   },
+   "V": {
+    "forward_station": 96,
+    "n": 129,
+    "has_return": true,
+    "chord_deg": 27.5,
+    "wall_deg": [
+     4.7,
+     6.8,
+     13.3,
+     21.7
+    ],
+    "gap_at_30pct_deg": 14.2
+   },
+   "rows": 65
+  },
+  "rolled_family_rect_term_v1": {
+   "brief": "room_landscape_80x50_700_hf1440_v10",
+   "mode": "screen",
+   "J": 9.5779942690587,
+   "version": 10,
+   "run": "runs/20261120T182453Z-screen-63c7f7",
+   "design": "317f30fd98d3",
+   "H": {
+    "forward_station": 92,
+    "n": 129,
+    "has_return": true,
+    "chord_deg": 39.1,
+    "wall_deg": [
+     5.7,
+     8.8,
+     17.0,
+     30.9
+    ],
+    "gap_at_30pct_deg": 22.1
+   },
+   "V": {
+    "forward_station": 96,
+    "n": 129,
+    "has_return": true,
+    "chord_deg": 25.3,
+    "wall_deg": [
+     4.1,
+     5.2,
+     10.8,
+     17.9
+    ],
+    "gap_at_30pct_deg": 14.5
+   },
+   "rows": 65
+  },
+  "rolled_family_rect_v1": {
+   "brief": "room_landscape_80x50_900_hf1440_v11cd",
+   "mode": "screen",
+   "J": 7.942102643195616,
+   "version": 11,
+   "run": "runs/20261123T221455Z-screen-a07561",
+   "design": "20874108fe25",
+   "H": {
+    "forward_station": 89,
+    "n": 129,
+    "has_return": true,
+    "chord_deg": 42.3,
+    "wall_deg": [
+     8.2,
+     14.2,
+     24.3,
+     37.1
+    ],
+    "gap_at_30pct_deg": 18.0
+   },
+   "V": {
+    "forward_station": 96,
+    "n": 129,
+    "has_return": true,
+    "chord_deg": 28.0,
+    "wall_deg": [
+     4.8,
+     6.7,
+     13.1,
+     21.8
+    ],
+    "gap_at_30pct_deg": 14.8
+   },
+   "rows": 65
+  },
+  "rolled_family_section_v1": {
+   "brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+   "mode": "screen",
+   "J": 6.722997374967079,
+   "version": 7,
+   "run": "runs/20261116T043544Z-screen-dd15d8",
+   "design": "6f60c6180a27",
+   "error": "GeneratorError: rolled-family schema or implementation differs from saved recipe"
+  },
+  "rolled_rect": {
+   "brief": "room_landscape_80x50_700_hf1440_v7",
+   "mode": "screen",
+   "J": 29.422981398850794,
+   "version": 7,
+   "run": "runs/20261115T163824Z-screen-d4a7c4",
+   "design": "dd23c8704459",
+   "error": "GeneratorError: grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']"
+  },
+  "rolled_rect_pucker": {
+   "brief": "room_landscape_80x50_700_hf1440_v7",
+   "mode": "screen",
+   "J": 15.691632229511894,
+   "version": 7,
+   "run": "runs/20261116T001222Z-screen-b25d61",
+   "design": "f33608ac93e6",
+   "error": "GeneratorError: grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']"
+  },
+  "rosse_rect": {
+   "brief": "room_landscape_80x50_700_hf1440_rosse_rect_v7",
+   "mode": "screen",
+   "J": 3.31737134716092,
+   "version": 7,
+   "run": "runs/20261117T070118Z-screen-8627f8",
+   "design": "3ba1f9bff270",
+   "error": "GeneratorError: grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']"
+  },
+  "salmon_elliptical": {
+   "brief": "b3bt_pa_90x60_600_load_tall_rows_v4",
+   "mode": "screen",
+   "J": 4.021501931465124,
+   "version": 4,
+   "run": "runs/20261027T083216Z-screen-23544f",
+   "design": "63034eff4baf",
+   "H": {
+    "forward_station": 29,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 45.5,
+    "wall_deg": [
+     19.2,
+     23.6,
+     28.8,
+     38.5
+    ],
+    "gap_at_30pct_deg": 16.7
+   },
+   "V": {
+    "forward_station": 30,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 36.3,
+    "wall_deg": [
+     9.5,
+     12.8,
+     17.1,
+     26.2
+    ],
+    "gap_at_30pct_deg": 19.2
+   },
+   "rows": 15
+  },
+  "sculpted_rosse_meridians_v1": {
+   "brief": "room_landscape_80x50_900_hf1440_v11cd_sculpted_cma",
+   "mode": "screen",
+   "J": 2.0706721428533004,
+   "version": 11,
+   "run": "runs/20261121T135752Z-screen-8c15a8",
+   "design": "b0b9c044e536",
+   "H": {
+    "forward_station": 84,
+    "n": 97,
+    "has_return": true,
+    "chord_deg": 45.5,
+    "wall_deg": [
+     32.4,
+     34.9,
+     39.7,
+     44.6
+    ],
+    "gap_at_30pct_deg": 5.8
+   },
+   "V": {
+    "forward_station": 84,
+    "n": 97,
+    "has_return": true,
+    "chord_deg": 24.0,
+    "wall_deg": [
+     9.5,
+     14.7,
+     18.3,
+     22.2
+    ],
+    "gap_at_30pct_deg": 5.7
+   },
+   "rows": 49
+  },
+  "section_pucker": {
+   "brief": "room_landscape_80x50_700_hf1440_v7",
+   "mode": "screen",
+   "J": 22.7651703799414,
+   "version": 7,
+   "run": "runs/20261115T180109Z-screen-0f2ab5",
+   "design": "75a489825a07",
+   "error": "GeneratorError: grid rows: unknown key(s) ['driver', 'implementation_sha256', 'schema']"
+  },
+  "toroidal_rollback": {
+   "brief": "axi_90x90_1in",
+   "mode": "screen",
+   "J": 53.45907928298128,
+   "version": null,
+   "run": "runs/20261025T061536Z-screen-6641c3",
+   "design": "537b30e3d1c1",
+   "H": {
+    "forward_station": 20,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 32.2,
+    "wall_deg": [
+     8.7,
+     11.5,
+     15.0,
+     22.2
+    ],
+    "gap_at_30pct_deg": 17.2
+   },
+   "V": {
+    "forward_station": 20,
+    "n": 33,
+    "has_return": true,
+    "chord_deg": 32.2,
+    "wall_deg": [
+     8.7,
+     11.5,
+     15.0,
+     22.2
+    ],
+    "gap_at_30pct_deg": 17.2
+   },
+   "rows": 15
+  }
+ }
+}

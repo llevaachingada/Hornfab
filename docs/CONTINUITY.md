@@ -1,5 +1,32 @@
 ﻿# CONTINUITY
 
+## 2026-11-25 (noon) — CD backbone: recipe transfers to a second rolled body; Lamé stops; cross-application survey
+
+- Batch 6 (4 Lamé solves): longer throat + shorter roll-in move the 2.7 kHz waistband to 2.3 kHz and lift loading to 0.554–0.608 (floor 0.617); no pass, best J 6.851. Lamé line stopped: needs a mouth/rollback or depth change, not body knobs.
+- Batch 7 (3 solves): rolled keeper `bb_h` 0.65 / throat 0.25 on a second rolled body `20874108fe25` passes all six rules vs its own control; 6–8 kHz H within 0.3° of the first body (8 kHz 54.5 → 68.3°), J 7.683 → 4.562.
+- Survey of saved rows families: lever applies to rolled designs on the CD brief; sculpted R-OSSE and OSSE rollback already carry it natively; Le Cléac'h/Iwata/Salmon are on loading-first briefs and must not get a CD backbone. New tool `tools/geometry/apply_cd_backbone.py` wraps any saved rolled/Lamé Phase A design (neutral parity checked). [Readout](evidence/cd_backbone_2026-11-25/README.md).
+
+## 2026-11-25 (late morning) — CD backbone batches 4–5: throat transition fixes the loading edge
+
+- 7 verify solves (6 at epw 6, 1 at epw 9), predeclared in `docs/evidence/cd_backbone_2026-11-25/PREDECLARED.md` (batch-4 addendum). The `bb_h` 0.65 loading failure sits at 896 Hz and follows the near-throat flare: `g_bb_throat_frac` 0.15 → 0.25 lifts Re z 0.864 → 1.085 (min 0.993); roll-in changes it by ≤ 0.035.
+- New rolled keeper `rolled_bb_h065_th025`: H ≥ 68.5° at all 6–8 kHz bins (8 kHz 54.8 → 68.5°), 2–4 kHz H 76.5–82.3°, all six rules pass, epw-9 gate passes (deltas ≤ 0.3°), J 8.121 → 4.679. A longer throat costs top-octave H (8 kHz 70.9 / 68.5 / 66.9° at throat 0.15 / 0.25 / 0.30), which the station-map heuristic missed.
+- Not committed. [Readout](evidence/cd_backbone_2026-11-25/README.md).
+
+## 2026-11-25 — CD wall-angle backbone: rolled bb_h 0.5 passes, Lamé waistbands
+
+- Versioned kernel `hornlab_search/design/generators/_cd_backbone_v1.py` + adapter `cd_backbone_family.py` (kinds `rolled_family_rect_bb_v1`, `klangfilm_lame_hv_bb_v1`), wired through `grid.py` / `generated.py` / `mesh/build.py`. Each pre-roll row is blended at equal arc fraction toward a CD schedule (throat angle -> theta_c -> the parent's own tangent at its roll-on station) with `lam(psi) = bb_h cos^2 + bb_v sin^2`; throat/roll-on stations, return and rim stay within 1e-13 mm and zero strength returns the parent bit-for-bit (`neutral_parity.json`). Tests `tests/test_cd_backbone_geometry.py` + parents: 32 pass, 0 failures.
+- 5 predeclared verify solves (4 at epw 6, 1 refined; v11 frozen, 29-frequency grid). Rolled `bb_h` 0.5: H 69.0 / 68.4 / 67.6 / 67.5 / 65.7 deg at 6085-8000 Hz (control 62.5 -> 54.8), H 72.4-80.6 deg across 2-4 kHz, V not narrower, no multilobe, min Re(z) 0.991 → 0.997, J 8.121 → 5.407; deltas hold within 0.2 deg at epw 9 (J 5.377). Rolled 1.0 fails the 2-4 kHz ceiling (87.0 deg at 4037 Hz) and loading (min Re(z) 0.610).
+- Lame on `morph_frac` 0.40: `bb_h` 0.5 misses 8 kHz (60.5 deg) and loses loading; `bb_h` 1.0 reaches 69.8-75.7 deg at 6-8 kHz but waistbands to 46.8 deg at 2678 Hz and min Re(z) 0.487 → fails the predeclared band and loading rules. V remains capped by the roll-on budget (moving the V roll-on outward is an owner decision); the conditional CMA over (bb_h, bb_v, throat fraction, roll-in fraction) is unlocked for rolled but not run.
+- Dose bracket (predeclared addendum, 3 more solves): H at 8 kHz 60.1 / 64.1 / 70.9 deg for bb_h 0.35 / 0.45 / 0.65. 0.35 misses the 62 deg HF floor and has J 6.474; 0.45 passes every rule (J 5.743); 0.65 passes the H band, V and lobe rules with the lowest J of the batch (4.676) but fails loading (min Re(z) 0.864, 0.127 worse than control). Passing interval 0.45-0.50; J has no minimum on this axis, so the conditional CMA (still not run) must be scored against the six pass rules. [Evidence](evidence/cd_backbone_2026-11-25/README.md).
+
+## 2026-11-24/25 — directivity attribution: early-wall levers widen 6–8 kHz H on both anchors
+
+- 14 fixed-candidate verify solves (8 at epw 6, 6 refined-mesh/source), predeclared in `docs/evidence/directivity_attribution_2026-11-24/PREDECLARED.md`; v11 frozen. A first launch failed before any solve (relative forward-slash argv[0]; see NOTES_FOR_SENIOR).
+- Rolled `fa5b207bca6d`: H amplitude causes the 2 kHz overshoot; V-only carries the combined J gain. Moving the existing CD law earlier (H +10°, window 0.12/0.40/0.65) gives H +7.6…+8.4° at 6–8 kHz, 8 kHz H 63.1° (in corridor), 2 kHz H 79.4°, J 8.121 → 6.533; deltas hold within 0.3° at epw 9. Late window: no HF authority.
+- Lamé `0782945027ae`: `morph_frac` 0.40 (H +5.3…+5.6°, V +3.7…+5.1°, J 9.084) and H mid gain −2 mm (H +3.9…+4.4°, J 10.736) both widen 6–8 kHz H with throat, rim and return held; 8 kHz H still ≤ 51.6°.
+- Driver exit angles: Beyma states 7–29.5° (convention unstated); CP-850Nd datasheet has no angle or outlet section. Next experiments and promotion criteria: [readout](evidence/directivity_attribution_2026-11-24/README.md).
+- Geometry limit (2026-11-25): both parents keep the HF-critical wall at 5–23° while straight walls to their roll-on stations would sit near the target; a CPU-only CD-backbone blend that keeps return and rim bit-identical resolves on both anchors. No solve yet. [Dossier](research/typologies/RETURNED_LIP_CD_BACKBONE_RESEARCH_2026-11-25.md).
+
 ## 2026-11-23 - Overnight BO data top-up and updated horn sheets
 
 - **`bo_data_topup_2026-11-22`** (other lane, 22:25-00:19, 6/6) resumed the round-3 open-envelope run dirs in place to grow each cohort to BO training size while continuing CMA (dual use). Every job was stopped by the pin watchdog after 30-40 rows: `morph_corner_mm` low on c400a, `L_mm` low on c400b, and similar pins later.

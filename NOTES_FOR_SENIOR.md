@@ -1329,3 +1329,24 @@ Withdrawn from the audit: F6's inference, decision 4 (the six-design dense solve
   refusals at all; the remainder are `invalid_geometry` at the newly opened extremes (37.5 % home
   Fold, 0-28 % elsewhere).
 - **Not changed.** No objective/scalar change, no default flip, no frozen contract edit, no run dir.
+
+## 2026-11-24  directivity attribution: queue argv[0] must use backslashes when the runner is started outside queue.ps1
+What happened: `tools/run_campaign_night.py --night docs/queue/directivity_attribution_2026-11-24.yaml`, started from a
+Git Bash shell in the canonical checkout, failed all 8 `kind: command` jobs at launch with `[WinError 2]` (no solve
+ran; GPU untouched; logs kept in `runs/nights/directivity_attribution_2026-11-24_launchfail/`). The night file used
+`argv[0]: .venv/Scripts/hornlab-search.exe` like the earlier 2026-11-24 queues. Reproduced from PowerShell too:
+`subprocess.run(['.venv/Scripts/hornlab-search.exe','--help'], cwd=repo)` -> FileNotFoundError, while
+`'.venv\Scripts\hornlab-search.exe'` -> rc 0. Relaunched with backslashes; 8/8 then ran.
+Suggested fix (runner owner): resolve `argv[0]` against `repo_root` with `Path(...).resolve()` before `Popen`, or
+document backslash/absolute paths for command jobs. Not changed here (not my file).
+
+
+## 2026-11-25  CD-backbone pass: two pre-existing failures in tests/test_design_generated.py are not from the backbone kernel
+`tests/test_design_generated.py::test_failure_marker_replays_without_counting` and `..._is_ignored_after_a_library_change`
+fail in the working copy: the refusal path now returns `invalid_envelope: generator: GeneratorError: invalid_envelope: mouth
+800 x 800 mm ...` while both tests assert `ev.error.startswith("invalid_geometry")`. The prefix comes from the uncommitted
+`invalid_envelope:` raise in `hornlab_search/design/generators/registry.py` (another lane, 58 changed lines), not from
+`_cd_backbone_v1.py` / `cd_backbone_family.py` (their own 32 tests pass; `tests/test_design_generators_grid_rows.py`,
+`tests/test_mesh_build_grid_rows.py`, `tests/test_design_generated_recipe.py` and both dispatch tests also pass).
+Suggested fix (registry lane): either keep `invalid_geometry` as the outer prefix for generator-refused envelope
+violations, or update the two assertions in the same commit as the prefix change. Not touched here (not my files).

@@ -1,5 +1,11 @@
 # Docs index
 
+[CD backbone under a retained returned lip](research/typologies/RETURNED_LIP_CD_BACKBONE_RESEARCH_2026-11-25.md) — why the rolled and Lamé parents limit 6–8 kHz H, sourced literature (R-OSSE re-read), CPU backbone prototype and validation ladder; agent web report kept verbatim alongside.
+
+[Rolled and Lamé directivity attribution](evidence/directivity_attribution_2026-11-24/README.md) — predeclared H/V controls, early-wall levers that widen 6–8 kHz H, refined-mesh gate, 36 mm source-angle sensitivity and stated driver exit angles.
+
+[CD wall-angle backbone fixed candidates](evidence/cd_backbone_2026-11-25/README.md) — versioned backbone kernel + adapters, predeclared four-candidate verify and one refined solve; rolled bb_h 0.5 passes (H 65.7 at 8 kHz, J 8.121 → 5.407, epw-9 confirmed), rolled 1.0 and both Lamé doses fail on waistband/loading.
+
 [Sculpted home-900 V11 CMA pilot](queue/sculpted_xo900_cma_pilot_2026-11-21.yaml) — R3, K axial and Crowe k-home first tranches with conditional extension to 60 valid evaluations.
 
 [Sculpted home-900 V11 acoustic readout](evidence/sculpted_xo900_v11_2026-11-21/README.md) — measured fixed-mesh BEM, packaging parity, matched refinement and native rollback.

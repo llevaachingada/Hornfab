@@ -1,0 +1,194 @@
+{
+  "rolled_lamH0.5_lamV0.0": {
+    "ok": true,
+    "max_disp_mm": 16.01,
+    "rim_delta_mm": 0.0,
+    "return_delta_mm": 0.0,
+    "extents_mm": [
+      581.1,
+      365.9,
+      214.4
+    ],
+    "theta_c_H": 36.51,
+    "theta_c_V": null,
+    "max_closure_c_deg": 0.082,
+    "H_wall_u.2/.3/.45": [
+      25.1,
+      30.0,
+      36.8
+    ],
+    "V_wall_u.2/.3/.45": [
+      6.8,
+      13.3,
+      21.7
+    ]
+  },
+  "rolled_lamH1.0_lamV0.0": {
+    "ok": true,
+    "max_disp_mm": 31.07,
+    "rim_delta_mm": 0.0,
+    "return_delta_mm": 0.0,
+    "extents_mm": [
+      581.1,
+      365.9,
+      214.4
+    ],
+    "theta_c_H": 36.51,
+    "theta_c_V": null,
+    "max_closure_c_deg": 0.09,
+    "H_wall_u.2/.3/.45": [
+      36.5,
+      36.5,
+      36.5
+    ],
+    "V_wall_u.2/.3/.45": [
+      6.8,
+      13.3,
+      21.7
+    ]
+  },
+  "rolled_lamH0.5_lamV0.5": {
+    "ok": true,
+    "max_disp_mm": 18.31,
+    "rim_delta_mm": 0.0,
+    "return_delta_mm": 0.0,
+    "extents_mm": [
+      581.1,
+      365.9,
+      214.4
+    ],
+    "theta_c_H": 36.51,
+    "theta_c_V": 19.49,
+    "max_closure_c_deg": 0.105,
+    "H_wall_u.2/.3/.45": [
+      25.1,
+      30.0,
+      36.8
+    ],
+    "V_wall_u.2/.3/.45": [
+      13.0,
+      16.3,
+      20.5
+    ]
+  },
+  "rolled_lamH1.0_lamV1.0": {
+    "ok": true,
+    "max_disp_mm": 35.56,
+    "rim_delta_mm": 0.0,
+    "return_delta_mm": 0.0,
+    "extents_mm": [
+      581.1,
+      365.9,
+      214.4
+    ],
+    "theta_c_H": 36.51,
+    "theta_c_V": 19.49,
+    "max_closure_c_deg": 0.0,
+    "H_wall_u.2/.3/.45": [
+      36.5,
+      36.5,
+      36.5
+    ],
+    "V_wall_u.2/.3/.45": [
+      19.5,
+      19.5,
+      19.5
+    ]
+  },
+  "lame_lamH0.5_lamV0.0": {
+    "ok": true,
+    "max_disp_mm": 10.52,
+    "rim_delta_mm": 0.0,
+    "return_delta_mm": 0.0,
+    "extents_mm": [
+      489.7,
+      281.0,
+      207.8
+    ],
+    "theta_c_H": 32.23,
+    "theta_c_V": null,
+    "max_closure_c_deg": 0.023,
+    "H_wall_u.2/.3/.45": [
+      24.6,
+      27.4,
+      32.2
+    ],
+    "V_wall_u.2/.3/.45": [
+      11.9,
+      12.3,
+      14.0
+    ]
+  },
+  "lame_lamH1.0_lamV0.0": {
+    "ok": true,
+    "max_disp_mm": 20.71,
+    "rim_delta_mm": 0.0,
+    "return_delta_mm": 0.0,
+    "extents_mm": [
+      489.7,
+      281.0,
+      207.8
+    ],
+    "theta_c_H": 32.23,
+    "theta_c_V": null,
+    "max_closure_c_deg": 0.024,
+    "H_wall_u.2/.3/.45": [
+      32.2,
+      32.2,
+      32.2
+    ],
+    "V_wall_u.2/.3/.45": [
+      11.9,
+      12.3,
+      14.0
+    ]
+  },
+  "lame_lamH0.5_lamV0.5": {
+    "ok": true,
+    "max_disp_mm": 10.91,
+    "rim_delta_mm": 0.0,
+    "return_delta_mm": 0.0,
+    "extents_mm": [
+      489.7,
+      281.0,
+      207.8
+    ],
+    "theta_c_H": 32.23,
+    "theta_c_V": 15.49,
+    "max_closure_c_deg": 0.043,
+    "H_wall_u.2/.3/.45": [
+      24.6,
+      27.4,
+      32.2
+    ],
+    "V_wall_u.2/.3/.45": [
+      13.6,
+      13.9,
+      14.7
+    ]
+  },
+  "lame_lamH1.0_lamV1.0": {
+    "ok": true,
+    "max_disp_mm": 21.45,
+    "rim_delta_mm": 0.0,
+    "return_delta_mm": 0.0,
+    "extents_mm": [
+      489.7,
+      281.0,
+      207.8
+    ],
+    "theta_c_H": 32.23,
+    "theta_c_V": 15.49,
+    "max_closure_c_deg": 0.0,
+    "H_wall_u.2/.3/.45": [
+      32.2,
+      32.2,
+      32.2
+    ],
+    "V_wall_u.2/.3/.45": [
+      15.5,
+      15.5,
+      15.5
+    ]
+  }
+}

@@ -1,0 +1,132 @@
+night: directivity_attribution_2026-11-24
+lane: gpu
+# Fixed-candidate verify solves (argv[0] uses backslashes: CreateProcess rejected the forward-slash form on 2026-11-24, launch-fail logs in runs/nights/directivity_attribution_2026-11-24_launchfail); predeclared in docs/evidence/directivity_attribution_2026-11-24/PREDECLARED.md
+jobs:
+  - id: rolled_h10_v0
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - docs/evidence/directivity_attribution_2026-11-24/rolled_h10_v0.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/directivity_attribution_2026-11-24/cache_rolled_h10_v0
+      - --dataset-dir
+      - runs/directivity_attribution_2026-11-24/dataset
+  - id: rolled_h0_v6
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - docs/evidence/directivity_attribution_2026-11-24/rolled_h0_v6.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/directivity_attribution_2026-11-24/cache_rolled_h0_v6
+      - --dataset-dir
+      - runs/directivity_attribution_2026-11-24/dataset
+  - id: rolled_h10_early
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - docs/evidence/directivity_attribution_2026-11-24/rolled_h10_early.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/directivity_attribution_2026-11-24/cache_rolled_h10_early
+      - --dataset-dir
+      - runs/directivity_attribution_2026-11-24/dataset
+  - id: rolled_h20_early
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - docs/evidence/directivity_attribution_2026-11-24/rolled_h20_early.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/directivity_attribution_2026-11-24/cache_rolled_h20_early
+      - --dataset-dir
+      - runs/directivity_attribution_2026-11-24/dataset
+  - id: rolled_h10_late
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - docs/evidence/directivity_attribution_2026-11-24/rolled_h10_late.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/directivity_attribution_2026-11-24/cache_rolled_h10_late
+      - --dataset-dir
+      - runs/directivity_attribution_2026-11-24/dataset
+  - id: lame_morph_040
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - docs/evidence/directivity_attribution_2026-11-24/lame_morph_040.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/directivity_attribution_2026-11-24/cache_lame_morph_040
+      - --dataset-dir
+      - runs/directivity_attribution_2026-11-24/dataset
+  - id: lame_morph_085
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - docs/evidence/directivity_attribution_2026-11-24/lame_morph_085.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/directivity_attribution_2026-11-24/cache_lame_morph_085
+      - --dataset-dir
+      - runs/directivity_attribution_2026-11-24/dataset
+  - id: lame_hmid_m2
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - docs/evidence/directivity_attribution_2026-11-24/lame_hmid_m2.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/directivity_attribution_2026-11-24/cache_lame_hmid_m2
+      - --dataset-dir
+      - runs/directivity_attribution_2026-11-24/dataset

@@ -1,0 +1,26 @@
+{
+  "rolled_bb_control": {
+    "fresh_sha256": "62fa92f673b7c46073a5de108847aa76294a3ffff5b82d76dd49153313b70e7a",
+    "saved_sha256": "62fa92f673b7c46073a5de108847aa76294a3ffff5b82d76dd49153313b70e7a",
+    "saved_mesh": "runs/rolled_lame_anchor_verify_2026-11-24/rolled/designs/fa5b207bca6d/mesh.msh",
+    "byte_identical": true,
+    "triangles": 6744,
+    "design_hash": "e32ca4607424"
+  },
+  "lame_bb_control": {
+    "fresh_sha256": "5ebfc475ca2c032665706e0c91f513c1e419d791a976d5911c980901c1677d93",
+    "saved_sha256": "5ebfc475ca2c032665706e0c91f513c1e419d791a976d5911c980901c1677d93",
+    "saved_mesh": "runs/rolled_lame_anchor_verify_2026-11-24/lame/designs/0782945027ae/mesh.msh",
+    "byte_identical": true,
+    "triangles": 6821,
+    "design_hash": "c1cfa1dd2a67"
+  },
+  "lame_bb_control_m040": {
+    "fresh_sha256": "2482ca98095e0f6f79cb69cce85638dcd95525b7c616cdcf203b1ccb4ce90d35",
+    "saved_sha256": "2482ca98095e0f6f79cb69cce85638dcd95525b7c616cdcf203b1ccb4ce90d35",
+    "saved_mesh": "C:/Users/hunte/Hrns/hornlab-search/runs/20261124T235357Z-verify-dd210e/designs/69a8df8d79b4/mesh.msh",
+    "byte_identical": true,
+    "triangles": 6808,
+    "design_hash": "338789bc0a05"
+  }
+}

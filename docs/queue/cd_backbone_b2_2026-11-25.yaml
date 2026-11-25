@@ -1,0 +1,23 @@
+night: cd_backbone_b2_2026-11-25
+lane: gpu
+# Predeclared refined-mesh gate (epw 6 -> 9) for the one passing candidate of the batch.
+# See docs/evidence/cd_backbone_2026-11-25/PREDECLARED.md. Controls (rolled_anchor_epw9,
+# lame_morph_040_epw9) already exist in runs/nights/directivity_attribution_b2_2026-11-24.
+# argv[0] uses backslashes: CreateProcess rejects the forward-slash form on 2026-11-24.
+jobs:
+  - id: rolled_bb_h050_epw9
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - examples/typologies/cd_backbone_2026-11-25/rolled_bb_h050_epw9.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/cd_backbone_2026-11-25/cache_rolled_bb_h050_epw9
+      - --dataset-dir
+      - runs/cd_backbone_2026-11-25/dataset

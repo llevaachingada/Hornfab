@@ -3019,8 +3019,8 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
 def rows_grid_points(spec: dict, knobs: dict, brief: dict,
                      prefix: str = "g") -> tuple[np.ndarray, dict]:
     """Public rows-route entry used by ``mesh/build.py`` and ``design_params``."""
-    from . import rolled_family, rolled_cd_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
-    for family in (rolled_family, rolled_cd_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
+    from . import rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
+    for family in (rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
         if family.is_family_spec(spec):
             if prefix != 'g':
                 raise registry.GeneratorError('versioned family knobs require the g prefix')
@@ -3106,8 +3106,8 @@ def design_params(spec: dict, knobs: dict, brief: dict) -> dict:
     The knob prefix is always ``"g"`` (the wire-in contract); knobs equal to the GRID defaults are
     canonicalised away so an explicit zero and an absent zero hash identically.
     """
-    from . import rolled_family, rolled_cd_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
-    for family in (rolled_family, rolled_cd_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
+    from . import rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
+    for family in (rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
         if family.is_family_spec(spec):
             return family.design_params(spec, knobs, brief)
     knob_map = _knob_map(knobs)
@@ -3149,8 +3149,8 @@ def validate_grid_params(block: dict) -> None:
     Same structural ranges as :func:`grid_points`; meridian/brief-dependent legality was already
     enforced when the design was materialised. Raises ``registry.GeneratorError``.
     """
-    from . import rolled_family, rolled_cd_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
-    for family in (rolled_family, rolled_cd_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
+    from . import rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
+    for family in (rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
         if family.is_family_spec(block):
             family.validate_grid_params(block)
             return
@@ -3210,8 +3210,8 @@ def envelope_extents(spec: dict, knobs: dict, brief: dict) -> tuple[float, float
     radial envelope of the modulated section is taken as ``max_phi r(1, phi)`` for both width and
     height (conservative; mirrors ``registry.envelope_overshoot_estimate``'s max-radius rule).
     """
-    from . import rolled_family, rolled_cd_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
-    for family in (rolled_family, rolled_cd_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
+    from . import rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
+    for family in (rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
         if family.is_family_spec(spec):
             block = family.design_params(spec, knobs, brief)['grid'] if 'implementation_sha256' not in spec['rows'] else {**spec, 'knobs': knobs}
             meta = family.resolve_grid(block, brief)['meta']

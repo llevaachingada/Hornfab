@@ -1,0 +1,54 @@
+night: cd_backbone_b3_2026-11-25
+lane: gpu
+# Fixed dose bracket around the passing rolled candidate (bb_h 0.35 / 0.45 / 0.65).
+# Post-hoc extension, predeclared in docs/evidence/cd_backbone_2026-11-25/PREDECLARED.md
+# (addendum 2026-11-25T01:40Z) before any of these solves. argv[0] uses backslashes.
+jobs:
+  - id: rolled_bb_h035
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - examples/typologies/cd_backbone_2026-11-25/rolled_bb_h035.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/cd_backbone_2026-11-25/cache_rolled_bb_h035
+      - --dataset-dir
+      - runs/cd_backbone_2026-11-25/dataset
+  - id: rolled_bb_h045
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - examples/typologies/cd_backbone_2026-11-25/rolled_bb_h045.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/cd_backbone_2026-11-25/cache_rolled_bb_h045
+      - --dataset-dir
+      - runs/cd_backbone_2026-11-25/dataset
+  - id: rolled_bb_h065
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv\Scripts\hornlab-search.exe
+      - run
+      - --config
+      - examples/typologies/cd_backbone_2026-11-25/rolled_bb_h065.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/cd_backbone_2026-11-25/cache_rolled_bb_h065
+      - --dataset-dir
+      - runs/cd_backbone_2026-11-25/dataset
