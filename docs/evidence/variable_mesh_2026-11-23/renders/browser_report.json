@@ -1,0 +1,402 @@
+{
+  "base": "http://127.0.0.1:8799",
+  "runs": [
+    {
+      "route": "/#/run/20261120T055336Z-screen-e23136/3d",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8799/?theme=dark#/run/20261120T055336Z-screen-e23136/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T055336Z-screen-e23136/3d",
+        "title": "cd11__osse_morph",
+        "body_text_len": 943
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T055336Z-screen-e23136_3d__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T063822Z-screen-a5a822/3d",
+      "width": 1280,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8799/?theme=dark#/run/20261120T063822Z-screen-a5a822/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T063822Z-screen-a5a822/3d",
+        "title": "cd11__ath_core_petal",
+        "body_text_len": 947
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T063822Z-screen-a5a822_3d__1280__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T055336Z-screen-e23136/3d",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8799/?theme=dark#/run/20261120T055336Z-screen-e23136/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T055336Z-screen-e23136/3d",
+        "title": "cd11__osse_morph",
+        "body_text_len": 943
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T055336Z-screen-e23136_3d__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T063822Z-screen-a5a822/3d",
+      "width": 1009,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8799/?theme=dark#/run/20261120T063822Z-screen-a5a822/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T063822Z-screen-a5a822/3d",
+        "title": "cd11__ath_core_petal",
+        "body_text_len": 947
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T063822Z-screen-a5a822_3d__1009__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T055336Z-screen-e23136/3d",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8799/?theme=dark#/run/20261120T055336Z-screen-e23136/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T055336Z-screen-e23136/3d",
+        "title": "cd11__osse_morph",
+        "body_text_len": 982
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T055336Z-screen-e23136_3d__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T063822Z-screen-a5a822/3d",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8799/?theme=dark#/run/20261120T063822Z-screen-a5a822/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T063822Z-screen-a5a822/3d",
+        "title": "cd11__ath_core_petal",
+        "body_text_len": 939
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T063822Z-screen-a5a822_3d__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T055336Z-screen-e23136/3d",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8799/?theme=dark#/run/20261120T055336Z-screen-e23136/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T055336Z-screen-e23136/3d",
+        "title": "cd11__osse_morph",
+        "body_text_len": 833
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T055336Z-screen-e23136_3d__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T063822Z-screen-a5a822/3d",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8799/?theme=dark#/run/20261120T063822Z-screen-a5a822/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T063822Z-screen-a5a822/3d",
+        "title": "cd11__ath_core_petal",
+        "body_text_len": 837
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T063822Z-screen-a5a822_3d__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "error": "TimeoutError: Page.reload: Timeout 90000ms exceeded.\nCall log:\n  - waiting for navigation until \"networkidle\"\n    - navigated to \"http://127.0.0.1:8799/?theme=dark#/run/20261120T063822Z-screen-a5a822/3d\"\n",
+      "failures": [
+        "TimeoutError: Page.reload: Timeout 90000ms exceeded.\nCall log:\n  - waiting for navigation until \"networkidle\"\n    - navigated to \"http://127.0.0.1:8799/?theme=dark#/run/20261120T063822Z-screen-a5a822/3d\"\n"
+      ]
+    },
+    {
+      "route": "/#/run/20261120T055336Z-screen-e23136/3d",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8799/?theme=light#/run/20261120T055336Z-screen-e23136/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T055336Z-screen-e23136/3d",
+        "title": "cd11__osse_morph",
+        "body_text_len": 935
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T055336Z-screen-e23136_3d__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T063822Z-screen-a5a822/3d",
+      "width": 1280,
+      "theme": "light",
+      "url": "http://127.0.0.1:8799/?theme=light#/run/20261120T063822Z-screen-a5a822/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T063822Z-screen-a5a822/3d",
+        "title": "cd11__ath_core_petal",
+        "body_text_len": 939
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T063822Z-screen-a5a822_3d__1280__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T055336Z-screen-e23136/3d",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8799/?theme=light#/run/20261120T055336Z-screen-e23136/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T055336Z-screen-e23136/3d",
+        "title": "cd11__osse_morph",
+        "body_text_len": 935
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T055336Z-screen-e23136_3d__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T063822Z-screen-a5a822/3d",
+      "width": 1009,
+      "theme": "light",
+      "url": "http://127.0.0.1:8799/?theme=light#/run/20261120T063822Z-screen-a5a822/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 1009,
+        "clientWidth": 1009,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T063822Z-screen-a5a822/3d",
+        "title": "cd11__ath_core_petal",
+        "body_text_len": 939
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T063822Z-screen-a5a822_3d__1009__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T055336Z-screen-e23136/3d",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8799/?theme=light#/run/20261120T055336Z-screen-e23136/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T055336Z-screen-e23136/3d",
+        "title": "cd11__osse_morph",
+        "body_text_len": 935
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T055336Z-screen-e23136_3d__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T063822Z-screen-a5a822/3d",
+      "width": 768,
+      "theme": "light",
+      "url": "http://127.0.0.1:8799/?theme=light#/run/20261120T063822Z-screen-a5a822/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T063822Z-screen-a5a822/3d",
+        "title": "cd11__ath_core_petal",
+        "body_text_len": 939
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T063822Z-screen-a5a822_3d__768__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T055336Z-screen-e23136/3d",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8799/?theme=light#/run/20261120T055336Z-screen-e23136/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T055336Z-screen-e23136/3d",
+        "title": "cd11__osse_morph",
+        "body_text_len": 833
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T055336Z-screen-e23136_3d__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    },
+    {
+      "route": "/#/run/20261120T063822Z-screen-a5a822/3d",
+      "width": 375,
+      "theme": "light",
+      "url": "http://127.0.0.1:8799/?theme=light#/run/20261120T063822Z-screen-a5a822/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T063822Z-screen-a5a822/3d",
+        "title": "cd11__ath_core_petal",
+        "body_text_len": 837
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\run_20261120T063822Z-screen-a5a822_3d__375__light.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    }
+  ],
+  "failures": [
+    {
+      "route": "/#/run/20261120T063822Z-screen-a5a822/3d",
+      "width": 375,
+      "theme": "dark",
+      "failures": [
+        "TimeoutError: Page.reload: Timeout 90000ms exceeded.\nCall log:\n  - waiting for navigation until \"networkidle\"\n    - navigated to \"http://127.0.0.1:8799/?theme=dark#/run/20261120T063822Z-screen-a5a822/3d\"\n"
+      ]
+    }
+  ]
+}

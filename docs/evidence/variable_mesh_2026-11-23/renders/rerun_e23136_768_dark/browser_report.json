@@ -1,0 +1,30 @@
+{
+  "base": "http://127.0.0.1:8799",
+  "runs": [
+    {
+      "route": "/#/run/20261120T055336Z-screen-e23136/3d",
+      "width": 768,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8799/?theme=dark#/run/20261120T055336Z-screen-e23136/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T055336Z-screen-e23136/3d",
+        "title": "cd11__osse_morph",
+        "body_text_len": 943
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\rerun_e23136_768_dark\\run_20261120T055336Z-screen-e23136_3d__768__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    }
+  ],
+  "failures": []
+}

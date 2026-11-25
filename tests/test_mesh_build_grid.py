@@ -67,13 +67,17 @@ def test_build_mesh_dispatches_a_grid_design_through_grid_build(tmp_path, monkey
     assert build.BBOX_MIN_M <= ext <= build.BBOX_MAX_M
     rep = topology.check_surface(xyz, tri, sizing.SYMMETRY_PLANE["1"])
     assert rep.bad_open_edges == 0 and rep.nonmanifold_edges == 0
-    # the grid route has no mesh cache/meta yet (documented in grid_build.py)
-    assert not (out / "mesh_meta.json").exists()
-    # search/evaluate.py's _grid_info must tolerate the missing mesh_meta.json (area is unknown,
-    # the grid block stays available); evaluate rows for grid designs thus carry area None.
+    # The grid route now writes the same additive provenance the formula route writes.  The
+    # mesh cache is still absent (grid builds are not cached); only the sidecar is new.
+    meta = json.loads((out / "mesh_meta.json").read_text(encoding="utf-8"))
+    assert meta["mesh_route"] == "grid"
+    assert meta["grid"]["n_phi"] == 13 and meta["grid"]["n_s"] > 0
+    assert meta["result"]["n_triangles"] == r.n_triangles
+    assert meta["summary"]["area_m2"] == pytest.approx(summary["area_m2"])
+    # search/evaluate.py's _grid_info now finds the stored area; the grid block stays available.
     from hornlab_search.search import evaluate as E
     area, grid_info = E._grid_info(out)
-    assert area is None and grid_info["available"] is True
+    assert area == pytest.approx(summary["area_m2"]) and grid_info["available"] is True
     print(f"\ngrid mesh: {r.n_triangles} tris, bbox={tuple(round(v, 4) for v in r.bbox_m)}, "
           f"res={r.res_mm}")
 

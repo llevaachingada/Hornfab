@@ -1,5 +1,16 @@
 ﻿# CONTINUITY
 
+## 2026-11-25 - variable mesh audit: 1.5 supported; CAD/mounted inert; density view
+
+- Scope: spatial mesh resolution only; the 12 kHz SCREEN grid/scoring was untouched. Evidence executed 2026-11-23/24; packet `docs/evidence/variable_mesh_2026-11-23/`.
+- The formula routes already graded correctly: class-1 throat p50 3.55 mm vs inner bore 6.12 vs mouth 7.01; outer shell p50 7.15 -> 10.71 -> 14.05 mm at factor 1.0/1.5/2.0, with inner/throat/mouth unchanged. Unknown-region fraction is 0.00% on formula classes after the audit fixes.
+- DOF: factor 1.5 is -21.96..-22.32% on the four formula classes; 2.0 is -29.68..-29.94%; point-grid -7.4% (saturates at 1.5 under the wall-clearance guard); CAD and mounted/enclosure 0% (inert, now recorded as not applied).
+- Acoustic A/B on frozen grids (`beat_cpu` CPU lane): worst deviations vs the epq-9 reference are 8 kHz 0.0241 dB on-axis / 0.0183 dB DI / 0.162 deg / 0.00227 z; 10 kHz 0.0126 / 0.0064 / 0.054 / 0.00132; 12 kHz leader 0.0230 / 0.0224 / 0.122 / 0.00169. The predeclared criteria (0.20 dB / 0.15 dB / 1.0 deg / 0.03) pass with 6-9x margin at 12 kHz and >15x at 10 kHz. Diagonal maxima sit at rear nulls; bounded complex error 0.0030-0.0107.
+- CPU solve time is 37-40% lower and complete candidate 31-43% lower at 1.5. GPU wall time was NOT measured because the 12 kHz queue owned the GPU; the DOF target is met.
+- Implemented `tools/analysis/mesh_region_audit.py`, `mesh_policy_ab.py`, `mesh_acoustic_ab.py`; GUI density payload/view with decimation and solved/stored disclosure; additive mesher/grid/CAD/mounting provenance. Focused tests: 107 passed in 58.75 s (`logs/tests.txt`).
+- Decision: keep `rear_res_factor: 1.5` explicit for new formula-class runs; do NOT change `config.py`'s 1.0 default (resume/hash semantics); 2.0 opt-in only; CAD and mounted/enclosure rear coarsening unsupported. Integration contract: `ADOPTION_DECISION.md`; rollback = set 1.0.
+- Open: GPU wall-time/VRAM confirmation when the queue frees; CAD T2 is valid only to 5023 Hz at a 10 kHz request; the point-grid fine-reference cap remains.
+
 ## 2026-11-25 (evening) - favL__2in_c500 continuation: walls opened, inert knobs narrowed, 150 valid running
 
 - Owner ask: open the wall-pinned knobs on run `20261121T003823Z-screen-75c147` (80 valid, best J 1.870458, `0ae816f04c06`), narrow the inert ones, continue 150 solves, and keep the rows usable by scalar and metric-aware BO. Built `examples/briefs/hf2in_2026-11-20/compact500_xo900_80x50_hf2in_v11cd_open115.yaml` (`envelope.enforce: false`, `max_utilization: 1.15`; there is no soft size term in J, `size_feasibility` is post-hoc) and `examples/typologies/favL_2026-11-20/favL__2in_c500_open115.yaml`.

@@ -35,8 +35,10 @@ export async function loadThree() {
  *   '12'   +y half (full x, y >= 0)  -> mirror across y=0        (2 copies)
  *   anything else ('1234', …) is already a full mesh -> passthrough.
  * verts: flat [x,y,z, x,y,z, ...] in mm; tris: flat [i,j,k, ...] indices.
- * Returns { verts: Float32Array, tris: Uint32Array }; verts on the symmetry planes are duplicated
- * (accepted seam — every mirrored quadrant keeps the original's triangulation).
+ * Returns { verts: Float32Array, tris: Uint32Array, triSrc: Int32Array }; verts on the symmetry
+ * planes are duplicated (accepted seam — every mirrored quadrant keeps the original's
+ * triangulation). `triSrc[t]` is the ORIGINAL triangle index of mirrored triangle `t`, so a
+ * per-triangle attribute (a density value, a tag) survives the mirror faithfully.
  */
 export function mirrorMesh(verts, tris, quadrants) {
   const q = String(quadrants ?? "");
@@ -44,11 +46,18 @@ export function mirrorMesh(verts, tris, quadrants) {
                : q === "14" ? [[1, 1], [-1, 1]]
                : q === "12" ? [[1, 1], [1, -1]]
                : [[1, 1]];
-  if (copies.length === 1) return { verts: new Float32Array(verts), tris: new Uint32Array(tris) };
+  const nT = Math.floor(tris.length / 3);
+  if (copies.length === 1) {
+    const triSrc = new Int32Array(nT);
+    for (let t = 0; t < nT; t++) triSrc[t] = t;
+    return { verts: new Float32Array(verts), tris: new Uint32Array(tris), triSrc };
+  }
 
   const nOrig = verts.length / 3;
   const allVerts = [];
   const allTris = [];
+  const triSrc = new Int32Array(nT * copies.length);
+  let copyIndex = 0;
   // A single reflection flips triangle handedness; two reflections preserve it.
   // flips when exactly one of sx, sy is -1 (sx * sy < 0).
   for (const [sx, sy] of copies) {
@@ -64,8 +73,10 @@ export function mirrorMesh(verts, tris, quadrants) {
         allTris.push(tris[i] + offset, tris[i + 1] + offset, tris[i + 2] + offset);
       }
     }
+    for (let t = 0; t < nT; t++) triSrc[copyIndex * nT + t] = t;
+    copyIndex++;
   }
-  return { verts: new Float32Array(allVerts), tris: new Uint32Array(allTris) };
+  return { verts: new Float32Array(allVerts), tris: new Uint32Array(allTris), triSrc };
 }
 
 // ── Persisted 3D render settings ─────────────────────────────────────────────
@@ -96,6 +107,38 @@ const MESH_NET_STYLES = {
   black: { hex: 0x14181b,    opacity: 0.22 },
   gray:  { hex: 0x8a949a,    opacity: 0.28 },
 };
+
+// ── Mesh-density heat ramp ───────────────────────────────────────────────────
+// Perceptually ordered cool -> warm stops (sRGB bytes). Cool = small max edge length (fine mesh),
+// warm = large max edge length (coarse mesh). Literal colours on purpose, like the mesh net: the
+// same scale reads in both themes. The CSS gradient is exported so the legend in app.js is the
+// exact same ramp the triangles use (one source of truth, no eyeballed copy).
+const HEAT_STOPS = [
+  [0.00, [ 40,  60, 130]],   // deep blue
+  [0.20, [ 42, 120, 178]],   // blue
+  [0.40, [ 65, 176, 160]],   // teal
+  [0.60, [170, 202,  90]],   // yellow-green
+  [0.80, [236, 170,  52]],   // amber
+  [1.00, [190,  46,  36]],   // warm red
+];
+export const HEAT_RAMP_CSS = "linear-gradient(90deg, " +
+  HEAT_STOPS.map(([t, rgb]) => `rgb(${rgb.join(",")}) ${Math.round(t * 100)}%`).join(", ") + ")";
+
+/** Heat colour for t in [0,1] as sRGB bytes, linearly interpolated between the stops. */
+function heatRgb(t) {
+  const x = Math.min(1, Math.max(0, t));
+  for (let i = 1; i < HEAT_STOPS.length; i++) {
+    const [t1, c1] = HEAT_STOPS[i];
+    if (x <= t1) {
+      const [t0, c0] = HEAT_STOPS[i - 1];
+      const f = t1 === t0 ? 0 : (x - t0) / (t1 - t0);
+      return [c0[0] + (c1[0] - c0[0]) * f,
+              c0[1] + (c1[1] - c0[1]) * f,
+              c0[2] + (c1[2] - c0[2]) * f];
+    }
+  }
+  return HEAT_STOPS[HEAT_STOPS.length - 1][1];
+}
 
 // Per-surface material + rig mix. `wireOpacity` is the "on" opacity *before* RIDGE_OPACITY_GAIN
 // (matte is deliberately "off-ish": calmer lines); "thin" starts at 0.12 and takes the same gain,
@@ -266,6 +309,66 @@ export function buildSmoothGeometry(T, verts, tris, creaseDeg = 45) {
   geo.setAttribute("position", new T.BufferAttribute(pos, 3));
   geo.setAttribute("normal", new T.BufferAttribute(nrm, 3));
   geo.setIndex(new T.BufferAttribute(idx, 1));
+  return geo;
+}
+
+/**
+ * Non-indexed triangle soup for the mesh-density heatmap: every triangle gets ONE flat colour
+ * (per-triangle constant, as required) while normals are averaged across welded positions so the
+ * horn still reads as a form instead of a faceted shell. `triEdge[t]` is triangle t's own max edge
+ * length (mm, same order as `tris`); the colour ramp is clamped to [lo, hi] (the displayed p05..p95).
+ * Positions are mm in, metres out — the same stage as buildSmoothGeometry + geo.scale(0.001).
+ */
+function buildDensityGeometry(T, verts, tris, triEdge, lo, hi) {
+  const nT = Math.floor(tris.length / 3);
+  const P = new Float32Array(nT * 9), N = new Float32Array(nT * 9), C = new Float32Array(nT * 9);
+  const keyToUid = new Map();
+  const wx = [], wy = [], wz = [], ax = [], ay = [], az = [];
+  const wid = new Int32Array(nT * 3);
+
+  for (let t = 0; t < nT; t++) {
+    for (let c = 0; c < 3; c++) {
+      const vi = tris[t * 3 + c];
+      const x = verts[vi * 3], y = verts[vi * 3 + 1], z = verts[vi * 3 + 2];
+      const key = `${Math.round(x * 100)},${Math.round(y * 100)},${Math.round(z * 100)}`;
+      let u = keyToUid.get(key);
+      if (u === undefined) {
+        u = wx.length; keyToUid.set(key, u);
+        wx.push(x); wy.push(y); wz.push(z);
+        ax.push(0); ay.push(0); az.push(0);
+      }
+      wid[t * 3 + c] = u;
+    }
+    const a = wid[t * 3], b = wid[t * 3 + 1], c = wid[t * 3 + 2];
+    if (a === b || b === c || c === a) continue;
+    const ux = wx[b] - wx[a], uy = wy[b] - wy[a], uz = wz[b] - wz[a];
+    const vx = wx[c] - wx[a], vy = wy[c] - wy[a], vz = wz[c] - wz[a];
+    const nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+    const len = Math.sqrt(nx * nx + ny * ny + nz * nz);
+    if (!(len > 0)) continue;
+    ax[a] += nx / len; ay[a] += ny / len; az[a] += nz / len;
+    ax[b] += nx / len; ay[b] += ny / len; az[b] += nz / len;
+    ax[c] += nx / len; ay[c] += ny / len; az[c] += nz / len;
+  }
+
+  const span = Math.max(1e-9, hi - lo);
+  const color = new T.Color();
+  for (let t = 0; t < nT; t++) {
+    const rgb = heatRgb((triEdge[t] - lo) / span);
+    color.setRGB(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255, T.SRGBColorSpace);
+    for (let c = 0; c < 3; c++) {
+      const u = wid[t * 3 + c];
+      const o = (t * 3 + c) * 3;
+      P[o] = wx[u] * 0.001; P[o + 1] = wy[u] * 0.001; P[o + 2] = wz[u] * 0.001;
+      const l = Math.sqrt(ax[u] * ax[u] + ay[u] * ay[u] + az[u] * az[u]) || 1;
+      N[o] = ax[u] / l; N[o + 1] = ay[u] / l; N[o + 2] = az[u] / l;
+      C[o] = color.r; C[o + 1] = color.g; C[o + 2] = color.b;
+    }
+  }
+  const geo = new T.BufferGeometry();
+  geo.setAttribute("position", new T.BufferAttribute(P, 3));
+  geo.setAttribute("normal", new T.BufferAttribute(N, 3));
+  geo.setAttribute("color", new T.BufferAttribute(C, 3));
   return geo;
 }
 
@@ -880,7 +983,7 @@ function mountingDetail(mounting) {
  * meshData: { quadrants, verts: [x,y,z,...], tris: [i,j,k,...], mounting? }
  * profile (optional): best design profile for 2D fallback.
  */
-export async function init3d(container, meshData, profile, seedProfile, shadows = true) {
+export async function init3d(container, meshData, profile, seedProfile, shadows = true, opts = {}) {
   container.innerHTML = "";
 
   const ok = await loadThree();
@@ -890,7 +993,7 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   if (!rawVerts || !rawVerts.length || !rawTris || !rawTris.length) {
     render2DFallback(container, profile, seedProfile); return;
   }
-  const { verts, tris } = mirrorMesh(rawVerts, rawTris, quadrants);
+  const { verts, tris, triSrc } = mirrorMesh(rawVerts, rawTris, quadrants);
 
   const cs = getComputedStyle(document.documentElement);
   const renderPrefs = Object.assign(loadRenderPrefs(), loadLookExtras());
@@ -1012,8 +1115,16 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
 
   const w = container.clientWidth || 600, h = container.clientHeight || 400;
   const camera = new THREE.PerspectiveCamera(45, w / h, 0.001, 100);
-  camera.position.set(center.x + maxDim * 1.2, center.y + maxDim * 0.8, center.z + maxDim * 1.5);
+  // Desktop framing is pinned to this exact position (2.094 * maxDim from the centre). Narrow
+  // canvases shrink the horizontal FOV, so the fit below may move the camera further out along the
+  // same ray; at >= 16:9 this copy is used unchanged.
+  const basePos = new THREE.Vector3(center.x + maxDim * 1.2, center.y + maxDim * 0.8,
+                                    center.z + maxDim * 1.5);
+  const camDir = basePos.clone().sub(center).normalize();
+  const baseDist = basePos.distanceTo(center);
+  camera.position.copy(basePos);
   camera.lookAt(center);
+  camera.updateProjectionMatrix();
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -1045,14 +1156,82 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   controls.target.copy(center);
   controls.update();
 
+  // ── Narrow-canvas framing ────────────────────────────────────────────────────────────────────
+  // The camera is framed for the 16:9 stage. On a tall/narrow canvas the fixed 45° vertical FOV
+  // shrinks the horizontal FOV and the horn can leave the frame, so project the model's own bounds
+  // at the current aspect and move the camera out along the SAME ray until they sit inside a small
+  // margin. At >= 16:9 the exact desktop position is reused (no refit, no framing change).
+  const REF_ASPECT = 16 / 9;
+  const FIT_NDC = 0.80;            // keep 10 % of the full canvas clear on the tight side
+  const fitCorners = [];
+  for (const x of [box.min.x, box.max.x])
+    for (const y of [box.min.y, box.max.y])
+      for (const z of [box.min.z, box.max.z])
+        fitCorners.push(new THREE.Vector3(x, y, z));
+  const fitProbe = new THREE.Vector3();
+  const posAttr = geo.getAttribute("position");
+
+  const maxNdcAt = dist => {
+    camera.position.copy(center).addScaledVector(camDir, dist);
+    camera.lookAt(center);
+    camera.updateMatrixWorld();
+    camera.updateProjectionMatrix();
+    let m = 0;
+    for (const c of fitCorners) {
+      fitProbe.copy(c).project(camera);
+      m = Math.max(m, Math.abs(fitProbe.x), Math.abs(fitProbe.y));
+    }
+    return m;
+  };
+
+  let cameraTouched = false;       // a resize never overrides a view the user has moved
+  controls.addEventListener("start", () => { cameraTouched = true; });
+
+  const fitCamera = () => {
+    const aspect = camera.aspect;
+    if (!(aspect > 0) || !(baseDist > 0)) return;   // hidden/zero-size container: keep the pose
+    let dist = baseDist;
+    let bboxMax = null;
+    if (aspect < REF_ASPECT - 0.01) {
+      bboxMax = maxNdcAt(dist);
+      for (let i = 0; i < 4 && bboxMax > FIT_NDC; i++) {
+        dist *= bboxMax / FIT_NDC;
+        bboxMax = maxNdcAt(dist);
+      }
+    }
+    // >= 16:9 keeps the byte-identical desktop position; narrow canvases use the fitted distance.
+    if (dist === baseDist) camera.position.copy(basePos);
+    else camera.position.copy(center).addScaledVector(camDir, dist);
+    camera.lookAt(center);
+    camera.updateMatrixWorld();
+    camera.updateProjectionMatrix();
+
+    let vx0 = Infinity, vx1 = -Infinity, vy0 = Infinity, vy1 = -Infinity;
+    for (let i = 0; i < posAttr.count; i++) {
+      fitProbe.set(posAttr.getX(i), posAttr.getY(i), posAttr.getZ(i)).project(camera);
+      vx0 = Math.min(vx0, fitProbe.x); vx1 = Math.max(vx1, fitProbe.x);
+      vy0 = Math.min(vy0, fitProbe.y); vy1 = Math.max(vy1, fitProbe.y);
+    }
+    container._view3dFit = {
+      aspect, ref_aspect: REF_ASPECT, fit_ndc: FIT_NDC,
+      base_dist_m: baseDist, dist_m: dist, refit: dist !== baseDist,
+      bbox_max_ndc: bboxMax,
+      vertex_ndc: { x: [vx0, vx1], y: [vy0, vy1] },
+      vertex_max_ndc: Math.max(Math.abs(vx0), Math.abs(vx1), Math.abs(vy0), Math.abs(vy1)),
+    };
+  };
+  fitCamera();
+
   // Resize observer
   const ro = new ResizeObserver(entries => {
     for (const e of entries) {
       const { width, height } = e.contentRect;
+      if (!(width > 0 && height > 0)) continue;   // transient zero-size (hidden/teardown)
       renderer.setSize(width, height);
       meshNet.setSize(width, height);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+      if (!cameraTouched) fitCamera();
     }
   });
   ro.observe(container);
@@ -1065,11 +1244,60 @@ export async function init3d(container, meshData, profile, seedProfile, shadows 
   }
   animate();
 
+  // ── Mesh-density overlay (lazy: the caller fetches the density payload only on demand) ───────
+  // Colours the DISPLAYED triangles by their own max edge length. The payload's edge_mm is in the
+  // stored (pre-mirror) triangle order; triSrc carries each mirrored triangle back to it.
+  let densityMesh = null, densityGeo = null, densityMat = null;
+  function clearDensity() {
+    if (densityMesh) scene.remove(densityMesh);
+    if (densityGeo) densityGeo.dispose();
+    if (densityMat) densityMat.dispose();
+    densityMesh = null; densityGeo = null; densityMat = null;
+    mesh.visible = true;
+  }
+  container._setMeshDensity = (density) => {
+    clearDensity();
+    if (!density) return { ok: false, reason: "off" };
+    const edges = density.edge_mm;
+    const nRaw = Math.floor(rawTris.length / 3);
+    if (!Array.isArray(edges) || edges.length !== nRaw) {
+      return { ok: false,
+               reason: `density describes ${Array.isArray(edges) ? edges.length : 0} triangles, the displayed mesh has ${nRaw}` };
+    }
+    // One length per mirrored triangle, from that triangle's own stored index.
+    const perMirrored = new Float32Array(tris.length / 3);
+    for (let t = 0; t < perMirrored.length; t++) perMirrored[t] = edges[triSrc ? triSrc[t] : t];
+    // Colour domain from the DISPLAYED lengths: p05..p95 keeps one hot triangle from flattening
+    // the whole ramp; values outside the domain clamp to the end colours.
+    const sorted = Float32Array.from(edges).sort();
+    const min = sorted[0], max = sorted[sorted.length - 1];
+    let lo = sorted[Math.floor(0.05 * (sorted.length - 1))];
+    let hi = sorted[Math.floor(0.95 * (sorted.length - 1))];
+    if (!(hi > lo)) { lo = min; hi = max; }
+    if (!(hi > lo)) { lo = min - 0.5; hi = max + 0.5; }
+    densityGeo = buildDensityGeometry(THREE, verts, tris, perMirrored, lo, hi);
+    densityMat = new THREE.MeshStandardMaterial({
+      vertexColors: true, roughness: 0.62, metalness: 0.03,
+      side: THREE.DoubleSide, transparent: false,
+      polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2,
+    });
+    densityMesh = new THREE.Mesh(densityGeo, densityMat);
+    densityMesh.castShadow = densityMesh.receiveShadow = shadows;
+    scene.add(densityMesh);
+    mesh.visible = false;      // the coloured soup is the surface; ridges + net stay on top
+    return { ok: true, min, max, lo, hi, n: edges.length };
+  };
+  if (opts && opts.density) container._setMeshDensity(opts.density);
+
   // Cleanup when container is removed
   container._dispose3d = () => {
     cancelAnimationFrame(raf);
     ro.disconnect();
     renderer.dispose();
+    if (densityMesh) scene.remove(densityMesh);
+    if (densityGeo) densityGeo.dispose();
+    if (densityMat) densityMat.dispose();
+    container._setMeshDensity = null;
     geo.dispose(); mat.dispose();
     ridgeCache.delete(geo);
     wireGeo.dispose(); wireMat.dispose();

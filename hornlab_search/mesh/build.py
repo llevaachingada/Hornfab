@@ -187,6 +187,33 @@ def _result_to_json(r: MeshResult) -> dict:
             "res_mm": r.res_mm, "bbox_m": list(r.bbox_m), "seconds": r.seconds}
 
 
+_MESHER_META_KEYS = ("mouthRimClearance", "outerWallClearance", "quality",
+                     "freeformProfileDeviationMm", "freeformReport", "meshTriangleCount",
+                     "meshTriangleLimitExceeded", "shellFacetValidation", "midPorts",
+                     "meshTopologyMode")
+
+
+def _mesher_provenance(built) -> dict:
+    """JSON-safe subset of the mesher's own build metadata (clearance caps, quality, facets)."""
+    raw = getattr(built, "metadata", None) or {}
+    if not isinstance(raw, dict):
+        return {}
+    out = {k: raw[k] for k in _MESHER_META_KEYS if k in raw}
+    if not out:
+        return {}
+    try:
+        json.dumps(out, allow_nan=False)
+    except (TypeError, ValueError):
+        # Never let provenance break a successful build; record only what serialises.
+        out = {k: v for k, v in out.items()
+               if isinstance(v, (str, int, float, bool, list, dict)) or v is None}
+        try:
+            json.dumps(out, allow_nan=False)
+        except (TypeError, ValueError):
+            return {"note": "mesher metadata was not JSON-safe"}
+    return out
+
+
 def _surface_fit_meta(mcfg, resolved: str | None) -> dict | None:
     """WP 0.9 / D9 surfaceFit echo (R12b): what the mesher actually used, plus the fallback flag.
 
@@ -473,6 +500,12 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
         seconds=time.perf_counter() - t0)
     meta = {"key": key, "result": _result_to_json(result), "summary": summary,
             "mesher_config": mcfg, "rear_res_factor": rear_res_factor(cfg)}
+    # Additive mesher provenance: which clearance caps / quality / facet checks the build
+    # actually applied.  Older mesh_meta.json files simply lack the key; the mesh hash and every
+    # existing cache entry are untouched because this writes the sidecar only.
+    mesher_provenance = _mesher_provenance(built)
+    if mesher_provenance:
+        meta["mesher"] = mesher_provenance
     if mounting is not None:
         # WP12 additive echo (the mesher_config precedent): the normalized search-side block, the
         # mesher keys actually emitted, and the counts from THIS result. Absent on freestanding
@@ -482,6 +515,14 @@ def build_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *, mode: str 
             "mesher": families.enclosure_section(mounting),
             "n_triangles": int(result.n_triangles),
             "n_dof": result.n_dof,
+            # The enclosure topology replaces the free-standing outer shell/rear cap; its
+            # walls are sized by enc_front_res_mm/enc_back_res_mm, so rear_res_factor has no
+            # surface to act on.  Record the request and the measured non-application.
+            "rear_res_policy": {
+                "requested_rear_mm": float(res["rear"]),
+                "applied_to_mesh": False,
+                "reason": "enclosure walls use enc_front/enc_back resolution; no outer/rear group",
+            },
         }
     mid_ports_meta = (getattr(built, "metadata", None) or {}).get("midPorts")
     if mid_ports_meta is not None:
@@ -536,8 +577,10 @@ def _build_grid_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *,
             spec = {k: v for k, v in block.items() if k != "knobs"}
             inner, meta = grid_mod.rows_grid_points(spec, knobs, brief)
         else:
-            spec = {k: block[k] for k in grid_mod.GRID_SPEC_KEYS if k in block}
-            inner, meta = grid_mod.grid_points(spec, knobs, brief)
+            spec = {k: block[k] for k in (*grid_mod.GRID_SPEC_KEYS, *grid_mod.GRID_OPTIONAL_BLOCK_KEYS)
+                    if k in block}
+            inner, meta = grid_mod.grid_points(spec, knobs, brief,
+                                              legacy_depth_limits="uncapped_span_mm" not in spec)
     except GeneratorError as exc:      # recipe + brief no longer agree = an invalid candidate
         raise GeometryInvalidError(str(exc)) from exc
     out_dir = Path(out_dir)
@@ -549,7 +592,8 @@ def _build_grid_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *,
         if family.is_family_spec(block):
             if mounting is not None:
                 raise GeometryInvalidError('versioned explicit body cannot be combined with enclosure')
-            geometry.update(family.resolve_grid(block, brief))
+            from ..config import brief_for_envelope_adapter
+            geometry.update(family.resolve_grid(block, brief_for_envelope_adapter(brief)))
             break
     return grid_build.build_grid_mesh(
         geometry,

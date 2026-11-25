@@ -48,6 +48,7 @@ the wire-in note at the bottom of this module.
 """
 from __future__ import annotations
 
+import json
 import math
 import time
 from pathlib import Path
@@ -59,7 +60,7 @@ from ..design.generators import grid as grid_gen
 from ..types import GeometryInvalidError, MeshResult, MeshTooLargeError
 from . import sizing, topology
 from .build import (SOURCE_TAG, MeshConsistencyError, _check_bbox, _check_dofs,
-                    read_msh_summary, res_mm_for_spec)
+                    read_msh_summary, rear_res_factor, res_mm_for_spec)
 
 #: Same default shell the FREEFORM generator path uses (``families`` / ``registry``: 3 mm).
 DEFAULT_WALL_THICKNESS_MM = 3.0
@@ -276,11 +277,46 @@ def build_grid_mesh(grid, mesh, out_path, cfg, *, mode: str | None = None,
         out_path.unlink(missing_ok=True)     # never leave an unusable mesh to be picked up later
         raise
 
-    return MeshResult(
+    from ..design.size import sampled_surface_extents_mm
+
+    rim_width, rim_height, _ = sampled_surface_extents_mm(np.asarray(inner)[:, -1, :], want)
+    result = MeshResult(
         path=str(out_path), n_triangles=summary["n_triangles"], n_dof=None,
         quadrants=mesh.quadrants, symmetry_plane=want,
         res_mm=dict(res), bbox_m=tuple(summary["bbox_m"]),
-        seconds=time.perf_counter() - t0)
+        seconds=time.perf_counter() - t0, terminal_rim_wh_mm=(rim_width, rim_height))
+    # The GRID route used to write no sidecar, so the GUI/audit could not show its policy and a
+    # later reader had to re-derive the geometry.  Write the same additive provenance the formula
+    # route writes; no cache key or mesh hash depends on this file.
+    grid_meta = {k: v for k, v in (meta or {}).items()
+                 if isinstance(v, (str, int, float, bool)) or v is None}
+    mesher_meta = getattr(info, "metadata", None) or {}
+    doc = {
+        "key": None,
+        "result": {"path": str(out_path), "n_triangles": int(result.n_triangles),
+                   "n_dof": None, "quadrants": result.quadrants,
+                   "symmetry_plane": result.symmetry_plane, "res_mm": dict(res),
+                   "bbox_m": list(result.bbox_m), "seconds": float(result.seconds),
+                   "terminal_rim_wh_mm": list(result.terminal_rim_wh_mm)},
+        "summary": summary,
+        "rear_res_factor": rear_res_factor(cfg),
+        "mesh_route": "grid",
+        "grid": {
+            "n_phi": int(np.asarray(inner).shape[0]),
+            "n_s": int(np.asarray(inner).shape[1] - 1),
+            "wall_thickness_mm": float(t),
+            "row_span": row_span,
+            "closed": bool(full),
+            "meta": grid_meta,
+        },
+        "mesher": mesher_meta if isinstance(mesher_meta, dict) else {},
+    }
+    try:
+        (out_path.parent / "mesh_meta.json").write_text(
+            json.dumps(doc, indent=1, sort_keys=True, default=str), encoding="utf-8")
+    except OSError:
+        pass
+    return result
 
 
 # ------------------------------------------------------------------ wire-in note (no cache)

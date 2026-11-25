@@ -1,0 +1,35 @@
+acoustic_case,geometry_class,geometry_label,arm,rear_res_factor,epw_multiplier,epw,f_max_hz,n_triangles,n_vertices,dof_estimate,mesh_seconds,dof_reduction_pct_vs_rear1,solver_backend,solve_seconds,solve_reduction_pct_vs_rear1,measurement_note
+class1_8k,class1,smooth parametric OSSE (v11 morph),rear1_epw1,1,1,6,8000,8627,4474,4400,0.0617554,0.0,beat_cpu,129.436,0.0,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+class1_8k,class1,smooth parametric OSSE (v11 morph),rear1.5_epw1,1.5,1,6,8000,6721,3499,3428,0.0378835,22.091,beat_cpu,81.0392,37.391,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+class1_8k,class1,smooth parametric OSSE (v11 morph),rear2_epw1,2,1,6,8000,6066,3161,3094,0.0313986,29.682,beat_cpu,63.1008,51.249,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+class1_8k,class1,smooth parametric OSSE (v11 morph),rear1.5_epw1.5,1.5,1.5,9,8000,14978,7693,7639,0.0973426,-73.614,beat_cpu,682.952,-427.637,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+mesh_only_8k,class1,smooth parametric OSSE (v11 morph),rear1.5_epw2,1.5,2,12,8000,26251,13395,13389,0.142417,-204.295,,,,mesh-only arm; no solve
+class2_8k,class2,rolled / fold R-OSSE,rear1_epw1,1,1,6,8000,9469,4899,4830,0.0604058,0.0,beat_cpu,145.26,0.0,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+class2_8k,class2,rolled / fold R-OSSE,rear1.5_epw1,1.5,1,6,8000,7387,3836,3768,0.0418438,21.988,beat_cpu,90.435,37.743,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+class2_8k,class2,rolled / fold R-OSSE,rear2_epw1,2,1,6,8000,6634,3448,3384,0.0387762,29.938,beat_cpu,83.1097,42.786,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+class2_8k,class2,rolled / fold R-OSSE,rear1.5_epw1.5,1.5,1.5,9,8000,16823,8621,8580,0.111364,-77.64,beat_cpu,514.821,-254.413,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+mesh_only_8k,class2,rolled / fold R-OSSE,rear1.5_epw2,1.5,2,12,8000,29605,15079,15099,0.27832,-212.609,,,,mesh-only arm; no solve
+class3_8k,class3,ATH / ridged petal (OSSE + H/V superformula),rear1_epw1,1,1,6,8000,8792,4560,4484,0.0531822,0.0,beat_cpu,147.398,0.0,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+class3_8k,class3,ATH / ridged petal (OSSE + H/V superformula),rear1.5_epw1,1.5,1,6,8000,6828,3556,3483,0.0398817,22.324,beat_cpu,92.005,37.581,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+class3_8k,class3,ATH / ridged petal (OSSE + H/V superformula),rear2_epw1,2,1,6,8000,6175,3219,3150,0.0324324,29.75,beat_cpu,70.0887,52.449,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+class3_8k,class3,ATH / ridged petal (OSSE + H/V superformula),rear1.5_epw1.5,1.5,1.5,9,8000,15124,7770,7714,0.0829847,-72.034,beat_cpu,405.326,-174.987,"CPU lane, frozen 9-point 8 kHz grid; GPU timing not measured while the 12 kHz queue owned the GPU"
+mesh_only_8k,class3,ATH / ridged petal (OSSE + H/V superformula),rear1.5_epw2,1.5,2,12,8000,26580,13566,13556,0.147595,-202.319,,,,mesh-only arm; no solve
+mesh_only_8k,class4,point-grid FREEFORM (rolled rectangle),rear1_epw1,1,1,6,8000,10069,5187,5136,1.4432,0.0,,,,mesh-only arm; no solve
+mesh_only_8k,class4,point-grid FREEFORM (rolled rectangle),rear1.5_epw1,1.5,1,6,8000,9323,4810,4755,2.51573,7.418,,,,mesh-only arm; no solve
+mesh_only_8k,class4,point-grid FREEFORM (rolled rectangle),rear2_epw1,2,1,6,8000,9321,4809,4754,2.33647,7.438,,,,mesh-only arm; no solve
+mesh_only_8k,class5,CAD / STEP MEH (T2 large multicell),rear1_epw1,1,1,4.2,10000,11979,6135,6110,6.67524,0.0,,,,mesh-only arm; no solve
+mesh_only_8k,class5,CAD / STEP MEH (T2 large multicell),rear1.5_epw1,1.5,1,4.2,10000,11979,6135,6110,3.64334,0.0,,,,mesh-only arm; no solve
+mesh_only_8k,class5,CAD / STEP MEH (T2 large multicell),rear2_epw1,2,1,4.2,10000,11979,6135,6110,3.45195,0.0,,,,mesh-only arm; no solve
+mesh_only_8k,class6,large current leader (v11 home morph port),rear1_epw1,1,1,6,8000,10660,5514,5437,0.0635414,0.0,,,,mesh-only arm; no solve
+mesh_only_8k,class6,large current leader (v11 home morph port),rear1.5_epw1,1.5,1,6,8000,8318,4318,4243,0.0518126,21.961,,,,mesh-only arm; no solve
+mesh_only_8k,class6,large current leader (v11 home morph port),rear2_epw1,2,1,6,8000,7477,3885,3814,0.0379855,29.851,,,,mesh-only arm; no solve
+mesh_only_8k,class6,large current leader (v11 home morph port),rear1.5_epw1.5,1.5,1.5,9,8000,18695,9582,9535,0.126713,-75.372,,,,mesh-only arm; no solve
+mesh_only_8k,class6,large current leader (v11 home morph port),rear1.5_epw2,1.5,2,12,8000,32829,16726,16743,0.267645,-207.946,,,,mesh-only arm; no solve
+class6_12k,class6,large current leader (v11 home morph port),rear1_epw1,1,1,6.0,12000,16673,8565,8565,38.6906,0.0,beat_cpu,453.457,0.0,"CPU lane, frozen 9-point 12 kHz grid (scratch brief band_hi 12000); GPU timing not measured"
+class6_12k,class6,large current leader (v11 home morph port),rear1.5_epw1,1.5,1,6.0,12000,13011,6702,6702,9.97371,21.751,beat_cpu,269.961,40.466,"CPU lane, frozen 9-point 12 kHz grid (scratch brief band_hi 12000); GPU timing not measured"
+class6_12k,class6,large current leader (v11 home morph port),rear2_epw1,2,1,6.0,12000,11705,6034,6034,43.4281,29.55,beat_cpu,218.232,51.874,"CPU lane, frozen 9-point 12 kHz grid (scratch brief band_hi 12000); GPU timing not measured"
+class6_12k,class6,large current leader (v11 home morph port),rear1.5_epw1.5,1.5,1.5,9.0,12000,28857,14720,14720,15.1287,-71.862,beat_cpu,1475.17,-225.316,"CPU lane, frozen 9-point 12 kHz grid (scratch brief band_hi 12000); GPU timing not measured"
+class1_10k,class1,smooth parametric OSSE (v11 morph),rear1_epw1,1,1,6.0,10000,13327,6862,6862,2.07452,0.0,beat_cpu,270.424,0.0,"CPU lane, frozen 9-point 10 kHz grid (scratch brief band_hi 10000); GPU timing not measured"
+class1_10k,class1,smooth parametric OSSE (v11 morph),rear1.5_epw1,1.5,1,6.0,10000,10347,5344,5344,5.68965,22.122,beat_cpu,164.287,39.248,"CPU lane, frozen 9-point 10 kHz grid (scratch brief band_hi 10000); GPU timing not measured"
+class1_10k,class1,smooth parametric OSSE (v11 morph),rear2_epw1,2,1,6.0,10000,9266,4791,4791,7.33038,30.181,beat_cpu,127.023,53.028,"CPU lane, frozen 9-point 10 kHz grid (scratch brief band_hi 10000); GPU timing not measured"
+class1_10k,class1,smooth parametric OSSE (v11 morph),rear1.5_epw1.5,1.5,1.5,9.0,10000,23120,11813,11813,6.29821,-72.151,beat_cpu,792.328,-192.995,"CPU lane, frozen 9-point 10 kHz grid (scratch brief band_hi 10000); GPU timing not measured"

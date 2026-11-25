@@ -7,7 +7,7 @@ import { chart, heat, cmap, drawCbar, niceTicks, diFromCuts, groupColor,
          catColor, fmtSmart, sparkline, stackBarHtml, logNiceLimits } from "./charts.js";
 import { TERMS as GLOSSARY, TERM_ORDER, tip } from "./glossary.js";
 import { loadParamCatalog, paramTipHtml, typologyTipHtml, typologyChipsHtml } from "./paramtips.js";
-import { init3d, loadThree } from "./view3d.js";
+import { init3d, loadThree, HEAT_RAMP_CSS } from "./view3d.js";
 import { viewEvolution } from "./evolution.js";
 import { viewBalloon } from "./balloon.js";
 import { viewTypologySandbox } from "./sandbox.js";
@@ -7006,13 +7006,31 @@ async function viewRunDetail(id) {
     if (!inlineHash) {
       inline3d.innerHTML = `<div class="view3d-fallback">No best design hashed yet — nothing to render in 3D.</div>`;
     } else {
+      // mesh_kind now rides on the base mesh payload, so the solved/stored label and the display
+      // decimation disclosure need no second request and no density edge array.
+      let inlineTri = null, inlineQNote = "", inlineKind = "", inlineDecimated = "";
+      const paintInlineNote = () => {
+        if (!inlineNote) return;
+        if (inlineTri == null) { inlineNote.textContent = ""; return; }
+        inlineNote.textContent =
+          `${inlineTri} triangles in the meshed domain (${inlineQNote})` +
+          (inlineKind ? ` · ${inlineKind}` : "") +
+          (inlineDecimated ? ` · ${inlineDecimated}` : "") + ".";
+      };
       api("/api/mesh/" + id + "/" + inlineHash).then(meshD => {
         if (!inline3d.isConnected) return;               // navigated away while the mesh was loading
         const qNote = String((meshD || {}).quadrants || "") === "1" ? "quarter model mirrored to the full horn"
           : ((meshD || {}).quadrants === "14" || (meshD || {}).quadrants === "12") ? "half model mirrored to the full horn"
           : "full model, no mirroring";
-        if (inlineNote) inlineNote.textContent =
-          `${((meshD || {}).n_tris != null ? meshD.n_tris : "?")} triangles in the meshed domain (${qNote}).`;
+        inlineTri = (meshD || {}).n_tris != null ? meshD.n_tris : "?";
+        inlineQNote = qNote;
+        inlineKind = meshD && meshD.mesh_kind === "solved_mesh" ? "solved mesh"
+                   : meshD && meshD.mesh_kind === "stored_mesh" ? "stored mesh"
+                   : (meshD && meshD.solved === true ? "solved mesh" : "stored mesh");
+        inlineDecimated = meshD && meshD.decimated === true
+          ? `display decimated to ${Math.floor((((meshD && meshD.tris) || []).length) / 3)} of ${meshD.n_tris != null ? meshD.n_tris : "?"} triangles`
+          : "";
+        paintInlineNote();
         const start = () => init3d(inline3d, meshD, B.profile, S.profile, shBox.checked).catch(() => {
           if (inline3d.isConnected && inlineNote) inlineNote.textContent =
             "3D could not start (three.js did not load) — the wall cross-section above carries the geometry.";
@@ -7594,6 +7612,100 @@ async function viewRunDetail(id) {
 
 // ── View 3 / 7: 3D view ────────────────────────────────────────────
 
+/** Number for the mesh-density readout: exact to 3 decimals (no "~25 mm" claims), n/a when absent. */
+function densityNum(v, digits = 3) {
+  const n = Number(v);
+  if (v == null || !isFinite(n)) return "n/a";
+  // Never round a tiny non-zero h/λ to "0" (a 1 Hz choice is legal): keep its magnitude.
+  if (n !== 0 && Math.abs(n) < 0.001) return n.toExponential(2);
+  return String(Number(n.toFixed(digits)));
+}
+
+/**
+ * Readout under the dedicated 3D view when the density heatmap is on: mesh kind, triangle counts,
+ * DOF, the policy that produced the mesh, the colour legend, the full-mesh edge percentiles and the
+ * h/λ line. <b> values come straight from the density payload (stats keep 3 decimals); the legend
+ * endpoints are the DISPLAYED triangle lengths. Any decimation is stated, never hidden.
+ */
+function densityPanelHTML(density, meshD, hz, range) {
+  const d = density || {};
+  const stats = d.stats || {};
+  const policy = d.policy || {};
+  const shown = stats.n_tris_shown != null ? stats.n_tris_shown
+              : (Array.isArray(d.edge_mm) ? d.edge_mm.length : null);
+  const full = stats.n_tris_full != null ? stats.n_tris_full : (meshD && meshD.n_tris);
+  const kind = d.mesh_kind === "solved_mesh" ? "solved mesh" : "stored mesh";
+  const decimated = d.decimated === true || d.edge_basis === "display_decimated";
+  const basis = d.edge_basis === "display_decimated" ? "display-decimated mesh"
+              : d.edge_basis === "solver_mesh" ? "solver mesh" : (d.edge_basis || "n/a");
+
+  const chips = [
+    `<span class="pill ${d.mesh_kind === "solved_mesh" ? "good" : "warn"}">${esc(kind)}</span>`,
+    `<span>triangles <b>${esc(shown == null ? "n/a" : shown)}</b> shown / <b>${esc(full == null ? "n/a" : full)}</b> full</span>`,
+  ];
+  if (stats.dof_estimate != null) chips.push(`<span>DOF estimate <b>${esc(stats.dof_estimate)}</b></span>`);
+  chips.push(`<span>edge basis: <b>${esc(basis)}</b></span>`);
+
+  const policyBits = [];
+  const res = policy.res_mm || {};
+  const hasRes = res && (res.throat != null || res.mouth != null || res.rear != null);
+  if (hasRes) {
+    const bit = k => res[k] == null ? "n/a" : densityNum(res[k]);
+    policyBits.push(`res mm throat <b>${bit("throat")}</b> / mouth <b>${bit("mouth")}</b> / rear <b>${bit("rear")}</b>`);
+  }
+  const mm = policy.mesher_mesh;
+  if (!hasRes && mm && typeof mm === "object") {
+    const flat = Object.entries(mm).filter(([, v]) => typeof v === "number" && isFinite(v));
+    if (flat.length) {
+      policyBits.push("mesher mesh: " +
+        flat.map(([k, v]) => `${esc(k)} <b>${densityNum(v)}</b>`).join(" / "));
+    }
+  }
+  if (policy.rear_res_factor != null) policyBits.push(`rear_res_factor <b>${densityNum(policy.rear_res_factor)}</b>`);
+  if (policy.epw != null) policyBits.push(`epw <b>${densityNum(policy.epw)}</b>`);
+  if (policy.curvature_npts != null) policyBits.push(`curvature_npts <b>${densityNum(policy.curvature_npts)}</b>`);
+  if (policy.band_split != null) policyBits.push(`band_split <b>${densityNum(policy.band_split)}</b>`);
+
+  const tags = d.tags && typeof d.tags === "object" ? Object.entries(d.tags) : [];
+  let tagLine = "";
+  if (tags.length) {
+    const sortedTags = [...tags].sort((a, b) => Number(b[1]) - Number(a[1]));
+    tagLine = "tags: " + sortedTags.map(([k, v]) => `tag ${esc(k)} × ${esc(v)}`).join(" / ");
+    if (String(sortedTags[0][0]) === "1") {
+      tagLine += " — tag 1 = rigid wall (inner bore + outer shell + rear cap combined)";
+    }
+  }
+
+  const lambda_mm = hz > 0 ? 343000 / hz : null;
+  const hOver = v => (v == null || !lambda_mm) ? null : v / lambda_mm;
+  const h50 = hOver(stats.edge_mm_p50), h95 = hOver(stats.edge_mm_p95);
+
+  const rangeMin = range && range.min != null ? range.min : stats.edge_mm_p05;
+  const rangeMax = range && range.max != null ? range.max : stats.edge_mm_max;
+  const rangeLo = range && range.lo != null ? range.lo : stats.edge_mm_p05;
+  const rangeHi = range && range.hi != null ? range.hi : stats.edge_mm_p95;
+  const legendAria = `Mesh density colour ramp: ${densityNum(rangeMin)} millimetres (cool) to ` +
+    `${densityNum(rangeMax)} millimetres (warm)`;
+
+  return `
+    <div class="mesh-density-row">${chips.join("")}</div>
+    ${policyBits.length ? `<div class="mesh-density-row">${policyBits.join(" / ")}</div>` : ""}
+    ${tagLine ? `<div class="mesh-density-row">${esc(tagLine)}</div>` : ""}
+    <div class="mesh-density-legend" role="img" aria-label="${esc(legendAria)}">
+      <span class="mesh-density-ramp" style="background:${HEAT_RAMP_CSS}" aria-hidden="true"></span>
+      <span class="mesh-density-scale"><b>${densityNum(rangeMin)}</b> mm (cool) → <b>${densityNum(rangeMax)}</b> mm (warm)</span>
+    </div>
+    <div class="mesh-density-stats">
+      <span>ramp spans displayed p05 <b>${densityNum(rangeLo)}</b> → p95 <b>${densityNum(rangeHi)}</b> mm; values outside are clamped.</span>
+      <span>full stored mesh edge stats: p05 <b>${densityNum(stats.edge_mm_p05)}</b> / p50 <b>${densityNum(stats.edge_mm_p50)}</b> / p95 <b>${densityNum(stats.edge_mm_p95)}</b> / max <b>${densityNum(stats.edge_mm_max)}</b> mm.</span>
+      ${h50 != null ? `<span>full stored mesh h/λ at ${esc(hz)} Hz: p50 <b>${densityNum(h50, 3)}</b> / p95 <b>${densityNum(h95, 3)}</b> (λ ${densityNum(lambda_mm)} mm).</span>` : ""}
+    </div>
+    ${decimated
+      ? `<div class="alert warn" role="alert"><b>Display decimated</b> to ${esc(shown == null ? "?" : shown)} of ${esc(full == null ? "?" : full)} triangles; edge lengths describe the displayed mesh, not the solver mesh. The original ${esc(full == null ? "?" : full)} triangles and ${stats.dof_estimate != null ? "a DOF estimate of " + esc(stats.dof_estimate) : "the DOF estimate when available"} remain stated above.</div>`
+      : `<div class="mesh-density-hint">No display decimation: the displayed triangles are the stored solver mesh, so these lengths describe the solver mesh as displayed.</div>`}
+  `;
+}
+
 async function viewRun3D(id) {
   const ROOT = currentRoot();     // this view's own container (see route())
   skel();
@@ -7610,12 +7722,23 @@ async function viewRun3D(id) {
     if (q === "1") return "quarter model mirrored to the full horn";
     if (q === "14" || q === "12") return "half model mirrored to the full horn";
     return "full model, no mirroring"; })();
+  // Always disclose what this surface is, and whether the display decimated it — independent of
+  // the density heatmap, which stays lazy. Counts come from the payload: n_tris is the stored full
+  // count, tris.length / 3 is what is actually drawn.
+  const meshKind = meshD.mesh_kind === "solved_mesh" ? "solved mesh"
+                 : meshD.mesh_kind === "stored_mesh" ? "stored mesh"
+                 : (meshD.solved === true ? "solved mesh" : "stored mesh");
+  const meshKindClass = meshKind === "solved mesh" ? "good" : "warn";
+  const shownTris = Math.floor(((meshD.tris || []).length) / 3);
+  const fullTris = meshD.n_tris != null ? meshD.n_tris : "?";
+  const decimatedNote = meshD.decimated === true
+    ? `display decimated to ${shownTris} of ${fullTris} triangles` : "";
   ROOT.innerHTML = `
     <div class="stack" style="gap:16px">
       <div>
         <div class="eyebrow">3D view</div>
         <h2>${esc(sum.name || id)}</h2>
-        <p class="muted" style="font-size:0.82rem">Hash: <span class="mono">${esc(hash)}</span> · ${esc(meshD.n_tris || "?")} triangles in the meshed domain (${esc(qNote)})</p>
+        <p class="muted" style="font-size:0.82rem">Hash: <span class="mono">${esc(hash)}</span> · ${esc(meshD.n_tris || "?")} triangles in the meshed domain (${esc(qNote)}) <span class="pill ${meshKindClass}">${esc(meshKind)}</span>${decimatedNote ? ` · <span style="color:var(--warn)">${esc(decimatedNote)}</span>` : ""}</p>
       </div>
       <div class="btn-row">
         <a class="btn" href="#/run/${esc(id)}">← Back to run</a>
@@ -7624,6 +7747,22 @@ async function viewRun3D(id) {
       <div class="fig-head">
         <label class="evo-opt" style="color:var(--ink)"><input type="checkbox" id="v3d-shadows" ${(() => { try { return localStorage.getItem("hl-v3d-shadows") === "0" ? "" : "checked"; } catch { return "checked"; } })()}> wall shadows</label>
       </div>
+      <section class="mesh-density" aria-labelledby="mesh-density-heading">
+        <div class="mesh-density-head">
+          <h3 id="mesh-density-heading">Mesh density</h3>
+          <span class="mesh-density-hint">colours each displayed triangle by its longest edge</span>
+        </div>
+        <div class="mesh-density-controls" role="group" aria-label="mesh density heatmap controls">
+          <label for="v3d-density-toggle"><input type="checkbox" id="v3d-density-toggle"> Show mesh density</label>
+          <label for="v3d-density-freq">Frequency</label>
+          <input type="number" id="v3d-density-freq" min="1" max="100000" step="100" value="12000"
+                 inputmode="numeric" aria-describedby="v3d-density-freq-hint">
+          <span class="mesh-density-unit">Hz</span>
+          <button type="button" id="v3d-density-reset" class="btn" disabled>Reset</button>
+          <span id="v3d-density-freq-hint" class="mesh-density-hint">h/λ uses λ = 343 m/s ÷ frequency</span>
+        </div>
+        <div id="v3d-density-panel" class="mesh-density-panel" aria-live="polite" hidden></div>
+      </section>
       <div id="view3d-wrap" data-v3d><div class="view3d-fallback">Loading 3D…</div></div>
       <p class="muted" style="font-size:0.8rem">Drag to orbit · scroll to zoom · right-drag to pan.</p>
     </div>`;
@@ -7632,15 +7771,98 @@ async function viewRun3D(id) {
   const profile = (runD.best || {}).profile;
   const seedProfile = (runD.seed || {}).profile;      // dashed under best in the 2D fallback
   const shadowsBox = document.getElementById("v3d-shadows");
+  const densityToggle = document.getElementById("v3d-density-toggle");
+  const densityFreq = document.getElementById("v3d-density-freq");
+  const densityReset = document.getElementById("v3d-density-reset");
+  const densityPanel = document.getElementById("v3d-density-panel");
   let shadows = true;
   try { shadows = localStorage.getItem("hl-v3d-shadows") !== "0"; } catch {}
   if (shadowsBox) shadowsBox.checked = shadows;
-  await init3d(wrap, meshD, profile, seedProfile, shadows);
+
+  let activeDensity = null;      // the fetched density block; NEVER fetched before the user opts in
+  let lastRange = null;          // {min,max,lo,hi,n} from the overlay build, reused for the legend
+
+  await init3d(wrap, meshD, profile, seedProfile, shadows, { density: activeDensity });
   if (shadowsBox) shadowsBox.onchange = () => {
     try { localStorage.setItem("hl-v3d-shadows", shadowsBox.checked ? "1" : "0"); } catch {}
     if (wrap._dispose3d) wrap._dispose3d();
-    init3d(wrap, meshD, profile, seedProfile, shadowsBox.checked).catch(() => {});
+    init3d(wrap, meshD, profile, seedProfile, shadowsBox.checked, { density: activeDensity }).catch(() => {});
   };
+
+  const clampFreq = raw => {
+    if (raw == null || String(raw).trim() === "") return 12000;   // empty -> the documented default
+    const n = Number(raw);
+    if (!isFinite(n) || n <= 0) return 1;                         // clamp to > 0
+    return Math.max(1, Math.min(100000, Math.round(n)));
+  };
+  const readFreq = () => {
+    const hz = clampFreq(densityFreq.value);
+    densityFreq.value = String(hz);
+    return hz;
+  };
+  const paintPanel = hz => {
+    if (!activeDensity) return;
+    densityPanel.innerHTML = densityPanelHTML(activeDensity, meshD, hz, lastRange);
+  };
+  const setBusy = busy => {
+    densityToggle.disabled = busy;
+    densityFreq.disabled = busy;
+    densityReset.disabled = busy || !activeDensity;
+  };
+  const turnOff = () => {
+    activeDensity = null; lastRange = null;
+    if (wrap._setMeshDensity) wrap._setMeshDensity(null);
+    densityPanel.hidden = true;
+    densityPanel.innerHTML = "";
+    densityReset.disabled = true;
+    densityToggle.disabled = false;
+    densityFreq.disabled = false;
+  };
+
+  densityToggle.addEventListener("change", async () => {
+    if (!densityToggle.checked) { turnOff(); return; }
+    const hz = readFreq();
+    densityReset.disabled = false;
+    setBusy(true);
+    densityPanel.hidden = false;
+    densityPanel.innerHTML = `<p class="muted" role="status">Loading mesh density…</p>`;
+    try {
+      const payload = await api(`/api/mesh/${id}/${hash}?density=1&f=${hz}`);
+      if (!wrap.isConnected) return;              // navigated away while the payload loaded
+      const density = payload && payload.density;
+      if (!density) throw new Error("the response carried no density block");
+      activeDensity = density;
+      const info = wrap._setMeshDensity ? wrap._setMeshDensity(density) : null;
+      if (!info || info.ok !== true) {
+        throw new Error(info && info.reason ? info.reason : "could not colour the displayed mesh");
+      }
+      lastRange = info;
+      paintPanel(hz);
+      setBusy(false);
+    } catch (e) {
+      activeDensity = null;
+      if (wrap._setMeshDensity) wrap._setMeshDensity(null);
+      densityToggle.checked = false;
+      densityReset.disabled = true;
+      setBusy(false);
+      densityFreq.disabled = false;
+      densityPanel.innerHTML = `<div class="alert warn" role="alert">Could not load mesh density: ${esc(e.message)}</div>`;
+    }
+  });
+
+  densityFreq.addEventListener("change", () => {
+    const hz = readFreq();
+    paintPanel(hz);                               // h/λ is the only value that depends on f
+  });
+  densityFreq.addEventListener("keydown", e => {
+    if (e.key === "Enter") { e.preventDefault(); densityFreq.blur(); }
+  });
+
+  densityReset.addEventListener("click", () => {
+    densityToggle.checked = false;
+    densityFreq.value = "12000";
+    turnOff();
+  });
 }
 
 // ── View 4: Compare ────────────────────────────────────────────────

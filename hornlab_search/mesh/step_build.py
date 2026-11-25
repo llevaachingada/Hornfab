@@ -78,7 +78,7 @@ import numpy as np
 from ..types import GeometryInvalidError, MeshResult, MeshTooLargeError
 from . import sizing, topology
 from .build import (SOURCE_TAG, MeshConsistencyError, MeshUnitsError, _check_bbox,
-                    _check_dofs, read_msh_summary, res_mm_for_spec)
+                    _check_dofs, read_msh_summary, rear_res_factor, res_mm_for_spec)
 
 log = logging.getLogger("hornlab_search.mesh.step_build")
 
@@ -795,6 +795,16 @@ def build_mesh_from_cad(recipe: dict, mesh, cfg, out_dir: Path, *,
             },
             "summary": summary,
             "cad": cad_meta,
+            "mesh_route": "cad",
+            "rear_res_factor": rear_res_factor(cfg),
+            # The CAD route has no labelled outer/rear surface group; its single wall tag spans
+            # the whole STEP wall, so a rear size cannot be applied without coarsening the
+            # acoustic bore too.  Record the request and the honest non-application.
+            "rear_res_policy": {
+                "requested_rear_mm": float(res["rear"]),
+                "applied_to_mesh": False,
+                "reason": "CAD route uses one global wall size; no outer/rear surface label",
+            },
         })
         _meta_path(out_dir).write_text(
             json.dumps(provenance, indent=1, sort_keys=True), encoding="utf-8")

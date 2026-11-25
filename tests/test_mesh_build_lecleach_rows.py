@@ -9,6 +9,7 @@ the [0.02, 5.0] m unit band, the source tag, the self-approach meta and rollback
 from __future__ import annotations
 
 import dataclasses
+import json
 from pathlib import Path
 
 import numpy as np
@@ -69,7 +70,8 @@ def test_rollback_lecleach_rows_build_through_the_full_wire_in(tmp_path):
     assert 0.02 <= ext <= 5.0                       # the task's explicit unit band
     rep = topology.check_surface(xyz, tri, sizing.SYMMETRY_PLANE["1"])
     assert rep.bad_open_edges == 0 and rep.nonmanifold_edges == 0
-    assert not (out / "mesh_meta.json").exists()    # the grid route writes no meta file
+    meta = json.loads((out / "mesh_meta.json").read_text(encoding="utf-8"))
+    assert meta["mesh_route"] == "grid" and meta["result"]["n_triangles"] == r.n_triangles
     print(f"\nlecleach rollback rows mesh: {r.n_triangles} tris, "
           f"bbox={tuple(round(v, 4) for v in r.bbox_m)}, res={r.res_mm}")
 
@@ -157,7 +159,8 @@ def test_half_model_saddle_builds_through_the_full_wire_in(tmp_path):
     # the reduced half lies in x >= 0 and actually crosses y = 0 (top and bottom present)
     assert float(np.min(xyz[:, 0])) >= -1e-9
     assert float(np.min(xyz[:, 1])) < 0.0 < float(np.max(xyz[:, 1]))
-    assert not (out / "mesh_meta.json").exists()    # the grid route writes no meta file
+    meta = json.loads((out / "mesh_meta.json").read_text(encoding="utf-8"))
+    assert meta["mesh_route"] == "grid" and meta["result"]["n_triangles"] == r.n_triangles
     print(f"\nsalmon saddle HALF mesh: {r.n_triangles} tris, "
           f"bbox={tuple(round(v, 4) for v in r.bbox_m)}, res={r.res_mm}")
 

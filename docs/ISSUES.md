@@ -1,5 +1,15 @@
 ﻿# ISSUES
 
+## 2026-11-25 - Variable mesh audit (factor 1.5 supported; route limits)
+
+- DONE: regional audit from producer geometry proves formula-route grading; 0% unknown on formula classes. [Evidence](evidence/variable_mesh_2026-11-23/README.md)
+- DONE: factor 1.5 reduces DOF by 21.96-22.32% on four formula classes and passes the frozen acoustic criteria at 8/10/12 kHz. [Adoption](evidence/variable_mesh_2026-11-23/ADOPTION_DECISION.md)
+- DONE: GUI mesh-density heatmap with h/lambda, policy line, and explicit decimation/solved-stored disclosure; screenshots in `evidence/variable_mesh_2026-11-23/renders/`.
+- DONE: additive mesher/grid/CAD/mounting provenance; focused tests 107 passed in 58.75 s.
+- OPEN: GPU wall-time/VRAM confirmation (not measured while the 12 kHz queue owned the GPU).
+- OPEN: CAD/STEP rear factor inert and T2 valid only to 5023 Hz at 10 kHz; mounted/enclosure rear factor inert (4726 tris at 1.0/1.5/2.0); point-grid 2.0 inert at the clearance guard. Details in `evidence/variable_mesh_2026-11-23/FAILURES.md`.
+- OPEN (owner/integrator): keep `config.py` default 1.0; set `rear_res_factor: 1.5` explicitly for new formula-class runs; 2.0 opt-in only.
+
 ## 2026-11-25 - favL__2in_c500 open115 continuation
 
 - DONE: open115 brief + wall-opened/inert-narrowed box; `shape_check` and `search_preflight` pass (64/64 meshed samples, 128/128 admission, d=11 BO round-trip). [Predeclaration](evidence/favL_2in_c500_continue_2026-11-25/PREDECLARED.md)

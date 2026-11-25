@@ -191,6 +191,18 @@ def test_provenance_echo_shape(tiny, tiny_meta):
     assert tiny_meta["result"]["n_triangles"] == result.n_triangles
 
 
+def test_cad_rear_res_policy_is_recorded_as_not_applied(tiny_meta):
+    """The CAD route has one global wall size, so ``rear_res_factor`` cannot coarsen a rear
+    surface; the record must say so instead of implying the requested size was used."""
+    assert tiny_meta["mesh_route"] == "cad"
+    assert tiny_meta["rear_res_factor"] == pytest.approx(1.0)
+    policy = tiny_meta["rear_res_policy"]
+    assert policy["applied_to_mesh"] is False
+    assert policy["requested_rear_mm"] == pytest.approx(
+        tiny_meta["result"]["res_mm"]["rear"])
+    assert "no outer/rear surface label" in policy["reason"]
+
+
 def test_same_recipe_same_mesh_bytes(cfg, tmp_path):
     design = Design("FREEFORM", {"cad": dict(TINY)})
     first = build.build_mesh(design, TINY_SPEC, cfg, tmp_path / "a", mode="screen")

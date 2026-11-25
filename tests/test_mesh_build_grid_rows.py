@@ -7,6 +7,7 @@ route and checked for topology, units and the meta the estimator/report need.
 from __future__ import annotations
 
 import dataclasses
+import json
 from pathlib import Path
 
 import pytest
@@ -64,8 +65,10 @@ def test_rollback_rows_build_through_the_full_wire_in(tmp_path):
     assert build.BBOX_MIN_M <= ext <= build.BBOX_MAX_M
     rep = topology.check_surface(xyz, tri, sizing.SYMMETRY_PLANE["1"])
     assert rep.bad_open_edges == 0 and rep.nonmanifold_edges == 0
-    # the grid/rows route still writes no mesh_meta.json (documented in grid_build.py)
-    assert not (out / "mesh_meta.json").exists()
+    # the grid/rows route now writes the same additive sidecar as the formula route
+    meta = json.loads((out / "mesh_meta.json").read_text(encoding="utf-8"))
+    assert meta["mesh_route"] == "grid" and meta["grid"]["row_span"]
+    assert meta["result"]["n_triangles"] == r.n_triangles
     print(f"\nrollback rows mesh: {r.n_triangles} tris, "
           f"bbox={tuple(round(v, 4) for v in r.bbox_m)}, res={r.res_mm}")
 

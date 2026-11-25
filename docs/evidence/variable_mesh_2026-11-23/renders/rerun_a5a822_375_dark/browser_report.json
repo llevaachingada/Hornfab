@@ -1,0 +1,30 @@
+{
+  "base": "http://127.0.0.1:8799",
+  "runs": [
+    {
+      "route": "/#/run/20261120T063822Z-screen-a5a822/3d",
+      "width": 375,
+      "theme": "dark",
+      "url": "http://127.0.0.1:8799/?theme=dark#/run/20261120T063822Z-screen-a5a822/3d",
+      "console_errors": [],
+      "checks": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "charts": [],
+        "svg_total": 0,
+        "svg_missing_aria": 0,
+        "h1_count": 0,
+        "hash": "#/run/20261120T063822Z-screen-a5a822/3d",
+        "title": "cd11__ath_core_petal",
+        "body_text_len": 868
+      },
+      "screenshot": "docs\\evidence\\variable_mesh_2026-11-23\\renders\\rerun_a5a822_375_dark\\run_20261120T063822Z-screen-a5a822_3d__375__dark.png",
+      "first_tab": {
+        "tag": "A",
+        "id": ""
+      },
+      "reload_hash_ok": true
+    }
+  ],
+  "failures": []
+}

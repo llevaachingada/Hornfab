@@ -1497,8 +1497,68 @@ def run_archive(runs: Path, run_id: str) -> dict:
     return clean(out)
 
 
+def _tri_max_edge_mm(pts: np.ndarray, tris: np.ndarray) -> np.ndarray:
+    """Longest edge of every triangle, mm (pts are metres)."""
+    p = np.asarray(pts, dtype=float)[np.asarray(tris, dtype=np.int64)]
+    e = np.stack([
+        np.linalg.norm(p[:, 1] - p[:, 0], axis=1),
+        np.linalg.norm(p[:, 2] - p[:, 1], axis=1),
+        np.linalg.norm(p[:, 0] - p[:, 2], axis=1),
+    ], axis=1)
+    return e.max(axis=1) * 1000.0
+
+
+def _mesh_density_payload(pts, tris, out_pts, out_tris, decimated, meta, design_dir,
+                          run_dir, freq_hz: float | None) -> dict:
+    """Edge-length heatmap + policy/stats for the stored mesh, never a solved-material claim."""
+    full_mm = _tri_max_edge_mm(pts, tris)
+    shown_mm = _tri_max_edge_mm(out_pts, out_tris)
+    result = meta.get("result") if isinstance(meta.get("result"), dict) else {}
+    mcfg = meta.get("mesher_config") if isinstance(meta.get("mesher_config"), dict) else {}
+    mesh_policy = mcfg.get("mesh") if isinstance(mcfg.get("mesh"), dict) else {}
+    run_mesh = _config(run_dir).get("mesh") or {}
+    res_mm = result.get("res_mm") if isinstance(result.get("res_mm"), dict) else {}
+    dpt = run_mesh.get("dof_per_triangle")
+    stats = {
+        "n_tris_full": int(len(full_mm)),
+        "n_tris_shown": int(len(shown_mm)),
+        "edge_mm_p05": float(np.percentile(full_mm, 5)) if full_mm.size else None,
+        "edge_mm_p50": float(np.percentile(full_mm, 50)) if full_mm.size else None,
+        "edge_mm_p95": float(np.percentile(full_mm, 95)) if full_mm.size else None,
+        "edge_mm_max": float(full_mm.max()) if full_mm.size else None,
+        "dof_estimate": int(math.ceil(len(full_mm) * float(dpt))) if dpt else None,
+    }
+    if freq_hz is not None and float(freq_hz) > 0:
+        lam_mm = 1000.0 * 343.0 / float(freq_hz)
+        stats["freq_hz"] = float(freq_hz)
+        stats["lambda_mm"] = lam_mm
+        stats["h_over_lambda_p50"] = stats["edge_mm_p50"] / lam_mm
+        stats["h_over_lambda_p95"] = stats["edge_mm_p95"] / lam_mm
+        stats["h_over_lambda_max"] = stats["edge_mm_max"] / lam_mm
+    return clean({
+        "edge_mm": np.round(shown_mm, 4).tolist(),
+        "edge_basis": "display_decimated" if decimated else "solver_mesh",
+        "decimated": bool(decimated),
+        "stats": stats,
+        "policy": {
+            "res_mm": res_mm or None,
+            "mesher_mesh": mesh_policy or None,
+            "rear_res_factor": meta.get("rear_res_factor"),
+            "epw": run_mesh.get("epw"),
+            "curvature_npts": run_mesh.get("curvature_npts"),
+            "band_split": run_mesh.get("band_split"),
+        },
+        "tags": (meta.get("summary") or {}).get("tags")
+        if isinstance(meta.get("summary"), dict) else None,
+        "mesh_kind": "solved_mesh" if (Path(design_dir) / "response.npz").is_file()
+        else "stored_mesh",
+        "solved": bool((Path(design_dir) / "response.npz").is_file()),
+    })
+
+
 def mesh_surface(runs: Path, run_id: str, h: str, tier: str = "screen",
-                 max_tris: int = 60000) -> dict:
+                 max_tris: int = 60000, density: bool = False,
+                 freq_hz: float | None = None) -> dict:
     """Triangle surface of a solved design (mm), the meshed domain only (a quarter for quadrants '1',
     an x/y half for '14'/'12').
 
@@ -1513,15 +1573,23 @@ def mesh_surface(runs: Path, run_id: str, h: str, tier: str = "screen",
         design_dir = d / "verify" / "designs" / h
     else:
         design_dir = d / "designs" / h
-    return mesh_surface_at(design_dir, d, h, max_tris=max_tris, error_label=run_id)
+    return mesh_surface_at(design_dir, d, h, max_tris=max_tris, error_label=run_id,
+                           density=density, freq_hz=freq_hz)
 
 
 def mesh_surface_at(design_dir: Path, run_dir: Path, h: str, *,
-                    max_tris: int = 60000, error_label: str | None = None) -> dict:
+                    max_tris: int = 60000, error_label: str | None = None,
+                    density: bool = False, freq_hz: float | None = None) -> dict:
     """The :func:`mesh_surface` payload for an already-resolved design directory.
 
     ``run_dir`` supplies the recorded quadrant fallbacks (``search.ndjson`` / ``config.yaml``);
     for a study tier it is that tier's folder.  Reads only the stored ``mesh.msh`` and metadata.
+
+    ``density=True`` adds ``density``: the displayed triangles' own max-edge lengths (mm, in the
+    same order as ``tris``), the stored full-mesh length statistics, the mesh policy read from
+    ``mesh_meta.json``/``config.yaml``, and (with ``freq_hz``) the same lengths as h/lambda at that
+    frequency.  The values describe the mesh actually on disk; if the display decimated it, the
+    payload says so and reports both the original and displayed triangle counts.
     """
     design_dir = Path(design_dir)
     nt = mesh_nodes_tris(design_dir / "mesh.msh")
@@ -1538,6 +1606,14 @@ def mesh_surface_at(design_dir: Path, run_dir: Path, h: str, *,
            "tris": out_tris.ravel().tolist()}
     if decimated:
         out["decimated"] = True
+    # Always disclose whether this is the solved design or only a stored mesh; additive keys,
+    # so the viewer never has to infer it from a second endpoint.
+    _solved = (Path(design_dir) / "response.npz").is_file()
+    out["solved"] = bool(_solved)
+    out["mesh_kind"] = "solved_mesh" if _solved else "stored_mesh"
+    if density:
+        out["density"] = _mesh_density_payload(
+            pts, tris, out_pts, out_tris, decimated, meta, design_dir, run_dir, freq_hz)
     # WP12: ``mesh_meta.json["mounting"]`` (the mesher + normalized blocks) is served additively so
     # the 3D view can draw the solved mesh's own outline. Absent on every non-enclosure run — the
     # key then stays absent, never fabricated.
@@ -3538,22 +3614,19 @@ def _rows_overshoot_from_arrays(inner, meta: dict, wall_mm: float, brief: dict |
     grid's own axial span (the bend is already inside it) plus the shell. Limits are the
     registry's own constants, not copies of a number.
     """
-    from hornlab_search.design.generators.registry import _ENVELOPE_MOUTH_TOLERANCE_MM
-    from hornlab_search.search.evaluate import ENVELOPE_DEPTH_ALLOWANCE_MM
+    from hornlab_search.config import envelope_policy
+    from hornlab_search.design.size import sampled_surface_extents_mm
 
     env = (brief or {}).get("envelope") or {}
     if not env:
         return 0.0
-    arr = np.asarray(inner, dtype=float)
-    lim_w = float(env.get("max_mouth_w_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
-    lim_h = float(env.get("max_mouth_h_mm", 1e9)) + _ENVELOPE_MOUTH_TOLERANCE_MM
-    lim_d = float(env.get("max_depth_mm", 1e9)) + float(ENVELOPE_DEPTH_ALLOWANCE_MM)
-    if not (lim_w > 0.0 and lim_h > 0.0 and lim_d > 0.0):
-        return 0.0
-    width = 2.0 * float(np.max(np.abs(arr[..., 0]))) + 2.0 * wall_mm
-    height = 2.0 * float(np.max(np.abs(arr[..., 1]))) + 2.0 * wall_mm
-    depth = float(np.max(arr[..., 2]) - np.min(arr[..., 2])) + wall_mm
-    return max(width / lim_w - 1.0, height / lim_h - 1.0, depth / lim_d - 1.0, 0.0)
+    span = meta.get("row_span") or meta.get("span") or "quarter"
+    planes = {"quarter": "yz+xz", "half": "yz", "half_xz": "xz"}.get(span)
+    width, height, depth = sampled_surface_extents_mm(inner, planes)
+    dimensions = (width + 2.0 * wall_mm, height + 2.0 * wall_mm, depth + wall_mm)
+    ratios = [dim / limit - 1.0 for dim, limit in
+              zip(dimensions, envelope_policy(brief).mesh_limits_mm)]
+    return max(0.0, *ratios)
 
 
 def _preview_response(*, config: str, brief: str | None, kind: str, quadrants: str,
@@ -3794,10 +3867,13 @@ def preview_shape(root: Path, config_name: str, q: dict) -> dict:
                            if is_rows and f.is_family_spec(gspec)), None)
             if family is not None:
                 # Versioned families own both sheets; preview the same body as meshing.
-                block = (family.design_params(gspec, effective, cfg.brief)["grid"]
+                from hornlab_search.config import brief_for_envelope_adapter
+
+                adapter_brief = brief_for_envelope_adapter(cfg.brief)
+                block = (family.design_params(gspec, effective, adapter_brief)["grid"]
                          if "implementation_sha256" not in gspec["rows"]
                          else {**gspec, "knobs": effective})
-                resolved = family.resolve_grid(block, cfg.brief)
+                resolved = family.resolve_grid(block, adapter_brief)
                 inner = resolved["inner_points"]
                 outer = resolved["outer_points"]
                 meta = resolved["meta"]
@@ -3992,11 +4068,12 @@ def _plughorn_preview(cfg, effective, notes, detail, config_name, brief_name, qu
     mouth = {"inner": [[round(x, 3), round(y, 3)] for x, y, _z in p.front_octagon()], "outer": []}
     d = p.derived()
     rejected = []
-    env = (cfg.brief or {}).get("envelope") or {}
-    for key, val in (("max_mouth_w_mm", d["outer_w_mm"]), ("max_mouth_h_mm", d["outer_h_mm"]),
-                     ("max_depth_mm", d["depth_total_mm"])):
-        if key in env and val > float(env[key]) + 0.5:
-            rejected.append(f"invalid_envelope: outer {key[4:-3]} {val:.0f} mm > {env[key]} mm")
+    from hornlab_search.design.generated import _check_cad_envelope
+
+    try:
+        _check_cad_envelope("plughorn", (d["outer_w_mm"], d["outer_h_mm"], d["depth_total_mm"]), cfg.brief)
+    except ValueError as exc:
+        rejected.append(str(exc))
     envelope = {"available": True, "overshoot": 0.0 if not rejected else 1.0}
     notes = list(notes) + [f"{k}: {v}" for k, v in d.items() if k in (
         "compression_ratio", "min_channel_area_cm2", "side_wall_angle_deg", "top_wall_angle_deg",

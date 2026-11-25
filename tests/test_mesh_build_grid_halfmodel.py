@@ -10,6 +10,7 @@ their recipes are meshable; the quarter route stays byte-identical (protected su
 from __future__ import annotations
 
 import dataclasses
+import json
 from pathlib import Path
 
 import numpy as np
@@ -60,7 +61,8 @@ def test_saddle_half_builds_through_the_full_wire_route(tmp_path):
     # the reduced half is x >= 0 and crosses y = 0 (both top and bottom present)
     assert float(np.min(xyz[:, 0])) >= -1e-9
     assert float(np.min(xyz[:, 1])) < 0.0 < float(np.max(xyz[:, 1]))
-    assert not (out / "mesh_meta.json").exists()
+    meta = json.loads((out / "mesh_meta.json").read_text(encoding="utf-8"))
+    assert meta["mesh_route"] == "grid" and meta["result"]["n_triangles"] == r.n_triangles
     print(f"\nsaddle HALF mesh: {r.n_triangles} tris, "
           f"bbox={tuple(round(v, 4) for v in r.bbox_m)}, res={r.res_mm}")
 

@@ -1,0 +1,12 @@
+mesh: runs\20261120T055336Z-screen-e23136\designs\09752eb2cd0a\mesh.msh
+triangles: 6721  vertices: 3499  dof_estimate: 3428  area: 0.15410 m2
+policy: res_mm {"mouth": 7.145833333333333, "rear": 10.71875, "throat": 3.5729166666666665}  rear_res_factor: 1.50  epw: 6  fmax: 8000 Hz
+region source: producer_geometry  (ok); unknown 0.00%
+region               tris  verts   p50mm   p95mm   maxmm   hreq  r/req  asp95  dih95  res95
+source                 58     40   3.053   4.254   4.426    3.6   0.84   2.38    0.3      -
+throat_transition     140     87   3.553   3.961   4.696    3.7   0.88   2.25   10.3   0.49
+inner_bore           4324   2282   6.118   7.056   9.343    6.2   0.99   2.08    8.3   2.92
+mouth_lip             456    336   7.006   7.804   9.570    7.1   0.92   2.85   94.9   4.39
+mouth_aperture          9     17   4.792   6.017   6.017    7.1   0.64   2.21    0.0      -
+outer_shell          1713    964  10.709  11.953  15.131   10.7   0.98   2.36   84.5   3.48
+rear_cap               21     18   8.106  11.066  11.205   10.7   0.74   2.21   87.4  20.07

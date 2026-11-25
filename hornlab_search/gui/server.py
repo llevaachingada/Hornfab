@@ -475,7 +475,16 @@ class App:
             return D.campaign_detail(self.runs, parts[1])
         if head == "mesh" and len(parts) == 3:
             tier = (q.get("tier") or ["screen"])[0]
-            return D.mesh_surface(self.runs, parts[1], parts[2], tier=tier)
+            density = (q.get("density") or ["0"])[0].lower() not in ("", "0", "false", "no")
+            raw_f = (q.get("f") or [""])[0]
+            try:
+                freq_hz = float(raw_f) if raw_f else None
+            except ValueError:
+                freq_hz = None
+            if freq_hz is not None and not (1.0 <= freq_hz <= 100000.0):
+                freq_hz = None
+            return D.mesh_surface(self.runs, parts[1], parts[2], tier=tier,
+                                  density=density, freq_hz=freq_hz)
         if head == "preview-shape" and len(parts) == 2:
             return D.preview_shape(self.root, parts[1], q)
         if head == "balloon" and len(parts) == 2:
