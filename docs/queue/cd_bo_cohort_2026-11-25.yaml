@@ -7,6 +7,7 @@
 # docs/evidence/favL_2in_c500_continue_2026-11-25/PREDECLARED.md
 # 16:45 EST: exploration cohorts APPENDED (nothing removed); lcl_beak_cohort / iwar_beak_cohort re-added; verify + knob-effects analysis at the end.
 # 17:55 EST: +-5 deg constant-directivity jobs (owner 17:43) INSERTED before klangfilm_core_beak_cohort; nothing removed. docs/evidence/cd_pm5const_2026-11-25/
+# 18:15 EST: favl_pm5_wide INSERTED after favl_pm5 (a_h/a_v box could not reach 80 x 50); nothing removed.
 night: cd_bo_cohort_2026-11-25
 lane: gpu
 jobs:
@@ -353,6 +354,41 @@ jobs:
   - dataset
   - --cache-dir
   - runs/cd_pm5const_2026-11-25/cache_favl_pm5
+  - --budget
+  - '100'
+- id: favl_pm5_wide
+  kind: command
+  timeout_s: 10800
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    min_attempts: 40
+    refusal_max: 0.4
+    no_gain_valid: 0
+    stall_valid: 0
+    pin_ignore:
+    - g_L_mm
+    - g_a_h_deg
+    - g_a_v_deg
+    - g_k
+    - g_n
+    - g_r_lip_mm
+    - g_s
+    - g_sf_ab
+    - g_sf_amt
+    - g_throat_hv_ratio
+    - g_wrap_deg
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/cd_pm5const_2026-11-25/favl_pm5_wide.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/cd_pm5const_2026-11-25/cache_favl_pm5_wide
   - --budget
   - '100'
 - id: rolled_pm5
