@@ -1,0 +1,148 @@
+# CD variants of non-CD returned-lip families, batch 1; predeclared in docs/evidence/cd_variants_2026-11-25/PREDECLARED.md
+night: cd_variants_b1_2026-11-25
+lane: gpu
+jobs:
+- id: lcar_control
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_variants_2026-11-25/lcar_control.yaml
+  - --mode
+  - verify
+  - --cache-dir
+  - runs/cd_variants_2026-11-25/cache_lcar_control
+  - --dataset-dir
+  - runs/cd_variants_2026-11-25/dataset
+- id: lcar_bb_h065_v000_t25_r30
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_variants_2026-11-25/lcar_bb_h065_v000_t25_r30.yaml
+  - --mode
+  - verify
+  - --cache-dir
+  - runs/cd_variants_2026-11-25/cache_lcar_bb_h065_v000_t25_r30
+  - --dataset-dir
+  - runs/cd_variants_2026-11-25/dataset
+- id: lcar_bb_h100_v000_t25_r30
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_variants_2026-11-25/lcar_bb_h100_v000_t25_r30.yaml
+  - --mode
+  - verify
+  - --cache-dir
+  - runs/cd_variants_2026-11-25/cache_lcar_bb_h100_v000_t25_r30
+  - --dataset-dir
+  - runs/cd_variants_2026-11-25/dataset
+- id: lcl_control
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_variants_2026-11-25/lcl_control.yaml
+  - --mode
+  - verify
+  - --cache-dir
+  - runs/cd_variants_2026-11-25/cache_lcl_control
+  - --dataset-dir
+  - runs/cd_variants_2026-11-25/dataset
+- id: lcl_bb_h065_v000_t25_r30
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_variants_2026-11-25/lcl_bb_h065_v000_t25_r30.yaml
+  - --mode
+  - verify
+  - --cache-dir
+  - runs/cd_variants_2026-11-25/cache_lcl_bb_h065_v000_t25_r30
+  - --dataset-dir
+  - runs/cd_variants_2026-11-25/dataset
+- id: lcl_bb_h100_v000_t25_r30
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_variants_2026-11-25/lcl_bb_h100_v000_t25_r30.yaml
+  - --mode
+  - verify
+  - --cache-dir
+  - runs/cd_variants_2026-11-25/cache_lcl_bb_h100_v000_t25_r30
+  - --dataset-dir
+  - runs/cd_variants_2026-11-25/dataset
+- id: iwar_control
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_variants_2026-11-25/iwar_control.yaml
+  - --mode
+  - verify
+  - --cache-dir
+  - runs/cd_variants_2026-11-25/cache_iwar_control
+  - --dataset-dir
+  - runs/cd_variants_2026-11-25/dataset
+- id: iwar_bb_h065_v000_t25_r30
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_variants_2026-11-25/iwar_bb_h065_v000_t25_r30.yaml
+  - --mode
+  - verify
+  - --cache-dir
+  - runs/cd_variants_2026-11-25/cache_iwar_bb_h065_v000_t25_r30
+  - --dataset-dir
+  - runs/cd_variants_2026-11-25/dataset
+- id: iwar_bb_h100_v000_t25_r30
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv\Scripts\hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/cd_variants_2026-11-25/iwar_bb_h100_v000_t25_r30.yaml
+  - --mode
+  - verify
+  - --cache-dir
+  - runs/cd_variants_2026-11-25/cache_iwar_bb_h100_v000_t25_r30
+  - --dataset-dir
+  - runs/cd_variants_2026-11-25/dataset
