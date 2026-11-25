@@ -1330,6 +1330,11 @@ Withdrawn from the audit: F6's inference, decision 4 (the six-design dense solve
   Fold, 0-28 % elsewhere).
 - **Not changed.** No objective/scalar change, no default flip, no frozen contract edit, no run dir.
 
+## 2026-11-24  task-05  runtime cuda_oom: beat_cuda CUDA out of memory
+What happened: RuntimeError('Out of GPU memory') on C:\Users\hunte\Hrns\hornlab-search\runs\20261124T052425Z-screen-da8e70\designs\cceac2918759\mesh.msh (n_triangles=10515, n_dof=None, quadrants=1)
+What it means: the dof cap in TOOLCHAIN.md / the YAML is wrong for this GPU state (or a stale Julia host held VRAM; run solve.worker.clear_stale_hosts and re-test from a clean state before changing the cap, AGENTS.md hygiene rule 7).
+(Appended automatically by hornlab_search.solve.base.note_failure_for_senior.)
+
 ## 2026-11-24  directivity attribution: queue argv[0] must use backslashes when the runner is started outside queue.ps1
 What happened: `tools/run_campaign_night.py --night docs/queue/directivity_attribution_2026-11-24.yaml`, started from a
 Git Bash shell in the canonical checkout, failed all 8 `kind: command` jobs at launch with `[WinError 2]` (no solve

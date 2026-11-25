@@ -3,8 +3,17 @@
 **This is a pointer, not authority.** It names where current state lives and what was verified when
 it was last written. If it disagrees with the tools below, the tools win.
 
-Last checked **2026-11-25** in the canonical checkout, branch `hornfab-all-2026-11-18` with local
-changes; newest state bullet below. Run live status before any solve.
+Last checked **2026-11-25** in the canonical checkout, branch `hornfab-all-2026-11-18` at `626a7c65` with local changes.
+Size-aware constraints and the two body experiments are indexed in the [current handoff](evidence/size_aware_2026-11-24/HANDOFF.md).
+The bounded GPU queues are [exact anchors](queue/rolled_lame_anchor_verify_2026-11-24.yaml),
+[body variants](queue/rolled_lame_body_verify_2026-11-24.yaml) and
+[Compact500 size finalists](queue/size_aware_crowe_verify_2026-11-24.yaml). Use live status for GPU readiness.
+Directivity attribution (2026-11-24/25): [readout](evidence/directivity_attribution_2026-11-24/README.md), queues
+[batch 1](queue/directivity_attribution_2026-11-24.yaml) and [batch 2](queue/directivity_attribution_b2_2026-11-24.yaml) (finished).
+CD wall-angle backbone (2026-11-25): [readout](evidence/cd_backbone_2026-11-25/README.md), queues
+[batch 1](queue/cd_backbone_2026-11-25.yaml), [batch 2](queue/cd_backbone_b2_2026-11-25.yaml) and [dose bracket](queue/cd_backbone_b3_2026-11-25.yaml) (finished; passing band rolled bb_h 0.45-0.50, 0.50 best, J 8.121 -> 5.407).
+
+Metric-aware BO (2026-11-25): the Home v11 Fold loop is proven end-to-end (clean 8+2 canary, two refits, post-refit proposals, verify 4.791516). The adaptive 20-screen tranche and four native/900 Hz canaries are staged but held; release requires owner GPU authorization. Admission table and handoff: `docs/research/metric_bo_2026-11-22/12_HANDOFF_2026-11-24.md`. Regression 512 passed / 0 failed / 0 skipped.
 
 ## Verify first (never trust this file alone)
 
@@ -44,31 +53,76 @@ git log --oneline -5; git status --porcelain
   `cd_bo_cohort_2026-11-25` (run `runs/20261125T204727Z-screen-02b4bf`); best 1.691470 by n=4.
   Evidence `docs/evidence/favL_2in_c500_continue_2026-11-25/`.
 
-- **2026-11-23 09:05 EST (overnight top-up closed):** `bo_data_topup_2026-11-22` (other lane)
-  6/6; it resumed the round-3 open run dirs in place. New screen bests: compact500 Crowe
-  **1.70512** (770x548x393, `138f09ce5472`), FAV **3.30792** (720x608x418, `5987a94e99c0`),
-  v11 Fold **3.42866** (522x445x423, `606abb301970`); the other five leaders unchanged. The
-  `docs/renders/2026-11-22-best-horns` gallery was re-rendered on 2026-11-23 and republished.
-  None verify-grid confirmed. Lane free.
+- **2026-11-23 13:31 EST (BO-250 review + queue):** reviewed 443 runs (2026-11-09..23). The
+  metric-aware BO gate needs >=100 usable screen rows per frozen identity and a widened box or a
+  changed brief is a NEW identity, so 250 solves buys two identities at the gate. `hornfab_bo250_2026-11-23`
+  is live (pid 57016, cutoff 17:30): (A) compact400 v11 open, the v10 fleet best 0.96787 ported onto
+  the v11 CD scorer (same target 80/50, 350-8000, f0 1000), 150 valid, pins opened `a_deg` hi,
+  `morph_rate` lo, `morph_corner` lo; (B) room w90x50 v11 open, +10.6% over its last 40 valid with
+  `g_a_h_deg` pinned low and `g_s` pinned high, 100 valid. Both v11, open envelope, best-seeded.
+  Configs `examples/typologies/round4_2026-11-23/`, briefs `*_open_2026-11-23`. Not queued:
+  compact500 2-inch (4 pins), room w90x60 (`g_s` hi), a9 (`g_sf_ab` hi), compact400 w90x50 (+9.1%).
 
+- **2026-11-22 16:00 EST (open envelope + round 3 live):** owner decision: the brief size envelope no
+  longer refuses search candidates. `envelope.enforce: false` + `envelope.sanity_max_mm` (default
+  1200 mm per dimension) is implemented in `config.effective_envelope_limits` and used by the
+  post-mesh `envelope_violation`, both pre-mesh registry estimators and `tools/shape_check.py`;
+  default (absent/true) is byte-identical. Four `*_open` briefs and seven round-3 configs are in
+  `examples/briefs/*_open_2026-11-22.yaml` / `examples/typologies/round3_2026-11-22/`; these are NEW
+  identities and their J is not comparable to closed-envelope runs or published floors. All
+  watchdog-pinned/near-limit knobs were opened (home Fold k/q/az_a_cos_amp/L/morph W,H; compact400
+  morph_rate/az_fold_v_deg/az_a_cos_amp; compact500 g_a_h low 4/6; v11 Fold a0_deg low 5/6). Night
+  `hornfab_round3_2026-11-22` is live (pid 7460, cutoff 20:00, 7 jobs, `no_gain_valid`/`stall_valid`
+  60). Preflight on the opened boxes: zero envelope refusals, 0-37.5 % `invalid_geometry`. Record:
+  `NOTES_FOR_SENIOR.md` 2026-11-22 block.
 
-- **2026-11-22 20:10 EST (round 3 closed, open envelope):** `hornfab_round3_2026-11-22` 7/7 with
-  `envelope.enforce: false` (sanity 1200 mm). Screen bests: home Fold 1.3087 -> **1.1932** (k=3.36,
-  past the old 2.81 cap; still inside the old 600x480 box), compact400 1.0243 -> **0.9679**
-  (474x350 mm, outside the old 400 cube), compact500 Crowe 2.7579 -> **1.8150** (719x538x386; g_L
-  pinned at the new 400), FAV 4.1990 -> **3.3848** (730x577x403), v11 Fold no gain. Zero envelope
-  refusals; 0-37.5 % `invalid_geometry` at the opened extremes. None verify-grid confirmed.
-- **2026-11-22 (verify + round 2):** verify 8/8: home fold_s **1.4727**, fold_k 1.5551, morph 1.7484,
-  twinray 2.1593 (leader 1.4867, floor 0.4677 -> tie/worse); compact400 s2 **1.1532**, s1 1.2293
-  (best 1.1864, floor 0.1293 -> tie); c500 2.8570; FAV 4.5828. Round 2 lifted c400 1.0243, c500
-  2.7579, FAV 4.1990, v11 fold 3.6172.
-- **2026-11-22 (decision + renders):** owner: the brief envelope no longer refuses candidates;
-  `config.effective_envelope_limits` is the one source (default byte-identical) for the post-mesh
-  gate, both pre-mesh estimators and `tools/shape_check.py`; 84 focused tests. Eight leaders
-  rendered at 200 dpi: `docs/renders/2026-11-22-best-horns/` (gallery `index.html`, Pages).
-- **2026-11-22 (queue 1):** `hornfab_12h_2026-11-22` 10/10, all watchdog-stopped: TwinRay
-  2.5748->1.7356, Morph 1.5769->1.3973, c400 1.1891->1.0742, home Fold 1.3738->1.3176/1.3087,
-  c500 2.9901->2.8392, FAV 4.4527->4.4305; v11 Fold no gain.
+- **2026-11-22 11:50 EST (round 2 closed):** `hornfab_round2_2026-11-22` recorded 7/7 in ~1 h,
+  again every job via the watchdog. Screen bests: c400_open_b 1.0742 -> **1.0243** (pinned
+  az_fold_v_deg high), c500_local_cont 2.8392 -> **2.7579** (refusal 50 %, 18 valid), fav_crowe_wrap
+  4.4305 -> **4.1990** (refusal 47 %, 32 valid), v11 fold corner 3.6930 -> **3.6172** (pinned a0_deg
+  low 5/6); h_fold_kq a/b and c400_open_a stopped at 30 with no gain over the seed. All refusals in
+  play are `invalid_envelope` from the FREEFORM grid generator's pre-mesh estimate (zero
+  tolerance), driven by `g_L_mm`: c500 refused 6 % below 260 mm, 50 % at 260-280, 100 % at >=280.
+  Nothing verified this round yet. `examples/typologies/round2_2026-11-22/`; lane free.
+
+- **2026-11-22 10:48 EST (verify done, round 2 launched):** `hornfab_verify_2026-11-22` ran 8/8
+  (`run --mode verify`, 8 new configs under `examples/typologies/verify_2026-11-22/`). Verify J:
+  home v10 fold_s **1.4727**, fold_k 1.5551, morph 1.7484, twinray 2.1593 (reference: fold s2w
+  1.4867, published 1.6704, floor 0.4677 -> fold_s/fold_k TIE the leader; morph/twinray do not
+  beat it). compact400 s2 **1.1532**, s1 1.2293 (previous best 1.1864, floor 0.1293 -> TIE).
+  compact500 crowe 2.8570 (first verify row for this identity); v11 FAV 4.5828 (prior 4.6493).
+  Screen J is a poor cross-family predictor (gap +0.6 % c500 to +25 % morph). Round 2
+  `hornfab_round2_2026-11-22` followed (see above): home Fold k<=3.0/q<=1.0 box x2
+  seeds, compact400 morph_rate/az_a_cos_amp opened x2 seeds, c500 resume with refusal_max 0.45,
+  v11 Fold corner<=15, FAV g_wrap>=25. Configs in `examples/typologies/round2_2026-11-22/`.
+  TwinRay and Morph get no further GPU time this round.
+
+- **2026-11-22 10:07 EST (queue closed):** `hornfab_12h_2026-11-22` recorded 10/10 at 04:32, NOT at the
+  14:50 cutoff: every job ended via the watchdog (exit 75) after 25-204 evals, 110 min total. Real
+  best-J moves (screen grid, unverified): TwinRay 2.5748 -> 1.7356 (+33%, stopped at the brief
+  envelope morph_height 480), compact400 Fold s2 1.1891 -> 1.0742 and s1 1.1501, Morph 1.5769 ->
+  1.3973 (stalled 204/219), home Fold k 1.3738 -> 1.3176 (pin: q high) and s 1.3087 (pin: k high),
+  c500 Crowe 2.9901 -> 2.8392 (refusal 33% @27 attempts), FAV 4.4527 -> 4.4305, v11 Fold no gain,
+  2-inch 1.8705 -> 1.9330 (refusal 64% @25). Job 9 (verify) did not run and no common-grid
+  confirmation exists yet. Lane free, no julia; `runs/.gpu.lock` holds dead pid 56760 (next runner
+  takes it over - do not delete by hand). Per-job reasons: `runs/nights/hornfab_12h_2026-11-22/`.
+  Next: verify the improved finalists, then round 2 that widens the pinned knobs (q, k,
+  morph_rate, az_a_cos_amp) and sets pin_ignore on envelope-capped knobs.
+
+- **2026-11-22 02:42 EST:** `hornfab_12h_2026-11-22` launched as a detached controller (pid 54452,
+  parent WmiPrvSE), cutoff 14:50. Ten sequential GPU jobs reconciled from the 12-hour advisor queue:
+  Morph resume (cap 120->340), v11 Fold resume (50->270), compact500 Crowe local (new box), TwinRay
+  resume (120->320), home-v10 Fold k- and s-expansions, compact400 Fold 2x80 independent seeds, FAV
+  resume (60->220), 2-inch bounded follow-up. Two resume jobs carry explicit watchdog overrides
+  (TwinRay `pin_ignore: morph_rate/morph_width_mm`; FAV `refusal_max: 0.55`) because the pure
+  `watchdog_verdict` replay over the historical rows stops them on the first poll. The advisor's
+  job 8 (resume 75c147) was replaced by the pre-staged `favL__2in_c500_unbound_followup` config.
+  Live state: `runs/nights/hornfab_12h_2026-11-22/queue_state.json`; log
+  `runs/nights/queue_hornfab_12h_2026-11-22.log`. Verified after launch: julia host up, Morph
+  `search.ndjson` 121 -> 125 rows. Verification job 9 is to be inserted by live edit once finalists
+  exist. Five new configs are untracked under `examples/typologies/` (not yet committed).
+
+- **2026-11-21 (local, no GPU):** optimizer audit P0/P1 implemented as opt-in/offline code: CMA-MAE v3 split archives, full-identity floor registry, v10/v11 study admission, covariance-transfer warm start, composed advisory report and matched-benchmark plan/report. No queue, default or score version changed; P2 needs matched real-BEM authorization and owner GPU approval. [Status](research/optimizer_audit_2026-11-21/IMPLEMENTATION_STATUS.md).
 
 - **2026-11-21 08:57 EST:** `sculpted_xo900_cma_pilot_2026-11-21` launched as detached controller PID 12984. Three V11 screen tranches precede matched verification and conditional 60-valid extensions. Read `runs/nights/sculpted_xo900_cma_pilot_2026-11-21/queue_state.json` for live state. [Queue recipe](queue/sculpted_xo900_cma_pilot_2026-11-21.yaml).
 

@@ -1,0 +1,56 @@
+{
+  "schema": "metric-real-approvals-v1",
+  "status": "APPROVED_FOR_CANARY",
+  "profile": "metric-canary-8x2",
+  "task_identity": "82dbd04691c7b456",
+  "artifact_sha256": "8281868365fbd52423bdf2ead3d6df0308f4e93dec52ce10d6f752cbbe720b97",
+  "screen_cap": 8,
+  "verify_cap": 2,
+  "refit_every": 4,
+  "lane": "gpu",
+  "identity": {
+    "task_identity": "82dbd04691c7b456",
+    "backend": "beat_cuda",
+    "fidelity": "screen",
+    "grid_hash": "c41ff9a7581ba429",
+    "dependency_hash": "f4dcdca807bdfad0",
+    "mesh_hash": "8e789cd0deef",
+    "brief_hash": "c6bc496e7b4f",
+    "score_hash": "77d4fdd49bd2c3b4"
+  },
+  "study_id": "e62d9f3b1b264b0589d2b2ce6cc4ba60",
+  "spec_revision": 1,
+  "starting_artifact": {
+    "config": {
+      "path": "examples/typologies/round3_2026-11-22/r3_v11_fold.yaml",
+      "sha256": "1027e395601b3c97e040f9e02a1165292004ecb183d6304161b6f5d25c6cc3db"
+    },
+    "brief": {
+      "path": "examples/briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd_open_2026-11-22.yaml",
+      "sha256": "d4a86f0310a788e7c3754f46d210e46d1ce2bff18fc9c4383d75f6601edaebd7"
+    },
+    "training_artifact_sha256": "8281868365fbd52423bdf2ead3d6df0308f4e93dec52ce10d6f752cbbe720b97",
+    "training_artifact_bytes_sha256": "fd7c01871635f64c2c8b4a4f3fcf682d7a7c9f94f0b6584d23a35e56459e7b3c",
+    "training_manifest_sha256": "486d16b08fa0fad0dfd10ed2a65aa74b3f97b526c98bcec2f16cd0ab7a317e4f",
+    "rows": 174,
+    "offline_package_id": "9c8862dd0afef2fa31d93866b36c07147b253da94e45726d799bb0eab1d392ba"
+  },
+  "evidence": {
+    "reproducer": "runs/v11_bo_day_planning/fold_metric_service_174.py",
+    "run_log": "runs/v11_bo_day_planning/fold_metric_service_174_final.log",
+    "execution_plan": "docs/research/metric_bo_2026-11-22/11_METRIC_BO_EXECUTION_PLAN.md",
+    "b4_task_decision": "PASS FOR EXPLORATORY PILOT (2 of 3 frozen fresh same-identity cohorts) on task 82dbd04691c7b456 / artifact 8281868365fbd52423bdf2ead3d6df0308f4e93dec52ce10d6f752cbbe720b97. Cohort 81271 (20261124T033511Z-screen-3b2969): HOLD, recall 0.500 vs 0.750, median selected J 5.8447 vs 7.3898, best 3.471456. Cohort 81281 (20261124T045139Z-screen-f58b04): PASS, recall 0.500 vs 0.250, median tied 6.2682, best 4.130019. Cohort 81291 (20261124T061534Z-screen-c5a770): PASS, recall 0.750 vs 0.750, median tied 4.0899, best 3.954269. Tie-break rule frozen before the third run in runs/v11_bo_day_planning/acquisition_confirmation_2026-11-23/PARENT_TIEBREAK_2026-11-24.md. The 81271 HOLD stands as the pre-registered confirmation result; no scorer, split, seed, draw or threshold was retuned.",
+    "required_before_release": "B4 PASS FOR EXPLORATORY PILOT on this exact identity and artifact",
+    "confirmation": "runs/v11_bo_day_planning/acquisition_confirmation_2026-11-23/confirmation.json",
+    "confirmation_81271": "runs/v11_bo_day_planning/acquisition_confirmation_2026-11-23/confirmation.json",
+    "confirmation_81281": "runs/v11_bo_day_planning/acquisition_confirmation_2026-11-23/lmc_confirmation.log",
+    "confirmation_81291": "runs/v11_bo_day_planning/acquisition_confirmation_2026-11-23/confirmation.json (last run)"
+  },
+  "owner_authorization": {
+    "authorized": true,
+    "authority": "owner mission 2026-11-23; parent-integrator release decision under the frozen 2-of-3 tie-break",
+    "authorized_utc": "2026-11-24T06:55:00Z",
+    "note": "Canary only: 8 screen + 2 verify backend calls, refit every 4 accepted unique screens. Adaptive 30-call tranche requires a separate approvals record with canary_acceptance after a clean canary."
+  },
+  "canary_acceptance": null
+}

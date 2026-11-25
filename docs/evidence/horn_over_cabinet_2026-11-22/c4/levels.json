@@ -1,0 +1,671 @@
+{
+  "schema": "c4_mesh_levels_v1",
+  "experiment_id": "hf_c4_mesh_2026-11-22",
+  "created_utc": "2026-11-23T01:54:55.345364+00:00",
+  "authorized_by": "owner directive 2026-11-22 C4 mesh-sensitivity: hf_overhang_2026-11-22 P2b pose fixed (dy 268.674 dz 13), beat_cpu, 3 mesh levels x 10 freqs, per-excitation only, no system ranking",
+  "request": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\evidence\\horn_over_cabinet_2026-11-22\\request_c4_mesh_10f.json",
+  "request_sha256": "deb11a25718a40ef875b8077cd223b2c5eb97420b91b6dd85d7ee43e7071602d",
+  "backend": "beat_cpu",
+  "sequential": true,
+  "levels": [
+    {
+      "level": "L0",
+      "case_id": "20261123T011651Z-assembly-45740-4b3fbc6a",
+      "case_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T011651Z-assembly-45740-4b3fbc6a",
+      "case_dir_resolved": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T011651Z-assembly-45740-4b3fbc6a",
+      "mesh_size_m": 0.03,
+      "detail_size_m": 0.009,
+      "geometry_id": "ecfae5f89ebee429",
+      "horn_design_hash": "f04827bc5973",
+      "horn_mesh_sha256": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+      "horn_mesh_path": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\ref_case\\horn_full\\lecleach_rollback_1in_v6_9e02db06ecc3\\mesh.msh",
+      "clearance": {
+        "status": "PASS",
+        "clearance_mm": 3.0,
+        "min_gap_m": 0.003,
+        "min_distance_m": 0.01
+      },
+      "bl_output_mesh_info": {
+        "interior": {
+          "nodes": 5290,
+          "triangles": 5980,
+          "tetrahedra": 23150
+        },
+        "exterior": {
+          "nodes": 1626,
+          "triangles": 3248,
+          "tetrahedra": 0
+        },
+        "air_volume_m3": 0.042169449931173324,
+        "gmsh_version": "4.15.2"
+      },
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T011651Z-assembly-45740-4b3fbc6a\\run",
+      "run_dir_resolved": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T011651Z-assembly-45740-4b3fbc6a\\run",
+      "run_manifest": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T011651Z-assembly-45740-4b3fbc6a\\run\\manifest.json",
+      "run_status": "complete",
+      "frequencies_requested": 10,
+      "frequencies_solved": 10,
+      "completion_mask_all_true": true,
+      "frequencies_solved_hz": [
+        700.0,
+        800.0,
+        900.0,
+        1000.0,
+        1050.0,
+        1100.0,
+        1150.0,
+        1250.0,
+        1400.0,
+        1600.0
+      ],
+      "run_started_utc": "2026-11-23T01:23:06.727539+00:00",
+      "run_finished_utc": "2026-11-23T01:26:10.475955+00:00",
+      "bl_manifest_elapsed_s": 183.748416,
+      "wrapper_wall_clock_s": 185.9569274,
+      "returncode": 0,
+      "checks": {
+        "ten_of_ten_completed": true,
+        "excitation_port_ids_per_frequency": [
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ]
+        ],
+        "both_ports_present_every_frequency": true,
+        "on_axis_2m_finite_complex_both_ports": true,
+        "max_inter_frequency_gap_s": 17.5,
+        "every_frequency_under_480_s": true,
+        "failed_checks": []
+      },
+      "on_axis_2m_complex_pa": {
+        "700.0": [
+          [
+            0.15290288627147675,
+            -0.4048478901386261
+          ],
+          [
+            -1.0763132572174072,
+            0.02238851971924305
+          ]
+        ],
+        "800.0": [
+          [
+            0.12429343909025192,
+            0.27013471722602844
+          ],
+          [
+            1.2645376920700073,
+            -2.0654709339141846
+          ]
+        ],
+        "900.0": [
+          [
+            -0.13796590268611908,
+            -0.20381619036197662
+          ],
+          [
+            1.718912959098816,
+            2.3120875358581543
+          ]
+        ],
+        "1000.0": [
+          [
+            0.27888819575309753,
+            0.10379647463560104
+          ],
+          [
+            -2.7657740116119385,
+            -0.2238810956478119
+          ]
+        ],
+        "1050.0": [
+          [
+            -0.006204607430845499,
+            -0.2594982981681824
+          ],
+          [
+            0.7477942109107971,
+            2.6350836753845215
+          ]
+        ],
+        "1100.0": [
+          [
+            0.14870955049991608,
+            -0.029755039140582085
+          ],
+          [
+            2.231757164001465,
+            -1.5252360105514526
+          ]
+        ],
+        "1150.0": [
+          [
+            0.23243634402751923,
+            0.29222846031188965
+          ],
+          [
+            -2.165360689163208,
+            -1.6932777166366577
+          ]
+        ],
+        "1250.0": [
+          [
+            -0.20608025789260864,
+            0.03859259560704231
+          ],
+          [
+            2.95617938041687,
+            0.27170997858047485
+          ]
+        ],
+        "1400.0": [
+          [
+            -0.3160601854324341,
+            0.0621979758143425
+          ],
+          [
+            2.5908374786376953,
+            2.3564822673797607
+          ]
+        ],
+        "1600.0": [
+          [
+            -0.09302448481321335,
+            0.1113271713256836
+          ],
+          [
+            3.477609395980835,
+            -2.049548625946045
+          ]
+        ]
+      }
+    },
+    {
+      "level": "L1",
+      "case_id": "20261123T012027Z-assembly-60396-c33304e6",
+      "case_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T012027Z-assembly-60396-c33304e6",
+      "case_dir_resolved": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T012027Z-assembly-60396-c33304e6",
+      "mesh_size_m": 0.021,
+      "detail_size_m": 0.0063,
+      "geometry_id": "ecfae5f89ebee429",
+      "horn_design_hash": "f04827bc5973",
+      "horn_mesh_sha256": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+      "horn_mesh_path": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\ref_case\\horn_full\\lecleach_rollback_1in_v6_9e02db06ecc3\\mesh.msh",
+      "clearance": {
+        "status": "PASS",
+        "clearance_mm": 3.0,
+        "min_gap_m": 0.003,
+        "min_distance_m": 0.01
+      },
+      "bl_output_mesh_info": {
+        "interior": {
+          "nodes": 10889,
+          "triangles": 10232,
+          "tetrahedra": 51397
+        },
+        "exterior": {
+          "nodes": 3222,
+          "triangles": 6440,
+          "tetrahedra": 0
+        },
+        "air_volume_m3": 0.042169449931173324,
+        "gmsh_version": "4.15.2"
+      },
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T012027Z-assembly-60396-c33304e6\\run",
+      "run_dir_resolved": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T012027Z-assembly-60396-c33304e6\\run",
+      "run_manifest": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T012027Z-assembly-60396-c33304e6\\run\\manifest.json",
+      "run_status": "complete",
+      "frequencies_requested": 10,
+      "frequencies_solved": 10,
+      "completion_mask_all_true": true,
+      "frequencies_solved_hz": [
+        700.0,
+        800.0,
+        900.0,
+        1000.0,
+        1050.0,
+        1100.0,
+        1150.0,
+        1250.0,
+        1400.0,
+        1600.0
+      ],
+      "run_started_utc": "2026-11-23T01:28:32.778850+00:00",
+      "run_finished_utc": "2026-11-23T01:34:03.771072+00:00",
+      "bl_manifest_elapsed_s": 330.992222,
+      "wrapper_wall_clock_s": 334.0307016,
+      "returncode": 0,
+      "checks": {
+        "ten_of_ten_completed": true,
+        "excitation_port_ids_per_frequency": [
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ]
+        ],
+        "both_ports_present_every_frequency": true,
+        "on_axis_2m_finite_complex_both_ports": true,
+        "max_inter_frequency_gap_s": 32.6,
+        "every_frequency_under_480_s": true,
+        "failed_checks": []
+      },
+      "on_axis_2m_complex_pa": {
+        "700.0": [
+          [
+            0.15493033826351166,
+            -0.4025792181491852
+          ],
+          [
+            -1.0629751682281494,
+            0.02445055916905403
+          ]
+        ],
+        "800.0": [
+          [
+            0.1254289448261261,
+            0.2706497609615326
+          ],
+          [
+            1.261181116104126,
+            -2.0667266845703125
+          ]
+        ],
+        "900.0": [
+          [
+            -0.13865551352500916,
+            -0.20709951221942902
+          ],
+          [
+            1.7162643671035767,
+            2.311140537261963
+          ]
+        ],
+        "1000.0": [
+          [
+            0.2778347134590149,
+            0.10290201008319855
+          ],
+          [
+            -2.7667036056518555,
+            -0.22504407167434692
+          ]
+        ],
+        "1050.0": [
+          [
+            -0.009762263856828213,
+            -0.23385001718997955
+          ],
+          [
+            0.7475829124450684,
+            2.634545087814331
+          ]
+        ],
+        "1100.0": [
+          [
+            -0.4715719223022461,
+            0.12704496085643768
+          ],
+          [
+            2.2501683235168457,
+            -1.5580142736434937
+          ]
+        ],
+        "1150.0": [
+          [
+            0.23184837400913239,
+            0.29535549879074097
+          ],
+          [
+            -2.1686553955078125,
+            -1.6933414936065674
+          ]
+        ],
+        "1250.0": [
+          [
+            -0.2293761521577835,
+            -0.025538191199302673
+          ],
+          [
+            2.946995258331299,
+            0.2312992960214615
+          ]
+        ],
+        "1400.0": [
+          [
+            -0.11790519952774048,
+            0.10089658200740814
+          ],
+          [
+            2.5968732833862305,
+            2.2892210483551025
+          ]
+        ],
+        "1600.0": [
+          [
+            0.1486922800540924,
+            -0.2720496356487274
+          ],
+          [
+            3.4833571910858154,
+            -2.0430185794830322
+          ]
+        ]
+      }
+    },
+    {
+      "level": "L2",
+      "case_id": "20261123T012101Z-assembly-49572-fbe5af54",
+      "case_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T012101Z-assembly-49572-fbe5af54",
+      "case_dir_resolved": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T012101Z-assembly-49572-fbe5af54",
+      "mesh_size_m": 0.015,
+      "detail_size_m": 0.0045,
+      "geometry_id": "ecfae5f89ebee429",
+      "horn_design_hash": "f04827bc5973",
+      "horn_mesh_sha256": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+      "horn_mesh_path": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\ref_case\\horn_full\\lecleach_rollback_1in_v6_9e02db06ecc3\\mesh.msh",
+      "clearance": {
+        "status": "PASS",
+        "clearance_mm": 3.0,
+        "min_gap_m": 0.003,
+        "min_distance_m": 0.01
+      },
+      "bl_output_mesh_info": {
+        "interior": {
+          "nodes": 22144,
+          "triangles": 17596,
+          "tetrahedra": 110106
+        },
+        "exterior": {
+          "nodes": 5983,
+          "triangles": 11962,
+          "tetrahedra": 0
+        },
+        "air_volume_m3": 0.042169449931173324,
+        "gmsh_version": "4.15.2"
+      },
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T012101Z-assembly-49572-fbe5af54\\run",
+      "run_dir_resolved": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T012101Z-assembly-49572-fbe5af54\\run",
+      "run_manifest": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T012101Z-assembly-49572-fbe5af54\\run\\manifest.json",
+      "run_status": "complete",
+      "frequencies_requested": 10,
+      "frequencies_solved": 10,
+      "completion_mask_all_true": true,
+      "frequencies_solved_hz": [
+        700.0,
+        800.0,
+        900.0,
+        1000.0,
+        1050.0,
+        1100.0,
+        1150.0,
+        1250.0,
+        1400.0,
+        1600.0
+      ],
+      "run_started_utc": "2026-11-23T01:35:18.735002+00:00",
+      "run_finished_utc": "2026-11-23T01:47:48.709085+00:00",
+      "bl_manifest_elapsed_s": 749.974083,
+      "wrapper_wall_clock_s": 753.2250926,
+      "returncode": 0,
+      "checks": {
+        "ten_of_ten_completed": true,
+        "excitation_port_ids_per_frequency": [
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ]
+        ],
+        "both_ports_present_every_frequency": true,
+        "on_axis_2m_finite_complex_both_ports": true,
+        "max_inter_frequency_gap_s": 76.5,
+        "every_frequency_under_480_s": true,
+        "failed_checks": []
+      },
+      "on_axis_2m_complex_pa": {
+        "700.0": [
+          [
+            0.15822778642177582,
+            -0.3994975686073303
+          ],
+          [
+            -1.0459139347076416,
+            0.02438393607735634
+          ]
+        ],
+        "800.0": [
+          [
+            0.12616373598575592,
+            0.2703646421432495
+          ],
+          [
+            1.2572301626205444,
+            -2.067840337753296
+          ]
+        ],
+        "900.0": [
+          [
+            -0.13891898095607758,
+            -0.20790642499923706
+          ],
+          [
+            1.7145636081695557,
+            2.3103256225585938
+          ]
+        ],
+        "1000.0": [
+          [
+            0.27709344029426575,
+            0.10238581150770187
+          ],
+          [
+            -2.767117977142334,
+            -0.2259518951177597
+          ]
+        ],
+        "1050.0": [
+          [
+            -0.01242101565003395,
+            -0.21125057339668274
+          ],
+          [
+            0.7471016645431519,
+            2.63364315032959
+          ]
+        ],
+        "1100.0": [
+          [
+            -0.42862096428871155,
+            0.1232159361243248
+          ],
+          [
+            2.249546766281128,
+            -1.556935429573059
+          ]
+        ],
+        "1150.0": [
+          [
+            0.23190264403820038,
+            0.2969716787338257
+          ],
+          [
+            -2.170990228652954,
+            -1.6932862997055054
+          ]
+        ],
+        "1250.0": [
+          [
+            -0.22719866037368774,
+            -0.04294056445360184
+          ],
+          [
+            2.9371113777160645,
+            0.21887975931167603
+          ]
+        ],
+        "1400.0": [
+          [
+            -0.019225049763917923,
+            -0.11216945946216583
+          ],
+          [
+            2.531801462173462,
+            2.2973411083221436
+          ]
+        ],
+        "1600.0": [
+          [
+            -0.7619245648384094,
+            -0.19767877459526062
+          ],
+          [
+            3.4818451404571533,
+            -2.0256447792053223
+          ]
+        ]
+      }
+    }
+  ],
+  "identity_check": {
+    "horn_mesh_sha256_by_level": {
+      "L0": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+      "L1": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+      "L2": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d"
+    },
+    "horn_mesh_sha256_all_identical": true,
+    "horn_mesh_sha256": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+    "horn_design_hash_by_level": {
+      "L0": "f04827bc5973",
+      "L1": "f04827bc5973",
+      "L2": "f04827bc5973"
+    },
+    "horn_design_hash_all_identical": true,
+    "horn_design_hash": "f04827bc5973",
+    "geometry_id_by_level": {
+      "L0": "ecfae5f89ebee429",
+      "L1": "ecfae5f89ebee429",
+      "L2": "ecfae5f89ebee429"
+    },
+    "geometry_id_all_identical": true,
+    "statement": "The horn mesh was imported unchanged at every level: horn_mesh_sha256 is identical across L0/L1/L2 (and the horn design hash and geometry id agree). Only the vented-generator mesh_size_m/detail_size_m varied."
+  },
+  "sequential_check": {
+    "non_overlapping": true,
+    "order": [
+      "L0",
+      "L1",
+      "L2"
+    ]
+  },
+  "overall": {
+    "all_levels_passed_checks": true,
+    "failed_checks": {}
+  }
+}

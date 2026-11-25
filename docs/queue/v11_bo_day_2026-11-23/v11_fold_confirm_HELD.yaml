@@ -1,0 +1,55 @@
+# HELD - DISPATCH C fresh confirmation trajectory. Do not launch from this file.
+# Release only after the GPU lane is free: copy to
+# runs/nights/v11_fold_confirm_2026-11-23.yaml, set pause: false, dry-run with --night,
+# then launch with the normal detached controller. All eligible rows are reserved for
+# evaluation by the acquisition confirmation harness and stay out of the 174 training cohort.
+# cma_seed 81271 is verified unused across examples/, docs/queue/ and runs/nights/.
+night: v11_fold_confirm_2026-11-23
+lane: gpu
+pause: true
+watchdog:
+  min_attempts: 20
+  refusal_window: 30
+  refusal_max: 0.45
+jobs:
+  - id: fold_confirm_81271_40
+    kind: command
+    timeout_s: 3600
+    env: {HORNLAB_GPU_LOCK: refuse}
+    watchdog:
+      pin_ignore:
+        - L_mm
+        - a0_deg
+        - a_deg
+        - az_a_cos_amp
+        - az_a_cos_pow
+        - az_fold_h_deg
+        - az_fold_h_width_deg
+        - az_fold_v_deg
+        - az_fold_v_width_deg
+        - az_s_cos2_amp
+        - k
+        - morph_corner_mm
+        - morph_height_mm
+        - morph_rate
+        - morph_width_mm
+        - n
+        - q
+        - s
+      no_gain_valid: 100
+      stall_valid: 100
+    argv:
+      - .venv/Scripts/hornlab-search.exe
+      - search
+      - --config
+      - examples/typologies/round3_2026-11-22/r3_v11_fold.yaml
+      - --mode
+      - screen
+      - --budget
+      - '40'
+      - --cma-seed
+      - '81271'
+      - --dataset-dir
+      - dataset
+      - --cache-dir
+      - runs/v11_bo_day_cache/fold_v11_confirm

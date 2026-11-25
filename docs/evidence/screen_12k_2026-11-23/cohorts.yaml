@@ -1,0 +1,26 @@
+﻿# HF-screen experiment cohorts (2026-11-23).
+# Each cohort = one brief/config identity and one search run whose valid designs are sampled
+# across the J range (deterministic quantiles).  The probe brief extends the scored band and the
+# CD bands to 12 kHz as a NEW identity; arms differ only in solve.screen_grid.
+band_hi_hz: 12000.0
+cohorts:
+  - id: c400
+    class: smooth_OSSE_compact
+    config: examples/typologies/round4_2026-11-23/c400_v11_open.yaml
+    run: runs/20261123T213343Z-screen-2699ee
+    designs: 6
+  - id: room
+    class: large_room_OSSE
+    config: examples/typologies/round4_2026-11-23/room_w90x50_v11_open.yaml
+    run: runs/20261124T030839Z-screen-dd7310
+    designs: 6
+  - id: morph
+    class: R-OSSE_morph
+    config: examples/typologies/photo_xo900_v11_2026-11-23/osse_morph.yaml
+    run: runs/20261124T001003Z-screen-ec87fc
+    designs: 6
+  - id: twinray
+    class: rolled_twinray
+    config: examples/typologies/photo_xo900_v11_2026-11-23/twinray.yaml
+    run: runs/20261124T004123Z-screen-22c3e5
+    designs: 6

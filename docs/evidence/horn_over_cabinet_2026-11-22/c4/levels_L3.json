@@ -1,0 +1,195 @@
+{
+  "schema": "c4_mesh_levels_v1",
+  "experiment_id": "hf_c4_mesh_2026-11-22",
+  "created_utc": "2026-11-23T02:45:51.976155+00:00",
+  "authorized_by": "owner directive 2026-11-22 C4 mesh-sensitivity: hf_overhang_2026-11-22 P2b pose fixed (dy 268.674 dz 13), beat_cpu, 3 mesh levels x 10 freqs, per-excitation only, no system ranking",
+  "request": "C:\\Users\\hunte\\Hrns\\hornlab-search\\docs\\evidence\\horn_over_cabinet_2026-11-22\\request_c4_subset4.json",
+  "request_sha256": "2d37ace40aabe54763468385bc948a754158a8afc71a663b46c7f143ab867469",
+  "backend": "beat_cpu",
+  "sequential": true,
+  "note": "Targeted 4-frequency probe (1000, 1100, 1400, 1600 Hz) at the fourth, finer mesh level L3 (mesh_size_m 0.010, detail_size_m 0.0030). Purpose: test whether the woofer channel converges at the four bins where L0->L2 moved most. This is NOT a 10-frequency C4 level and must not be pooled with L0/L1/L2 phase-RMS statistics; it carries a per-frequency elapsed budget failure (see checks).",
+  "levels": [
+    {
+      "level": "L3",
+      "case_id": "20261123T020636Z-assembly-14652-2acd8a5a",
+      "case_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T020636Z-assembly-14652-2acd8a5a",
+      "case_dir_resolved": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T020636Z-assembly-14652-2acd8a5a",
+      "mesh_size_m": 0.01,
+      "detail_size_m": 0.003,
+      "geometry_id": "ecfae5f89ebee429",
+      "horn_design_hash": "f04827bc5973",
+      "horn_mesh_sha256": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+      "horn_mesh_path": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\ref_case\\horn_full\\lecleach_rollback_1in_v6_9e02db06ecc3\\mesh.msh",
+      "clearance": {
+        "status": "PASS",
+        "clearance_mm": 3.0,
+        "min_gap_m": 0.003,
+        "min_distance_m": 0.01
+      },
+      "bl_output_mesh_info": {
+        "interior": {
+          "nodes": 61765,
+          "triangles": 36894,
+          "tetrahedra": 327766
+        },
+        "exterior": {
+          "nodes": 12801,
+          "triangles": 25598,
+          "tetrahedra": 0
+        },
+        "air_volume_m3": 0.042169449931173324,
+        "gmsh_version": "4.15.2"
+      },
+      "run_dir": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T020636Z-assembly-14652-2acd8a5a\\run",
+      "run_dir_resolved": "C:\\Users\\hunte\\Hrns\\hornlab-woofer-system-wt\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T020636Z-assembly-14652-2acd8a5a\\run",
+      "run_manifest": "C:\\Users\\hunte\\Hrns\\hornlab-search\\system_runs\\system\\hf_c4_mesh_2026-11-22\\20261123T020636Z-assembly-14652-2acd8a5a\\run\\manifest.json",
+      "run_status": "complete",
+      "frequencies_requested": 4,
+      "frequencies_solved": 4,
+      "completion_mask_all_true": true,
+      "frequencies_solved_hz": [
+        1000.0,
+        1100.0,
+        1400.0,
+        1600.0
+      ],
+      "run_started_utc": "2026-11-23T02:08:02.631950+00:00",
+      "run_finished_utc": "2026-11-23T02:43:40.029116+00:00",
+      "bl_manifest_elapsed_s": 2137.397166,
+      "wrapper_wall_clock_s": 2147.5632105,
+      "returncode": 0,
+      "checks": {
+        "all_requested_frequencies_completed": true,
+        "excitation_port_ids_per_frequency": [
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ],
+          [
+            "vented/voltage",
+            "excitation:horn"
+          ]
+        ],
+        "both_ports_present_every_frequency": true,
+        "on_axis_2m_finite_complex_both_ports": true,
+        "per_frequency_completion_wall_s": {
+          "1000.0": 520.7,
+          "1100.0": 378.2,
+          "1400.0": 633.3,
+          "1600.0": 603.5
+        },
+        "per_frequency_solve_s": {
+          "1000.0": 8.1843274,
+          "1100.0": 5.4843979,
+          "1400.0": 4.9999131,
+          "1600.0": 4.7718002
+        },
+        "max_inter_frequency_gap_s": 633.3,
+        "every_frequency_under_480_s": false,
+        "frequencies_exceeding_480_s": [
+          1000.0,
+          1400.0,
+          1600.0
+        ],
+        "failed_checks": [
+          "BUDGET: per-frequency completion wall exceeded 480 s at 1000 Hz (520.7 s), 1400 Hz (633.3 s), 1600 Hz (603.5 s)"
+        ]
+      },
+      "on_axis_2m_complex_pa": {
+        "1000.0": [
+          [
+            0.27637794613838196,
+            0.10205327719449997
+          ],
+          [
+            -2.7673966884613037,
+            -0.2270253747701645
+          ]
+        ],
+        "1100.0": [
+          [
+            -0.4091980457305908,
+            0.12108559161424637
+          ],
+          [
+            2.249941110610962,
+            -1.55690336227417
+          ]
+        ],
+        "1400.0": [
+          [
+            -0.11684627085924149,
+            -0.19651749730110168
+          ],
+          [
+            2.543210744857788,
+            2.337893009185791
+          ]
+        ],
+        "1600.0": [
+          [
+            -0.31001052260398865,
+            0.10402711480855942
+          ],
+          [
+            3.4839935302734375,
+            -2.039135217666626
+          ]
+        ]
+      },
+      "note": "Targeted 4-frequency probe (1000, 1100, 1400, 1600 Hz) at the fourth, finer mesh level L3 (mesh_size_m 0.010, detail_size_m 0.0030). Purpose: test whether the woofer channel converges at the four bins where L0->L2 moved most. This is NOT a 10-frequency C4 level and must not be pooled with L0/L1/L2 phase-RMS statistics; it carries a per-frequency elapsed budget failure (see checks)."
+    }
+  ],
+  "identity_check": {
+    "horn_mesh_sha256_by_level": {
+      "L0": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+      "L1": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+      "L2": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+      "L3": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d"
+    },
+    "horn_mesh_sha256_all_identical": true,
+    "horn_mesh_sha256": "9b4057c27ba72779dc07bbf4a50f910ea9223fb982f0071cb0fb3139cf49815d",
+    "horn_design_hash_by_level": {
+      "L0": "f04827bc5973",
+      "L1": "f04827bc5973",
+      "L2": "f04827bc5973",
+      "L3": "f04827bc5973"
+    },
+    "horn_design_hash_all_identical": true,
+    "horn_design_hash": "f04827bc5973",
+    "geometry_id_by_level": {
+      "L0": "ecfae5f89ebee429",
+      "L1": "ecfae5f89ebee429",
+      "L2": "ecfae5f89ebee429",
+      "L3": "ecfae5f89ebee429"
+    },
+    "geometry_id_all_identical": true,
+    "statement": "The horn mesh was imported unchanged at L3 as at L0/L1/L2: horn_mesh_sha256 is identical across all four levels (and the horn design hash and geometry id agree). Only the vented-generator mesh_size_m/detail_size_m varied."
+  },
+  "overall": {
+    "all_levels_passed_checks": false,
+    "failed_checks": {
+      "L3": [
+        "BUDGET: per-frequency completion wall exceeded 480 s at 1000 Hz (520.7 s), 1400 Hz (633.3 s), 1600 Hz (603.5 s)"
+      ]
+    }
+  },
+  "sequential_check": {
+    "non_overlapping_with_prior_levels": true,
+    "order": [
+      "L0",
+      "L1",
+      "L2",
+      "L3"
+    ],
+    "note": "Single L3 run; it started after L2 finished and no other solve was live."
+  }
+}

@@ -545,3 +545,64 @@ def test_solve_builds_absolute_argv_and_writes_no_output_dir(tmp_path, monkeypat
     assert Path(argv[5]).is_absolute()
     assert Path(argv[9]).is_absolute() and Path(argv[9]).name == "run"
     assert not (case / "run").exists()  # output dir creation belongs to BL, not this wrapper
+
+
+# ------------------------------------------------------------------ multi-run provenance
+# Senior directive 2026-11-22 §5: repeated requests in one case must produce separate,
+# correctly identified, non-overwriting, replayable solve records.  BL is faked by copying
+# the recorded result fixture into the requested output directory.
+
+
+def _fake_solve_subprocess(monkeypatch) -> None:
+    class _Proc:
+        returncode = 0
+        stdout = '{"event":"completed","solved_count":21,"frequency_count":21}'
+        stderr = ""
+
+    def fake_run(argv, **kwargs):
+        out = Path(argv[argv.index("--output") + 1])
+        shutil.copytree(FIXTURE, out)
+        return _Proc()
+
+    monkeypatch.setattr(REF.subprocess, "run", fake_run)
+
+
+def _solve_case(tmp_path: Path, monkeypatch, out_name: str | None) -> REF.ReferenceSolveResult:
+    _fake_solve_subprocess(monkeypatch)
+    case = tmp_path / "case"
+    case.mkdir(exist_ok=True)
+    (case / "case.blab.json").write_text(
+        json.dumps(_fake_project(), indent=2, sort_keys=True), encoding="utf-8")
+    monkeypatch.setattr(REF, "_root_for_case", lambda root: _fake_root(tmp_path))
+    return REF.solve(
+        case, FIXTURE / "request.json", authorized_by="multi-run-test",
+        out=None if out_name is None else case / out_name)
+
+
+def test_two_requests_in_one_case_write_separate_records(tmp_path, monkeypatch) -> None:
+    first = _solve_case(tmp_path, monkeypatch, None)
+    second = _solve_case(tmp_path, monkeypatch, "run_placement_21f")
+
+    assert first.status == "complete" and second.status == "complete"
+    assert first.record_path.name == "reference_solve.json"
+    assert second.record_path.name == "reference_solve_run_placement_21f.json"
+    assert first.record_path.is_file() and second.record_path.is_file()
+    assert first.record_path != second.record_path
+
+    payloads = [json.loads(p.read_text(encoding="utf-8"))["payload"]
+                for p in (first.record_path, second.record_path)]
+    payloads = [json.loads(p) for p in payloads]
+    assert [Path(p["run_dir"]).name for p in payloads] == ["run", "run_placement_21f"]
+    assert all(p["authorized_by"] == "multi-run-test" for p in payloads)
+    # Replayable: both the request and the project are pinned by path and digest.
+    assert all(len(p["request_sha256"]) == 64 for p in payloads)
+    assert all(len(p["project_sha256"]) == 64 for p in payloads)
+    assert all(p["run_status"] == "complete" for p in payloads)
+
+
+def test_a_completed_record_is_never_overwritten(tmp_path) -> None:
+    record = tmp_path / "reference_solve.json"
+    REF._write_record(record, {"kind": "first"})
+    with pytest.raises(REF.ReferenceError, match="REFERENCE_RECORD_EXISTS"):
+        REF._write_record(record, {"kind": "second"})
+    assert json.loads(json.loads(record.read_text(encoding="utf-8"))["payload"])["kind"] == "first"

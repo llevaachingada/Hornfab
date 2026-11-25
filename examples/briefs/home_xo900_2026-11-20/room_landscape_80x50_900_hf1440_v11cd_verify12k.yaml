@@ -1,0 +1,18 @@
+extends: room_landscape_80x50_900_hf1440_v11cd.yaml
+name: room_landscape_80x50_900_hf1440_v11cd_verify12k
+description: 12 kHz verify-only extension for 900 Hz v11 finalists. Rank within this brief.
+verify_only: true
+target:
+  band_hi_hz: 12000.0
+  coverage_profile:
+    h:
+    - {hz: 900, min_deg: 60, preferred_deg: 80, max_deg: 90}
+    - {hz: 12000, min_deg: 60, preferred_deg: 80, max_deg: 90}
+    v:
+    - {hz: 1000, min_deg: 40, preferred_deg: 50, max_deg: 60}
+    - {hz: 12000, min_deg: 40, preferred_deg: 50, max_deg: 60}
+objective:
+  cd:
+    band_hz: [900.0, 12000.0]
+    offaxis:
+      band_hz: [2500.0, 12000.0]

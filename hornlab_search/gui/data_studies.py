@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 import math
+import os
 from pathlib import Path
 import re
 from typing import Any, Mapping
@@ -31,6 +32,8 @@ _EXECUTE_ACTION_KINDS = frozenset({
 
 # Frozen fallback selector labels. The ``mode`` is the backend proposal-policy value; the
 # ``id``/``label`` are the frozen public labels used before a panel supplies explicit cards.
+# A metric-composite card is appended by :func:`workflow_panel` only for an opt-in metric study;
+# the fallback tuple itself stays exactly the historical five so legacy callers are unchanged.
 POLICY_FALLBACKS = (
     {"id": "scalar", "mode": "scalar", "label": "scalar",
      "requires": ["training_set"], "verification_mode": "scalar"},
@@ -43,6 +46,21 @@ POLICY_FALLBACKS = (
     {"id": "exploration", "mode": "exploration", "label": "exploration",
      "requires": ["pool"], "verification_mode": "scalar"},
 )
+
+#: Real-metric canary contract values (kept in sync with ``hornlab_search.studies.package``; this
+#: module only reads them for display and route gating, it never redefines the source of truth).
+METRIC_POLICY = "metric_composite_v1"
+REAL_METRIC = "real_metric_v1"
+REAL_DATA_OFFLINE = "real_data_offline_v1"
+METRIC_REAL_PROFILES = ("metric-canary-8x2", "metric-adaptive-30x2")
+METRIC_APPROVAL_STATUSES = ("HELD_PENDING_PARENT_RELEASE", "APPROVED_FOR_CANARY")
+METRIC_EXECUTABLE_APPROVAL_STATUSES = ("APPROVED_FOR_CANARY",)
+REAL_METRIC_RELEASE_ENV = "HORNLAB_METRIC_REAL_EXECUTE"
+
+METRIC_POLICY_CARD = {"id": "metric-composite", "mode": METRIC_POLICY,
+                      "label": "metric-composite (opt-in)",
+                      "requires": ["metric_training", "approvals"],
+                      "verification_mode": "scalar"}
 
 
 @dataclass(frozen=True)
@@ -135,7 +153,8 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
     from hornlab_search.studies.package import verify_package
     sid, revision = study["id"], study["revision"]
     kinds = ("snapshot", "training_manifest", "analysis", "model", "pool", "proposal", "package",
-             "results", "verification", "pareto_metrics", "seed_pack")
+             "results", "verification", "pareto_metrics", "seed_pack",
+             "metric_training", "metric_training_manifest")
     metadata = {kind: service.get_artifact_metadata(sid, kind) for kind in kinds}
     def read(kind):
         if metadata[kind].get("status") != "available":
@@ -154,6 +173,165 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
             return {}
         return view if isinstance(view, dict) else {}
     manifest, proposal, package = read("training_manifest"), read("proposal"), read("package")
+    metric_manifest = read("metric_training_manifest")
+    metric_training_meta = metadata["metric_training"]
+    metric_manifest_meta = metadata["metric_training_manifest"]
+    package_body = ({"package_id": metadata["package"]["sha256"], **package}
+                    if package and metadata["package"].get("sha256") else None)
+
+    def metric_panel():
+        """Opt-in real-metric evidence from the same artifacts and package checks as the CLI.
+
+        Every value is read from a studied artifact or re-verified by
+        ``verify_real_metric_package_files``; the panel never promotes a prediction to a
+        measurement and never infers a release from file presence.
+        """
+        metric: dict[str, Any] = {
+            "policy": METRIC_POLICY,
+            "real_profiles": list(METRIC_REAL_PROFILES),
+            "approval_statuses": list(METRIC_APPROVAL_STATUSES),
+            "parent_release_env": REAL_METRIC_RELEASE_ENV,
+        }
+        artifacts = {}
+        for kind in ("metric_training", "metric_training_manifest"):
+            meta = metadata.get(kind) or {}
+            artifacts[kind] = {"status": meta.get("status"), "sha256": meta.get("sha256"),
+                               "revision": meta.get("revision")}
+        metric["artifacts"] = artifacts
+        if isinstance(metric_manifest, Mapping) and metric_manifest:
+            task = metric_manifest.get("task") if isinstance(metric_manifest.get("task"), Mapping) else {}
+            metric["task_identity"] = task.get("task_identity") or metric_manifest.get("task_identity")
+            qualified = metric_manifest.get("n")
+            if isinstance(qualified, bool) or not isinstance(qualified, int):
+                qualified = metric_manifest.get("n_compatible")
+            metric["qualified_rows"] = (qualified if isinstance(qualified, int)
+                                        and not isinstance(qualified, bool) else None)
+            metric["artifact_revision"] = metric_manifest.get(
+                "revision", metric_manifest_meta.get("revision"))
+            metric["artifact_sha256"] = (metric_training_meta.get("sha256")
+                                         or metric_manifest.get("artifact_bytes_sha256"))
+            metric["checksum"] = metric_manifest.get("checksum")
+            metric["synthetic"] = metric_manifest.get("synthetic")
+            metric["objective_version"] = metric_manifest.get("objective_version")
+            status = metric_manifest.get("status")
+            if status != "ok":
+                metric["status"] = "unavailable"
+                metric["reason"] = f"Metric training manifest status is {status!r}."
+            elif metric_manifest.get("synthetic") is not False:
+                metric["status"] = "unavailable"
+                metric["reason"] = ("Synthetic metric artifacts are proposal-only and can never "
+                                    "authorize a real metric solve.")
+            else:
+                metric["status"] = "ready"
+                metric["reason"] = ("Measured metric artifacts are recorded; a real package also needs "
+                                    "the task approvals record and the parent release.")
+        else:
+            metric["status"] = "missing"
+            metric["reason"] = "No metric training manifest is available for this revision."
+
+        # Actual observed J only from measured result rows. Predictions stay a separate field.
+        observed: dict[str, Any] = {"status": "unknown",
+                                    "source": "results observations observed_j"}
+        if phase in ("execute", "decide"):
+            results_doc = read_results().get("data")
+            observations = results_doc.get("observations") if isinstance(results_doc, Mapping) else None
+            values = []
+            if isinstance(observations, list):
+                for item in observations:
+                    if not isinstance(item, Mapping):
+                        continue
+                    result = item.get("result") if isinstance(item.get("result"), Mapping) else {}
+                    if result.get("physical_measurement") is not True:
+                        continue
+                    value = _finite_number(result.get("observed_j"))
+                    if value is not None:
+                        values.append(value)
+            observed = {"status": "measured" if values else "missing",
+                        "best_j": min(values) if values else None,
+                        "n_measured": len(values),
+                        "source": "results observations observed_j"}
+        metric["observed"] = observed
+        predicted = proposal.get("predicted") if isinstance(proposal, Mapping) else None
+        predicted_j = None
+        if isinstance(predicted, Mapping):
+            predicted_j = predicted.get("j_mean", predicted.get("value"))
+        elif isinstance(predicted, (int, float)) and not isinstance(predicted, bool):
+            predicted_j = predicted
+        predicted_value = _finite_number(predicted_j)
+        metric["predicted"] = {"status": "model_prediction" if predicted_value is not None else "missing",
+                               "j": predicted_value,
+                               "measured": False,
+                               "source": ("proposal predicted j_mean "
+                                          "(model output, never a measurement)")}
+
+        metric["mode"] = None
+        metric["budget_profile"] = None
+        metric["budget"] = None
+        metric["lane"] = "gpu"
+        metric["deadline"] = None
+        metric["approvals_record"] = None
+        metric["release"] = {"status": "unavailable",
+                             "reason": "No real metric package is prepared for this revision."}
+        package_metric = package_body.get("metric") if isinstance(package_body, Mapping) else None
+        if isinstance(package_metric, Mapping):
+            from hornlab_search.studies import package as package_mod
+            mode = package_metric.get("provenance_mode") or "synthetic_metric"
+            metric["mode"] = mode
+            metric["synthetic"] = package_metric.get("synthetic")
+            metric["real_solver_allowed"] = package_metric.get("real_solver_allowed") is True
+            approvals = (package_metric.get("approvals")
+                         if isinstance(package_metric.get("approvals"), Mapping) else {})
+            metric["approvals_record"] = approvals.get("record")
+            metric["budget_profile"] = package_body.get("budget_profile") or "baseline"
+            metric["budget"] = package_body.get("budget")
+            metric["lane"] = package_body.get("lane")
+            metric["deadline"] = package_body.get("deadline")
+            if mode == REAL_METRIC:
+                try:
+                    evidence = package_mod.verify_real_metric_package_files(package_body, root=root)
+                    record = package_mod.load_metric_approvals(
+                        approvals.get("record"), root=root)["payload"]
+                    owner_ok = (record.get("owner_authorization") or {}).get("authorized") is True
+                    parent_ok = os.environ.get(REAL_METRIC_RELEASE_ENV) == "1"
+                    status = evidence["approvals"]["status"]
+                    executable = status in METRIC_EXECUTABLE_APPROVAL_STATUSES
+                    reasons = []
+                    if not executable:
+                        reasons.append(f"approvals status is {status}")
+                    if not owner_ok:
+                        reasons.append("owner authorization is absent")
+                    if not parent_ok:
+                        reasons.append(f"parent release {REAL_METRIC_RELEASE_ENV}=1 is unset")
+                    metric["release"] = {
+                        "status": "ready" if executable and owner_ok and parent_ok else "unavailable",
+                        "approvals_status": status,
+                        "owner_authorized": owner_ok,
+                        "parent_release": parent_ok,
+                        "refit_every": approvals.get("refit_every"),
+                        "pinned_files": evidence.get("pinned_files"),
+                        "reason": ("Real metric release gates are satisfied."
+                                   if executable and owner_ok and parent_ok else "; ".join(reasons)),
+                    }
+                except Exception as exc:  # noqa: BLE001 - a typed refusal is the honest view
+                    metric["release"] = {
+                        "status": "unavailable",
+                        "approvals_status": None,
+                        "owner_authorized": False,
+                        "parent_release": os.environ.get(REAL_METRIC_RELEASE_ENV) == "1",
+                        "reason": f"{type(exc).__name__}: {exc}",
+                    }
+            else:
+                metric["release"] = {
+                    "status": "unavailable",
+                    "approvals_status": None,
+                    "owner_authorized": False,
+                    "parent_release": False,
+                    "reason": (f"{mode} packages are prepare/dry-run only and can never "
+                               "authorize a real solver."),
+                }
+        return metric
+
+    metric = metric_panel()
     import subprocess
     import sys
     from pathlib import Path
@@ -172,6 +350,10 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
     active = next((job for job in jobs if job["status"] in ("queued", "running", "unknown")), None)
     policy = study.get("spec", {}).get("policy") or {}
     current_policy = policy.get("proposal_policy") or policy.get("mode") or "scalar"
+    proposal_policy = (proposal.get("proposal_policy") or proposal.get("policy")
+                       or (proposal.get("selection") or {}).get("proposal_policy")
+                       if isinstance(proposal, Mapping) else None)
+    metric_explicit = current_policy == METRIC_POLICY or proposal_policy == METRIC_POLICY
     try:
         from hornlab_search.bo.policy import PROPOSAL_POLICIES
         supported = set(PROPOSAL_POLICIES)
@@ -205,6 +387,19 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
                             "engine cannot freeze them from the training rows.")
                 return "ready", "Coverage/ripple rows are frozen from the training data when you propose."
             return "ready", "Scalar score model is available; proposal still requires geometry validation."
+        if mode == METRIC_POLICY:
+            if not engine:
+                return "capability_missing", data_ready_reason
+            if not isinstance(metric_manifest, Mapping) or metric_manifest.get("status") != "ok":
+                return "unavailable", "Metric training artifact is missing or not valid."
+            n = metric_manifest.get("n")
+            if isinstance(n, int) and not isinstance(n, bool) and n < 16:
+                return "no_data", "The metric training artifact has too few compatible rows."
+            if metric_manifest.get("synthetic") is not False:
+                return ("ready", "Synthetic metric artifacts are proposal-only; a real solve is "
+                                 "always refused.")
+            return ("ready", "Measured metric artifacts are recorded; the real package remains "
+                             "opt-in and needs an approvals record plus the parent release.")
         if mode == "cma_seed":
             return (("ready", "An explicit CMA archive seed pack is recorded.") if seed_ready else
                     ("unavailable", "Save a CMA archive seed pack first."))
@@ -217,6 +412,9 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
     for card in POLICY_FALLBACKS:
         status, why = policy_status(card["mode"])
         policies.append(dict(card, status=status, reason=why))
+    if metric_explicit or metric.get("status") == "ready" or metric.get("mode"):
+        status, why = policy_status(METRIC_POLICY)
+        policies.append(dict(METRIC_POLICY_CARD, status=status, reason=why))
     selected_status = next((card["status"] for card in policies if card["mode"] == current_policy), "unknown")
     selected_ready = selected_status == "ready"
     readiness_reason = next((card["reason"] for card in policies if card["mode"] == current_policy),
@@ -225,7 +423,7 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
     # Presence of a prepared run package, for every phase. The client uses it to decide the
     # Live tab; it must not have to visit the execute panel first to learn that it exists.
     data.update({"current_policy": current_policy, "policies": policies,
-                 "package_present": bool(package),
+                 "package_present": bool(package), "metric": metric,
                  "readiness": {"engine_available": engine, "eligible_rows": manifest.get("n"),
                                "minimum_rows": manifest.get("n_min"), "reason": readiness_reason},
                  "artifacts": [{"kind": k, "sha256": m["sha256"]} for k, m in metadata.items() if m.get("status") == "available"],
@@ -257,9 +455,28 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
                                    "acquisition": proposal.get("acquisition"),
                                    "trust_region": proposal.get("trust_region"), "measured": False}]
     if phase in ("propose", "execute"):
-        data["actions"].append(action("package", "Prepare immutable solve package",
-                                      not package and proposal.get("status") == "ok"
-                                      and selected_ready and active is None))
+        if metric_explicit or metric.get("status") == "ready" or metric.get("mode"):
+            build_ready = (metric_explicit and metric.get("status") == "ready"
+                           and not package and proposal.get("status") == "ok" and active is None)
+            reason = None
+            if not metric_explicit:
+                reason = ("Switch the proposal policy to metric-composite (opt-in) before preparing "
+                          "a real metric package; the scalar route is separate.")
+            elif metric.get("status") != "ready":
+                reason = metric.get("reason")
+            elif package:
+                reason = "A package is already prepared for this revision."
+            data["actions"].append(action(
+                "package", "Prepare real metric package (opt-in)", build_ready,
+                payload={"metric": REAL_METRIC, "budget_profile": "metric-canary-8x2",
+                         "lane": "gpu"},
+                metric=True, budget_profile="metric-canary-8x2",
+                real_profiles=list(METRIC_REAL_PROFILES),
+                approvals_record=metric.get("approvals_record"), reason=reason))
+        if not metric_explicit:
+            data["actions"].append(action("package", "Prepare immutable solve package",
+                                          not package and proposal.get("status") == "ok"
+                                          and selected_ready and active is None))
     if phase == "decide":
         verification = read("verification")
         selection = verification.get("selection") or {}
@@ -301,13 +518,30 @@ def workflow_panel(service, study, phase, artifact=None, *, root, runs_root=None
                         "verified": sum(k in ("verify", "audit") and bool(r.get("physical_measurement")) for k, r in results),
                         "unknown": sum(row["status"] == "unknown" for row in attempts),
                     }
+                package_metric = (package.get("metric")
+                                  if isinstance(package.get("metric"), Mapping) else None)
+                package_mode = (package_metric or {}).get("provenance_mode")
+                if package_metric is None:
+                    release_ready, launch_reason = True, None
+                elif package_mode == REAL_METRIC:
+                    release_ready = metric.get("release", {}).get("status") == "ready"
+                    launch_reason = None if release_ready else metric.get("release", {}).get("reason")
+                else:
+                    release_ready = False
+                    launch_reason = (f"{package_mode or 'synthetic_metric'} package can never "
+                                     "authorize a real solver.")
                 data["actions"].append(action("launch", "Launch serial solve study",
-                    launcher_available and capability.get("status") == "ok" and not launched, package_hash=package["package_id"], package_revision=revision))
+                    launcher_available and capability.get("status") == "ok" and not launched
+                    and release_ready,
+                    package_hash=package["package_id"], package_revision=revision,
+                    reason=launch_reason))
                 data["actions"].append(action("cancel", "Stop after current candidate", launched and bool(package_row["active"]),
                     package_id=package["package_id"], package_status="running"))
                 data["actions"].append(action("queue_study", "Write night-queue file for this study",
-                    phase in ("execute", "decide"), package_hash=package["package_id"],
-                    package_revision=revision, lane=package.get("lane") or "gpu"))
+                    phase in ("execute", "decide") and release_ready,
+                    package_hash=package["package_id"],
+                    package_revision=revision, lane=package.get("lane") or "gpu",
+                    reason=launch_reason))
         except (ValueError, ImportError) as exc:
             data["execution_capability"] = {"status": "unavailable", "reason": str(exc)}
     if active:

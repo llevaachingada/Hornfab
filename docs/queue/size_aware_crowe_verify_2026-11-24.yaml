@@ -1,0 +1,57 @@
+night: size_aware_crowe_verify_2026-11-24
+lane: gpu
+jobs:
+  - id: crowe_product
+    kind: command
+    timeout_s: 900
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv/Scripts/hornlab-search.exe
+      - verify
+      - --run
+      - runs/20261122T223153Z-screen-98b41d
+      - --designs
+      - fbaa37e52eb9
+      - --verify-dir
+      - runs/size_aware_crowe_verify_2026-11-24/product
+      - --cache-dir
+      - runs/size_aware_crowe_verify_2026-11-24/cache_product
+      - --dataset-dir
+      - runs/size_aware_crowe_verify_2026-11-24/dataset
+  - id: crowe_epsilon_125
+    kind: command
+    timeout_s: 900
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv/Scripts/hornlab-search.exe
+      - verify
+      - --run
+      - runs/20261122T223153Z-screen-98b41d
+      - --designs
+      - 7d0caa63b55c
+      - --verify-dir
+      - runs/size_aware_crowe_verify_2026-11-24/epsilon_125
+      - --cache-dir
+      - runs/size_aware_crowe_verify_2026-11-24/cache_epsilon_125
+      - --dataset-dir
+      - runs/size_aware_crowe_verify_2026-11-24/dataset
+  - id: crowe_discovery
+    kind: command
+    timeout_s: 900
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv/Scripts/hornlab-search.exe
+      - verify
+      - --run
+      - runs/20261122T223153Z-screen-98b41d
+      - --designs
+      - '138f09ce5472'
+      - --verify-dir
+      - runs/size_aware_crowe_verify_2026-11-24/discovery
+      - --cache-dir
+      - runs/size_aware_crowe_verify_2026-11-24/cache_discovery
+      - --dataset-dir
+      - runs/size_aware_crowe_verify_2026-11-24/dataset

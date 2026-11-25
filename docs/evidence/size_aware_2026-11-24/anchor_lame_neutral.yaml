@@ -1,0 +1,368 @@
+bounds:
+  g_aspect:
+    lo: 1.7429677913
+    hi: 1.7429677913
+    search: false
+  g_end_frac:
+    lo: 1.2135753946
+    hi: 1.2135753946
+    search: false
+  g_entry_half_angle_deg:
+    lo: 2.0
+    hi: 2.0
+    search: false
+  g_fc_hz:
+    lo: 519.9916524292
+    hi: 519.9916524292
+    search: false
+  g_lame_p:
+    lo: 3.9992265168
+    hi: 3.9992265168
+    search: false
+  g_morph_frac:
+    lo: 0.6
+    hi: 0.6
+    search: false
+  g_rim_sweep_ratio:
+    lo: -0.2014039349
+    hi: -0.2014039349
+    search: false
+  g_source_blend_ratio:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_cd_core_blend:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_theta_h0_deg:
+    lo: 9.944991134895036
+    hi: 9.944991134895036
+    search: false
+  g_theta_v0_deg:
+    lo: 9.942713586128136
+    hi: 9.942713586128136
+    search: false
+  g_h_mid_gain_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_v_mid_gain_mm:
+    lo: 0.0
+    hi: 0.0
+    search: false
+  g_core_join_fraction:
+    lo: 0.65
+    hi: 0.65
+    search: false
+brief:
+  description: '(objective v11) HOME XO900 CD identity: the v11 home CD brief (600x480x480)
+    with F_X 900 Hz (H corridor from 900, V from 1000, CD band 900-8000). Own identity:
+    never ranked against the 700 Hz brief.'
+  driver:
+    exit_angle_deg: 2.0
+    exit_radius_mm: 18.0
+  envelope:
+    max_depth_mm: 480.0
+    max_mouth_h_mm: 480.0
+    max_mouth_w_mm: 600.0
+  grid:
+    screen_extra_hz:
+    - 250
+    - 315
+    - 400
+    - 2573
+    - 3311
+    - 4260
+    verify_points_per_octave: 6
+  name: room_landscape_80x50_900_hf1440_v11cd
+  objective:
+    cd:
+      band_hz:
+      - 900.0
+      - 8000.0
+      di_std:
+        tolerance_db: 1.0
+        weight: 0.75
+      lw:
+        tolerance_db: 1.5
+        weight: 1.5
+      nacc:
+        tolerance: 0.02
+        weight: 0.75
+      offaxis:
+        angles_h_deg:
+        - -40
+        - -30
+        - 30
+        - 40
+        angles_v_deg:
+        - -25
+        - -10
+        - 10
+        - 25
+        band_hz:
+        - 2500.0
+        - 8000.0
+        reference: band_mean
+        tolerance_db: 1.0
+        weight: 1.0
+      report:
+        contour: false
+        omega: true
+      window_h_deg: 30.0
+      window_v_deg: 10.0
+    cov_below_f0: one_sided
+    cov_narrow_ratio: 2.0
+    cov_v_weight: 0.5
+    flat_band: scored
+    lfp_crossover_ratio: 1.6
+    lfp_re_z: 0.2
+    loaded_re_z: 0.5
+    ripple_region: preferred_edge
+    tolerances:
+      cov_profile: 3.0
+      di_roughness: 1.0
+      dislope: 9.0
+      flat: 1.5
+      flat_cv: 1.5
+      load: 0.3
+      rip: 1.0
+    version: 11
+  source:
+    cap: auto
+  symmetry: hv
+  target:
+    band_hi_hz: 8000.0
+    band_lo_hz: 350.0
+    coverage_h_deg: 80.0
+    coverage_profile:
+      h:
+      - hz: 900
+        max_deg: 90
+        min_deg: 60
+        preferred_deg: 80
+      - hz: 8000
+        max_deg: 90
+        min_deg: 60
+        preferred_deg: 80
+      interpolation: log_frequency
+      mode: corridor
+      v:
+      - hz: 1000
+        max_deg: 60
+        min_deg: 40
+        preferred_deg: 50
+      - hz: 8000
+        max_deg: 60
+        min_deg: 40
+        preferred_deg: 50
+    coverage_v_deg: 50.0
+    coverage_v_down_deg: null
+    coverage_v_up_deg: null
+    di_slope_target: 0.0
+    di_target_db: null
+    driver_exit_radius_mm: null
+    f0_hz: 900.0
+    f0_v_hz: 900.0
+    freq_weights:
+      band_hz:
+      - - 2500.0
+        - 5500.0
+        - 2.0
+    loaded_hi_hz: 5600.0
+    z_min: 0.5
+  weights:
+    cov_profile: 1.0
+    di_roughness: 0.5
+    dislope: 0.5
+    flat: 0.5
+    flat_cv: 0.5
+    load: 1.0
+    rip: 0.5
+brief_file: null
+description: HOME LANDSCAPE Klangfilm-Lame curved-cap horn (derived, source blend
+  off), smooth brief
+family: FREEFORM
+feasibility:
+  derivation:
+  - knob: '-'
+    note: 'seed_policy explicit: derivation skipped'
+  envelope_mouth_h_mm: 480.0
+  envelope_mouth_w_mm: 600.0
+  f0_hz: 900.0
+  f0_v_hz: 900.0
+  feasible_v: false
+  feasible_w: true
+  held_coverage_v_deg: 58.7962962962963
+  held_coverage_w_deg: 47.03703703703704
+  required_mouth_h_mm: 564.4444444444445
+  required_mouth_w_mm: 352.77777777777777
+  rule: d = KEELE_K / (f0 * coverage) mm (KEELE_K = 25,400 m-deg-Hz)
+  screen_freqs_below_f0: 3
+  screen_freqs_total: 12
+  verify_freqs_below_f0: 9
+  verify_freqs_total: 25
+generator:
+  n_phi: 19
+  n_s: 64
+  span: quarter
+  wall_thickness_mm: 3.0
+  name: grid
+  rows:
+    type: klangfilm_lame_hv_cd
+  seed_policy: explicit
+grid:
+  screen_extra_hz:
+  - 250
+  - 315
+  - 400
+  - 2573
+  - 3311
+  - 4260
+  verify_points_per_octave: 6
+mesh:
+  dof_cap_final: 24000
+  dof_cap_screen: 24000
+  dof_cap_verify: 24000
+  dof_per_triangle: 0.51
+  epw: 6.0
+  quadrants: '1'
+name: anchor_lame_neutral_2026_11_24
+objective:
+  cd:
+    band_hz:
+    - 900.0
+    - 8000.0
+    di_std:
+      tolerance_db: 1.0
+      weight: 0.75
+    lw:
+      tolerance_db: 1.5
+      weight: 1.5
+    nacc:
+      tolerance: 0.02
+      weight: 0.75
+    offaxis:
+      angles_h_deg:
+      - -40
+      - -30
+      - 30
+      - 40
+      angles_v_deg:
+      - -25
+      - -10
+      - 10
+      - 25
+      band_hz:
+      - 2500.0
+      - 8000.0
+      reference: band_mean
+      tolerance_db: 1.0
+      weight: 1.0
+    report:
+      contour: false
+      omega: true
+    window_h_deg: 30.0
+    window_v_deg: 10.0
+  cov_below_f0: one_sided
+  cov_narrow_ratio: 2.0
+  cov_v_weight: 0.5
+  flat_band: scored
+  lfp_crossover_ratio: 1.6
+  lfp_re_z: 0.2
+  loaded_re_z: 0.5
+  ripple_region: preferred_edge
+  tolerances:
+    cov_profile: 3.0
+    di_roughness: 1.0
+    dislope: 9.0
+    flat: 1.5
+    flat_cv: 1.5
+    load: 0.3
+    rip: 1.0
+  version: 11
+search:
+  algorithm: cma
+  budget: 85
+  budget_counts: valid
+  error_policy: retry_same_then_stop
+  infeasible_penalty: resample_strict
+  max_attempts: 425
+  popsize: null
+  seed: 81302
+  sigma0: 0.12
+  tolfun: 0.001
+seed_params:
+  g_aspect: 1.7429677913
+  g_end_frac: 1.2135753946
+  g_entry_half_angle_deg: 2.0
+  g_fc_hz: 519.9916524292
+  g_lame_p: 3.9992265168
+  g_morph_frac: 0.6
+  g_rim_sweep_ratio: -0.2014039349
+  g_source_blend_ratio: 0.0
+  g_cd_core_blend: 0.0
+  g_theta_h0_deg: 9.944991134895036
+  g_theta_v0_deg: 9.942713586128136
+  g_h_mid_gain_mm: 0.0
+  g_v_mid_gain_mm: 0.0
+  g_core_join_fraction: 0.65
+solve:
+  angle_count: 73
+  backend: beat_cuda
+  balloon: true
+  balloon_points_screen: 512
+  balloon_points_verify: 1024
+  cuda_fused: true
+  distance_m: 10.0
+  gmres_tol: 1.0e-05
+  timeout_s: 900
+target:
+  band_hi_hz: 8000.0
+  band_lo_hz: 350.0
+  coverage_h_deg: 80.0
+  coverage_profile:
+    h:
+    - hz: 900
+      max_deg: 90
+      min_deg: 60
+      preferred_deg: 80
+    - hz: 8000
+      max_deg: 90
+      min_deg: 60
+      preferred_deg: 80
+    interpolation: log_frequency
+    mode: corridor
+    v:
+    - hz: 1000
+      max_deg: 60
+      min_deg: 40
+      preferred_deg: 50
+    - hz: 8000
+      max_deg: 60
+      min_deg: 40
+      preferred_deg: 50
+  coverage_v_deg: 50.0
+  coverage_v_down_deg: null
+  coverage_v_up_deg: null
+  di_slope_target: 0.0
+  di_target_db: null
+  driver_exit_radius_mm: null
+  f0_hz: 900.0
+  f0_v_hz: 900.0
+  freq_weights:
+    band_hz:
+    - - 2500.0
+      - 5500.0
+      - 2.0
+  loaded_hi_hz: 5600.0
+  z_min: 0.5
+weights:
+  cov_profile: 1.0
+  di_roughness: 0.5
+  dislope: 0.5
+  flat: 0.5
+  flat_cv: 0.5
+  load: 1.0
+  rip: 0.5

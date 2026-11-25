@@ -1,0 +1,21 @@
+# Knobs from the measured 2-inch 900 Hz winner 0ae816f04c06.
+extends: ../favL_2026-11-20/favL__2in_c500.yaml
+name: photo_comparison_crowe_2in_half2_xo900_v11
+brief_file: ../../briefs/hf2in_2026-11-20/compact500_xo900_80x50_hf2in_v11cd.yaml
+seed_params:
+  g_L_mm: 252.1465012403
+  g_a_h_deg: 33.0599344847
+  g_a_v_deg: 30.9999541934
+  g_k: 1.0011859329
+  g_n: 2.8543050896
+  g_q: 0.996
+  g_r_lip_mm: 17.7941953999
+  g_s: 0.3396638831
+  g_sf_ab: 0.8987713564
+  g_sf_amt: 0.2352754117
+  g_sf_m: 4.0
+  g_sf_n1: 1.8
+  g_sf_n2: 7.0
+  g_sf_start: 0.25
+  g_throat_hv_ratio: 1.1207256832
+  g_wrap_deg: 110.1759118831

@@ -212,6 +212,9 @@ def test_budget_exactness_and_deterministic_resume_match_an_uninterrupted_run(
     assert len(rows) == budget and not any(r["cached"] for r in rows)
     assert run_json(tmp_path / "r")["stats"]["non_cached"] == budget   # combined, exactly once
     assert run_json(tmp_path / "r")["stop_reason"] == "budget"
+    # A v3 run resumes deterministically: the protocol marker is the new split-archive protocol.
+    assert run_json(tmp_path / "r")["qd"]["protocol"] == "cma-me-archive-v3"
+    assert run_json(tmp_path / "r")["qd"]["protocol"] == qd_mod.QD_PROTOCOL
 
     # deterministic replay: byte-for-byte the same cell set, centers, objectives and stats
     au, ar = archive_json(tmp_path / "u"), archive_json(tmp_path / "r")
@@ -223,6 +226,32 @@ def test_budget_exactness_and_deterministic_resume_match_an_uninterrupted_run(
     assert hu["cells"] == hr["cells"]
     assert json.loads((tmp_path / "u" / "best.json").read_text())["objective"] == \
         json.loads((tmp_path / "r" / "best.json").read_text())["objective"]
+
+
+def test_v2_archive_protocol_refuses_resume_before_any_evaluation(tmp_path, monkeypatch):
+    """An old v2 result archive cannot be reinterpreted as this build's hard best-in-cell archive.
+
+    The refusal happens before ``_prepare``/any evaluation, and the clear message names the old
+    result-archive semantics rather than silently rebuilding the archive from old rows.
+    """
+    pytest.importorskip("ribs", reason="ribs not installed")
+    cfg = two_knob_cfg(load_config(_config(tmp_path, qd=qd_block(), name="v2cfg.yaml")))
+    rd = tmp_path / "v2"
+    rd.mkdir()
+    (rd / "run.json").write_text(
+        json.dumps({"qd": {"algorithm": "cma_me", "protocol": "cma-me-archive-v2"}}),
+        encoding="utf-8")
+    calls = []
+
+    def boom(*a, **k):   # pragma: no cover - the refusal must happen before this is reached
+        calls.append(1)
+        raise AssertionError("evaluate ran before the v2 protocol refusal")
+
+    monkeypatch.setattr(qd_mod, "evaluate", boom)
+    with pytest.raises(ConfigError, match="old result-archive semantics cannot be resumed"):
+        run_qd(cfg, rd, 5)
+    assert calls == []
+    assert not (rd / "search.ndjson").exists()
 
 
 def test_archive_json_matches_the_pinned_contract(smoke_cfg, tmp_path, monkeypatch):

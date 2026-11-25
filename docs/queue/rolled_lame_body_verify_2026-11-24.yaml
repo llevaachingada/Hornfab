@@ -1,0 +1,35 @@
+night: rolled_lame_body_verify_2026-11-24
+lane: gpu
+jobs:
+  - id: rolled_frontload_10_6
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv/Scripts/hornlab-search.exe
+      - run
+      - --config
+      - docs/evidence/size_aware_2026-11-24/anchor_rolled_variant.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/rolled_lame_body_verify_2026-11-24/cache_rolled
+      - --dataset-dir
+      - runs/rolled_lame_body_verify_2026-11-24/dataset
+  - id: lame_phase_a_h_mid_2mm
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv/Scripts/hornlab-search.exe
+      - run
+      - --config
+      - docs/evidence/size_aware_2026-11-24/anchor_lame_variant.yaml
+      - --mode
+      - verify
+      - --cache-dir
+      - runs/rolled_lame_body_verify_2026-11-24/cache_lame
+      - --dataset-dir
+      - runs/rolled_lame_body_verify_2026-11-24/dataset

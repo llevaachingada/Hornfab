@@ -1,0 +1,13 @@
+extends: ../cd_v11_verify_2026-11-20/cd11v__ath_core_petal.yaml
+name: home_core_petal_v11_open
+description: Open-envelope continuation from measured native ATH CORE-petal geometry 2683984c802c.
+brief: null
+brief_file: ../../briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd_open_2026-11-22.yaml
+search:
+  budget: 60
+  seed: 81231
+  sigma0: 0.10
+  budget_counts: valid
+  max_attempts: 360
+  infeasible_penalty: resample_strict
+  error_policy: retry_same_then_stop

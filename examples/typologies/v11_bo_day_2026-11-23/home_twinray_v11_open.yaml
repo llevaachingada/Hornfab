@@ -1,0 +1,13 @@
+extends: ../verify_2026-11-22/v22_twinray_home_1_7356.yaml
+name: home_twinray_v11_open
+description: TwinRay-inspired native OSSE transfer from measured v10 seed 026edbad538c.
+brief: null
+brief_file: ../../briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd_open_2026-11-22.yaml
+search:
+  budget: 60
+  seed: 81211
+  sigma0: 0.15
+  budget_counts: valid
+  max_attempts: 360
+  infeasible_penalty: resample_strict
+  error_policy: retry_same_then_stop

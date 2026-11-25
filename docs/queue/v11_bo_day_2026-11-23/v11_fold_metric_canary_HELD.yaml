@@ -1,0 +1,36 @@
+# HELD — real metric-composite canary (Home v11 Fold, 80x50 open).
+# Do not copy to runs/nights or set pause: false until the parent has:
+#   1. recorded a B4 PASS FOR EXPLORATORY PILOT on task_identity 82dbd04691c7b456 /
+#      artifact 8281868365fbd52423bdf2ead3d6df0308f4e93dec52ce10d6f752cbbe720b97;
+#   2. edited docs/queue/v11_bo_day_2026-11-23/v11_fold_metric_canary_APPROVAL.json to
+#      status: APPROVED_FOR_CANARY and owner_authorization.authorized: true;
+#   3. changed the HORNLAB_METRIC_REAL_EXECUTE value below from "0" to "1".
+# The package is already prepared and dry-run-verified; no backend call was made.
+# Package id: 77dd1f255166fe4fbdb1b4159d179eda83be58a777e34b19c575a444200a1387
+# Budget: 8 screen + 2 verify = 10 calls, 60 attempts, refit_every 4, lane gpu.
+night: v11_bo_metric_canary_2026-11-23
+lane: gpu
+pause: true
+jobs:
+  - id: v11_fold_metric_canary_8x2
+    kind: command
+    timeout_s: 5400
+    env:
+      HORNLAB_GPU_LOCK: refuse
+      HORNLAB_METRIC_REAL_EXECUTE: "0"
+      PYTHONPATH: "C:\\Users\\hunte\\Hrns\\hornlab-search;C:\\Users\\hunte\\Hrns\\oc-wt\\bo-study\\bayes-venv\\Lib\\site-packages;C:\\Users\\hunte\\Hrns\\hornlab-search\\.venv\\Lib\\site-packages"
+      OMP_NUM_THREADS: "1"
+      MKL_NUM_THREADS: "1"
+      OPENBLAS_NUM_THREADS: "1"
+    argv:
+      - C:/Users/hunte/Hrns/hornlab-search/.venv/Scripts/python.exe
+      - -m
+      - hornlab_search.studies.cli
+      - run
+      - --root
+      - C:/Users/hunte/Hrns/hornlab-search/runs/v11_bo_day_planning/metric_canary_rehearsal/registry
+      - --package
+      - C:/Users/hunte/Hrns/hornlab-search/runs/v11_bo_day_planning/metric_canary_rehearsal/registry/package_metric_canary.json
+      - --execute
+      - --project-root
+      - C:/Users/hunte/Hrns/hornlab-search/runs/v11_bo_day_planning/metric_canary_work

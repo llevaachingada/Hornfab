@@ -359,15 +359,34 @@ class AssemblyRanges:
 
 @dataclass(frozen=True)
 class AssemblyPoint:
-    """One resolved assembly: explicit transforms, never inferred from names."""
+    """One resolved assembly: explicit transforms, never inferred from names.
+
+    ``horn_mount_offset_xyz_mm`` is the complete world-frame offset applied to the horn
+    mesh (X right, Y up, Z toward the listener; the cabinet baffle is ``z = 0`` and the
+    body sits at ``z < 0``).  ``horn_mount_offset_z_mm`` stays as a read-only view for
+    older records; new code must carry the full three-vector so a vertical placement can
+    never be silently dropped to a forward-only one.
+    """
 
     horn_layout: str
     woofer_center_xyz_mm: tuple[float, float, float]
-    horn_mount_offset_z_mm: float
+    horn_mount_offset_xyz_mm: tuple[float, float, float]
     horn_mount_transform_m: tuple[tuple[float, ...], ...]   # 4x4 row-major, metres
     assembly_origin_description: str
     horn_to_woofer_center_sep_mm: float
     baffle_seam_model: Literal["separate_closed_meshes", "flush_seam_explicit"]
+
+    @property
+    def horn_mount_offset_z_mm(self) -> float:
+        return float(self.horn_mount_offset_xyz_mm[2])
+
+    @property
+    def horn_mount_offset_y_mm(self) -> float:
+        return float(self.horn_mount_offset_xyz_mm[1])
+
+    @property
+    def horn_mount_offset_x_mm(self) -> float:
+        return float(self.horn_mount_offset_xyz_mm[0])
 
 
 @dataclass(frozen=True)

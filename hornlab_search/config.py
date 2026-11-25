@@ -7,6 +7,8 @@ the typed DesignSpace and Target from `bounds_raw` and `target_raw`.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import math
 from dataclasses import dataclass
@@ -56,6 +58,23 @@ HF_VERIFY_LO_HZ = 5000.0
 
 def freq_grid(lo: float, hi: float, n: int) -> tuple[float, ...]:
     return tuple(round(float(f), 2) for f in np.geomspace(lo, hi, n))
+
+
+# ------------------------------------------------------------------ screen policy profiles
+# 2026-11-23 (HF screen pass): ``solve.screen_grid`` overrides ONLY the ``screen`` mode grid.
+# ``solve.freq_grid`` is left byte-identical (it replaces every mode's grid, and the meh_* configs
+# rely on that). A named profile is a frozen explicit list, so the solved frequencies record is
+# independent of float rounding in a config's ppo arithmetic. ``min_band_hi_hz`` is the promise the
+# profile makes to the scorer: a profile that solves to 12 kHz on a brief that stops at 10 kHz
+# would spend GPU time on samples the objective masks out, so the loader refuses it instead.
+SCREEN_GRID_PROFILES: dict[str, dict] = {
+    "hf12k_screen_v1": {
+        "freqs_hz": freq_grid(500.0, 12_000.0, 19),
+        "min_band_hi_hz": 12_000.0,
+        "description": "HF screen profile v1: 500-12000 Hz, 19 log-spaced points (~4/oct), "
+                       "mesh f_max 12000 Hz",
+    },
+}
 
 
 # ------------------------------------------------------------------ settings
@@ -248,22 +267,101 @@ def _load_yaml_extends(path, _chain: tuple = ()):
 #: Owner decision 2026-11-22: with ``envelope.enforce: false`` the brief's build box stops being a
 #: search refusal; only this absolute per-dimension sanity ceiling remains so nothing grows to ~5 ft.
 DEFAULT_ENVELOPE_SANITY_MAX_MM = 1200.0
+ENVELOPE_AXES = ("max_mouth_w_mm", "max_mouth_h_mm", "max_depth_mm")
+ENVELOPE_LEGACY_TOLERANCE_MM = (0.5, 0.5, 15.0)
+ENVELOPE_PRODUCT_TOLERANCE_MM = 0.5
+
+
+@dataclass(frozen=True)
+class EnvelopePolicy:
+    """Candidate limits and product dimensions, held outside design and solve keys."""
+
+    mode: str
+    product_limits_mm: tuple[float, float, float]
+    candidate_limits_mm: tuple[float, float, float]
+    sanity_max_mm: float
+    max_utilization: float | None = None
+
+    @property
+    def mesh_limits_mm(self) -> tuple[float, float, float]:
+        if self.mode == "production":
+            return tuple(min(limit + tol, self.sanity_max_mm) for limit, tol in
+                         zip(self.candidate_limits_mm, ENVELOPE_LEGACY_TOLERANCE_MM))
+        return self.candidate_limits_mm
+
+    def _identity_fields(self) -> dict:
+        return {"version": 1, "axes": ["width", "height", "depth"], "mode": self.mode,
+                "product_limits_mm": self.product_limits_mm,
+                "candidate_limits_mm": self.candidate_limits_mm,
+                "mesh_limits_mm": self.mesh_limits_mm, "sanity_max_mm": self.sanity_max_mm,
+                "max_utilization": self.max_utilization,
+                "product_tolerance_mm": ENVELOPE_PRODUCT_TOLERANCE_MM}
+
+    @property
+    def policy_id(self) -> str:
+        payload = json.dumps(self._identity_fields(), sort_keys=True, separators=(",", ":"))
+        return "envelope-v1-" + hashlib.sha256(payload.encode()).hexdigest()[:16]
+
+    def as_dict(self) -> dict:
+        return {**self._identity_fields(), "policy_id": self.policy_id}
+
+
+def envelope_policy(brief: dict | None) -> EnvelopePolicy:
+    """Resolve legacy production, bounded exploration or open discovery from one brief."""
+    env = (brief or {}).get("envelope") or {}
+    product = tuple(float(env.get(key, 1e9)) for key in ENVELOPE_AXES)
+    if not env:
+        return EnvelopePolicy("unspecified", product, product, 1e9)
+    sanity = float(env.get("sanity_max_mm", DEFAULT_ENVELOPE_SANITY_MAX_MM))
+    if env.get("enforce", True):
+        return EnvelopePolicy("production", product, tuple(min(v, sanity) for v in product), sanity)
+    if env.get("max_utilization") is not None:
+        utilization = float(env["max_utilization"])
+        candidate = tuple(min(v * utilization, sanity) for v in product)
+        return EnvelopePolicy("exploration", product, candidate, sanity, utilization)
+    return EnvelopePolicy("discovery", product, (sanity, sanity, sanity), sanity)
 
 
 def effective_envelope_limits(brief: dict | None) -> tuple[float, float, float, bool]:
-    """(max_w_mm, max_h_mm, max_depth_mm, enforced) after the brief's `envelope.enforce` flag.
-    enforce absent/true -> the brief's three maxima, enforced=True (historical behaviour,
-    byte for byte). enforce false -> one absolute sanity ceiling per dimension
-    (`envelope.sanity_max_mm`, default 1200.0), enforced=False: the build box stops being a
-    search refusal and size becomes a post-hoc filter. Owner decision 2026-11-22."""
-    env = (brief or {}).get("envelope") or {}
-    if env.get("enforce", True):
-        return (float(env.get("max_mouth_w_mm", 1e9)),
-                float(env.get("max_mouth_h_mm", 1e9)),
-                float(env.get("max_depth_mm", 1e9)),
-                True)
-    ceiling = float(env.get("sanity_max_mm", DEFAULT_ENVELOPE_SANITY_MAX_MM))
-    return ceiling, ceiling, ceiling, False
+    """Compatibility interface for callers using nominal candidate dimensions."""
+    policy = envelope_policy(brief)
+    return (*policy.candidate_limits_mm, policy.mode in ("production", "unspecified"))
+
+
+def brief_for_envelope_adapter(brief: dict) -> dict:
+    """Pass effective maxima to versioned adapters whose input contract uses raw limits.
+
+    The adapter view is never used to hash a brief or to persist a design recipe.
+    """
+    policy = envelope_policy(brief)
+    if policy.mode in ("production", "unspecified") and (
+            policy.candidate_limits_mm == policy.product_limits_mm):
+        return brief
+    return {**brief, "envelope": {**(brief.get("envelope") or {}),
+                                 **dict(zip(ENVELOPE_AXES, policy.candidate_limits_mm))}}
+
+
+def _validate_envelope(env, where: str) -> None:
+    if not isinstance(env, dict):
+        raise ConfigError(f"{where}: envelope must be a mapping")
+    for key in ENVELOPE_AXES:
+        val = env.get(key)
+        if (not isinstance(val, (int, float)) or isinstance(val, bool)
+                or not math.isfinite(val) or val <= 0):
+            raise ConfigError(f"{where}: envelope.{key} must be a positive finite number")
+    if "enforce" in env and not isinstance(env["enforce"], bool):
+        raise ConfigError(f"{where}: envelope.enforce must be true or false")
+    if "sanity_max_mm" in env:
+        val = env["sanity_max_mm"]
+        if (not isinstance(val, (int, float)) or isinstance(val, bool)
+                or not math.isfinite(val) or val <= 0):
+            raise ConfigError(f"{where}: envelope.sanity_max_mm must be a positive finite number")
+    if "max_utilization" in env:
+        val = env["max_utilization"]
+        if (not isinstance(val, (int, float)) or isinstance(val, bool)
+                or not math.isfinite(val) or val < 1 or env.get("enforce", True)):
+            raise ConfigError(f"{where}: envelope.max_utilization requires enforce: false "
+                              "and must be a finite number >= 1")
 
 
 def load_brief(path) -> dict:
@@ -302,19 +400,7 @@ def load_brief(path) -> dict:
     meh_cfg = None
     if "meh" in raw and raw["meh"] is not None:
         meh_cfg = _validate_meh_block(raw["meh"], f"{where}:meh")
-    for k in ("max_mouth_w_mm", "max_mouth_h_mm", "max_depth_mm"):
-        if not isinstance(env.get(k), (int, float)) or not float(env[k]) > 0:
-            raise ConfigError(f"{where}: envelope.{k} must be a positive number")
-    # Owner decision 2026-11-22: envelope.enforce opts out of the build box as a refusal;
-    # envelope.sanity_max_mm sets the remaining absolute ceiling. Unknown envelope keys are
-    # left alone (today's behaviour: not rejected) so future additive keys stay readable.
-    if "enforce" in env and not isinstance(env["enforce"], bool):
-        raise ConfigError(f"{where}: envelope.enforce must be true or false")
-    if "sanity_max_mm" in env:
-        val = env["sanity_max_mm"]
-        if (not isinstance(val, (int, float)) or isinstance(val, bool)
-                or not math.isfinite(float(val)) or not float(val) > 0):
-            raise ConfigError(f"{where}: envelope.sanity_max_mm must be a positive finite number")
+    _validate_envelope(env, where)
     if not isinstance(raw.get("verify_only", False), bool):
         raise ConfigError(f"{where}: verify_only must be true or false")
     if raw["symmetry"] not in BRIEF_SYMMETRY:
@@ -1057,6 +1143,63 @@ def _validate_search_links(value, where: str, bounds_raw: dict) -> dict | None:
     return resolved
 
 
+def _validate_warm_start_covariance(value, where: str) -> dict | bool:
+    """P1b (senior optimizer audit, 2026-11-21): opt-in covariance transfer.
+
+    ``search.warm_start.covariance`` is ``true``/``false`` or a mapping with ``blend`` (0..1,
+    default 0.25), ``eig_floor`` (> 0), ``eig_cap`` (>= eig_floor), ``max_dim`` (1..16, default
+    16) and ``scale_sigma`` (bool, default true). ``false`` is kept as ``false`` so the absent
+    and explicitly disabled cases both add no run.json keys. Unknown keys are refused.
+    """
+    if value is None or value is False:
+        return False
+    if value is True:
+        return dict(warmstart_covariance_defaults())
+    if not isinstance(value, dict):
+        raise ConfigError(f"{where}: must be true, false or a mapping of options, got {value!r}")
+    allowed = {"blend", "eig_floor", "eig_cap", "max_dim", "scale_sigma"}
+    unknown = set(value) - allowed
+    if unknown:
+        raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)} (allowed: {sorted(allowed)})")
+    out = warmstart_covariance_defaults()
+    out.update(value)
+
+    def _number(key):
+        v = out[key]
+        if isinstance(v, bool) or not isinstance(v, (int, float)):
+            raise ConfigError(f"{where}.{key} must be a number, got {v!r}")
+        v = float(v)
+        if not np.isfinite(v):
+            raise ConfigError(f"{where}.{key} must be finite, got {out[key]!r}")
+        return v
+
+    blend = _number("blend")
+    if not (0.0 <= blend <= 1.0):
+        raise ConfigError(f"{where}.blend must be in [0, 1], got {out['blend']!r}")
+    eig_floor = _number("eig_floor")
+    if eig_floor <= 0.0:
+        raise ConfigError(f"{where}.eig_floor must be > 0, got {out['eig_floor']!r}")
+    eig_cap = _number("eig_cap")
+    if eig_cap < eig_floor:
+        raise ConfigError(f"{where}.eig_cap must be >= eig_floor ({eig_floor}), "
+                          f"got {out['eig_cap']!r}")
+    max_dim = out["max_dim"]
+    if isinstance(max_dim, bool) or not isinstance(max_dim, int) or not (1 <= max_dim <= 16):
+        raise ConfigError(f"{where}.max_dim must be an integer in [1, 16], got {max_dim!r}")
+    scale_sigma = out["scale_sigma"]
+    if not isinstance(scale_sigma, bool):
+        raise ConfigError(f"{where}.scale_sigma must be true or false, got {scale_sigma!r}")
+    out.update({"blend": blend, "eig_floor": eig_floor, "eig_cap": eig_cap,
+                "max_dim": int(max_dim), "scale_sigma": scale_sigma})
+    return out
+
+
+def warmstart_covariance_defaults() -> dict:
+    """The P1b defaults, imported lazily to keep config.py free of a search import cycle."""
+    from .search.warmstart import COVARIANCE_DEFAULTS
+    return dict(COVARIANCE_DEFAULTS)
+
+
 def _validate_warm_start(value, where: str, cfg_path: Path) -> dict | None:
     """B.1 (day 2026-11-12): ``search.warm_start: {from_runs, top_k, sigma_from_spread,
     allow_cross_brief}``. ``from_runs`` (required, non-empty) lists run DIRECTORIES whose
@@ -1069,7 +1212,7 @@ def _validate_warm_start(value, where: str, cfg_path: Path) -> dict | None:
         return None
     if not isinstance(value, dict):
         raise ConfigError(f"{where}: must be a mapping of options")
-    allowed = {"from_runs", "top_k", "sigma_from_spread", "allow_cross_brief"}
+    allowed = {"from_runs", "top_k", "sigma_from_spread", "allow_cross_brief", "covariance"}
     unknown = set(value) - allowed
     if unknown:
         raise ConfigError(f"{where}: unknown key(s) {sorted(unknown)} (allowed: {sorted(allowed)})")
@@ -1088,12 +1231,16 @@ def _validate_warm_start(value, where: str, cfg_path: Path) -> dict | None:
     for b in ("sigma_from_spread", "allow_cross_brief"):
         if b in value and not isinstance(value[b], bool):
             raise ConfigError(f"{where}.{b} must be true or false, got {value[b]!r}")
+    cov_resolved = _validate_warm_start_covariance(
+        value["covariance"], f"{where}.covariance") if "covariance" in value else None
     missing = [r for r in resolved if not Path(r).is_dir()]
     if missing:
         raise ConfigError(f"{where}.from_runs: run directory does not exist: {missing[0]}")
     out = dict(value)
     out["from_runs"] = resolved
     out["top_k"] = int(top_k)
+    if "covariance" in value:
+        out["covariance"] = cov_resolved
     return out
 
 
@@ -1385,6 +1532,9 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
         # A run directory's config.yaml already holds the merged brief (target/weights applied and
         # the brief embedded); use it as is, so resume/verify/report reproduce the run exactly.
         brief_d = dict(raw["brief"])
+        env = brief_d.get("envelope")
+        if isinstance(env, dict) and {"enforce", "sanity_max_mm", "max_utilization"} & env.keys():
+            _validate_envelope(env, where)
         brief_path = None
         embedded_brief = True
     obj_cfg = None
@@ -1454,9 +1604,26 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     mesh = _build(MeshSettings, _require(raw, "mesh", where), f"{where}:mesh",
                   optional=("max_triangle_slack", "rear_res_factor", "band_split", "curvature_npts", "dof_cap_finalist"))
     solve_section = dict(_require(raw, "solve", where))
-    if solve_section.get("freq_grid") is not None:
+    _has_freq_grid = solve_section.get("freq_grid") is not None
+    if _has_freq_grid:
         _validate_freq_grid(solve_section["freq_grid"], f"{where}:solve")
         solve_section.pop("freq_grid")
+    if solve_section.get("screen_grid") is not None:
+        try:
+            _band_hi = float(raw["target"]["band_hi_hz"])
+        except (KeyError, TypeError, ValueError):
+            raise ConfigError(f"{where}: target.band_hi_hz is required to size a screen grid") \
+                from None
+        _validate_screen_grid(solve_section["screen_grid"], f"{where}:solve", _band_hi)
+        if _has_freq_grid:
+            raise ConfigError(
+                f"{where}: solve.screen_grid and solve.freq_grid cannot both be set — freq_grid "
+                f"replaces EVERY mode's grid (legacy), screen_grid replaces only screen; pick one")
+        if (raw.get("grid") or {}).get("screen_extra_hz"):
+            raise ConfigError(
+                f"{where}: solve.screen_grid replaces the screen grid, so the brief's "
+                f"grid.screen_extra_hz would be silently ignored; remove one of the two")
+        solve_section.pop("screen_grid")
     if "worker_restart_every" in solve_section:
         try:
             _restart = int(solve_section["worker_restart_every"])
@@ -1592,6 +1759,19 @@ def load_config(path, *, brief=None, cma_seed: int | None = None,
     elif search.qd is not None:
         raise ConfigError(f"{where}:search.qd: search.qd is only used with "
                           f"search.algorithm: cma_me")
+    warm_cov = (search.warm_start or {}).get("covariance") if search.warm_start else None
+    if warm_cov:
+        # P1b: the covariance transfer is implemented only for the plain single-ES CMA path.
+        # Refuse a silent no-op (CMA-ME has no covariance start) or a recorded-but-not-injected
+        # transfer (restarts build fresh ES instances after the mean-only warm start).
+        if search.algorithm == "cma_me":
+            raise ConfigError(f"{where}:search.warm_start.covariance: the covariance-transfer "
+                              f"warm start is only implemented for search.algorithm: cma (got "
+                              f"cma_me; the atlas keeps today's emitters)")
+        if search.restarts is not None:
+            raise ConfigError(f"{where}:search.warm_start.covariance: the covariance-transfer "
+                              f"warm start is not supported with search.restarts (it applies to "
+                              f"the single-ES initial distribution only)")
     # F0 strict-mode cross-checks (only when a new key was actually opted into; absent keys leave
     # every legacy configuration byte-for-byte identical). Strict chronology is only tested for the
     # single-ES serial path, so restarts/lq/prefetch are refused until that work lands. Prefetch is
@@ -1798,6 +1978,90 @@ def _merge_screen_extra(base: list[float], extra, hi: float) -> tuple[float, ...
     return tuple(sorted(set(base) | pts))
 
 
+def _screen_grid_freqs(block: dict, band_hi: float | None) -> tuple[float, ...]:
+    """Expand a validated ``solve.screen_grid`` block into the SCREEN solve frequencies.
+
+    Precedence inside the block: ``profile`` (a frozen list) > ``freqs_hz`` (explicit) >
+    ``lo_hz``/``hi_hz``/``points_per_octave``. Validation has already run at load time, so this
+    only does arithmetic; a 12 kHz top edge is never clipped to ``band_hi`` (the loader refuses
+    that combination instead of silently dropping the frequencies the profile exists to solve).
+    """
+    if "profile" in block:
+        return tuple(float(f) for f in SCREEN_GRID_PROFILES[str(block["profile"])]["freqs_hz"])
+    if "freqs_hz" in block:
+        return tuple(round(float(f), 2) for f in block["freqs_hz"])
+    lo = float(block["lo_hz"]); hi = float(block["hi_hz"]); ppo = float(block["points_per_octave"])
+    if band_hi is not None:
+        hi = min(hi, float(band_hi))
+    n_pts = max(2, int(round(float(np.log2(hi / lo)) * ppo)) + 1)
+    return tuple(round(float(f), 2) for f in np.geomspace(lo, hi, n_pts))
+
+
+def _validate_screen_grid(block, where: str, band_hi: float | None) -> tuple[float, ...]:
+    """Validate ``solve.screen_grid`` and return the SCREEN frequencies it will solve.
+
+    Schema (exactly one form per block):
+      * ``{profile: hf12k_screen_v1}`` — a frozen named list in :data:`SCREEN_GRID_PROFILES`;
+      * ``{lo_hz, hi_hz, points_per_octave}`` — the same arithmetic as ``solve.freq_grid``;
+      * ``{freqs_hz: [..]}`` — an explicit list (>= 2, strictly increasing, no duplicates).
+
+    Refusals are deliberate and never silent:
+      * a top edge above ``target.band_hi_hz`` (the objective would mask those samples out);
+      * ``profile`` combined with any explicit key (ambiguous policy record);
+      * together with ``solve.freq_grid`` or a brief ``grid.screen_extra_hz`` (two screen policies).
+    """
+    if not isinstance(block, dict):
+        raise ConfigError(f"{where}: screen_grid must be a mapping "
+                          f"({{profile}} or {{lo_hz, hi_hz, points_per_octave}} or {{freqs_hz}})")
+    allowed = {"profile", "lo_hz", "hi_hz", "points_per_octave", "freqs_hz"}
+    unknown = set(block) - allowed
+    if unknown:
+        raise ConfigError(f"{where}: screen_grid has unknown key(s) {sorted(unknown)} "
+                          f"(allowed: {sorted(allowed)})")
+    forms = (int("profile" in block) + int("freqs_hz" in block)
+             + int(any(k in block for k in ("lo_hz", "hi_hz", "points_per_octave"))))
+    if forms != 1:
+        raise ConfigError(f"{where}: screen_grid needs exactly one form: "
+                          f"profile | freqs_hz | lo_hz+hi_hz+points_per_octave (got {sorted(block)})")
+    if "profile" in block:
+        name = block["profile"]
+        if name not in SCREEN_GRID_PROFILES:
+            raise ConfigError(f"{where}: screen_grid.profile {name!r} is not a known screen "
+                              f"policy (known: {sorted(SCREEN_GRID_PROFILES)})")
+        prof = SCREEN_GRID_PROFILES[str(name)]
+        need = float(prof["min_band_hi_hz"])
+        if band_hi is None or float(band_hi) < need:
+            raise ConfigError(
+                f"{where}: screen_grid.profile {name!r} solves to {need:g} Hz but "
+                f"target.band_hi_hz is {band_hi!r}; extend the brief's band (a new identity) or "
+                f"drop the profile — the extra samples would never be scored")
+        freqs = tuple(float(f) for f in prof["freqs_hz"])
+    elif "freqs_hz" in block:
+        raw = block["freqs_hz"]
+        if not isinstance(raw, (list, tuple)) or len(raw) < 2:
+            raise ConfigError(f"{where}: screen_grid.freqs_hz must be a list of >= 2 frequencies")
+        try:
+            freqs = tuple(round(float(f), 2) for f in raw)
+        except (TypeError, ValueError):
+            raise ConfigError(f"{where}: screen_grid.freqs_hz must be numbers") from None
+        if any(not np.isfinite(f) or f <= 0.0 for f in freqs):
+            raise ConfigError(f"{where}: screen_grid.freqs_hz must be positive finite numbers")
+        if len(set(freqs)) != len(freqs):
+            raise ConfigError(f"{where}: screen_grid.freqs_hz has duplicate points")
+        if list(freqs) != sorted(freqs):
+            raise ConfigError(f"{where}: screen_grid.freqs_hz must be ascending")
+    else:
+        lo, hi, ppo = _validate_freq_grid(
+            {k: block[k] for k in ("lo_hz", "hi_hz", "points_per_octave")}, f"{where}:screen_grid")
+        freqs = _screen_grid_freqs({"lo_hz": lo, "hi_hz": hi, "points_per_octave": ppo}, None)
+    if band_hi is not None and max(freqs) > float(band_hi):
+        raise ConfigError(
+            f"{where}: screen_grid top edge {max(freqs):g} Hz exceeds target.band_hi_hz "
+            f"{float(band_hi):g} Hz; the objective masks samples above band_hi, so extend the "
+            f"brief band (a new identity) or lower the screen grid")
+    return freqs
+
+
 def mode_freqs(mode: str, cfg: Config) -> tuple[float, ...]:
     """The mode's frozen log grid, with its top edge clipped to the target band's upper
     edge so the mesh is never asked to resolve frequencies the objective ignores.
@@ -1814,6 +2078,12 @@ def mode_freqs(mode: str, cfg: Config) -> tuple[float, ...]:
     band_hi = cfg.target_raw.get("band_hi_hz")
     if band_hi is not None and float(band_hi) < hi:
         hi = float(band_hi)
+    # 2026-11-23: a SCREEN-only override (``solve.screen_grid``) takes precedence over the frozen
+    # grid and the brief's ``screen_extra_hz``; verify/final/finalist are untouched by it. The
+    # loader has already validated the block and refused a top edge above ``band_hi``.
+    screen_override = ((getattr(cfg, "raw", None) or {}).get("solve") or {}).get("screen_grid")
+    if mode == "screen" and screen_override is not None:
+        return _screen_grid_freqs(screen_override, band_hi)
     override = (getattr(cfg, "raw", None) or {}).get("solve", {}).get("freq_grid") \
         if isinstance((getattr(cfg, "raw", None) or {}).get("solve"), dict) else None
     if override is not None:

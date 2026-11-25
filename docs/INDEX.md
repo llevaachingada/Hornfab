@@ -1,5 +1,11 @@
 # Docs index
 
+[Metric-aware BO handoff (2026-11-24)](research/metric_bo_2026-11-22/12_HANDOFF_2026-11-24.md) - integrated worker/refit/package/CLI, clean Home v11 Fold canary, 2-of-3 acquisition PASS, adaptive continuation staged, native/900 Hz admission table, cohort inventory and release/resume instructions.
+
+[Metric-aware BO ADR and implementation status](research/metric_bo_2026-11-22/ADR_metric_composite_v1.md) - frozen `metric-training-v1` artifact and `metric_composite_v1` policy; [Pass 2 status](research/metric_bo_2026-11-22/09_IMPLEMENTATION_STATUS.md) and [real-data/GPU plan](research/metric_bo_2026-11-22/07_DEFERRED_REAL_DATA_PLAN.md).
+
+[Metric-aware GUI exposure evidence](evidence/metric_bo_gui_2026-11-23/README.md) - opt-in metric panel, refusal matrix, zero-call dry-run proof and real-canary read-only probe.
+
 [+-5 deg constant-directivity briefs and jobs](evidence/cd_pm5const_2026-11-25/README.md) — corridor mode was zero-cost inside [min, max]; owner intent (any constant angle in a +-5 deg window) encoded with the opt-in `constancy` term; two new briefs, seven 100-valid jobs queued.
 
 [Repo findability handoff](handoffs/REPO_FINDABILITY_HANDOFF_2026-11-25.md) — senior plan for parallel sub-agents: inventories, family-law cards, scoring reference, tools catalog, skill updates, archive moves, log rotation; owner decisions listed.
@@ -12,6 +18,8 @@
 
 [CD wall-angle backbone fixed candidates](evidence/cd_backbone_2026-11-25/README.md) — versioned backbone kernel + adapters, predeclared four-candidate verify and one refined solve; rolled bb_h 0.5 passes (H 65.7 at 8 kHz, J 8.121 → 5.407, epw-9 confirmed), rolled 1.0 and both Lamé doses fail on waistband/loading.
 [CD variants of non-CD returned-lip horns](evidence/cd_variants_2026-11-25/README.md) — Le Cléac'h AR, Le Cléac'h H/V and Iwata AR wrapped as labeled CD hybrids (`rows_bb_v1`) on the v11cd brief; 14 predeclared solves, none passes (best 8 kHz H 59.9°), Le Cléac'h H/V + roll-in 0.20 closest; section hypothesis rejected.
+
+[Size-aware optimization and retained-return directivity](evidence/size_aware_2026-11-24/HANDOFF.md) — constraint audit, historical BO eligibility, offline size frontiers and matched GPU verification.
 
 [Sculpted home-900 V11 CMA pilot](queue/sculpted_xo900_cma_pilot_2026-11-21.yaml) — R3, K axial and Crowe k-home first tranches with conditional extension to 60 valid evaluations.
 
@@ -74,6 +82,8 @@ per-lane bests under v7 / v9 / v10 side by side (never pooled) plus the v10 freq
 [FAV-001 throat-loading levers (2026-11-20)](research/favorites_2026-11-20/THROAT_LOADING_LEVERS.md): k damages only >3 kHz (HF beaming), so V-only k (existing `g_throat_hv_ratio`) and a 2-inch exit (briefs `hf2in_2026-11-20`) are the levers; lanes `favL_*` and the fav8 night plan `FAV8_NIGHT_PLAN.md`.
 
 [FAV split-plane proposals (2026-11-20)](research/typologies/FAV_SPLIT_PLANE_PROPOSALS_2026-11-20.md): proposal dossier from today's measured findings: P1 split-plane OS-SE (`g_k_v`, `g_s_v`, H kept pure OS), P2 Keele-in-V exponential-throat hybrid (gated), P3 mouth termination, P4 2-inch + mild k_V; combination lanes `favM_*` queued.
+
+[Senior optimizer audit (2026-11-21)](research/optimizer_audit_2026-11-21/README.md): independent review of the existing CMA-ES/IPOP, CMA-ME/MAE, BoTorch scalar/TuRBO/Pareto and advisory tooling; P0 CMA-MAE archive semantics, floor identity and BO versioning, P1 advisory composition, covariance transfer and matched benchmarking, with the current-tree verification in [CURRENT_STATE_CHECK.md](research/optimizer_audit_2026-11-21/CURRENT_STATE_CHECK.md) and the implementation record in [IMPLEMENTATION_STATUS.md](research/optimizer_audit_2026-11-21/IMPLEMENTATION_STATUS.md).
 
 [B1 readiness + zero-dimension truth fix (2026-11-18, WP 2.2/D7)](evidence/b1_readiness_2026-11-18/README.md):
 B1/B1f lines checked (kind: command, safe), search/CLI/night dry-run now refuse a zero-free-dimension
@@ -189,9 +199,6 @@ Verification: legacy `sp__strong_v7` is the canonical section family at axial 7/
 
 [CMA-ES vs TuRBO, matched configs (2026-11-19)](renders/2026-11-19-turbo-vs-cma/README.md): six same-config/brief pairs as design cards (views + H/V dispersion), overview sheet, `pairs.json` with all 14 BO pairings.
 [Last-24h solved horns, 61 designs in 21 contact sheets at 200 dpi](renders/2026-11-19-last-day-horns/README.md): isometric, top-skew, V/H cut sections, V/H dispersion per design; scripts alongside.
-[Best horns solved 2026-11-22](renders/2026-11-22-best-horns/README.md): eight family leaders at
-200 dpi in 3 contact sheets (isometric, top-skew, V/H section cuts, V/H dispersion, scores);
-[gallery](renders/2026-11-22-best-horns/index.html).
 
 [25x2 pilot: section home pucker vs square X](renders/2026-11-15-25x2/README.md): four 25-eval screen runs, seeds 1234/5678.
 Square X best J **8.20–8.82** vs section home **17.397–17.398**; the square X wants a gentler X (`sf_amt` 0.42–0.47 vs

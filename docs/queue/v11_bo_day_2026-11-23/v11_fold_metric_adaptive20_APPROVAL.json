@@ -1,0 +1,44 @@
+{
+  "schema": "metric-real-approvals-v1",
+  "status": "HELD_PENDING_PARENT_RELEASE",
+  "profile": "metric-adaptive-20x2",
+  "screen_cap": 20,
+  "verify_cap": 2,
+  "refit_every": 4,
+  "lane": "gpu",
+  "task_identity": "82dbd04691c7b456",
+  "artifact_sha256": "10f1ffa31a84795f592f8bb3c1ec3f3d842a58ad7b3bb4139ac00c4bd0776ce6",
+  "identity": {
+    "task_identity": "82dbd04691c7b456",
+    "backend": "beat_cuda",
+    "fidelity": "screen",
+    "grid_hash": "c41ff9a7581ba429",
+    "dependency_hash": "f4dcdca807bdfad0",
+    "mesh_hash": "8e789cd0deef",
+    "brief_hash": "c6bc496e7b4f",
+    "score_hash": "77d4fdd49bd2c3b4"
+  },
+  "canary_acceptance": {
+    "accepted": true,
+    "canary_package_id": "3bf53815e1ab78bb7170455876531d5e79419ec844b4cf4799e46292b2ec9d8e",
+    "canary_study_id": "46cd5e1d3c63486796258fdc37e79abd",
+    "canary_generation": 2,
+    "canary_snapshot_sha256": "f4962d41184380c3ac2967273bccedab18f633d6968cafcf8d80ad54f743f94d",
+    "canary_screen_calls": 8,
+    "canary_verify_calls": 2,
+    "canary_best_verify_j": 4.791515723838074
+  },
+  "child_study": {
+    "study_id": "a5d78f8dc31c4785b997ad7161fb041b",
+    "parent_study_id": "46cd5e1d3c63486796258fdc37e79abd",
+    "training_rows": 182,
+    "training_artifact_bytes_sha256": "6d482878ce3221484d25a0f475b7a27ada4ea9d712a41e1c042788b498d010b1",
+    "training_artifact_checksum": "10f1ffa31a84795f592f8bb3c1ec3f3d842a58ad7b3bb4139ac00c4bd0776ce6",
+    "refit_lineage": "runs/metric_bo_canary_2026-11-23/registry_v4 (metric_training_manifest.refit_lineage)",
+    "note": "re-promoted after the study-scoped dataset run_id fix; same gen-2 artifact"
+  },
+  "owner_authorization": {
+    "authorized": false,
+    "note": "HELD. 20 additional screen calls bring the identity to 28 total (8 canary + 20 tranche), inside the owner's suggested 25-30 total. Parent release: flip status to APPROVED_FOR_CANARY, set owner_authorization.authorized=true, set HORNLAB_METRIC_REAL_EXECUTE=1 and insert the held queue job."
+  }
+}

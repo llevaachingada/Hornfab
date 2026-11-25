@@ -350,3 +350,30 @@ def test_cli_writes_json_md_csv(tmp_path):
     assert doc["tool"] == "catalog" and doc["counts"]["records"] == 11
     assert (out / "catalog.md").exists() and (out / "catalog.csv").exists()
     assert "Experiment catalog" in (out / "catalog.md").read_text(encoding="utf-8")
+
+
+def test_pure_catalog_identity_matches_historical_formulas():
+    from hornlab_search.dataset.catalog_identity import catalog_identity_from_record
+
+    for record in (meta(1, version=11), {"objective_version": "bad"}):
+        result = catalog_identity_from_record(record)
+        target = cat._sha16(cat._target_identity(cat._target_block(record)))
+        version, _ = cat._objective_version(record)
+        prov = cat._dict_or_empty(record.get("provenance"))
+        expected_score = cat._sha16({"objective_version": version, "target": target,
+            "brief": prov.get("brief"), "brief_hash": prov.get("brief_hash"),
+            "terms_keys": cat._terms_identity(record)["keys"], "terms_schema": True})
+        expected_task = cat._sha16({"family": record.get("family"), "brief": prov.get("brief"),
+            "brief_hash": prov.get("brief_hash"), "target": target, "objective_version": version})
+        assert result["score_hash"] == expected_score
+        assert result["task_identity"] == expected_task
+        assert result["physical_solve_id"] == cat._sha16([record.get("design_hash"), record.get("mesh_hash"), record.get("solve_hash")])
+        solve = cat._solve_block(record)
+        assert result["grid_hash"] == cat._sha16({k: solve[k] for k in ("freqs_hz", "observation", "gmres_tol")})
+        shas = cat._lib_shas(record)
+        external = ("hornlab_mesher", "hornlab_beat_bem", "hornlab_bempp_bem", "hornlab_plots")
+        assert result["dependency_hash"] == cat._sha16({k: shas.get(k) for k in external})
+        assert result["mesh_hash"] == cat._str_or_none(record.get("mesh_hash"))
+        assert result["backend"] == solve["backend"]
+        assert result["fidelity"] == solve["mode"]
+        assert result["brief_hash"] == prov.get("brief_hash")

@@ -162,6 +162,8 @@ def plan_assembly(
     *,
     horn_name: str = "horn",
     horn_mount_offset_z_mm: float = 0.0,
+    horn_mount_offset_y_mm: float = 0.0,
+    horn_mount_offset_x_mm: float = 0.0,
     out_dir: str | Path | None = None,
     experiment_id: str = "bl_assembly_prep",
     bl_root: BLRoot | None = None,
@@ -189,12 +191,15 @@ def plan_assembly(
             "mesh or an explicit mirror-weld step), not an improvised closure")
     elif not qa.closed:
         blockers.append("BLOCKED_BY_OPEN_HORN_MESH")
+    # The pose is three-dimensional: a vertical mount offset is not a forward offset.
+    translation = (float(horn_mount_offset_x_mm), float(horn_mount_offset_y_mm),
+                   float(horn_mount_offset_z_mm))
     row = _imported_row(Path(horn_asset_mesh), horn_name, scale_factor=1.0,
-                        translation_mm=(0.0, 0.0, float(horn_mount_offset_z_mm)))
+                        translation_mm=translation)
     transform = (
-        (1.0, 0.0, 0.0, 0.0),
-        (0.0, 1.0, 0.0, 0.0),
-        (0.0, 0.0, 1.0, float(horn_mount_offset_z_mm) / 1000.0),
+        (1.0, 0.0, 0.0, translation[0] / 1000.0),
+        (0.0, 1.0, 0.0, translation[1] / 1000.0),
+        (0.0, 0.0, 1.0, translation[2] / 1000.0),
         (0.0, 0.0, 0.0, 1.0),
     )
     payload = {

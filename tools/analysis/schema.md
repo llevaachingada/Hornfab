@@ -480,3 +480,94 @@ read-only reports: the Analysis renderer does not initiate a solve.
 result. It requires explicitly validated cohort and group inputs and independent
 fit/proposal adapters; missing evidence returns unavailable and synthetic fixtures
 do not establish a performance claim or pass the M2 gate.
+
+## benchmark_plan.json / benchmark_report.json (`tools/analysis/benchmark_orchestrator.py`)
+
+P1c pre-registered matched-benchmark orchestrator. It is advisory and offline:
+`plan` only validates a spec, derives arm configs and writes plan text; `report`
+compares completed run dirs. **Neither subcommand dispatches a search/solve/GPU
+job.** Outputs are `<out>/benchmark_plan.{json,md}` and
+`<out>/benchmark_report.{json,md}`; derived configs live in `<out>/arms/`. The
+tool refuses an `--out` inside `examples/`, `runs/`, `docs/`, an input run dir or
+the input spec directory.
+
+Spec schema `benchmark-plan-v1` (YAML/JSON):
+
+```yaml
+schema: benchmark-plan-v1
+task: <name>
+base_config: <path to a real config YAML>       # loaded by hornlab_search.config
+brief: <path to a real brief YAML>
+family: OSSE                                     # optional cross-check
+objective_version: 10
+seeds: [40001, 40002, 40003, 40004, 40005]      # declared paired list; default 5 derived
+budget: 80                                      # new valid evals per arm
+cost_budget_s: 21600                            # optional
+target_j: 1.3147
+practical_delta: 0.1293
+floor_j: 0.1293                                 # optional identity floor
+information_parity:                             # optional declarations
+  incumbent_j: 1.3147
+  training_cohort: <path>                       # optional
+  training_cohort_sha256: <hex>                 # optional (offline_scores.json)
+  catalog_sha256: <hex>                         # optional (catalog.csv)
+  budget_profile: comparison-80x2               # optional launch hint
+arms:
+  - {id, algorithm, base: config, overrides: {...}, expected_information}
+pairs: [[cold_cma, warm_mean_cma], ...]         # predeclared only
+```
+
+Arms accept `id`, `algorithm`, `base` (only `config`), `overrides`,
+`expected_information` and `label`; **unknown arm fields are refused**.
+Algorithms: `cma` (cold), `cma_warm_mean` (mean only, requires
+`warm_start.sigma_from_spread: false`), `cma_warm_covariance` (mean + opt-in
+`warm_start.covariance`), `bo_scalar`, `turbo`. Overrides are search-only:
+`sigma0`, `seed`, `algorithm`, `policy`, `warm_start`, `restarts`, `qd`; unknown
+override keys are refused. Bounds are frozen: a `bounds` override is refused because
+a bounds/sigma factorial is a different experiment. `warm_start: null` removes an
+inherited warm start. BO/TuRBO arms keep
+the task config's `search.algorithm` and carry their proposal policy at plan
+level; their launch text uses the study runner, not `search`.
+
+Plan JSON adds `dispatched: false` and `advisory_only: true`, the resolved
+base/brief paths and brief sha256, the frozen identity (`hash`, `fields`,
+config-derived `bounds`), per-arm `config_file`/`config_sha256`, declared
+seeds/budget, `applied_overrides`, `plan_level_overrides`, per-arm
+`information_parity` (warm sources + hashes, cohort hash, incumbent, budget),
+predeclared pairs, and `launch.arms.<id>.commands` as **text only**. Every arm's
+non-search identity (`task/brief/family/objective/bounds/mesh/solve`) is proven
+equal; the search treatment is the only expected difference.
+
+Report JSON:
+
+```json
+{
+  "schema": "benchmark-report-v1", "dispatched": false, "advisory_only": true,
+  "plan": {"task": "...", "seeds": [40001], "budget": 80, "floor_j": 0.1293, "identity": {}},
+  "arms": [{"id": "cold_cma", "n_runs": 5, "final_best": {"median": 1.2},
+            "cost": {"attempts_new": 400, "valid_evaluations_new": 380, "cache_hits": 20,
+                     "actual_bem_calls_observed": 360, "actual_bem_calls_inferred": 380,
+                     "actual_bem_seconds": 1.0e5,
+                     "elapsed_seconds": {"wall_span": null, "unaccounted_overhead": null}},
+            "curves": [], "median_curve": [], "replicates": {},
+            "information_parity": {"status": "ok|blocking", "blocking": [], "disclosures": []}}],
+  "pairs": [{"pair": "cold_cma_vs_warm_mean_cma", "n_pairs": 5,
+             "ab_compare": {}, "verdict": {"verdict": "a-beats-b|b-beats-a|indicative|pilot_only|inconclusive|no-verdict",
+                                           "decisive_claim": true, "effect": {"mean": -0.2, "ci95": [-0.3, -0.1]}}}],
+  "overall": {"floor_present": true, "decisive_pairs": [], "any_decisive": true}
+}
+```
+
+Each reported arm must carry the plan's declared seed set exactly once (matched
+via `run.json` `cma_seed`); duplicate, missing and extra seeds are refused.
+Every run's non-search identity must equal the plan identity (cross-task/brief/
+version comparisons are exit 2). Information parity compares the declared warm
+sources / cohort sha256 / incumbent against each run; a mismatch is blocking and
+forces `decisive_claim: false`. Paired comparisons are delegated to
+`ab_compare.analyse` and only exist for predeclared pairs; `< 5` pairs is
+`pilot_only`. A decisive `a-beats-b` / `b-beats-a` claim additionally requires a
+declared `floor_j` and a 95% paired-difference CI that clears it; without
+`floor_j` the report refuses a decisive superiority claim and labels the
+comparison `indicative`/`no-verdict`. Cost ledgers keep attempts separate from
+successful BEM calls; `wall_span` is `null` when timestamps are missing/partial.
+

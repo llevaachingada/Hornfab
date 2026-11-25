@@ -481,7 +481,19 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
 
     config_path = Path(config_path)
     cfg = load_config(config_path)
-    space = DesignSpace.from_config(cfg)
+    # A rolled-family generator resolves its seed and each reconstructed point while
+    # building the space. Replay historical observations without today's size filter;
+    # retain the same driver, recipe and parameter bounds and never alter the live config.
+    import copy
+    from ..design.generators import rolled_family
+    replay_cfg = cfg
+    if rolled_family.is_family_spec(getattr(cfg, "generator", None) or {}):
+        replay_cfg = copy.deepcopy(cfg)
+        replay_cfg.brief["envelope"] = {"max_mouth_w_mm": float("inf"),
+                                        "max_mouth_h_mm": float("inf"),
+                                        "max_depth_mm": float("inf"),
+                                        "sanity_max_mm": float("inf"), "enforce": True}
+    space = DesignSpace.from_config(replay_cfg)
     # ``morph_exponent`` is the audited no-op only where that knob exists (the frozen
     # native task).  A registered task without it (the home v7 task has six knobs)
     # uses the identity projection; a missing no-op must not crash the build.
@@ -491,7 +503,9 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
 
     payload = json.loads(Path(scores_json).read_text(encoding="utf-8"))
     all_rows = list(payload.get("rows") or [])
-    rows = all_rows if limit is None else all_rows[:int(limit)]
+    # ``limit`` is a training-selection cap, never a raw-discovery cap: every scored row is
+    # validated/deduplicated before :func:`build_training_set` applies it as ``n_max``.
+    rows = all_rows
     expected_config = str((payload.get("cohort") or {}).get("native_config")
                           or config_path.stem)
     brief_block = payload.get("brief") if isinstance(payload.get("brief"), Mapping) else {}
@@ -627,7 +641,7 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
                 continue
         try:
             x = projection.normalize_design(design, verify_round_trip=False)
-            reconstructed = canonical_design(projection.denormalize(x), cfg, space=space)
+            reconstructed = canonical_design(projection.denormalize(x), replay_cfg, space=space)
         except EncodingError as exc:
             refuse(obs_id, [f"{NATIVE_R_ENCODE_REFUSED}:{type(exc).__name__}"],
                    shard=shard, row=row_idx, detail=str(exc)[:200])
@@ -675,15 +689,20 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
             continue
 
         geometry_hash = str(meta_design_hash or actual_design_hash)
+        product_envelope_ok = None
         block = params.get("grid")
         if isinstance(block, dict):
             from ..design.generators import rolled_family
             if rolled_family.is_family_spec(block):
                 try:
-                    mat = materialize_geometry(design, cfg)
-                    _, envelope_ok, throat_ok = geometry_checks(mat, cfg, params)
-                    if not envelope_ok or not throat_ok:
-                        raise ValueError("historical surface fails envelope or throat checks")
+                    mat = materialize_geometry(design, replay_cfg)
+                    desc, _, throat_ok = geometry_checks(mat, cfg, params)
+                    if not throat_ok:
+                        raise ValueError("historical surface fails throat checks")
+                    # Candidate eligibility is not a condition on an observation's validity.
+                    # Keep the original measured point, including outside the current box.
+                    brief = getattr(cfg, "brief", None) or {}
+                    product_envelope_ok = _envelope_ok(desc, brief.get("envelope") or {})
                     geometry_hash = materialized_geometry_hash(mat)
                 except Exception as exc:  # noqa: BLE001 - historical data must fail closed
                     refuse(obs_id, [f"{NATIVE_R_ENCODE_REFUSED}:surface_replay"],
@@ -724,6 +743,8 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
                              else float(score_row["parity_delta"])),
             "stored_objective_version": score_row.get("stored_objective_version"),
         }
+        if product_envelope_ok is not None:
+            identities[obs_id]["product_envelope_eligible"] = product_envelope_ok
         if geometry_hash != str(meta_design_hash or actual_design_hash):
             identities[obs_id]["geometry_hash"] = geometry_hash
 
@@ -768,7 +789,8 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
                  "independent re-derivation of their source files."),
     }
 
-    ts = build_training_set(observations, encoding=projection)
+    ts = build_training_set(observations, encoding=projection,
+                            n_max=DEFAULT_N_MAX if limit is None else int(limit))
     if policy_status == "incompatible":
         ts = replace(ts, status="incompatible_cohort")
     elif policy_status == "capability_missing":
@@ -793,14 +815,17 @@ def build_native_training_set(config_path, *, scores_json, catalog_csv, limit=No
         "refusal_reasons": dict(sorted(refusal_counts.items())),
         "n_unique_design_hashes": len({o.geometry_hash for o in observations}),
         "identities": identities,
+        "outside_product_envelope_ids": sorted(
+            obs_id for obs_id, identity in identities.items()
+            if identity.get("product_envelope_eligible") is False),
         "cohort_policy": cohort_policy,
         "subset_policy": {
             "method": "build_training_set",
             "n_min": ts.n_min,
             "n_max": ts.n_max,
             "elite_n": DEFAULT_ELITE_N,
-            "cap": DEFAULT_N_MAX,
-            "rule": "64 lowest-J + 192 deterministic maximin when above the cap; "
+            "cap": ts.n_max,
+            "rule": "64 lowest-J + deterministic maximin when above the cap; "
                     "ties by observation/design ID",
         },
     }
@@ -840,8 +865,9 @@ def _brief_envelope(config) -> dict:
     brief = getattr(config, "brief", None)
     if not isinstance(brief, dict):
         brief = (getattr(config, "raw", None) or {}).get("brief")
-    env = (brief or {}).get("envelope") or {}
-    return dict(env) if isinstance(env, dict) else {}
+    from ..config import ENVELOPE_AXES, envelope_policy
+
+    return dict(zip(ENVELOPE_AXES, envelope_policy(brief).mesh_limits_mm))
 
 
 def _expected_throat_radius(params: Mapping[str, Any]) -> float | None:
@@ -887,7 +913,9 @@ def materialize_geometry(design, config, *, resolution_mm: float = 20.0) -> dict
                     raise ValueError("a resolved brief is required")
                 if getattr(config, "mounting", None) is not None:
                     raise ValueError("rolled-family solid cannot use an enclosure mounting")
-                grid = rolled_family.resolve_grid(block, brief)
+                from ..config import brief_for_envelope_adapter
+
+                grid = rolled_family.resolve_grid(block, brief_for_envelope_adapter(brief))
                 inner = np.asarray(grid["inner_points"], dtype=np.float64)
                 outer = np.asarray(grid["outer_points"], dtype=np.float64)
                 if (inner.ndim != 3 or inner.shape[-1] != 3 or inner.shape != outer.shape
@@ -1216,13 +1244,13 @@ def _surface_descriptors(points: np.ndarray) -> dict:
     }
 
 
-def _envelope_ok(desc: Mapping[str, float], env: Mapping[str, Any]) -> bool:
+def _envelope_ok(desc: Mapping[str, float], env: Mapping[str, Any], tolerance_mm=0.5) -> bool:
     checks = (
-        ("max_mouth_w_mm", "mouth_width_mm"),
-        ("max_mouth_h_mm", "mouth_height_mm"),
-        ("max_depth_mm", "depth_mm"),
+        ("max_mouth_w_mm", "envelope_width_mm", "mouth_width_mm"),
+        ("max_mouth_h_mm", "envelope_height_mm", "mouth_height_mm"),
+        ("max_depth_mm", "envelope_depth_mm", "depth_mm"),
     )
-    for env_key, desc_key in checks:
+    for env_key, desc_key, fallback in checks:
         if env_key not in env:
             continue
         try:
@@ -1231,7 +1259,7 @@ def _envelope_ok(desc: Mapping[str, float], env: Mapping[str, Any]) -> bool:
             continue
         if not math.isfinite(limit):
             continue
-        if float(desc[desc_key]) > limit + 0.5:
+        if float(desc.get(desc_key, desc[fallback])) > limit + tolerance_mm:
             return False
     return True
 
@@ -1254,16 +1282,21 @@ def geometry_checks(mat: Mapping[str, Any], config, params: Mapping[str, Any]):
     against its frozen recipe.  Here every sampled throat radius is checked, rather
     than relying on an average which could hide an out-of-round inlet.
     """
+    from ..design.size import sampled_surface_extents_mm
+
     inner = np.asarray(mat["inner_points"], dtype=float)
     desc = _surface_descriptors(inner)
+    symmetry = mat.get("native_symmetry_plane")
     if mat["formula"] != "rolled-family-v1":
-        return (desc, _envelope_ok(desc, _brief_envelope(config)),
+        w, h, depth = sampled_surface_extents_mm(inner, symmetry)
+        desc.update(envelope_width_mm=w, envelope_height_mm=h, envelope_depth_mm=depth)
+        return (desc, _envelope_ok(desc, _brief_envelope(config), 0.0),
                 _throat_ok(desc["throat_radius_mm"], _expected_throat_radius(params)))
     outer = np.asarray(mat["outer_points"], dtype=float)
     both = np.concatenate((inner.reshape(-1, 3), outer.reshape(-1, 3)))
-    desc.update(mouth_width_mm=2.0 * float(np.max(np.abs(both[:, 0]))),
-                mouth_height_mm=2.0 * float(np.max(np.abs(both[:, 1]))),
-                depth_mm=float(np.ptp(both[:, 2])))
+    w, h, depth = sampled_surface_extents_mm(both, symmetry or "yz+xz")
+    desc.update(envelope_width_mm=w, envelope_height_mm=h, envelope_depth_mm=depth,
+                mouth_width_mm=w, mouth_height_mm=h, depth_mm=depth)
     driver = (getattr(config, "brief", None) or {}).get("driver") or {}
     try:
         expected = float(driver["exit_radius_mm"])
@@ -1275,7 +1308,7 @@ def geometry_checks(mat: Mapping[str, Any], config, params: Mapping[str, Any]):
                      all(_throat_ok(float(r), expected) for r in radii))
     except (KeyError, TypeError, ValueError):
         throat_ok = False
-    return desc, _envelope_ok(desc, _brief_envelope(config)), bool(throat_ok)
+    return desc, _envelope_ok(desc, _brief_envelope(config), 0.0), bool(throat_ok)
 
 
 __all__ = [

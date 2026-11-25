@@ -1,0 +1,23 @@
+﻿{
+  "kind": "c3_area_scaling_fixture_v1",
+  "model": "ideal rigid circular piston, infinite baffle, far field on axis: |p| proportional to piston area A = pi*d^2/4",
+  "label": "ANALYTIC_FIXTURE (no BEM, no calibration)",
+  "inputs": {
+    "sd_m2": 0.0533,
+    "sd_cm2": 533.0,
+    "bl_demo_moving_diameter_m": 0.2
+  },
+  "demo_piston_area_m2": 0.031415926535897934,
+  "area_equivalent_diameter_m": 0.26050655986823856,
+  "diameter_ratio": 1.3025327993411928,
+  "diameter_ratio_db": 2.2957733633243835,
+  "area_ratio": 1.6965916933596041,
+  "area_ratio_db": 4.591546726648767,
+  "equal_surface_velocity_db": 4.591546726648767,
+  "equal_displacement_same_frequency_db": 4.591546726648767,
+  "note": "At one frequency, volume velocity is Sd times surface velocity OR Sd times displacement; both scale with area, so the two ideal-piston limits coincide at +4.59 dB. The +2.30 dB figure is the diameter ratio, not a pressure-scaling limit, and must not be quoted as one.",
+  "measured_c3_median_woofer_rise_db": 3.6,
+  "measured_c3_on_axis_rms_diff_db": 3.22,
+  "measured_source": "docs/evidence/horn_over_cabinet_2026-11-22/c3/placement_compare.json",
+  "caveat": "The simulated rise (+3.6 dB median) is below the ideal-piston area limit (+4.59 dB); the difference is not a calibration and must not be interpreted as efficiency, sensitivity or a driver model."
+}

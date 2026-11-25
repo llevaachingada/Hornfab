@@ -1,0 +1,21 @@
+extends: ../home_landscape_2026-11-15/hl__klangfilm_lame_curved_v1_seedE2.yaml
+name: photo_lame_deep_alt_xo900_v11
+brief: null
+brief_file: ../../briefs/home_xo900_2026-11-20/room_landscape_80x50_900_hf1440_v11cd.yaml
+search:
+  sigma0: 0.12
+  budget: 85
+  budget_counts: valid
+  max_attempts: 425
+  infeasible_penalty: resample_strict
+  error_policy: retry_same_then_stop
+generator:
+  rows:
+    type: klangfilm_lame_v1
+# Starting recipe transcribed from the supplied deepest-alt sheet.
+seed_params:
+  g_fc_hz: 390.0
+  g_aspect: 1.6
+  g_lame_p: 5.0
+  g_end_frac: 0.7
+  g_rim_sweep_ratio: 0.2

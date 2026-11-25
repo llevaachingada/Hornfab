@@ -1,0 +1,371 @@
+{
+  "screen_run": "20261122T223153Z-screen-98b41d",
+  "verify_identity": {
+    "backend": "beat_cuda",
+    "lib_shas": {
+      "hornlab_mesher": "55da4f46d662d8dcd7a9f94a609eeea4009fcd62",
+      "hornlab_beat_bem": "38e5b1f8ca840ebf6351c54611a08fedb1a0750f",
+      "hornlab_bempp_bem": "8e6910602ece9abb2e9ce0db7a637f4bedf17f53",
+      "hornlab_plots": "9e4a6d0dd2ccb6e735dd00233dccccb50d12ed44",
+      "hornlab_search": "626a7c65bbb77adc45b88f20b1fa5ffdfc3b014b"
+    },
+    "brief": {
+      "description": "(objective v11) COMPACT500 XO900 CD identity: the v11 CD brief with the envelope cut to 500x500x500 mm and F_X 900 Hz (H corridor 60-90 pref 80 from 900 Hz, V 40-60 pref 50 from 1000 Hz, CD block band 900-8000 Hz); HF1440, band 350-8000. Own identity: never ranked against the 700 Hz 600x480x480 v11 brief or any v7/v9/v10 brief. | OPEN ENVELOPE (owner decision 2026-11-22): the build box is not a search refusal; only a 1200 mm per-dimension sanity ceiling applies. Filter by size post hoc if a build constraint returns.",
+      "driver": {
+        "exit_angle_deg": 2.0,
+        "exit_radius_mm": 18.0
+      },
+      "envelope": {
+        "enforce": false,
+        "max_depth_mm": 500.0,
+        "max_mouth_h_mm": 500.0,
+        "max_mouth_w_mm": 500.0,
+        "sanity_max_mm": 1200.0
+      },
+      "grid": {
+        "screen_extra_hz": [
+          250,
+          315,
+          400,
+          2573,
+          3311,
+          4260
+        ],
+        "verify_points_per_octave": 6
+      },
+      "name": "compact500_xo900_80x50_hf1440_v11cd_open",
+      "objective": {
+        "cd": {
+          "band_hz": [
+            900.0,
+            8000.0
+          ],
+          "di_std": {
+            "tolerance_db": 1.0,
+            "weight": 0.75
+          },
+          "lw": {
+            "tolerance_db": 1.5,
+            "weight": 1.5
+          },
+          "nacc": {
+            "tolerance": 0.02,
+            "weight": 0.75
+          },
+          "offaxis": {
+            "angles_h_deg": [
+              -40,
+              -30,
+              30,
+              40
+            ],
+            "angles_v_deg": [
+              -25,
+              -10,
+              10,
+              25
+            ],
+            "band_hz": [
+              2500.0,
+              8000.0
+            ],
+            "reference": "band_mean",
+            "tolerance_db": 1.0,
+            "weight": 1.0
+          },
+          "report": {
+            "contour": false,
+            "omega": true
+          },
+          "window_h_deg": 30.0,
+          "window_v_deg": 10.0
+        },
+        "cov_below_f0": "one_sided",
+        "cov_narrow_ratio": 2.0,
+        "cov_v_weight": 0.5,
+        "flat_band": "scored",
+        "lfp_crossover_ratio": 1.6,
+        "lfp_re_z": 0.2,
+        "loaded_re_z": 0.5,
+        "ripple_region": "preferred_edge",
+        "tolerances": {
+          "cov_profile": 3.0,
+          "di_roughness": 1.0,
+          "dislope": 9.0,
+          "flat": 1.5,
+          "flat_cv": 1.5,
+          "load": 0.3,
+          "rip": 1.0
+        },
+        "version": 11
+      },
+      "source": {
+        "cap": "auto"
+      },
+      "symmetry": "hv",
+      "target": {
+        "band_hi_hz": 8000.0,
+        "band_lo_hz": 350.0,
+        "coverage_h_deg": 80.0,
+        "coverage_profile": {
+          "h": [
+            {
+              "hz": 900,
+              "max_deg": 90,
+              "min_deg": 60,
+              "preferred_deg": 80
+            },
+            {
+              "hz": 8000,
+              "max_deg": 90,
+              "min_deg": 60,
+              "preferred_deg": 80
+            }
+          ],
+          "interpolation": "log_frequency",
+          "mode": "corridor",
+          "v": [
+            {
+              "hz": 1000,
+              "max_deg": 60,
+              "min_deg": 40,
+              "preferred_deg": 50
+            },
+            {
+              "hz": 8000,
+              "max_deg": 60,
+              "min_deg": 40,
+              "preferred_deg": 50
+            }
+          ]
+        },
+        "coverage_v_deg": 50.0,
+        "coverage_v_down_deg": null,
+        "coverage_v_up_deg": null,
+        "di_slope_target": 0.0,
+        "di_target_db": null,
+        "driver_exit_radius_mm": null,
+        "f0_hz": 900.0,
+        "f0_v_hz": 900.0,
+        "freq_weights": {
+          "band_hz": [
+            [
+              2500.0,
+              5500.0,
+              2.0
+            ]
+          ]
+        },
+        "loaded_hi_hz": 5600.0,
+        "z_min": 0.5
+      },
+      "weights": {
+        "cov_profile": 1.0,
+        "di_roughness": 0.5,
+        "dislope": 0.5,
+        "flat": 0.5,
+        "flat_cv": 0.5,
+        "load": 1.0,
+        "rip": 0.5
+      }
+    },
+    "target": {
+      "band_hi_hz": 8000.0,
+      "band_lo_hz": 350.0,
+      "coverage_h_deg": 80.0,
+      "coverage_profile": {
+        "h": [
+          {
+            "hz": 900,
+            "max_deg": 90,
+            "min_deg": 60,
+            "preferred_deg": 80
+          },
+          {
+            "hz": 8000,
+            "max_deg": 90,
+            "min_deg": 60,
+            "preferred_deg": 80
+          }
+        ],
+        "interpolation": "log_frequency",
+        "mode": "corridor",
+        "v": [
+          {
+            "hz": 1000,
+            "max_deg": 60,
+            "min_deg": 40,
+            "preferred_deg": 50
+          },
+          {
+            "hz": 8000,
+            "max_deg": 60,
+            "min_deg": 40,
+            "preferred_deg": 50
+          }
+        ]
+      },
+      "coverage_v_deg": 50.0,
+      "coverage_v_down_deg": null,
+      "coverage_v_up_deg": null,
+      "di_slope_target": 0.0,
+      "di_target_db": null,
+      "driver_exit_radius_mm": null,
+      "f0_hz": 900.0,
+      "f0_v_hz": 900.0,
+      "freq_weights": {
+        "band_hz": [
+          [
+            2500.0,
+            5500.0,
+            2.0
+          ]
+        ]
+      },
+      "loaded_hi_hz": 5600.0,
+      "z_min": 0.5
+    },
+    "weights": {
+      "cov_profile": 1.0,
+      "di_roughness": 0.5,
+      "dislope": 0.5,
+      "flat": 0.5,
+      "flat_cv": 0.5,
+      "load": 1.0,
+      "rip": 0.5
+    },
+    "brief_hash": "99a1d837354d",
+    "mesh": {
+      "dof_cap_final": 24000,
+      "dof_cap_screen": 24000,
+      "dof_cap_verify": 24000,
+      "dof_per_triangle": 0.51,
+      "epw": 6.0,
+      "quadrants": "1"
+    },
+    "solve": {
+      "angle_count": 73,
+      "backend": "beat_cuda",
+      "balloon": true,
+      "balloon_points_screen": 512,
+      "balloon_points_verify": 1024,
+      "cuda_fused": true,
+      "distance_m": 10.0,
+      "gmres_tol": 1e-05,
+      "timeout_s": 900
+    },
+    "res_mm": {
+      "throat": 3.5729166666666665,
+      "mouth": 7.145833333333333,
+      "rear": 7.145833333333333
+    },
+    "objective_version": 11,
+    "solve_hash": "20797f2ac2d7",
+    "freqs_hz": [
+      300.0,
+      343.98,
+      394.41,
+      452.24,
+      518.54,
+      594.56,
+      681.73,
+      781.68,
+      896.28,
+      1027.68,
+      1178.35,
+      1351.11,
+      1549.19,
+      1776.32,
+      2036.74,
+      2335.35,
+      2677.73,
+      3070.31,
+      3520.45,
+      4036.58,
+      4628.37,
+      5000.0,
+      5306.94,
+      5623.41,
+      6084.98,
+      6324.56,
+      6977.09,
+      7113.12,
+      8000.0
+    ],
+    "di_source": "balloon"
+  },
+  "finalists": {
+    "product": {
+      "verify_run": "runs\\size_aware_crowe_verify_2026-11-24\\product",
+      "design_hash": "fbaa37e52eb9",
+      "verify_j": 2.694141772556809,
+      "whd_mm": [
+        490.4124738124992,
+        444.0804193516662,
+        274.0051795404585
+      ],
+      "utilization": 0.9808249476249984,
+      "product_fit": "inside",
+      "terminal_rim": {
+        "source": "sampled_terminal_inner_rim_projection",
+        "width_mm": 488.1587057985901,
+        "height_mm": 442.0697847714592
+      },
+      "policy_id": "envelope-v1-e699be8e619dbaff",
+      "n_dof": 4037,
+      "solve_seconds": 31.792633899953216,
+      "wall_seconds": 55.328,
+      "vram_baseline_mib": 1206.0,
+      "vram_after_mib": 1206.0,
+      "status": "ok"
+    },
+    "epsilon_125": {
+      "verify_run": "runs\\size_aware_crowe_verify_2026-11-24\\epsilon_125",
+      "design_hash": "7d0caa63b55c",
+      "verify_j": 1.9759275560914937,
+      "whd_mm": [
+        607.2865478948036,
+        475.946094324911,
+        342.6397910219013
+      ],
+      "utilization": 1.214573095789607,
+      "product_fit": "outside",
+      "terminal_rim": {
+        "source": "sampled_terminal_inner_rim_projection",
+        "width_mm": 607.2865478948036,
+        "height_mm": 475.8898346164775
+      },
+      "policy_id": "envelope-v1-e699be8e619dbaff",
+      "n_dof": 5654,
+      "solve_seconds": 54.79167339997366,
+      "wall_seconds": 77.625,
+      "vram_baseline_mib": 1206.0,
+      "vram_after_mib": 1206.0,
+      "status": "ok"
+    },
+    "discovery": {
+      "verify_run": "runs\\size_aware_crowe_verify_2026-11-24\\discovery",
+      "design_hash": "138f09ce5472",
+      "verify_j": 1.6083228729238912,
+      "whd_mm": [
+        769.9946766677014,
+        547.7719353899768,
+        393.4843320427652
+      ],
+      "utilization": 1.5399893533354028,
+      "product_fit": "outside",
+      "terminal_rim": {
+        "source": "sampled_terminal_inner_rim_projection",
+        "width_mm": 769.9946766677012,
+        "height_mm": 547.6944111412881
+      },
+      "policy_id": "envelope-v1-e699be8e619dbaff",
+      "n_dof": 7777,
+      "solve_seconds": 93.41271840012632,
+      "wall_seconds": 117.172,
+      "vram_baseline_mib": 1206.0,
+      "vram_after_mib": 1206.0,
+      "status": "ok"
+    }
+  }
+}

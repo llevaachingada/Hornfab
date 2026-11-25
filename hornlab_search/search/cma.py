@@ -314,6 +314,42 @@ def covariance_summary(
         out["C"] = C.tolist()
     return out
 
+
+def apply_initial_covariance(es, C) -> dict:
+    """P1b: inject a full covariance matrix into a fresh pycma ES before its first ``ask``.
+
+    cma 4.5.0 exposes the sampler as ``es.sm`` with a writable ``C`` and
+    ``es.sm._decompose_C()`` (verified empirically against the installed 4.5.0). The matrix is
+    symmetrized here as a last defence; a non-finite or non-SPD matrix is refused with
+    ``ConfigError`` instead of letting pycma repair it silently. Returns the verified
+    condition number / trace so the caller can record what was actually injected.
+    """
+    matrix = np.asarray(C, dtype=float)
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1] or matrix.shape[0] == 0:
+        raise ConfigError(f"initial covariance must be a non-empty square matrix, got shape "
+                          f"{getattr(matrix, 'shape', None)}")
+    matrix = (matrix + matrix.T) / 2.0
+    if not np.all(np.isfinite(matrix)):
+        raise ConfigError("initial covariance contains non-finite values")
+    w = np.linalg.eigvalsh(matrix)
+    if float(w.min()) <= 0.0:
+        raise ConfigError(f"initial covariance is not SPD (min eigenvalue "
+                          f"{float(w.min()):.6g})")
+    sm = getattr(es, "sm", None)
+    if sm is None or not hasattr(sm, "C") or not hasattr(sm, "_decompose_C"):
+        raise ConfigError("installed cma sampler does not expose sm.C/_decompose_C; cannot "
+                          "inject the warm-start covariance")
+    sm.C = matrix
+    sm._decompose_C()
+    actual = np.asarray(sm.C, dtype=float)
+    actual = (actual + actual.T) / 2.0
+    w_actual = np.linalg.eigvalsh(actual)
+    if not np.all(np.isfinite(w_actual)) or float(w_actual.min()) <= 0.0:
+        raise ConfigError("injected covariance did not survive pycma's decomposition as SPD")
+    return {"condition_number": float(w_actual[-1] / w_actual[0]),
+            "trace": float(np.trace(actual)), "spd_verified": True}
+
+
 # Consecutive non-cached ``solve_failed`` evaluations (each already retried once by the backend
 # after a worker-host recovery) that stop a search. A string of solver failures says the solver
 # is unhealthy, not that the designs are bad: scoring them as 1000-penalties flattens the landscape
@@ -368,8 +404,15 @@ def summarize_rows(rows: list[dict]) -> dict:
 def _prepare(cfg, run_dir: Path, mode: str, backend, store, cache_dir, trace_fraction, command,
              config_path, lib_shas):
     """Shared setup of ``search`` and ``run_once``: directories, backend, warm worker, context."""
+    from ..config import envelope_policy
+
     run_dir = Path(run_dir).resolve()
     run_dir.mkdir(parents=True, exist_ok=True)
+    size_policy = envelope_policy(getattr(cfg, "brief", None))
+    prior = rundir.read_json(run_dir / "run.json")
+    prior_policy = (prior or {}).get("envelope_policy") or {}
+    if prior_policy and prior_policy.get("policy_id") != size_policy.policy_id:
+        raise ValueError("cannot resume after changing the candidate envelope; start a new run")
     metrics_compute.reset_warning_state()
     if backend is None:
         from ..solve.base import get_backend
@@ -391,7 +434,7 @@ def _prepare(cfg, run_dir: Path, mode: str, backend, store, cache_dir, trace_fra
     lib_shas = lib_shas or collect_lib_shas()
     ctx = make_context(cfg, store, cache_dir=cache_dir, lib_shas=lib_shas,
                        trace_fraction=trace_fraction, ndjson=run_dir / "search.ndjson")
-    first = rundir.read_json(run_dir / "run.json") is None
+    first = prior is None
     rundir.write_config_snapshot(run_dir, cfg)
     base = {"run_id": run_dir.name, "config_name": cfg.name, "family": cfg.family, "mode": mode,
             "config_path": None if config_path is None else str(config_path),
@@ -403,12 +446,13 @@ def _prepare(cfg, run_dir: Path, mode: str, backend, store, cache_dir, trace_fra
             "cma_seed": cfg.search.seed, "trace_fraction": trace_fraction,
             "command": command, "status": "running", "started_utc": rundir.utc_now(),
             "dataset_dir": None if store is None else str(store.root)}
+    if size_policy.mode != "unspecified":
+        base["envelope_policy"] = size_policy.as_dict()
     if first:
         base["created_utc"] = base["started_utc"]
         rundir.write_json_atomic(run_dir / "run.json", base)
     else:
-        prev = rundir.read_json(run_dir / "run.json", {}) or {}
-        resumes = list(prev.get("resumes", [])) + [base["started_utc"]]
+        resumes = list(prior.get("resumes", [])) + [base["started_utc"]]
         base.pop("started_utc")
         base["resumes"] = resumes
         rundir.update_run_json(run_dir, **base)
@@ -568,6 +612,23 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                  warm_record["mean_design_hash"], warm_record["from_runs"],
                  warm_record["mean_objective"], sigma0_eff)
     restarts = getattr(cfg.search, "restarts", None)
+    warm_cov_C = None
+    warm_cov_record = None
+    if warm_design is not None:
+        # P1b (opt-in): only when search.warm_start.covariance is set. Absent/false returns
+        # (None, None) and leaves the mean-only path byte for byte unchanged.
+        try:
+            warm_cov_C, warm_cov_record = warmstart.covariance(cfg, space, warm_record)
+        except warmstart.WarmStartError as exc:
+            raise ConfigError(str(exc)) from None
+        if warm_cov_record is not None:
+            sigma0_eff = float(warm_cov_record["target_sigma"])
+            warm_record["covariance"] = warm_cov_record
+            log.info("warm start covariance: shape from %s (source sigma %.6g, C %s), "
+                     "blend %.3f, target sigma %.6g",
+                     warm_cov_record["source"]["run"], warm_cov_record["source"]["sigma"],
+                     warm_cov_record["source"]["C_sha256"][:12], warm_cov_record["blend"],
+                     sigma0_eff)
     (run_dir / "cma").mkdir(exist_ok=True)
 
     def es_options(prefix: Path, seed: int, popsize) -> dict:
@@ -598,6 +659,13 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
     if restarts is None:                       # today's single-ES path, bit-for-bit
         es = cma_lib.CMAEvolutionStrategy(list(map(float, x0)), sigma0_eff,
                                           es_options(run_dir / "cma", cfg.search.seed, popsize0))
+        if warm_cov_C is not None and warm_cov_record is not None:
+            # P1b: replace the sampler's initial C BEFORE the first ask (cma 4.5.0 sm.C +
+            # sm._decompose_C; verified empirically). Restarts/CMA-ME never reach this branch.
+            injected = apply_initial_covariance(es, warm_cov_C)
+            warm_cov_record["injected_condition_number"] = injected["condition_number"]
+            warm_cov_record["injected_trace"] = injected["trace"]
+            warm_cov_record["spd_verified"] = bool(injected["spd_verified"])
 
     evals: list[Evaluation] = []
     wall: list[float] = []

@@ -147,6 +147,9 @@ class HornEnvelope:
     source: str
     design_hash: str
     envelope_sha256: str
+    #: Absolute path of the full-domain horn mesh the envelope was measured from, when
+    #: known. The overhang placement policy needs the real surface, not just the bbox.
+    mesh_path: str | None = None
 
     @property
     def width_mm(self) -> float:
@@ -200,6 +203,7 @@ def envelope_from_bbox_m(
     *,
     source: str,
     design_hash: str,
+    mesh_path: str | None = None,
 ) -> HornEnvelope:
     """Build a :class:`HornEnvelope` from a metre bbox (validated; mm converted)."""
     validate_bbox_m(bbox_m)
@@ -208,7 +212,8 @@ def envelope_from_bbox_m(
                             {"bbox_m": [round(float(v), 12) for v in bbox_m]})
     return HornEnvelope(
         x_min_mm=x0, x_max_mm=x1, y_min_mm=y0, y_max_mm=y1, z_min_mm=z0, z_max_mm=z1,
-        source=str(source), design_hash=str(design_hash), envelope_sha256=digest)
+        source=str(source), design_hash=str(design_hash), envelope_sha256=digest,
+        mesh_path=mesh_path)
 
 
 def _envelope_from_provenance(path: Path, asset: C.HornAsset) -> HornEnvelope | None:
@@ -224,9 +229,14 @@ def _envelope_from_provenance(path: Path, asset: C.HornAsset) -> HornEnvelope | 
     if not isinstance(full, (list, tuple)) or len(full) != 6:
         return None
     case_tag = str(data.get("case_tag") or path.parent.name)
+    full_mesh = data.get("full_mesh")
+    mesh_path = None
+    if isinstance(full_mesh, Mapping) and full_mesh.get("path"):
+        mesh_path = str(full_mesh["path"])
     return envelope_from_bbox_m(
         [float(v) for v in full], source=f"full_domain_provenance:{case_tag}",
-        design_hash=str(data.get("design_hash_full") or asset.design_hash))
+        design_hash=str(data.get("design_hash_full") or asset.design_hash),
+        mesh_path=mesh_path)
 
 
 def derive_horn_envelope(
@@ -291,6 +301,7 @@ def derive_min_center_spacing_mm(
     layout: str = "separate_above",
     clearance_mm: float = DEFAULT_CLEARANCE_MM,
     woofer_frame_radius_mm: float | None = None,
+    woofer_frame_center_y_mm: float = 0.0,
 ) -> float:
     """Derived-legal minimum horn/woofer centre spacing [mm] from real geometry.
 
@@ -299,7 +310,13 @@ def derive_min_center_spacing_mm(
 
     * ``separate_above``: cabinet top ``H/2`` + horn lower half-extent + clearance;
     * ``separate_side_baffle``: cabinet half-width ``W/2`` + horn left half-extent + clearance;
-    * ``flush_baffle``: woofer frame radius + horn lower half-extent + clearance.
+    * ``flush_baffle``: woofer frame top edge (``cy + r``) + horn lower half-extent + clearance.
+
+    ``woofer_frame_center_y_mm`` is the resolved driver mount height in the cabinet frame
+    (millimetres, positive = up).  ``0.0`` is the legacy default; every real caller must pass
+    the mount height BL's panel fit accepted.  It only affects ``flush_baffle``: for
+    ``separate_above``/``separate_side_baffle`` the cabinet edge governs and a frame poking into
+    the overhang is caught by :func:`placement_legality`'s frame check.
     """
     gap = _finite(clearance_mm, "clearance_mm")
     if gap < 0.0:
@@ -313,7 +330,8 @@ def derive_min_center_spacing_mm(
             raise ValueError(
                 "flush_baffle placement needs an explicit woofer_frame_radius_mm; "
                 "the frame size is not guessed")
-        value = float(woofer_frame_radius_mm) - float(envelope.y_min_mm) + gap
+        cy = _finite(woofer_frame_center_y_mm, "woofer_frame_center_y_mm")
+        value = cy + float(woofer_frame_radius_mm) - float(envelope.y_min_mm) + gap
     else:
         raise ValueError(f"unknown horn_layout {layout!r}")
     if not (math.isfinite(value) and value > 0.0):
@@ -367,6 +385,15 @@ class PlacementCheck:
     gaps_mm: Mapping[str, float]
     min_clearance_mm: float
     clearance_mm: float
+    #: Resolved driver mount height used for the frame solid (cabinet frame, mm, +=up).
+    woofer_frame_center_y_mm: float = 0.0
+    #: Non-blocking observations (e.g. an AABB overlap that the exact stage check must
+    #: resolve). A note never by itself rejects a placement.
+    notes: tuple[str, ...] = ()
+
+    @property
+    def aabb_overlaps(self) -> bool:
+        return all(value < self.clearance_mm - 1e-9 for value in self.gaps_mm.values())
 
     def to_dict(self) -> dict[str, Any]:
         return _round({
@@ -380,6 +407,9 @@ class PlacementCheck:
             "gaps_mm": dict(self.gaps_mm),
             "min_clearance_mm": self.min_clearance_mm,
             "clearance_mm": self.clearance_mm,
+            "woofer_frame_center_y_mm": self.woofer_frame_center_y_mm,
+            "aabb_overlaps": self.aabb_overlaps,
+            "notes": list(self.notes),
         })
 
 
@@ -399,6 +429,9 @@ def placement_legality(
     clearance_mm: float = DEFAULT_CLEARANCE_MM,
     woofer_frame_radius_mm: float | None = None,
     woofer_rear_depth_mm: float | None = None,
+    woofer_frame_center_y_mm: float = 0.0,
+    horn_points_mm: "Any" = None,
+    placement_policy: str = "envelope_above",
 ) -> PlacementCheck:
     """Spacing + 3-D AABB collision/clearance check for one mechanical placement.
 
@@ -406,7 +439,11 @@ def placement_legality(
     envelope is translated by the mount transform; the cabinet occupies
     ``z in [-depth, 0]`` behind the baffle.  A collision requires every axis gap to be below the
     declared clearance.  The woofer frame is included as a bounded volume when its radius is
-    supplied.  Clearance is inclusive (``>= clearance``).
+    supplied, centred on the resolved driver mount height ``woofer_frame_center_y_mm`` in the
+    cabinet frame (millimetres, positive = up).  Clearance is inclusive (``>= clearance``).
+
+    ``woofer_frame_center_y_mm`` defaults to ``0.0`` for legacy callers only; every real caller
+    must pass the resolved mount height BL's panel fit accepted.
     """
     dx = _check_mount_offset(dx_mm, "dx_mm")
     dy = _check_mount_offset(dy_mm, "dy_mm")
@@ -414,15 +451,44 @@ def placement_legality(
     gap = _finite(clearance_mm, "clearance_mm")
     if gap < 0.0:
         raise ValueError(f"clearance_mm must be >= 0, got {clearance_mm!r}")
-    dy_min = derive_min_center_spacing_mm(
-        envelope, cabinet, layout=layout, clearance_mm=gap,
-        woofer_frame_radius_mm=woofer_frame_radius_mm)
+    frame_cy = _finite(woofer_frame_center_y_mm, "woofer_frame_center_y_mm")
+    notes: list[str] = []
+    if placement_policy == "envelope_above":
+        dy_min = derive_min_center_spacing_mm(
+            envelope, cabinet, layout=layout, clearance_mm=gap,
+            woofer_frame_radius_mm=woofer_frame_radius_mm,
+            woofer_frame_center_y_mm=frame_cy)
+    elif placement_policy == "seated_overhang":
+        from hornlab_search.system.assembly_pose import min_legal_dy_mm
+
+        if horn_points_mm is None:
+            raise ValueError(
+                "placement_policy='seated_overhang' needs the full-domain horn points; "
+                "a bbox cannot show that only the throat is over the cabinet top")
+        derived = min_legal_dy_mm(
+            horn_points_mm, dz_mm=dz, clearance_mm=gap,
+            cabinet={"external_width_mm": float(cabinet.external_width_mm),
+                     "external_height_mm": float(cabinet.external_height_mm),
+                     "external_depth_mm": float(cabinet.external_depth_mm)},
+            dx_mm=dx)
+        if derived is None:
+            dy_min = math.inf
+            notes.append(
+                f"cantilever: dz={dz:.1f} mm leaves no horn geometry over the cabinet top; "
+                "the placement needs an explicit mount, recorded at stage time")
+        else:
+            dy_min = derived
+    else:
+        raise ValueError(
+            f"placement_policy must be 'envelope_above' or 'seated_overhang', "
+            f"got {placement_policy!r}")
 
     reasons: list[str] = []
-    if dy + 1e-9 < dy_min:
+    if math.isfinite(dy_min) and dy + 1e-9 < dy_min:
         reasons.append(
             f"illegal spacing: dy={dy:.1f} mm < derived-legal minimum {dy_min:.1f} mm "
-            f"(real horn envelope + cabinet frame + {gap:.1f} mm clearance)")
+            f"(placement_policy={placement_policy}; real horn geometry + cabinet frame + "
+            f"{gap:.1f} mm clearance)")
 
     horn_x0, horn_x1 = dx + envelope.x_min_mm, dx + envelope.x_max_mm
     horn_y0, horn_y1 = dy + envelope.y_min_mm, dy + envelope.y_max_mm
@@ -440,17 +506,27 @@ def placement_legality(
         "z": _axis_gap(horn_z0, horn_z1, cab_bbox[2], cab_bbox[5]),
     }
     if all(value < gap - 1e-9 for value in gaps.values()):
-        reasons.append(
-            "3-D collision: horn and cabinet overlap on every axis without the required "
+        message = (
+            "3-D AABB overlap on every axis without the required "
             f"{gap:.1f} mm clearance (gaps x={gaps['x']:.1f}, y={gaps['y']:.1f}, "
             f"z={gaps['z']:.1f} mm)")
+        if placement_policy == "seated_overhang":
+            # Broad phase only: a mouth hanging in front of the baffle overlaps the box
+            # silhouette while the solids stay apart. The exact triangle-vs-cabinet check
+            # runs at stage time and is the only collision authority.
+            notes.append("AABB broad-phase overlap; exact horn-vs-cabinet clearance is "
+                         "required at stage time: " + message)
+        else:
+            reasons.append("3-D collision: horn and cabinet " + message)
 
     min_clearance = min(gaps.values())
     if woofer_frame_radius_mm is not None:
         radius = _finite(woofer_frame_radius_mm, "woofer_frame_radius_mm")
         rear = 0.0 if woofer_rear_depth_mm is None else _finite(
             woofer_rear_depth_mm, "woofer_rear_depth_mm")
-        frame_bbox = (-radius, -radius, -rear, radius, radius, 0.0)
+        # The frame sits on the baffle at the driver's mounted height, not at y=0.  0.0 is the
+        # legacy default; every real caller passes the resolved mount height.
+        frame_bbox = (-radius, frame_cy - radius, -rear, radius, frame_cy + radius, 0.0)
         # AABB separation needs ONE axis with the required gap; the best axis is the maximum
         # signed gap (a deeply overlapping axis is not a collision if another axis separates).
         frame_gap = max(
@@ -470,7 +546,9 @@ def placement_legality(
         reasons=tuple(reasons), dy_min_mm=dy_min,
         transform=mount_transform(dx_mm=dx, dy_mm=dy, dz_mm=dz),
         horn_bbox_mm=horn_bbox, cabinet_bbox_mm=cab_bbox, gaps_mm=gaps,
-        min_clearance_mm=float(min_clearance), clearance_mm=float(gap))
+        min_clearance_mm=float(min_clearance), clearance_mm=float(gap),
+        woofer_frame_center_y_mm=float(frame_cy),
+        notes=tuple(notes))
 
 
 # --------------------------------------------------------------------------- driver catalog
@@ -1195,6 +1273,7 @@ def run_seed_screen(
     clearance_mm: float = DEFAULT_CLEARANCE_MM,
     candidate_centers_hz: Sequence[float] | None = None,
     xo_range_hz: tuple[float, float] | None = None,
+    placement_policy: str = "envelope_above",
 ) -> SeedResult:
     """Run the deterministic seed screen and return a Pareto shortlist (never one winner)."""
     entries = tuple(catalog.entries) if isinstance(catalog, CatalogResult) else tuple(catalog)
@@ -1213,8 +1292,22 @@ def run_seed_screen(
             "no usable stored horn fingerprint plane: "
             + "; ".join(r for fp in fingerprints.values() for r in fp.reasons))
 
+    if placement_policy not in ("envelope_above", "seated_overhang"):
+        raise ValueError(
+            f"placement_policy must be 'envelope_above' or 'seated_overhang', "
+            f"got {placement_policy!r}")
     env = envelope if envelope is not None else derive_horn_envelope(
         asset, full_domain_provenance=full_domain_provenance)
+    horn_points_mm = None
+    if placement_policy == "seated_overhang":
+        from hornlab_search.system.assembly_pose import load_horn_points_mm
+
+        env_mesh = getattr(env, "mesh_path", None)
+        if not env_mesh or not Path(env_mesh).is_file():
+            raise C.DataQualityError(
+                "placement_policy='seated_overhang' needs the full-domain horn mesh; the "
+                f"envelope came from {env.source!r} and carries no usable mesh_path")
+        horn_points_mm = load_horn_points_mm(env_mesh)
 
     center_list: list[float] | None = None
     if candidate_centers_hz is not None:
@@ -1246,6 +1339,7 @@ def run_seed_screen(
         "no_db_power_averaging": True,
         "no_back_hemisphere": True,
         "clearance_mm": float(clearance_mm),
+        "placement_policy": placement_policy,
         "dz_offsets_mm": [float(x) for x in dz_offsets_mm],
         "f3_target_hz": target.low_freq_f3_hz_max,
         "horn_layout": assembly.horn_layout,
@@ -1348,9 +1442,12 @@ def run_seed_screen(
             if entry.driver.geometry_mm is not None:
                 rear_depth = (entry.driver.geometry_mm.mounting_depth_behind_baffle_mm
                               or entry.driver.geometry_mm.depth_mm)
-            dy_min = derive_min_center_spacing_mm(
-                env, point, layout=assembly.horn_layout, clearance_mm=clearance_mm,
-                woofer_frame_radius_mm=frame_radius)
+            dy_above_min = None
+            if placement_policy == "envelope_above":
+                dy_above_min = derive_min_center_spacing_mm(
+                    env, point, layout=assembly.horn_layout, clearance_mm=clearance_mm,
+                    woofer_frame_radius_mm=frame_radius,
+                    woofer_frame_center_y_mm=float(panel_fit["driver_y_m"]) * 1e3)
 
             for xo_hz in screen.hypothesis_centers_hz:
                 counts["xo_hypotheses"] += 1
@@ -1377,11 +1474,34 @@ def run_seed_screen(
 
                 for dz in dz_offsets_mm:
                     counts["placements_considered"] += 1
+                    if placement_policy == "envelope_above":
+                        dy_min = dy_above_min
+                    else:
+                        from hornlab_search.system.assembly_pose import min_legal_dy_mm
+
+                        dy_min = min_legal_dy_mm(
+                            horn_points_mm, dz_mm=float(dz), clearance_mm=clearance_mm,
+                            cabinet={"external_width_mm": float(point.external_width_mm),
+                                     "external_height_mm": float(point.external_height_mm),
+                                     "external_depth_mm": float(point.external_depth_mm)})
+                        if dy_min is None:
+                            counts["placements_rejected"] += 1
+                            ledger.append({
+                                "stage": "placement", "driver_id": entry.driver_id,
+                                "xo_hz": float(xo_hz), "dz_mm": float(dz),
+                                "reasons": [
+                                    f"cantilever: dz={dz:.1f} mm leaves no horn geometry "
+                                    "over the cabinet top; an explicit mount would be "
+                                    "needed and is not modelled by this screen"]})
+                            continue
                     check = placement_legality(
                         env, point, dx_mm=0.0, dy_mm=dy_min, dz_mm=float(dz),
                         layout=assembly.horn_layout, clearance_mm=clearance_mm,
                         woofer_frame_radius_mm=frame_radius,
-                        woofer_rear_depth_mm=rear_depth)
+                        woofer_rear_depth_mm=rear_depth,
+                        woofer_frame_center_y_mm=float(panel_fit["driver_y_m"]) * 1e3,
+                        horn_points_mm=horn_points_mm,
+                        placement_policy=placement_policy)
                     if not check.accepted:
                         counts["placements_rejected"] += 1
                         ledger.append({
@@ -1430,9 +1550,16 @@ def run_seed_screen(
                         "placement": {
                             "dx_mm": 0.0, "dy_mm": float(dy_min), "dz_mm": float(dz),
                             "dy_min_mm": float(dy_min),
+                            "translation_mm": [0.0, float(dy_min), float(dz)],
+                            "placement_policy": placement_policy,
+                            "support": ("seated_on_cabinet_top" if check.accepted else None),
                             "transform": [list(r) for r in check.transform],
+                            "woofer_frame_center_y_mm": check.woofer_frame_center_y_mm,
                             "min_clearance_mm": check.min_clearance_mm,
                             "gaps_mm": dict(check.gaps_mm),
+                            "aabb_overlaps": check.aabb_overlaps,
+                            "notes": list(check.notes),
+                            "requires_exact_clearance": bool(check.aabb_overlaps),
                         },
                         "match": {
                             "H": planes["H"].to_dict(),
@@ -1579,6 +1706,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--shortlist-size", type=int, default=DEFAULT_SHORTLIST_SIZE)
     parser.add_argument("--ts-dir", default=str(DEFAULT_TS_DIR))
     parser.add_argument("--geometry-dir", default=str(DEFAULT_GEOMETRY_DIR))
+    parser.add_argument("--placement-policy", default="envelope_above",
+                        choices=("envelope_above", "seated_overhang"),
+                        help="'envelope_above' keeps the whole horn envelope above the "
+                             "cabinet top; 'seated_overhang' lets the mouth hang in front "
+                             "of the baffle and derives the closest legal height from the "
+                             "real horn mesh (exact clearance is still proven at stage time)")
     args = parser.parse_args(argv)
 
     spec_doc = yaml.safe_load(Path(args.spec).read_text(encoding="utf-8"))
@@ -1592,7 +1725,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         asset, catalog, cabinet=spec.cabinet, assembly=spec.assembly, target=spec.target,
         full_domain_provenance=args.full_domain_provenance,
         limit_boxes=args.limit_boxes, shortlist_size=args.shortlist_size,
-        xo_range_hz=spec.dsp.xo_hz_range)
+        xo_range_hz=spec.dsp.xo_hz_range,
+        placement_policy=args.placement_policy)
     json_path, md_path = result.write(args.out)
     _print_summary(result)
     print(f"wrote: {json_path.name}, {md_path.name} under {Path(args.out)}")

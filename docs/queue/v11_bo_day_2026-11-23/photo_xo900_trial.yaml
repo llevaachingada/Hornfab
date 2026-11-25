@@ -1,0 +1,446 @@
+night: photo_xo900_v11_trial_2026-11-23
+lane: gpu
+pause: true
+jobs:
+- id: photo900_lame_v4_81301
+  kind: command
+  timeout_s: 7200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - g_aspect
+    - g_end_frac
+    - g_fc_hz
+    - g_lame_p
+    - g_rim_sweep_ratio
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/lame_v4.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/lame_v4
+  - --cma-seed
+  - '81301'
+  - --budget
+  - '30'
+- id: photo900_rolled_h_pucker0_screen
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/rolled_h_pucker0.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/rolled_h_pucker0
+- id: photo900_rolled_h_pucker6_screen
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/rolled_h_pucker6.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/rolled_h_pucker6
+- id: photo900_crowe_2in_half2_matched_screen
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/crowe_2in_half2_matched.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/crowe_2in_half2_matched
+- id: photo900_crowe_2in_half15_screen
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/crowe_2in_half15.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/crowe_2in_half15
+- id: photo900_rolled_hybrid_81311
+  kind: command
+  timeout_s: 7200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - g_axial_h_mm
+    - g_axial_v_mm
+    - g_decay
+    - g_depth_h_ratio
+    - g_depth_mm
+    - g_height_mm
+    - g_inward_h_mm
+    - g_inward_v_mm
+    - g_rect_exponent
+    - g_rect_turn_deg
+    - g_terminal_deg
+    - g_throat_turn_deg
+    - g_width_mm
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/rolled_hybrid.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/rolled_hybrid
+  - --cma-seed
+  - '81311'
+  - --budget
+  - '35'
+- id: photo900_osse_morph_81321
+  kind: command
+  timeout_s: 7200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_s_cos2_amp
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/osse_morph.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/osse_morph
+  - --cma-seed
+  - '81321'
+  - --budget
+  - '85'
+- id: photo900_twinray_81331
+  kind: command
+  timeout_s: 7200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_fold_v_deg
+    - az_fold_v_width_deg
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/twinray.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/twinray
+  - --cma-seed
+  - '81331'
+  - --budget
+  - '85'
+- id: photo900_lame_e2_screen
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/lame_e2.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/lame_e2
+- id: photo900_lame_v5_screen
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/lame_v5.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/lame_v5
+- id: photo900_lame_deep_alt_screen
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/lame_deep_alt.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/lame_deep_alt
+- id: photo900_lame_c200_reference_screen
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/lame_c200_reference.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/lame_c200_reference
+- id: photo900_rolled_record_screen
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/rolled_record.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/rolled_record
+- id: photo900_diag_pull_screen
+  kind: command
+  timeout_s: 1200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - run
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/diag_pull.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/diag_pull
+- id: photo900_lame_v4_81302
+  kind: command
+  timeout_s: 7200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - g_aspect
+    - g_end_frac
+    - g_fc_hz
+    - g_lame_p
+    - g_rim_sweep_ratio
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/lame_v4.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/lame_v4
+  - --cma-seed
+  - '81302'
+  - --budget
+  - '30'
+- id: photo900_rolled_hybrid_81312
+  kind: command
+  timeout_s: 7200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - g_axial_h_mm
+    - g_axial_v_mm
+    - g_decay
+    - g_depth_h_ratio
+    - g_depth_mm
+    - g_height_mm
+    - g_inward_h_mm
+    - g_inward_v_mm
+    - g_rect_exponent
+    - g_rect_turn_deg
+    - g_terminal_deg
+    - g_throat_turn_deg
+    - g_width_mm
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/rolled_hybrid.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/rolled_hybrid
+  - --cma-seed
+  - '81312'
+  - --budget
+  - '35'
+- id: photo900_osse_morph_81322
+  kind: command
+  timeout_s: 7200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_s_cos2_amp
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/osse_morph.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/osse_morph
+  - --cma-seed
+  - '81322'
+  - --budget
+  - '85'
+- id: photo900_twinray_81332
+  kind: command
+  timeout_s: 7200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_fold_v_deg
+    - az_fold_v_width_deg
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/photo_xo900_v11_2026-11-23/twinray.yaml
+  - --mode
+  - screen
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/photo_xo900_v11_cache/twinray
+  - --cma-seed
+  - '81332'
+  - --budget
+  - '85'

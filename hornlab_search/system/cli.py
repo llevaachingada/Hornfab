@@ -150,7 +150,9 @@ def _cmd_reference_prepare(args: argparse.Namespace) -> int:
             experiment_id=args.experiment_id,
             mesh_role=args.mesh_role,
             scale_factor=args.scale_factor,
-            translation_mm=tuple(args.translation_mm),
+            translation_mm=(None if args.pose else tuple(args.translation_mm)),
+            assembly_pose=(json.loads(Path(args.pose).read_text(encoding="utf-8"))
+                           if args.pose else None),
             timeout_s=args.timeout_s,
             run_now=not args.dry_run,
         )
@@ -373,6 +375,10 @@ def main(argv: list[str] | None = None) -> int:
     p_ref_prepare.add_argument("--scale-factor", type=float, default=1.0)
     p_ref_prepare.add_argument("--translation-mm", type=float, nargs=3,
                                default=(0.0, 0.0, 0.0), metavar=("X", "Y", "Z"))
+    p_ref_prepare.add_argument("--pose", default=None,
+                               help="resolved pose JSON from `tools/system/pose.py`; its "
+                                    "translation_mm overrides --translation-mm and the pose "
+                                    "is recorded verbatim in the case manifest")
     p_ref_prepare.add_argument("--overrides", default=None,
                                help="JSON object (or @file) of vented-source overrides")
     p_ref_prepare.add_argument("--experiment-id", default="bl_ref_case")

@@ -28,17 +28,15 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from hornlab_search.config import (  # noqa: E402
-    effective_envelope_limits,
+    envelope_policy,
     load_config,
     mesh_spec,
 )
+from hornlab_search.design.size import mesh_dimensions_mm, size_feasibility_record  # noqa: E402
 from hornlab_search.design.space import DesignSpace  # noqa: E402
 from hornlab_search.mesh import build  # noqa: E402
 from hornlab_search.mesh.throat_check import fits_exit, throat_shape  # noqa: E402
-
-#: Wall allowance added to the mouth/depth extents before the envelope comparison (mm). The bounding box
-#: already includes the outer shell, so this is a small margin for the estimator's rounding only.
-ENVELOPE_SLACK_MM = 0.5
+from hornlab_search.search.evaluate import envelope_violation  # noqa: E402
 
 
 def check(path: str, brief: str | None, mode: str, save_dir: Path | None, geometry_only: bool) -> dict:
@@ -50,8 +48,7 @@ def check(path: str, brief: str | None, mode: str, save_dir: Path | None, geomet
     if err:
         out["note"] = f"REFUSED by the generator: {err[:160]}"
         return out
-    env = (cfg.brief or {}).get("envelope") or {}
-    max_w, max_h, max_depth, enforced = effective_envelope_limits(cfg.brief)
+    policy = envelope_policy(cfg.brief)
     exit_r = ((cfg.brief or {}).get("driver") or {}).get("exit_radius_mm")
     exit_d = 2.0 * float(exit_r) if exit_r else None
     if geometry_only:
@@ -60,9 +57,9 @@ def check(path: str, brief: str | None, mode: str, save_dir: Path | None, geomet
         if not isinstance(g, dict):
             out["note"] = "geometry-only needs a grid/rows generator config"
             return out
-        spec = {k: v for k, v in g.items() if k != "knobs"}
-        _pts, meta = grid.rows_grid_points(spec, g["knobs"], cfg.brief) if "rows" in g else (None, {})
-        out.update(mouth_w=meta.get("mouth_w_mm"), mouth_h=meta.get("mouth_h_mm"), depth=meta.get("x_span_mm"))
+        w, h, depth = grid.envelope_extents(g, g["knobs"], cfg.brief)
+        out.update(mouth_w=w, mouth_h=h, depth=depth, note="estimated geometry; mesh unchecked",
+                   envelope=policy.mode)
         out["ok"] = True
         return out
     ms = mesh_spec(mode, cfg)
@@ -70,7 +67,7 @@ def check(path: str, brief: str | None, mode: str, save_dir: Path | None, geomet
     try:
         mesh = build.build_mesh(design, ms, cfg, work, mode=mode)
         summ = build.read_msh_summary(Path(mesh.path))
-        bb = mesh.bbox_m
+        w, h, depth = mesh_dimensions_mm(mesh)
         cad = design.params.get("cad") if isinstance(design.params, dict) else None
         if isinstance(cad, dict) and cad.get("tool") == "plughorn":
             # A cone mid horn: the driver face IS the cone, there is no compression-driver exit to match.
@@ -79,8 +76,12 @@ def check(path: str, brief: str | None, mode: str, save_dir: Path | None, geomet
             shape = throat_shape(mesh.path)
             fit, why = fits_exit(shape, exit_d)
         out.update(dofs=int(summ["n_nodes_used"]), cap=int(cfg.mesh.dof_cap(mode)), quadrants=mesh.quadrants,
-                   mouth_w=2000.0 * bb[3], mouth_h=2000.0 * bb[4], depth=1000.0 * (bb[5] - bb[2]),
+                   mouth_w=w, mouth_h=h, depth=depth,
                    throat=why if fit is not None else "unknown", throat_ok=bool(fit))
+        if policy.mode != "unspecified":
+            out["size_feasibility"] = size_feasibility_record(
+                mesh, policy, design_hash=design.hash(), mesh_hash=ms.hash(),
+                mounted=bool(getattr(cfg, "mounting", None)))
         if save_dir is not None:
             dest = save_dir / Path(path).stem
             dest.mkdir(parents=True, exist_ok=True)
@@ -91,19 +92,8 @@ def check(path: str, brief: str | None, mode: str, save_dir: Path | None, geomet
         return out
     finally:
         shutil.rmtree(work, ignore_errors=True)
-    over = []
-    for key, lim_key, lim in (("mouth_w", "max_mouth_w_mm", max_w),
-                              ("mouth_h", "max_mouth_h_mm", max_h),
-                              ("depth", "max_depth_mm", max_depth)):
-        if out[key] > lim + ENVELOPE_SLACK_MM:
-            shown = env.get(lim_key, lim) if enforced else lim
-            over.append(f"{key} {out[key]:.0f} > {float(shown):.0f}")
-    if over:
-        out["envelope"] = ("OVER: " if enforced else "OVER sanity: ") + ", ".join(over)
-    else:
-        # Same historical word when the brief box is enforced; name the ceiling when it is not
-        # (owner decision 2026-11-22: the build box is a post-hoc filter, not a refusal).
-        out["envelope"] = "fits" if enforced else f"fits (sanity {max_w:g})"
+    over = envelope_violation(mesh, cfg.brief)
+    out["envelope"] = over or f"fits ({policy.mode})"
     out["ok"] = out["dofs"] <= out["cap"] and not over and out["throat_ok"]
     return out
 

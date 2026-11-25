@@ -60,13 +60,27 @@ def test_evaluate_happy_path_writes_every_artifact(cfg, tmp_path, monkeypatch):
     (row,) = read_ndjson(tmp_path / "run" / "search.ndjson")
     assert row["design_hash"] == ev.design_hash and row["objective"] == ev.objective
     assert "mesh_policy" not in row
-    (meta, arrays) = next(store.iter_records(with_arrays=True))
+    assert ev.dataset_position == (0, 0)
+    meta, arrays = store.read(*ev.dataset_position)
     assert meta["ok"] and meta["objective_version"] == 1
     assert "mesh_policy" not in (meta.get("provenance") or {})
     assert "cad" not in row and "cad" not in (meta.get("provenance") or {})
     assert meta["mesh"]["area_m2"] == 0.1 and meta["mesh"]["grid"]["available"]
     assert meta["mesh"]["grid"]["angular_segments"] == 64 and meta["solve"]["mode"] == "screen"
     assert "spl_h_db" in arrays and meta["solve"]["freqs_hz"] == list(mode_freqs("screen", cfg))
+
+
+def test_context_run_id_overrides_the_dataset_record_run_id(cfg, tmp_path, monkeypatch):
+    """A study worker names its mode directory 'screen'; the context run_id must win."""
+    be = SyntheticBackend()
+    install_fakes(monkeypatch, be)
+    store = DatasetStore(tmp_path / "ds")
+    space = DesignSpace.from_config(cfg)
+    ev = evaluate(space.seed, space, cfg, "screen", tmp_path / "run", store, be,
+                  ctx=_ctx(cfg, store, ndjson=tmp_path / "run" / "search.ndjson",
+                           run_id="study-pkg123-screen"))
+    meta, _ = store.read(*ev.dataset_position)
+    assert meta["run_id"] == "study-pkg123-screen"
 
 
 def test_row_roundtrip_preserves_the_objective_exactly(cfg, tmp_path, monkeypatch):
@@ -130,6 +144,7 @@ def test_dataset_write_failure_is_logged_not_raised(cfg, tmp_path, monkeypatch, 
     with caplog.at_level("ERROR"):
         ev = evaluate(space.seed, space, cfg, "screen", tmp_path / "r", store, be, ctx=_ctx(cfg, store))
     assert not ev.error and "was NOT written" in caplog.text
+    assert ev.dataset_position is None
     assert len(read_ndjson(tmp_path / "r" / "search.ndjson")) == 1
 
 

@@ -1,0 +1,5 @@
+extends: crowe_2in_half2.yaml
+name: photo_comparison_crowe_2in_half2_matched_xo900_v11
+# Use the same shorter starting depth in both exit-angle arms.
+seed_params:
+  g_L_mm: 242.0

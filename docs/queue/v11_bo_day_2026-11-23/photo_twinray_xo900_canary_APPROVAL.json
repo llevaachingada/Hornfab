@@ -1,0 +1,40 @@
+{
+  "schema": "metric-real-approvals-v1",
+  "status": "HELD_PENDING_PARENT_RELEASE",
+  "profile": "metric-canary-8x2",
+  "screen_cap": 8,
+  "verify_cap": 2,
+  "refit_every": 4,
+  "lane": "gpu",
+  "task_identity": "83700027fe6fc17e",
+  "artifact_sha256": "71a3d51ac56d6e0080e11ebc42f1f61334720de8f40e2f29f81b0d61a2ffbafc",
+  "identity": {
+    "task_identity": "83700027fe6fc17e",
+    "backend": "beat_cuda",
+    "fidelity": "screen",
+    "grid_hash": "c41ff9a7581ba429",
+    "dependency_hash": "f4dcdca807bdfad0",
+    "mesh_hash": "8e789cd0deef",
+    "brief_hash": "205eb1c8efbb",
+    "score_hash": "7cf5fa261b09d576"
+  },
+  "canary_acceptance": null,
+  "task": {
+    "config": "examples/typologies/photo_xo900_v11_2026-11-23/twinray.yaml",
+    "config_name": "photo_twinray_xo900_v11",
+    "brief": "room_landscape_80x50_900_hf1440_v11cd",
+    "study_id": "3a0a42645d5045bb83fa57848fb299c9",
+    "cohort_dir": "runs/v11_bo_day_planning/cohort_twinray_2026-11-24",
+    "rows": 170
+  },
+  "evidence": {
+    "cohort_replay": "170/170 exact_complete, one dependency/grid/brief group",
+    "strict_artifact": "checksum 71a3d51ac56d6e0080e11ebc42f1f61334720de8f40e2f29f81b0d61a2ffbafc, n=170, synthetic=false, model/pool/proposal ok",
+    "holdout": "runs/v11_bo_day_planning/cohort_twinray_2026-11-24/holdout_comparison.json",
+    "holdout_verdict": "PASS_FOR_EXPLORATORY_PILOT (130/40 chronological split; metric tied scalar on median J 4.4166, recall 0.50, best-at-k 3.60241; Spearman 0.815 vs 0.790; coverage 0.90)"
+  },
+  "owner_authorization": {
+    "authorized": false,
+    "note": "HELD. 8 screen + 2 verify canary for the first admitted 900 Hz cohort. Parent release: flip status to APPROVED_FOR_CANARY, set authorized=true, set HORNLAB_METRIC_REAL_EXECUTE=1, insert the held queue job. Separate from the Home v11 Fold 700 Hz loop."
+  }
+}

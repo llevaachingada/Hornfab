@@ -1,0 +1,339 @@
+{
+ "ref": "F3",
+ "arms": [
+  "F0",
+  "F0M",
+  "F1",
+  "F2",
+  "FA",
+  "FB",
+  "F3"
+ ],
+ "cost": {
+  "F0": {
+   "n": 24,
+   "wall": 40.27470585005358,
+   "vram": 1422.0,
+   "refusals": 0
+  },
+  "F0M": {
+   "n": 24,
+   "wall": 72.17998335004086,
+   "vram": 2798.0,
+   "refusals": 0
+  },
+  "F1": {
+   "n": 24,
+   "wall": 95.56132855004398,
+   "vram": 2798.0,
+   "refusals": 0
+  },
+  "F2": {
+   "n": 24,
+   "wall": 147.04073614999652,
+   "vram": 2798.0,
+   "refusals": 0
+  },
+  "FA": {
+   "n": 24,
+   "wall": 106.8184923499939,
+   "vram": 2798.0,
+   "refusals": 0
+  },
+  "FB": {
+   "n": 18,
+   "wall": 130.00304330000654,
+   "vram": 2798.0,
+   "refusals": 0
+  },
+  "F3": {
+   "n": 23,
+   "wall": 268.9407834999729,
+   "vram": 1966.0,
+   "refusals": 1
+  }
+ },
+ "rank": {
+  "F0": {
+   "rho": [
+    0.8999999999999998,
+    0.6,
+    0.8285714285714287,
+    1.0
+   ],
+   "recall": {
+    "c400": 0.6666666666666666,
+    "room": 0.6666666666666666,
+    "morph": 0.6666666666666666,
+    "twinray": 1.0
+   },
+   "fn": 3
+  },
+  "F0M": {
+   "rho": [
+    0.9999999999999999,
+    0.7142857142857143,
+    0.942857142857143,
+    1.0
+   ],
+   "recall": {
+    "c400": 1.0,
+    "room": 0.6666666666666666,
+    "morph": 0.6666666666666666,
+    "twinray": 1.0
+   },
+   "fn": 2
+  },
+  "F1": {
+   "rho": [
+    0.9999999999999999,
+    0.942857142857143,
+    0.7142857142857143,
+    1.0
+   ],
+   "recall": {
+    "c400": 1.0,
+    "room": 1.0,
+    "morph": 0.6666666666666666,
+    "twinray": 1.0
+   },
+   "fn": 1
+  },
+  "F2": {
+   "rho": [
+    0.9999999999999999,
+    1.0,
+    0.8285714285714287,
+    1.0
+   ],
+   "recall": {
+    "c400": 1.0,
+    "room": 1.0,
+    "morph": 0.6666666666666666,
+    "twinray": 1.0
+   },
+   "fn": 1
+  },
+  "FA": {
+   "rho": [
+    0.9999999999999999,
+    0.6571428571428573,
+    0.8857142857142858,
+    0.942857142857143
+   ],
+   "recall": {
+    "c400": 1.0,
+    "room": 0.6666666666666666,
+    "morph": 0.6666666666666666,
+    "twinray": 1.0
+   },
+   "fn": 2
+  },
+  "FB": {
+   "rho": [
+    0.9999999999999999,
+    0.942857142857143,
+    0.8857142857142858
+   ],
+   "recall": {
+    "c400": 1.0,
+    "room": 1.0,
+    "morph": 0.6666666666666666
+   },
+   "fn": 1
+  },
+  "F3": {
+   "rho": [
+    0.9999999999999999,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "recall": {
+    "c400": 1.0,
+    "room": 1.0,
+    "morph": 1.0,
+    "twinray": 1.0
+   },
+   "fn": 0
+  }
+ },
+ "hf": {
+  "F0": {
+   "defects": 6,
+   "caught": 0,
+   "missed": 0,
+   "unassessable": 6,
+   "false_pos": 0
+  },
+  "F0M": {
+   "defects": 6,
+   "caught": 0,
+   "missed": 0,
+   "unassessable": 6,
+   "false_pos": 0
+  },
+  "F1": {
+   "defects": 6,
+   "caught": 5,
+   "missed": 1,
+   "unassessable": 0,
+   "false_pos": 1
+  },
+  "F2": {
+   "defects": 6,
+   "caught": 6,
+   "missed": 0,
+   "unassessable": 0,
+   "false_pos": 0
+  },
+  "FA": {
+   "defects": 6,
+   "caught": 5,
+   "missed": 1,
+   "unassessable": 0,
+   "false_pos": 1
+  },
+  "FB": {
+   "defects": 6,
+   "caught": 5,
+   "missed": 1,
+   "unassessable": 0,
+   "false_pos": 1
+  },
+  "F3": {
+   "defects": 6,
+   "caught": 6,
+   "missed": 0,
+   "unassessable": 0,
+   "false_pos": 0
+  }
+ },
+ "epw": {
+  "max_d_oa_db": 0.012,
+  "max_d_bw_deg": 0.122,
+  "designs": 4
+ },
+ "verdicts": {
+  "F0": {
+   "c1_pooled_spearman": 0.8321,
+   "c1_gain_vs_F0": 0.0,
+   "c1_recall_not_worse": true,
+   "c1_pass": false,
+   "c2_caught_of_F0_missed": 0.0,
+   "c2_false_positives": 0,
+   "c2_pass": false,
+   "c3_wall_ratio_vs_F0": 1.0,
+   "c3_max_vram_delta_mib": 1422.0,
+   "c3_refusals": 0,
+   "c3_pass": true,
+   "c4_epw_max_d_oa_db": 0.012,
+   "c4_epw_max_d_bw_deg": 0.122,
+   "c4_pass": true,
+   "all_pass": false
+  },
+  "F0M": {
+   "c1_pooled_spearman": 0.9143,
+   "c1_gain_vs_F0": 0.0821,
+   "c1_recall_not_worse": true,
+   "c1_pass": false,
+   "c2_caught_of_F0_missed": 0.0,
+   "c2_false_positives": 0,
+   "c2_pass": false,
+   "c3_wall_ratio_vs_F0": 1.792,
+   "c3_max_vram_delta_mib": 2798.0,
+   "c3_refusals": 0,
+   "c3_pass": true,
+   "c4_epw_max_d_oa_db": 0.012,
+   "c4_epw_max_d_bw_deg": 0.122,
+   "c4_pass": true,
+   "all_pass": false
+  },
+  "F1": {
+   "c1_pooled_spearman": 0.9143,
+   "c1_gain_vs_F0": 0.0821,
+   "c1_recall_not_worse": true,
+   "c1_pass": false,
+   "c2_caught_of_F0_missed": 0.833,
+   "c2_false_positives": 1,
+   "c2_pass": false,
+   "c3_wall_ratio_vs_F0": 2.373,
+   "c3_max_vram_delta_mib": 2798.0,
+   "c3_refusals": 0,
+   "c3_pass": false,
+   "c4_epw_max_d_oa_db": 0.012,
+   "c4_epw_max_d_bw_deg": 0.122,
+   "c4_pass": true,
+   "all_pass": false
+  },
+  "F2": {
+   "c1_pooled_spearman": 0.9571,
+   "c1_gain_vs_F0": 0.125,
+   "c1_recall_not_worse": true,
+   "c1_pass": true,
+   "c2_caught_of_F0_missed": 1.0,
+   "c2_false_positives": 0,
+   "c2_pass": true,
+   "c3_wall_ratio_vs_F0": 3.651,
+   "c3_max_vram_delta_mib": 2798.0,
+   "c3_refusals": 0,
+   "c3_pass": false,
+   "c4_epw_max_d_oa_db": 0.012,
+   "c4_epw_max_d_bw_deg": 0.122,
+   "c4_pass": true,
+   "all_pass": false
+  },
+  "FA": {
+   "c1_pooled_spearman": 0.8714,
+   "c1_gain_vs_F0": 0.0393,
+   "c1_recall_not_worse": true,
+   "c1_pass": false,
+   "c2_caught_of_F0_missed": 0.833,
+   "c2_false_positives": 1,
+   "c2_pass": false,
+   "c3_wall_ratio_vs_F0": 2.652,
+   "c3_max_vram_delta_mib": 2798.0,
+   "c3_refusals": 0,
+   "c3_pass": false,
+   "c4_epw_max_d_oa_db": 0.012,
+   "c4_epw_max_d_bw_deg": 0.122,
+   "c4_pass": true,
+   "all_pass": false
+  },
+  "FB": {
+   "c1_pooled_spearman": 0.9429,
+   "c1_gain_vs_F0": 0.1107,
+   "c1_recall_not_worse": false,
+   "c1_pass": false,
+   "c2_caught_of_F0_missed": 0.833,
+   "c2_false_positives": 1,
+   "c2_pass": false,
+   "c3_wall_ratio_vs_F0": 3.228,
+   "c3_max_vram_delta_mib": 2798.0,
+   "c3_refusals": 0,
+   "c3_pass": false,
+   "c4_epw_max_d_oa_db": 0.012,
+   "c4_epw_max_d_bw_deg": 0.122,
+   "c4_pass": true,
+   "all_pass": false
+  },
+  "F3": {
+   "c1_pooled_spearman": 1.0,
+   "c1_gain_vs_F0": 0.1679,
+   "c1_recall_not_worse": true,
+   "c1_pass": true,
+   "c2_caught_of_F0_missed": 1.0,
+   "c2_false_positives": 0,
+   "c2_pass": true,
+   "c3_wall_ratio_vs_F0": 6.678,
+   "c3_max_vram_delta_mib": 1966.0,
+   "c3_refusals": 1,
+   "c3_pass": false,
+   "c4_epw_max_d_oa_db": 0.012,
+   "c4_epw_max_d_bw_deg": 0.122,
+   "c4_pass": true,
+   "all_pass": false
+  }
+ },
+ "cheapest_passing_arm": null
+}

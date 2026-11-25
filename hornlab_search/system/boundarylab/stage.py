@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from hornlab_search.system import provenance
+from hornlab_search.system.boundarylab import collision
 from hornlab_search.system.boundarylab import run as bl_run
 from hornlab_search.system.boundarylab.clearance import DEFAULT_MIN_GAP_M, body_clearance
 from hornlab_search.system.boundarylab.generate import (
@@ -151,6 +152,7 @@ def build_stage_spec(
     document_name: str = "vented",
     expectations: Mapping[str, Any] | None = None,
     horn: Mapping[str, Any] | None = None,
+    pose: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """The BL-side spec for one staging run (pure; used by tests and dry runs).
 
@@ -182,6 +184,8 @@ def build_stage_spec(
         "expectations": dict(_DEFAULT_EXPECTATIONS if expectations is None else expectations),
         "runner_version": "v1",
     }
+    if pose is not None:
+        started["pose"] = dict(pose)
     if horn is not None:
         started["horn"] = dict(horn)
         # The horn body changes region coverage but not the vented fixture's air volume.
@@ -262,27 +266,63 @@ def _stage(
     # R16: BL accepts intersecting separate bodies, so the horn-to-enclosure gap is checked
     # here and recorded in the manifest; a staged two-body project without a proven gap is
     # not "ok", whatever BL's validate said.
+    #
+    # The verdict comes from the exact triangle-vs-cabinet-solid test (:mod:`.collision`),
+    # which understands a mouth overhanging the baffle plane. The older AABB/vertex guard
+    # is kept in the manifest as a coarse cross-check only - it cannot prove a gap and it
+    # used to refuse legal overhangs.
     clearance: dict[str, Any] | None = None
     horn_spec = spec.get("horn")
     if staged and horn_spec:
         surfaces = [m["path"] for m in meshes if m.get("purpose") == "bem_surface" and m.get("path")]
+        source = spec.get("source") or {}
         try:
-            report = body_clearance(
-                horn_spec["mesh_path"], surfaces,
+            horn_surface = collision.transform_surface(
+                collision.read_surface(horn_spec["mesh_path"], label="horn"),
                 translation_mm=horn_spec.get("translation_mm", (0.0, 0.0, 0.0)),
-                scale_factor=float(horn_spec.get("scale_factor", 1.0)),
-                min_gap_m=min_clearance_m,
-            )
+                scale_factor=float(horn_spec.get("scale_factor", 1.0)))
+            box = collision.box_from_cabinet_mm(
+                width_mm=float(source["width_m"]) * 1e3,
+                height_mm=float(source["height_m"]) * 1e3,
+                depth_mm=float(source["depth_m"]) * 1e3)
+            exterior = (collision.read_surface(surfaces[0], label="cabinet_exterior")
+                        if surfaces else None)
+            extra = []
+            frame = ((spec.get("pose") or {}).get("detail") or {}).get("driver_frame")
+            if frame:
+                radius = float(frame["frame_od_mm"]) / 2.0 / 1e3
+                depth = float(frame["depth_behind_baffle_mm"]) / 1e3
+                cy = float(frame.get("center_y_mm", 0.0)) / 1e3
+                cx = float(frame.get("center_x_mm", 0.0)) / 1e3
+                extra.append(collision.Box(lo=(cx - radius, cy - radius, -depth),
+                                           hi=(cx + radius, cy + radius, 0.0)))
+            report = collision.test_horn_box_clearance(
+                horn_surface, box, min_gap_m=min_clearance_m, compiled_exterior=exterior,
+                extra_solids=extra)
             clearance = report.to_dict()
-        except (FileNotFoundError, ValueError) as exc:
-            clearance = {"kind": "body_clearance_v1", "status": "BODY_CLEARANCE_UNCHECKED",
-                         "min_gap_m": min_clearance_m, "error": f"{type(exc).__name__}: {exc}"}
+            try:
+                legacy = body_clearance(
+                    horn_spec["mesh_path"], surfaces,
+                    translation_mm=horn_spec.get("translation_mm", (0.0, 0.0, 0.0)),
+                    scale_factor=float(horn_spec.get("scale_factor", 1.0)),
+                    min_gap_m=min_clearance_m,
+                ).to_dict()
+            except (FileNotFoundError, ValueError):
+                legacy = None
+            if legacy is not None:
+                clearance["aabb_vertex_guard"] = legacy
+        except (FileNotFoundError, ValueError, KeyError) as exc:
+            clearance = {"kind": "horn_box_clearance_v1",
+                         "status": "BODY_CLEARANCE_UNCHECKED",
+                         "min_gap_m": min_clearance_m,
+                         "error": f"{type(exc).__name__}: {exc}"}
         if clearance["status"] != "PASS":
             staged = False
             log_lines.append(
                 f"[adapter] {clearance['status']}: horn-to-enclosure clearance not proven >= "
-                f"{min_clearance_m} m (aabb_gap_m={clearance.get('aabb_gap_m')}, "
-                f"vertex_min_distance_m={clearance.get('vertex_min_distance_m')})"
+                f"{min_clearance_m} m (min_distance_m={clearance.get('min_distance_m')}, "
+                f"nested={clearance.get('nested')}, reason="
+                f"{(clearance.get('detail') or {}).get('reason')})"
             )
 
     detail = {
@@ -363,6 +403,7 @@ def stage_horn_project(
     cancel_path: Path | None = None,
     run_now: bool = True,
     min_clearance_m: float = DEFAULT_MIN_GAP_M,
+    pose: Mapping[str, Any] | None = None,
 ) -> StagedProject:
     """Stage the two-body project: seeded vented system + one imported closed horn BEM mesh.
 
@@ -392,6 +433,7 @@ def stage_horn_project(
             "source_group": source_group,
             "mesh_role": mesh_role,
         },
+        pose=pose,
     )
     return _stage(root, spec, store_root=store_root, case_dir=case_dir,
                   experiment_id=experiment_id, tag="assembly", timeout_s=timeout_s,

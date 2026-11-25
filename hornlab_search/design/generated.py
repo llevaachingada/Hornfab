@@ -17,6 +17,7 @@ import copy
 import hashlib
 import json
 import logging
+import math
 
 import numpy as np
 
@@ -57,8 +58,123 @@ def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
         return meh_params(gen, knobs, brief)
     from .generators import crowe_hv_area_aspect_v1
     if str(gen.get("name", "")) == crowe_hv_area_aspect_v1.KIND:
-        return crowe_hv_area_aspect_v1.materialize(gen, knobs, brief)
+        from ..config import brief_for_envelope_adapter
+        return crowe_hv_area_aspect_v1.materialize(gen, knobs, brief_for_envelope_adapter(brief))
     return registry.materialize(gen, knobs, brief)
+
+
+class GeneratorRecipeError(ValueError):
+    """A persisted generator provenance recipe cannot be proven against the configured task.
+
+    Raised by :func:`design_from_recipe`; it always means "refuse the historical record", never
+    "clip it into range" or "recover knobs from geometry". ``GeneratedSpace.normalize`` cannot
+    invert geometry, so a durable generated-space intake must carry the recorded recipe.
+    """
+
+
+def design_from_recipe(space, recipe: dict, *, expected_design_hash: str,
+                       brief: dict | None = None) -> Design:
+    """Rebuild a historical generated-space Design from its persisted provenance recipe.
+
+    ``recipe`` is the ``provenance.generator`` block written by
+    :meth:`GeneratedSpace.provenance` and reduced by ``search/evaluate.py`` to
+    ``{name, spec, knobs, brief, brief_hash}``. This is the durable intake path for generated
+    tasks (grid rows, typologies, CAD recipes): ``Design.params`` alone is a recipe, not an
+    invertible continuous vector.
+
+    Validation is deliberately fail-closed and happens BEFORE conversion:
+
+    * the recipe must carry a ``spec`` mapping, a ``knobs`` mapping and a ``brief_hash``;
+    * the recorded spec must equal the configured generator spec exactly (a changed recipe is
+      refused, including ``rows``/``n_phi``/``wall_thickness_mm`` and any generator ``fixed``
+      block);
+    * the recorded ``brief_hash`` must equal the resolved task brief's hash;
+    * the knob key set must equal the configured generator's knob key set exactly (neither a
+      missing nor an extra key is accepted);
+    * every knob must be a finite scalar; pinned (``search: false``, ``lo == hi``) knobs must
+      equal the configured fixed value exactly, and searched knobs must lie inside their
+      resolved bound (no clipping);
+    * the knobs must materialise a legal horn and reproduce ``expected_design_hash`` exactly.
+
+    On success the exact knob vector is attached to ``space``'s recipe cache so the subsequent
+    :class:`~hornlab_search.bo.encoding.ActiveProjection` round-trip reads the recipe rather than
+    trying to invert geometry. Any failure raises :class:`GeneratorRecipeError`.
+    """
+    if not isinstance(space, GeneratedSpace):
+        raise GeneratorRecipeError("recipe intake requires a generated task space")
+    if not isinstance(recipe, dict):
+        raise GeneratorRecipeError(f"generator recipe is {type(recipe).__name__}, not a mapping")
+    spec, knobs = recipe.get("spec"), recipe.get("knobs")
+    if not isinstance(spec, dict) or not isinstance(knobs, dict):
+        raise GeneratorRecipeError("generator recipe needs both a spec mapping and a knobs mapping")
+    recorded_brief = recipe.get("brief_hash")
+    if not isinstance(recorded_brief, str) or not recorded_brief:
+        raise GeneratorRecipeError("generator recipe has no brief_hash proof")
+    resolved_brief = dict(space.brief if brief is None else brief)
+    if brief_hash(resolved_brief) != recorded_brief:
+        raise GeneratorRecipeError(
+            "generator recipe brief_hash differs from the configured task brief "
+            f"({recorded_brief!r} != {brief_hash(resolved_brief)!r})")
+    if spec != space.gen:
+        raise GeneratorRecipeError(
+            "generator recipe spec differs from the configured task generator block")
+    name = recipe.get("name")
+    if name is not None and str(name) != str(space.gen.get("name", "typology")):
+        raise GeneratorRecipeError(
+            f"generator recipe name {name!r} differs from configured {space.gen.get('name')!r}")
+
+    expected_keys = set(space.seed_knobs)
+    got_keys = set(knobs)
+    if got_keys != expected_keys:
+        missing = sorted(expected_keys - got_keys)
+        extra = sorted(got_keys - expected_keys)
+        raise GeneratorRecipeError(
+            f"generator recipe knob set differs from the configured task (missing={missing}, "
+            f"extra={extra})")
+
+    validated: dict[str, float] = {}
+    for key in sorted(knobs):
+        value = knobs[key]
+        if isinstance(value, (list, tuple)):
+            raise GeneratorRecipeError(
+                f"generator knob {key!r} is list-valued; the continuous intake cannot encode it")
+        if isinstance(value, bool):
+            raise GeneratorRecipeError(f"generator knob {key!r} is boolean, not a finite number")
+        try:
+            number = float(value)
+        except (TypeError, ValueError):
+            raise GeneratorRecipeError(
+                f"generator knob {key!r} is not a finite number ({value!r})") from None
+        if not math.isfinite(number):
+            raise GeneratorRecipeError(f"generator knob {key!r} is not finite ({value!r})")
+        bound = space.bounds.get(key)
+        if bound is None:
+            raise GeneratorRecipeError(f"generator knob {key!r} has no resolved bound")
+        if bound.hi == bound.lo:
+            if number != float(bound.lo):
+                raise GeneratorRecipeError(
+                    f"pinned generator knob {key!r} changed: recipe {number!r} != configured "
+                    f"fixed value {float(bound.lo)!r}")
+        else:
+            _, clipped = bound.to_unit(number)
+            if clipped:
+                raise GeneratorRecipeError(
+                    f"generator knob {key!r}={number!r} is outside its resolved bound "
+                    f"[{bound.lo}, {bound.hi}]; historical observations are never clipped")
+        validated[key] = number
+
+    try:
+        params = materialize(space.gen, validated, resolved_brief)
+    except Exception as exc:  # noqa: BLE001 - a bad recipe is a typed refusal
+        raise GeneratorRecipeError(
+            f"generator recipe does not materialise a legal horn: {exc}") from exc
+    design = Design("FREEFORM", params)
+    if design.hash() != str(expected_design_hash):
+        raise GeneratorRecipeError(
+            f"re-materialised design hash {design.hash()} != recorded {expected_design_hash}")
+    # Make the recipe directly available to ActiveProjection; geometry cannot be inverted.
+    space._knobs_by_hash[design.hash()] = dict(validated)
+    return design
 
 
 def generator_info(gen: dict, knobs: dict, brief: dict) -> dict:
@@ -96,11 +212,7 @@ def plughorn_params(gen: dict, knobs: dict, brief: dict) -> dict:
         recipe[k] = int(round(recipe[k]))
     params = tool.params_from_recipe(recipe)          # raises ValueError on a bad shape
     d = params.derived()
-    env = (brief or {}).get("envelope") or {}
-    for key, val in (("max_mouth_w_mm", d["outer_w_mm"]), ("max_mouth_h_mm", d["outer_h_mm"]),
-                     ("max_depth_mm", d["depth_total_mm"])):
-        if key in env and val > float(env[key]) + 0.5:
-            raise ValueError(f"plughorn: outer {key[4:-3]} {val:.0f} mm exceeds the brief's {env[key]} mm")
+    _check_cad_envelope("plughorn", (d["outer_w_mm"], d["outer_h_mm"], d["depth_total_mm"]), brief)
     return {"cad": {"tool": step_build.PLUGHORN_TOOL, **recipe}}
 
 
@@ -133,12 +245,19 @@ def meh_params(gen: dict, knobs: dict, brief: dict) -> dict:
     reasons = list(d.get("reasons") or [])
     if reasons:
         raise ValueError(f"meh: layout infeasible: {reasons}")
-    env = (brief or {}).get("envelope") or {}
-    for key, val in (("max_mouth_w_mm", float(d["mouth_w"])), ("max_mouth_h_mm", float(d["mouth_h"])),
-                     ("max_depth_mm", float(recipe["env_d_mm"]))):
-        if key in env and val > float(env[key]) + 0.5:
-            raise ValueError(f"meh: {key[4:-3]} {val:.1f} mm exceeds the brief's {env[key]} mm")
+    _check_cad_envelope("meh", (d["mouth_w"], d["mouth_h"], recipe["env_d_mm"]), brief)
     return {"cad": {"tool": step_build.MEH_TOOL, **recipe}}
+
+
+def _check_cad_envelope(tool: str, dimensions_mm, brief: dict) -> None:
+    from ..config import ENVELOPE_AXES, envelope_policy
+
+    policy = envelope_policy(brief)
+    tolerance = 0.5 if policy.mode == "production" else 0.0
+    for key, actual, limit in zip(ENVELOPE_AXES, dimensions_mm, policy.candidate_limits_mm):
+        if float(actual) > min(limit + tolerance, policy.sanity_max_mm):
+            raise ValueError(f"invalid_envelope: {tool}: {key} {actual:.1f} mm "
+                             f"exceeds the {policy.mode} envelope {limit:g} mm")
 
 
 class GeneratedSpace:
@@ -212,12 +331,15 @@ class GeneratedSpace:
         return out
 
     def design_from_knobs(self, knobs: dict) -> Design:
+        from ..config import envelope_policy
+
+        policy = envelope_policy(self.brief)
         try:
             params = materialize(self.gen, knobs, self.brief)
         except Exception as exc:  # noqa: BLE001 - scored as invalid_geometry in evaluate
             params = {GENERATOR_ERROR_KEY: f"{type(exc).__name__}: {exc}",
                       "_knobs": {k: knobs[k] for k in sorted(knobs)}}
-        else:
+        if GENERATOR_ERROR_KEY not in params and policy.mode == "production":
             # Pre-mesh envelope estimate. ``materialize`` checks the INNER mouth; this catches
             # the outer shell offset the post-mesh bounding box includes, so an envelope
             # violation is scored (invalid_envelope) without paying for a mesh. The happy path
@@ -260,7 +382,8 @@ class GeneratedSpace:
             block = d.params.get('grid') if isinstance(d.params, dict) else None
             for family in (rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rim_beak_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family):
                 if family.is_family_spec(block) and family.is_family_spec(self.gen):
-                    family.resolve_grid(block, self.brief)
+                    from ..config import brief_for_envelope_adapter
+                    family.resolve_grid(block, brief_for_envelope_adapter(self.brief))
                     candidate = block.get('knobs')
                     if not isinstance(candidate, dict) or set(candidate) != set(self.seed_knobs):
                         raise ValueError('saved family knob set differs from configured task')

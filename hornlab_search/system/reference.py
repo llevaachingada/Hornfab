@@ -415,6 +415,7 @@ def prepare(
     horn_name: str | None = None,
     scale_factor: float | None = None,
     translation_mm: Sequence[float] | None = None,
+    assembly_pose: Any = None,
     mesh_role: str | None = None,
     timeout_s: float | None = None,
     run_now: bool | None = None,
@@ -468,6 +469,25 @@ def prepare(
         resolved_horn = Path(horn_value)
     group = pick("source_group", source_group)
     role = pick("mesh_role", mesh_role, "full_domain")
+    pose_value = assembly_pose
+    if pose_value is None and "assembly_pose" in spec_map:
+        pose_value = spec_map["assembly_pose"]
+    pose_payload: dict[str, Any] | None = None
+    if pose_value is not None:
+        if hasattr(pose_value, "to_dict"):
+            pose_payload = dict(pose_value.to_dict())
+        elif isinstance(pose_value, Mapping):
+            pose_payload = dict(pose_value)
+        else:
+            raise ReferenceError("REFERENCE_POSE_INVALID",
+                                 f"assembly_pose must be an AssemblyPose or mapping, "
+                                 f"got {type(pose_value).__name__}")
+        if translation_mm is None:
+            pose_translation = pose_payload.get("translation_mm")
+            if not isinstance(pose_translation, (list, tuple)) or len(pose_translation) != 3:
+                raise ReferenceError("REFERENCE_POSE_INVALID",
+                                     "assembly_pose has no three-component translation_mm")
+            translation_mm = tuple(float(v) for v in pose_translation)
     resolved_translation = tuple(
         float(value) for value in pick("translation_mm", translation_mm, (0.0, 0.0, 0.0)))
     if resolved_horn is not None and not group:
@@ -498,6 +518,10 @@ def prepare(
             translation_mm=(resolved_translation[0], resolved_translation[1],
                             resolved_translation[2]),
             mesh_role=str(role),
+            pose=pose_payload,
+            min_clearance_m=(
+                float(pose_payload["clearance_mm"]) / 1e3
+                if pose_payload and pose_payload.get("clearance_mm") else 1e-3),
             **common,
         )
     else:
@@ -535,6 +559,7 @@ def prepare(
             "horn_mesh": None if resolved_horn is None else str(resolved_horn),
             "source_group": None if resolved_horn is None else str(group),
             "mesh_role": None if resolved_horn is None else str(role),
+            "assembly_pose": pose_payload,
             "valid": staged.valid,
             "returncode": staged.returncode,
             "blockers": blockers,
@@ -1086,7 +1111,11 @@ def solve(
         except (OSError, ValueError):
             status = None
 
-    record_path = _write_record(root / _SOLVE_RECORD, {
+    # One record per run, not per case: a case may legitimately carry several requests
+    # (smoke + placement sweep) and each run needs its own authorization record.
+    record_path = _write_record(
+        root / (_SOLVE_RECORD if run_dir == root / "run"
+                else f"reference_solve_{run_dir.name}.json"), {
         "kind": "bl_reference_solve",
         "schema_version": 1,
         "case_dir": str(root),

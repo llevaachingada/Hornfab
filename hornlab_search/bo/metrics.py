@@ -639,9 +639,13 @@ def measure_metrics(policy: FrozenSupport, metrics, response) -> MetricObservati
 #: the v9 profile cost and v10 ripple is the declared ``ripple_region`` window, so a v10
 #: observation is not comparable with a v4/v7/v9 one and must never enter the same GP cohort.
 METRIC_SCHEMA_V10 = "bo-physical-metric-v10/1"
+#: A SEPARATE metric identity for objective v11 (2026-11-20): v10 coverage/ripple plus the CD
+#: matrix block. It never shares a schema, payload layout or hash with v4/v7/v9/v10, so a v11
+#: observation must never enter a cohort with any other objective label.
+METRIC_SCHEMA_V11 = "bo-physical-metric-v11/1"
 #: The objective-version labels that each define their own metric identity. A cohort mixing any
 #: two of these labels is refused by :func:`assert_single_objective_cohort`.
-_EXCLUSIVE_OBJECTIVE_LABELS = (4, 7, 9, 10)
+_EXCLUSIVE_OBJECTIVE_LABELS = (4, 7, 9, 10, 11)
 
 
 def freeze_metric_policy_v10(brief: Brief, freqs_hz, *, restricted_mask=None,
@@ -743,8 +747,168 @@ def measure_metrics_v10(policy: FrozenSupport, metrics, response) -> MetricObser
         return missing(f"required metric input unavailable: {exc}")
 
 
+# ------------------------------------------------------------------ v11 policy
+#: A SEPARATE metric identity for objective v11: the v10 coverage/ripple raw math plus the
+#: ``objective.cd`` block identity. The raw coverage/ripple math reuses the v10 helpers; the
+#: schema, payload and hash are distinct so v11 is never pooled with v4/v7/v9/v10.
+
+
+def freeze_metric_policy_v11(brief: Brief, freqs_hz, *, restricted_mask=None,
+                             restriction_name: str | None = None) -> FrozenSupport:
+    """Freeze the v11 raw-metric policy (v10 coverage/ripple + required CD block identity).
+
+    Accepts ONLY a resolved objective-v11 Brief (``freeze_metric_policy`` and
+    ``freeze_metric_policy_v10`` keep refusing it).  The payload records ``objective_version: 11``,
+    the normalised ``v11_params`` block (v10 plus ``cd``), the explicit ``cd`` block and the
+    sha256 of the scoring modules including ``objective.scalar_v11`` and ``metrics.cd``, so the
+    hash is deterministic for the same brief/support/code and distinct from every v4/v7/v10
+    policy.  The measured coverage/ripple pair reuses the v10 raw helpers.
+    """
+    from ..objective import scalar_v9, scalar_v10, scalar_v11
+    from ..metrics import cd as cd_metrics
+
+    if not isinstance(brief, Brief) or brief.objective_version != 11:
+        raise ValueError("a resolved objective v11 replay Brief is required")
+    block = brief.objective_block
+    if not isinstance(block, dict):
+        raise ValueError("objective v11 needs its validated objective block")
+    params = scalar_v11.V11Params.from_block(block)
+    t = Target.from_dict(asdict(brief.target))
+    if not (getattr(t, "coverage_profile_h", None) and getattr(t, "coverage_profile_v", None)):
+        raise ValueError("objective v11 needs target.coverage_profile")
+    f = np.asarray(freqs_hz, dtype=float)
+    if (f.ndim != 1 or f.size == 0 or not np.all(np.isfinite(f)) or np.any(f <= 0)
+            or np.any(np.diff(f) <= 0)):
+        raise ValueError("frequencies must be finite, positive and strictly increasing")
+    intended = (f >= t.band_lo_hz) & (f <= t.band_hi_hz)
+    if restricted_mask is None:
+        if restriction_name is not None:
+            raise ValueError("restriction name requires a mask")
+        restriction = np.ones(f.size, dtype=bool)
+    else:
+        restriction = np.asarray(restricted_mask)
+        if (restriction.dtype != np.bool_ or restriction.shape != f.shape
+                or not restriction_name or not restriction_name.strip()):
+            raise ValueError("a shared restricted mask requires a nonempty name and matching "
+                             "boolean array")
+    band = intended & restriction
+    if not band.any():
+        raise ValueError("the intended band mask is empty")
+    for f_j in f[band]:            # min_edge on a target-mode profile is refused here, early
+        for plane in ("h", "v"):
+            scalar_v10.v10_inspected_total_deg(t, plane, float(f_j), params.v10.ripple_region)
+    w = scalar_v2.freq_weight_vector(f, t)
+    if not np.all(np.isfinite(w)) or np.any(w < 0) or not w[band].sum() > 0:
+        raise ValueError("frequency weights must be finite, nonnegative and positive on the band")
+    code = {m.__name__: hashlib.sha256(Path(str(m.__file__)).read_bytes()).hexdigest()
+            for m in (scalar_v2, scalar_v9, scalar_v10, scalar_v11, cd_metrics, smoothness)}
+    payload = {"schema": METRIC_SCHEMA_V11, "objective_version": 11,
+               "target": asdict(t), "v11_params": params.to_block(),
+               "ripple_region": dict(params.v10.ripple_region),
+               "cd": params.cd.to_block(),
+               "brief_hash": brief.brief_hash(), "objective_weights": brief.weights,
+               "frequency_hz": f.tolist(), "masks": {"band": band.tolist()},
+               "weights": w.tolist(), "restriction_name": restriction_name,
+               "status": "partial" if restricted_mask is not None else "complete",
+               "units": {"coverage": "profile_cost_deg2_per_100", "ripple": "dB"},
+               "coverage_definition": "v9_cov_profile_raw",
+               "ripple_definition": "v11_region_detrended_h_plus_v",
+               "cd_definition": scalar_v11.V11_SCORE_IDENTITY_NAME, "code_sha256": code}
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return FrozenSupport(encoded, hashlib.sha256(encoded.encode()).hexdigest())
+
+
+def measure_metrics_v11(policy: FrozenSupport, metrics, response) -> MetricObservation:
+    """Raw v11 observations (v10 coverage/ripple pair) or an explicit capability refusal.
+
+    The CD block is part of the metric *identity* (it changes the score), but the Pareto raw
+    observation stays the two-objective (coverage, ripple) pair measured by the v10 helpers.
+    """
+    from ..objective import scalar_v10, scalar_v11
+    from ..objective.scalar_v9 import _cov_profile_term
+
+    def missing(reason):
+        return MetricObservation("capability_missing", reason, policy.physical_metric_spec_hash)
+
+    try:
+        if (hashlib.sha256(policy.payload_json.encode()).hexdigest()
+                != policy.physical_metric_spec_hash):
+            return missing("metric policy hash mismatch")
+        p = policy.payload
+        if p.get("schema") != METRIC_SCHEMA_V11 or p.get("objective_version") != 11:
+            return missing("not a v11 metric policy")
+        f = np.asarray(metrics.freqs_hz, dtype=float)
+        if not np.array_equal(f, np.asarray(p["frequency_hz"], dtype=float)):
+            return missing("frequency support differs from frozen policy")
+        band = np.asarray(p["masks"]["band"], dtype=bool)
+        for name in ("bw_h_deg", "bw_v_deg"):
+            a = np.asarray(getattr(metrics, name), dtype=float)
+            if a.shape != f.shape or not np.all(np.isfinite(a[band])):
+                return missing(f"{name} missing intended bins")
+        target = Target.from_dict(p["target"])
+        params = scalar_v11.V11Params.from_block(p["v11_params"])
+        v10 = params.v10
+        values = scalar_v10._v10_ripple_values(metrics, response, target, band,
+                                               v10.ripple_region)
+        if values.shape != f.shape or not np.all(np.isfinite(values[band])):
+            return missing("region ripple unavailable on intended bins")
+        rip = scalar_v10._rip_term_v10(metrics, response, target, f, band, v10.ripple_region)
+        cov = _cov_profile_term(metrics, target, f, band, v10.v9)
+        if (not np.isfinite(cov) or not np.isfinite(rip) or cov == NAN_TERM_FILL
+                or rip == NAN_TERM_FILL):
+            return missing("raw helper returned invalid or sentinel value")
+        return MetricObservation(p["status"], None, policy.physical_metric_spec_hash,
+                                 float(cov), float(rip))
+    except (AttributeError, TypeError, ValueError, IndexError, KeyError, ArithmeticError) as exc:
+        return missing(f"required metric input unavailable: {exc}")
+
+
+# ------------------------------------------------------------------ explicit dispatch
+#: No silent fallback: an unknown version or a schema/version mismatch raises instead of being
+#: measured under another policy's contract.
+
+
+def freeze_metric_policy_for_version(brief: Brief, freqs_hz, *, restricted_mask=None,
+                                     restriction_name: str | None = None) -> FrozenSupport:
+    """Freeze the metric policy for the brief's resolved objective version (explicit dispatch).
+
+    v4/v7 -> :func:`freeze_metric_policy` (unchanged payload), v10 -> :func:`freeze_metric_policy_v10`,
+    v11 -> :func:`freeze_metric_policy_v11`.  Any other version is refused; there is no fallback.
+    """
+    try:
+        version = int(brief.objective_version)
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ValueError(f"brief carries no usable objective version: {exc}") from exc
+    kwargs = {"restricted_mask": restricted_mask, "restriction_name": restriction_name}
+    if version in (4, 7):
+        return freeze_metric_policy(brief, freqs_hz, **kwargs)
+    if version == 10:
+        return freeze_metric_policy_v10(brief, freqs_hz, **kwargs)
+    if version == 11:
+        return freeze_metric_policy_v11(brief, freqs_hz, **kwargs)
+    raise ValueError(f"unsupported objective v{version}: no frozen metric policy exists")
+
+
+def measure_metrics_for_policy(policy: FrozenSupport, metrics, response) -> MetricObservation:
+    """Measure a stored observation under the policy's OWN schema/version (explicit dispatch).
+
+    A payload whose schema and objective version are not a known matching pair raises; it is never
+    reinterpreted as a v4/v7 observation.
+    """
+    p = policy.payload
+    schema, version = p.get("schema"), p.get("objective_version")
+    if version in (4, 7) and schema == METRIC_SCHEMA:
+        return measure_metrics(policy, metrics, response)
+    if version == 10 and schema == METRIC_SCHEMA_V10:
+        return measure_metrics_v10(policy, metrics, response)
+    if version == 11 and schema == METRIC_SCHEMA_V11:
+        return measure_metrics_v11(policy, metrics, response)
+    raise ValueError(f"metric policy schema/version cannot be measured: schema={schema!r} "
+                     f"objective_version={version!r}")
+
+
 def assert_single_objective_cohort(labels) -> int:
-    """Refuse any GP cohort that mixes objective identities (v4/v7/v9/v10 never pool).
+    """Refuse any GP cohort that mixes objective identities (v4/v7/v9/v10/v11 never pool).
 
     ``labels`` are objective versions, or FrozenSupport policies (their payload version is
     read). Returns the single version; raises ``ValueError`` on a mix, an empty cohort or an
@@ -781,5 +945,10 @@ __all__ = [
     "METRIC_SCHEMA_V10",
     "freeze_metric_policy_v10",
     "measure_metrics_v10",
+    "METRIC_SCHEMA_V11",
+    "freeze_metric_policy_v11",
+    "measure_metrics_v11",
+    "freeze_metric_policy_for_version",
+    "measure_metrics_for_policy",
     "assert_single_objective_cohort",
 ]

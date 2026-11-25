@@ -1,0 +1,35 @@
+# Held template. Copy to runs/nights and clear pause only after the README release checks.
+night: v11_bo_day_core_2026-11-23
+lane: gpu
+pause: true
+watchdog:
+  min_attempts: 20
+  refusal_window: 30
+  refusal_max: 0.45
+  no_gain_valid: 65
+  stall_valid: 65
+jobs:
+  - id: home_fold_a_v11_transfer_40
+    kind: command
+    timeout_s: 2700
+    env: {HORNLAB_GPU_LOCK: refuse}
+    argv: [.venv/Scripts/hornlab-search.exe, search, --config,
+      examples/typologies/v11_bo_day_2026-11-23/home_fold_a_v11_port.yaml,
+      --mode, screen, --budget, "40", --cma-seed, "81131", --dataset-dir, dataset,
+      --cache-dir, runs/v11_bo_day_cache/home_fold_a_v11]
+  - id: compact400_v11_independent_40
+    kind: command
+    timeout_s: 2400
+    env: {HORNLAB_GPU_LOCK: refuse}
+    argv: [.venv/Scripts/hornlab-search.exe, search, --config,
+      examples/typologies/round4_2026-11-23/c400_v11_open.yaml,
+      --mode, screen, --budget, "40", --cma-seed, "81141", --dataset-dir, dataset,
+      --cache-dir, runs/v11_bo_day_cache/compact400_v11]
+  - id: home_morph_v11_scout_24
+    kind: command
+    timeout_s: 2100
+    env: {HORNLAB_GPU_LOCK: refuse}
+    argv: [.venv/Scripts/hornlab-search.exe, search, --config,
+      examples/typologies/v11_bo_day_2026-11-23/home_morph_v11_port.yaml,
+      --mode, screen, --budget, "24", --cma-seed, "81151", --dataset-dir, dataset,
+      --cache-dir, runs/v11_bo_day_cache/home_morph_v11]

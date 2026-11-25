@@ -1,0 +1,4 @@
+extends: rolled_h_pucker0.yaml
+name: photo_rolled_h_pucker6_xo900_v11
+seed_params:
+  g_inward_h_mm: 6.0

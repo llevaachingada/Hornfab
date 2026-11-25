@@ -1,0 +1,5 @@
+extends: rolled_hybrid.yaml
+name: photo_rolled_h_pucker0_xo900_v11
+# Fixed comparison. V relief and axial placement stay matched.
+seed_params:
+  g_inward_h_mm: 0.0

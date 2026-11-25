@@ -1,0 +1,192 @@
+{
+  "config": "runs/20261123T204853Z-screen-fe8efb/config.yaml",
+  "seed": 4101,
+  "draws_per_arm": 128,
+  "estimated_surface": "formula_inner",
+  "arms": {
+    "production": {
+      "policy": {
+        "version": 1,
+        "axes": [
+          "width",
+          "height",
+          "depth"
+        ],
+        "mode": "production",
+        "product_limits_mm": [
+          600.0,
+          480.0,
+          480.0
+        ],
+        "candidate_limits_mm": [
+          600.0,
+          480.0,
+          480.0
+        ],
+        "mesh_limits_mm": [
+          600.5,
+          480.5,
+          495.0
+        ],
+        "sanity_max_mm": 1200.0,
+        "max_utilization": null,
+        "product_tolerance_mm": 0.5,
+        "policy_id": "envelope-v1-bbc3ba5d6ade7e09"
+      },
+      "counts": {
+        "generated": 128,
+        "schema_rejected": 0,
+        "envelope_rejected": 65,
+        "throat_rejected": 0,
+        "geometry_rejected": 42,
+        "geometry_duplicate": 0,
+        "near_duplicate": 0,
+        "known_duplicate": 0,
+        "unique": 21,
+        "novel": 21
+      },
+      "status": "ok",
+      "accepted_max_utilization": 1.0033594877741085,
+      "in_final_five_percent_of_product_use": 10,
+      "elapsed_seconds": 9.077519200043753
+    },
+    "exploration_105": {
+      "policy": {
+        "version": 1,
+        "axes": [
+          "width",
+          "height",
+          "depth"
+        ],
+        "mode": "exploration",
+        "product_limits_mm": [
+          600.0,
+          480.0,
+          480.0
+        ],
+        "candidate_limits_mm": [
+          630.0,
+          504.0,
+          504.0
+        ],
+        "mesh_limits_mm": [
+          630.0,
+          504.0,
+          504.0
+        ],
+        "sanity_max_mm": 1200.0,
+        "max_utilization": 1.05,
+        "product_tolerance_mm": 0.5,
+        "policy_id": "envelope-v1-0a2b4384141a810e"
+      },
+      "counts": {
+        "generated": 128,
+        "schema_rejected": 0,
+        "envelope_rejected": 50,
+        "throat_rejected": 0,
+        "geometry_rejected": 42,
+        "geometry_duplicate": 0,
+        "near_duplicate": 0,
+        "known_duplicate": 0,
+        "unique": 36,
+        "novel": 36
+      },
+      "status": "ok",
+      "accepted_max_utilization": 1.046762253291558,
+      "in_final_five_percent_of_product_use": 10,
+      "elapsed_seconds": 9.029150500195101
+    },
+    "exploration_125": {
+      "policy": {
+        "version": 1,
+        "axes": [
+          "width",
+          "height",
+          "depth"
+        ],
+        "mode": "exploration",
+        "product_limits_mm": [
+          600.0,
+          480.0,
+          480.0
+        ],
+        "candidate_limits_mm": [
+          750.0,
+          600.0,
+          600.0
+        ],
+        "mesh_limits_mm": [
+          750.0,
+          600.0,
+          600.0
+        ],
+        "sanity_max_mm": 1200.0,
+        "max_utilization": 1.25,
+        "product_tolerance_mm": 0.5,
+        "policy_id": "envelope-v1-2daf02be4ebb4496"
+      },
+      "counts": {
+        "generated": 128,
+        "schema_rejected": 0,
+        "envelope_rejected": 3,
+        "throat_rejected": 0,
+        "geometry_rejected": 42,
+        "geometry_duplicate": 0,
+        "near_duplicate": 0,
+        "known_duplicate": 0,
+        "unique": 83,
+        "novel": 83
+      },
+      "status": "ok",
+      "accepted_max_utilization": 1.2406269014285802,
+      "in_final_five_percent_of_product_use": 10,
+      "elapsed_seconds": 9.031416400102898
+    },
+    "discovery": {
+      "policy": {
+        "version": 1,
+        "axes": [
+          "width",
+          "height",
+          "depth"
+        ],
+        "mode": "discovery",
+        "product_limits_mm": [
+          600.0,
+          480.0,
+          480.0
+        ],
+        "candidate_limits_mm": [
+          1200.0,
+          1200.0,
+          1200.0
+        ],
+        "mesh_limits_mm": [
+          1200.0,
+          1200.0,
+          1200.0
+        ],
+        "sanity_max_mm": 1200.0,
+        "max_utilization": null,
+        "product_tolerance_mm": 0.5,
+        "policy_id": "envelope-v1-c8046a48d5d3b7f0"
+      },
+      "counts": {
+        "generated": 128,
+        "schema_rejected": 0,
+        "envelope_rejected": 0,
+        "throat_rejected": 0,
+        "geometry_rejected": 42,
+        "geometry_duplicate": 0,
+        "near_duplicate": 0,
+        "known_duplicate": 0,
+        "unique": 86,
+        "novel": 86
+      },
+      "status": "ok",
+      "accepted_max_utilization": 1.3877163664768322,
+      "in_final_five_percent_of_product_use": 10,
+      "elapsed_seconds": 8.965452600037679
+    }
+  }
+}

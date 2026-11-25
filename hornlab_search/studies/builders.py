@@ -117,6 +117,41 @@ ATLAS_OSSE_EXT_THROAT_BRIEF = (
     REPO_ROOT / "examples" / "briefs" / "hardened_2026-10-29_v5"
     / "b1w_hifi_90x60_850_wide_v5.yaml")
 
+# COMPACT400 v10 (objective v10xo) task (registered 2026-11-21).  Config is the compact400
+# fold-warm leader cell (published v10 1.4214); its brief_file resolves to the compact400 v10xo
+# brief.  Version 10 is opt-in for production studies only through a registered task like this.
+COMPACT400_V10XO_TASK_NAME = "compact400__fold_warm_v10xo"
+COMPACT400_V10XO_CONFIG = (
+    REPO_ROOT / "examples" / "typologies" / "compact400_2026-11-19"
+    / "c4_01_fold_warm__hl__osse_rrect_fold_warm_v7__b6_v10_s1.yaml")
+COMPACT400_V10XO_BRIEF = (
+    REPO_ROOT / "examples" / "briefs" / "compact400_2026-11-19"
+    / "compact400_xo1000_1400_hf1440_v10xo.yaml")
+COMPACT400_V10XO_OBJECTIVE_VERSION = 10
+
+# HOME v10 morph task (registered 2026-11-21).  A d=14 production v10 task with a completed
+# single-ES source run that carries the full C sidecar, so the audit's covariance-transfer
+# pilot is runnable on the registered task.  Version 10 is opt-in through the registry.
+HOME_V10_TASK_NAME = "home_v10__morph"
+HOME_V10_CONFIG = (
+    REPO_ROOT / "examples" / "typologies" / "b6_2026-11-19"
+    / "hl__osse_rrect_morph_v7__b6_v10_s1.yaml")
+HOME_V10_BRIEF = (
+    REPO_ROOT / "examples" / "briefs" / "home_landscape_2026-11-18_v10"
+    / "room_landscape_80x50_700_hf1440_v10.yaml")
+HOME_V10_OBJECTIVE_VERSION = 10
+
+# HOME 900 v11 CD task (registered 2026-11-21).  The real config lives under fav8_2026-11-20 and
+# its brief_file resolves to the HOME XO900 v11 CD brief; there is no home_xo900_2026-11-20
+# typology directory.  Version 11 is opt-in for production studies only through a registered task.
+HOME900_V11CD_TASK_NAME = "home900__landscape_v11cd"
+HOME900_V11CD_CONFIG = (
+    REPO_ROOT / "examples" / "typologies" / "fav8_2026-11-20" / "fav8__x900_k1.yaml")
+HOME900_V11CD_BRIEF = (
+    REPO_ROOT / "examples" / "briefs" / "home_xo900_2026-11-20"
+    / "room_landscape_80x50_900_hf1440_v11cd.yaml")
+HOME900_V11CD_OBJECTIVE_VERSION = 11
+
 # Task registry: maps every accepted task name to its (config, brief, objective_version).
 # A task in this registry may be used by _read_task as a named task; a name absent from
 # this registry is refused.  The M0 contract is frozen; registry additions do NOT alter it.
@@ -163,6 +198,23 @@ _TASK_REGISTRY: dict[str, dict] = {
         "brief": ATLAS_OSSE_EXT_THROAT_BRIEF,
         "objective_version": 7,
     },
+    # Objective v10 (opt-in): compact400 v10xo cell.
+    COMPACT400_V10XO_TASK_NAME: {
+        "config": COMPACT400_V10XO_CONFIG,
+        "brief": COMPACT400_V10XO_BRIEF,
+        "objective_version": COMPACT400_V10XO_OBJECTIVE_VERSION,
+    },
+    HOME_V10_TASK_NAME: {
+        "config": HOME_V10_CONFIG,
+        "brief": HOME_V10_BRIEF,
+        "objective_version": HOME_V10_OBJECTIVE_VERSION,
+    },
+    # Objective v11 (opt-in): HOME 900 v11 CD cell.
+    HOME900_V11CD_TASK_NAME: {
+        "config": HOME900_V11CD_CONFIG,
+        "brief": HOME900_V11CD_BRIEF,
+        "objective_version": HOME900_V11CD_OBJECTIVE_VERSION,
+    },
 }
 
 SNAPSHOT_SCHEMA = "study-snapshot-v1"
@@ -185,7 +237,145 @@ _ALLOWED_TASK_NAMES = {
     P80X60_ATH_CORE_14IN_HOME700_TASK_NAME, P80X60_ATH_CORE_14IN_HOME700_CONFIG.stem,
     P80X60_EXT_THROAT_CORELAW_TASK_NAME, P80X60_EXT_THROAT_CORELAW_CONFIG.stem,
     ATLAS_OSSE_EXT_THROAT_TASK_NAME, ATLAS_OSSE_EXT_THROAT_CONFIG.stem,
+    COMPACT400_V10XO_TASK_NAME,
+    HOME_V10_TASK_NAME,
+    HOME900_V11CD_TASK_NAME,
 }
+
+
+def registered_objective_versions() -> frozenset[int]:
+    """Objective versions that appear in the explicit production task registry."""
+    return frozenset(int(entry["objective_version"]) for entry in _TASK_REGISTRY.values())
+
+
+def registered_task_for(objective_version, config, brief):
+    """Return the registry entry matching (version, config, brief) or ``None``.
+
+    Paths are compared after resolution so a snapshot's absolute paths match the registry's
+    repository paths.  This is the exact-path basis; :func:`registered_task_match` additionally
+    admits a derived config that preserves the registered task identity.
+    """
+    try:
+        version = int(objective_version)
+    except (TypeError, ValueError):
+        return None
+    if config is None or brief is None:
+        return None
+    try:
+        config_path, brief_path = Path(config).resolve(), Path(brief).resolve()
+    except (OSError, TypeError, ValueError):
+        return None
+    for entry in _TASK_REGISTRY.values():
+        if int(entry["objective_version"]) != version:
+            continue
+        try:
+            if (entry["config"].resolve() == config_path
+                    and entry["brief"].resolve() == brief_path):
+                return entry
+        except OSError:
+            continue
+    return None
+
+
+def _brief_file_sha256(config_path) -> str:
+    """sha256 of the resolved brief FILE that a config points at.
+
+    ``Brief.brief_hash()`` folds loader metadata (the config/brief paths) and is therefore not
+    location-independent for two configs that resolve the same brief.  The matched-arm admission
+    needs the brief's content identity, so hash the resolved file bytes (or the embedded brief
+    payload with loader metadata removed when no ``brief_file`` exists).
+    """
+    from hornlab_search.config import load_config
+
+    cfg = load_config(config_path)
+    raw = cfg.raw or {}
+    brief_file = raw.get("brief_file")
+    if brief_file:
+        path = Path(str(brief_file))
+        if not path.is_absolute():
+            path = Path(config_path).resolve().parent / path
+        if path.is_file():
+            return _sha256_file(path)
+    from hornlab_search.objective.replay import brief_from_config
+
+    brief = brief_from_config(config_path)
+    payload = {k: v for k, v in (brief.raw or {}).items()
+               if k not in ("path", "config", "brief")}
+    payload["name"] = brief.name
+    payload["version"] = brief.objective_version
+    text = json.dumps(payload, sort_keys=True, default=str, separators=(",", ":"))
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _task_identity(config_path) -> dict:
+    """Canonical NON-search task identity of a resolved config.
+
+    A matched-benchmark arm is a copy of a registered task config with only its ``search``
+    treatment (and descriptive metadata) changed.  The brief is compared by resolved file
+    content hash, never by the ``brief_file`` spelling; the remaining task fields (target,
+    objective, weights, bounds, mesh, solve, seed, generator/grid...) must be identical.
+    """
+    from hornlab_search.config import load_config
+
+    cfg = load_config(config_path)
+    raw = dict(cfg.raw or {})
+    for key in ("brief", "brief_file", "description", "name", "search"):
+        raw.pop(key, None)
+    return {"objective_version": int(cfg.objective_version),
+            "brief_sha256": _brief_file_sha256(config_path),
+            "task": raw}
+
+
+def _task_identity_hash(config_path) -> str:
+    payload = json.dumps(_task_identity(config_path), sort_keys=True, default=str,
+                         separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def registered_task_match(objective_version, config, brief):
+    """Admission match: exact registered path first, then an unchanged task identity.
+
+    Returns ``{"entry": <registry entry>, "basis": "exact_path"|"derived_task_identity"}`` or
+    ``None``.  The derived basis exists for the controlled matched-benchmark orchestrator, which
+    writes one arm config per treatment under an output directory.  It never admits a different
+    brief, objective version, bounds, target, objective, weights, mesh, solve, family or seed:
+    only ``search`` and descriptive metadata may differ.  v4/v7 keep their historical blanket
+    admission in :func:`hornlab_search.studies.production.objective_admission`; this helper is
+    used for the opt-in v10/v11 registry only.
+    """
+    exact = registered_task_for(objective_version, config, brief)
+    if exact is not None:
+        return {"entry": exact, "basis": "exact_path"}
+    try:
+        version = int(objective_version)
+    except (TypeError, ValueError):
+        return None
+    if version not in (10, 11) or config is None or brief is None:
+        return None
+
+    def _brief_sha(path) -> str | None:
+        p = Path(str(path))
+        candidates = [p] if p.is_absolute() else [Path(config).resolve().parent / p, p,
+                                                  REPO_ROOT / p]
+        for candidate in candidates:
+            if candidate.is_file():
+                return _sha256_file(candidate)
+        return None
+
+    for entry in _TASK_REGISTRY.values():
+        if int(entry["objective_version"]) != version:
+            continue
+        try:
+            if _task_identity_hash(entry["config"]) != _task_identity_hash(config):
+                continue
+            want_brief = _brief_sha(entry["brief"])
+            got_brief = _brief_sha(brief)
+            if want_brief is None or want_brief != got_brief:
+                continue
+        except (OSError, TypeError, ValueError, KeyError):
+            continue
+        return {"entry": entry, "basis": "derived_task_identity"}
+    return None
 
 
 # --------------------------------------------------------------------------- helpers
@@ -635,6 +825,7 @@ def build_training(service, study_id, *, root, spec=None, idempotency_key=None):
         "elite_ids": list(training.elite_ids),
         "maximin_ids": list(training.maximin_ids),
     }
+    metric_identity = _training_metric_identity(task, training, sources)
     manifest = {
         "tool": "study_training_manifest",
         "schema": TRAINING_MANIFEST_SCHEMA,
@@ -689,6 +880,9 @@ def build_training(service, study_id, *, root, spec=None, idempotency_key=None):
             if origin == "native_build" else
             list((getattr(training, "meta", {}) or {}).get("refused", ()))),
         "refusal_reasons": dict((getattr(training, "meta", {}) or {}).get("refusal_reasons", {})),
+        # v10/v11 only: the version-specific metric identity/hash is part of the training
+        # identity. v4/v7 manifests stay byte-identical (no key, no change).
+        **({"metric_identity": metric_identity} if metric_identity is not None else {}),
         "no_backend_calls": True,
         "predictions_appended_to_measured_rows": False,
         "limitations": [
@@ -842,6 +1036,10 @@ def _load_pool(pool_arg, source_spec, config_path, *, root, seed=0,
 
 
 def _pool_manifest(pool, *, policy, config_path, encoding):
+    from hornlab_search.config import envelope_policy, load_config
+    policy_fields = {}
+    if policy in ("scalar", "turbo"):
+        policy_fields["candidate_policy"] = envelope_policy(load_config(config_path).brief).as_dict()
     summary = pool.summary() if hasattr(pool, "summary") else {}
     sample = []
     for candidate in tuple(getattr(pool, "candidates", ()) or ())[:5]:
@@ -857,6 +1055,7 @@ def _pool_manifest(pool, *, policy, config_path, encoding):
         "generated_utc": _utc_now(),
         "policy": policy,
         "config": str(config_path),
+        **policy_fields,
         "encoding": (None if encoding is None else {
             "version": getattr(encoding, "version", None),
             "d": int(getattr(encoding, "d", 0)),
@@ -916,13 +1115,92 @@ def _read_dataset_record(dataset_root: Path, shard: int, row: int):
     return meta, arrays
 
 
+def _read_record_meta(dataset_root: Path, shard: int, row: int):
+    """Read one stored record's meta line only (no arrays); ``None`` when absent/corrupt."""
+    jsonl = dataset_root / f"shard-{int(shard):04d}.jsonl"
+    try:
+        with open(jsonl, encoding="utf-8") as fh:
+            for index, line in enumerate(fh):
+                if index == int(row):
+                    return json.loads(line)
+    except (OSError, ValueError):
+        return None
+    return None
+
+
+def _training_metric_identity(task, training, sources):
+    """Version-specific metric identity for a v10/v11 training manifest (else ``None``).
+
+    v4/v7 return ``None`` so their manifest bytes are unchanged.  For v10/v11 the frozen
+    metric policy is resolved from the task brief and the cohort's stored frequency grid; its
+    deterministic hash is recorded.  A stored row whose objective version disagrees, or a frozen
+    policy whose version disagrees, is a mixed-version training set and is refused.
+    """
+    import numpy as np
+
+    version = int(task["objective_version"])
+    if version not in (10, 11):
+        return None
+    meta = getattr(training, "meta", {}) or {}
+    identities = meta.get("identities") or {}
+    if not identities:
+        raise Unavailable(f"objective v{version} training needs per-row dataset identities to "
+                          f"freeze its metric identity")
+    dataset_raw = (sources or {}).get("dataset_root")
+    if not dataset_raw:
+        raise Unavailable(f"objective v{version} training needs explicit dataset sources")
+    dataset_root = Path(dataset_raw)
+    grid = None
+    seen_versions = set()
+    for oid in getattr(training, "ids", ()) or tuple(identities):
+        ident = identities.get(str(oid)) or {}
+        if "shard" not in ident or "row" not in ident:
+            continue
+        record_meta = _read_record_meta(dataset_root, ident["shard"], ident["row"])
+        if isinstance(record_meta, dict) and record_meta.get("objective_version") is not None:
+            try:
+                seen_versions.add(int(record_meta["objective_version"]))
+            except (TypeError, ValueError):
+                raise Unavailable("stored training row has a malformed objective version")
+        if grid is None:
+            _meta, arrays = _read_dataset_record(dataset_root, ident["shard"], ident["row"])
+            if arrays is not None and arrays.get("freqs_hz") is not None:
+                grid = np.asarray(arrays["freqs_hz"], dtype=float)
+    if seen_versions and seen_versions != {version}:
+        raise Unavailable(f"training rows mix objective versions {sorted(seen_versions)}; "
+                          f"refusing a v{version} metric identity")
+    if grid is None:
+        raise Unavailable("no training record carries a stored frequency grid for the metric "
+                          "identity")
+    from hornlab_search.bo.metrics import freeze_metric_policy_for_version
+    from hornlab_search.objective import replay
+    brief = replay.brief_from_config(task["config"])
+    if int(brief.objective_version) != version:
+        raise Unavailable("training task and resolved brief disagree on objective version")
+    try:
+        policy = freeze_metric_policy_for_version(brief, grid)
+    except ValueError as exc:
+        raise Unavailable(f"metric policy cannot be frozen for this task: {exc}") from exc
+    if int(policy.payload.get("objective_version")) != version:
+        raise Unavailable("frozen metric policy objective version differs from the training task")
+    identity = {
+        "objective_version": version,
+        "schema": policy.payload["schema"],
+        "physical_metric_spec_hash": policy.physical_metric_spec_hash,
+        "code_sha256": dict(policy.payload.get("code_sha256") or {}),
+    }
+    if version == 11:
+        identity["cd"] = policy.payload.get("cd")
+    return identity
+
+
 def measure_record_metrics(policy, meta, arrays, target):
     """Physical coverage/ripple error of one stored record under a frozen metric policy.
 
-    Reuses the replay module's stored-array readers and ``bo.metrics.measure_metrics``; no
-    metric math lives here.  Returns a ``MetricObservation``.
+    Reuses the replay module's stored-array readers and the explicit metric-policy dispatcher;
+    no metric math lives here.  Returns a ``MetricObservation``.
     """
-    from hornlab_search.bo.metrics import MetricObservation, measure_metrics
+    from hornlab_search.bo.metrics import MetricObservation, measure_metrics_for_policy
     from hornlab_search.objective import replay
     if meta is None or arrays is None:
         return MetricObservation("capability_missing", "stored record or arrays missing",
@@ -932,7 +1210,7 @@ def measure_record_metrics(policy, meta, arrays, target):
     if metrics is None or response is None:
         return MetricObservation("capability_missing", missing or "stored metrics missing",
                                  policy.physical_metric_spec_hash)
-    return measure_metrics(policy, metrics, response)
+    return measure_metrics_for_policy(policy, metrics, response)
 
 
 def build_pareto_metrics(service, study_id, *, root, idempotency_key=None):
@@ -960,10 +1238,13 @@ def build_pareto_metrics(service, study_id, *, root, idempotency_key=None):
         raise Unavailable("pareto metrics need a native-build training manifest with per-row "
                           "dataset identities (shard/row) and a dataset_root")
     dataset_root = _resolve_input(root, dataset_raw, None, "dataset_root")
-    from hornlab_search.bo.metrics import freeze_metric_policy
+    from hornlab_search.bo.metrics import freeze_metric_policy_for_version
     from hornlab_search.bo.pareto import frozen_reference
     from hornlab_search.objective import replay
     brief = replay.brief_from_config(snapshot["task"]["config"])
+    version = int(snapshot["task"]["objective_version"])
+    if int(brief.objective_version) != version:
+        raise Unavailable("snapshot task and resolved brief disagree on objective version")
     ids = list(manifest["ids"])
     records = {}
     for oid in ids:
@@ -977,9 +1258,15 @@ def build_pareto_metrics(service, study_id, *, root, idempotency_key=None):
     if grid is None:
         raise Unavailable("no training record carries a stored frequency grid")
     try:
-        policy = freeze_metric_policy(brief, grid)
+        policy = freeze_metric_policy_for_version(brief, grid)
     except ValueError as exc:
         raise Unavailable(f"metric policy cannot be frozen for this task: {exc}") from exc
+    recorded_identity = manifest.get("metric_identity")
+    if recorded_identity is not None:
+        if (int(recorded_identity.get("objective_version", -1)) != version
+                or recorded_identity.get("physical_metric_spec_hash")
+                != policy.physical_metric_spec_hash):
+            raise Unavailable("training metric identity differs from this task's frozen policy")
     observations, excluded = {}, {}
     for oid in ids:
         meta, arrays = records[oid]
@@ -1011,8 +1298,9 @@ def build_pareto_metrics(service, study_id, *, root, idempotency_key=None):
         "n_complete": len(observations), "n_excluded": len(excluded),
         "dataset_root": str(dataset_root), "no_backend_calls": True,
         "limitations": [
-            "Physical errors from the frozen v8 raw helper (coverage deg, response-detrended "
-            "ripple dB); rows without complete support are excluded, never filled.",
+            "Physical errors from the frozen version-specific raw helper (coverage deg, "
+            "response-detrended ripple dB); rows without complete support are excluded, "
+            "never filled.",
         ],
     }
     deps = {"snapshot": snapshot_meta["sha256"], "training": training_meta["sha256"],
@@ -1080,7 +1368,7 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
                       if isinstance(effective.get("task"), dict) else None)
     from hornlab_search.bo.encoding import ActiveProjection
     from hornlab_search.bo.data import TrainingSet
-    from hornlab_search.config import load_config
+    from hornlab_search.config import envelope_policy, load_config
     from hornlab_search.design.space import DesignSpace
 
     cfg = load_config(task["config"])
@@ -1115,6 +1403,11 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
     try:
         from hornlab_search.design.generators import rolled_family
         is_family = rolled_family.is_family_spec(getattr(space, "gen", None))
+        region = envelope_policy(cfg.brief)
+        source = effective.get("source") or {}
+        external_pool = pool is not None or source.get("pool_json") is not None
+        if chosen in ("scalar", "turbo") and region.mode in ("exploration", "discovery") and external_pool:
+            raise Unavailable("open or near-envelope studies must build their pool from the resolved task")
         known_geometry_hashes = None
         if is_family:
             identities = (training_set.meta or {}).get("identities") or {}
@@ -1231,6 +1524,8 @@ def build_proposal(service, study_id, *, root, policy=None, seed=None, idempoten
         "reason": reason,
         "detail": detail,
         "proposal_policy": chosen,
+        **({"candidate_policy": envelope_policy(cfg.brief).as_dict()}
+           if chosen in ("scalar", "turbo") else {}),
         "verification_mode": policy_mod.verification_mode(chosen),
         "proposal": (outcome.proposal if outcome is not None else None),
         "candidate": (outcome.proposal if outcome is not None else None),

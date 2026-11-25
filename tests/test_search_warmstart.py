@@ -179,3 +179,57 @@ def test_generated_grid_rows_are_readable_by_the_warm_start():
     assert warmstart._param_get(_Space(), {"g_x": 2.0}, "g_x") == 2.0
     with pytest.raises(KeyError):
         warmstart._param_get(_Space(), params, "g_missing")
+
+
+def test_brief_identity_is_location_and_spelling_independent():
+    """A source run's relative brief_file and a derived arm's absolute/embedded brief are the
+    same identity when the resolved content matches (P1c matched pilot, 2026-11-21)."""
+    common = {"name": "x", "target": {"coverage_h_deg": 80.0},
+              "objective": {"version": 4}, "weights": {"cov": 1.0}}
+    source = {"name": "cfg", "brief_file": "../../briefs/x.yaml",
+              "brief": {**common, "path": "C:/a/x.yaml"}}
+    derived = {"name": "cfg", "brief_file": "C:/b/x.yaml",
+               "brief": {**common, "config": "C:/b/base.yaml", "brief": "nested"}}
+    assert warmstart._brief_key(source) == warmstart._brief_key(derived)
+    changed = dict(common, target={"coverage_h_deg": 90.0})
+    assert warmstart._brief_key(dict(source, brief=changed)) != warmstart._brief_key(derived)
+    # A bare brief_file remains a path identity (legacy behavior, not a false match).
+    assert warmstart._brief_key({"brief_file": "a.yaml"}) != warmstart._brief_key(
+        {"brief_file": "b.yaml"})
+
+
+def test_grid_key_covers_the_solve_grid_replacements():
+    """2026-11-23: a config that REPLACES the screen grid must not warm-start from a run whose
+    stored J was measured on different solved frequencies. Frozen grids stay key None (so every
+    historical pair still compares equal)."""
+    assert warmstart._grid_key({}) is None
+    assert warmstart._grid_key({"solve": {}}) is None
+    # additive brief points live in the brief payload, not here
+    assert warmstart._grid_key({"grid": {"screen_extra_hz": [250.0]}}) is None
+    a = {"solve": {"screen_grid": {"profile": "hf12k_screen_v1"}}}
+    b = {"solve": {"screen_grid": {"freqs_hz": [500.0, 12000.0]}}}
+    c = {"solve": {"freq_grid": {"lo_hz": 500.0, "hi_hz": 10000.0,
+                                 "points_per_octave": 4}}}
+    assert warmstart._grid_key(a) is not None
+    assert warmstart._grid_key(a) != warmstart._grid_key(b)
+    assert warmstart._grid_key(c) == warmstart._grid_key(
+        {"solve": {"freq_grid": {"lo_hz": 500.0, "hi_hz": 10000.0,
+                                 "points_per_octave": 4}}})
+    assert warmstart._grid_key(c) != warmstart._grid_key(a)
+
+
+def test_screen_grid_mismatch_is_refused_and_the_override_works(
+        tmp_path, smoke_cfg, smoke_cfg_path, monkeypatch):
+    rd, _ = _source_run(tmp_path, monkeypatch, smoke_cfg_path)
+    # The source run used a replaced screen grid; this config uses the frozen grid.
+    raw = json.loads((rd / "run.json").read_text())
+    raw["config"].setdefault("solve", {})["screen_grid"] = {"freqs_hz": [500.0, 1000.0, 2000.0]}
+    write_json_atomic(rd / "run.json", raw)
+    cfg = _warm_cfg_raw(tmp_path, smoke_cfg_path, {"from_runs": [str(rd)]})
+    space = DesignSpace.from_config(cfg)
+    with pytest.raises(warmstart.WarmStartError, match="solve-grid mismatch"):
+        warmstart.mean_and_sigma(cfg, space)
+    cfg2 = _warm_cfg_raw(tmp_path, smoke_cfg_path,
+                         {"from_runs": [str(rd)], "allow_cross_brief": True})
+    design, record = warmstart.mean_and_sigma(cfg2, space)
+    assert design is not None

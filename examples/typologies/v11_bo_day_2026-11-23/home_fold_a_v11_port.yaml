@@ -1,0 +1,46 @@
+extends: ../round3_2026-11-22/r3_v11_fold.yaml
+name: home_fold_a_v11_port
+description: v11 BO data collection seeded from measured geometry 6d9e8c874827 in
+  20261122T205923Z-screen-391141. New v11 labels only.
+brief_file: ../../briefs/cd_v11_2026-11-20/room_landscape_80x50_700_hf1440_v11cd_open_2026-11-22.yaml
+search:
+  seed: 81131
+  sigma0: 0.15
+  infeasible_penalty: resample_strict
+  error_policy: retry_same_then_stop
+seed_params:
+  L_mm: 259.0022182712
+  a0_deg: 2.0066
+  a_deg: 39.6469973257
+  aspect_ratio: 1.0
+  az_a_cos_amp: 9.458705513
+  az_a_cos_pow: 1.205013604
+  az_a_sf_amp: 0.0
+  az_fold_h_deg: -3.8197769719
+  az_fold_h_width_deg: 23.4558712645
+  az_fold_v_deg: 4.7397216251
+  az_fold_v_width_deg: 17.9257106424
+  az_n_cos2_amp: 0.0
+  az_s_cos2_amp: -0.2480156556
+  az_sf_a: 1.0
+  az_sf_b: 0.8569
+  az_sf_m: 4.0
+  az_sf_n1: 7.4958
+  az_sf_n2: 12.4449
+  az_sf_n3: 13.4442
+  exponent: 2.0
+  k: 3.3574798434
+  morph_allow_shrinkage: 1
+  morph_corner_mm: 32.8559684347
+  morph_exponent: 4.0
+  morph_fixed: 0.0
+  morph_height_mm: 423.8874313045
+  morph_rate: 3.4160575403
+  morph_target: 1
+  morph_width_mm: 510.8451498165
+  n: 3.9697797342
+  q: 0.9849658307
+  r0_mm: 18.0
+  s: 0.9289712833
+  s1: 1.1799
+  s2: 0.0286

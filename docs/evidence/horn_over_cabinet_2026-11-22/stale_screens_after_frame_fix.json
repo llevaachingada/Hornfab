@@ -1,0 +1,3031 @@
+{
+  "kind": "stale_screen_replay_v1",
+  "generated_utc": "2026-11-23T02:06:57Z",
+  "repo": "C:/Users/hunte/Hrns/hornlab-search",
+  "branch": "hornfab-all-2026-11-18",
+  "head_commit": "07a8d2d07889c2a95c7ec0625e93f2d27aac5e7b",
+  "fix": "The woofer frame solid in placement_legality is now centred on the BL-resolved driver mount height (woofer_frame_center_y_mm) instead of y=0, and derive_min_center_spacing_mm uses cy + r for flush_baffle.",
+  "verified_by_replay": true,
+  "replay_basis": "Every verdict below was recomputed in this follow-up by importing the current hornlab_search.system.woofer_seed and calling placement_legality per kept row with the row's recorded dy/dz, the screen's recorded layout/clearance, the driver's published frame radius and rear depth, and the driver_y from the screen's own panel-fit path. No verdict is quoted from the previous analysis.",
+  "method": {
+    "driver_y_source": "woofer_seed._panel_fit_geometry(box, BL_DEMO_DRIVER_MOVING_DIAMETER_M, no explicit y, BL_DEMO_PORT_WALL_M, BL_DEMO_PORT_ROUNDOVER_M, BL_DEMO_CONE_DEPTH_M, BL_VALIDATE_CLEARANCE_M, allow_auto_y=True) -> _max_legal_panel_y(...)[0], i.e. the identical two calls bl_panel_fit_separation() makes for the screen. Inputs taken from each row: external_width/height/depth_mm, wall_mm, port_throat_area_cm2; BL defaults otherwise.",
+    "formula_check": "driver_y = max(0, external_height_mm/2 - wall_mm - 100.0 mm (moving diameter/2) - 3.0 mm (BL clearance) - 1e-12)",
+    "assumed_values": "none: every kept row's box has external height, wall and port area, so driver_y is resolved, not assumed. All four drivers in the runs have published geometry YAMLs (frame OD 261.0/316.0 mm), so every row carried a frame solid.",
+    "envelope": "rebuilt from each artifact's stored envelope mm via envelope_from_bbox_m",
+    "rear_depth": "row['driver_geometry']['rear_depth_mm_used'] == driver depth_mm (no mounting_depth published), same value the screen passed"
+  },
+  "screens": [
+    {
+      "path": "system_runs/screens/system_evidence_2026-11-19/woofer_seed.json",
+      "study_id": "27616eedee09009f",
+      "layout": "separate_above",
+      "clearance_mm": 10.0,
+      "kept_rows": 27,
+      "rows_flipped": 9,
+      "flipped_rows": [
+        {
+          "candidate_id": "b07ba3fefb0e9f9b",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "d9982f60cdd55176",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "879f717e2f4207e7",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "5c8055e15cdb8a61",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "f427878a3d50832f",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "05329706ed397186",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "593bb51fc895bb90",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "01e7d07d2bf70364",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "ca6ac8f3128ac18a",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        }
+      ],
+      "verified_against_shipped_source": true
+    },
+    {
+      "path": "system_runs/woofer_seed_stage5/woofer_seed.json",
+      "study_id": "65f6db3e8c8e8f86",
+      "layout": "separate_above",
+      "clearance_mm": 10.0,
+      "kept_rows": 126,
+      "rows_flipped": 42,
+      "flipped_rows": [
+        {
+          "candidate_id": "ee9eed23aa27a711",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1173.346181941087
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "daa4fec2689e5550",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1173.346181941087
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "3c7cb4f0d3638504",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1173.346181941087
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "273fe068d64d996f",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.748284363139
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "0ecb4dd8d005c2a4",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.748284363139
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "663fdd6519763a1a",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.748284363139
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "f1ffd7bfd0a8077e",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.836469306745
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "858d51e9ba3799ca",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.836469306745
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "054ca261ae358ef5",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.836469306745
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "578b0898c8848148",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1511.539414461344
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "273c558b74853d20",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1511.539414461344
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "9d20bbae75e79c4c",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1511.539414461344
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "2f3db7a85aa0a012",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 839.165045398631
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "775e7f79327bb81f",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 839.165045398631
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "90b24a8e71678275",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 839.165045398631
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "3c0d990d0877b2ed",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1172.727395451554
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "80da9beab999c7eb",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1172.727395451554
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "68c69a8c3710ed0b",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1172.727395451554
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "d6baa0dbd706edad",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.129497873606
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "4dfa7b313cd1f72a",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.129497873606
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "7ea2f6fd90e488fc",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.129497873606
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "8ef30845328c91c1",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.217682817212
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "8b8393d7c651409c",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.217682817212
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "6d8fe6f8041a8aa7",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.217682817212
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "4baaffccdbd1625a",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1510.920627971811
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "3cfa02d6365c1a7b",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1510.920627971811
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "fa34b1c463481069",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1510.920627971811
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "b07ba3fefb0e9f9b",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "d9982f60cdd55176",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "879f717e2f4207e7",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "07ccb72f9c6f8d44",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1080.690776151898
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "a0f8f10da18df517",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1080.690776151898
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "7503a3dfaed881fb",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1080.690776151898
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "5c8055e15cdb8a61",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "f427878a3d50832f",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "05329706ed397186",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "593bb51fc895bb90",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "01e7d07d2bf70364",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "ca6ac8f3128ac18a",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "013b8e65daa6ba64",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1075.240386774396
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "437d9fc1b1fef44d",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1075.240386774396
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "63ee69aa9d1e23b6",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1075.240386774396
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        }
+      ],
+      "verified_against_shipped_source": true
+    },
+    {
+      "path": "system_runs/woofer_seed_stage5_blfit/woofer_seed.json",
+      "study_id": "27616eedee09009f",
+      "layout": "separate_above",
+      "clearance_mm": 10.0,
+      "kept_rows": 27,
+      "rows_flipped": 9,
+      "flipped_rows": [
+        {
+          "candidate_id": "b07ba3fefb0e9f9b",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "d9982f60cdd55176",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "879f717e2f4207e7",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "5c8055e15cdb8a61",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "f427878a3d50832f",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "05329706ed397186",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "593bb51fc895bb90",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "01e7d07d2bf70364",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "ca6ac8f3128ac18a",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        }
+      ],
+      "verified_against_shipped_source": true
+    },
+    {
+      "path": "system_runs/woofer_seed_stage5_blfit_replay/woofer_seed.json",
+      "study_id": "27616eedee09009f",
+      "layout": "separate_above",
+      "clearance_mm": 10.0,
+      "kept_rows": 27,
+      "rows_flipped": 9,
+      "flipped_rows": [
+        {
+          "candidate_id": "b07ba3fefb0e9f9b",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "d9982f60cdd55176",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "879f717e2f4207e7",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "5c8055e15cdb8a61",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "f427878a3d50832f",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "05329706ed397186",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "593bb51fc895bb90",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "01e7d07d2bf70364",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "ca6ac8f3128ac18a",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        }
+      ],
+      "verified_against_shipped_source": true
+    },
+    {
+      "path": "system_runs/seed_replay_a/woofer_seed.json",
+      "study_id": "65f6db3e8c8e8f86",
+      "layout": "separate_above",
+      "clearance_mm": 10.0,
+      "kept_rows": 126,
+      "rows_flipped": 42,
+      "flipped_rows": [
+        {
+          "candidate_id": "ee9eed23aa27a711",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1173.346181941087
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "daa4fec2689e5550",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1173.346181941087
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "3c7cb4f0d3638504",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1173.346181941087
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "273fe068d64d996f",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.748284363139
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "0ecb4dd8d005c2a4",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.748284363139
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "663fdd6519763a1a",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.748284363139
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "f1ffd7bfd0a8077e",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.836469306745
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "858d51e9ba3799ca",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.836469306745
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "054ca261ae358ef5",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.836469306745
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "578b0898c8848148",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1511.539414461344
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "273c558b74853d20",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1511.539414461344
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "9d20bbae75e79c4c",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1511.539414461344
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "2f3db7a85aa0a012",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 839.165045398631
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "775e7f79327bb81f",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 839.165045398631
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "90b24a8e71678275",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 839.165045398631
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "3c0d990d0877b2ed",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1172.727395451554
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "80da9beab999c7eb",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1172.727395451554
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "68c69a8c3710ed0b",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1172.727395451554
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "d6baa0dbd706edad",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.129497873606
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "4dfa7b313cd1f72a",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.129497873606
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "7ea2f6fd90e488fc",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.129497873606
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "8ef30845328c91c1",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.217682817212
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "8b8393d7c651409c",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.217682817212
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "6d8fe6f8041a8aa7",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.217682817212
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "4baaffccdbd1625a",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1510.920627971811
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "3cfa02d6365c1a7b",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1510.920627971811
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "fa34b1c463481069",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1510.920627971811
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "b07ba3fefb0e9f9b",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "d9982f60cdd55176",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "879f717e2f4207e7",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "07ccb72f9c6f8d44",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1080.690776151898
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "a0f8f10da18df517",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1080.690776151898
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "7503a3dfaed881fb",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1080.690776151898
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "5c8055e15cdb8a61",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "f427878a3d50832f",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "05329706ed397186",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "593bb51fc895bb90",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "01e7d07d2bf70364",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "ca6ac8f3128ac18a",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "013b8e65daa6ba64",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1075.240386774396
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "437d9fc1b1fef44d",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1075.240386774396
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "63ee69aa9d1e23b6",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1075.240386774396
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        }
+      ],
+      "verified_against_shipped_source": true
+    },
+    {
+      "path": "system_runs/seed_replay_b/woofer_seed.json",
+      "study_id": "65f6db3e8c8e8f86",
+      "layout": "separate_above",
+      "clearance_mm": 10.0,
+      "kept_rows": 126,
+      "rows_flipped": 42,
+      "flipped_rows": [
+        {
+          "candidate_id": "ee9eed23aa27a711",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1173.346181941087
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "daa4fec2689e5550",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1173.346181941087
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "3c7cb4f0d3638504",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1173.346181941087
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "273fe068d64d996f",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.748284363139
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "0ecb4dd8d005c2a4",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.748284363139
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "663fdd6519763a1a",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.748284363139
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "f1ffd7bfd0a8077e",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.836469306745
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "858d51e9ba3799ca",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.836469306745
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "054ca261ae358ef5",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.836469306745
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "578b0898c8848148",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1511.539414461344
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "273c558b74853d20",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1511.539414461344
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "9d20bbae75e79c4c",
+          "driver_id": "faitalpro_10pr300",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1511.539414461344
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "2f3db7a85aa0a012",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 839.165045398631
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "775e7f79327bb81f",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 839.165045398631
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "90b24a8e71678275",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 839.165045398631
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "3c0d990d0877b2ed",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1172.727395451554
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "80da9beab999c7eb",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1172.727395451554
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "68c69a8c3710ed0b",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1172.727395451554
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "d6baa0dbd706edad",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.129497873606
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "4dfa7b313cd1f72a",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.129497873606
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "7ea2f6fd90e488fc",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1175.129497873606
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "8ef30845328c91c1",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.217682817212
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "8b8393d7c651409c",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.217682817212
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "6d8fe6f8041a8aa7",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1508.217682817212
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "4baaffccdbd1625a",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1510.920627971811
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "3cfa02d6365c1a7b",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1510.920627971811
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "fa34b1c463481069",
+          "driver_id": "faitalpro_10pr320",
+          "box_external_mm": {
+            "width": 317.0,
+            "height": 317.0,
+            "depth": 1510.920627971811
+          },
+          "placement_dy_mm": 285.172787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 37.499999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": 0.500000001,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance 0.5 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "b07ba3fefb0e9f9b",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "d9982f60cdd55176",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "879f717e2f4207e7",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1078.791264974584
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "07ccb72f9c6f8d44",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1080.690776151898
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "a0f8f10da18df517",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1080.690776151898
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "7503a3dfaed881fb",
+          "driver_id": "faitalpro_12pr300",
+          "box_external_mm": {
+            "width": 371.2,
+            "height": 371.2,
+            "depth": 1080.690776151898
+          },
+          "placement_dy_mm": 312.272787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.599999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "5c8055e15cdb8a61",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "f427878a3d50832f",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "05329706ed397186",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 838.703433888271
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "593bb51fc895bb90",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "01e7d07d2bf70364",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "ca6ac8f3128ac18a",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1073.349910120198
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "013b8e65daa6ba64",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1075.240386774396
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "437d9fc1b1fef44d",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1075.240386774396
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        },
+        {
+          "candidate_id": "63ee69aa9d1e23b6",
+          "driver_id": "faitalpro_12pr320",
+          "box_external_mm": {
+            "width": 372.0,
+            "height": 372.0,
+            "depth": 1075.240386774396
+          },
+          "placement_dy_mm": 312.672787871046,
+          "placement_dz_mm": 0.0,
+          "frame_center_y_mm_used": 64.999999999,
+          "old_woofer_frame_gap_mm": 38.0,
+          "new_woofer_frame_gap_mm": -3.0,
+          "old_verdict": "PASS",
+          "new_verdict": "FAIL",
+          "new_reasons": [
+            "woofer frame clearance -3.0 mm < required 10.0 mm"
+          ]
+        }
+      ],
+      "verified_against_shipped_source": true
+    }
+  ],
+  "impact": [
+    {
+      "artifacts": [
+        "system_runs/system/bl_motor12pr/20261119T005942Z-motor12pr-08924-642dfb2d/adapter_spec.json",
+        "system_runs/system/bl_motor12pr/20261119T005942Z-motor12pr-08924-642dfb2d/manifest.json",
+        "system_runs/system/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/adapter_spec.json",
+        "system_runs/system/bl_motor12pr/20261119T010548Z-motor12pr-17944-fa37ab5e/manifest.json"
+      ],
+      "verdict_unchanged": true,
+      "why": "both seeds are candidate 42d171062dcda386 at dz=50 mm; the recorded woofer_frame gap 47.0 mm comes from the z axis (dz=50 - envelope z_min=-3), which the frame-centre change does not touch. The y-axis overlap becomes -26.6 mm but max-over-axes still reports 47.0 mm, so PASS remains PASS."
+    },
+    {
+      "artifacts": [
+        "system_runs/system/portfolio_screen/20261118T212116Z-portfolio-48996-2d31c6ec/manifest.json",
+        "system_runs/system/portfolio_screen/20261118T212611Z-portfolio-51528-05e70819/manifest.json",
+        "system_runs/system/portfolio_screen/20261118T212738Z-portfolio-25080-368e68a1/manifest.json",
+        "system_runs/system/portfolio_screen/20261118T213057Z-portfolio-39052-dae2d753/manifest.json"
+      ],
+      "verdict_unchanged": true,
+      "why": "portfolio manifests contain no woofer_frame gap and no placement verdict."
+    }
+  ],
+  "unit_conflict_resolved": {
+    "was": {
+      "present": true,
+      "keywords": "woofer_frame_center_y_mm is documented in millimetres",
+      "caller_passes": "float(panel_fit['driver_y_m'])",
+      "value_actually_passed": "metres (e.g. 0.0646 for a 371.2 mm panel)",
+      "clocked_value": "0.0646 mm instead of 64.6 mm",
+      "effect_on_shipped_tree": "the frame centre moves by < 0.1 mm, so every rows_flipped count below is 0: the screen verdicts are NOT yet invalidated by the current code",
+      "intended_correction": "multiply by 1e3 at the screen call sites (run_seed_screen, both placement_legality and derive_min_center_spacing_mm)",
+      "shipped_replay_json_verified": true
+    },
+    "resolution": "hornlab_search/system/woofer_seed.py now passes float(panel_fit['driver_y_m']) * 1e3 at both screen call sites (derive_min_center_spacing_mm and placement_legality), and the recorded placement carries woofer_frame_center_y_mm in millimetres.",
+    "evidence": "tests/system/test_woofer_seed.py::test_screen_passes_the_mounted_height_in_millimetres and ::test_screen_refuses_a_seated_dz0_horn_over_a_frame_that_reaches_the_top"
+  },
+  "regenerated_utc": "2026-11-23T02:07:31.270344+00:00",
+  "regenerated_by": "integrator re-ran the replay after applying the *1e3 caller fix; rows_flipped now equals the mm-corrected branch, which is the shipped behaviour",
+  "shipped_source_call": "woofer_frame_center_y_mm=float(panel_fit[\"driver_y_m\"]) * 1e3"
+}

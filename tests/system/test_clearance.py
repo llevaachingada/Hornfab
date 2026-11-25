@@ -134,7 +134,10 @@ def _mock_bl(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, box: Path) -> None
 
 @pytest.mark.parametrize("offset_z, ok, status", [
     (17.0, True, "PASS"),
-    (-3.0, False, "BODY_CLEARANCE_UNPROVEN"),
+    # The exact triangle-vs-box stage gate is stronger than the legacy AABB/vertex guard:
+    # this synthetic 8-vertex cube overlaps the box by 3 mm, which is a proven crossing, not
+    # merely an unproven ambiguity.
+    (-3.0, False, "VIOLATION"),
 ])
 def test_stage_horn_project_records_clearance_and_gates_ok(
         monkeypatch: pytest.MonkeyPatch, tmp_path: Path, horn: Path, box: Path,
@@ -185,3 +188,39 @@ def test_real_staged_cases_replay(case: str, expected: str) -> None:
     rep = CL.body_clearance(horn["mesh_path"], exteriors, translation_mm=horn["translation_mm"],
                             scale_factor=horn.get("scale_factor", 1.0))
     assert rep.status == expected
+
+
+# --------------------------------------------------------------------------- exact stage gate
+
+_REAL_CASES_EXACT = {
+    # dy = 0 puts the mouth ring in the middle of the cabinet: 27 horn vertices are inside
+    # the solid, so the exact gate proves a collision the legacy AABB guard called ambiguous.
+    "bl_ref_case/20261118T231100Z-assembly-62864-f62bf799": "VIOLATION",
+    # the 20 mm forward assembly the smoke/G4 solves used: 17 mm standoff.
+    "bl_horn_assembly/20261118T224519Z-assembly-11000-4a85a0f8": "PASS",
+}
+
+
+@pytest.mark.parametrize("case, expected", sorted(_REAL_CASES_EXACT.items()))
+def test_real_staged_cases_exact_horn_box_gate(case: str, expected: str) -> None:
+    from hornlab_search.system.boundarylab import collision as K
+
+    case_dir = _RUNS / case
+    spec_path = case_dir / "adapter_spec.json"
+    exteriors = sorted(case_dir.glob("bl_output/*/exterior.msh"))
+    if not spec_path.is_file() or not exteriors:
+        pytest.skip(f"gitignored run dir not on disk: {case}")
+    spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    horn, source = spec["horn"], spec["source"]
+    if not Path(horn["mesh_path"]).is_file():
+        pytest.skip(f"horn mesh not on disk: {horn['mesh_path']}")
+    placed = K.transform_surface(K.read_surface(horn["mesh_path"]),
+                                 translation_mm=horn["translation_mm"],
+                                 scale_factor=horn.get("scale_factor", 1.0))
+    box = K.box_from_cabinet_mm(width_mm=source["width_m"] * 1e3,
+                                height_mm=source["height_m"] * 1e3,
+                                depth_mm=source["depth_m"] * 1e3)
+    rep = K.test_horn_box_clearance(placed, box, min_gap_m=0.001,
+                                    compiled_exterior=K.read_surface(exteriors[0]))
+    assert rep.status == expected
+    assert rep.detail["compiled_exterior_matches_box"] is True

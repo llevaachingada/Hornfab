@@ -893,7 +893,7 @@ def _verify_wanted_hashes(args) -> list[str] | None:
 
 
 def _verify_body(args, argv, d) -> int:
-    from hornlab_search.config import load_config
+    from hornlab_search.config import envelope_policy, load_config
     from hornlab_search.dataset.store import DatasetStore
     from hornlab_search.design.space import DesignSpace
     from hornlab_search.search import rundir
@@ -991,6 +991,7 @@ def _verify_body(args, argv, d) -> int:
         rundir.write_json_atomic(vdir / "run.json", {
             "run_id": vdir.name, "config_name": cfg.name, "family": cfg.family, "mode": "verify",
             "config": cfg.raw, "config_sha": rundir.config_sha(cfg.raw), "backend": cfg.solve.backend,
+            "envelope_policy": envelope_policy(cfg.brief).as_dict(),
             "lib_shas": collect_lib_shas(), "toolchain": rundir.toolchain_snapshot(),
             "runtime": rundir.runtime_provenance(), "command": _command_string(argv),
             "verify_of": {"run": str(run_dir.resolve()), "top": len(top),

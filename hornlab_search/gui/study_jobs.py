@@ -195,17 +195,26 @@ class StudyRunBridge:
     real launcher.
     """
 
-    def __init__(self, registry, *, launcher=None, canceller=None):
+    def __init__(self, registry, *, launcher=None, canceller=None, approvals_root=None,
+                 dependency_pins=None, resolved_config=None):
         self.registry = registry
         self.launcher = launcher
         self.canceller = canceller
+        # Real-metric package preparation re-reads the approval record and every pinned intake
+        # file.  ``approvals_root`` lets a contained registry resolve that record beside its own
+        # tree (tests/embedded roots); None means the canonical repository root.
+        self.approvals_root = approvals_root
+        self.dependency_pins = dependency_pins
+        self.resolved_config = resolved_config
 
     def prepare_package(self, study_id, payload):
         _id(study_id, "study id")
-        if not isinstance(payload, dict) or set(payload) - {
-                "expected_revision", "lane", "deadline", "idempotency_key"}:
+        allowed = {"expected_revision", "lane", "deadline", "idempotency_key"}
+        metric_requested = isinstance(payload, dict) and payload.get("metric") is not None
+        if metric_requested:
+            allowed |= {"metric", "budget_profile", "approvals_record"}
+        if not isinstance(payload, dict) or set(payload) - allowed:
             raise StudyJobError("invalid_input", "invalid package request fields", 400)
-        from hornlab_search.studies.package import prepare_run_package
         revision = payload.get("expected_revision")
         if revision is not None and (isinstance(revision, bool)
                                      or not isinstance(revision, int) or revision < 1):
@@ -216,6 +225,37 @@ class StudyRunBridge:
         key = payload.get("idempotency_key")
         if key is not None:
             _id(key, "idempotency key")
+        if metric_requested:
+            # Opt-in real-metric route: the same checked API the CLI uses.  Nothing here falls
+            # back to a scalar package; a missing approval or artifact is a typed refusal.
+            metric = payload.get("metric")
+            if metric != "real_metric_v1":
+                raise StudyJobError("invalid_input", "unsupported metric package type", 400)
+            approvals_record = payload.get("approvals_record")
+            if not isinstance(approvals_record, str) or not approvals_record.strip():
+                raise StudyJobError(
+                    "invalid_input", "approvals_record is required for a real metric package", 400)
+            budget_profile = payload.get("budget_profile")
+            if not isinstance(budget_profile, str) or not budget_profile.strip():
+                raise StudyJobError(
+                    "invalid_input", "budget_profile is required for a real metric package", 400)
+            if lane != "gpu":
+                raise StudyJobError(
+                    "invalid_input", "a real metric package requires the gpu lane", 400)
+            from hornlab_search.studies.package import prepare_real_metric_package
+            try:
+                return prepare_real_metric_package(
+                    self.registry, study_id, approvals_record=approvals_record,
+                    budget_profile=budget_profile, lane="gpu",
+                    deadline=payload.get("deadline"), expected_revision=revision,
+                    idempotency_key=key, dependency_pins=self.dependency_pins,
+                    resolved_config=self.resolved_config, approvals_root=self.approvals_root)
+            except StudyJobError:
+                raise
+            except Exception as exc:  # noqa: BLE001 - typed study errors carry HTTP codes
+                raise StudyJobError("unavailable", str(exc),
+                                    getattr(exc, "status_code", 422)) from exc
+        from hornlab_search.studies.package import prepare_run_package
         try:
             return prepare_run_package(
                 self.registry, study_id, expected_revision=revision, lane=lane,
@@ -244,6 +284,55 @@ class StudyRunBridge:
             raise StudyJobError("unavailable", "package artifact must contain an object", 422)
         return {"package_id": package_id, **body} if "package_id" not in body else body
 
+    def _require_metric_release_if_any(self, package):
+        """Refuse a non-real metric package; gate a real one through the CLI release check."""
+        from hornlab_search.studies import package as package_mod
+        metric = package.get("metric")
+        if not isinstance(metric, dict):
+            return       # legacy scalar/turbo/pareto package: every existing route is unchanged
+        mode = metric.get("provenance_mode")
+        if mode != package_mod.REAL_METRIC:
+            raise StudyJobError(
+                "unavailable",
+                f"{mode or 'synthetic_metric'} metric package can never authorize a real solver",
+                422)
+        try:
+            self._require_real_metric_release(package)
+        except StudyJobError:
+            raise
+        except Exception as exc:  # noqa: BLE001 - a typed study refusal is surfaced as 422
+            raise StudyJobError("unavailable", str(exc),
+                                getattr(exc, "status_code", 422)) from exc
+
+    def _require_real_metric_release(self, package):
+        """Run the CLI release gate, or its exact root-aware equivalent for a contained root.
+
+        With no ``approvals_root`` this delegates to ``studies.cli._require_real_metric_release``
+        so production uses the one reviewed gate.  A contained root re-runs the same checks through
+        the package module, because the CLI helper resolves the record from the canonical checkout.
+        """
+        if self.approvals_root is None:
+            from hornlab_search.studies.cli import _require_real_metric_release
+            return _require_real_metric_release(package)
+        from hornlab_search.studies import package as package_mod
+        from hornlab_search.studies.cli import REAL_METRIC_RELEASE_ENV
+        from hornlab_search.studies.schema import Unavailable
+        info = package_mod.verify_real_metric_package_files(package, root=self.approvals_root)
+        status = info["approvals"]["status"]
+        if status not in package_mod.METRIC_EXECUTABLE_APPROVAL_STATUSES:
+            raise Unavailable(f"metric approvals record is {status}; parent approval is required")
+        payload = package_mod.load_metric_approvals(
+            (package["metric"]["approvals"])["record"], root=self.approvals_root)["payload"]
+        if (payload.get("owner_authorization") or {}).get("authorized") is not True:
+            raise Unavailable("metric approvals record does not carry owner authorization")
+        import sys
+        if os.environ.get(REAL_METRIC_RELEASE_ENV) != "1":
+            raise Unavailable(f"parent release required: set {REAL_METRIC_RELEASE_ENV}=1")
+        declared = ((package.get("resolved_config") or {}).get("interpreter") or {}).get("executable")
+        if declared and Path(declared).resolve() != Path(sys.executable).resolve():
+            raise Unavailable("running interpreter differs from the pinned worker interpreter")
+        return info
+
     def launch(self, study_id, payload):
         _id(study_id, "study id")
         if not isinstance(payload, dict) or set(payload) - {
@@ -270,6 +359,7 @@ class StudyRunBridge:
         study = self.registry.get_study(study_id)
         if package.get("spec_revision") != study.get("revision"):
             raise StudyJobError("conflict", "stale package revision", 409)
+        self._require_metric_release_if_any(package)
         if self.launcher is None:
             raise StudyJobError("capability_missing", "study launch adapter unavailable", 503)
         pid = package["package_id"]

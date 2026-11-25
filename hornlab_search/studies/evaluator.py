@@ -66,6 +66,95 @@ def _finite(value):
     return value if math.isfinite(value) else None
 
 
+def record_metric_measurement(result, terms, replay, *, brief, dataset_record=None):
+    """Attach canonical metric labels to a freshly measured screen for journal/refit."""
+    from hornlab_search.bo.metric_contracts import parity_tolerance
+    from hornlab_search.bo.metric_training import extract_contributions
+
+    if (result.get("kind") != "screen" or result.get("call_status") != "called"
+            or result.get("eligible") is not True):
+        return {**result, "eligible": False, "metric_refusal": "not_new_eligible_screen"}
+
+    version = brief.objective_version
+    if (not replay.complete or replay.objective_version != version
+            or replay.design_hash != result.get("design_hash")
+            or not all((replay.physical_id, replay.score_id, replay.metric_id))):
+        return {**result, "eligible": False, "metric_refusal": "replay_identity_mismatch"}
+
+    j, live_j, stored_j = map(_finite, (replay.j, result.get("observed_j"), replay.stored_j))
+    if (j is None or live_j is None or stored_j is None
+            or max(abs(j - live_j), abs(j - stored_j)) > parity_tolerance(j)):
+        return {**result, "eligible": False, "metric_refusal": "replay_score_mismatch"}
+
+    labels = extract_contributions(terms, objective_version=version,
+                                   weights=brief.weights, params=brief.objective_params)
+    replay_labels = extract_contributions(replay.terms, objective_version=version,
+                                          weights=brief.weights, params=brief.objective_params)
+    for source, row in (("live", labels), ("replay", replay_labels)):
+        if not row.ok:
+            return {**result, "eligible": False, "metric_refusal": f"{source}:{row.reason}"}
+        if abs(j - row.j) > parity_tolerance(j):
+            return {**result, "eligible": False, "metric_refusal": f"{source}:component_total_mismatch"}
+    if (labels.cd_status != replay_labels.cd_status or labels.quality_flags != replay_labels.quality_flags
+            or any(abs(a - b) > parity_tolerance(j)
+                   for a, b in zip(labels.components, replay_labels.components, strict=True))):
+        return {**result, "eligible": False, "metric_refusal": "replay_component_mismatch"}
+
+    record = {**result, "observed_j": j, "stored_j": stored_j, "objective_version": version,
+              "physical_id": replay.physical_id, "score_id": replay.score_id, "metric_id": replay.metric_id,
+              "components": labels.components.tolist(), "component_names": list(labels.component_names),
+              "component_schema_hash": labels.schema_hash, "cd_status": labels.cd_status,
+              "quality_flags": list(labels.quality_flags)}
+    if dataset_record is not None:
+        record["metric_dataset_record"] = dataset_record
+    return record
+
+
+def load_metric_dataset_record(store, position, result, *, run_id, version):
+    """Read back the exact record committed by this attempt and bind its catalog physical ID."""
+    from hornlab_search.bo.metric_contracts import parity_tolerance
+    from hornlab_search.dataset.identity_v2 import physical_solve_id
+
+    if position is None:
+        raise ValueError("dataset_record_missing")
+    shard, row = position
+    meta, arrays = store.read(shard, row)
+    full_key = tuple(meta.get(k) for k in ("design_hash", "mesh_hash", "solve_hash"))
+    expected_key = tuple(result.get(k) for k in ("design_hash", "mesh_hash", "solve_hash"))
+    if (not all(full_key) or full_key != expected_key or meta.get("run_id") != run_id
+            or meta.get("objective_version") != version or (meta.get("solve") or {}).get("mode") != "screen"
+            or meta.get("ok") is not True or not arrays):
+        raise ValueError("dataset_record_identity_mismatch")
+    stored_j, replay_j = map(_finite, (meta.get("objective"), result.get("observed_j")))
+    if stored_j is None or replay_j is None or abs(stored_j - replay_j) > parity_tolerance(replay_j):
+        raise ValueError("dataset_record_score_mismatch")
+    return meta, {"root": str(store.root), "shard": shard, "row": row,
+                  "physical_solve_id": physical_solve_id(*full_key)}
+
+
+def bind_metric_record_identity(meta, result, *, expected, encoding, bounds_hash):
+    """Validate task and active-space identity before a measured row can enter a refit."""
+    from hornlab_search.bo.metric_training import bounds_identity
+    from hornlab_search.dataset.catalog_identity import catalog_identity_from_record
+    from hornlab_search.types import Design
+
+    actual = catalog_identity_from_record(meta)
+    changed = [key for key, value in expected.items() if not value or actual.get(key) != value]
+    if changed:
+        raise ValueError("metric_task_identity_mismatch:" + ",".join(sorted(changed)))
+    if not bounds_hash or bounds_identity(encoding) != bounds_hash:
+        raise ValueError("metric_bounds_identity_mismatch")
+    design = Design(meta["family"], meta["params"])
+    if design.hash() != result.get("design_hash"):
+        raise ValueError("metric_materialized_design_mismatch")
+    measured = encoding.normalize_design(design, verify_round_trip=True)
+    proposed = np.asarray(result.get("x"), dtype=np.float64)
+    if (measured.shape != proposed.shape or not np.isfinite(proposed).all()
+            or np.max(np.abs(measured - proposed)) > 1e-6):
+        raise ValueError("metric_proposal_projection_mismatch")
+    return {**expected, "bounds_hash": bounds_hash, "active_keys": list(encoding.active_keys)}
+
+
 def _engine_available() -> bool:
     return all(importlib.util.find_spec(name) is not None
                for name in ("torch", "botorch", "gpytorch"))
@@ -776,6 +865,164 @@ class PipelineStudyEvaluator:
         if self.policy == "pareto":
             extra["pareto_excluded"] = dict(sorted(self.pareto_excluded.items()))
         return encode_proposal_history(self.history, extra)
+
+
+class MetricPipelineStudyEvaluator(PipelineStudyEvaluator):
+    """Production metric-composite evaluator: strict binding, four-screen refit, durable replay.
+
+    The evaluation itself is still injected (``measure_fn`` for a fake canary dispatch, the real
+    pipeline adapter's ``evaluate`` in production).  What this class owns is the *learning* half:
+    it accepts only canonical fresh screens, publishes an immutable training snapshot and moves the
+    refit pointer after every four newly accepted unique screens, and restores that exact state
+    from the journal without repeating a backend call.
+    """
+
+    adapter_contract = "b5-metric-pipeline-evaluator-v1"
+
+    def __init__(self, service, package, *, metric_artifact, metric_manifest, metric_ledger,
+                 metric_brief=None, initial_proposal=None, measure_fn=None, **kwargs):
+        from hornlab_search.bo.policy import POLICY_METRIC_COMPOSITE
+
+        metric_mode = kwargs.get("policy") == POLICY_METRIC_COMPOSITE
+        if metric_mode and (metric_artifact is None or metric_manifest is None
+                            or metric_ledger is None):
+            raise ContractError("metric training artifact, manifest and refit ledger are required")
+        super().__init__(service, package, **kwargs)
+        self._metric_base_artifact = metric_artifact
+        self._metric_manifest = dict(metric_manifest or {})
+        self._metric_ledger = metric_ledger
+        self._metric_brief = metric_brief
+        self.initial_proposal = initial_proposal
+        self.measure_fn = measure_fn
+        self._metric_artifact = (metric_ledger.current_artifact if metric_ledger is not None
+                                 else metric_artifact)
+        self._metric_seen = set(str(v) for v in (
+            getattr(metric_artifact, "observation_ids", None) or ()))
+        self._metric_accepted = []
+        self._metric_attempt_ids = []
+        self._metric_items = {}
+        self._metric_excluded = {}
+        self._metric_refit_log = []
+        self._metric_error = None
+
+    # -- binding / proposal --------------------------------------------------
+    def metric_binding(self):
+        from hornlab_search.bo.policy import MetricTrainingBinding
+
+        manifest = self._metric_manifest
+        return MetricTrainingBinding(
+            artifact=self._metric_artifact,
+            encoding=self.encoding,
+            expected_bounds_hash=str((manifest.get("bounds") or {}).get("hash") or ""),
+            expected_score=dict((manifest.get("score") or {}).get("payload") or {}),
+            expected_task={k: (manifest.get("task") or {}).get(k) for k in
+                           ("task_identity", "backend", "fidelity", "grid_hash",
+                            "dependency_hash", "mesh_hash")},
+            component_schema=str(manifest.get("component_schema_hash") or ""),
+        )
+
+    def _propose_through_policy(self):
+        from hornlab_search.bo import policy as policy_mod
+        from hornlab_search.bo.policy import POLICY_METRIC_COMPOSITE
+
+        if self.policy != POLICY_METRIC_COMPOSITE:
+            return super()._propose_through_policy()
+        if self.history.proposal_index == 0 and self.initial_proposal is not None:
+            return dict(self.initial_proposal)
+        outcome = policy_mod.fit_and_propose(
+            self.policy, metric_training=self.metric_binding(), pool=self.pool,
+            seed=self.seed, encoding=self.encoding, config=self.config,
+            resolution_mm=self.resolution_mm, metric_history=self.history)
+        self.last_outcome = outcome
+        if getattr(outcome, "status", None) != "ok" or outcome.proposal is None:
+            return None
+        if not isinstance(outcome.proposal, dict):
+            return outcome.proposal
+        proposal = dict(outcome.proposal)
+        proposal["predicted"] = outcome.predicted
+        proposal["selection_reason"] = outcome.selection_reason
+        proposal["acquisition"] = outcome.acquisition
+        return proposal
+
+    # -- evaluation ----------------------------------------------------------
+    def evaluate(self, candidate, attempt_id):
+        if callable(self.measure_fn):
+            result = self.measure_fn(candidate, attempt_id)
+            if not isinstance(result, dict):
+                raise ContractError("metric measure_fn must return a result dict")
+            return dict(result)
+        return super().evaluate(candidate, attempt_id)
+
+    # -- learning ------------------------------------------------------------
+    def _add_observation(self, result):
+        from hornlab_search.bo.policy import POLICY_METRIC_COMPOSITE
+        from .metric_refit import MetricRefitError, metric_candidate_from_result
+
+        if self.policy != POLICY_METRIC_COMPOSITE:
+            return super()._add_observation(result)
+        try:
+            candidate = metric_candidate_from_result(
+                result, artifact=self._metric_artifact, seen_ids=self._metric_seen)
+        except MetricRefitError as exc:
+            self._metric_excluded[str(result.get("solve_id") or "")] = str(exc)
+            return False
+        self._metric_seen.add(candidate.observation_id)
+        self._metric_accepted.append(candidate)
+        attempt_id = result.get("attempt_id")
+        self._metric_attempt_ids.append(None if attempt_id is None else str(attempt_id))
+        self._metric_items[candidate.observation_id] = candidate
+        return True
+
+    def _refit(self):
+        from hornlab_search.bo.policy import POLICY_METRIC_COMPOSITE
+        from .metric_refit import MetricRefitError
+
+        if self.policy != POLICY_METRIC_COMPOSITE:
+            return super()._refit()
+        try:
+            record = self._metric_ledger.refit(
+                self._metric_accepted, self._metric_attempt_ids, self.proposal_rng_state())
+        except MetricRefitError as exc:
+            self._metric_error = str(exc)
+            return False
+        if record is not None:
+            self._metric_artifact = self._metric_ledger.current_artifact
+            self._metric_refit_log.append(record)
+        return True
+
+    # -- resume --------------------------------------------------------------
+    def restore_progress(self, progress):
+        from hornlab_search.bo.policy import POLICY_METRIC_COMPOSITE
+
+        if self.policy != POLICY_METRIC_COMPOSITE:
+            return super().restore_progress(progress)
+        self._metric_accepted = []
+        self._metric_attempt_ids = []
+        self._metric_items = {}
+        self._metric_excluded = {}
+        self._metric_seen = set(str(v) for v in (self._metric_base_artifact.observation_ids or ()))
+        self._metric_error = None
+        if not super().restore_progress(progress):
+            return False
+        # Re-derive the current artifact from the durable pointer after the journal replay; an
+        # ambiguous pointer (generation ahead of, or a different prefix than, the replay) refuses.
+        self._metric_artifact = self._metric_ledger.current_artifact
+        return True
+
+    def proposal_rng_state(self):
+        from hornlab_search.bo.policy import POLICY_METRIC_COMPOSITE
+
+        encoded = super().proposal_rng_state()
+        if self.policy == POLICY_METRIC_COMPOSITE:
+            extra = encoded.get("rng_state") if isinstance(encoded, dict) else None
+            if isinstance(extra, dict):
+                extra["metric"] = {
+                    "refit_generation": int(self._metric_ledger.generation),
+                    "artifact_bytes_sha256": (
+                        self._metric_ledger.pointer or {}).get("artifact_bytes_sha256"),
+                    "accepted_ids": [c.observation_id for c in self._metric_accepted],
+                }
+        return encoded
 
 
 def build_production_wiring(service, package, *, root, config_path, lane=None,

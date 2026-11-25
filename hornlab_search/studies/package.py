@@ -1,4 +1,4 @@
-"""Immutable adaptive-serial run packages for Bayesian design studies.
+﻿"""Immutable adaptive-serial run packages for Bayesian design studies.
 
 A package is an authorization binding, not a claim that future candidates are
 known.  Its bytes are canonical JSON and its identity is the SHA-256 of those
@@ -13,14 +13,44 @@ from __future__ import annotations
 
 import json
 import hashlib
-from pathlib import Path
-from datetime import datetime
+import os
+import re
+import sys
+from pathlib import Path, PurePosixPath
+from datetime import datetime, timezone
 
 from .schema import PROTOCOL, Conflict, StudyError, Unavailable, canonical, digest
 
 PACKAGE_SCHEMA = 'run-package-v1'
 PACKAGE_KIND = 'package'
 EXECUTION_MODE = 'adaptive_serial'
+REAL_DATA_OFFLINE = 'real_data_offline_v1'
+#: Versioned opt-in provenance mode for a REAL solver package.  Everything else in a
+#: metric package stays synthetic/offline-only; this mode is the single exception and is
+#: gated by a task-level approval record plus a parent release at execution time.
+REAL_METRIC = 'real_metric_v1'
+
+#: Fixed, versioned task-approval record schema.  The package body carries only the record's
+#: repo-relative path and the six frozen approval fields; the record itself is re-read (and its
+#: pinned files re-hashed) at prepare, dry-run and execute time.
+METRIC_APPROVALS_SCHEMA = 'metric-real-approvals-v1'
+METRIC_APPROVAL_REFIT_EVERY = 4
+METRIC_REAL_PROFILES = ('metric-canary-8x2', 'metric-adaptive-20x2', 'metric-adaptive-30x2')
+#: ``HELD_PENDING_PARENT_RELEASE`` may be prepared/dry-run but never executed; only the
+#: explicit ``APPROVED_FOR_CANARY`` state (plus the CLI parent gate) can reach dispatch.
+METRIC_APPROVAL_STATUSES = ('HELD_PENDING_PARENT_RELEASE', 'APPROVED_FOR_CANARY')
+METRIC_EXECUTABLE_APPROVAL_STATUSES = ('APPROVED_FOR_CANARY',)
+
+_HEX16 = re.compile(r'[0-9a-f]{16}')
+_HEX40 = re.compile(r'[0-9a-f]{40}')
+_HEX64 = re.compile(r'[0-9a-f]{64}')
+_APPROVAL_IDENTITY_FIELDS = ('task_identity', 'backend', 'fidelity', 'grid_hash',
+                             'dependency_hash', 'mesh_hash')
+
+
+def repo_root() -> Path:
+    """The canonical source checkout; approvals records are resolved relative to it."""
+    return Path(__file__).resolve().parents[2]
 
 #: Frozen baseline budget from protocol bo-study-v1.1 section 4.  A prepared
 #: package must carry exactly these caps; callers cannot widen or shrink them.
@@ -57,6 +87,12 @@ BUDGET_PROFILES = {
     # tier (2x screen DOF cap, >= 29 frequencies). The finalist solves are counted in ``verify_calls``;
     # the runner's per-tier dispatch of those calls is the open wiring (see CONTINUITY).
     'fidelity-ladder-10': {'screen_calls': 10, 'verify_calls': 10, 'total_calls': 20, 'attempts': 60},
+    # Real metric-composite canary (D1): 8 actual screen calls and a separately budgeted
+    # verify pair.  ``metric-adaptive-30x2`` is the follow-up tranche and is refused until a
+    # task approval record names an accepted canary package.
+    'metric-canary-8x2': {'screen_calls': 8, 'verify_calls': 2, 'total_calls': 10, 'attempts': 60},
+    'metric-adaptive-20x2': {'screen_calls': 20, 'verify_calls': 2, 'total_calls': 22, 'attempts': 140},
+    'metric-adaptive-30x2': {'screen_calls': 30, 'verify_calls': 2, 'total_calls': 32, 'attempts': 180},
 }
 
 
@@ -138,6 +174,101 @@ def _timezone_deadline(value):
     return value
 
 
+def _deadline_moment(value):
+    """Parse a validated timezone-aware deadline string into an aware datetime."""
+    return datetime.fromisoformat(value.replace('Z', '+00:00'))
+
+
+def _is_hex(value, pattern):
+    return isinstance(value, str) and pattern.fullmatch(value) is not None
+
+
+def _approval_record_path(record, *, root=None):
+    """Normalize a repo-relative approvals path and refuse escapes/absolute forms."""
+    if not isinstance(record, str) or not record.strip():
+        raise StudyError('metric approvals record must be a repo-relative path')
+    text = record.strip().replace('\\', '/')
+    pure = PurePosixPath(text)
+    if pure.is_absolute() or re.match(r'^[A-Za-z]:', text) or not pure.parts \
+            or any(part in ('', '.', '..') for part in pure.parts):
+        raise StudyError('metric approvals record must stay inside the repository')
+    relative = pure.as_posix()
+    base = Path(root) if root is not None else repo_root()
+    return relative, base / pure
+
+
+def _approval_caps(payload):
+    profile = payload.get('profile')
+    if profile not in BUDGET_PROFILES or profile not in METRIC_REAL_PROFILES:
+        raise StudyError(f'unknown real metric approvals profile {profile!r}')
+    caps = BUDGET_PROFILES[profile]
+    for field in ('screen_cap', 'verify_cap'):
+        value = payload.get(field)
+        if type(value) is not int or value < 0:
+            raise StudyError(f'metric approvals {field} must be a non-negative integer')
+    if payload['screen_cap'] != caps['screen_calls'] or payload['verify_cap'] != caps['verify_calls']:
+        raise StudyError('metric approvals caps must equal the named budget profile')
+    if payload.get('refit_every') != METRIC_APPROVAL_REFIT_EVERY:
+        raise StudyError(f'metric approvals refit_every must be {METRIC_APPROVAL_REFIT_EVERY}')
+    if payload.get('lane') != 'gpu':
+        raise StudyError('metric approvals must authorize the gpu lane')
+    return profile, caps
+
+
+def load_metric_approvals(record, *, root=None):
+    """Read and structurally validate a task approval record; never touches a backend.
+
+    Returns ``{'record', 'path', 'payload'}``.  ``HELD_PENDING_PARENT_RELEASE`` records are valid
+    for rehearsal (prepare/dry-run); execution additionally requires ``APPROVED_FOR_CANARY``.
+    """
+    relative, path = _approval_record_path(record, root=root)
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise Unavailable(f'metric approvals record cannot be read: {exc}') from exc
+    try:
+        payload = json.loads(raw.decode('utf-8-sig'))
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise StudyError('metric approvals record is not valid UTF-8 JSON') from exc
+    if not isinstance(payload, dict):
+        raise StudyError('metric approvals record must contain an object')
+    if payload.get('schema') != METRIC_APPROVALS_SCHEMA:
+        raise StudyError('unsupported metric approvals schema')
+    if payload.get('status') not in METRIC_APPROVAL_STATUSES:
+        raise StudyError('metric approvals status must be one of '
+                         + ', '.join(METRIC_APPROVAL_STATUSES))
+    profile, _ = _approval_caps(payload)
+    if not _is_hex(payload.get('task_identity'), _HEX16):
+        raise StudyError('metric approvals task_identity must be 16 lowercase hex')
+    if not _is_hex(payload.get('artifact_sha256'), _HEX64):
+        raise StudyError('metric approvals artifact_sha256 must be a sha256')
+    identity = payload.get('identity')
+    if not isinstance(identity, dict):
+        raise StudyError('metric approvals identity must be an object')
+    for field in _APPROVAL_IDENTITY_FIELDS:
+        if not isinstance(identity.get(field), str) or not identity[field].strip():
+            raise StudyError(f'metric approvals identity field {field!r} is required')
+    if identity.get('task_identity') != payload['task_identity']:
+        raise StudyError('metric approvals identity disagrees with its task_identity')
+    if profile in ('metric-adaptive-20x2', 'metric-adaptive-30x2'):
+        acceptance = payload.get('canary_acceptance')
+        if not isinstance(acceptance, dict) or acceptance.get('accepted') is not True \
+                or not _is_hex(acceptance.get('canary_package_id'), _HEX64):
+            raise StudyError('the adaptive metric profile requires an accepted canary package')
+    return {'record': relative, 'path': path, 'payload': payload}
+
+
+def _check_approval_bindings(payload, *, task_identity, artifact_sha256, caps):
+    """Cross-check approval constraints against the frozen metric artifact identity."""
+    if payload.get('task_identity') != task_identity:
+        raise Unavailable('metric approvals task_identity does not match the training artifact')
+    if payload.get('artifact_sha256') != artifact_sha256:
+        raise Unavailable('metric approvals artifact_sha256 does not match the training artifact')
+    if payload.get('screen_cap') != caps['screen_calls'] \
+            or payload.get('verify_cap') != caps['verify_calls']:
+        raise StudyError('metric approvals caps must equal the package profile caps')
+
+
 def _proposal_identity(service, study_id, revision, spec):
     """Read the current proposal policy (or the spec/default) for the package body.
 
@@ -194,6 +325,28 @@ def package_hash(package):
     return digest(body)
 
 
+def verify_candidate_policy(package, config, *, pool=None):
+    """Check the separate candidate policy binding without changing solve identities.
+
+    New scalar and TuRBO regional runs require a bound proposal and package.
+    Other policies retain their existing admission contracts.
+    """
+    from hornlab_search.config import envelope_policy
+    actual = envelope_policy(config.brief)
+    bound = package.get('candidate_policy')
+    if bound is None:
+        policy = (package.get('proposal_policy') or {}).get('policy') or 'scalar'
+        if policy in ('scalar', 'turbo') and actual.mode in ('exploration', 'discovery'):
+            raise Unavailable('open or near-envelope execution requires a candidate-policy binding')
+        return
+    if not isinstance(bound, dict) or bound.get('policy_id') != actual.policy_id:
+        raise Unavailable('candidate envelope policy changed since the proposal was frozen')
+    if pool is not None:
+        recorded = pool.get('candidate_policy') if isinstance(pool, dict) else None
+        if not isinstance(recorded, dict) or recorded.get('policy_id') != actual.policy_id:
+            raise Unavailable('candidate pool envelope policy differs from the package')
+
+
 def verify_package(package):
     """Validate package identity/shape without publishing, dispatching or solving."""
     if not isinstance(package, dict):
@@ -224,6 +377,11 @@ def verify_package(package):
     if package.get('status_note') != STATUS_NOTE:
         raise StudyError('package status_note must state cheap-check-only eligibility')
     proposal_policy = package.get('proposal_policy')
+    candidate_policy = package.get('candidate_policy')
+    if candidate_policy is not None and (not isinstance(candidate_policy, dict)
+            or not isinstance(candidate_policy.get('policy_id'), str)
+            or not candidate_policy['policy_id'].startswith('envelope-v1-')):
+        raise StudyError('package candidate_policy must contain an envelope policy identity')
     if proposal_policy is not None:
         from hornlab_search.bo import policy as policy_mod
         if not isinstance(proposal_policy, dict):
@@ -233,7 +391,115 @@ def verify_package(package):
             raise StudyError('package carries an unsupported proposal policy')
         if proposal_policy.get('verification_mode') != policy_mod.verification_mode(policy):
             raise StudyError('package verification_mode disagrees with the proposal policy')
+    metric = package.get('metric')
+    if metric is not None:
+        # Additive Pass-2 metric block.  Synthetic/offline packages can never authorize a real
+        # solver; the single exception is the versioned, task-approved real_metric_v1 mode.
+        if not isinstance(metric, dict):
+            raise StudyError('package metric block must be an object')
+        if metric.get('policy') != 'metric_composite_v1':
+            raise StudyError('package metric block policy must be metric_composite_v1')
+        mode = metric.get('provenance_mode')
+        if mode is None:
+            if metric.get('synthetic') is not True:
+                raise StudyError('package metric block must declare synthetic provenance')
+            if metric.get('real_solver_allowed') is not False:
+                raise StudyError('metric packages may not authorize a real solver')
+        elif mode == REAL_DATA_OFFLINE:
+            if metric.get('synthetic') is not False or metric.get('no_backend_calls') is not True:
+                raise StudyError('offline metric package requires real-data offline provenance')
+            for key in ('training_artifact_sha256', 'training_manifest_sha256',
+                        'proposal_sha256', 'model_sha256', 'source_provenance_sha256'):
+                if not isinstance(metric.get(key), str) or not re.fullmatch(r'[0-9a-f]{64}', metric[key]):
+                    raise StudyError(f'offline metric package requires valid {key}')
+            if not isinstance(metric.get('source_provenance'), dict) or \
+                    digest(metric['source_provenance']) != metric['source_provenance_sha256']:
+                raise StudyError('offline metric source provenance hash mismatch')
+            if not package.get('dependency_pins') or not package.get('code_pins'):
+                raise StudyError('offline metric package requires code and dependency pins')
+            if (package.get('proposal_policy') or {}).get('policy') != 'metric_composite_v1':
+                raise StudyError('offline metric package requires metric proposal policy')
+            if any(metric[k + '_sha256'] != package.get('artifacts', {}).get(k)
+                   for k in ('proposal', 'model')):
+                raise StudyError('offline metric package model/proposal bindings mismatch')
+            if any(metric['training_' + suffix + '_sha256'] !=
+                   package.get('artifacts', {}).get('metric_training' + extra)
+                   for suffix, extra in (('artifact', ''), ('manifest', '_manifest'))):
+                raise StudyError('offline metric package training bindings mismatch')
+            if metric.get('real_solver_allowed') is not False:
+                raise StudyError('metric packages may not authorize a real solver')
+        elif mode == REAL_METRIC:
+            _verify_real_metric_block(package, metric)
+        else:
+            raise StudyError('unsupported metric provenance mode')
+        if not isinstance(metric.get('training_artifact_sha256'), str) or \
+                not metric['training_artifact_sha256']:
+            raise StudyError('package metric block needs the training artifact hash')
     return package
+
+
+def _verify_real_metric_block(package, metric):
+    """Structural real_metric_v1 rules; the approval record is re-read separately."""
+    if metric.get('synthetic') is not False:
+        raise StudyError('real metric package must declare non-synthetic provenance')
+    if metric.get('real_solver_allowed') is not True:
+        raise StudyError('real metric package must explicitly authorize the real solver')
+    if metric.get('no_backend_calls') is True:
+        raise StudyError('real metric package cannot claim zero backend calls')
+    profile = package.get('budget_profile')
+    if profile not in METRIC_REAL_PROFILES:
+        raise StudyError('real metric package requires a metric budget profile')
+    if package.get('lane') != 'gpu':
+        raise StudyError('real metric package requires the gpu lane')
+    deadline = package.get('deadline')
+    if deadline is None:
+        raise StudyError('real metric package requires a timezone-aware future deadline')
+    if _deadline_moment(deadline) <= datetime.now(timezone.utc):
+        raise StudyError('real metric package deadline must be in the future')
+
+    approvals = metric.get('approvals')
+    if not isinstance(approvals, dict):
+        raise StudyError('real metric package requires an approvals block')
+    _approval_record_path(approvals.get('record'))
+    if not _is_hex(approvals.get('task_identity'), _HEX16):
+        raise StudyError('metric approvals task_identity must be 16 lowercase hex')
+    if not _is_hex(approvals.get('artifact_sha256'), _HEX64):
+        raise StudyError('metric approvals artifact_sha256 must be a sha256')
+    if approvals.get('refit_every') != METRIC_APPROVAL_REFIT_EVERY:
+        raise StudyError(f'metric approvals refit_every must be {METRIC_APPROVAL_REFIT_EVERY}')
+    caps = budget_caps(package)
+    if approvals.get('screen_cap') != caps['screen_calls'] \
+            or approvals.get('verify_cap') != caps['verify_calls']:
+        raise StudyError('metric approvals caps must equal the package budget')
+
+    for key in ('training_artifact_sha256', 'training_manifest_sha256', 'training_checksum',
+                'proposal_sha256', 'model_sha256', 'source_provenance_sha256'):
+        if not _is_hex(metric.get(key), _HEX64):
+            raise StudyError(f'real metric package requires valid {key}')
+    if not _is_hex(metric.get('task_identity'), _HEX16):
+        raise StudyError('real metric package requires a 16-hex task_identity')
+    if approvals['task_identity'] != metric['task_identity']:
+        raise StudyError('metric approvals task_identity disagrees with the package')
+    if approvals['artifact_sha256'] != metric['training_checksum']:
+        raise StudyError('metric approvals artifact_sha256 disagrees with the training checksum')
+    if not isinstance(metric.get('source_provenance'), dict) or \
+            digest(metric['source_provenance']) != metric['source_provenance_sha256']:
+        raise StudyError('real metric source provenance hash mismatch')
+    if not package.get('code_pins') or not package.get('dependency_pins'):
+        raise StudyError('real metric package requires code and dependency pins')
+    if (package.get('proposal_policy') or {}).get('policy') != 'metric_composite_v1':
+        raise StudyError('real metric package requires the metric proposal policy')
+    artifacts = package.get('artifacts') or {}
+    if _metric_pin_mismatch(metric, artifacts):
+        raise StudyError('real metric package model/proposal/training bindings mismatch')
+
+
+def _metric_pin_mismatch(metric, artifacts):
+    pairs = (('training_artifact_sha256', 'metric_training'),
+             ('training_manifest_sha256', 'metric_training_manifest'),
+             ('proposal_sha256', 'proposal'),
+             ('model_sha256', 'model'))
+    return any(metric.get(key) != artifacts.get(kind) for key, kind in pairs)
 
 
 def _validate_proposal_payload(raw):
@@ -295,13 +561,19 @@ def _pins(explicit, spec, key):
 
 def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu',
                         deadline=None, idempotency_key=None, code_pins=None,
-                        dependency_pins=None, resolved_config=None, budget_profile='baseline'):
+                        dependency_pins=None, resolved_config=None, budget_profile='baseline',
+                        metric=None):
     """Bind the current study revision and artifacts into an immutable package.
 
     ``expected_revision`` defaults to the current revision.  A concurrent manual
     edit raises ``Conflict`` at publication time.  ``idempotency_key`` follows
     the service rule: the same key and payload returns the original package;
     the same key with different inputs fails.
+
+    ``metric`` is an optional, additive Pass-2 block (metric-composite training artifact hash +
+    identity pins + synthetic flag).  When absent, the body and identity are exactly the historical
+    scalar/turbo/pareto package; when present, the block is validated as synthetic-only and can
+    never authorize a real solver run.
     """
     if lane not in ('cpu', 'gpu'):
         raise StudyError('lane must be cpu or gpu')
@@ -355,8 +627,32 @@ def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu'
         'artifacts': artifacts,
         'status_note': STATUS_NOTE,
     }
+    proposal = json.loads(service.store.read_artifact(artifacts['proposal']).decode('utf-8'))
+    candidate_policy = proposal.get('candidate_policy') if isinstance(proposal, dict) else None
+    if candidate_policy is not None:
+        snapshot = json.loads(service.store.read_artifact(artifacts['snapshot']).decode('utf-8'))
+        pool_sha = _current_artifact(service, study_id, revision, 'pool')
+        pool = json.loads(service.store.read_artifact(pool_sha).decode('utf-8'))
+        from hornlab_search.config import load_config
+        body['candidate_policy'] = candidate_policy
+        verify_candidate_policy(body, load_config(snapshot['task']['config']), pool=pool)
     if budget_profile != 'baseline':     # baseline packages keep their exact historical body
         body['budget_profile'] = budget_profile
+    if metric is not None:
+        # Additive only: the metric block is part of the body/hash for metric packages and is
+        # absent for every existing scalar/turbo/pareto package.
+        if not isinstance(metric, dict):
+            raise StudyError('metric block must be an object')
+        body['metric'] = dict(metric)
+        mode = metric.get('provenance_mode')
+        if mode == REAL_DATA_OFFLINE:
+            _verify_offline_metric_bindings(service, study_id, revision, body)
+        if mode == REAL_METRIC:
+            body['artifacts']['metric_training'] = metric.get('training_artifact_sha256')
+            body['artifacts']['metric_training_manifest'] = metric.get('training_manifest_sha256')
+        if mode in (REAL_DATA_OFFLINE, REAL_METRIC):
+            dependencies.update({kind: body['artifacts'][kind] for kind in
+                                 ('metric_training', 'metric_training_manifest')})
     if not isinstance(body['resolved_config'], dict):
         raise StudyError('resolved_config must be an object')
 
@@ -375,6 +671,315 @@ def prepare_run_package(service, study_id, *, expected_revision=None, lane='cpu'
     return package
 
 
+def _verify_offline_metric_bindings(service, study_id, revision, body):
+    """Re-read immutable study artifacts and pinned intake files; never invoke a backend."""
+    from .metric_study import metric_bindings
+    from .metric_intake import _pinned_file
+
+    metric = body['metric']
+    binding = metric_bindings(service, study_id)
+    if binding.get('status') != 'ok':
+        raise Unavailable('offline metric proposal binding invalid: ' + str(binding.get('detail')))
+    manifest_sha = _current_artifact(service, study_id, revision, 'metric_training_manifest')
+    training_sha = _current_artifact(service, study_id, revision, 'metric_training')
+    if (metric.get('training_artifact_sha256') != training_sha or
+            metric.get('training_manifest_sha256') != manifest_sha or
+            binding.get('artifact_bytes_sha256') != training_sha or
+            binding.get('manifest_sha256') != manifest_sha):
+        raise Unavailable('offline metric training binding mismatch')
+    try:
+        manifest = json.loads(service.store.read_artifact(manifest_sha).decode('utf-8'))
+        source = manifest['offline_intake']
+        if manifest.get('synthetic') is not False or manifest.get('no_backend_calls') is not True:
+            raise ValueError('manifest is not real-data offline intake')
+        if (source != metric.get('source_provenance') or
+                manifest.get('artifact_bytes_sha256') != training_sha or
+                manifest.get('checksum') != binding.get('artifact_checksum')):
+            raise ValueError('manifest provenance or training mismatch')
+        if manifest.get('dependencies', {}).get('snapshot') != body['artifacts']['snapshot']:
+            raise ValueError('manifest snapshot dependency mismatch')
+        for key in ('config', 'brief', 'catalog', 'replay'):
+            _pinned_file(source[key], key)
+        shards = source['shards']
+        if not isinstance(shards, dict) or not shards:
+            raise ValueError('source shards required')
+        for key, item in shards.items():
+            _pinned_file(item, f'shard {key}')
+    except (KeyError, ValueError, TypeError, UnicodeError) as exc:
+        raise Unavailable(f'offline metric provenance invalid: {exc}') from exc
+    body['artifacts']['metric_training'] = training_sha
+    body['artifacts']['metric_training_manifest'] = manifest_sha
+
+
+def prepare_real_data_offline_metric_package(service, study_id, **kwargs):
+    """Package an existing validated offline intake for rehearsal, never real execution."""
+    from .metric_study import metric_bindings
+
+    binding = metric_bindings(service, study_id)
+    if binding.get('status') != 'ok':
+        raise Unavailable('offline metric proposal binding invalid: ' + str(binding.get('detail')))
+    revision = service.get_study(study_id)['revision']
+    manifest_sha = _current_artifact(service, study_id, revision, 'metric_training_manifest')
+    try:
+        manifest = json.loads(service.store.read_artifact(manifest_sha).decode('utf-8'))
+        source = manifest['offline_intake']
+    except (KeyError, ValueError, UnicodeError) as exc:
+        raise Unavailable('offline intake provenance unavailable') from exc
+    metric = {
+        'policy': 'metric_composite_v1', 'provenance_mode': REAL_DATA_OFFLINE,
+        'synthetic': False, 'real_solver_allowed': False, 'no_backend_calls': True,
+        'training_artifact_sha256': binding['artifact_bytes_sha256'],
+        'training_manifest_sha256': manifest_sha,
+        'proposal_sha256': _current_artifact(service, study_id, revision, 'proposal'),
+        'model_sha256': _current_artifact(service, study_id, revision, 'model'),
+        'source_provenance': source, 'source_provenance_sha256': digest(source),
+    }
+    return prepare_run_package(service, study_id, metric=metric, **kwargs)
+
+
+def _real_resolved_config(service, study_id, revision, *, lane, budget_profile, deadline,
+                          approvals_record, overrides=None):
+    """Pin the exact preparation/worker context that the package authorizes."""
+    study = service.get_study(study_id)
+    snapshot = json.loads(service.store.read_artifact(
+        _current_artifact(service, study_id, revision, 'snapshot')).decode('utf-8'))
+    task = snapshot.get('task') or {}
+    source = (study.get('spec') or {}).get('source') or {}
+    pythonpath = [entry for entry in os.environ.get('PYTHONPATH', '').split(os.pathsep) if entry]
+    base = {
+        'schema': 'metric-real-resolved-config-v1',
+        'study_id': study_id,
+        'spec_revision': revision,
+        'spec_hash': study['spec_hash'],
+        'interpreter': {
+            'executable': str(Path(sys.executable).resolve()),
+            'version': sys.version.split()[0],
+            'implementation': sys.implementation.name,
+            'prefix': str(Path(sys.prefix).resolve()),
+            'pythonpath': pythonpath,
+        },
+        'config': {'path': task.get('config'), 'sha256': task.get('config_sha256')},
+        'brief': {'path': task.get('brief'), 'sha256': task.get('brief_sha256')},
+        'objective_version': task.get('objective_version'),
+        'backend': 'beat_cuda',
+        'fidelity': 'screen',
+        'lane': lane,
+        'budget_profile': budget_profile,
+        'deadline': deadline,
+        'dataset_root': source.get('dataset_root'),
+        'approvals_record': approvals_record,
+    }
+    if overrides is not None:
+        if not isinstance(overrides, dict):
+            raise StudyError('resolved_config overrides must be an object')
+        for key, value in overrides.items():
+            if key == 'interpreter' and isinstance(value, dict) \
+                    and isinstance(base.get('interpreter'), dict):
+                base['interpreter'] = {**base['interpreter'], **value}
+            else:
+                base[key] = value
+    return base
+
+
+def _verify_real_metric_bindings(service, study_id, revision, approvals, caps):
+    """Re-read the metric artifact/manifest and every pinned intake file."""
+    from .metric_study import metric_bindings
+    from .metric_intake import _pinned_file
+
+    binding = metric_bindings(service, study_id)
+    if binding.get('status') != 'ok':
+        raise Unavailable('real metric proposal binding invalid: ' + str(binding.get('detail')))
+    if binding.get('synthetic') is not False:
+        raise Unavailable('real metric execution requires a measured (non-synthetic) artifact')
+    training_sha = _current_artifact(service, study_id, revision, 'metric_training')
+    manifest_sha = _current_artifact(service, study_id, revision, 'metric_training_manifest')
+    proposal_sha = _current_artifact(service, study_id, revision, 'proposal')
+    model_sha = _current_artifact(service, study_id, revision, 'model')
+    if (binding.get('artifact_bytes_sha256') != training_sha
+            or binding.get('manifest_sha256') != manifest_sha):
+        raise Unavailable('real metric training binding mismatch')
+    try:
+        manifest = json.loads(service.store.read_artifact(manifest_sha).decode('utf-8'))
+        source = manifest['offline_intake']
+        if manifest.get('synthetic') is not False or manifest.get('no_backend_calls') is not True:
+            raise ValueError('manifest is not measured offline intake')
+        if manifest.get('artifact_bytes_sha256') != training_sha:
+            raise ValueError('manifest training bytes mismatch')
+    except (KeyError, ValueError, TypeError, UnicodeError) as exc:
+        raise Unavailable(f'real metric provenance invalid: {exc}') from exc
+    task = manifest.get('task') or {}
+    score = (manifest.get('score') or {}).get('payload') or {}
+    identity = {field: task.get(field) for field in _APPROVAL_IDENTITY_FIELDS}
+    identity['brief_hash'] = score.get('brief_hash')
+    identity['score_hash'] = score.get('score_hash')
+    _check_approval_bindings(approvals['payload'], task_identity=identity['task_identity'],
+                             artifact_sha256=manifest.get('checksum'), caps=caps)
+    approved_identity = approvals['payload']['identity']
+    for field in _APPROVAL_IDENTITY_FIELDS:
+        if approved_identity[field] != identity[field]:
+            raise Unavailable(f'metric approvals identity {field!r} differs from the artifact')
+    for field in ('brief_hash', 'score_hash'):
+        if approved_identity.get(field) not in (None, identity[field]):
+            raise Unavailable(f'metric approvals identity {field!r} differs from the artifact')
+    if manifest.get('dependencies', {}).get('snapshot') != \
+            service.get_artifact_metadata(study_id, 'snapshot', revision=revision).get('sha256'):
+        raise Unavailable('real metric manifest snapshot dependency mismatch')
+    try:
+        for key in ('config', 'brief', 'catalog', 'replay'):
+            _pinned_file(source[key], key)
+        shards = source['shards']
+        if not isinstance(shards, dict) or not shards:
+            raise ValueError('source shards required')
+        for key, item in shards.items():
+            _pinned_file(item, f'shard {key}')
+    except (KeyError, ValueError, TypeError) as exc:
+        raise Unavailable(f'real metric pinned file invalid: {exc}') from exc
+    return {
+        'training_artifact_sha256': training_sha,
+        'training_manifest_sha256': manifest_sha,
+        'training_checksum': binding.get('artifact_checksum') or manifest.get('checksum'),
+        'proposal_sha256': proposal_sha,
+        'model_sha256': model_sha,
+        'source_provenance': source,
+        'source_provenance_sha256': digest(source),
+        'task_identity': identity['task_identity'],
+        'identity': identity,
+        'objective_version': binding.get('objective_version') or manifest.get('objective_version'),
+    }
+
+
+def prepare_real_metric_package(service, study_id, *, approvals_record, budget_profile,
+                                lane='gpu', deadline=None, expected_revision=None,
+                                idempotency_key=None, code_pins=None, dependency_pins=None,
+                                resolved_config=None, approvals_root=None):
+    """Prepare the opt-in, task-approved real metric package (no backend call is made).
+
+    The package stays non-executable until the approval record is in
+    ``APPROVED_FOR_CANARY`` *and* the parent sets the CLI release gate.  Publication is the
+    ordinary immutable, content-addressed ``attach_artifact`` path.
+    """
+    if lane != 'gpu':
+        raise StudyError('a real metric package requires the gpu lane')
+    if budget_profile not in METRIC_REAL_PROFILES:
+        raise StudyError('a real metric package requires a metric budget profile '
+                         f'(known: {METRIC_REAL_PROFILES})')
+    deadline = _timezone_deadline(deadline)
+    if deadline is None:
+        raise StudyError('a real metric package requires an explicit deadline')
+    if _deadline_moment(deadline) <= datetime.now(timezone.utc):
+        raise StudyError('a real metric package deadline must be in the future')
+
+    approvals = load_metric_approvals(approvals_record, root=approvals_root)
+    profile, caps = _approval_caps(approvals['payload'])
+    if profile != budget_profile:
+        raise StudyError('metric approvals profile must equal the selected budget profile')
+
+    study = service.get_study(study_id)
+    revision = study['revision'] if expected_revision is None else expected_revision
+    if type(revision) is not int or revision < 1:
+        raise StudyError('expected_revision must be a positive integer')
+    if revision != study['revision']:
+        raise Conflict('stale study revision')
+
+    frozen_dependencies = dependency_pins
+    if frozen_dependencies is None:
+        from hornlab_search.search.evaluate import collect_lib_shas
+        frozen_dependencies = {key: value for key, value in collect_lib_shas().items()
+                               if key != 'hornlab_search'}
+    if not isinstance(frozen_dependencies, dict) or not frozen_dependencies:
+        raise StudyError('a real metric package requires dependency pins')
+    for key, value in frozen_dependencies.items():
+        # HornLab dependency pins are git commit IDs from ``direct_url.json`` (40 hex); a
+        # shadowing/externally pinned dependency may legitimately be a 64-hex sha256.  Anything
+        # else (notably the literal ``unknown``) is not a pin.
+        if not (_is_hex(value, _HEX40) or _is_hex(value, _HEX64)):
+            raise StudyError(f'dependency pin {key!r} is not a 40-hex git SHA or 64-hex sha256')
+
+    frozen = _verify_real_metric_bindings(service, study_id, revision, approvals, caps)
+    resolved = _real_resolved_config(
+        service, study_id, revision, lane=lane, budget_profile=budget_profile,
+        deadline=deadline, approvals_record=approvals['record'], overrides=resolved_config)
+    metric = {
+        'policy': 'metric_composite_v1',
+        'provenance_mode': REAL_METRIC,
+        'synthetic': False,
+        'real_solver_allowed': True,
+        'no_backend_calls': False,
+        'approvals': {
+            'record': approvals['record'],
+            'task_identity': approvals['payload']['task_identity'],
+            'artifact_sha256': approvals['payload']['artifact_sha256'],
+            'screen_cap': caps['screen_calls'],
+            'verify_cap': caps['verify_calls'],
+            'refit_every': METRIC_APPROVAL_REFIT_EVERY,
+        },
+        'training_artifact_sha256': frozen['training_artifact_sha256'],
+        'training_manifest_sha256': frozen['training_manifest_sha256'],
+        'training_checksum': frozen['training_checksum'],
+        'proposal_sha256': frozen['proposal_sha256'],
+        'model_sha256': frozen['model_sha256'],
+        'source_provenance': frozen['source_provenance'],
+        'source_provenance_sha256': frozen['source_provenance_sha256'],
+        'task_identity': frozen['task_identity'],
+        'identity': frozen['identity'],
+        'objective_version': frozen['objective_version'],
+    }
+    package = prepare_run_package(
+        service, study_id, expected_revision=revision, lane=lane, deadline=deadline,
+        idempotency_key=idempotency_key, code_pins=code_pins,
+        dependency_pins=frozen_dependencies, resolved_config=resolved,
+        budget_profile=budget_profile, metric=metric)
+    verify_real_metric_package_files(package, root=approvals_root or repo_root())
+    return package
+
+
+def verify_real_metric_package_files(package, *, root=None):
+    """Re-read and re-hash the approval record and every pinned intake file.
+
+    Pure filesystem/JSON work: no study-registry write, no mesh/BEM/GPU/queue call.  The
+    return value reports the record's *current* status so callers can refuse execution for a
+    held record while still allowing prepare/dry-run rehearsal.
+    """
+    verify_package(package)
+    metric = package.get('metric') or {}
+    if metric.get('provenance_mode') != REAL_METRIC:
+        raise StudyError('not a real metric package')
+    approvals = load_metric_approvals(
+        (metric.get('approvals') or {}).get('record'), root=root)
+    payload = approvals['payload']
+    caps = budget_caps(package)
+    _check_approval_bindings(payload, task_identity=metric.get('task_identity'),
+                             artifact_sha256=metric.get('training_checksum'), caps=caps)
+    if payload.get('profile') != package.get('budget_profile'):
+        raise StudyError('metric approvals profile differs from the package budget profile')
+    source = metric.get('source_provenance')
+    if not isinstance(source, dict) or digest(source) != metric.get('source_provenance_sha256'):
+        raise StudyError('real metric source provenance hash mismatch')
+    from .metric_intake import _pinned_file
+    try:
+        for key in ('config', 'brief', 'catalog', 'replay'):
+            _pinned_file(source[key], key)
+        shards = source['shards']
+        if not isinstance(shards, dict) or not shards:
+            raise ValueError('source shards required')
+        for key, item in shards.items():
+            _pinned_file(item, f'shard {key}')
+    except (KeyError, ValueError, TypeError) as exc:
+        raise Unavailable(f'real metric pinned file invalid: {exc}') from exc
+    return {
+        'status': 'ok',
+        'approvals': {
+            'record': approvals['record'],
+            'status': payload.get('status'),
+            'profile': payload.get('profile'),
+            'task_identity': payload['task_identity'],
+            'artifact_sha256': payload['artifact_sha256'],
+            'payload_sha256': digest(payload),
+        },
+        'pinned_files': 4 + len(source.get('shards') or {}),
+    }
+
+
 __all__ = [
     'PACKAGE_SCHEMA',
     'PACKAGE_KIND',
@@ -390,4 +995,15 @@ __all__ = [
     'package_hash',
     'verify_package',
     'prepare_run_package',
+    'prepare_real_data_offline_metric_package',
+    'prepare_real_metric_package',
+    'verify_real_metric_package_files',
+    'load_metric_approvals',
+    'repo_root',
+    'REAL_DATA_OFFLINE',
+    'REAL_METRIC',
+    'METRIC_APPROVALS_SCHEMA',
+    'METRIC_REAL_PROFILES',
+    'METRIC_APPROVAL_STATUSES',
+    'METRIC_EXECUTABLE_APPROVAL_STATUSES',
 ]

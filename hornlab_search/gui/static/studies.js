@@ -29,8 +29,10 @@ const ID = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
 const isId = value => typeof value === "string" && ID.test(value);
 const SHA256 = /^[a-f0-9]{64}$/i;
 const ARTIFACT_REF = /^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/;
-const POLICY_MODES = new Set(["scalar", "turbo", "pareto", "cma_seed", "exploration"]);
-// Frozen fallback labels; ``mode`` is the backend proposal-policy value.
+const POLICY_MODES = new Set(["scalar", "turbo", "pareto", "cma_seed", "exploration", "metric_composite_v1"]);
+// Frozen fallback labels; ``mode`` is the backend proposal-policy value. The metric-composite
+// card is supplied by the panel only for an opt-in metric study; this tuple stays the historical
+// five so legacy panels are unchanged.
 const POLICY_FALLBACKS = [
   {id:"scalar", mode:"scalar", label:"scalar", requires:["training_set"], verification_mode:"scalar"},
   {id:"turbo", mode:"turbo", label:"scalar, trust region", requires:["training_set", "pool"], verification_mode:"scalar"},
@@ -69,6 +71,12 @@ const POLICY_COPY = {
     summary: "Chooses a maximin-diverse candidate from the legal pool. Labelled non-BO; no predictions.",
     use: "Use when there is no trustworthy model or you want a space-filling sample.",
     success: "The sample covers new geometry and feeds a later model.",
+  },
+  metric_composite_v1: {
+    title: "Metric-composite (opt-in)",
+    summary: "Fits each scored term plus a scalar J model and ranks with the composite qLogNEI. Proposals are predictions; a real solve needs a task-approved package and the parent release.",
+    use: "Use only when a measured metric-training artifact exists and the canary is approved for this exact task.",
+    success: "The real package verifies, the approval record is current, and the parent releases the lane.",
   },
 };
 const PROGRESS_KEYS = ["proposed", "started", "solved", "cached", "refused", "infeasible", "infrastructure_failed", "verified", "unknown"];
@@ -263,6 +271,52 @@ function renderProgress(progress) {
   return `<h4>Progress</h4><ul>${entries.map(key => `<li>${esc(label(key))}: ${esc(progress[key])}</li>`).join("")}</ul>`;
 }
 
+function metricNumber(value) {
+  return typeof value === "number" && Number.isFinite(value) ? esc(value) : '<span class="muted">unknown</span>';
+}
+
+// Opt-in real-metric evidence. Every value is a studied artifact identity or a re-verified
+// package/approval result; predictions are labelled separately from measured J.
+function renderMetric(metric) {
+  if (!metric || typeof metric !== "object") return "";
+  const artifacts = metric.artifacts && typeof metric.artifacts === "object" ? metric.artifacts : {};
+  const manifest = artifacts.metric_training_manifest || {};
+  const training = artifacts.metric_training || {};
+  const release = metric.release && typeof metric.release === "object" ? metric.release : {};
+  const observed = metric.observed && typeof metric.observed === "object" ? metric.observed : {};
+  const predicted = metric.predicted && typeof metric.predicted === "object" ? metric.predicted : {};
+  const status = safeText(metric.status || "unknown", 64);
+  const reason = metric.reason ? `<p>${esc(safeText(metric.reason, 1000))}</p>` : "";
+  const identity = `<ul>
+    <li>Policy: <span class="mono">${esc(safeText(metric.policy, 64))}</span></li>
+    <li>Task identity: <span class="mono">${esc(safeText(metric.task_identity || "unknown", 64))}</span></li>
+    <li>Qualified rows: ${metricNumber(metric.qualified_rows)}</li>
+    <li>Artifact revision: ${esc(metric.artifact_revision ?? "unknown")} · sha256: <span class="mono">${esc(safeText(metric.artifact_sha256 || "unknown", 64))}</span></li>
+    <li>Manifest sha256: <span class="mono">${esc(safeText(manifest.sha256 || "unknown", 64))}</span> · training sha256: <span class="mono">${esc(safeText(training.sha256 || "unknown", 64))}</span></li>
+    <li>Objective version: ${esc(metric.objective_version ?? "unknown")} · synthetic: ${metric.synthetic === true ? "yes" : metric.synthetic === false ? "no" : "unknown"}</li>
+  </ul>`;
+  const jValues = `<ul>
+    <li><strong>Actual observed J</strong> (measured rows only): best ${metricNumber(observed.best_j)} across ${esc(observed.n_measured ?? 0)} measured row(s).</li>
+    <li><strong>Predicted J</strong> (model output, never measured): ${metricNumber(predicted.j)}.</li>
+  </ul>`;
+  const packageBits = [];
+  if (metric.mode != null) packageBits.push(`mode ${esc(safeText(metric.mode, 64))}`);
+  if (metric.budget_profile != null) packageBits.push(`profile ${esc(safeText(metric.budget_profile, 64))}`);
+  if (metric.lane != null) packageBits.push(`lane ${esc(safeText(metric.lane, 32))}`);
+  if (metric.deadline != null) packageBits.push(`deadline ${esc(safeText(metric.deadline, 64))}`);
+  const packageLine = packageBits.length ? `<p>${packageBits.join(" · ")}</p>` : "";
+  const budget = metric.budget != null ? `<h4>Budget</h4>${display(metric.budget)}` : "";
+  const approval = release.approvals_status != null || release.status != null
+    ? `<h4>Release gate</h4><ul>
+        <li>Approvals status: <strong>${esc(safeText(release.approvals_status || "not prepared", 64))}</strong></li>
+        <li>Owner authorization: ${release.owner_authorized === true ? "yes" : "no"} · parent release: ${release.parent_release === true ? "set" : "unset"}</li>
+        <li>Release readiness: ${esc(label(release.status || "unknown"))}${release.reason ? ` — ${esc(safeText(release.reason, 1000))}` : ""}</li>
+      </ul>`
+    : "";
+  return `<section aria-label="Real metric (opt-in)" data-study-metric><h3>Real metric (opt-in)</h3>
+    <p><span class="pill">${esc(label(status))}</span></p>${reason}${identity}${jValues}${packageLine}${budget}${approval}</section>`;
+}
+
 function renderExecute(data) {
   const packageData = data?.package && typeof data.package === "object" ? data.package : null;
   const packageHash = data?.package_hash ?? packageData?.hash ?? packageData?.package_hash ?? packageData?.sha256;
@@ -274,9 +328,10 @@ function renderExecute(data) {
   const verification = data?.verification ?? data?.verification_policy ?? packageData?.verification ?? packageData?.verification_policy;
   const job = data?.job || (data?.job_status != null ? {id:data?.job_id, status:data?.job_status} : null);
   const counts = data?.call_counts;
+  const metricSection = renderMetric(data?.metric);
   const measuredProgress = data?.run_status || counts ? `<section aria-label="Measured study progress"><h3>Study execution</h3><p>Status: ${esc(data?.run_status?.cancelled ? "cancellation requested" : data?.run_status?.status || "not launched")}</p>${counts ? `<table><thead><tr><th>Screen solve calls</th><th>Verify solve calls</th><th>Total solve calls</th></tr></thead><tbody><tr><td>${esc(counts.screen_calls ?? 0)}</td><td>${esc(counts.verify_calls ?? 0)}</td><td>${esc(counts.total_calls ?? 0)}</td></tr></tbody></table><p class="muted">Counts are persisted backend calls. Cache hits and cheap refusals consume no solve calls.</p>` : ""}${renderProgress(data?.progress)}</section>` : "";
-  if (![packageHash, packageRevision, lane, deadline, budget, stop, verification, job, data?.progress].some(v => v != null)) return "";
-  return `${measuredProgress}<section aria-label="Execution package"><h3>Run package</h3>${packageHash ? `<p>Package hash: <span class="mono">${esc(safeText(packageHash, 128))}</span>${packageRevision != null ? ` · revision ${esc(packageRevision)}` : ""}</p>` : ""}${lane != null || deadline != null ? `<p>${lane != null ? `Lane: ${esc(safeText(lane, 64))}` : ""}${lane != null && deadline != null ? " · " : ""}${deadline != null ? `Deadline: ${display(deadline)}` : ""}</p>` : ""}${budget != null ? `<h4>Budget</h4>${display(budget)}` : ""}${stop != null ? `<h4>Stop and recovery</h4>${display(stop)}` : ""}${renderVerification(verification)}${!measuredProgress ? renderProgress(data?.progress) : ""}${job ? `<h4>Job status</h4><p>${job.id ? `Job ${esc(safeText(job.id, 128))} · ` : ""}${esc(safeText(job.status || "unknown", 64))}</p>` : ""}</section>`;
+  if (!metricSection && ![packageHash, packageRevision, lane, deadline, budget, stop, verification, job, data?.progress].some(v => v != null)) return "";
+  return `${measuredProgress}${metricSection}${packageHash || packageRevision || lane || deadline || budget || stop || verification || job ? `<section aria-label="Execution package"><h3>Run package</h3>${packageHash ? `<p>Package hash: <span class="mono">${esc(safeText(packageHash, 128))}</span>${packageRevision != null ? ` · revision ${esc(packageRevision)}` : ""}</p>` : ""}${lane != null || deadline != null ? `<p>${lane != null ? `Lane: ${esc(safeText(lane, 64))}` : ""}${lane != null && deadline != null ? " · " : ""}${deadline != null ? `Deadline: ${display(deadline)}` : ""}</p>` : ""}${budget != null ? `<h4>Budget</h4>${display(budget)}` : ""}${stop != null ? `<h4>Stop and recovery</h4>${display(stop)}` : ""}${renderVerification(verification)}${!measuredProgress ? renderProgress(data?.progress) : ""}${job ? `<h4>Job status</h4><p>${job.id ? `Job ${esc(safeText(job.id, 128))} · ` : ""}${esc(safeText(job.status || "unknown", 64))}</p>` : ""}</section>` : ""}`;
 }
 
 // A study has no `runs/<ts>-screen-*` folder; the results artifact's observations are its solve
@@ -838,7 +893,7 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   const status = stale ? "stale" : (panel.status || "unknown");
   const data = panel.data && typeof panel.data === "object" ? panel.data : {};
   const actions = Array.isArray(data.actions) ? data.actions.map((action, index) => ({action, index})).filter(x => x.action && ACTIONS.has(x.action.kind)) : [];
-  const visibleData = Object.fromEntries(Object.entries(data).filter(([k]) => !["actions", "selected_horn", "policies", "candidates", "package", "budget", "lane", "deadline", "stop_recovery", "stop_rules", "verification", "verification_policy", "progress", "job", "job_id", "job_status", "package_hash", "package_revision", "package_present", "artifacts", "bo", "solves"].includes(k)));
+  const visibleData = Object.fromEntries(Object.entries(data).filter(([k]) => !["actions", "selected_horn", "policies", "candidates", "package", "budget", "lane", "deadline", "stop_recovery", "stop_rules", "verification", "verification_policy", "progress", "job", "job_id", "job_status", "package_hash", "package_revision", "package_present", "artifacts", "bo", "solves", "metric"].includes(k)));
   const activePanel = {...panel, status};
   const renderState = {busy:state?.busy === true, artifact:state?.artifact || null};
   const isLive = phase === LIVE_PHASE;
@@ -850,7 +905,9 @@ export function renderStudyPanel(study, panel, selected = null, notice = "", sta
   const actionHtml = actions.map(({action: a, index: i}) => {
     const outcomes = Array.isArray(a.allowed_outcomes) ? a.allowed_outcomes.filter(x => ["inconclusive", "accept", "reject"].includes(x)) : ["inconclusive", "accept", "reject"];
     const inputs = a.kind === "decision" ? `<label>Decision <select data-study-field="outcome">${outcomes.map(x => `<option value="${x}">${esc(label(x))}</option>`).join("")}</select></label><label>Rationale <textarea data-study-field="rationale" maxlength="4000"></textarea></label>` : a.kind === "save_draft" ? `<label>Study question <input data-study-field="question" maxlength="500"></label>` : a.kind === "create_child" ? `<label>Child study question <input data-study-field="question" maxlength="500"></label><label>Child policy <select data-study-field="policy"><option value="scalar">scalar</option><option value="turbo">turbo (trust region)</option><option value="pareto">coverage-ripple</option></select></label>` : "";
-    const packageInputs = a.kind === "package" ? `<label>Solve lane <select data-study-field="lane"><option value="gpu">GPU</option><option value="cpu">CPU</option></select></label><label>Stop deadline (ISO 8601 with timezone) <input data-study-field="deadline" placeholder="2026-11-15T18:00:00-05:00" required></label>` : "";
+    const packageInputs = a.kind === "package" && (a.metric === true || a.payload?.metric === "real_metric_v1")
+      ? `<label>Approvals record (repo-relative) <input data-study-field="approvals_record" value="${esc(a.approvals_record || "")}" placeholder="docs/queue/.../APPROVAL.json" maxlength="500" required></label><label>Budget profile <select data-study-field="budget_profile">${(Array.isArray(a.real_profiles) ? a.real_profiles : ["metric-canary-8x2"]).map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join("")}</select></label><label>Stop deadline (ISO 8601 with timezone) <input data-study-field="deadline" placeholder="2026-11-30T05:05:22+00:00" required></label><p class="muted">GPU lane only. Preparing a real metric package writes an immutable package; it does not launch a solve.</p>`
+      : a.kind === "package" ? `<label>Solve lane <select data-study-field="lane"><option value="gpu">GPU</option><option value="cpu">CPU</option></select></label><label>Stop deadline (ISO 8601 with timezone) <input data-study-field="deadline" placeholder="2026-11-15T18:00:00-05:00" required></label>` : "";
     return `<div data-study-action-group="${i}">${a.reason ? `<p>${esc(a.reason)}</p>` : ""}${inputs}${packageInputs} <button type="button" data-study-action="${i}"${actionEnabled(a, activePanel, study, data) && !renderState.busy ? "" : " disabled"}>${esc(a.label || label(a.kind))}</button></div>`;
   }).join(" ");
   const selector = Array.isArray(data.candidates) ? data.candidates.slice(0, 50).map((c, i) => `<button type="button" data-study-select="${i}">${esc(c.label || c.id || `Candidate ${i + 1}`)}</button>`).join(" ") : "";

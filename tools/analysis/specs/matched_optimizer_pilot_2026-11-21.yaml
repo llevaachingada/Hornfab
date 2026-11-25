@@ -1,0 +1,117 @@
+# Pre-registered matched-arm optimizer pilot - 2026-11-21 (P1c, senior optimizer audit).
+#
+# This is a PLAN, not a run. It names a real registered home-v10 morph task, derives one
+# config per arm, and declares the five matched seeds, budget, target, practical delta,
+# identity floor and task-specific training cohort BEFORE any GPU time. Do not edit it
+# after a run starts: a changed declaration invalidates the comparison.
+#
+#   python tools/analysis/benchmark_orchestrator.py plan \
+#       --spec tools/analysis/specs/matched_optimizer_pilot_2026-11-21.yaml \
+#       --out runs/analysis/matched_optimizer_pilot_2026-11-21
+#
+# The plan command only writes configs/plan text; it never launches a search. The BO/TuRBO
+# arms use the existing study runner and the prepared home-v10 cohort below; the CMA arms
+# use `search`. The covariance arm's source run carries the full 14x14 C sidecar.
+#
+# Why home v10 rather than compact400 v10: the compact400 fold task has 17 free dimensions,
+# above the 16-dim full-covariance capture cap, and no existing compact400 run carries the
+# C sidecar. The home-v10 morph task has 14 dimensions and the completed source run
+# 20261119T181029Z-screen-c3b6c6 (120 non-cached evaluations) with a full C sidecar.
+
+schema: benchmark-plan-v1
+task: home v10 morph - matched optimizer pilot (cold/warm CMA, BO, TuRBO)
+description: >
+  Five-seed matched pilot on the registered home v10 morph task. Cold CMA, mean-only warm CMA,
+  covariance-informed warm CMA, scalar BO and TuRBO share one brief, objective version, mesh,
+  solve identity and exact bounds. Only the search treatment and the warm-start information
+  differ. The BO/TuRBO arms use the task-specific 120-row home-v10 cohort.
+base_config: examples/typologies/b6_2026-11-19/hl__osse_rrect_morph_v7__b6_v10_s1.yaml
+brief: examples/briefs/home_landscape_2026-11-18_v10/room_landscape_80x50_700_hf1440_v10.yaml
+family: OSSE
+objective_version: 10
+
+# Declared paired seed list (5 seeds; every arm runs every seed exactly once).
+seeds: [40001, 40002, 40003, 40004, 40005]
+
+# New valid evaluations per arm (the base config uses budget_counts: new, budget 120).
+budget: 80
+
+# Incumbent = the source run's best screen J 1.5769395108379058. target_j is the
+# floor-clearing improvement (incumbent - home-v10 floor 0.4677) = 1.1092395108379058.
+target_j: 1.1092395108379058
+practical_delta: 0.4677
+floor_j: 0.4677
+
+information_parity:
+  incumbent_j: 1.5769395108379058
+  training_cohort: runs/analysis/home_v10_pilot_cohort_2026-11-21
+  training_cohort_sha256: c9610debaa0bd997bbc90bab35425dbe0ad57202365523e21b04a177e10b56f7
+  catalog_sha256: bdd7d6acfd1fcce98585b5e7ee5fffdde8803e980aa7258262f24d19843f90b5
+  budget_profile: comparison-80x2
+  notes: >
+    All arms see the same task identity. CMA warm arms use the same prior run as the
+    mean/covariance source. The BO/TuRBO arms use the prepared home-v10 cohort: 120
+    exact-complete rows in one dependency/grid group, produced offline by
+    `python -m tools.analysis.study_cohort --config <base> --dataset dataset --out <out>
+    --limit 200` (no backend calls). No arm sees another arm's live candidates.
+
+arms:
+  - id: cold_cma
+    label: Cold CMA
+    algorithm: cma
+    overrides:
+      warm_start: null
+      sigma0: 0.2
+      seed: 40001
+    expected_information: no prior candidates; the seed design is the initial mean.
+
+  - id: warm_mean_cma
+    label: Mean-only warm CMA
+    algorithm: cma_warm_mean
+    overrides:
+      sigma0: 0.2
+      seed: 40002
+      warm_start:
+        from_runs: [runs/20261119T181029Z-screen-c3b6c6]
+        top_k: 10
+        sigma_from_spread: false
+    expected_information: the prior run's best valid design as the initial mean only.
+
+  - id: warm_cov_cma
+    label: Covariance-informed warm CMA
+    algorithm: cma_warm_covariance
+    overrides:
+      sigma0: 0.2
+      seed: 40003
+      warm_start:
+        from_runs: [runs/20261119T181029Z-screen-c3b6c6]
+        top_k: 10
+        sigma_from_spread: false
+        covariance:
+          blend: 0.25
+    expected_information: >
+      the prior run's best design plus a 25% blend of its full 14x14 CMA covariance shape,
+      transformed through the same bound box and rescaled to sigma0 0.2.
+
+  - id: scalar_bo
+    label: Scalar BO
+    algorithm: bo_scalar
+    overrides:
+      policy: scalar
+    expected_information: scalar GP + qLogNEI over the frozen 120-row home-v10 cohort.
+
+  - id: turbo
+    label: TuRBO
+    algorithm: turbo
+    overrides:
+      policy: turbo
+    expected_information: scalar GP + qLogNEI inside a trust region over the same cohort.
+
+# Predeclared paired comparisons only. A shared RNG seed is not proof of shared
+# candidates; these pairs were declared before the runs.
+pairs:
+  - [cold_cma, warm_mean_cma]
+  - [cold_cma, warm_cov_cma]
+  - [warm_mean_cma, warm_cov_cma]
+  - [cold_cma, scalar_bo]
+  - [cold_cma, turbo]

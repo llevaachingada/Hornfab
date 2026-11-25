@@ -1,0 +1,141 @@
+[
+  {
+    "group": "hf_overhang_2026-11-22",
+    "case": "20261122T212531Z-assembly-21700-98b4310e",
+    "driver_diameter_m": 0.2,
+    "driver_y_m": 0.1,
+    "translation_mm": [
+      0.0,
+      369.672787871046,
+      0.0
+    ],
+    "layout": "above",
+    "support": "seated_on_cabinet_top",
+    "driver_frame_in_pose": false,
+    "clearance_status": "PASS",
+    "min_distance_mm": 50.0,
+    "front_view_y_overlap_mm": 0.0,
+    "run_dirs": [
+      "run"
+    ]
+  },
+  {
+    "group": "hf_overhang_2026-11-22",
+    "case": "20261122T212619Z-assembly-32880-4bbd22ee",
+    "driver_diameter_m": 0.2,
+    "driver_y_m": 0.1,
+    "translation_mm": [
+      0.0,
+      268.674157237634,
+      0.0
+    ],
+    "layout": "seated_overhang",
+    "support": "seated_on_cabinet_top",
+    "driver_frame_in_pose": false,
+    "clearance_status": "PASS",
+    "min_distance_mm": 3.0,
+    "front_view_y_overlap_mm": 97.998630633412,
+    "run_dirs": [
+      "run",
+      "run_placement_21f"
+    ]
+  },
+  {
+    "group": "hf_overhang_2026-11-22",
+    "case": "20261122T212630Z-assembly-36576-7dee2536",
+    "driver_diameter_m": 0.2,
+    "driver_y_m": 0.1,
+    "translation_mm": [
+      0.0,
+      268.674157,
+      40.0
+    ],
+    "layout": "seated_overhang",
+    "support": "unmodeled_cantilever",
+    "driver_frame_in_pose": false,
+    "clearance_status": "PASS",
+    "min_distance_mm": 37.121,
+    "front_view_y_overlap_mm": 97.998630871046,
+    "run_dirs": [
+      "run"
+    ]
+  },
+  {
+    "group": "hf_overhang_2026-11-22",
+    "case": "20261122T221414Z-assembly-24200-0f425b7b",
+    "driver_diameter_m": 0.2,
+    "driver_y_m": 0.1,
+    "translation_mm": [
+      0.0,
+      268.674157,
+      13.0
+    ],
+    "layout": "seated_overhang",
+    "support": "unmodeled_cantilever",
+    "driver_frame_in_pose": true,
+    "clearance_status": "PASS",
+    "min_distance_mm": 10.0,
+    "front_view_y_overlap_mm": 97.998630871046,
+    "run_dirs": [
+      "run"
+    ]
+  },
+  {
+    "group": "hf_overhang_2026-11-22",
+    "case": "20261122T230403Z-assembly-57912-77467bec",
+    "driver_diameter_m": 0.2605,
+    "driver_y_m": 0.098,
+    "translation_mm": [
+      0.0,
+      268.674157,
+      13.0
+    ],
+    "layout": "seated_overhang",
+    "support": "unmodeled_cantilever",
+    "driver_frame_in_pose": true,
+    "clearance_status": "PASS",
+    "min_distance_mm": 10.0,
+    "front_view_y_overlap_mm": 97.998630871046,
+    "run_dirs": [
+      "run"
+    ]
+  },
+  {
+    "group": "hf_overhang_refusal_2026-11-22",
+    "case": "20261122T222757Z-assembly-23736-7ae00416",
+    "driver_diameter_m": 0.2,
+    "driver_y_m": 0.1,
+    "translation_mm": [
+      0.0,
+      268.674157237634,
+      0.0
+    ],
+    "layout": "seated_overhang",
+    "support": "seated_on_cabinet_top",
+    "driver_frame_in_pose": false,
+    "clearance_status": "PASS",
+    "min_distance_mm": 3.0,
+    "front_view_y_overlap_mm": 97.998630633412,
+    "run_dirs": [],
+    "note": "superseded: staged before the driver-frame solid was passed in the pose; PASS is cabinet-only"
+  },
+  {
+    "group": "hf_overhang_refusal_2026-11-22",
+    "case": "20261122T222833Z-assembly-51740-ccd102bf",
+    "driver_diameter_m": 0.2,
+    "driver_y_m": 0.1,
+    "translation_mm": [
+      0.0,
+      268.674157237634,
+      0.0
+    ],
+    "layout": "seated_overhang",
+    "support": "seated_on_cabinet_top",
+    "driver_frame_in_pose": true,
+    "clearance_status": "VIOLATION",
+    "min_distance_mm": 0.0,
+    "front_view_y_overlap_mm": 97.998630871046,
+    "run_dirs": [],
+    "note": "refusal proof: identical pose with the real 315.2 mm frame in the pose"
+  }
+]

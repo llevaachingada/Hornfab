@@ -1,0 +1,35 @@
+# HELD - photo_twinray_xo900_v11 metric-BO canary (first admitted 900 Hz cohort).
+# Task identity 83700027fe6fc17e; strict 170-row artifact checksum 71a3d51a..., two-run cohort.
+# Frozen holdout PASS_FOR_EXPLORATORY_PILOT (130/40 chronological split).
+# 8 screen + 2 verify, refit every 4 accepted unique screens. Separate identity from Home v11
+# Fold (700 Hz); never pool or rank the two.
+# Release only after the parent flips
+# docs/queue/v11_bo_day_2026-11-23/photo_twinray_xo900_canary_APPROVAL.json to APPROVED_FOR_CANARY
+# with owner_authorization.authorized=true, then copy to runs/nights/ with pause: false,
+# dry-run, and launch once the GPU lane is free. Do not preempt active work.
+night: photo_twinray_xo900_canary_2026-11-24
+lane: gpu
+pause: true
+jobs:
+  - id: metric_canary_twinray_xo900_8
+    kind: command
+    timeout_s: 5400
+    env:
+      HORNLAB_GPU_LOCK: refuse
+      HORNLAB_METRIC_REAL_EXECUTE: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      PYTHONPATH: 'C:/Users/hunte/Hrns/hornlab-search;C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Lib/site-packages;C:/Users/hunte/Hrns/hornlab-search/.venv/Lib/site-packages'
+    argv:
+      - C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe
+      - -m
+      - hornlab_search.studies.cli
+      - run
+      - --root
+      - C:/Users/hunte/Hrns/hornlab-search/runs/metric_bo_cohorts_2026-11-24/twinray/registry
+      - --package
+      - C:/Users/hunte/Hrns/hornlab-search/runs/metric_bo_cohorts_2026-11-24/twinray/registry/package_canary.json
+      - --execute
+      - --project-root
+      - C:/Users/hunte/Hrns/hornlab-search/runs/metric_bo_cohorts_2026-11-24/twinray/work_canary

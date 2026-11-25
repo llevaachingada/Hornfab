@@ -79,6 +79,7 @@ SELF_APPROACH_MARGIN_MM = 2.0
 #: must not share a design hash (dedup/cache/failure-marker keys are design hashes).
 GRID_SPEC_KEYS = ("profile_h", "profile_v", "n_phi", "n_s", "max_wall_deg", "wall_thickness_mm")
 GRID_BLOCK_KEYS = (*GRID_SPEC_KEYS, "knobs")
+GRID_OPTIONAL_BLOCK_KEYS = ("uncapped_span_mm",)
 
 # ------------------------------------------------------------------ WP9b rows kind
 #
@@ -444,7 +445,8 @@ def _fourier_k(knobs: dict, prefix: str) -> int:
     return max(2, k_max)
 
 
-def _meridians(spec: dict, knobs: dict, brief: dict, *, check_envelope: bool = True):
+def _meridians(spec: dict, knobs: dict, brief: dict, *, check_envelope: bool = True,
+               legacy_depth_limits: bool = False):
     """``(meridian_h, meridian_v, L_mm, source_angle_deg)`` on the shared depth.
 
     ``check_envelope=False`` is for the WP3 pre-mesh estimate only: it must be able to price a
@@ -452,14 +454,23 @@ def _meridians(spec: dict, knobs: dict, brief: dict, *, check_envelope: bool = T
     """
     r0 = float(brief["driver"]["exit_radius_mm"])
     a0 = float(brief["driver"]["exit_angle_deg"])
-    env = brief.get("envelope") or {}
+    from ...config import envelope_policy
+
+    policy = envelope_policy(brief)
+    production_depth = policy.candidate_limits_mm[2] if policy.mode == "production" else None
+    if legacy_depth_limits and brief.get("envelope"):
+        production_depth = policy.product_limits_mm[2]
+    uncapped_span = spec.get("uncapped_span_mm")
+    if uncapped_span is not None:
+        check_envelope = False
     max_wall = float(spec.get("max_wall_deg", 80.0))
     if not 10.0 <= max_wall < 90.0:
         raise registry.GeneratorError(f"max_wall_deg must be in [10, 90), got {max_wall}")
     L_knob = float(knobs.get("L_mm", registry.DEFAULT_KNOBS["L_mm"]))
-    if check_envelope and env and L_knob > float(env["max_depth_mm"]) + 1e-9:
+    if check_envelope and production_depth is not None and L_knob > production_depth + 1e-9:
         raise registry.GeneratorError(
-            f"depth L_mm={L_knob:.1f} exceeds the brief envelope {env['max_depth_mm']} mm")
+            f"invalid_envelope: depth L_mm={L_knob:.1f} exceeds the brief envelope "
+            f"{production_depth:g} mm")
 
     if "profile_h" not in spec:
         raise registry.GeneratorError("grid generator needs profile_h")
@@ -474,8 +485,11 @@ def _meridians(spec: dict, knobs: dict, brief: dict, *, check_envelope: bool = T
         mv = registry.build_meridian(spec["profile_v"], knobs, "v", r0=r0, a0=a0, L=L_knob,
                                      max_wall=max_wall, phi=math.pi / 2)
     span = min(mh.length_mm, mv.length_mm)
-    if check_envelope and env:
-        span = min(span, float(env["max_depth_mm"]))
+    if check_envelope and production_depth is not None:
+        span = min(span, production_depth)
+    if uncapped_span is not None and not math.isclose(
+            float(uncapped_span), span, rel_tol=0.0, abs_tol=1e-8):
+        raise registry.GeneratorError("grid recipe's uncapped depth no longer matches its meridians")
     if not span > 0.0:
         raise registry.GeneratorError(f"grid depth must be positive, got {span}")
     # The rounded source cap needs a nonzero throat wall angle; fall back to the brief's
@@ -564,7 +578,7 @@ def _self_approach_limit(spec: dict) -> float:
 
 
 def grid_points(spec: dict, knobs: dict, brief: dict, *, prefix: str = "g",
-                full_circle: bool = False) -> tuple[np.ndarray, dict]:
+                full_circle: bool = False, legacy_depth_limits: bool = False) -> tuple[np.ndarray, dict]:
     """GRID radius field -> ``(inner_points (n_phi, n_s + 1, 3) mm, meta)``.
 
     ``spec`` is the generator block (``profile_h`` / ``profile_v`` / ``n_phi`` / ``n_s`` /
@@ -586,7 +600,7 @@ def grid_points(spec: dict, knobs: dict, brief: dict, *, prefix: str = "g",
     n_s = _spec_int(spec, "n_s", 32, 8)
     _check_spec(spec)
 
-    mh, mv, L, angle = _meridians(spec, knobs, brief)
+    mh, mv, L, angle = _meridians(spec, knobs, brief, legacy_depth_limits=legacy_depth_limits)
     p, term, k_modes, a_throat, a_mouth = _shape_knobs(spec, knobs, prefix)
 
     s = np.linspace(0.0, 1.0, n_s + 1)
@@ -3019,13 +3033,15 @@ def rows_per_azimuth(base_spec_with_rows: dict, knobs: dict, brief: dict,
 def rows_grid_points(spec: dict, knobs: dict, brief: dict,
                      prefix: str = "g") -> tuple[np.ndarray, dict]:
     """Public rows-route entry used by ``mesh/build.py`` and ``design_params``."""
+    from ...config import brief_for_envelope_adapter
     from . import rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rim_beak_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
     for family in (rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rim_beak_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
         if family.is_family_spec(spec):
             if prefix != 'g':
                 raise registry.GeneratorError('versioned family knobs require the g prefix')
-            block = family.design_params(spec, knobs, brief)['grid'] if 'implementation_sha256' not in spec['rows'] else {**spec, 'knobs': knobs}
-            resolved = family.resolve_grid(block, brief)
+            adapter_brief = brief_for_envelope_adapter(brief)
+            block = family.design_params(spec, knobs, adapter_brief)['grid'] if 'implementation_sha256' not in spec['rows'] else {**spec, 'knobs': knobs}
+            resolved = family.resolve_grid(block, adapter_brief)
             return resolved['inner_points'], resolved['meta']
     return rows_per_azimuth(spec, knobs, brief, prefix=prefix)
 
@@ -3106,10 +3122,11 @@ def design_params(spec: dict, knobs: dict, brief: dict) -> dict:
     The knob prefix is always ``"g"`` (the wire-in contract); knobs equal to the GRID defaults are
     canonicalised away so an explicit zero and an absent zero hash identically.
     """
+    from ...config import brief_for_envelope_adapter
     from . import rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rim_beak_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
     for family in (rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rim_beak_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
         if family.is_family_spec(spec):
-            return family.design_params(spec, knobs, brief)
+            return family.design_params(spec, knobs, brief_for_envelope_adapter(brief))
     knob_map = _knob_map(knobs)
     if isinstance(spec, dict) and "rows" in spec:
         # Rows kind: the depth comes from each row's march, so ``L_mm`` is NOT part of the
@@ -3130,7 +3147,7 @@ def design_params(spec: dict, knobs: dict, brief: dict) -> dict:
             block["span"] = span
         return {"grid": block}
 
-    grid_points(spec, knob_map, brief)          # full knob + meridian + envelope validation
+    _, meta = grid_points(spec, knob_map, brief)  # full knob + meridian + envelope validation
     block = {
         "profile_h": copy.deepcopy(spec["profile_h"]),
         "profile_v": copy.deepcopy(spec.get("profile_v", "same")),
@@ -3140,6 +3157,11 @@ def design_params(spec: dict, knobs: dict, brief: dict) -> dict:
         "wall_thickness_mm": float(spec.get("wall_thickness_mm", 3.0)),
         "knobs": _recipe_knobs(knob_map),
     }
+    from ...config import envelope_policy
+    policy = envelope_policy(brief)
+    if policy.mode in ("discovery", "exploration") and meta["L_mm"] > policy.product_limits_mm[2]:
+        # This surface used to be truncated or refused. Give only the changed geometry a new key.
+        block["uncapped_span_mm"] = round(meta["L_mm"], 9)
     return {"grid": block}
 
 
@@ -3189,7 +3211,7 @@ def validate_grid_params(block: dict) -> None:
             _rows_shape_knobs(knob_map)
             rows_task_harmonics(knob_map, half=(half or span == "full"))
         return
-    unknown = sorted(set(block) - set(GRID_BLOCK_KEYS))
+    unknown = sorted(set(block) - set(GRID_BLOCK_KEYS) - set(GRID_OPTIONAL_BLOCK_KEYS))
     if unknown:
         raise registry.GeneratorError(f"grid: unknown key(s) {unknown}")
     if "profile_h" not in block:
@@ -3203,18 +3225,14 @@ def validate_grid_params(block: dict) -> None:
 
 
 def envelope_extents(spec: dict, knobs: dict, brief: dict) -> tuple[float, float, float]:
-    """Conservative OUTER ``(width, height, depth)`` in mm, without meshing (WP3 estimate).
-
-    Uses the same meridians and radius field as :func:`grid_points` at the mouth, plus the wall
-    thickness, so the estimate cannot under-report what the freestanding bbox will include. The
-    radial envelope of the modulated section is taken as ``max_phi r(1, phi)`` for both width and
-    height (conservative; mirrors ``registry.envelope_overshoot_estimate``'s max-radius rule).
-    """
+    """Estimate outer W/H/D from independent axis extrema and the declared shell."""
+    from ...config import brief_for_envelope_adapter
     from . import rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rim_beak_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
     for family in (rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rim_beak_family, rolled_terminal_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
         if family.is_family_spec(spec):
-            block = family.design_params(spec, knobs, brief)['grid'] if 'implementation_sha256' not in spec['rows'] else {**spec, 'knobs': knobs}
-            meta = family.resolve_grid(block, brief)['meta']
+            adapter_brief = brief_for_envelope_adapter(brief)
+            block = family.design_params(spec, knobs, adapter_brief)['grid'] if 'implementation_sha256' not in spec['rows'] else {**spec, 'knobs': knobs}
+            meta = family.resolve_grid(block, adapter_brief)['meta']
             return meta['mouth_w_mm'], meta['mouth_h_mm'], meta['x_span_mm']
     if isinstance(spec, dict) and "rows" in spec:
         # WP9b rows: extents come from the same per-azimuth marches the mesher will use

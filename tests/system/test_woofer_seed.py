@@ -186,6 +186,115 @@ def test_300mm_spacing_is_refused_by_derived_legality() -> None:
     assert legal.horn_bbox_mm[1] >= box.external_height_mm / 2.0
 
 
+FRAME_RADIUS_MM = 130.5  # 10PR300-class 261 mm outside frame diameter
+
+
+def test_woofer_frame_box_tracks_positive_mount_height() -> None:
+    envelope = _envelope()
+    box = _box_point()
+    dy = W.derive_min_center_spacing_mm(envelope, box) + 1.0
+    centered = W.placement_legality(
+        envelope, box, dy_mm=dy, woofer_frame_radius_mm=FRAME_RADIUS_MM,
+        woofer_frame_center_y_mm=0.0)
+    raised = W.placement_legality(
+        envelope, box, dy_mm=dy, woofer_frame_radius_mm=FRAME_RADIUS_MM,
+        woofer_frame_center_y_mm=100.0)
+    # Moving the frame 100 mm up eats exactly 100 mm of the horn/woofer gap.
+    assert (centered.gaps_mm["woofer_frame"] - raised.gaps_mm["woofer_frame"]
+            == pytest.approx(100.0, abs=1e-6))
+    assert raised.woofer_frame_center_y_mm == pytest.approx(100.0)
+
+
+def test_woofer_frame_box_tracks_negative_mount_height() -> None:
+    envelope = _envelope()
+    box = _box_point()
+    dy = W.derive_min_center_spacing_mm(envelope, box) + 1.0
+    centered = W.placement_legality(
+        envelope, box, dy_mm=dy, woofer_frame_radius_mm=FRAME_RADIUS_MM,
+        woofer_frame_center_y_mm=0.0)
+    lowered = W.placement_legality(
+        envelope, box, dy_mm=dy, woofer_frame_radius_mm=FRAME_RADIUS_MM,
+        woofer_frame_center_y_mm=-100.0)
+    # Moving the frame 100 mm down opens exactly 100 mm of gap below the horn.
+    assert (lowered.gaps_mm["woofer_frame"] - centered.gaps_mm["woofer_frame"]
+            == pytest.approx(100.0, abs=1e-6))
+
+
+def test_flush_baffle_derived_spacing_shifts_with_mount_height() -> None:
+    envelope = _envelope()
+    box = _box_point()
+    base = W.derive_min_center_spacing_mm(
+        envelope, box, layout="flush_baffle", woofer_frame_radius_mm=FRAME_RADIUS_MM)
+    raised = W.derive_min_center_spacing_mm(
+        envelope, box, layout="flush_baffle", woofer_frame_radius_mm=FRAME_RADIUS_MM,
+        woofer_frame_center_y_mm=250.0)
+    assert raised - base == pytest.approx(250.0)
+    # separate_above is governed by the cabinet top, so the frame centre must not move it.
+    above = W.derive_min_center_spacing_mm(envelope, box)
+    above_shifted = W.derive_min_center_spacing_mm(
+        envelope, box, woofer_frame_center_y_mm=250.0)
+    assert above_shifted == pytest.approx(above)
+
+
+def test_legal_placement_still_passes_with_nonzero_mount_height() -> None:
+    envelope = _envelope()
+    box = _box_point()
+    dy = W.derive_min_center_spacing_mm(envelope, box) + 100.0
+    check = W.placement_legality(
+        envelope, box, dy_mm=dy, woofer_frame_radius_mm=FRAME_RADIUS_MM,
+        woofer_frame_center_y_mm=150.0)
+    assert check.status == "PASS", check.reasons
+    # Horn bottom edge at 460 mm; frame top at 150 + 130.5 = 280.5 mm -> 179.5 mm of gap.
+    assert check.gaps_mm["woofer_frame"] == pytest.approx(179.5, abs=1e-6)
+
+
+def test_horn_lip_overlapping_raised_woofer_frame_fails() -> None:
+    envelope = _envelope()
+    box = _box_point()
+    dy = W.derive_min_center_spacing_mm(envelope, box) + 1.0
+    check = W.placement_legality(
+        envelope, box, dy_mm=dy, woofer_frame_radius_mm=250.0,
+        woofer_frame_center_y_mm=200.0)
+    assert check.accepted is False
+    assert check.status == "FAIL"
+    # Horn bottom edge at 361 mm, raised 250 mm frame top at 450 mm -> 89 mm of y overlap.
+    # The reported gap is the best axis (max): the horn envelope's z_min of -3 mm caps the z
+    # axis at -3.0 mm, so that is what the check reports for a fully overlapping frame.
+    assert (check.horn_bbox_mm[1] - (200.0 + 250.0)) == pytest.approx(-89.0, abs=1e-6)
+    assert check.gaps_mm["woofer_frame"] == pytest.approx(-3.0, abs=1e-6)
+    assert any("woofer frame clearance" in reason for reason in check.reasons)
+    assert not any("3-D collision" in reason for reason in check.reasons), check.reasons
+
+
+def test_frame_verdict_flips_when_frame_moves_to_true_mount_height() -> None:
+    """The old y=0 frame PASSed a horn that the really-mounted frame collides with.
+
+    ``separate_above`` derives dy from the cabinet top alone, so both checks carry the same
+    ``dy_min_mm``; only the frame solid moves.  That isolates the old defect (frame modelled at
+    the cabinet mid-height) from a mere spacing difference.
+    """
+    envelope = _envelope()
+    box = _box_point()
+    dy = W.derive_min_center_spacing_mm(envelope, box) + 1.0
+    legacy = W.placement_legality(
+        envelope, box, dy_mm=dy, woofer_frame_radius_mm=FRAME_RADIUS_MM,
+        woofer_frame_center_y_mm=0.0)
+    real = W.placement_legality(
+        envelope, box, dy_mm=dy, woofer_frame_radius_mm=FRAME_RADIUS_MM,
+        woofer_frame_center_y_mm=300.0)
+    assert legacy.status == "PASS", legacy.reasons
+    assert legacy.gaps_mm["woofer_frame"] == pytest.approx(230.5, abs=1e-6)
+    assert real.status == "FAIL"
+    assert len(real.reasons) == 1, real.reasons
+    assert "woofer frame clearance" in real.reasons[0]
+    assert "required 10.0 mm" in real.reasons[0], real.reasons[0]
+    # Physics of the flip: the horn bottom edge is at 361 mm, the real 300 mm frame top at
+    # 430.5 mm -> 69.5 mm of solid overlap that the y=0 frame never saw.
+    assert (real.horn_bbox_mm[1] - (300.0 + FRAME_RADIUS_MM)) == pytest.approx(-69.5, abs=1e-6)
+    assert real.dy_min_mm == pytest.approx(legacy.dy_min_mm)
+    assert real.to_dict()["woofer_frame_center_y_mm"] == pytest.approx(300.0)
+
+
 def test_1000x_unit_scale_errors_are_caught() -> None:
     # Millimetres passed where metres are expected.
     with pytest.raises(ValueError, match="unit-scale"):
@@ -352,7 +461,7 @@ def test_identical_inputs_produce_byte_identical_outputs(tmp_path: Path) -> None
         low_freq_f3_hz_max=None)
     kwargs = dict(
         cabinet=cabinet, assembly=assembly, target=target, envelope=_envelope(),
-        limit_boxes=2, dz_offsets_mm=(0.0, 10.0), xo_range_hz=(600.0, 900.0),
+        limit_boxes=2, dz_offsets_mm=(0.0, 25.0), xo_range_hz=(600.0, 900.0),
         shortlist_size=3)
 
     first = W.run_seed_screen(asset, catalog, **kwargs)
@@ -373,6 +482,79 @@ def json_text(result: W.SeedResult) -> str:
     import json
 
     return json.dumps(result.to_payload(), sort_keys=True)
+
+
+def test_screen_passes_the_mounted_height_in_millimetres(tmp_path: Path) -> None:
+    """The frame-centre argument is mm while BL's panel fit reports metres.
+
+    2026-11-22: the first caller passed ``panel_fit["driver_y_m"]`` unconverted, so the frame
+    centre moved by ~0.00006 mm instead of tens of millimetres — the fix was inert. This pins
+    the unit at the seam by reading the value the screen actually recorded.
+    """
+    asset = _synthetic_asset(tmp_path)
+    catalog = W.load_driver_catalog(["faitalpro_10pr300", "faitalpro_12pr320"])
+    cabinet = C.VentedBoxRanges(
+        net_volume_l_range=(60.0, 115.0), tuning_hz_range=(40.0, 55.0),
+        port_throat_area_cm2_range=(45.0, 45.0), wall_mm=18.0)
+    assembly = C.AssemblyRanges(horn_layout="separate_above")
+    target = C.SystemTargets(
+        listening_angle_h_deg=(-30.0, 30.0), listening_angle_v_deg=(-15.0, 15.0),
+        low_freq_f3_hz_max=None)
+    result = W.run_seed_screen(
+        asset, catalog, cabinet=cabinet, assembly=assembly, target=target,
+        envelope=_envelope(), limit_boxes=2, dz_offsets_mm=(25.0,),
+        xo_range_hz=(600.0, 900.0), shortlist_size=3)
+    assert result.kept_rows
+    row = result.kept_rows[0]
+    recorded = float(row["placement"]["woofer_frame_center_y_mm"])
+
+    # The screen's own panel fit reports the same placement in metres; the seam must scale it.
+    box = row["box"]
+    point = C.BoxPoint(
+        kind=str(box.get("kind", "vented")),
+        external_width_mm=float(box["external_width_mm"]),
+        external_height_mm=float(box["external_height_mm"]),
+        external_depth_mm=float(box["external_depth_mm"]),
+        net_volume_l=float(box["net_volume_l"]),
+        wall_mm=float(box["wall_mm"]),
+        port_type=str(box.get("port_type", "round_flared")),
+        port_throat_area_cm2=float(box["port_throat_area_cm2"]),
+        port_nfr=float(box.get("port_nfr", 0.12)),
+        requested_tuning_hz=float(box.get("derived_tuning_hz") or 40.0),
+        derived_effective_port_length_m=box.get("derived_effective_port_length_m"),
+        derived_tuning_hz=box.get("derived_tuning_hz"))
+    separation = W.bl_panel_fit_separation(point)
+    assert recorded == pytest.approx(float(separation["driver_y_m"]) * 1e3)
+    # Guard against a silently inert (sub-millimetre) frame offset.
+    assert recorded > 1.0
+
+
+def test_screen_refuses_a_seated_dz0_horn_over_a_frame_that_reaches_the_top(
+        tmp_path: Path) -> None:
+    """Physical consequence of the mm fix: at BL's maximum legal driver_y the real frame
+    overhangs the cabinet top by (frame radius - moving radius), so a horn seated on the top
+    at dz=0 collides with it and only a forward offset clears the frame.
+    """
+    asset = _synthetic_asset(tmp_path)
+    catalog = W.load_driver_catalog(["faitalpro_10pr300", "faitalpro_12pr320"])
+    cabinet = C.VentedBoxRanges(
+        net_volume_l_range=(60.0, 115.0), tuning_hz_range=(40.0, 55.0),
+        port_throat_area_cm2_range=(45.0, 45.0), wall_mm=18.0)
+    assembly = C.AssemblyRanges(horn_layout="separate_above")
+    target = C.SystemTargets(
+        listening_angle_h_deg=(-30.0, 30.0), listening_angle_v_deg=(-15.0, 15.0),
+        low_freq_f3_hz_max=None)
+    result = W.run_seed_screen(
+        asset, catalog, cabinet=cabinet, assembly=assembly, target=target,
+        envelope=_envelope(), limit_boxes=2, dz_offsets_mm=(0.0, 25.0),
+        xo_range_hz=(600.0, 900.0), shortlist_size=3)
+
+    assert result.kept_rows, result.rejected_ledger
+    assert {row["placement"]["dz_mm"] for row in result.kept_rows} == {25.0}
+    dz0 = [row for row in result.rejected_ledger
+           if row["stage"] == "placement" and row.get("dz_mm") == 0.0]
+    assert dz0, result.rejected_ledger
+    assert any("woofer frame clearance" in " ".join(row["reasons"]) for row in dz0)
 
 
 def _pareto_row(row_id: str, **overrides: float) -> dict:

@@ -179,3 +179,46 @@ favorites:
     g_sf_start: 0.25
     g_wrap_deg: 94.422715
   status: active
+- id: FAV-006
+  added: '2026-11-25'
+  added_by: owner (GUI star)
+  title: rolled_v3_s2 (aa8c16949362)
+  owner_note: SICKR0LLBACK
+  design_hash: aa8c16949362
+  family: FREEFORM
+  generator: grid / rows.type rolled_family_rect_bb_v1
+  config: examples/typologies/cd_bo_cohort_2026-11-25/rolled_v3_s2.yaml
+  objective: v11
+  runs:
+    screen:
+      run_dir: runs/20261125T185314Z-screen-5194ae
+      eval_no: 50
+      J: 4.4208988008663805
+  gui: http://127.0.0.1:8765/#/run/20261125T185314Z-screen-5194ae
+  knobs:
+    g_axial_h_mm: -7.447456
+    g_axial_v_mm: -0.935546
+    g_bb_h: 0.686999
+    g_bb_rollin_frac: 0.203004
+    g_bb_throat_frac: 0.248458
+    g_bb_v: 0.0
+    g_cd_end_s: 0.88
+    g_cd_h_deg: 0.0
+    g_cd_peak_s: 0.6
+    g_cd_start_s: 0.3
+    g_cd_v_deg: 0.0
+    g_decay: 0.875796
+    g_depth_h_ratio: 1.132271
+    g_depth_mm: 223.410179
+    g_height_mm: 413.34737
+    g_inward_h_mm: 6.036251
+    g_inward_v_mm: 0.053447
+    g_rect_exponent: 10.047321
+    g_rect_turn_deg: 58.928555
+    g_relief_end_s: 0.96
+    g_relief_peak_s: 0.8
+    g_relief_start_s: 0.5
+    g_terminal_deg: 260.751017
+    g_throat_turn_deg: 15.271766
+    g_width_mm: 597.91018
+  status: active

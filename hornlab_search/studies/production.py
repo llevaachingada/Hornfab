@@ -47,7 +47,50 @@ def _write(path, value):
 
 
 #: Policies the production worker can execute.  Pareto additionally needs frozen bindings.
+#: ``metric_composite_v1`` is deliberately NOT appended here: it is a package-gated route with
+#: its own explicit ``real_metric_v1`` contract (see :func:`execution_capability`).
 PRODUCTION_POLICIES = ('scalar', 'turbo', 'pareto')
+
+METRIC_POLICY = 'metric_composite_v1'
+REAL_METRIC_PROVENANCE = 'real_metric_v1'
+
+
+def objective_admission(cfg, task):
+    """Return ``None`` when the resolved objective is admitted, else a refusal reason.
+
+    v4/v7 keep their historical blanket admission.  v10/v11 are OPT-IN: the resolved config and
+    brief must be the exact pair of a registered study task in ``studies.builders._TASK_REGISTRY``
+    AND the version-specific metric policy must freeze for that brief.  Every other version is
+    refused.  This is a pure unit-level check: it reads YAML and freezes a policy identity, never a
+    solver.
+    """
+    version = int(getattr(cfg, 'objective_version', -1))
+    if version in (4, 7):
+        return None
+    from . import builders
+    if version not in builders.registered_objective_versions():
+        return ('production worker supports objective v4/v7 and registered v10/v11 tasks only; '
+                f'got v{version}')
+    task = task if isinstance(task, dict) else {}
+    match = builders.registered_task_match(version, task.get('config'), task.get('brief'))
+    if match is None:
+        return (f'objective v{version} is admitted only through a registered study task '
+                '(exact config/brief pair or a derived config with unchanged task identity); '
+                'this task is not registered')
+    entry = match['entry']
+    try:
+        import numpy as np
+        from hornlab_search.bo.metrics import freeze_metric_policy_for_version
+        from hornlab_search.objective import replay
+        brief = replay.brief_from_config(entry['config'])
+        if int(brief.objective_version) != version:
+            return 'registered task config and brief disagree on objective version'
+        target = brief.target
+        grid = np.asarray([float(target.band_lo_hz), float(target.band_hi_hz)])
+        freeze_metric_policy_for_version(brief, grid)
+    except (ValueError, TypeError, OSError) as exc:
+        return f'registered task metric policy cannot be frozen: {exc}'
+    return None
 
 
 def pareto_bindings(service, sid, proposal=None):
@@ -84,9 +127,26 @@ def pareto_bindings(service, sid, proposal=None):
 
 
 def execution_capability(service, package, *, root):
-    """Validate the immutable inputs without creating a backend or writing files."""
+    """Validate the immutable inputs without creating a backend or writing files.
+
+    ``scalar``/``turbo``/``pareto`` use the historical admissions unchanged.  A
+    ``metric_composite_v1`` package is admitted only through the explicit ``real_metric_v1``
+    contract in :mod:`hornlab_search.studies.metric_refit` (approvals, pins, caps, GPU lane);
+    there is no fallback to scalar or synthetic execution.
+    """
+    metric = package.get('metric') if isinstance(package, dict) else None
+    real_metric = (isinstance(metric, dict)
+                   and metric.get('provenance_mode') == REAL_METRIC_PROVENANCE)
+    real_metric_status = None
     try:
-        verify_package(package)
+        if real_metric:
+            from .metric_refit import verify_real_metric_package
+            real_metric_status = verify_real_metric_package(service, package, root=root)
+            if real_metric_status.get('status') != 'ok':
+                raise Unavailable(real_metric_status.get('detail')
+                                  or 'real metric package contract refused')
+        else:
+            verify_package(package)
         from .package import EXECUTION_CODE_FILES
         for name in EXECUTION_CODE_FILES:
             pinned = package.get('code_pins', {}).get(name)
@@ -118,9 +178,12 @@ def execution_capability(service, package, *, root):
         if datetime.fromisoformat(package['deadline'].replace('Z', '+00:00')) <= datetime.now(timezone.utc):
             raise Unavailable('execution deadline has expired')
         policy = (package.get('proposal_policy') or {}).get('policy')
-        if policy not in PRODUCTION_POLICIES:
-            raise Unavailable('production worker supports scalar, turbo and pareto policies only; '
+        if policy not in PRODUCTION_POLICIES and not real_metric:
+            raise Unavailable('production worker supports scalar, turbo and pareto policies only '
+                              '(and the explicit real_metric_v1 metric package); '
                               f'got {policy!r}')
+        if policy != METRIC_POLICY and real_metric:
+            raise Unavailable('real_metric_v1 provenance requires the metric_composite_v1 policy')
         interpreter = study_interpreter(root)
         if interpreter.resolve() != Path(sys.executable).resolve():
             probe = subprocess.run([str(interpreter), '-c',
@@ -142,22 +205,28 @@ def execution_capability(service, package, *, root):
         cfg = load_config(task['config'])
         if cfg.objective_version != task['objective_version']:
             raise Unavailable('resolved objective differs from frozen task')
-        if cfg.objective_version not in (4, 7):
-            raise Unavailable('production scalar worker supports objective v4 and v7')
+        if real_metric:
+            # The metric route replaces only the registered-task scalar admission with its own
+            # explicit provenance/identity contract; canonical admission is untouched above.
+            if (real_metric_status or {}).get('status') != 'ok':
+                raise Unavailable((real_metric_status or {}).get('detail')
+                                  or 'real metric package contract refused')
+        else:
+            refusal = objective_admission(cfg, task)
+            if refusal is not None:
+                raise Unavailable(refusal)
         if cfg.raw.get('band_split') or cfg.raw.get('meh'):
             raise Unavailable('multi-call band-split/MEH configurations require a separate budget contract')
         expected_backend = 'beat_cuda' if package['lane'] == 'gpu' else 'beat_cpu'
         if cfg.solve.backend != expected_backend:
             raise Unavailable(f'lane requires {expected_backend}; configuration uses {cfg.solve.backend}')
+        if real_metric and (package['lane'] != 'gpu' or cfg.solve.backend != 'beat_cuda'):
+            raise Unavailable('real metric canary requires a gpu/beat_cuda execution lane')
         pool = _json(service, study['id'], 'pool')
         if not pool.get('candidates'):
             raise Unavailable('full immutable candidate pool is missing; regenerate the proposal')
-        manifest = _json(service, study['id'], 'training_manifest')
-        if manifest.get('status') != 'ok':
-            raise Unavailable('training set is not ready')
-        for key in ('config_sha256', 'brief_sha256', 'objective_version'):
-            if (manifest.get('task') or {}).get(key) != task[key]:
-                raise Unavailable('training task differs from frozen snapshot')
+        from .package import verify_candidate_policy
+        verify_candidate_policy(package, cfg, pool=pool)
         from hornlab_search.search.evaluate import collect_lib_shas
         current_pins = collect_lib_shas()
         if interpreter.resolve() != Path(sys.executable).resolve():
@@ -167,19 +236,30 @@ def execution_capability(service, package, *, root):
             if probe.returncode:
                 raise Unavailable('cannot inspect execution interpreter dependency pins')
             current_pins = json.loads(probe.stdout)
-        measured_pins = (manifest.get('meta') or {}).get('measured_dependency_pins')
-        if not isinstance(measured_pins, dict):
-            raise Unavailable('training cohort lacks measured dependency pins; regenerate intake')
-        for key in ('hornlab_mesher', 'hornlab_beat_bem', 'hornlab_plots'):
-            value = measured_pins.get(key)
-            if not isinstance(value, str) or value == 'unknown' or not value:
-                raise Unavailable(f'training cohort lacks measured pin: {key}')
-            if value != current_pins.get(key):
-                raise Unavailable(f'training cohort dependency differs from execution: {key}')
+        if not real_metric:
+            manifest = _json(service, study['id'], 'training_manifest')
+            if manifest.get('status') != 'ok':
+                raise Unavailable('training set is not ready')
+            for key in ('config_sha256', 'brief_sha256', 'objective_version'):
+                if (manifest.get('task') or {}).get(key) != task[key]:
+                    raise Unavailable('training task differs from frozen snapshot')
+            measured_pins = (manifest.get('meta') or {}).get('measured_dependency_pins')
+            if not isinstance(measured_pins, dict):
+                raise Unavailable('training cohort lacks measured dependency pins; regenerate intake')
+            for key in ('hornlab_mesher', 'hornlab_beat_bem', 'hornlab_plots'):
+                value = measured_pins.get(key)
+                if not isinstance(value, str) or value == 'unknown' or not value:
+                    raise Unavailable(f'training cohort lacks measured pin: {key}')
+                if value != current_pins.get(key):
+                    raise Unavailable(f'training cohort dependency differs from execution: {key}')
         for key, value in package.get('dependency_pins', {}).items():
             if current_pins.get(key) != value:
                 raise Unavailable(f'dependency pin changed: {key}')
-        if policy != 'scalar':
+        if policy == METRIC_POLICY:
+            proposal = _json(service, study['id'], 'proposal')
+            if proposal.get('proposal_policy') != policy:
+                raise Unavailable('proposal artifact policy differs from the package policy')
+        elif policy != 'scalar':
             proposal = _json(service, study['id'], 'proposal')
             if proposal.get('proposal_policy') != policy:
                 raise Unavailable('proposal artifact policy differs from the package policy')
@@ -260,7 +340,11 @@ def build_worker(service, package, *, root, backend_factory=None):
     """Construct adapters; backend/store creation remains inside owned lane evaluation."""
     from hornlab_search.config import load_config, mesh_spec, solve_spec
     from hornlab_search.design.space import DesignSpace
-    from hornlab_search.studies.evaluator import PipelineStudyEvaluator
+    from hornlab_search.bo.policy import POLICY_METRIC_COMPOSITE
+    from hornlab_search.studies.evaluator import (MetricPipelineStudyEvaluator,
+                                                 bind_metric_record_identity,
+                                                 load_metric_dataset_record,
+                                                 record_metric_measurement)
     from .lanes import StudyLane
     from hornlab_search.search import evaluate as pipeline
     from hornlab_search.solve.base import get_backend
@@ -268,6 +352,20 @@ def build_worker(service, package, *, root, backend_factory=None):
     root = Path(root).resolve()
     snapshot = _json(service, package['study_id'], 'snapshot')
     cfg = load_config(snapshot['task']['config'])
+    from .package import verify_candidate_policy
+    verify_candidate_policy(package, cfg, pool=_json(service, package['study_id'], 'pool'))
+    policy = (package.get('proposal_policy') or {}).get('policy') or 'scalar'
+    metric_brief = None
+    if policy == POLICY_METRIC_COMPOSITE:
+        from hornlab_search.objective.replay import brief_from_config
+        from .metric_study import METRIC_TRAINING_MANIFEST_KIND, TASK_IDENTITY_FIELDS
+
+        metric_brief = brief_from_config(snapshot['task']['config'])
+        metric_manifest = _json(service, package['study_id'], METRIC_TRAINING_MANIFEST_KIND)
+        metric_score = metric_manifest['score']['payload']
+        metric_task = {key: metric_manifest['task'].get(key) for key in TASK_IDENTITY_FIELDS}
+        metric_task.update(brief_hash=metric_score.get('brief_hash'), score_hash=metric_score.get('score_hash'))
+        metric_bounds = metric_manifest['bounds']['hash']
     space = DesignSpace.from_config(cfg)
     from .builders import _task_encoding
     encoding = _task_encoding(space)
@@ -288,7 +386,7 @@ def build_worker(service, package, *, root, backend_factory=None):
                      cpu_dataset=root / 'dataset_cpu', gpu_dataset=root / 'dataset')
     run_root = root / 'runs' / ('study-' + package['package_id'][:16])
 
-    class WorkerEvaluator(PipelineStudyEvaluator):
+    class WorkerEvaluator(MetricPipelineStudyEvaluator):
         def _propose_through_policy(self):
             if self.history.proposal_index == 0:
                 proposal = _json(service, package['study_id'], 'proposal')
@@ -299,7 +397,7 @@ def build_worker(service, package, *, root, backend_factory=None):
 
         def _pareto_metric(self, design_hash):
             '''Measure this screen's physical errors with the SAME frozen metric policy.'''
-            from hornlab_search.bo.metrics import FrozenSupport, measure_metrics
+            from hornlab_search.bo.metrics import FrozenSupport, measure_metrics_for_policy
             from hornlab_search.objective import replay
             from hornlab_search.solve.cache import load_response
             frozen = FrozenSupport(pareto_payload['metric_policy']['payload_json'],
@@ -311,7 +409,7 @@ def build_worker(service, package, *, root, backend_factory=None):
                     json.loads((ddir / 'metrics.json').read_text(encoding='utf-8')))
                 if metrics is None:
                     raise ValueError('metrics.json missing')
-                obs = measure_metrics(frozen, metrics, response)
+                obs = measure_metrics_for_policy(frozen, metrics, response)
             except (OSError, ValueError, TypeError, KeyError) as exc:
                 return {'status': 'capability_missing', 'reason': f'stored screen arrays: {exc}',
                         'physical_metric_spec_hash': frozen.physical_metric_spec_hash,
@@ -395,8 +493,12 @@ def build_worker(service, package, *, root, backend_factory=None):
 
             # Main dataset roots are single-writer; the lane lock owns publication.
             store = DatasetStore(runtime['dataset_dir'])
+            # A study's mode directory is always named 'screen'/'verify'; the dataset row needs
+            # a study-scoped run id so later cohort admission can identify the package attempt.
+            study_run_id = f"study-{package['package_id'][:16]}-{mode}"
             context = pipeline.make_context(cfg, store, cache_dir=runtime['cache_dir'],
-                                            ndjson=directory / 'search.ndjson')
+                                            ndjson=directory / 'search.ndjson',
+                                            run_id=study_run_id)
             evaluation = pipeline.evaluate(self._design(candidate), space, cfg, mode,
                                            directory, store, CountedBackend(), ctx=context)
             result = self.result_from_evaluation(candidate, evaluation)
@@ -427,6 +529,21 @@ def build_worker(service, package, *, root, backend_factory=None):
             # Successful cached responses are measured evidence under the current score.
             if result['eligible']:
                 result['outcome'] = 'success' if calls[0] else 'cached'
+                if metric_brief is not None and calls[0]:
+                    try:
+                        meta, reference = load_metric_dataset_record(
+                            store, evaluation.dataset_position, result, run_id=study_run_id,
+                            version=metric_brief.objective_version)
+                        reference['identity'] = bind_metric_record_identity(
+                            meta, result, expected=metric_task, encoding=encoding, bounds_hash=metric_bounds)
+                    except (OSError, ValueError, TypeError, IndexError, KeyError) as exc:
+                        result.update(eligible=False, metric_refusal=str(exc))
+                    else:
+                        result = record_metric_measurement(
+                            {**result, 'observed_j': evaluation.objective}, meta.get('terms'), replay,
+                            brief=metric_brief, dataset_record=reference)
+                elif metric_brief is not None:
+                    result.update(eligible=False, metric_refusal='not_new_eligible_screen')
             if self.policy == 'pareto' and result['eligible']:
                 result['pareto_metric'] = self._pareto_metric(evaluation.design_hash)
             result['attempt_id'] = attempt_id
@@ -434,17 +551,38 @@ def build_worker(service, package, *, root, backend_factory=None):
             return result
 
     seed = int((_json(service, package['study_id'], 'model')).get('seed', 0))
-    policy = (package.get('proposal_policy') or {}).get('policy') or 'scalar'
-    training = _training(service, package['study_id'])
     pareto_payload = pareto_training = None
-    if policy == 'pareto':
-        from .builders import pareto_training_from_artifacts
-        pareto_payload = pareto_bindings(service, package['study_id'])
-        pareto_training = pareto_training_from_artifacts(training, pareto_payload)
+    metric_artifact = metric_ledger = metric_manifest_obj = None
+    initial_proposal = None
+    if policy == POLICY_METRIC_COMPOSITE:
+        from .metric_refit import MetricRefitLedger, REAL_METRIC_REFIT_EVERY
+        from .metric_study import _load_training_artifact
+
+        metric_artifact, metric_manifest_obj, training_meta, _manifest_meta = (
+            _load_training_artifact(service, package['study_id']))
+        model_manifest = _json(service, package['study_id'], 'model')
+        seed = int(model_manifest.get('seed', 0))
+        metric_ledger = MetricRefitLedger(
+            service, package['study_id'], package['package_id'],
+            base_artifact=metric_artifact, base_manifest=metric_manifest_obj,
+            base_artifact_sha256=training_meta['sha256'], seed=seed,
+            refit_every=REAL_METRIC_REFIT_EVERY)
+        proposal = _json(service, package['study_id'], 'proposal')
+        initial_proposal = proposal.get('candidate') or proposal.get('proposal')
+        training = None
+    else:
+        training = _training(service, package['study_id'])
+        if policy == 'pareto':
+            from .builders import pareto_training_from_artifacts
+            pareto_payload = pareto_bindings(service, package['study_id'])
+            pareto_training = pareto_training_from_artifacts(training, pareto_payload)
     evaluator = WorkerEvaluator(service, package, config=cfg, space=space, encoding=encoding,
         training_set=training, pool=_pool(service, package['study_id']),
         seed=seed, audit_seed=seed, evaluate_fn=lambda *args: None, policy=policy,
-        pareto_training=pareto_training)
+        pareto_training=pareto_training,
+        metric_artifact=metric_artifact, metric_manifest=metric_manifest_obj,
+        metric_ledger=metric_ledger, metric_brief=metric_brief,
+        initial_proposal=initial_proposal)
     return evaluator, lane, ProductionJournal(service)
 
 
@@ -454,6 +592,17 @@ def execute_study(service, package, *, root):
         return status
     from .runner import run_package
     evaluator, lane, journal = build_worker(service, package, root=root)
+    policy = (package.get('proposal_policy') or {}).get('policy')
+    if policy == METRIC_POLICY:
+        # The evaluator is injected by this caller; the gate refuses a metric package without a
+        # real evaluator, and never falls back to scalar/synthetic execution.
+        from .metric_study import metric_execution_gate
+        gate = metric_execution_gate(
+            package, allow_real_solver=True, real_evaluator=evaluator,
+            service=service, root=root)
+        if gate.get('status') != 'ok':
+            return {'status': 'capability_missing', 'reason': gate.get('reason'),
+                    'detail': gate.get('detail')}
     previous = os.environ.get('HORNLAB_GPU_LOCK')
     os.environ['HORNLAB_GPU_LOCK'] = 'refuse'
     try:

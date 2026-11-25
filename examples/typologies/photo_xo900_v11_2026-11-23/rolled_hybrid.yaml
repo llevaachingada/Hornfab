@@ -1,0 +1,11 @@
+extends: ../priority10_2026-11-19/p12__verify_rolled_hybrid_96790c.yaml
+name: photo_rolled_hybrid_xo900_v11
+brief: null
+brief_file: ../../briefs/home_xo900_2026-11-20/room_landscape_80x50_900_hf1440_v11cd.yaml
+search:
+  sigma0: 0.12
+  budget: 85
+  budget_counts: valid
+  max_attempts: 425
+  infeasible_penalty: resample_strict
+  error_policy: retry_same_then_stop

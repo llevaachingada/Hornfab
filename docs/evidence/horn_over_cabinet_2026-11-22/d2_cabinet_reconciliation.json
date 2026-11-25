@@ -1,0 +1,798 @@
+{
+  "schema": "hornlab.evidence.d2_cabinet_reconciliation.v1",
+  "date": "2026-11-22",
+  "purpose": "Numbers for the D2 cabinet decision; no recommendation, no solve, CPU geometry generation only.",
+  "gpu": "none; no BEM/FEM solve, no GPU job",
+  "inputs": {
+    "vented_overrides": {
+      "path": "docs/evidence/horn_over_cabinet_2026-11-22/vented_overrides.json",
+      "sha256": "ee59de0e86567fc372e4388165bcaad5a1760f953c23ba61863435ba21dc163d"
+    },
+    "cabinet_fit": {
+      "path": "docs/evidence/horn_over_cabinet_2026-11-22/cabinet_fit.json",
+      "sha256": "eb8d51ff6187af6042fcbe68b9e4ac9c675073091e454db34a51ba19bf5e70c1"
+    },
+    "driver_ts": {
+      "path": "examples/systems/driver_ts/faitalpro_12pr300.yaml",
+      "sha256": "22e470b505c98a8854cb90bbb602696f19f50bc7c77d00845b710384aa7cabb3"
+    },
+    "driver_geometry": {
+      "path": "examples/systems/driver_geometry/faitalpro_12pr300.yaml",
+      "sha256": "f9f5ba558c3b1367e13aebc970486f9760c796bcd9ac6a87dd69fe83cdd647c5"
+    }
+  },
+  "boundary_lab": {
+    "path": "C:\\Users\\hunte\\Github\\boundary-lab",
+    "version": "0.5.0",
+    "git_head": "15f9a89245a9adfec8c2f0006c164953ce381e58",
+    "provider_id": "blab.vented_enclosure",
+    "parameters_py_sha256": "51f8e82071ce9984ff651d1266a208d2ba51ff0e9df2fcb2edd22ff3cc0d78c5"
+  },
+  "driver": {
+    "id": "faitalpro_12pr300",
+    "name": "FaitalPRO 12PR300",
+    "sd_cm2": 533.0,
+    "fs_hz": 50.0,
+    "re_ohm": 5.4,
+    "p_aes_w": 300.0,
+    "xmax_mm": 4.92,
+    "frame_od_mm": 315.2,
+    "cutout_mm": 283.0,
+    "mounting_depth_behind_baffle_mm": 140.6,
+    "moving_diameter_proxy_mm": 260.5,
+    "distinction": "The 315.2 mm frame is the mounting flange; 260.5 mm is the area-equivalent moving diaphragm used only as BL's driver_diameter_m. They are never interchanged."
+  },
+  "port_convention": {
+    "chosen_port_y_m": -0.13,
+    "choice_note": "Base vented_overrides.json port_y (-0.130 m) retained: it satisfies BL's port wall and driver/port separation budgets for A, C and D. B is refused by BL on the driver wall rule before the port matters.",
+    "bl_port_length_total_m": 0.22,
+    "bl_port_area_m2": 0.002827433388,
+    "bl_port_nfr": 0.12,
+    "bl_port_roundover_m": 0.008,
+    "bl_port_wall_m": 0.003,
+    "bassbox_n_end": 2.0,
+    "r_eq_m": 0.029999999998775496,
+    "neck_for_bassbox_m": 0.20400000000000001,
+    "derived_effective_length_m": 0.25499999999791834,
+    "derived_neck_mm": 204.0,
+    "mapping_source": "hornlab_search/system/boundarylab/assemble.py:250-261 (BL total incl. lips -> neck -> bassbox effective length)"
+  },
+  "horn_surface": {
+    "mesh": "system_runs/system/ref_case/horn_full/lecleach_rollback_1in_v6_9e02db06ecc3/mesh.msh",
+    "group": "SD1D1001 (physical tag 1)",
+    "n_points": 2937,
+    "n_points_all": 2977,
+    "n_triangles_all": 5950,
+    "physical_tag_counts": {
+      "1": 5848,
+      "2": 102
+    },
+    "bbox_mm": [
+      -116.6727878710462,
+      -116.6727878710462,
+      -3.000000000000001,
+      116.6727878710462,
+      116.6727878710462,
+      139.8738872624888
+    ],
+    "bbox_all_points_mm": [
+      -116.6727878710462,
+      -116.6727878710462,
+      -3.000000000000001,
+      116.6727878710462,
+      116.6727878710462,
+      139.8738872624888
+    ]
+  },
+  "candidates": {
+    "A": {
+      "external_mm": [
+        320.0,
+        500.0,
+        360.0
+      ],
+      "internal_mm": [
+        284.0,
+        464.0,
+        324.0
+      ],
+      "wall_mm": 18.0,
+      "front_area_mm2": 160000.0,
+      "external_volume_l": 57.6,
+      "empty_internal_volume_l": 42.695424,
+      "nominal_alignment_vb_l": 42.0,
+      "bl_generation": {
+        "ok": true,
+        "case_dir": "system_runs/system/hf_d2_cabinet_2026-11-22/20261123T012301Z-vented-29388-7f8129cc",
+        "error": null,
+        "air_volume_m3": 0.04227029597165141,
+        "air_volume_l": 42.270295971651414,
+        "mesh_info": {
+          "interior": {
+            "nodes": 5217,
+            "triangles": 5968,
+            "tetrahedra": 22739
+          },
+          "exterior": {
+            "nodes": 1642,
+            "triangles": 3280,
+            "tetrahedra": 0
+          },
+          "air_volume_m3": 0.04227029597165141,
+          "gmsh_version": "4.15.2"
+        },
+        "mesh_info_sha256": "ea4f8018770a5f52898295d8d46e6e8e4d9f7976a5142e2a319c362e61aa0c75",
+        "port_mouth_diameter_m": 0.087486040661,
+        "overrides": {
+          "cap_diameter_m": 0.05,
+          "cone_depth_m": 0.04,
+          "depth_m": 0.36,
+          "detail_size_m": 0.009,
+          "driver_diameter_m": 0.2605,
+          "driver_y_m": 0.098,
+          "height_m": 0.5,
+          "mesh_size_m": 0.03,
+          "port_area_m2": 0.002827433388,
+          "port_length_m": 0.22,
+          "port_nfr": 0.12,
+          "port_roundover_m": 0.008,
+          "port_wall_m": 0.003,
+          "port_y_m": -0.13,
+          "surround_width_m": 0.012,
+          "wall_m": 0.018,
+          "width_m": 0.32
+        }
+      },
+      "delta_vs_empty_internal_l": -0.4251280283485883,
+      "delta_vs_empty_internal_pct": -0.9957226993426469,
+      "delta_vs_nominal_alignment_l": 0.2702959716514144,
+      "port": {
+        "chosen_port_y_m": -0.13,
+        "port_length_total_m": 0.22,
+        "port_area_m2": 0.002827433388,
+        "port_area_cm2": 28.27433388,
+        "port_nfr": 0.12,
+        "port_roundover_m": 0.008,
+        "port_wall_m": 0.003,
+        "neck_for_bassbox_m": 0.20400000000000001,
+        "derived_effective_length_m": 0.25499999999791834,
+        "derived_neck_mm": 204.0,
+        "mouth_radius_mm_from_BL": 43.7430203305,
+        "port_outer_radius_mm": 46.7430203305,
+        "bl_move_radius_mm": 130.25,
+        "bl_wall_budget_mm": {
+          "width_headroom": 8.75,
+          "driver_height_headroom": 0.75,
+          "port_width_headroom": 92.2569796695,
+          "port_height_headroom": 52.2569796695
+        },
+        "driver_port_separation_mm": 228.0,
+        "bl_required_separation_mm": 179.9930203305,
+        "rules_port_fits": "PASS: port needs 237.0 mm (neck 204.0 + flare 30.0 + clearance 3.0) <= internal depth 324.0 mm",
+        "rules_required_mm": 236.9999999987755,
+        "rules_required_with_actual_mouth_mm": 250.7430203305,
+        "rules_internal_depth_mm": 324.0,
+        "bl_rear_wall_required_m": 0.307486040661,
+        "bl_rear_wall_available_m": 0.324,
+        "bl_rear_wall_margin_mm": 16.513959338999996
+      },
+      "lf": {
+        "available": true,
+        "net_volume_l": 42.270295971651414,
+        "tuning_hz": 27.959069146541825,
+        "tuning_convention": "BL port total length 0.22 m -> neck 0.204 m (subtract two 8 mm lips) -> bassbox Leff = neck + N_END*0.85*r_eq (assembled per assemble.py:250-261)",
+        "f3_hz": 64.3439401439,
+        "f10_hz": 38.022648100705354,
+        "f10_source": "bassbox.evaluate SPL curve; 63-120 Hz mean reference, same convention as bassbox._f3_hz",
+        "port_velocity_mps_40hz": 26.107157180629,
+        "port_velocity_mps_63hz": 13.40063272698,
+        "port_velocity_ratio_40": 1.535715128272294,
+        "port_velocity_ratio_63": 0.7882725133517647,
+        "port_velocity_ratio_max": 1.535715128272294,
+        "port_velocity_flag_gt1": true,
+        "port_velocity_limit_mps": 17.0,
+        "excursion_margin_db": null,
+        "limiting_40hz": "port",
+        "limiting_63_120hz": "xmax",
+        "evaluate_box_statuses": {
+          "port": "PASS: port needs 244.0 mm (neck 204.0 + flare 30.0 + clearance 10.0) <= internal depth 324.0 mm",
+          "driver_and_brace": "FAIL: frame OD 315.2 mm > internal width 284.0 mm",
+          "wall": "PASS: wall 18.0 mm >= minimum 12.0 mm"
+        },
+        "spl_curve_samples_db_re_1v_1m_halfspace": {
+          "20": 66.9283280805401,
+          "25": 69.93970807435616,
+          "30": 72.32478307412859,
+          "40": 76.24316317702393,
+          "50": 79.29918465204511,
+          "63": 82.2873110784986,
+          "80": 84.96265295154929,
+          "100": 86.90583055054765,
+          "120": 88.05255854214023,
+          "150": 88.98072685836638
+        }
+      },
+      "real_frame_panel_fit": {
+        "frame_od_mm": 315.2,
+        "cutout_mm": 283.0,
+        "mounting_depth_behind_baffle_mm": 140.6,
+        "clearance_mm": 3.0,
+        "wall_mm": 18.0,
+        "convention": "frame radius + 3 mm <= external/2 - wall (internal panel half-extent); reproduces README 5.5 minimum 360x400 for this frame",
+        "driver_at_centre_line": {
+          "width_headroom_mm": -18.599999999999994,
+          "height_headroom_mm": 71.4,
+          "frame_pass": false,
+          "port_separation_mm": 130.0,
+          "required_separation_mm": 207.3430203305,
+          "port_separation_pass": false,
+          "pass": false
+        },
+        "driver_at_y98": {
+          "height_headroom_mm": -26.600000000000023,
+          "frame_pass": false,
+          "port_separation_mm": 228.0,
+          "port_separation_pass": true,
+          "pass": false
+        },
+        "legal_driver_y_window_at_chosen_port_mm": [
+          77.3430203305,
+          71.4
+        ],
+        "legal_driver_y_window_empty": false,
+        "legal_driver_y_window_at_bottom_port_mm": [
+          25.086040661,
+          71.4
+        ],
+        "legal_driver_y_window_at_bottom_port_empty": true,
+        "external_face_check": {
+          "width_headroom_mm": -0.5999999999999943,
+          "height_y98_headroom_mm": -8.600000000000023,
+          "width_pass": false,
+          "height_y98_pass": false
+        },
+        "note": "BL's own validator uses the 260.5 mm moving diameter, not this 315.2 mm frame; the frame is checked separately here"
+      },
+      "horn_pose": {
+        "mesh": "system_runs/system/ref_case/horn_full/lecleach_rollback_1in_v6_9e02db06ecc3/mesh.msh",
+        "group": "SD1D1001",
+        "dz_mm": 13.0,
+        "min_legal_dy_at_dz13_mm": null,
+        "min_legal_dy_at_dz0_mm": 268.6741572376342,
+        "centre_spacing_at_dz0_mm": 170.67415723763418,
+        "note": "At dz=13 mm every SD1D1001 point has z+13 >= 10 mm > the 3 mm baffle-plane threshold, so the seated-overhang policy finds no rear geometry and returns None (cantilever). dz=0 values are the policy reference; the README's p2b pose retains dy=268.674 mm at dz=13 (system_runs/poses_2026-11-22/p2b_overhang_dz013.json)."
+      },
+      "baffle_step_hz": 341.1884092532506,
+      "largest_external_dimension_mm": 500.0,
+      "largest_dimension_characteristic_hz": {
+        "c_over_pi_L": 218.3605819220804,
+        "c_over_2L": 343.0
+      }
+    },
+    "B": {
+      "external_mm": [
+        360.0,
+        420.0,
+        374.0
+      ],
+      "internal_mm": [
+        324.0,
+        384.0,
+        338.0
+      ],
+      "wall_mm": 18.0,
+      "front_area_mm2": 151200.0,
+      "external_volume_l": 56.5488,
+      "empty_internal_volume_l": 42.052608,
+      "nominal_alignment_vb_l": 42.0,
+      "bl_generation": {
+        "ok": false,
+        "case_dir": "system_runs/system/hf_d2_cabinet_2026-11-22/20261123T012303Z-vented-29388-56532ec8",
+        "error": "Driver must fit inside the enclosure walls with 3 mm clearance.",
+        "air_volume_m3": null,
+        "air_volume_l": null,
+        "mesh_info": null,
+        "mesh_info_sha256": null,
+        "port_mouth_diameter_m": null,
+        "overrides": {
+          "cap_diameter_m": 0.05,
+          "cone_depth_m": 0.04,
+          "depth_m": 0.374,
+          "detail_size_m": 0.009,
+          "driver_diameter_m": 0.2605,
+          "driver_y_m": 0.098,
+          "height_m": 0.42,
+          "mesh_size_m": 0.03,
+          "port_area_m2": 0.002827433388,
+          "port_length_m": 0.22,
+          "port_nfr": 0.12,
+          "port_roundover_m": 0.008,
+          "port_wall_m": 0.003,
+          "port_y_m": -0.13,
+          "surround_width_m": 0.012,
+          "wall_m": 0.018,
+          "width_m": 0.36
+        }
+      },
+      "delta_vs_empty_internal_l": null,
+      "delta_vs_nominal_alignment_l": null,
+      "port": {
+        "chosen_port_y_m": -0.13,
+        "port_length_total_m": 0.22,
+        "port_area_m2": 0.002827433388,
+        "port_area_cm2": 28.27433388,
+        "port_nfr": 0.12,
+        "port_roundover_m": 0.008,
+        "port_wall_m": 0.003,
+        "neck_for_bassbox_m": 0.20400000000000001,
+        "derived_effective_length_m": 0.25499999999791834,
+        "derived_neck_mm": 204.0,
+        "mouth_radius_mm_from_BL": 43.7430203305,
+        "port_outer_radius_mm": 46.7430203305,
+        "bl_move_radius_mm": 130.25,
+        "bl_wall_budget_mm": {
+          "width_headroom": 28.75,
+          "driver_height_headroom": -39.25,
+          "port_width_headroom": 112.2569796695,
+          "port_height_headroom": 12.256979669499998
+        },
+        "driver_port_separation_mm": 228.0,
+        "bl_required_separation_mm": 179.9930203305,
+        "rules_port_fits": "PASS: port needs 237.0 mm (neck 204.0 + flare 30.0 + clearance 3.0) <= internal depth 338.0 mm",
+        "rules_required_mm": 236.9999999987755,
+        "rules_required_with_actual_mouth_mm": 250.7430203305,
+        "rules_internal_depth_mm": 338.0,
+        "bl_rear_wall_required_m": 0.307486040661,
+        "bl_rear_wall_available_m": 0.338,
+        "bl_rear_wall_margin_mm": 30.513959338999996
+      },
+      "lf": {
+        "available": false,
+        "reason": "BL generation refused before meshing; no achieved net volume, not guessed"
+      },
+      "real_frame_panel_fit": {
+        "frame_od_mm": 315.2,
+        "cutout_mm": 283.0,
+        "mounting_depth_behind_baffle_mm": 140.6,
+        "clearance_mm": 3.0,
+        "wall_mm": 18.0,
+        "convention": "frame radius + 3 mm <= external/2 - wall (internal panel half-extent); reproduces README 5.5 minimum 360x400 for this frame",
+        "driver_at_centre_line": {
+          "width_headroom_mm": 1.4000000000000057,
+          "height_headroom_mm": 31.400000000000006,
+          "frame_pass": true,
+          "port_separation_mm": 130.0,
+          "required_separation_mm": 207.3430203305,
+          "port_separation_pass": false,
+          "pass": false
+        },
+        "driver_at_y98": {
+          "height_headroom_mm": -66.60000000000002,
+          "frame_pass": false,
+          "port_separation_mm": 228.0,
+          "port_separation_pass": true,
+          "pass": false
+        },
+        "legal_driver_y_window_at_chosen_port_mm": [
+          77.3430203305,
+          31.400000000000006
+        ],
+        "legal_driver_y_window_empty": false,
+        "legal_driver_y_window_at_bottom_port_mm": [
+          65.086040661,
+          31.400000000000006
+        ],
+        "legal_driver_y_window_at_bottom_port_empty": false,
+        "external_face_check": {
+          "width_headroom_mm": 19.400000000000006,
+          "height_y98_headroom_mm": -48.60000000000002,
+          "width_pass": true,
+          "height_y98_pass": false
+        },
+        "note": "BL's own validator uses the 260.5 mm moving diameter, not this 315.2 mm frame; the frame is checked separately here"
+      },
+      "horn_pose": {
+        "mesh": "system_runs/system/ref_case/horn_full/lecleach_rollback_1in_v6_9e02db06ecc3/mesh.msh",
+        "group": "SD1D1001",
+        "dz_mm": 13.0,
+        "min_legal_dy_at_dz13_mm": null,
+        "min_legal_dy_at_dz0_mm": 228.6741572376342,
+        "centre_spacing_at_dz0_mm": 130.6741572376342,
+        "note": "At dz=13 mm every SD1D1001 point has z+13 >= 10 mm > the 3 mm baffle-plane threshold, so the seated-overhang policy finds no rear geometry and returns None (cantilever). dz=0 values are the policy reference; the README's p2b pose retains dy=268.674 mm at dz=13 (system_runs/poses_2026-11-22/p2b_overhang_dz013.json)."
+      },
+      "baffle_step_hz": 303.2785860028894,
+      "largest_external_dimension_mm": 420.0,
+      "largest_dimension_characteristic_hz": {
+        "c_over_pi_L": 259.9530737167624,
+        "c_over_2L": 408.33333333333337
+      }
+    },
+    "C": {
+      "external_mm": [
+        540.0,
+        700.0,
+        380.0
+      ],
+      "internal_mm": [
+        504.0,
+        664.0,
+        344.0
+      ],
+      "wall_mm": 18.0,
+      "front_area_mm2": 378000.0,
+      "external_volume_l": 143.64,
+      "empty_internal_volume_l": 115.121664,
+      "nominal_alignment_vb_l": 115.0,
+      "bl_generation": {
+        "ok": true,
+        "case_dir": "system_runs/system/hf_d2_cabinet_2026-11-22/20261123T012304Z-vented-29388-b6d4b2fd",
+        "error": null,
+        "air_volume_m3": 0.11469653597165141,
+        "air_volume_l": 114.69653597165141,
+        "mesh_info": {
+          "interior": {
+            "nodes": 10629,
+            "triangles": 8872,
+            "tetrahedra": 51972
+          },
+          "exterior": {
+            "nodes": 2842,
+            "triangles": 5680,
+            "tetrahedra": 0
+          },
+          "air_volume_m3": 0.11469653597165141,
+          "gmsh_version": "4.15.2"
+        },
+        "mesh_info_sha256": "53516dc838b48f7e82c50bf789a69285c0e7e6d7db3087e4f2e2ab8a6f106dc3",
+        "port_mouth_diameter_m": 0.087486040661,
+        "overrides": {
+          "cap_diameter_m": 0.05,
+          "cone_depth_m": 0.04,
+          "depth_m": 0.38,
+          "detail_size_m": 0.009,
+          "driver_diameter_m": 0.2605,
+          "driver_y_m": 0.098,
+          "height_m": 0.7,
+          "mesh_size_m": 0.03,
+          "port_area_m2": 0.002827433388,
+          "port_length_m": 0.22,
+          "port_nfr": 0.12,
+          "port_roundover_m": 0.008,
+          "port_wall_m": 0.003,
+          "port_y_m": -0.13,
+          "surround_width_m": 0.012,
+          "wall_m": 0.018,
+          "width_m": 0.54
+        }
+      },
+      "delta_vs_empty_internal_l": -0.4251280283485812,
+      "delta_vs_empty_internal_pct": -0.36928586121599255,
+      "delta_vs_nominal_alignment_l": -0.30346402834858566,
+      "port": {
+        "chosen_port_y_m": -0.13,
+        "port_length_total_m": 0.22,
+        "port_area_m2": 0.002827433388,
+        "port_area_cm2": 28.27433388,
+        "port_nfr": 0.12,
+        "port_roundover_m": 0.008,
+        "port_wall_m": 0.003,
+        "neck_for_bassbox_m": 0.20400000000000001,
+        "derived_effective_length_m": 0.25499999999791834,
+        "derived_neck_mm": 204.0,
+        "mouth_radius_mm_from_BL": 43.7430203305,
+        "port_outer_radius_mm": 46.7430203305,
+        "bl_move_radius_mm": 130.25,
+        "bl_wall_budget_mm": {
+          "width_headroom": 118.75,
+          "driver_height_headroom": 100.75,
+          "port_width_headroom": 202.2569796695,
+          "port_height_headroom": 152.2569796695
+        },
+        "driver_port_separation_mm": 228.0,
+        "bl_required_separation_mm": 179.9930203305,
+        "rules_port_fits": "PASS: port needs 237.0 mm (neck 204.0 + flare 30.0 + clearance 3.0) <= internal depth 344.0 mm",
+        "rules_required_mm": 236.9999999987755,
+        "rules_required_with_actual_mouth_mm": 250.7430203305,
+        "rules_internal_depth_mm": 344.0,
+        "bl_rear_wall_required_m": 0.307486040661,
+        "bl_rear_wall_available_m": 0.344,
+        "bl_rear_wall_margin_mm": 36.513959338999996
+      },
+      "lf": {
+        "available": true,
+        "net_volume_l": 114.69653597165141,
+        "tuning_hz": 16.973257568817985,
+        "tuning_convention": "BL port total length 0.22 m -> neck 0.204 m (subtract two 8 mm lips) -> bassbox Leff = neck + N_END*0.85*r_eq (assembled per assemble.py:250-261)",
+        "f3_hz": 58.68596304284,
+        "f10_hz": 29.851956671592266,
+        "f10_source": "bassbox.evaluate SPL curve; 63-120 Hz mean reference, same convention as bassbox._f3_hz",
+        "port_velocity_mps_40hz": 12.603801621468,
+        "port_velocity_mps_63hz": 5.391696308002,
+        "port_velocity_ratio_40": 0.7414000953804706,
+        "port_velocity_ratio_63": 0.31715860635305887,
+        "port_velocity_ratio_max": 0.7414000953804706,
+        "port_velocity_flag_gt1": false,
+        "port_velocity_limit_mps": 17.0,
+        "excursion_margin_db": null,
+        "limiting_40hz": "xmax",
+        "limiting_63_120hz": "xmax",
+        "evaluate_box_statuses": {
+          "port": "PASS: port needs 244.0 mm (neck 204.0 + flare 30.0 + clearance 10.0) <= internal depth 344.0 mm",
+          "driver_and_brace": "PASS: driver + brace needs 165.6 mm <= internal depth 344.0 mm and frame OD 315.2 mm fits the baffle",
+          "wall": "PASS: wall 18.0 mm >= minimum 12.0 mm"
+        },
+        "spl_curve_samples_db_re_1v_1m_halfspace": {
+          "20": 71.54527742038509,
+          "25": 73.5639032274767,
+          "30": 75.47097257687143,
+          "40": 78.58830293726653,
+          "50": 80.89338380188872,
+          "63": 83.04961368994711,
+          "80": 84.9578884867837,
+          "100": 86.4140873205366,
+          "120": 87.36887293737935,
+          "150": 88.26987212623519
+        }
+      },
+      "real_frame_panel_fit": {
+        "frame_od_mm": 315.2,
+        "cutout_mm": 283.0,
+        "mounting_depth_behind_baffle_mm": 140.6,
+        "clearance_mm": 3.0,
+        "wall_mm": 18.0,
+        "convention": "frame radius + 3 mm <= external/2 - wall (internal panel half-extent); reproduces README 5.5 minimum 360x400 for this frame",
+        "driver_at_centre_line": {
+          "width_headroom_mm": 91.4,
+          "height_headroom_mm": 171.4,
+          "frame_pass": true,
+          "port_separation_mm": 130.0,
+          "required_separation_mm": 207.3430203305,
+          "port_separation_pass": false,
+          "pass": false
+        },
+        "driver_at_y98": {
+          "height_headroom_mm": 73.39999999999998,
+          "frame_pass": true,
+          "port_separation_mm": 228.0,
+          "port_separation_pass": true,
+          "pass": true
+        },
+        "legal_driver_y_window_at_chosen_port_mm": [
+          77.3430203305,
+          171.4
+        ],
+        "legal_driver_y_window_empty": false,
+        "legal_driver_y_window_at_bottom_port_mm": [
+          -74.91395933899997,
+          171.4
+        ],
+        "legal_driver_y_window_at_bottom_port_empty": true,
+        "external_face_check": {
+          "width_headroom_mm": 109.4,
+          "height_y98_headroom_mm": 91.39999999999998,
+          "width_pass": true,
+          "height_y98_pass": true
+        },
+        "note": "BL's own validator uses the 260.5 mm moving diameter, not this 315.2 mm frame; the frame is checked separately here"
+      },
+      "horn_pose": {
+        "mesh": "system_runs/system/ref_case/horn_full/lecleach_rollback_1in_v6_9e02db06ecc3/mesh.msh",
+        "group": "SD1D1001",
+        "dz_mm": 13.0,
+        "min_legal_dy_at_dz13_mm": null,
+        "min_legal_dy_at_dz0_mm": 368.6741572376342,
+        "centre_spacing_at_dz0_mm": 270.6741572376342,
+        "note": "At dz=13 mm every SD1D1001 point has z+13 >= 10 mm > the 3 mm baffle-plane threshold, so the seated-overhang policy finds no rear geometry and returns None (cantilever). dz=0 values are the policy reference; the README's p2b pose retains dy=268.674 mm at dz=13 (system_runs/poses_2026-11-22/p2b_overhang_dz013.json)."
+      },
+      "baffle_step_hz": 202.18572400192627,
+      "largest_external_dimension_mm": 700.0,
+      "largest_dimension_characteristic_hz": {
+        "c_over_pi_L": 155.97184423005743,
+        "c_over_2L": 245.00000000000003
+      }
+    },
+    "D": {
+      "external_mm": [
+        420.0,
+        620.0,
+        420.0
+      ],
+      "internal_mm": [
+        384.0,
+        584.0,
+        384.0
+      ],
+      "wall_mm": 18.0,
+      "front_area_mm2": 260400.0,
+      "external_volume_l": 109.368,
+      "empty_internal_volume_l": 86.114304,
+      "nominal_alignment_vb_l": null,
+      "bl_generation": {
+        "ok": true,
+        "case_dir": "system_runs/system/hf_d2_cabinet_2026-11-22/20261123T012306Z-vented-29388-4c3be5b0",
+        "error": null,
+        "air_volume_m3": 0.0856891759716514,
+        "air_volume_l": 85.68917597165141,
+        "mesh_info": {
+          "interior": {
+            "nodes": 8427,
+            "triangles": 7596,
+            "tetrahedra": 40269
+          },
+          "exterior": {
+            "nodes": 2314,
+            "triangles": 4624,
+            "tetrahedra": 0
+          },
+          "air_volume_m3": 0.0856891759716514,
+          "gmsh_version": "4.15.2"
+        },
+        "mesh_info_sha256": "241907f369aaa53d4bd3c6cbeed1e377ca02d9d131fb4529697cd606f49b895b",
+        "port_mouth_diameter_m": 0.087486040661,
+        "overrides": {
+          "cap_diameter_m": 0.05,
+          "cone_depth_m": 0.04,
+          "depth_m": 0.42,
+          "detail_size_m": 0.009,
+          "driver_diameter_m": 0.2605,
+          "driver_y_m": 0.098,
+          "height_m": 0.62,
+          "mesh_size_m": 0.03,
+          "port_area_m2": 0.002827433388,
+          "port_length_m": 0.22,
+          "port_nfr": 0.12,
+          "port_roundover_m": 0.008,
+          "port_wall_m": 0.003,
+          "port_y_m": -0.13,
+          "surround_width_m": 0.012,
+          "wall_m": 0.018,
+          "width_m": 0.42
+        }
+      },
+      "delta_vs_empty_internal_l": -0.4251280283485954,
+      "delta_vs_empty_internal_pct": -0.4936787602075904,
+      "delta_vs_nominal_alignment_l": null,
+      "port": {
+        "chosen_port_y_m": -0.13,
+        "port_length_total_m": 0.22,
+        "port_area_m2": 0.002827433388,
+        "port_area_cm2": 28.27433388,
+        "port_nfr": 0.12,
+        "port_roundover_m": 0.008,
+        "port_wall_m": 0.003,
+        "neck_for_bassbox_m": 0.20400000000000001,
+        "derived_effective_length_m": 0.25499999999791834,
+        "derived_neck_mm": 204.0,
+        "mouth_radius_mm_from_BL": 43.7430203305,
+        "port_outer_radius_mm": 46.7430203305,
+        "bl_move_radius_mm": 130.25,
+        "bl_wall_budget_mm": {
+          "width_headroom": 58.75,
+          "driver_height_headroom": 60.75,
+          "port_width_headroom": 142.2569796695,
+          "port_height_headroom": 112.2569796695
+        },
+        "driver_port_separation_mm": 228.0,
+        "bl_required_separation_mm": 179.9930203305,
+        "rules_port_fits": "PASS: port needs 237.0 mm (neck 204.0 + flare 30.0 + clearance 3.0) <= internal depth 384.0 mm",
+        "rules_required_mm": 236.9999999987755,
+        "rules_required_with_actual_mouth_mm": 250.7430203305,
+        "rules_internal_depth_mm": 384.0,
+        "bl_rear_wall_required_m": 0.307486040661,
+        "bl_rear_wall_available_m": 0.384,
+        "bl_rear_wall_margin_mm": 76.513959339
+      },
+      "lf": {
+        "available": true,
+        "net_volume_l": 85.68917597165141,
+        "tuning_hz": 19.637100793766454,
+        "tuning_convention": "BL port total length 0.22 m -> neck 0.204 m (subtract two 8 mm lips) -> bassbox Leff = neck + N_END*0.85*r_eq (assembled per assemble.py:250-261)",
+        "f3_hz": 59.683477281654,
+        "f10_hz": 31.38680989998079,
+        "f10_source": "bassbox.evaluate SPL curve; 63-120 Hz mean reference, same convention as bassbox._f3_hz",
+        "port_velocity_mps_40hz": 16.273251539204,
+        "port_velocity_mps_63hz": 7.196850987817,
+        "port_velocity_ratio_40": 0.9572500905414119,
+        "port_velocity_ratio_63": 0.4233441757539412,
+        "port_velocity_ratio_max": 0.9572500905414119,
+        "port_velocity_flag_gt1": false,
+        "port_velocity_limit_mps": 17.0,
+        "excursion_margin_db": null,
+        "limiting_40hz": "xmax",
+        "limiting_63_120hz": "xmax",
+        "evaluate_box_statuses": {
+          "port": "PASS: port needs 244.0 mm (neck 204.0 + flare 30.0 + clearance 10.0) <= internal depth 384.0 mm",
+          "driver_and_brace": "PASS: driver + brace needs 165.6 mm <= internal depth 384.0 mm and frame OD 315.2 mm fits the baffle",
+          "wall": "PASS: wall 18.0 mm >= minimum 12.0 mm"
+        },
+        "spl_curve_samples_db_re_1v_1m_halfspace": {
+          "20": 70.92632110113817,
+          "25": 73.03815155207471,
+          "30": 75.0066626057354,
+          "40": 78.27527180372901,
+          "50": 80.72571338585888,
+          "63": 83.02546875434953,
+          "80": 85.04501055384247,
+          "100": 86.5576521849524,
+          "120": 87.52649800041488,
+          "150": 88.41698804867364
+        }
+      },
+      "real_frame_panel_fit": {
+        "frame_od_mm": 315.2,
+        "cutout_mm": 283.0,
+        "mounting_depth_behind_baffle_mm": 140.6,
+        "clearance_mm": 3.0,
+        "wall_mm": 18.0,
+        "convention": "frame radius + 3 mm <= external/2 - wall (internal panel half-extent); reproduces README 5.5 minimum 360x400 for this frame",
+        "driver_at_centre_line": {
+          "width_headroom_mm": 31.400000000000006,
+          "height_headroom_mm": 131.4,
+          "frame_pass": true,
+          "port_separation_mm": 130.0,
+          "required_separation_mm": 207.3430203305,
+          "port_separation_pass": false,
+          "pass": false
+        },
+        "driver_at_y98": {
+          "height_headroom_mm": 33.39999999999998,
+          "frame_pass": true,
+          "port_separation_mm": 228.0,
+          "port_separation_pass": true,
+          "pass": true
+        },
+        "legal_driver_y_window_at_chosen_port_mm": [
+          77.3430203305,
+          131.4
+        ],
+        "legal_driver_y_window_empty": false,
+        "legal_driver_y_window_at_bottom_port_mm": [
+          -34.913959339,
+          131.4
+        ],
+        "legal_driver_y_window_at_bottom_port_empty": true,
+        "external_face_check": {
+          "width_headroom_mm": 49.400000000000006,
+          "height_y98_headroom_mm": 51.39999999999998,
+          "width_pass": true,
+          "height_y98_pass": true
+        },
+        "note": "BL's own validator uses the 260.5 mm moving diameter, not this 315.2 mm frame; the frame is checked separately here"
+      },
+      "horn_pose": {
+        "mesh": "system_runs/system/ref_case/horn_full/lecleach_rollback_1in_v6_9e02db06ecc3/mesh.msh",
+        "group": "SD1D1001",
+        "dz_mm": 13.0,
+        "min_legal_dy_at_dz13_mm": null,
+        "min_legal_dy_at_dz0_mm": 328.6741572376342,
+        "centre_spacing_at_dz0_mm": 230.67415723763418,
+        "note": "At dz=13 mm every SD1D1001 point has z+13 >= 10 mm > the 3 mm baffle-plane threshold, so the seated-overhang policy finds no rear geometry and returns None (cantilever). dz=0 values are the policy reference; the README's p2b pose retains dy=268.674 mm at dz=13 (system_runs/poses_2026-11-22/p2b_overhang_dz013.json)."
+      },
+      "baffle_step_hz": 259.9530737167624,
+      "largest_external_dimension_mm": 620.0,
+      "largest_dimension_characteristic_hz": {
+        "c_over_pi_L": 176.09724348554872,
+        "c_over_2L": 276.61290322580646
+      }
+    }
+  },
+  "sources": {
+    "empty_internal_volume": "[computed] (W-2*18)(H-2*18)(D-2*18); wall 18 mm from vented_overrides.json:5",
+    "bl_air_volume": "[measured] BL generator mesh_info.json air_volume_m3; adapter hornlab_search/system/boundarylab/generate.py:144-226, runner_vented.py:94-107",
+    "port_neck_flare_rule": "[computed] hornlab_search/system/geometry/rules.py:53-85 check_port_fits, clearance_mm=3 (DEFAULT is 10 at rules.py:36)",
+    "port_neck": "[computed] hornlab_search/system/bass_reference.py:103-118; bassbox.py:203-204; N_END bassbox.py:115",
+    "tuning": "[computed] tools/bassbox.py port_tuning_hz (inverse of port_effective_length); mapping boundarylab/assemble.py:250-261",
+    "f3": "[computed] bass_reference.py:285-331 lf_report_row -> bassbox.py:457 _f3_hz",
+    "f10": "[computed] bassbox.evaluate SPL; same 63-120 Hz mean as _f3_hz, -10 dB crossing",
+    "port_velocity": "[computed] bass_reference.py:306-328 at AES voltage ceiling; limit bassbox.py:112 PORT_AIR_MPS_MAX=17 m/s",
+    "real_frame_fit": "[computed] frame radius 157.6 + 3 mm vs internal half-extents; convention matches docs/evidence/horn_over_cabinet_2026-11-22/README.md 5.5 and cabinet_fit.json",
+    "bl_moving_validator": "[measured, BL] C:/Users/hunte/Github/boundary-lab/geometry_providers/vented_enclosure/enclosure/parameters.py:100-105 (uses driver_diameter_m, not the 315.2 frame)",
+    "horn_min_dy": "[computed] hornlab_search/system/assembly_pose.py:206-228 min_legal_dy_mm on SD1D1001 points; dz=13 mm",
+    "baffle_step": "[computed] c/(pi*W), c=343 m/s [assumed]"
+  },
+  "label_key": {
+    "measured": "BL-generated artifact value",
+    "computed": "analytic/derived from stated source",
+    "assumed": "chosen input not measured (wall 18 mm given; port_y -0.130 m chosen; c=343 m/s)"
+  }
+}

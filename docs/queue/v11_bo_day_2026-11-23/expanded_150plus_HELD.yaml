@@ -1,0 +1,628 @@
+night: v11_bo_day_expanded_150plus_2026-11-23
+lane: gpu
+pause: true
+watchdog:
+  min_attempts: 20
+  refusal_window: 30
+  refusal_max: 0.45
+jobs:
+- id: cma150_fold_81201
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_fold_h_deg
+    - az_fold_h_width_deg
+    - az_fold_v_deg
+    - az_fold_v_width_deg
+    - az_s_cos2_amp
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/round3_2026-11-22/r3_v11_fold.yaml
+  - --mode
+  - screen
+  - --budget
+  - '55'
+  - --cma-seed
+  - '81201'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/fold_v11_fixed_box
+- id: cma150_ext_81221
+  kind: command
+  timeout_s: 3900
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_s_cos2_amp
+    - s
+    - throat_ext_angle_deg
+    - throat_ext_length_mm
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_ext_throat_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81221'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_ext_throat_v11
+- id: cma150_c400_81241
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_fold_h_deg
+    - az_fold_h_width_deg
+    - az_fold_v_deg
+    - az_fold_v_width_deg
+    - az_s_cos2_amp
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/round4_2026-11-23/c400_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81241'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/compact400_v11
+- id: cma150_twinray_81211
+  kind: command
+  timeout_s: 5400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_fold_v_deg
+    - az_fold_v_width_deg
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_twinray_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81211'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_twinray_v11
+- id: cma150_petal_81231
+  kind: command
+  timeout_s: 3900
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_a_sf_amp
+    - az_s_cos2_amp
+    - k
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_core_petal_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81231'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_core_petal_v11
+- id: cma150_morph_81251
+  kind: command
+  timeout_s: 3900
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_s_cos2_amp
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_morph_v11_port.yaml
+  - --mode
+  - screen
+  - --budget
+  - '55'
+  - --cma-seed
+  - '81251'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_morph_v11
+- id: cma150_room_81261
+  kind: command
+  timeout_s: 4200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - g_L_mm
+    - g_a_h_deg
+    - g_a_v_deg
+    - g_k_v
+    - g_n
+    - g_r_lip_mm
+    - g_s
+    - g_s_v
+    - g_sf_ab
+    - g_sf_amt
+    - g_wrap_deg
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/round4_2026-11-23/room_w90x50_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '55'
+  - --cma-seed
+  - '81261'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/room_w90x50_v11
+- id: cma150_ext_81222
+  kind: command
+  timeout_s: 3900
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_s_cos2_amp
+    - s
+    - throat_ext_angle_deg
+    - throat_ext_length_mm
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_ext_throat_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81222'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_ext_throat_v11
+- id: cma150_twinray_81212
+  kind: command
+  timeout_s: 5400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_fold_v_deg
+    - az_fold_v_width_deg
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_twinray_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81212'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_twinray_v11
+- id: cma150_c400_81242
+  kind: command
+  timeout_s: 3600
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_fold_h_deg
+    - az_fold_h_width_deg
+    - az_fold_v_deg
+    - az_fold_v_width_deg
+    - az_s_cos2_amp
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/round4_2026-11-23/c400_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81242'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/compact400_v11
+- id: cma150_petal_81232
+  kind: command
+  timeout_s: 3900
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_a_sf_amp
+    - az_s_cos2_amp
+    - k
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_core_petal_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81232'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_core_petal_v11
+- id: cma150_morph_81252
+  kind: command
+  timeout_s: 3900
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_s_cos2_amp
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_morph_v11_port.yaml
+  - --mode
+  - screen
+  - --budget
+  - '55'
+  - --cma-seed
+  - '81252'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_morph_v11
+- id: cma150_room_81262
+  kind: command
+  timeout_s: 4200
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - g_L_mm
+    - g_a_h_deg
+    - g_a_v_deg
+    - g_k_v
+    - g_n
+    - g_r_lip_mm
+    - g_s
+    - g_s_v
+    - g_sf_ab
+    - g_sf_amt
+    - g_wrap_deg
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/round4_2026-11-23/room_w90x50_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '55'
+  - --cma-seed
+  - '81262'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/room_w90x50_v11
+- id: cma150_ext_81223
+  kind: command
+  timeout_s: 3900
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_s_cos2_amp
+    - s
+    - throat_ext_angle_deg
+    - throat_ext_length_mm
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_ext_throat_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81223'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_ext_throat_v11
+- id: cma150_twinray_81213
+  kind: command
+  timeout_s: 5400
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_fold_v_deg
+    - az_fold_v_width_deg
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_twinray_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81213'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_twinray_v11
+- id: cma150_petal_81233
+  kind: command
+  timeout_s: 3900
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_a_sf_amp
+    - az_s_cos2_amp
+    - k
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_core_petal_v11_open.yaml
+  - --mode
+  - screen
+  - --budget
+  - '60'
+  - --cma-seed
+  - '81233'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_core_petal_v11
+- id: cma150_morph_81253
+  kind: command
+  timeout_s: 3900
+  env:
+    HORNLAB_GPU_LOCK: refuse
+  watchdog:
+    pin_ignore:
+    - L_mm
+    - a0_deg
+    - a_deg
+    - az_a_cos_amp
+    - az_a_cos_pow
+    - az_s_cos2_amp
+    - k
+    - morph_corner_mm
+    - morph_height_mm
+    - morph_rate
+    - morph_width_mm
+    - n
+    - q
+    - s
+    no_gain_valid: 100
+    stall_valid: 100
+  argv:
+  - .venv/Scripts/hornlab-search.exe
+  - search
+  - --config
+  - examples/typologies/v11_bo_day_2026-11-23/home_morph_v11_port.yaml
+  - --mode
+  - screen
+  - --budget
+  - '55'
+  - --cma-seed
+  - '81253'
+  - --dataset-dir
+  - dataset
+  - --cache-dir
+  - runs/v11_bo_day_cache/home_morph_v11

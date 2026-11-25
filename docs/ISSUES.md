@@ -1,5 +1,25 @@
 ﻿# ISSUES
 
+## 2026-11-25 - Metric-aware BO release and admission queue
+
+- DONE: integrated metric-aware worker/refit/package/CLI; clean Home v11 Fold canary (8+2 calls,
+  two refits, post-refit proposals); 2-of-3 acquisition PASS; adaptive 20-screen tranche staged and
+  held (child `a5d78f8d...`, package `7c64fd32...`); generated recipe seam fixed (c500 211/211,
+  FAV 184/184, room 193/193); native/900 Hz admission holdouts run; regression 512 passed.
+- OPEN: release the held canaries/tranche when GPU time is authorized - Home Fold adaptive 20
+  screen (`v11_fold_metric_adaptive20_HELD.yaml`), home_morph `9c6264f5...`, home_twinray
+  `80cacbf7...`, home_petal `4b09ef22...`, photo twinray 900 `506a72fa...`. Each approval record
+  is `HELD_PENDING_PARENT_RELEASE`; flip status/authorized and insert the queue job.
+- OPEN: `r3_c500` strict study cannot build a pool (`metric pool artifact has no candidates`); the
+  generated study needs a generator-aware pool source before a c500 canary.
+- OPEN: FAV (184 rows) and room_w90x50 (193 rows) replay exactly but still need strict artifacts and
+  frozen holdouts before admission.
+- OPEN: `home_ext_throat_v11_open` counts 180 valid rows but only 1/180 encodes in the current
+  config's projection; recover the original config/box before admission.
+- OPEN: commit/push done in this pass; CONTINUITY/INDEX/CODE_MAP/ACTIVE_STATE updated.
+- OPEN (pre-existing): `test_dataset_manifest` v11 version-set drift and the dataset-store
+  500-append timing flake; leave to their owners.
+
 ## 2026-11-25 - Variable mesh audit (factor 1.5 supported; route limits)
 
 - DONE: regional audit from producer geometry proves formula-route grading; 0% unknown on formula classes. [Evidence](evidence/variable_mesh_2026-11-23/README.md)
@@ -18,28 +38,22 @@
 - OPEN: the parent 80-row closed identity is not pooled (brief + box changed = new identity); keep it archived, do not merge without acoustic-parity evidence.
 - OPEN: verify-grid confirmation of the finalist; size post-filter (1.0-1.15 is unpenalised in J) before any build.
 
-## 2026-11-25 - CD wall-angle backbone (rolled, Lamé) and cross-family survey
+## 2026-11-24 — size-aware constraints
 
-- DONE: `cd-backbone-v1` construction (`_cd_backbone_v1.py`, `cd_backbone_family.py`; kinds `rolled_family_rect_bb_v1`, `klangfilm_lame_hv_bb_v1`), 32 CPU tests, neutral controls byte-identical to saved meshes. [Evidence](evidence/cd_backbone_2026-11-25/README.md)
-- DONE: rolled recipe `bb_h` 0.65 / throat 0.25 passes all six predeclared rules and the epw-9 gate on two rolled bodies (8 kHz H 54.8 → 68.5°, 54.5 → 68.3°). Tool `tools/geometry/apply_cd_backbone.py`.
-- OPEN: Lamé CD variant fails (2.3–2.7 kHz waistband, loading 0.55–0.61 < 0.617); needs a mouth/rollback or depth change.
-- OPEN: labeled CD variants of non-CD families (Le Cléac'h AR/asym, Iwata AR, Salmon elliptical, Klangfilm parent) on the v11cd brief; needs a generic-rows parent path in the adapter.
-- OPEN: bempp cross-check of the rolled keeper; V lever (owner decision); 2-inch CP-850Nd outlet drawing.
+- OPEN: authoritative printed and mounted dimensions, near-limit full-family validation, and numerical floor for directivity changes. Native BO uses an inner-sheet estimate before the final mesh check.
+- OPEN: production promotion needs explicit cross-envelope acoustic identity parity and a real paired scalar/CMA benchmark. Synthetic boundary selection and same-grid finalist verification cover separate acceptance gates.
+- [Evidence and next slices](evidence/size_aware_2026-11-24/HANDOFF.md).
 
-## 2026-11-23 - Overnight top-up and updated sheets
+## 2026-11-21 - Optimizer audit P0/P1 implementation
 
-- DONE: `bo_data_topup_2026-11-22` 6/6; new accepted screen rows pool into the BO cohorts and continue the CMA search.
-- CHANGED: three screen bests improved overnight — compact500 Crowe 1.70512, FAV 3.30792, v11 Fold 3.42866. The 2026-11-22 gallery was re-rendered and republished.
-- OPEN: none of the open-envelope winners is verify-grid confirmed.
-- OPEN (size): compact400 474 mm, compact500 770 mm and FAV 720 mm exceed their old build cubes; the size filter decision is still outstanding.
-
-## 2026-11-22 - Open-envelope search and 2026-11-22 horn renders
-
-- DONE: the brief size envelope is switchable off per brief (`envelope.enforce: false`, `sanity_max_mm` default 1200 mm). One helper (`config.effective_envelope_limits`) feeds the post-mesh gate, both pre-mesh estimators and `tools/shape_check.py`; the default is byte-identical. Focused tests 84 passed.
-- DONE: 200 dpi contact sheets with V/H section cuts, V/H dispersion and scores for the eight family leaders at `docs/renders/2026-11-22-best-horns/`.
-- OPEN: the open-envelope winners are screen-grid only. None is verify-grid confirmed.
-- OPEN (size): compact400 474 mm, compact500 719 mm and FAV 730 mm exceed their old build cubes; decide the size filter/limit before any build or cross-run comparison. The `*_open` briefs are new identities, so their J must not be ranked against closed-envelope runs or the published floors.
-- OPEN (known, unchanged): full offline profile still carries the seven pre-existing other-lane failures recorded on 2026-11-21.
+- DONE (P0a): CMA-MAE split search/result archives; exports come from the hard best-in-cell archive; `archive_learning.json` is a labelled diagnostic; protocol `cma-me-archive-v3`; v2 resumes refused. [Status](research/optimizer_audit_2026-11-21/IMPLEMENTATION_STATUS.md).
+- DONE (P0b): full-identity floor registry + identity-aware continuation advice + typed optimizer-switch outcome counts; compact400 is not assigned the generic v10 floor.
+- DONE (P0c): opt-in v10/v11 production study admission and metric dispatch; v11 has its own metric identity; derived arm configs with unchanged task identity are admitted.
+- DONE (P1a/P1b/P1c): composed advisory report, opt-in covariance warm start, matched-benchmark plan/report. No job was launched.
+- OPEN (by design): the two historical v2 CMA-ME run dirs are non-resumable after the v3 archive correction; they remain read-only evidence.
+- OPEN: P2 QD descriptor study and cost-aware BO pilot require the audit's matched real-BEM authorization and owner GPU approval.
+- OPEN: floor entries mark backend/quadrants/epw/exact-grid as `unverified_fields` because the published floor artifacts do not store them; persist these on the next floor re-measure.
+- OPEN (pre-existing, not touched): full offline profile remains at 7 failures (v8 registration x2, score_identities, preflight history, B8 `study_jobs` Popen, v11 dataset census, scout40 queue count).
 
 ## 2026-11-21 - System closeout: R5a/R7a/WP6/backend
 

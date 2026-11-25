@@ -1,0 +1,12 @@
+extends: ../v11_bo_day_2026-11-23/home_morph_v11_port.yaml
+name: photo_osse_morph_xo900_v11
+description: Native OSSE Morph seeded from adf7e74388f0; closed HOME XO900 v11.
+brief: null
+brief_file: ../../briefs/home_xo900_2026-11-20/room_landscape_80x50_900_hf1440_v11cd.yaml
+search:
+  budget: 150
+  max_attempts: 900
+  budget_counts: valid
+  sigma0: 0.10
+  infeasible_penalty: resample_strict
+  error_policy: retry_same_then_stop

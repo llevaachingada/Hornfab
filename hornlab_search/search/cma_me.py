@@ -28,6 +28,14 @@ Archive correctness (S1/F1)
   eligibility mask excludes every non-complete evaluation from ``GridArchive.add`` while stitching
   back full-batch ``add_info`` arrays (status 0, finite value strictly below every eligible value).
   Invalid rows therefore never become elites, and no row is dropped from ``tell`` or re-asked.
+* The two archives do NOT share threshold semantics. Only the *search* archive is soft when
+  ``search.qd.maes`` is set (CMA-MAE: ``learning_rate`` in [0.01, 0.1], finite
+  ``threshold_min = -j_threshold``). The *result* archive is ALWAYS hard (``learning_rate=1.0``,
+  ``threshold_min=-inf``) so its cells hold the best design ever seen, not the last design that
+  crossed a decayed learning threshold. ``archive.json`` and the GUI-consumed
+  ``archive_heatmap.json`` are exported from the hard result archive; when ``maes`` is set the soft
+  search archive is additionally written to ``archive_learning.json`` as a clearly labelled
+  diagnostic that the atlas never reads.
 * A small ``RankerBase`` ranks excluded failures last through the supported ranker API, without
   setting ``status != 0`` (which would corrupt ribs' ``new_sols`` count). This changes invalid
   admission/ranks for runs with failures; it is NOT trajectory-neutral and it is NOT feasible-only
@@ -78,9 +86,15 @@ DESCRIPTOR_RANGE_DEG = (0.0, 180.0)
 #: atlas may be.
 ARCHIVE_REFRESH_EVALS = 25
 
-#: Resume-protocol marker for the failure-excluding archive semantics (S1/F1). An existing
-#: run.json carrying a different/missing marker is refused rather than silently reinterpreted.
-QD_PROTOCOL = "cma-me-archive-v2"
+#: Resume-protocol marker for the failure-excluding archive semantics (S1/F1) and the split
+#: search/result archive thresholds. An existing run.json carrying a different/missing marker is
+#: refused rather than silently reinterpreted.
+QD_PROTOCOL = "cma-me-archive-v3"
+
+#: Older cma_me protocols whose result archive shared the CMA-MAE soft thresholds with the search
+#: archive. They cannot be resumed: v3 always exports a hard best-in-cell result archive, so the
+#: old cells mean something different. Kept only to give an explicit refusal message.
+QD_LEGACY_RESULT_ARCHIVE_PROTOCOLS = ("cma-me-archive-v2",)
 QD_FAILURE_EXCLUSION_POLICY = "failure_excluding_grid_archive"
 QD_FAILURE_EXCLUSION_VERSION = 1
 QD_DETERMINISTIC_REFUSAL_POLICY = "legacy_finite_penalty_for_qd_v1"
@@ -283,6 +297,33 @@ else:  # pragma: no cover
             raise ImportError("FailureExcludingGridArchive requires the ribs package")
 
 
+def make_qd_archive(*, soft: bool, solution_dim: int, bins, seed: int,
+                    maes: dict | None = None) -> FailureExcludingGridArchive:
+    """Build one failure-excluding GridArchive with explicit threshold semantics.
+
+    ``soft=True`` is the CMA-MAE **search/learning** archive: ``learning_rate`` and the finite
+    ``threshold_min = -j_threshold`` come from ``search.qd.maes``. ``soft=False`` is the **hard**
+    best-in-cell archive the scheduler uses as its result archive and that the exported atlas
+    files describe: ``learning_rate=1.0`` and ``threshold_min=-inf``, i.e. plain CMA-ME
+    improvement values (a cell only changes when a strictly better objective arrives).
+
+    Kept as a module-level factory so the regression tests can construct the exact archive pair
+    production uses without duplicating the threshold policy.
+    """
+    if soft:
+        if not isinstance(maes, dict):
+            raise ValueError("a soft CMA-MAE archive requires the search.qd.maes block")
+        learning_rate = float(maes["learning_rate"])
+        threshold_min = -float(maes["j_threshold"])
+    else:
+        learning_rate = 1.0
+        threshold_min = -np.inf
+    return FailureExcludingGridArchive(
+        solution_dim=int(solution_dim), dims=list(bins),
+        ranges=[DESCRIPTOR_RANGE_DEG, DESCRIPTOR_RANGE_DEG],
+        learning_rate=learning_rate, threshold_min=threshold_min, seed=int(seed))
+
+
 if _RankerBase is not None:
 
     class _FailureLastRanker(_RankerBase):
@@ -370,31 +411,28 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                  warm_record["mean_objective"], sigma0_eff)
     solution_dim = int(len(x0))
 
-    # B.8 (opt-in): search.qd.maes turns the CMA-ME archive into a CMA-MAE soft archive
+    # B.8 (opt-in): search.qd.maes turns the SEARCH archive into a CMA-MAE soft archive
     # (Fontaine & Nikolaidis 2023): learning_rate in [0.01, 0.1] and threshold_min = the NEGATIVE
     # J threshold (the archive MAXIMISES -J = -(-1000) = 1000 for refusal-penalty rows), the
-    # emitter ranks with "imp". Legacy CMA-MAE keeps its unbounded emitter; the
-    # rolled family uses unit bounds so distinct asks cannot collapse by clipping.
+    # emitter ranks with "imp". The RESULT archive stays hard regardless: it must keep the best
+    # design ever seen in each cell, because archive.json / archive_heatmap.json are derived from
+    # it. Legacy CMA-MAE keeps its unbounded emitter; the rolled family uses unit bounds so
+    # distinct asks cannot collapse by clipping.
     maes = qd.get("maes") if isinstance(qd, dict) else None
     family_bounded = False
     if maes:
         from ..design.generators.rolled_family import is_family_spec
         family_bounded = is_family_spec(getattr(cfg, "generator", None))
 
-    def make_archive() -> FailureExcludingGridArchive:
-        kwargs = dict(solution_dim=solution_dim, dims=list(bins),
-                      ranges=[DESCRIPTOR_RANGE_DEG, DESCRIPTOR_RANGE_DEG],
-                      seed=int(cfg.search.seed))
-        if maes:
-            kwargs["learning_rate"] = float(maes["learning_rate"])
-            kwargs["threshold_min"] = -float(maes["j_threshold"])
-        return FailureExcludingGridArchive(**kwargs)
-
     if maes:
-        log.info("CMA-MAE: archive learning_rate %.4g, threshold_min %.6g (J threshold %.6g)",
+        log.info("CMA-MAE: search archive learning_rate %.4g, threshold_min %.6g (J threshold "
+                 "%.6g); result archive is hard (learning_rate 1.0, threshold_min -inf)",
                  maes["learning_rate"], -maes["j_threshold"], maes["j_threshold"])
-    archive = make_archive()
-    result_archive = make_archive()            # Scheduler requires a distinct result archive
+    archive = make_qd_archive(soft=bool(maes), solution_dim=solution_dim, bins=bins,
+                              seed=int(cfg.search.seed), maes=maes)
+    # Scheduler requires a distinct result archive; it is ALWAYS the hard best-in-cell archive.
+    result_archive = make_qd_archive(soft=False, solution_dim=solution_dim, bins=bins,
+                                     seed=int(cfg.search.seed))
     emitter = EvolutionStrategyEmitter(
         archive, x0=np.asarray(x0, dtype=float), sigma0=sigma0_eff,
         ranker=(lambda seed: _FailureLastRanker(seed, maes=bool(maes))),
@@ -525,24 +563,29 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
             state["solve_fail_streak"] = 0
         return ev, attempts, out
 
-    def archive_payload() -> dict:
+    def archive_payload(arc=None) -> dict:
         """The pinned ``archive.json`` payload: occupied cells only, sorted by (bin_h, bin_v).
+
+        The default archive is the HARD result archive (best-in-cell), which is what the exported
+        atlas must always describe. ``arc`` is passed explicitly only for the CMA-MAE
+        ``archive_learning.json`` diagnostic.
 
         Cells carry the MINIMISATION objective (``objective`` = -archive objective, i.e. the same J
         as best.json) and the ndjson row number (``eval_no``) of the design that owns the cell. The
         stats are cumulative over every resume (they are read back from search.ndjson); the archive
         itself is rebuilt deterministically by replaying the same tells, so a resumed run ends with
         the same cells / ranges as an uninterrupted one."""
+        arc = result_archive if arc is None else arc
         eval_no = {}
         rows = read_ndjson(run_dir / "search.ndjson")
         for r in rows:
             eval_no.setdefault(str(r.get("design_hash")), r.get("n"))
         cells: list[dict] = []
-        bounds = archive.boundaries
-        data = archive.data()
+        bounds = arc.boundaries
+        data = arc.data()
         ints = np.asarray(data.get("index", []), dtype=np.int64)
         if ints.size:
-            grid = archive.int_to_grid_index(ints)
+            grid = arc.int_to_grid_index(ints)
             objs = np.asarray(data["objective"], dtype=float)
             sols = np.asarray(data["solution"], dtype=float)
             for k in range(len(ints)):
@@ -562,7 +605,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                     "eval_no": eval_no.get(dh),
                 })
         cells.sort(key=lambda c: (c["bin"][0], c["bin"][1]))
-        total_bins = int(archive.cells)
+        total_bins = int(arc.cells)
         occupied = int(len(cells))
         non_cached = sum(1 for r in rows if not r.get("cached"))
         return {
@@ -581,6 +624,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
         }
 
     def write_archive() -> dict:
+        # archive.json + archive_heatmap.json ALWAYS come from the hard best-in-cell result archive.
         payload = archive_payload()
         rundir.write_json_atomic(run_dir / "archive.json", payload)
         # GUI contract: archive_heatmap.json is the ONLY file the read-only atlas consumes, and its
@@ -596,6 +640,19 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
                       for c in payload["cells"]],
         }
         rundir.write_json_atomic(run_dir / "archive_heatmap.json", heat)
+        if maes:
+            # Diagnostic only: the soft CMA-MAE search archive. It is never the atlas source.
+            learning = archive_payload(archive)
+            learning.update({
+                "role": "learning_archive_diagnostic",
+                "diagnostic": True,
+                "learning_rate": float(maes["learning_rate"]),
+                "threshold_min": -float(maes["j_threshold"]),
+                "note": ("CMA-MAE soft search/learning archive. NOT the exported atlas: "
+                         "archive.json and archive_heatmap.json always come from the hard "
+                         "best-in-cell result archive."),
+            })
+            rundir.write_json_atomic(run_dir / "archive_learning.json", learning)
         return payload
 
     def finish(status: str) -> None:
@@ -614,29 +671,63 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
             upd["best"] = {"design_hash": best.design_hash, "objective": best.objective,
                            "eval_no": state["best_no"]}
         # Present ONLY for cma_me runs; a plain cma run.json keeps exactly today's schema.
-        upd["qd"] = {"algorithm": "cma_me", "protocol": QD_PROTOCOL,
-                     "descriptors": payload["descriptors"],
-                     "bins": payload["bins"], "ranges": payload["ranges"],
-                     "total_bins": payload["stats"]["total_bins"],
-                     "occupied_bins": payload["stats"]["occupied_bins"],
-                     "coverage": payload["stats"]["coverage"],
-                     "total_evals": payload["stats"]["total_evals"],
-                     "non_cached": payload["stats"]["non_cached"],
-                     "descriptor_h_meaning": _describe_descriptor(names[0]),
-                     "descriptor_v_meaning": _describe_descriptor(names[1]),
-                     "failure_exclusion": {
-                         "policy": QD_FAILURE_EXCLUSION_POLICY,
-                         "version": QD_FAILURE_EXCLUSION_VERSION,
-                         "search_archive": True,
-                         "result_archive": True,
-                         "emitter_rank_treatment": "failure_last_ranker",
-                         "mae_feasible_only": False,
-                         "note": ("Archive admission excludes non-complete evaluations; CMA-MAE "
-                                  "threshold learning is NOT feasible-only learning and the "
-                                  "emitter is not isolated from invalid ranks. This correction "
-                                  "changes invalid admission/ranks and is not trajectory-neutral."),
-                     },
-                     "deterministic_refusal_policy": QD_DETERMINISTIC_REFUSAL_POLICY}
+        # ``search_archive`` / ``result_archive`` make the split semantics explicit: only the
+        # search archive is soft under search.qd.maes, while the exported atlas always comes from
+        # the hard best-in-cell result archive.
+        qd_out = {"algorithm": "cma_me", "protocol": QD_PROTOCOL,
+                  "descriptors": payload["descriptors"],
+                  "bins": payload["bins"], "ranges": payload["ranges"],
+                  "total_bins": payload["stats"]["total_bins"],
+                  "occupied_bins": payload["stats"]["occupied_bins"],
+                  "coverage": payload["stats"]["coverage"],
+                  "total_evals": payload["stats"]["total_evals"],
+                  "non_cached": payload["stats"]["non_cached"],
+                  "descriptor_h_meaning": _describe_descriptor(names[0]),
+                  "descriptor_v_meaning": _describe_descriptor(names[1]),
+                  "search_archive": {
+                      "role": "search",
+                      "kind": "cma_mae_soft" if maes else "cma_me_hard",
+                      "learning_rate": float(maes["learning_rate"]) if maes else 1.0,
+                      "threshold_min": -float(maes["j_threshold"]) if maes else "-inf",
+                  },
+                  "result_archive": {
+                      "role": "best_in_cell",
+                      "learning_rate": 1.0,
+                      "threshold_min": "-inf",
+                      "export": ["archive.json", "archive_heatmap.json"],
+                  },
+                  "failure_exclusion": {
+                      "policy": QD_FAILURE_EXCLUSION_POLICY,
+                      "version": QD_FAILURE_EXCLUSION_VERSION,
+                      "search_archive": True,
+                      "result_archive": True,
+                      "shared_mae_thresholds": False,
+                      "emitter_rank_treatment": "failure_last_ranker",
+                      "mae_feasible_only": False,
+                      "note": ("Archive admission excludes non-complete evaluations from BOTH the "
+                               "search/learning archive and the hard best-in-cell result archive. "
+                               "Each archive keeps its own threshold semantics: the search "
+                               "archive is CMA-MAE soft only when search.qd.maes is set, while "
+                               "the result archive is always hard (learning_rate=1.0, "
+                               "threshold_min=-inf). CMA-MAE threshold learning is NOT "
+                               "feasible-only learning and the emitter is not isolated from "
+                               "invalid ranks. The admission correction is not "
+                               "trajectory-neutral."),
+                  },
+                  "deterministic_refusal_policy": QD_DETERMINISTIC_REFUSAL_POLICY}
+        if maes:
+            # The diagnostic soft archive is never the atlas source; label it as such.
+            qd_out["learning_archive"] = {
+                "role": "learning_archive_diagnostic",
+                "file": "archive_learning.json",
+                "learning_rate": float(maes["learning_rate"]),
+                "threshold_min": -float(maes["j_threshold"]),
+                "note": ("Diagnostic only. archive.json and archive_heatmap.json (the latter is "
+                         "the only file the GUI atlas reads) are always exported from the hard "
+                         "best-in-cell result archive; this soft CMA-MAE archive is never fed to "
+                         "the atlas."),
+            }
+        upd["qd"] = qd_out
         if strict:
             upd["qd"]["error_policy"] = "retry_same_then_stop"
             upd["qd"]["error_policy_stats"] = {
@@ -675,7 +766,7 @@ def search(cfg, run_dir, mode="screen", resume=None, *, backend=None, budget: in
             cap_txt = "none" if bc["attempts_cap"] is None else str(bc["attempts_cap"])
             suffix = (f", valid {bc['valid']} (budget counts), refusals free {bc['refused_free']}"
                       f", attempts {bc['attempts']}/{cap_txt}")
-        log.info("CMA-ME %s: %d evaluations (%d new, %d cached), archive %d/%d cells "
+        log.info("CMA-ME %s: %d evaluations (%d new, %d cached), result archive %d/%d cells "
                  "(%.1f%% coverage), best J=%.4f, %d failures %s%s",
                  status, stats["evaluations"], stats["non_cached"], stats["cache_hits"],
                  payload["stats"]["occupied_bins"], payload["stats"]["total_bins"],
@@ -1079,7 +1170,10 @@ def _refuse_incompatible_resume(run_dir: Path) -> None:
     """Refuse an existing cma_me run.json whose archive protocol is missing/different.
 
     archive.json / archive_heatmap.json are derived outputs, but old rows were produced under
-    different admission semantics; reinterpreting them silently would corrupt the archive identity.
+    different admission and/or result-archive threshold semantics; reinterpreting them silently
+    would corrupt the archive identity. Older protocols (v2 and earlier) are never resumed: their
+    result archive shared the CMA-MAE soft thresholds with the search archive, while this build
+    always exports a hard best-in-cell result archive.
     """
     prior = rundir.read_json(Path(run_dir) / "run.json")
     if not isinstance(prior, dict):
@@ -1089,8 +1183,16 @@ def _refuse_incompatible_resume(run_dir: Path) -> None:
         return
     protocol = qd_block.get("protocol")
     if protocol != QD_PROTOCOL:
+        if protocol in QD_LEGACY_RESULT_ARCHIVE_PROTOCOLS:
+            raise ConfigError(
+                f"resume {run_dir}: existing run.json has qd.protocol={protocol!r}; old "
+                f"result-archive semantics cannot be resumed. That protocol exported the CMA-MAE "
+                f"soft search archive (or shared its MAE thresholds) as the result archive, so "
+                f"its cells do not mean the same thing as this build's {QD_PROTOCOL!r} hard "
+                f"best-in-cell result archive. archive.json/archive_heatmap.json cannot be "
+                f"silently reinterpreted; start a new run.")
         raise ConfigError(
             f"resume {run_dir}: existing run.json has qd.protocol={protocol!r}, which is "
-            f"incompatible with this build's {QD_PROTOCOL!r} failure-excluding archive semantics. "
-            f"archive.json/archive_heatmap.json are derived outputs; start a new run or resume an "
-            f"artifact produced by this protocol rather than reinterpreting old archive rows.")
+            f"incompatible with this build's {QD_PROTOCOL!r} archive semantics. "
+            f"archive.json/archive_heatmap.json are derived outputs; start a new run rather than "
+            f"reinterpreting old archive rows.")

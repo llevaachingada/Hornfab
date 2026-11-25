@@ -1,5 +1,56 @@
 ﻿# CONTINUITY
 
+## 2026-11-25 - Metric-aware BO: real canary, adaptive continuation, cohort admission and handoff
+
+- Integrated the `feat/metric-aware-bo` stack (`8c815e2e`) into the canonical tree. Feature-only
+  modules now live in `bo/metric_*.py`, `bo/physical_composite.py`, `studies/metric_study.py`,
+  `studies/metric_refit.py`, `studies/metric_lineage.py`, `studies/metric_intake.py` and
+  `dataset/catalog_identity.py`; canonical `builders.py`/`bo/metrics.py`/`config.py` admission and
+  v11 policy freeze remain authoritative. `studies/production.py` keeps `objective_admission` and
+  adds the metric measurement path; `search/evaluate.py` records `dataset_position` and supports a
+  study-scoped `run_id`.
+- Real worker + durable refit: `metric_composite_v1` routes through `MetricTrainingBinding` and
+  `fit_and_propose(require_identity=True)`; refit every 4 accepted unique screens; immutable
+  `metric-refit-snapshot-v1` published before the append-only pointer; verify/cache/duplicate/
+  failed/parity-refused rows excluded; backend calls counted once and recovered from the journal.
+- Clean Home v11 Fold canary (study `46cd5e1d...`, package `3bf53815...`): 8 screen + 2 verify,
+  refits at 4 and 8 (snapshots `c1c35661...` n=178 and `f4962d41...` n=182), post-refit proposals,
+  best screen 5.121289, verify 4.791516 (`30e9fc43aa80`, 285x256x432 mm, DI 12.45->15.36 dB).
+  A first rehearsal package (`3e16eab7...`) spent 8+2 calls with no refit because the refit
+  validator required a 64-hex catalog id; fixed to the real 16-hex `physical_solve_id`, validated
+  on a copy of the journal, then re-run.
+- Acquisition confirmation (frozen 174 rows): 81271 HOLD (recall 0.50 vs 0.75), 81281 PASS,
+  81291 PASS -> **PASS FOR EXPLORATORY PILOT** on the pre-frozen 2-of-3 rule. The 81271 HOLD stands
+  unretuned; the pre-declared LMC arm passed 81281 but lost on both opened diagnosis slates and was
+  not promoted. Evidence: `runs/v11_bo_day_planning/acquisition_confirmation_2026-11-23/`.
+- Adaptive continuation staged/held: `metric_lineage.promote_metric_refit` promotes the gen-2
+  artifact into child `a5d78f8d...` (182 rows) with explicit lineage; package `7c64fd32...`
+  (`metric-adaptive-20x2`, 20 screen + 2 verify = 28 total), approvals and held queue; dry run 0
+  calls, held execute exit 6.
+- Cohort admission (canonical replay + strict 170-190 row artifact + frozen chronological holdout):
+  PASS `home_morph_v11_port` (metric median 3.654 vs 4.359), `home_twinray_v11_open` (recall 0.75),
+  `home_core_petal_v11_open` (tie), `photo_twinray_xo900_v11` (tie), `r3_c500` (recall 0.00 vs
+  0.50); HOLD `c400_v11_open` (recall 0.25/0.00, best-at-k loss) and `photo_osse_morph_xo900_v11`
+  (recall 0.50/0.75); `home_ext_throat_v11_open` is 1/180 replay (projection mismatch) and not
+  admissible with the current config.
+- Held canaries prepared: home_morph `9c6264f5...`, home_twinray `80cacbf7...`, home_petal
+  `4b09ef22...`, photo twinray 900 `506a72fa...`; combined held queue
+  `docs/queue/v11_bo_day_2026-11-23/native_metric_canaries_HELD.yaml` and the 900 Hz queue. Each
+  dry run made 0 backend calls; held execute refused with exit 6. No launch.
+- Generated-space seam fixed: `study_cohort._metric_candidates` and the run-dir `cohort_lib` are
+  recipe-aware (`metric_intake._historical_design`); c500 211/211, FAV 184/184, room_w90x50 193/193
+  replay. c500 strict artifact (study `77ed21b5...`, checksum `1ec02ccc...`) and holdout PASS;
+  `build_metric_pool` still returns no candidates for the generated study, blocking a c500 package.
+- GUI: opt-in metric panel with identity/revision/observed-vs-predicted/refusal state and the same
+  release gate; 12 new tests plus 123 GUI/study neighbours pass. Generated-space intake 33 tests.
+- Regression: integrated combined suite **512 passed, 0 failed, 0 errors, 0 skipped** (291.8 s);
+  canary/refit/package/CLI 37 passed; generated/cohort seam 45 passed. Pre-existing, not this pass:
+  `test_dataset_manifest` expects objective versions without 11; the dataset-store 500-append
+  timing test is load-sensitive under the live GPU night.
+- Handoff and inventory: `docs/research/metric_bo_2026-11-22/12_HANDOFF_2026-11-24.md`,
+  `runs/v11_bo_day_planning/{CANARY_2026-11-24.md,NEXT_COHORTS_2026-11-24.md}`. Tree committed as
+  a consolidated snapshot; the live night and its screen12k jobs were left untouched.
+
 ## 2026-11-25 - variable mesh audit: 1.5 supported; CAD/mounted inert; density view
 
 - Scope: spatial mesh resolution only; the 12 kHz SCREEN grid/scoring was untouched. Evidence executed 2026-11-23/24; packet `docs/evidence/variable_mesh_2026-11-23/`.
@@ -52,22 +103,52 @@
 - Driver exit angles: Beyma states 7–29.5° (convention unstated); CP-850Nd datasheet has no angle or outlet section. Next experiments and promotion criteria: [readout](evidence/directivity_attribution_2026-11-24/README.md).
 - Geometry limit (2026-11-25): both parents keep the HF-critical wall at 5–23° while straight walls to their roll-on stations would sit near the target; a CPU-only CD-backbone blend that keeps return and rim bit-identical resolves on both anchors. No solve yet. [Dossier](research/typologies/RETURNED_LIP_CD_BACKBONE_RESEARCH_2026-11-25.md).
 
-## 2026-11-23 - Overnight BO data top-up and updated horn sheets
+## 2026-11-24 — size-aware constraints and retained-return verify
 
-- **`bo_data_topup_2026-11-22`** (other lane, 22:25-00:19, 6/6) resumed the round-3 open-envelope run dirs in place to grow each cohort to BO training size while continuing CMA (dual use). Every job was stopped by the pin watchdog after 30-40 rows: `morph_corner_mm` low on c400a, `L_mm` low on c400b, and similar pins later.
-- **Three screen bests improved:** compact500 Crowe 1.8150 -> **1.70512** (770x548x393 mm, hash `138f09ce5472`), FAV 3.3848 -> **3.30792** (720x608x418, `5987a94e99c0`), v11 Fold 3.6172 -> **3.42866** (522x445x423, `606abb301970`). The other five family leaders are unchanged (home Fold 1.19315, Morph 1.39730, TwinRay 1.73558, compact400 0.96787, 2-inch 1.93303). All J are screen-grid; none is verify-grid confirmed.
-- **Gallery updated:** `docs/renders/2026-11-22-best-horns` re-rendered on 2026-11-23 (three 6000 px sheets, 200 dpi) with the new bests, table and README corrected, Pages republished.
+- First local slice centralizes production/open/epsilon candidate limits, adds mesh size records, and retains compatible oversized rolled BO rows. Related score versions and historical solve keys are preserved. Strict cross-envelope cohort compatibility and family-wide geometry promotion are open.
+- Exact-anchor and variant verify evidence documents a lower-J rolled result with continued H narrowing and a worse Lamé H mid-gain result. Size evidence includes three independent offline cohorts and the matched Compact500 verification queue.
+- [Handoff, audited routes and runnable next slices](evidence/size_aware_2026-11-24/HANDOFF.md).
 
-## 2026-11-22 - Advisor 12-hour queue, common-grid verify, open-envelope decision, renders
+## 2026-11-23 (noon) - seedspread landed: all six round3 cohorts BO-ready (121-213 usable rows)
 
-- **Queue 1 `hornfab_12h_2026-11-22`** (02:42-04:32, 10 jobs). Every job stopped by the watchdog after 25-204 evals, 110 min total. Screen bests: TwinRay 2.5748 -> 1.7356 (stopped at the brief envelope, morph_height 480), Morph 1.5769 -> 1.3973 (stalled 204/219), compact400 Fold s2 1.1891 -> 1.0742 and s1 1.1501, home Fold k 1.3738 -> 1.3176 (q pinned high) and s 1.3087 (k pinned high), compact500 Crowe 2.9901 -> 2.8392, FAV 4.4527 -> 4.4305; v11 Fold no gain (morph_corner pinned low); 2-inch 1.8705 -> 1.9330 (64 % refusal at 25 attempts). The advisor's job-8 resume was replaced by the pre-staged bounded 2-inch follow-up (75c147 resumes at a 43 % refusal window and three pinned knobs).
-- **Common-grid verify 8/8 `hornfab_verify_2026-11-22`.** home v10: fold_s **1.4727**, fold_k 1.5551, morph 1.7484, twinray 2.1593 (leader 1.4867, published 1.6704, floor 0.4677 -> fold_s/fold_k tie the leader, morph/twinray do not beat it). compact400 v10xo: s2 **1.1532**, s1 1.2293 (previous best 1.1864, floor 0.1293 -> tie). compact500 Crowe 2.8570 (first verify row of that identity); v11 FAV 4.5828 (prior 4.6493). Screen J is a poor cross-family predictor (+0.6 % c500 to +25 % morph).
-- **Round 2 `hornfab_round2_2026-11-22`** (7 jobs, 1 h): c400_open_b 1.0742 -> **1.0243**, c500 2.8392 -> **2.7579**, FAV 4.4305 -> **4.1990**, v11 Fold 3.6930 -> **3.6172**; three arms made no gain in 30 evals.
-- **Refusal audit.** Every refusal was `invalid_envelope` from the FREEFORM grid generator's pre-mesh envelope estimate, which refuses on any positive overshoot (zero tolerance); `g_L_mm` was the driver (c500: 6 % refused below 260 mm, 50 % at 260-280, 100 % at >=280). `resample_strict` made them free for the valid budget but they still tripped the watchdog refusal window.
-- **Owner decision (2026-11-22): the brief size envelope no longer refuses search candidates.** `envelope.enforce: false` replaces the build box with one absolute `envelope.sanity_max_mm` ceiling per dimension (default 1200 mm; nothing grows toward the 1524 mm example). Implemented once in `config.effective_envelope_limits` and used by the post-mesh `envelope_violation`, both pre-mesh registry estimators and `tools/shape_check.py`; refusals then say "sanity envelope". Default (absent/true) is byte-identical, so every existing brief hash, run and floor stays valid. Focused tests: **84 passed**.
-- **Round 3 `hornfab_round3_2026-11-22`** (7 jobs, 15:59-20:00, open envelope + every watchdog-pinned or near-limit knob opened). Screen bests: home Fold 1.3087 -> **1.1932** (k = 3.36, past the old 2.81 cap, mouth 512x426 still inside the old 600x480 box); compact400 1.0243 -> **0.9679** (mouth 474x350, outside the old 400 cube); compact500 Crowe 2.7579 -> **1.8150** (719x538x386, `g_L` pinned at the new 400; load term 0.46 -> 0.03, diagonal/off-axis now the limit); FAV 4.1990 -> **3.3848** (730x577x403); v11 Fold no gain; home Fold b and c400 a no gain. Zero envelope refusals in the whole round; remaining 0-37.5 % are `invalid_geometry` at the opened extremes.
-- **Renders.** `docs/renders/2026-11-22-best-horns/`: the eight family leaders at 200 dpi (isometric, top-skew, V cut x=0, H cut y=0, V and H dispersion, scores column), 3 sheets + gallery. Scripts alongside (`render_best.py`, `compose_best.py`, `targets.txt`).
-- **Open.** None of the open-envelope winners is verify-grid confirmed, and three of them exceed their old build cubes (compact400 474 mm, compact500 719 mm, FAV 730 mm), so size must be filtered before any build or comparison. The `*_open` briefs are new score identities; their J is not comparable to closed-envelope runs or the published floors.
+- **bo_data_seedspread_2026-11-23 complete (6/6):** fresh-seed CMA tranches (`--cma-seed` 31011-31016, 60 evals each) per round3 identity. Verified pooled usable (ok screen rows across all run dirs of each identity): **c500 213, fav 186, home_fold_a 177, c400a 151, c400b 145, v11_fold 121** - every cohort above the owner's >=100 data gate, five of six in the 145-213 comfort band (training-selection cap 256). Fleet bests unchanged: c400b 0.968, c400a 1.024, c500 1.705, home_fold_a 1.193, fav 3.308, v11_fold 3.429.
+- **Seed-spread value:** the fresh-seed rows are sigma0-scale box coverage the resumed-CMA rows lacked (incumbent-concentrated); the maximin half of the cohort selection and the composite GP's out-of-region validity are the beneficiaries. No fresh-seed arm beat its incumbent in 60 evals (expected) - their value is coverage and seed-variance evidence for the doc-08 pilot, not new winners.
+- **Mechanics:** the runner's `kind: search` argv has no `--cma-seed` passthrough (dry-run caught it), so the tranche ran as `kind: command` jobs with explicit argv - which also means the bound-pinning watchdog cannot truncate them; each tranche ran its full budget.
+- **GPU spend since round3:** ~1,100 additional screen solves total across topup1/topup2/topup2b/seedspread, all dual-use (CMA progress + BO training rows). Zero queue modifications to other lanes; canonical checkout untouched.
+- **Next:** Phase B cohort build + CPU validation (doc 07) on these six identities - the data side is now ready; production promotion stays owner-gated (doc 09).
+
+## 2026-11-23 (morning) - BO data topups landed: six round3 cohorts at 90-152 usable rows; fresh-seed tranche running
+
+- **Landed:** topup1 (6/6, +30-40 evals/arm), topup2 (3/6 - c400b/c400a refused by strict-resume cap shrink, c500 ran to **152 ok**; the home_fold_a/v11_fold/fav jobs never ran because the runner exited after c500 when its controller was killed - known-confirmed), topup2b (2/2 replacement blocks: c400b -> **114 ok**, c400a -> **121 ok**). New bests along the way: c500 **1.705** (was 1.815), fav **3.308**, v11_fold **3.429** (was 3.617). All stops after round3 were the watchdog **bound-pinning** rule (each arm's top 6 pin a box edge: L_mm/morph_corner_mm/g_L_mm/az_a_cos_pow) - round4 box-widening evidence.
+- **Usable rows now (ok screens per identity):** c400b 114, c400a 121, c500 152, home_fold_a 147, v11_fold 90, fav 125. Five of six above the owner's >=100 BoTorch-data gate; v11_fold crosses it with the running seed tranche.
+- **Fresh-seed tranche (running since 10:30):** `bo_data_seedspread_2026-11-23` - six FRESH CMA runs (`--cma-seed` 31011-31016, kind: command because the runner's search argv has no seed passthrough), one per config, 60 evals each. Rationale: resumed-CMA rows concentrate near the incumbent; the composite cohort selection is 64 lowest-J elites PLUS maximin diversity to 256, and GP validity outside the incumbent region needs input-space coverage. CMA seed is not part of the metric-composite identity contract, so fresh-seed rows pool with the resumed rows. Expected after this tranche: ~145-210 usable per arm, all six BO-ready. Chain note: seeded from the topup2b CONTROLLER pid (11120), which had already exited - so it started immediately; sequencing was verified collision-free (single lock holder = the seedspread solve).
+- **Ops notes:** queue.ps1 `-Cutoff` is today-only (a 06:00 cutoff at 22:24 refuses to start - one relaunch lost); killing the queue controller leaves the runner alive but the runner exited after its next job anyway; strict resume refuses ANY cap shrink - raise caps, never lower; stale `.gpu.lock` holders auto-taken-over; `gpu-clean --lane gpu` cleared 2 stale hosts (VRAM idle 1.4 GiB).
+- **Next:** Phase B cohort build + CPU validation (doc 07) on these six real identities; production promotion stays owner-gated (doc 09).
+
+## 2026-11-22 (late) - bo_data_topup night: round3 cohorts extended to BO-training size
+
+- **Topup 1 landed:** 6/6 jobs ran, +30-40 evals each (c400b 34, c400a 30, c500 30, home_fold_a 30, v11_fold 30, fav 40; zero solve failures). Cohort totals now (usable ok rows): **home_fold_a 147, fav 125, c500 122, c400a 90, v11_fold 90, c400b 84**. New bests: c500 **1.705** (was 1.815), fav **3.308**, v11_fold **3.429** (was 3.617). All arms stopped early by the watchdog **bound-pinning** rule (c400b L_mm low; c400a morph_corner low; c500 g_L high; home az_a_cos_pow low; v11_fold morph_corner low; fav g_L high) - the searches are shouting which box edge to widen in round4.
+- **Topup 2 (running since 08:59):** finishing tranche to cross the >=100 owner gate everywhere and reach ~150-200. Caps must EXCEED the persisted caps topup 1 wrote (strict resume refuses a shrink: c400b/c400a were refused 151/152 < 157/162 - fixed by chaining a replacement night). Live-file caps raised for the not-yet-started jobs (home_fold_a/v11_fold/fav -> 200); `pin_ignore` set per arm for the pinned knob (boundary rows are valid, informative BO training data). Replacement night `bo_data_topup2b` (c400b/c400a, cap 200) chained via `-WaitPid 31244 -WaitMatch run_campaign_night`. Expected final usable: ~140-200 per arm, all six BO-ready.
+- **Ops notes:** queue.ps1 `-Cutoff` is today-only (a 06:00 cutoff at 22:24 refuses to start - cost one relaunch); killing the controller leaves the runner alive by design; a stale `.gpu.lock` holder is auto-taken-over; `gpu-clean --lane gpu` cleared 2 stale hosts between nights (VRAM idle 1.4 GiB).
+
+## 2026-11-22 (late) - bo_data_topup night: round3 cohorts extended to BO-training size
+
+- **Why:** the metric-composite BO (feat/metric-aware-bo, Pass 2 complete at `39b6c9aa`) needs >=100 usable screen rows per frozen identity (recommended ~150, hard training-selection cap 256). The round3 open-envelope night left seven fresh cohorts at 53-117 usable rows (its watchdog stopped arms at 60 no-gain valid). This night resumes six of those run dirs in place - same config/brief/backend/fidelity/lib_sha, so new accepted screens pool with each existing cohort AND continue the CMA search (dual-use).
+- **Headroom (owner ask):** each cap adds ~25% more evals than the to-150 usable target (round3 measured ok-rates 89-100%, invalid_geometry mostly; one timeout). Watchdog no_gain_valid/stall_valid raised 60 -> 150 so data collection is not truncated. Expected result ~145-175 usable rows per arm.
+- **Queue:** `runs/nights/bo_data_topup_2026-11-22.yaml` (runner live-file), 6 resume blocks, sequential, lane gpu, `HORNLAB_GPU_LOCK=refuse`: c400b_topup (cap 157, best J 0.9679), c400a_topup (162, 1.0243), c500_topup (162, 1.815), home_fold_a_topup (194, 1.193), v11_fold_topup (161, 3.617), fav_topup (155, timeout in round3 - retry with 5400s). Dry-run validated all resume dirs/configs. First detached launch used `-Cutoff 06:00` which is today-only and refused to start; relaunched without cutoff at 22:25:53 - controller pid 44660 (parent WmiPrvSE), log `runs/nights/queue_bo_data_topup_2026-11-22.log`, julia host up, c400b rows 57 -> 59 within the first minute. Identity note: these are `*_open` briefs (envelope.enforce false, 1200 mm ceiling) - their J never ranks against closed-envelope cohorts.
+- **After the night:** each top-up cohort is BO-training ready (Phase B cohort build + CPU validation per `docs/research/metric_bo_2026-11-22/07_DEFERRED_REAL_DATA_PLAN.md`); production BO runs still need the separately-gated policy promotion (doc 09 recommended next authorization).
+
+## 2026-11-21 - Optimizer audit P0/P1 implementation (local, offline)
+
+- Placed the senior optimizer audit at `docs/research/optimizer_audit_2026-11-21/` with [CURRENT_STATE_CHECK.md](research/optimizer_audit_2026-11-21/CURRENT_STATE_CHECK.md) (verified HEAD `bdc3f037`, clean tree, GPU lock free, ribs 0.12.0, cma 4.5.0, botorch/gpytorch absent) and [IMPLEMENTATION_STATUS.md](research/optimizer_audit_2026-11-21/IMPLEMENTATION_STATUS.md).
+- **P0a:** CMA-MAE now has two distinct archives. Only the search archive is soft under `search.qd.maes`; the result archive is always hard (`learning_rate=1.0`, `threshold_min=-inf`) and is the sole source of `archive.json`/`archive_heatmap.json`. The soft archive is a labelled `archive_learning.json` diagnostic. QD protocol is `cma-me-archive-v3`; v2 runs are refused on resume with an explicit old-semantics message. Two historical v2 run dirs (`20261114T235641Z-screen-dfd27f`, `20261115T005614Z-screen-6d55fa`) are frozen read-only evidence.
+- **P0b:** `tools/analysis/floor_registry.py` keys floors to objective version, resolved brief content, score identity, backend/fidelity/grid, method and sample size, with a three-part uncertainty record. Entries: v7 0.310479, v10 home 0.467739, v10 slope5 0.486317, compact400 v10xo 0.1293 (whole-fleet caveat). Unknown identity returns "no applicable published floor"; compact400 never gets the generic v10 floor. `optimizer_switch` reports typed per-kind outcome counts and no dominant failure kind on a clean run.
+- **P0c:** opt-in v10/v11 production studies. v11 has a separate metric schema/hash carrying the `objective.cd` block and scalar_v11/metrics.cd code shas; v4/v7 contracts are unchanged. Admission is registry-driven (`compact400__fold_warm_v10xo`, `home_v10__morph`, `home900__landscape_v11cd`) and additionally admits a derived arm config with unchanged non-search task identity. Pareto/training metric dispatch is explicit; mixed stored versions are refused.
+- **P1a:** `tools/analysis/optimizer_evidence.py` composes the run-level evidence with per-number provenance, at most two suggestions, no dispatch and no cross-version raw-J ranking; unknown floors suppress only floor-dependent advice.
+- **P1b:** opt-in `search.warm_start.covariance` transfers the source mean's full `C` through the bound-span transform, with eigen floor/cap, identity blending, SPD verification and explicit scale convention; plain single-ES only, restarts/CMA-ME refused at config validation.
+- **P1c:** `tools/analysis/benchmark_orchestrator.py` writes a pre-registered matched plan with self-contained arm configs and compares completed runs with seed/identity/parity checks and floor-aware verdicts; template `tools/analysis/specs/matched_optimizer_pilot_2026-11-21.yaml`. Nothing was launched.
+- **Evidence:** focused CLI/suite **364 passed, 1 pre-existing botorch skip** in 78.21s; full offline profile **7 failures**, all the previously recorded other-lane items (v8 registration x2, score_identities, preflight history, B8 `study_jobs` Popen, v11 dataset census, scout40 queue count), **none in a touched file**. No GPU/solve was used.
+- **Deferred:** P2 QD descriptor study and cost-aware BO pilot stay gated on the audit's matched-real-BEM authorization and owner GPU approval. No production default, score version or queue was changed.
 
 ## 2026-11-21 - System closeout: R5a, R7a, WP6 ledger, backend hardening
 

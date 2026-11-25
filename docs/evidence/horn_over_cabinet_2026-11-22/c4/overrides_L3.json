@@ -1,0 +1,19 @@
+{
+  "width_m": 0.32,
+  "height_m": 0.5,
+  "depth_m": 0.36,
+  "wall_m": 0.018,
+  "driver_diameter_m": 0.2,
+  "cone_depth_m": 0.04,
+  "surround_width_m": 0.012,
+  "cap_diameter_m": 0.05,
+  "driver_y_m": 0.1,
+  "port_length_m": 0.22,
+  "port_area_m2": 0.002827433388,
+  "port_nfr": 0.12,
+  "port_roundover_m": 0.008,
+  "port_wall_m": 0.003,
+  "port_y_m": -0.13,
+  "mesh_size_m": 0.010,
+  "detail_size_m": 0.0030
+}

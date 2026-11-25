@@ -1,0 +1,27 @@
+# Held template. Only release after the primary scout qualifies this cohort.
+night: v11_bo_day_morph_scale_2026-11-23
+lane: gpu
+pause: true
+watchdog:
+  min_attempts: 20
+  refusal_window: 30
+  refusal_max: 0.45
+  no_gain_valid: 65
+  stall_valid: 65
+jobs:
+  - id: home_morph_v11_seed_b_50
+    kind: command
+    timeout_s: 2700
+    env: {HORNLAB_GPU_LOCK: refuse}
+    argv: [.venv/Scripts/hornlab-search.exe, search, --config,
+      examples/typologies/v11_bo_day_2026-11-23/home_morph_v11_port.yaml,
+      --mode, screen, --budget, "50", --cma-seed, "81152", --dataset-dir, dataset,
+      --cache-dir, runs/v11_bo_day_cache/home_morph_v11]
+  - id: home_morph_v11_seed_c_50
+    kind: command
+    timeout_s: 2700
+    env: {HORNLAB_GPU_LOCK: refuse}
+    argv: [.venv/Scripts/hornlab-search.exe, search, --config,
+      examples/typologies/v11_bo_day_2026-11-23/home_morph_v11_port.yaml,
+      --mode, screen, --budget, "50", --cma-seed, "81153", --dataset-dir, dataset,
+      --cache-dir, runs/v11_bo_day_cache/home_morph_v11]

@@ -1,0 +1,7 @@
+# Geometry-only source control. 15 degrees is modeled as a wall half-angle.
+# FaitalPRO HF206/HF2000 publish a 30-degree conical exit, not a measured source field.
+extends: ../hf2in_2026-11-20/compact500_xo900_80x50_hf2in_v11cd.yaml
+name: compact500_xo900_80x50_2in_half15_v11cd
+description: Compact 900 Hz v11 screen study with a 50.8 mm ideal source and an assumed 15 degree wall half-angle.
+driver:
+  exit_angle_deg: 15.0

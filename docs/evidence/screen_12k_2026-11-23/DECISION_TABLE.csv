@@ -1,0 +1,8 @@
+arm,c1_pooled_spearman,c1_gain_vs_F0,c1_recall_not_worse,c1_pass,c2_caught_of_F0_missed,c2_false_positives,c2_pass,c3_wall_ratio_vs_F0,c3_max_vram_delta_mib,c3_refusals,c3_pass,c4_epw_max_d_oa_db,c4_epw_max_d_bw_deg,c4_pass,all_pass
+F0,0.8321,0.0,True,False,0.0,0,False,1.0,1422.0,0,True,0.012,0.122,True,False
+F0M,0.9143,0.0821,True,False,0.0,0,False,1.792,2798.0,0,True,0.012,0.122,True,False
+F1,0.9143,0.0821,True,False,0.833,1,False,2.373,2798.0,0,False,0.012,0.122,True,False
+F2,0.9571,0.125,True,True,1.0,0,True,3.651,2798.0,0,False,0.012,0.122,True,False
+FA,0.8714,0.0393,True,False,0.833,1,False,2.652,2798.0,0,False,0.012,0.122,True,False
+FB,0.9429,0.1107,False,False,0.833,1,False,3.228,2798.0,0,False,0.012,0.122,True,False
+F3,1.0,0.1679,True,True,1.0,0,True,6.678,1966.0,1,False,0.012,0.122,True,False

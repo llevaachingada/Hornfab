@@ -241,18 +241,21 @@ def _anchors_rounded(m: P.Meridian, n: int, max_wall: float) -> list[list[float]
 
 def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
     """(generator block, knobs, brief) -> FREEFORM params. Raises GeneratorError."""
+    from ...config import envelope_policy
+
     # ``seed_policy`` is a config-load directive, not geometry; never let it into a recipe.
     gen = {k: v for k, v in gen.items() if k != "seed_policy"}
     r0 = float(brief["driver"]["exit_radius_mm"])
     a0 = float(brief["driver"]["exit_angle_deg"])
-    env = brief["envelope"]
+    policy = envelope_policy(brief)
+    max_w, max_h, max_d = policy.candidate_limits_mm
     max_wall = float(gen.get("max_wall_deg", 80.0))
     if not 10.0 <= max_wall < 90.0:
         raise GeneratorError(f"max_wall_deg must be in [10, 90), got {max_wall}")
     n_anchors = int(gen.get("n_anchors", 16))
     L = _knob(knobs, "", "L_mm")
-    if L > float(env["max_depth_mm"]) + 1e-9:
-        raise GeneratorError(f"depth L_mm={L:.1f} exceeds the brief envelope {env['max_depth_mm']} mm")
+    if policy.mode == "production" and L > max_d + 1e-9:
+        raise GeneratorError(f"invalid_envelope: depth L_mm={L:.1f} exceeds the brief envelope {max_d:g} mm")
 
     def side(key: str, blend_key: str, prefix: str, phi: float) -> P.Meridian:
         m = build_meridian(gen[key], knobs, prefix, r0=r0, a0=a0, L=L, max_wall=max_wall, phi=phi)
@@ -273,7 +276,9 @@ def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
     else:
         mv = side("profile_v", "blend_v", "v", math.pi / 2)
     # fixed-size meridians already end at L; length-derived ones end at max_wall. One z span.
-    span = min(mh.length_mm, mv.length_mm, float(env["max_depth_mm"]))
+    span = min(mh.length_mm, mv.length_mm)
+    if policy.mode == "production":
+        span = min(span, max_d)
     mh, mv = _truncate(mh, span), _truncate(mv, span)
 
     ah = _anchors_rounded(mh, n_anchors, max_wall)
@@ -302,9 +307,10 @@ def materialize(gen: dict, knobs: dict, brief: dict) -> dict:
                 row[2] = max(-max_wall, min(max_wall, row[2]))
 
     w_mouth, h_mouth = 2 * ah[-1][1], 2 * av[-1][1]
-    if w_mouth > float(env["max_mouth_w_mm"]) + 1e-6 or h_mouth > float(env["max_mouth_h_mm"]) + 1e-6:
-        raise GeneratorError(f"mouth {w_mouth:.0f} x {h_mouth:.0f} mm exceeds the brief envelope "
-                             f"{env['max_mouth_w_mm']} x {env['max_mouth_h_mm']} mm")
+    if w_mouth > max_w + 1e-6 or h_mouth > max_h + 1e-6 or span > max_d + 1e-9:
+        raise GeneratorError(f"invalid_envelope: mouth {w_mouth:.0f} x {h_mouth:.0f} mm, "
+                             f"depth {span:.1f} mm exceeds the {policy.mode} envelope "
+                             f"{max_w:g} x {max_h:g} x {max_d:g} mm")
 
     mouth = gen.get("mouth", "ellipse")
     if mouth not in MOUTHS:
@@ -380,10 +386,6 @@ def info(gen: dict, knobs: dict, brief: dict) -> dict:
     return out
 
 
-#: Tolerance search/evaluate.py::envelope_violation applies to the mouth W/H (mm).
-_ENVELOPE_MOUTH_TOLERANCE_MM = 0.5
-
-
 def _profile_radii(params: dict, key: str) -> list[float] | None:
     """Anchor radii of ``profileH``/``profileV``; None if this is not the generated form."""
     prof = params.get(key)
@@ -404,24 +406,16 @@ def _profile_radii(params: dict, key: str) -> list[float] | None:
 def _grid_overshoot_estimate(block: dict, brief: dict) -> float | None:
     """WP10/WP3: conservative pre-mesh envelope overshoot of a GRID design (no meshing).
 
-    Same limits and tolerance as the FREEFORM branch below; the outer extents come from
-    ``generators.grid.envelope_extents`` (meridians + radius field + wall thickness). The limits
-    are ``config.effective_envelope_limits``: the brief's own maxima when ``envelope.enforce`` is
-    absent/true, or the absolute ``envelope.sanity_max_mm`` ceiling when enforcement is off
-    (owner decision 2026-11-22), so an opted-out brief is only refused for the sanity ceiling.
-    The estimate is advisory: any failure returns ``None`` rather than turning a legal knob invalid.
+    The estimate uses the effective mesh limits and the sampled grid with its declared wall
+    allowance. A failed estimate returns ``None`` so the evaluator can try the actual mesh.
     """
     env = brief.get("envelope") or {}
     if not env:
         return 0.0
     try:
         from . import grid as grid_mod          # lazy: grid.py imports this module
-        from ...config import effective_envelope_limits
-        lim_w, lim_h, lim_d, _enforced = effective_envelope_limits(brief)
-        lim_w += _ENVELOPE_MOUTH_TOLERANCE_MM
-        lim_h += _ENVELOPE_MOUTH_TOLERANCE_MM
-        from ...search.evaluate import ENVELOPE_DEPTH_ALLOWANCE_MM
-        lim_d += float(ENVELOPE_DEPTH_ALLOWANCE_MM)
+        from ...config import envelope_policy
+        lim_w, lim_h, lim_d = envelope_policy(brief).mesh_limits_mm
         if not (lim_w > 0.0 and lim_h > 0.0 and lim_d > 0.0):
             return None
         w_mm, h_mm, depth_mm = grid_mod.envelope_extents(block, block.get("knobs") or {}, brief)
@@ -443,14 +437,8 @@ def envelope_overshoot_estimate(params: dict, brief: dict | None) -> float | Non
     * outer height = 2 * (max ``profileV`` radius + ``wall_thickness_mm``)
     * depth        = anchor z span + ``wall_thickness_mm``
 
-    The shell offset is included because the post-mesh bounding box includes the free-
-    standing outer shell.  The limits are the post-mesh ones: the brief's
-    ``max_mouth_w_mm``/``max_mouth_h_mm`` plus the 0.5 mm meshing tolerance and
-    ``max_depth_mm`` plus ``ENVELOPE_DEPTH_ALLOWANCE_MM``, or — when ``envelope.enforce`` is
-    false (owner decision 2026-11-22) — ``config.effective_envelope_limits``' absolute
-    ``envelope.sanity_max_mm`` ceiling with the same tolerances. ``effective_envelope_limits``
-    and ``ENVELOPE_DEPTH_ALLOWANCE_MM`` are imported lazily to keep the design layer
-    import-free of the search layer at module load.
+    The full shell allowance approximates the post-mesh bounding box conservatively. Compare
+    against the same resolved policy limits as the mesh gate.
 
     Returns ``max(0, max(value/limit - 1))`` over the three dimensions: ``0.0`` when the
     estimate is inside, a positive relative overshoot when it is outside.  ``None`` when
@@ -471,12 +459,8 @@ def envelope_overshoot_estimate(params: dict, brief: dict | None) -> float | Non
         return 0.0
     try:
         wt = float(params.get("wall_thickness_mm", 3.0))
-        from ...config import effective_envelope_limits
-        lim_w, lim_h, lim_d, _enforced = effective_envelope_limits(brief)
-        lim_w += _ENVELOPE_MOUTH_TOLERANCE_MM
-        lim_h += _ENVELOPE_MOUTH_TOLERANCE_MM
-        from ...search.evaluate import ENVELOPE_DEPTH_ALLOWANCE_MM
-        lim_d += float(ENVELOPE_DEPTH_ALLOWANCE_MM)
+        from ...config import envelope_policy
+        lim_w, lim_h, lim_d = envelope_policy(brief).mesh_limits_mm
     except (TypeError, ValueError):
         return None
     if not (math.isfinite(wt) and wt >= 0.0

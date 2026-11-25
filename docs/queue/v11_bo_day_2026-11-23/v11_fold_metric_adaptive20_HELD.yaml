@@ -1,0 +1,35 @@
+# HELD - Home v11 Fold adaptive tranche (continuation of the clean canary).
+# Child study a5d78f8dc31c4785b997ad7161fb041b carries the canary's gen-2 refit artifact
+# (182 rows = 174 archived + 8 accepted canary screens) and its refit lineage.
+# 20 additional screen calls + 2 verify bring the identity to 28 total (8 canary + 20 tranche),
+# inside the owner's suggested 25-30 total and below the approved metric-adaptive-20x2 cap.
+# Do not launch from this file. Release only after the parent flips
+# docs/queue/v11_bo_day_2026-11-23/v11_fold_metric_adaptive20_APPROVAL.json to APPROVED_FOR_CANARY
+# and sets owner_authorization.authorized=true; then copy to runs/nights/ with pause: false,
+# dry-run, and launch with the normal detached controller once the GPU lane is free.
+night: v11_fold_metric_adaptive20_2026-11-24
+lane: gpu
+pause: true
+jobs:
+  - id: metric_adaptive_fold_a5d78f8d_20
+    kind: command
+    timeout_s: 10800
+    env:
+      HORNLAB_GPU_LOCK: refuse
+      HORNLAB_METRIC_REAL_EXECUTE: '1'
+      OMP_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      PYTHONPATH: 'C:/Users/hunte/Hrns/hornlab-search;C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Lib/site-packages;C:/Users/hunte/Hrns/hornlab-search/.venv/Lib/site-packages'
+    argv:
+      - C:/Users/hunte/Hrns/oc-wt/bo-study/bayes-venv/Scripts/python.exe
+      - -m
+      - hornlab_search.studies.cli
+      - run
+      - --root
+      - C:/Users/hunte/Hrns/hornlab-search/runs/metric_bo_canary_2026-11-23/registry_v4
+      - --package
+      - C:/Users/hunte/Hrns/hornlab-search/runs/metric_bo_canary_2026-11-23/registry_v4/package_adaptive20.json
+      - --execute
+      - --project-root
+      - C:/Users/hunte/Hrns/hornlab-search/runs/metric_bo_canary_2026-11-23/work_adaptive20

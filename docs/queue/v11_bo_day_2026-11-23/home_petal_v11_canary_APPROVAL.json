@@ -1,0 +1,37 @@
+{
+  "schema": "metric-real-approvals-v1",
+  "status": "HELD_PENDING_PARENT_RELEASE",
+  "profile": "metric-canary-8x2",
+  "screen_cap": 8,
+  "verify_cap": 2,
+  "refit_every": 4,
+  "lane": "gpu",
+  "task_identity": "82dbd04691c7b456",
+  "artifact_sha256": "0eb0154a976c7a1194f396acf973bd5ad140203e3831bf7c6c2a9eb98ad71a4c",
+  "identity": {
+    "task_identity": "82dbd04691c7b456",
+    "backend": "beat_cuda",
+    "fidelity": "screen",
+    "grid_hash": "c41ff9a7581ba429",
+    "dependency_hash": "f4dcdca807bdfad0",
+    "mesh_hash": "8e789cd0deef",
+    "brief_hash": "c6bc496e7b4f",
+    "score_hash": "77d4fdd49bd2c3b4"
+  },
+  "canary_acceptance": null,
+  "task": {
+    "config": "examples/typologies/v11_bo_day_2026-11-23/home_core_petal_v11_open.yaml",
+    "config_name": "home_core_petal_v11_open",
+    "study_id": "d10ae37422ea454fa3f71cc580a846cb",
+    "cohort_dir": "runs/v11_bo_day_planning/cohort_home_petal_v11_2026-11-24",
+    "rows": 180
+  },
+  "evidence": {
+    "holdout": "runs/v11_bo_day_planning/cohort_home_petal_v11_2026-11-24/holdout_comparison.json",
+    "holdout_verdict": "PASS: median tie 4.793, recall 0/0, 140/40"
+  },
+  "owner_authorization": {
+    "authorized": false,
+    "note": "HELD. Parent release required; separate identity from Home v11 Fold."
+  }
+}

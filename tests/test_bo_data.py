@@ -202,6 +202,26 @@ def test_near_duplicate_tolerance():
     assert is_near_duplicate(base + 1e-4, [base]) is False
     assert is_near_duplicate(base, []) is False
 
+
+def test_open_envelope_pool_retains_shapes_above_the_nominal_box():
+    from types import SimpleNamespace
+
+    from hornlab_search.bo.data import geometry_checks
+
+    # The surface uses azimuth by axial station by Cartesian coordinate.
+    points = np.array([[[18.0, 0, 0], [300.0, 0, 200.0]],
+                       [[0, 18.0, 0], [0, 200.0, 200.0]],
+                       [[-18.0, 0, 0], [-300.0, 0, 200.0]],
+                       [[0, -18.0, 0], [0, -200.0, 200.0]]])
+    mat = {"formula": "fixture", "inner_points": points}
+    envelope = {"max_mouth_w_mm": 500.0, "max_mouth_h_mm": 500.0, "max_depth_mm": 500.0}
+    config = SimpleNamespace(brief={"envelope": envelope})
+    assert not geometry_checks(mat, config, {"r0_mm": 18.0})[1]
+    envelope["enforce"] = False
+    assert geometry_checks(mat, config, {"r0_mm": 18.0})[1]
+    envelope["sanity_max_mm"] = 550.0
+    assert not geometry_checks(mat, config, {"r0_mm": 18.0})[1]
+
 # ------------------------------------------------------------------ native cohort builder
 
 

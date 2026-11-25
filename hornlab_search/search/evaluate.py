@@ -1,4 +1,4 @@
-"""One candidate, end to end. ``evaluate`` NEVER raises (the search loop is never killed by one
+﻿"""One candidate, end to end. ``evaluate`` NEVER raises (the search loop is never killed by one
 bad candidate), with ONE deliberate exception: the mesh consistency errors (units bug, quadrants
 vs symmetry flag, 01_CONTRACTS section 15) propagate and stop the run, because a wrong-units
 horn solves fine and looks smooth.
@@ -144,7 +144,7 @@ def _with_meh_source_tags(sspec, block: dict):
 
 
 def warn_freq_weights_v1(cfg, target: Target) -> None:
-    """WP4 (senior pass 2026-10-24): ``Target.freq_weights`` under objective v1 is IGNORED — warn
+    """WP4 (senior pass 2026-10-24): ``Target.freq_weights`` under objective v1 is IGNORED â€” warn
     once per process so the YAML is never honoured silently, and point at the opt-in. Never in
     the hot path more than once."""
     global _FREQ_WEIGHTS_V1_WARNED
@@ -211,6 +211,7 @@ class EvalContext:
     counters: Counter = field(default_factory=Counter)
     write_ndjson: bool = True
     provenance: dict = field(default_factory=dict)     # config / brief identity for dataset records (R8)
+    run_id: str | None = None                          # study-scoped dataset run_id override
     objective_version: int = 1                         # WP1: 2 when the brief/config opts in
     objective_params: object | None = None             # v4: the validated ``V4Params`` (tolerances...)
 
@@ -248,11 +249,12 @@ def record_provenance(cfg) -> dict:
 
 
 def make_context(cfg, store=None, *, cache_dir=None, lib_shas=None,
-                 trace_fraction: float = DEFAULT_TRACE_FRACTION, ndjson: Path | None = None) -> EvalContext:
+                 trace_fraction: float = DEFAULT_TRACE_FRACTION, ndjson: Path | None = None,
+                 run_id: str | None = None) -> EvalContext:
     ctx = EvalContext(target=Target.from_dict(cfg.target_raw), weights=dict(cfg.weights),
                       lib_shas=lib_shas if lib_shas is not None else collect_lib_shas(),
                       cache_dir=None if cache_dir is None else Path(cache_dir),
-                      trace_fraction=float(trace_fraction))
+                      trace_fraction=float(trace_fraction), run_id=run_id)
     ctx.objective_version = int(getattr(cfg, "objective_version", 1))
     block = getattr(cfg, "objective_params", None)
     if block is None:
@@ -297,42 +299,23 @@ def mouth_dims_m(mesh: MeshResult) -> tuple[float, float]:
 
 #: Allowance on the brief's max depth for the outer shell and the source cap, which the meshed
 #: bounding box includes but a generator's inner depth L does not.
-ENVELOPE_DEPTH_ALLOWANCE_MM = 15.0
+ENVELOPE_DEPTH_ALLOWANCE_MM = config_mod.ENVELOPE_LEGACY_TOLERANCE_MM[2]
 
 
 def envelope_violation(mesh: MeshResult, brief: dict | None) -> str:
-    """'' if the meshed horn (outer envelope, shell included) fits the brief's size envelope,
-    else a message. Applies to EVERY family, so typologies and Magnus's families compete inside
-    the same box (a bigger mouth controls directivity lower; comparing across sizes is unfair).
+    """Return a candidate-size refusal from full solved-mesh extents, or an empty string."""
+    from ..design.size import mesh_dimensions_mm
 
-    With ``envelope.enforce: false`` (owner decision 2026-11-22) the brief's build box is no
-    longer a refusal; the comparison is against ``effective_envelope_limits``' absolute sanity
-    ceiling and the message says "sanity envelope" so a refusal is never misread as a brief
-    refusal."""
-    if not brief or mesh is None:
+    if mesh is None or not (brief or {}).get("envelope"):
         return ""
-    env = brief.get("envelope") or {}
-    max_w, max_h, max_depth, enforced = config_mod.effective_envelope_limits(brief)
-    w, h = mouth_dims_m(mesh)
-    b = mesh.bbox_m
-    depth = (b[5] - b[2]) * 1000.0
-    msgs = []
-
-    def _limit(key: str, value: float):
-        # enforced: print the brief's own value (historical message bytes); otherwise the
-        # effective sanity ceiling.
-        return env.get(key, 1e9) if enforced else value
-
-    if w * 1000.0 > max_w + 0.5:
-        msgs.append(f"width {w * 1000:.0f} > {_limit('max_mouth_w_mm', max_w)} mm")
-    if h * 1000.0 > max_h + 0.5:
-        msgs.append(f"height {h * 1000:.0f} > {_limit('max_mouth_h_mm', max_h)} mm")
-    if depth > max_depth + ENVELOPE_DEPTH_ALLOWANCE_MM:
-        msgs.append(f"depth {depth:.0f} > {_limit('max_depth_mm', max_depth)} + "
-                    f"{ENVELOPE_DEPTH_ALLOWANCE_MM:.0f} mm")
+    policy = config_mod.envelope_policy(brief)
+    msgs = [f"{axis} {actual:.3f} > {limit:g} mm"
+            for axis, actual, limit in zip(("width", "height", "depth"), mesh_dimensions_mm(mesh),
+                                           policy.mesh_limits_mm) if actual > limit]
     if not msgs:
         return ""
-    label = "brief envelope" if enforced else "sanity envelope"
+    label = {"production": "brief envelope", "exploration": "exploration envelope",
+             "discovery": "sanity envelope"}[policy.mode]
     return f"outside the {label} (" + ", ".join(msgs) + ")"
 
 
@@ -410,7 +393,7 @@ def _derive_throat_coupling(design: Design, cfg) -> Design:
     theta are SEARCHED, so this is derived per design here, never baked into the config at load.
 
     Returns a NEW ``Design`` (a shallow copy of the params; the CMA candidate object is never
-    mutated). Zero/absent extension — or no brief driver — returns the design unchanged, so every
+    mutated). Zero/absent extension â€” or no brief driver â€” returns the design unchanged, so every
     pre-C0 design hash and mesh key is byte-identical. Derivation happens before the hash is
     computed, so the mesh cache key, design dir, dataset record and every metric see the same
     derived geometry that is meshed.
@@ -654,18 +637,20 @@ def record_gate_margin(design, cfg) -> float | None:
     Resource, solve and metrics failures are NOT record disagreements and never flip the flag.
     """
     try:
-        env_raw = (getattr(cfg, "brief", None) or {}).get("envelope") or {}
-        env = {k: float(v) for k, v in (
-            ("width_mm", env_raw.get("max_mouth_w_mm")),
-            ("height_mm", env_raw.get("max_mouth_h_mm")),
-            ("depth_mm", env_raw.get("max_depth_mm"))) if v is not None}
-        if not env:
+        policy = config_mod.envelope_policy(getattr(cfg, "brief", None))
+        if policy.mode == "unspecified":
             return None
+        env = dict(zip(("width_mm", "height_mm", "depth_mm"), policy.mesh_limits_mm))
         from ..geometry.record import envelope_margins, record_for_design
         rec = record_for_design(design, cfg)
         margins = envelope_margins(rec, env)
         vals = [float(v) for v in margins.values() if v is not None]
-        return min(vals) if vals else None
+        margin = min(vals) if vals else None
+        if (margin is not None and margin < 0 and policy.mode != "production"
+                and getattr(cfg.search, "record_gate", None) == "resample"):
+            # An approximate build box can overstate the true dimensions. Let the mesh decide.
+            return None
+        return margin
     except Exception:  # noqa: BLE001 - the gate is advisory: UNKNOWN = admit, never raise
         log.debug("record gate: margin unavailable for this design", exc_info=True)
         return None
@@ -1064,6 +1049,12 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
     seconds = {"mesh": 0.0 if mesh is None else float(mesh.seconds),
                "solve": 0.0 if (outcome is None or st["from_disk"]) else float(outcome.seconds),
                "total": time.perf_counter() - t_start}
+    policy = config_mod.envelope_policy(getattr(cfg, "brief", None))
+    if policy.mode != "unspecified":
+        from ..design.size import size_feasibility_record
+
+        st["size_feasibility"] = size_feasibility_record(
+            mesh, policy, design_hash=dh, mesh_hash=mh, mounted=bool(mkey))
     if str(getattr(cfg.search, "record_gate", "") or "") == "shadow":
         # WP 3.3 (opt-in): annotate the row with the PRE-MESH record's worst envelope margin and
         # whether the record's inside/outside prediction agrees with the deterministic refusal.
@@ -1151,7 +1142,7 @@ def prefetch_candidate(design: Design, cfg, mode: str, run_dir, ctx: EvalContext
 def _failure_penalty(kind: str, design: Design, cfg) -> float:
     """The penalty J for an expected-failure kind. WP3 (senior pass 2026-10-24): with
     ``search: {infeasible_penalty: graded}`` a pre-mesh envelope violation (kind invalid_envelope)
-    is graded by the generator's relative overshoot capped at 2·PENALTY_INVALID; the default
+    is graded by the generator's relative overshoot capped at 2Â·PENALTY_INVALID; the default
     'flat' keeps today's flat PENALTY_INVALID. Other kinds are unchanged."""
     from ..design.generated import GENERATOR_OVERSHOOT_KEY
     from ..objective.terms import graded_infeasible_penalty
@@ -1270,7 +1261,7 @@ if tuple(sorted(_OBJECTIVE_SCORERS)) != SUPPORTED_OBJECTIVE_VERSIONS:
 def _stamp_design_fc_hz(metrics: MetricSet, design: Design | None) -> None:
     """Copy the design's area-law cutoff into ``metrics.scalars['fc_hz']`` for objective v6.
 
-    Looks at common knob names used by Le Cléac'h / rows generators. Absent = leave scalars alone
+    Looks at common knob names used by Le ClÃ©ac'h / rows generators. Absent = leave scalars alone
     so ``resolve_fc_hz`` falls back to the brief's ``f0_hz``.
     """
     if metrics is None or design is None:
@@ -1301,7 +1292,7 @@ def _score(metrics, resp, ctx, meh_ctx=None) -> tuple[float, dict]:
     owner-approved): freq-weighted cov + the below-f0 (K-law design frequency) mask on
     cov/dislope - see ``objective_v3`` in scalar_v2.py. Version 4 (2026-10-27): tolerance-normalised
     terms plus asymmetric coverage, DI std and the diagonal term - ``objective/scalar_v4.py``.
-    Version 6 (2026-11-05): loading_smooth for Le Cléac'h / rollback - ``objective/scalar_v6.py``.
+    Version 6 (2026-11-05): loading_smooth for Le ClÃ©ac'h / rollback - ``objective/scalar_v6.py``.
     Version 7 (2026-10-29, renumbered from the hardened branch's "5"): v4 plus the combined
     loading-frequency penalty (C1), constant-velocity flatness (C2), the 8 kHz one-sided floor (C3)
     and signed V coverage (C5) - ``objective/scalar_v7.py``.
@@ -1502,7 +1493,7 @@ def _meh_layout(design: Design, cad: dict | None,
     """(``layout_derived`` for M4 inner, full derived dict) from mesh provenance.
 
     Prefer the MEH CAD ``derived()`` block when present. Else accept OSSE
-    ``mid_ports`` (mesher fork): one full port rectangle = across_mm × port_along_mm
+    ``mid_ports`` (mesher fork): one full port rectangle = across_mm Ã— port_along_mm
     (same as CAD ``port_across * port_along``).
 
     The inner optimiser needs the printed port area and the L1 recipe. We deliberately do NOT
@@ -1809,6 +1800,8 @@ def _record_provenance(ctx: EvalContext, st: dict) -> dict:
         prov["cad"] = st["cad"]                      # WP14: cad-route recipe/tool/step echo
     if st.get("mounting"):
         prov["mounting"] = st["mounting"]            # WP12: normalized brief mounting block
+    if st.get("size_feasibility"):
+        prov["size_feasibility"] = st["size_feasibility"]
     if st.get("meh_layout"):
         # M7/C12: the CAD recipe + derived layout the inner network optimiser consumed.
         prov["meh"] = {"layout": st["meh_layout"]}
@@ -1827,7 +1820,8 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
     _write_json(design_dir / "status.json", {
         "ok": ok, "error": ev.error, "kind": error_kind(ev.error), "objective": ev.objective,
         "mode": mode, "key": f"{ev.design_hash}-{ev.mesh_hash}-{ev.solve_hash}", "cached": ev.cached,
-        "seconds": seconds, "terms": ev.terms})
+        "seconds": seconds, "terms": ev.terms,
+        **({"size_feasibility": st["size_feasibility"]} if "size_feasibility" in st else {})})
     if ok:
         solve_cache.save_response(design_dir / "response.npz", st["resp"])
         _write_json(design_dir / "metrics.json", metrics_to_json(ev.metrics))
@@ -1860,10 +1854,10 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
                     objective_version=ctx.objective_version,
                     provenance=_record_provenance(ctx, st),
                     network_solution=st.get("network_solution"),
-                    run_id=design_dir.parent.parent.name,
+                    run_id=ctx.run_id or design_dir.parent.parent.name,
                     config_name=ctx.provenance.get("config"),
                     typology=typology_name(st.get("generator"), ev.design.family))
-                store.append(meta, arrays)
+                ev.dataset_position = store.append(meta, arrays)
                 ctx.store_seen.add(seen)
             except Exception as exc:  # noqa: BLE001 - ValueError from validate_record, or I/O
                 log.error("dataset record for %s was NOT written: %s: %s", ev.design_hash,
@@ -1893,6 +1887,8 @@ def _persist(ev: Evaluation, mode: str, sspec, design_dir: Path, ctx: EvalContex
         row["cad"] = to_jsonable(st["cad"])
     if st.get("generator"):
         row["generator"] = to_jsonable(st["generator"])
+    if st.get("size_feasibility"):
+        row["size_feasibility"] = st["size_feasibility"]
     if ctx.write_ndjson:
         append_ndjson(design_dir.parent.parent / "search.ndjson", row)
     ctx.n_rows += 1

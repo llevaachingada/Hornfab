@@ -1,0 +1,4 @@
+extends: ../../studies/u3_biradial_es_style_v7/diag_pull.yaml
+name: photo_diag_pull_xo900_v11
+brief: null
+brief_file: ../../briefs/home_xo900_2026-11-20/room_landscape_80x50_900_hf1440_v11cd.yaml

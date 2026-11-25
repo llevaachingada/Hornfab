@@ -18,6 +18,7 @@ import sys
 import uuid
 from pathlib import Path
 
+from . import package as package_mod
 from .package import prepare_run_package, verify_package
 from .reconcile import reconcile_study
 from .runner import run_package
@@ -50,6 +51,8 @@ _COMMANDS = {
                               '--catalog', '--dataset-root', '--policy', '--seed', '--expected-revision'}),
     'package': ({'--study', '--out'},
                 {'--root', '--lane', '--deadline', '--key', '--revision', '--budget-profile'}),
+    'metric-package': ({'--study', '--out', '--approvals-record', '--deadline'},
+                       {'--root', '--lane', '--key', '--revision', '--budget-profile'}),
     'run': ({'--package'}, {'--root', '--dry-run', '--execute', '--project-root'}),
     'reconcile': ({'--study'}, {'--root', '--project-root'}),
     'decide': ({'--study', '--payload'}, {'--root', '--key'}),
@@ -302,6 +305,75 @@ def _build_chain(service, study_id, root, values, *, through):
     }
 
 
+#: Explicit parent release gate for real metric execution.  A prepared package, a verified
+#: dry run and an approved record are all necessary but not sufficient without this.
+REAL_METRIC_RELEASE_ENV = 'HORNLAB_METRIC_REAL_EXECUTE'
+
+
+def _metric_mode(package):
+    metric = package.get('metric')
+    if not isinstance(metric, dict):
+        return None
+    mode = metric.get('provenance_mode')
+    if mode == package_mod.REAL_METRIC:
+        return 'real_metric'
+    if mode == package_mod.REAL_DATA_OFFLINE:
+        return 'real_data_offline'
+    return 'synthetic_metric'
+
+
+def _dry_run_plan(package, *, approvals=None):
+    """The exact plan a dry run prints; it never contains a dispatch permission."""
+    budget = package.get('budget') or {}
+    resolved = package.get('resolved_config') or {}
+    mode = _metric_mode(package)
+    plan = {
+        'mode': mode or 'legacy',
+        'backend_calls': 0,
+        'package_id': package['package_id'],
+        'study_id': package['study_id'],
+        'spec_revision': package['spec_revision'],
+        'lane': package.get('lane'),
+        'deadline': package.get('deadline'),
+        'screen_calls': budget.get('screen_calls'),
+        'verify_calls': budget.get('verify_calls'),
+        'total_calls': budget.get('total_calls'),
+        'attempts': budget.get('attempts'),
+        'interpreter': (resolved.get('interpreter') or {}).get('executable'),
+        'execute_authorized': False,
+    }
+    if mode == 'real_metric':
+        plan['refit_every'] = (package['metric'].get('approvals') or {}).get('refit_every')
+        plan['approvals'] = approvals['approvals'] if approvals else None
+        plan['execute_requirements'] = [
+            f'approvals status is one of {list(package_mod.METRIC_EXECUTABLE_APPROVAL_STATUSES)}',
+            'approvals owner_authorization.authorized is true',
+            f'parent sets {REAL_METRIC_RELEASE_ENV}=1',
+            'the running interpreter equals resolved_config.interpreter.executable',
+        ]
+    elif mode is not None:
+        plan['execute_requirements'] = ['metric packages are prepare/dry-run only']
+    return plan
+
+
+def _require_real_metric_release(package):
+    """Refuse execute unless the real contract, approved record and parent gate all agree."""
+    info = package_mod.verify_real_metric_package_files(package)
+    status = info['approvals']['status']
+    if status not in package_mod.METRIC_EXECUTABLE_APPROVAL_STATUSES:
+        raise Unavailable(f'metric approvals record is {status}; parent approval is required')
+    payload = package_mod.load_metric_approvals(
+        (package['metric']['approvals'])['record'])['payload']
+    if (payload.get('owner_authorization') or {}).get('authorized') is not True:
+        raise Unavailable('metric approvals record does not carry owner authorization')
+    if os.environ.get(REAL_METRIC_RELEASE_ENV) != '1':
+        raise Unavailable(f'parent release required: set {REAL_METRIC_RELEASE_ENV}=1')
+    declared = ((package.get('resolved_config') or {}).get('interpreter') or {}).get('executable')
+    if declared and Path(declared).resolve() != Path(sys.executable).resolve():
+        raise Unavailable('running interpreter differs from the pinned worker interpreter')
+    return info
+
+
 class _NoEvidenceProbe:
     """Conservative probe: absence of evidence is never evidence of no call."""
 
@@ -320,7 +392,12 @@ def _dispatch(command, values):
             raise UsageError('run requires exactly one of --dry-run or --execute')
         package = verify_package(_read_json(
             _contained(root, values['--package'], '--package'), '--package'))
+        mode = _metric_mode(package)
         if not values.get('--dry-run'):
+            if mode is not None and mode != 'real_metric':
+                raise Unavailable(f'{mode} metric package can never authorize a real solver')
+            if mode == 'real_metric':
+                _require_real_metric_release(package)
             from .production import execute_study
             project_root = Path(values.get('--project-root', Path(__file__).resolve().parents[2])).resolve()
             result = execute_study(StudyService(root), package, root=project_root)
@@ -329,6 +406,9 @@ def _dispatch(command, values):
             return result
         # Handle dry-run before opening the registry: zero registry/acoustic writes.
         # Passing no adapters and dry_run=True is the zero-spawn guard.
+        approvals = None
+        if mode == 'real_metric':
+            approvals = package_mod.verify_real_metric_package_files(package)
         result = run_package(package, None, None, None, dry_run=True)
         result.update({
             'package_id': package['package_id'],
@@ -342,6 +422,8 @@ def _dispatch(command, values):
             'deadline_provided': bool(package.get('deadline')),
             'deadline': package.get('deadline'),
             'status_note': package['status_note'],
+            'metric': mode,
+            'plan': _dry_run_plan(package, approvals=approvals),
         })
         return result
 
@@ -377,6 +459,29 @@ def _dispatch(command, values):
                 'budget': package['budget'], 'lane': package['lane'],
                 'deadline_required': package['deadline_required'],
                 'deadline': package.get('deadline')}
+
+    if command == 'metric-package':
+        out = _contained(root, values['--out'], '--out')
+        expected = values.get('--revision')
+        if expected is not None:
+            if not expected.isdigit():
+                raise UsageError('--revision must be a positive integer')
+            expected = int(expected)
+        package = package_mod.prepare_real_metric_package(
+            service, values['--study'],
+            approvals_record=values['--approvals-record'],
+            budget_profile=values.get('--budget-profile', 'metric-canary-8x2'),
+            lane=values.get('--lane', 'gpu'),
+            deadline=values.get('--deadline'),
+            expected_revision=expected,
+            idempotency_key=values.get('--key'))
+        _write_json(out, package)
+        evidence = package_mod.verify_real_metric_package_files(package)
+        return {'path': str(out), 'package': package, 'package_id': package['package_id'],
+                'budget': package['budget'], 'budget_profile': package.get('budget_profile'),
+                'lane': package['lane'], 'deadline': package.get('deadline'),
+                'metric': 'real_metric', 'approvals': evidence['approvals'],
+                'plan': _dry_run_plan(package, approvals=evidence)}
 
     if command == 'reconcile':
         service.get_study(values['--study'])

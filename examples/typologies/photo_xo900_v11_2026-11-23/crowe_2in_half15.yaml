@@ -1,0 +1,3 @@
+extends: crowe_2in_half2_matched.yaml
+name: photo_comparison_crowe_2in_half15_xo900_v11
+brief_file: ../../briefs/home_xo900_2026-11-20/compact500_xo900_80x50_2in_half15_v11cd.yaml

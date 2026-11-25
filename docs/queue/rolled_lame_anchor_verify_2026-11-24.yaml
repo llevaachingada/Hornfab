@@ -1,0 +1,39 @@
+night: rolled_lame_anchor_verify_2026-11-24
+lane: gpu
+jobs:
+  - id: rolled_hybrid_anchor
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv/Scripts/hornlab-search.exe
+      - verify
+      - --run
+      - runs/20261124T000037Z-screen-f8a896
+      - --designs
+      - fa5b207bca6d
+      - --verify-dir
+      - runs/rolled_lame_anchor_verify_2026-11-24/rolled
+      - --cache-dir
+      - runs/rolled_lame_anchor_verify_2026-11-24/cache_rolled
+      - --dataset-dir
+      - runs/rolled_lame_anchor_verify_2026-11-24/dataset
+  - id: lame_v4_anchor
+    kind: command
+    timeout_s: 1200
+    env:
+      HORNLAB_GPU_LOCK: refuse
+    argv:
+      - .venv/Scripts/hornlab-search.exe
+      - verify
+      - --run
+      - runs/20261123T235306Z-screen-0a4f8a
+      - --designs
+      - '0782945027ae'
+      - --verify-dir
+      - runs/rolled_lame_anchor_verify_2026-11-24/lame
+      - --cache-dir
+      - runs/rolled_lame_anchor_verify_2026-11-24/cache_lame
+      - --dataset-dir
+      - runs/rolled_lame_anchor_verify_2026-11-24/dataset

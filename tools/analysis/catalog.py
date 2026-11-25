@@ -61,9 +61,23 @@ import hashlib
 import json
 import math
 import re
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
+
+# The script must use the checkout it belongs to, even with another editable install.
+if not __package__:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from hornlab_search.dataset.catalog_identity import (
+    catalog_identity_from_record,
+    lib_shas as _lib_shas,
+    objective_version as _objective_version,
+    solve_block as _solve_block,
+    target_block as _target_block,
+    target_identity as _target_identity,
+    terms_identity as _terms_identity,
+)
 
 try:  # reuse the frozen record schema constants; never instantiate DatasetStore
     from hornlab_search.dataset.record import (ARRAY_KEYS as _RECORD_ARRAY_KEYS,
@@ -113,7 +127,6 @@ for _v in (5, 6, 7):
     LOADING_ARRAY_REQUIREMENTS[_v] = V4_LOADING_ARRAYS + ("impedance_matrix",)
 
 _SHARD_RE = re.compile(r"^shard-(\d+)\.jsonl$")
-_EXTERNAL_LIBS = ("hornlab_mesher", "hornlab_beat_bem", "hornlab_bempp_bem", "hornlab_plots")
 
 
 # ------------------------------------------------------------------ small helpers
@@ -342,27 +355,6 @@ def _npz_inspect(path: Path, *, selected_keys: Iterable[str] | None = None,
     return out
 
 
-def _objective_version(meta: dict) -> tuple[int, str]:
-    if "objective_version" in meta:
-        v = meta.get("objective_version")
-        if isinstance(v, int) and not isinstance(v, bool):
-            return v, "record"
-        try:
-            return int(str(v)), "record_coerced"
-        except (TypeError, ValueError):
-            return 1, "invalid_defaults_to_v1"
-    return 1, "absent_defaults_to_v1"
-
-
-def _lib_shas(meta: dict) -> dict[str, str]:
-    raw = _dict_or_empty(meta.get("lib_shas"))
-    return {str(k): str(v) for k, v in raw.items() if isinstance(v, (str, int, float))}
-
-
-def _dependency_hash(shas: dict[str, str]) -> str:
-    return _sha16({k: shas.get(k) for k in _EXTERNAL_LIBS})
-
-
 def _software_hash(shas: dict[str, str]) -> str:
     return _sha16(shas)
 
@@ -392,49 +384,6 @@ def _generator_provenance(meta: dict) -> dict:
     }
 
 
-def _target_block(meta: dict) -> dict:
-    target = _dict_or_empty(meta.get("target"))
-    block = {
-        "coverage_h_deg": _num_or_none(target.get("coverage_h_deg")),
-        "coverage_v_deg": _num_or_none(target.get("coverage_v_deg")),
-        "coverage_v_up_deg": _num_or_none(target.get("coverage_v_up_deg")),
-        "coverage_v_down_deg": _num_or_none(target.get("coverage_v_down_deg")),
-        "band_lo_hz": _num_or_none(target.get("band_lo_hz")),
-        "band_hi_hz": _num_or_none(target.get("band_hi_hz")),
-        "f0_hz": _num_or_none(target.get("f0_hz")),
-        "f0_v_hz": _num_or_none(target.get("f0_v_hz")),
-        "di_target_db": _num_or_none(target.get("di_target_db")),
-        "di_slope_target": _num_or_none(target.get("di_slope_target")),
-        "z_min": _num_or_none(target.get("z_min")),
-        "driver_exit_radius_mm": _num_or_none(target.get("driver_exit_radius_mm")),
-        "freq_weights": target.get("freq_weights"),
-        "raw_keys": sorted(str(k) for k in target),
-    }
-    # v9 (2026-11-17, amended RFC): the coverage profile is part of the scoring identity.
-    # Display passthrough pop-when-absent so legacy blocks stay byte-identical.
-    profile = target.get("coverage_profile")
-    if isinstance(profile, dict):
-        block["coverage_profile"] = dict(profile)
-        block["raw_keys"] = sorted(set(block["raw_keys"]) | {"coverage_profile"})
-    return block
-
-
-def _target_identity(target: dict) -> dict:
-    """Semantic scoring target identity; ``raw_keys`` is provenance, not scoring.
-
-    The v9 coverage profile (2026-11-17 amendment) enters only when present — a
-    profile-less brief keeps the exact legacy identity dict and therefore the exact
-    legacy ``target_hash``, so two briefs differing only in profile can never collide."""
-    identity = {k: target.get(k) for k in (
-        "coverage_h_deg", "coverage_v_deg", "coverage_v_up_deg", "coverage_v_down_deg",
-        "band_lo_hz", "band_hi_hz", "f0_hz", "f0_v_hz", "di_target_db",
-        "di_slope_target", "z_min", "freq_weights")}
-    profile = target.get("coverage_profile")
-    if isinstance(profile, dict):
-        identity["coverage_profile"] = dict(profile)
-    return identity
-
-
 def _mesh_block(meta: dict) -> dict:
     mesh = _dict_or_empty(meta.get("mesh"))
     grid = _dict_or_empty(mesh.get("grid"))
@@ -452,48 +401,6 @@ def _mesh_block(meta: dict) -> dict:
             "available": grid.get("available") if isinstance(grid.get("available"), bool) else None,
         },
     }
-
-
-def _solve_block(meta: dict) -> dict:
-    solve = _dict_or_empty(meta.get("solve"))
-    obs = _dict_or_empty(solve.get("observation"))
-    freqs = solve.get("freqs_hz")
-    freqs = [round(float(f), 6) for f in freqs] if isinstance(freqs, list) else []
-    return {
-        "backend": _str_or_none(solve.get("backend")),
-        "mode": _str_or_none(solve.get("mode")),
-        "freqs_hz": freqs,
-        "observation": {
-            "distance_m": _num_or_none(obs.get("distance_m")),
-            "angle_count": _int_or_none(obs.get("angle_count")),
-            "balloon": obs.get("balloon") if isinstance(obs.get("balloon"), bool) else None,
-            "balloon_points": _int_or_none(obs.get("balloon_points")),
-        },
-        "gmres_tol": _num_or_none(solve.get("gmres_tol")),
-        "seconds": _num_or_none(solve.get("seconds")),
-        "peak_vram_mb": _num_or_none(solve.get("peak_vram_mb")),
-        "n_dof": _int_or_none(solve.get("n_dof")),
-    }
-
-
-def _terms_identity(meta: dict) -> dict:
-    terms = _dict_or_empty(meta.get("terms"))
-    metrics = _dict_or_empty(meta.get("metrics_scalars"))
-    return {
-        "keys": sorted(str(k) for k in terms),
-        "penalty": _num_or_none(terms.get("penalty")),
-        "total": _num_or_none(terms.get("total")),
-        "n_in_band": _int_or_none(terms.get("n_in_band")),
-        "n_nan": _int_or_none(terms.get("n_nan")),
-        "di_estimated": terms.get("di_estimated"),
-        "di_source": _str_or_none(metrics.get("di_source")),
-    }
-
-
-def _grid_hash(solve: dict) -> str:
-    return _sha16({"freqs_hz": solve.get("freqs_hz"),
-                   "observation": solve.get("observation"),
-                   "gmres_tol": solve.get("gmres_tol")})
 
 
 def _run_id(meta: dict) -> str | None:
@@ -664,13 +571,7 @@ def _record_entry(root: Path, shard_info: dict, item: dict, *,
         "driver_exit_radius_mm": target.get("driver_exit_radius_mm"),
         "mounting": prov.get("mounting"),
     })
-    score_schema = {"objective_version": ov, "target": target_hash,
-                    "brief": prov.get("brief"), "brief_hash": prov.get("brief_hash"),
-                    "terms_keys": terms["keys"], "terms_schema": True}
-    score_identity = _sha16(score_schema)
-    task_identity = _sha16({"family": meta.get("family"), "brief": prov.get("brief"),
-                            "brief_hash": prov.get("brief_hash"), "target": target_hash,
-                            "objective_version": ov})
+    identities = catalog_identity_from_record(meta)
     run_id = _run_id(meta)
     config_name = _config_name(meta)
     unknowns: list[str] = []
@@ -721,8 +622,7 @@ def _record_entry(root: Path, shard_info: dict, item: dict, *,
         "geometry_id": _str_or_none(meta.get("design_hash")),
         "mesh_spec_id": _str_or_none(meta.get("mesh_hash")),
         "solve_spec_id": _str_or_none(meta.get("solve_hash")),
-        "physical_solve_id": _sha16([meta.get("design_hash"), meta.get("mesh_hash"),
-                                     meta.get("solve_hash")]),
+        "physical_solve_id": identities["physical_solve_id"],
         "family": _str_or_none(meta.get("family")),
         "ok": meta.get("ok") if isinstance(meta.get("ok"), bool) else None,
         "error": meta.get("error") if isinstance(meta.get("error"), str) else None,
@@ -737,11 +637,11 @@ def _record_entry(root: Path, shard_info: dict, item: dict, *,
         "solve": solve,
         "fidelity": solve.get("mode"),
         "backend": solve.get("backend"),
-        "grid_hash": _grid_hash(solve),
+        "grid_hash": identities["grid_hash"],
         "excitation": meta.get("excitation") if isinstance(meta.get("excitation"), dict) else None,
         "traces": meta.get("traces") if isinstance(meta.get("traces"), dict) else None,
         "lib_shas": lib_shas,
-        "dependency_hash": _dependency_hash(lib_shas),
+        "dependency_hash": identities["dependency_hash"],
         "software_hash": _software_hash(lib_shas),
         "own_commit": lib_shas.get("hornlab_search"),
         "provenance": {
@@ -761,9 +661,9 @@ def _record_entry(root: Path, shard_info: dict, item: dict, *,
         "config_name": config_name,
         "treatment_id": config_name,
         "typology": _str_or_none(meta.get("typology")),
-        "task_identity": task_identity,
+        "task_identity": identities["task_identity"],
         "source_identity": source_identity,
-        "score_identity": score_identity,
+        "score_identity": identities["score_hash"],
         "score_parameters_known": False,
         "score_parameters_note": "record stores target/version/terms, not weights/tolerances",
         "unknowns": sorted(set(unknowns)),

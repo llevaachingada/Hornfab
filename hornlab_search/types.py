@@ -81,6 +81,7 @@ class MeshResult:
     res_mm: dict               # {throat, mouth, rear}
     bbox_m: tuple              # (xmin, ymin, zmin, xmax, ymax, zmax)
     seconds: float
+    terminal_rim_wh_mm: tuple[float, float] | None = None
 
 
 # ------------------------------------------------------------------ solve
@@ -194,6 +195,7 @@ class Evaluation:
     outcome: SolveOutcome | None
     cached: bool = False
     error: str = ""
+    dataset_position: tuple[int, int] | None = None
 
 
 class GeometryInvalidError(ValueError): ...

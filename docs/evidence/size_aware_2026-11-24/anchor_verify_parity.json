@@ -1,0 +1,116 @@
+{
+  "rolled": {
+    "spec_parity_neutral_variant": {
+      "mesh_spec": [
+        true,
+        true
+      ],
+      "solve_spec": [
+        true,
+        true
+      ],
+      "mesh_config": [
+        true,
+        true
+      ],
+      "target_raw": [
+        true,
+        true
+      ],
+      "weights": [
+        true,
+        true
+      ],
+      "objective_version": [
+        true,
+        true
+      ],
+      "objective_params": [
+        true,
+        true
+      ],
+      "brief": [
+        true,
+        true
+      ]
+    },
+    "fresh_anchor": {
+      "sha256": "62fa92f673b7c46073a5de108847aa76294a3ffff5b82d76dd49153313b70e7a",
+      "triangles": 6744,
+      "res_mm": {
+        "throat": 3.5729166666666665,
+        "mouth": 7.145833333333333,
+        "rear": 10.71875
+      }
+    },
+    "fresh_neutral": {
+      "sha256": "62fa92f673b7c46073a5de108847aa76294a3ffff5b82d76dd49153313b70e7a",
+      "triangles": 6744,
+      "res_mm": {
+        "throat": 3.5729166666666665,
+        "mouth": 7.145833333333333,
+        "rear": 10.71875
+      }
+    },
+    "saved_verify_mesh_sha256": "62fa92f673b7c46073a5de108847aa76294a3ffff5b82d76dd49153313b70e7a",
+    "fresh_byte_identical": true,
+    "fresh_anchor_matches_saved_verify": true
+  },
+  "lame": {
+    "spec_parity_neutral_variant": {
+      "mesh_spec": [
+        true,
+        true
+      ],
+      "solve_spec": [
+        true,
+        true
+      ],
+      "mesh_config": [
+        true,
+        true
+      ],
+      "target_raw": [
+        true,
+        true
+      ],
+      "weights": [
+        true,
+        true
+      ],
+      "objective_version": [
+        true,
+        true
+      ],
+      "objective_params": [
+        true,
+        true
+      ],
+      "brief": [
+        true,
+        true
+      ]
+    },
+    "fresh_anchor": {
+      "sha256": "5ebfc475ca2c032665706e0c91f513c1e419d791a976d5911c980901c1677d93",
+      "triangles": 6821,
+      "res_mm": {
+        "throat": 3.5729166666666665,
+        "mouth": 7.145833333333333,
+        "rear": 7.145833333333333
+      }
+    },
+    "fresh_neutral": {
+      "sha256": "5ebfc475ca2c032665706e0c91f513c1e419d791a976d5911c980901c1677d93",
+      "triangles": 6821,
+      "res_mm": {
+        "throat": 3.5729166666666665,
+        "mouth": 7.145833333333333,
+        "rear": 7.145833333333333
+      }
+    },
+    "saved_verify_mesh_sha256": "5ebfc475ca2c032665706e0c91f513c1e419d791a976d5911c980901c1677d93",
+    "fresh_byte_identical": true,
+    "fresh_anchor_matches_saved_verify": true
+  }
+}
