@@ -148,9 +148,9 @@ class GeneratedSpace:
         self.gen = dict(gen)
         self.brief = dict(brief)
         self.bounds = dict(bounds)
-        from .generators import (rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family,
+        from .generators import (rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family,
                                 lecleach_swept_hv, sculpted_rosse_family, crowe_hv_area_aspect_v1, record_body)
-        for family in (rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family,
+        for family in (rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family,
                        lecleach_swept_hv, sculpted_rosse_family, crowe_hv_area_aspect_v1, record_body):
             if family.is_family_spec(self.gen):
                 family.validate_search_config(self.gen, seed_knobs, self.bounds, self.brief)
@@ -256,9 +256,9 @@ class GeneratedSpace:
     def knobs_for(self, d: Design) -> dict | None:
         k = self._knobs_by_hash.get(d.hash())
         if k is None:
-            from .generators import rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family
+            from .generators import rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family
             block = d.params.get('grid') if isinstance(d.params, dict) else None
-            for family in (rolled_family, rolled_cd_family, cd_backbone_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family):
+            for family in (rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family):
                 if family.is_family_spec(block) and family.is_family_spec(self.gen):
                     family.resolve_grid(block, self.brief)
                     candidate = block.get('knobs')

@@ -172,3 +172,25 @@ diyAudio snippets, unverified).
 Status (updated 2026-11-25 16:15Z): rolled keeper `bb_h` 0.65 / throat 0.25 passes all six rules and the epw-9 gate on two different rolled bodies; the Lamé does not pass (waistband and loading, batch 6); other families surveyed (applies to rolled designs only under the CD brief). Earlier: steps 1–4 done (kernel tests, geometry parity, `shape_check --mode verify`, fixed-candidate solves with the refined-mesh gate); step 5 (CMA over the backbone knobs) not started. Results: [cd_backbone_2026-11-25](../../evidence/cd_backbone_2026-11-25/README.md). Ownership: `hornlab_search/design/generators/**` changes need the integrator's
 go-ahead; parents and existing digests stay frozen.
 
+## 5. CD variants of non-CD returned-lip families (added 2026-11-25)
+
+**Goal.** Take horns that were not designed to be CD and build *explicitly labeled CD hybrids* that keep each
+parent's character (mouth, return or rollback, section shape) while aiming at the CD corridor. The knowledge-card
+rule forbids silently scoring a non-CD horn as if it were CD; it does not forbid a new, labeled identity scored on
+a CD brief against its own control. Kind `rows_bb_v1` (`hornlab_search/design/generators/cd_backbone_rows_family.py`,
+its own module so the existing backbone digests do not move) carries the parent's generic WP9b rows recipe under
+`rows.parent_rows` and applies the unchanged `_cd_backbone_v1` kernel. Evidence:
+[cd_variants_2026-11-25](../../evidence/cd_variants_2026-11-25/README.md).
+
+| Parent | Construction (repo dossier) | Why it is not CD | What the CD variant keeps | What it changes |
+|---|---|---|---|---|
+| Le Cléac'h / JMLC (`lecleach`, `lecleach_ar`) | Spherical-wave expansion with a rollback; `JMLC_LECLEACH_RESEARCH_2026-10-25.md`, card `lecleach_iwata.md` [verified there] | Built for throat loading; the wall stays shallow (here 10–22° at 10–30 % of the pre-roll arc) and the pattern narrows with frequency, which the card calls the family-specific directivity curve | throat, rollback/return, rim, mouth outline, AR stretch (`lecleach_ar`) or H/V `fc` (`lecleach`) | pre-roll wall angle only: blend toward a solved constant θc between throat transition and roll-in |
+| Iwata (`iwata_ar`) | Our reconstruction of an Iwata-style AR march; `BIRADIAL_IWATA_300_RESEARCH_2026-10-25.md` [inferred there] | Same loading-first slow early flare (9.5–17.6° at 10–30 %); not a biradial/CD construction | throat, return, AR section | as above |
+| Salmon (`salmon_elliptical`) | Salmon 1946 hyperbolic family with T; `SALMON_X_HORN_EXPANSION_2026-10-25.md` [verified there] | Exponential-type flare; "narrowing can be the design" | — | not built: on the CD brief its height is 608.7 mm > 480 mm, so a CD variant needs a separate, labeled scale step first |
+
+Physics expectation [inferred from sections 1–3 and the backbone evidence]: 6–8 kHz width follows the wall angle
+at roughly 20–40 % of the pre-roll arc; the parent's straight chord to its roll-on station bounds the reachable
+body angle. Predictor carried from the rolled/Lamé batches: solved θc at the keeper window (throat 0.25, roll-in
+0.30) was 38.7–39.7° on the rolled bodies that passed and 33.7° on the Lamé that failed; the targets solve to
+37.5° (`lecleach` H/V), 35.3° (`lecleach_ar`) and 31.2° (`iwata_ar`). Naming in every config, card and table: the
+parent's name plus "+ CD backbone", flagged LABELED CD HYBRID; never the original typology's name alone.

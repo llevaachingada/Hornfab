@@ -1,0 +1,546 @@
+{
+ "cd_brief": "room_landscape_80x50_900_hf1440_v11cd",
+ "cd_driver": {
+  "exit_angle_deg": 2.0,
+  "exit_radius_mm": 18.0
+ },
+ "cd_envelope": {
+  "max_depth_mm": 480.0,
+  "max_mouth_h_mm": 480.0,
+  "max_mouth_w_mm": 600.0
+ },
+ "targets": {
+  "lecleach_ar": {
+   "run": "runs/20261119T205130Z-screen-5dbd97",
+   "design": "5f7fbfc276b9",
+   "rows": {
+    "type": "lecleach_ar"
+   },
+   "span": "quarter",
+   "orig_brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+   "orig_driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "orig_envelope": {
+    "max_depth_mm": 480.0,
+    "max_mouth_h_mm": 480.0,
+    "max_mouth_w_mm": 600.0
+   },
+   "extents_mm": [
+    537.4,
+    339.6,
+    221.5
+   ],
+   "fits_cd_envelope": true,
+   "grid_shape": [
+    15,
+    33,
+    3
+   ],
+   "H": {
+    "forward_station": 25,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 220.9,
+    "roll_on_r_mm": 199.6,
+    "chord_deg": 39.4,
+    "wall_deg": [
+     13.4,
+     17.3,
+     22.0,
+     31.0
+    ],
+    "gap_at_30pct_deg": 17.4
+   },
+   "V": {
+    "forward_station": 26,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 220.9,
+    "roll_on_r_mm": 133.5,
+    "chord_deg": 27.6,
+    "wall_deg": [
+     9.4,
+     11.8,
+     14.4,
+     19.4
+    ],
+    "gap_at_30pct_deg": 13.2
+   },
+   "backbone_full_strength": {
+    "t25_r30": {
+     "theta_c_h_deg": 35.2857,
+     "theta_c_v_deg": 21.174,
+     "max_disp_mm": 18.8
+    },
+    "t25_r20": {
+     "theta_c_h_deg": 38.355,
+     "theta_c_v_deg": 24.7136,
+     "max_disp_mm": 22.8
+    },
+    "t30_r20": {
+     "theta_c_h_deg": 39.2522,
+     "theta_c_v_deg": 25.297,
+     "max_disp_mm": 21.3
+    }
+   }
+  },
+  "lecleach": {
+   "run": "runs/20261116T040157Z-screen-402831",
+   "design": "a85be6929ad5",
+   "rows": {
+    "type": "lecleach"
+   },
+   "span": "quarter",
+   "orig_brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+   "orig_driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "orig_envelope": {
+    "max_depth_mm": 480.0,
+    "max_mouth_h_mm": 480.0,
+    "max_mouth_w_mm": 600.0
+   },
+   "extents_mm": [
+    507.1,
+    264.0,
+    235.6
+   ],
+   "fits_cd_envelope": true,
+   "grid_shape": [
+    15,
+    33,
+    3
+   ],
+   "H": {
+    "forward_station": 30,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 235.2,
+    "roll_on_r_mm": 222.7,
+    "chord_deg": 41.0,
+    "wall_deg": [
+     10.4,
+     14.9,
+     20.7,
+     32.3
+    ],
+    "gap_at_30pct_deg": 20.3
+   },
+   "V": {
+    "forward_station": 30,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 235.2,
+    "roll_on_r_mm": 119.8,
+    "chord_deg": 23.4,
+    "wall_deg": [
+     7.1,
+     9.1,
+     11.3,
+     15.5
+    ],
+    "gap_at_30pct_deg": 12.1
+   },
+   "backbone_full_strength": {
+    "t25_r30": {
+     "theta_c_h_deg": 37.5396,
+     "theta_c_v_deg": 15.018,
+     "max_disp_mm": 25.4
+    },
+    "t25_r20": {
+     "theta_c_h_deg": 40.6261,
+     "theta_c_v_deg": 19.1654,
+     "max_disp_mm": 29.6
+    },
+    "t30_r20": {
+     "theta_c_h_deg": 41.7066,
+     "theta_c_v_deg": 19.618,
+     "max_disp_mm": 27.4
+    }
+   }
+  },
+  "iwata_ar": {
+   "run": "runs/20261119T062638Z-screen-03ae3c",
+   "design": "06a008612260",
+   "rows": {
+    "type": "iwata_ar"
+   },
+   "span": "quarter",
+   "orig_brief": "room_landscape_80x50_700_hf1440_v7_smooth",
+   "orig_driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "orig_envelope": {
+    "max_depth_mm": 480.0,
+    "max_mouth_h_mm": 480.0,
+    "max_mouth_w_mm": 600.0
+   },
+   "extents_mm": [
+    427.8,
+    306.2,
+    236.6
+   ],
+   "fits_cd_envelope": true,
+   "grid_shape": [
+    15,
+    33,
+    3
+   ],
+   "H": {
+    "forward_station": 30,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 236.2,
+    "roll_on_r_mm": 188.8,
+    "chord_deg": 35.9,
+    "wall_deg": [
+     9.5,
+     13.2,
+     17.6,
+     26.5
+    ],
+    "gap_at_30pct_deg": 18.3
+   },
+   "V": {
+    "forward_station": 30,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 236.2,
+    "roll_on_r_mm": 137.9,
+    "chord_deg": 26.9,
+    "wall_deg": [
+     7.8,
+     10.2,
+     13.0,
+     18.2
+    ],
+    "gap_at_30pct_deg": 14.0
+   },
+   "backbone_full_strength": {
+    "t25_r30": {
+     "theta_c_h_deg": 31.1643,
+     "theta_c_v_deg": 19.8803,
+     "max_disp_mm": 20.6
+    },
+    "t25_r20": {
+     "theta_c_h_deg": 34.473,
+     "theta_c_v_deg": 23.6667,
+     "max_disp_mm": 25.4
+    },
+    "t30_r20": {
+     "theta_c_h_deg": 35.3744,
+     "theta_c_v_deg": 24.2487,
+     "max_disp_mm": 23.8
+    }
+   }
+  },
+  "iwata_ar_b3bt": {
+   "run": "runs/20261027T085242Z-screen-c7d820",
+   "design": "b01fcfa4b50a",
+   "rows": {
+    "type": "iwata_ar"
+   },
+   "span": "quarter",
+   "orig_brief": "b3bt_pa_90x60_600_load_tall_rows_v4",
+   "orig_driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "orig_envelope": {
+    "max_depth_mm": 600.0,
+    "max_mouth_h_mm": 740.0,
+    "max_mouth_w_mm": 500.0
+   },
+   "extents_mm": [
+    450.8,
+    415.3,
+    245.9
+   ],
+   "fits_cd_envelope": true,
+   "grid_shape": [
+    15,
+    33,
+    3
+   ],
+   "H": {
+    "forward_station": 28,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 245.6,
+    "roll_on_r_mm": 181.5,
+    "chord_deg": 33.7,
+    "wall_deg": [
+     10.8,
+     13.8,
+     17.4,
+     24.5
+    ],
+    "gap_at_30pct_deg": 16.2
+   },
+   "V": {
+    "forward_station": 28,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 245.6,
+    "roll_on_r_mm": 168.8,
+    "chord_deg": 31.5,
+    "wall_deg": [
+     10.3,
+     13.0,
+     16.2,
+     22.5
+    ],
+    "gap_at_30pct_deg": 15.3
+   },
+   "backbone_full_strength": {
+    "t25_r30": {
+     "theta_c_h_deg": 28.2009,
+     "theta_c_v_deg": 25.5634,
+     "max_disp_mm": 17.0
+    },
+    "t25_r20": {
+     "theta_c_h_deg": 31.6048,
+     "theta_c_v_deg": 29.0782,
+     "max_disp_mm": 22.3
+    },
+    "t30_r20": {
+     "theta_c_h_deg": 32.3656,
+     "theta_c_v_deg": 29.7694,
+     "max_disp_mm": 21.0
+    }
+   }
+  },
+  "salmon_elliptical": {
+   "run": "runs/20261027T083216Z-screen-23544f",
+   "design": "63034eff4baf",
+   "rows": {
+    "type": "salmon_elliptical"
+   },
+   "span": "quarter",
+   "orig_brief": "b3bt_pa_90x60_600_load_tall_rows_v4",
+   "orig_driver": {
+    "exit_angle_deg": 2.0,
+    "exit_radius_mm": 18.0
+   },
+   "orig_envelope": {
+    "max_depth_mm": 600.0,
+    "max_mouth_h_mm": 740.0,
+    "max_mouth_w_mm": 500.0
+   },
+   "extents_mm": [
+    473.2,
+    608.7,
+    367.3
+   ],
+   "fits_cd_envelope": false,
+   "grid_shape": [
+    15,
+    33,
+    3
+   ],
+   "H": {
+    "forward_station": 29,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 91.7,
+    "roll_on_r_mm": 111.5,
+    "chord_deg": 45.5,
+    "wall_deg": [
+     19.2,
+     23.6,
+     28.8,
+     38.5
+    ],
+    "gap_at_30pct_deg": 16.7
+   },
+   "V": {
+    "forward_station": 30,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 319.5,
+    "roll_on_r_mm": 252.6,
+    "chord_deg": 36.3,
+    "wall_deg": [
+     9.5,
+     12.8,
+     17.1,
+     26.2
+    ],
+    "gap_at_30pct_deg": 19.2
+   },
+   "backbone_full_strength": {
+    "t25_r30": {
+     "theta_c_h_deg": 42.5311,
+     "theta_c_v_deg": 31.2863,
+     "max_disp_mm": 30.5
+    },
+    "t25_r20": {
+     "theta_c_h_deg": 45.3105,
+     "theta_c_v_deg": 34.7095,
+     "max_disp_mm": 37.4
+    },
+    "t30_r20": {
+     "theta_c_h_deg": 46.3205,
+     "theta_c_v_deg": 35.6036,
+     "max_disp_mm": 35.3
+    }
+   }
+  },
+  "lecleach_asym": {
+   "run": "runs/20261027T064411Z-screen-019599",
+   "design": "fd63b53adeaf",
+   "rows": {
+    "type": "lecleach_asym"
+   },
+   "span": "full",
+   "orig_brief": "native_lecleach_1200_1in_v4",
+   "orig_driver": {
+    "exit_angle_deg": 4.0,
+    "exit_radius_mm": 12.7
+   },
+   "orig_envelope": {
+    "max_depth_mm": 260.0,
+    "max_mouth_h_mm": 400.0,
+    "max_mouth_w_mm": 400.0
+   },
+   "extents_mm": [
+    320.8,
+    320.1,
+    137.9
+   ],
+   "fits_cd_envelope": true,
+   "grid_shape": [
+    25,
+    33,
+    3
+   ],
+   "H": {
+    "forward_station": 25,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 137.2,
+    "roll_on_r_mm": 127.4,
+    "chord_deg": 38.6,
+    "wall_deg": [
+     14.9,
+     18.5,
+     22.6,
+     29.9
+    ],
+    "gap_at_30pct_deg": 16.0
+   },
+   "V": {
+    "forward_station": 25,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 137.2,
+    "roll_on_r_mm": 127.4,
+    "chord_deg": 38.6,
+    "wall_deg": [
+     14.9,
+     18.5,
+     22.6,
+     29.9
+    ],
+    "gap_at_30pct_deg": 16.0
+   },
+   "backbone_full_strength": {
+    "t25_r30": {
+     "theta_c_h_deg": 33.4335,
+     "theta_c_v_deg": 33.4331,
+     "max_disp_mm": 9.6
+    },
+    "t25_r20": {
+     "theta_c_h_deg": 36.7801,
+     "theta_c_v_deg": 36.7797,
+     "max_disp_mm": 12.4
+    },
+    "t30_r20": {
+     "theta_c_h_deg": 37.592,
+     "theta_c_v_deg": 37.5916,
+     "max_disp_mm": 11.6
+    }
+   }
+  },
+  "lecleach_1in": {
+   "run": "runs/20261118T195131Z-screen-8cd85f",
+   "design": "5a5fa1c976c2",
+   "rows": {
+    "type": "lecleach"
+   },
+   "span": "quarter",
+   "orig_brief": "lecleach_rollback_1in_v6",
+   "orig_driver": {
+    "exit_angle_deg": 5.0,
+    "exit_radius_mm": 12.7
+   },
+   "orig_envelope": {
+    "max_depth_mm": 260.0,
+    "max_mouth_h_mm": 420.0,
+    "max_mouth_w_mm": 520.0
+   },
+   "extents_mm": [
+    265.0,
+    265.0,
+    148.8
+   ],
+   "fits_cd_envelope": true,
+   "grid_shape": [
+    15,
+    33,
+    3
+   ],
+   "H": {
+    "forward_station": 30,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 148.4,
+    "roll_on_r_mm": 119.8,
+    "chord_deg": 34.4,
+    "wall_deg": [
+     10.2,
+     13.7,
+     17.8,
+     25.3
+    ],
+    "gap_at_30pct_deg": 16.7
+   },
+   "V": {
+    "forward_station": 30,
+    "n": 33,
+    "has_return": true,
+    "roll_on_z_mm": 148.4,
+    "roll_on_r_mm": 119.8,
+    "chord_deg": 34.4,
+    "wall_deg": [
+     10.2,
+     13.7,
+     17.8,
+     25.3
+    ],
+    "gap_at_30pct_deg": 16.7
+   },
+   "backbone_full_strength": {
+    "t25_r30": {
+     "theta_c_h_deg": 28.8528,
+     "theta_c_v_deg": 28.8528,
+     "max_disp_mm": 10.7
+    },
+    "t25_r20": {
+     "theta_c_h_deg": 32.3941,
+     "theta_c_v_deg": 32.3941,
+     "max_disp_mm": 13.9
+    },
+    "t30_r20": {
+     "theta_c_h_deg": 33.206,
+     "theta_c_v_deg": 33.206,
+     "max_disp_mm": 13.0
+    }
+   }
+  }
+ }
+}

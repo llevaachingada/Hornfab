@@ -1,5 +1,10 @@
 ﻿# CONTINUITY
 
+## 2026-11-25 (afternoon) — CD variants of non-CD returned-lip horns: none passes, Le Cléac'h H/V closest
+
+- New kind `rows_bb_v1` (`hornlab_search/design/generators/cd_backbone_rows_family.py`, own module so the batch 1–7 backbone digests are unchanged) wraps generic rows parents (`lecleach`, `lecleach_ar`, `iwata_ar`, …) as LABELED CD HYBRIDS; `apply_cd_backbone.py --base-config` re-scores a parent from another brief and checks neutral = bare parent verify mesh byte-for-byte. Tests: 51 pass (`runs/cd_variants_tests.xml`).
+- 14 predeclared verify solves (2 batches, v11cd brief, epw 6) on Le Cléac'h AR `5f7fbfc276b9`, Le Cléac'h H/V `a85be6929ad5`, Iwata AR `06a008612260`: **no candidate passes the six rules**. Controls narrow to 39–40° H at 8 kHz; the backbone adds +17 to +21° there, but best 8 kHz H is 59.9° (floor 62°) and 2–4 kHz waistbands appear. Closest: `lcl_bb_h100_v000_t25_r20` (6–8 kHz H 65.2–58.7°, 2–4 kHz 61.8–75.0°, loading kept). Section hypothesis (`bb_v` 1.0) rejected. Salmon excluded (608.7 mm tall > 480). Stop rule applied; next lever is a labeled mouth/roll-on change. [Readout](evidence/cd_variants_2026-11-25/README.md).
+
 ## 2026-11-25 (noon) — CD backbone: recipe transfers to a second rolled body; Lamé stops; cross-application survey
 
 - Batch 6 (4 Lamé solves): longer throat + shorter roll-in move the 2.7 kHz waistband to 2.3 kHz and lift loading to 0.554–0.608 (floor 0.617); no pass, best J 6.851. Lamé line stopped: needs a mouth/rollback or depth change, not body knobs.

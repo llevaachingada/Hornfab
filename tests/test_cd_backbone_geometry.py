@@ -12,6 +12,7 @@ from conftest import REPO
 from hornlab_search.config import brief_for_envelope_adapter, load_config
 from hornlab_search.design.generators import _cd_backbone_v1 as kernel
 from hornlab_search.design.generators import cd_backbone_family as bf
+from hornlab_search.design.generators import cd_backbone_rows_family as rf
 from hornlab_search.design.generators.registry import GeneratorError
 from hornlab_search.design.space import Bound, DesignSpace
 
@@ -110,3 +111,84 @@ def test_dormant_shape_search_is_refused():
     seed = dict(cfg.seed_params)
     with pytest.raises(GeneratorError):
         bf.validate_search_config(cfg.generator, seed, bounds, cfg.brief)
+
+
+# --------------------------------------------------------------- rows_bb_v1 (generic non-CD rows parents)
+# LABELED CD HYBRIDS of non-CD parents (Le Cleac'h AR, Le Cleac'h H/V, Iwata AR) re-scored on the CD brief.
+VAR_DIR = REPO / "examples/typologies/cd_variants_2026-11-25"
+ROWS_PREFIXES = ("lcar", "lcl", "iwar")
+#: Digests of the two original kinds as saved by the batch 1-7 recipes; rows_bb_v1 lives in its own module so
+#: adding it must not change them (a change would orphan every saved backbone design).
+SAVED_ROLLED_DIGEST_PREFIX = "0a3bcb0e29ef4c28"
+
+
+def test_existing_kind_digest_is_unchanged_by_rows_kind():
+    assert bf.implementation_digest(bf.ROLLED_KIND).startswith(SAVED_ROLLED_DIGEST_PREFIX)
+    assert not bf.is_family_spec({"rows": {"type": rf.KIND}})
+
+
+def _rows_resolved(name):
+    cfg = load_config(VAR_DIR / f"{name}.yaml")
+    block = DesignSpace.from_config(cfg).seed.params["grid"]
+    brief = brief_for_envelope_adapter(cfg.brief)
+    return cfg, block, brief, rf.resolve_grid(block, brief)
+
+
+@pytest.mark.parametrize("prefix", ROWS_PREFIXES)
+def test_rows_neutral_is_bit_for_bit_parent(prefix):
+    from hornlab_search.design.generators import grid
+    _cfg, block, brief, child = _rows_resolved(f"{prefix}_control")
+    assert block["rows"]["type"] == rf.KIND
+    pcfg = load_config(VAR_DIR / f"{prefix}_parent.yaml")
+    pblock = DesignSpace.from_config(pcfg).seed.params["grid"]
+    inner, _meta = grid.rows_grid_points({k: v for k, v in pblock.items() if k != "knobs"}, pblock["knobs"],
+                                         pcfg.brief)
+    np.testing.assert_array_equal(child["inner_points"], inner)
+    assert "outer_points" not in child        # grid_build offsets the shell exactly as for the bare parent
+
+
+def test_rows_neutral_verify_mesh_is_byte_identical():
+    import hashlib
+    import tempfile
+    from pathlib import Path
+    from hornlab_search.config import mesh_spec
+    from hornlab_search.mesh.build import build_mesh
+    shas = []
+    for name in ("lcar_parent", "lcar_control"):
+        cfg = load_config(VAR_DIR / f"{name}.yaml")
+        with tempfile.TemporaryDirectory() as td:
+            mesh = build_mesh(DesignSpace.from_config(cfg).seed, mesh_spec("verify", cfg), cfg, Path(td),
+                              mode="verify")
+            shas.append(hashlib.sha256(Path(mesh.path).read_bytes()).hexdigest())
+    assert shas[0] == shas[1]
+
+
+@pytest.mark.parametrize("prefix", ROWS_PREFIXES)
+def test_rows_backbone_keeps_throat_rollon_return_and_v_row(prefix):
+    _c, _b, _br, base = _rows_resolved(f"{prefix}_control")
+    _c, block, _br, geo = _rows_resolved(f"{prefix}_bb_h100_v000_t25_r30")
+    a, b = np.asarray(base["inner_points"], float), np.asarray(geo["inner_points"], float)
+    np.testing.assert_array_equal(a[-1], b[-1])                 # V-plane row untouched (bb_v = 0)
+    for j in range(a.shape[0]):
+        f = int(np.argmax(a[j, :, 2]))
+        np.testing.assert_allclose(b[j, 0], a[j, 0], atol=1e-9)   # throat
+        np.testing.assert_allclose(b[j, f:], a[j, f:], atol=1e-9)  # roll-on station, return, rim
+        assert int(np.argmax(b[j, :, 2])) == f
+    assert np.abs(b - a).max() > 5.0
+    meta = geo["meta"]
+    assert meta["backbone_rows"]["theta_c_h_deg"] > 30.0
+    assert any("LABELED CD HYBRID" in note for note in meta["notes"])
+
+
+def test_rows_recipe_contract_refusals():
+    _c, block, brief, _geo = _rows_resolved("lcar_bb_h065_v000_t25_r30")
+    for edit in ({"schema": "invalid"}, {"implementation_sha256": "invalid"},
+                 {"parent_rows": {"type": "rolled_family_rect_v1"}}, {"extra": 1}):
+        bad = copy.deepcopy(block)
+        bad["rows"].update(edit)
+        with pytest.raises(GeneratorError):
+            rf.resolve_grid(bad, brief)
+    bad = copy.deepcopy(block)
+    bad["span"] = "full"
+    with pytest.raises(GeneratorError):
+        rf.resolve_grid(bad, brief)
