@@ -1,0 +1,352 @@
+{
+ "rolled_bb_cohort_s1": {
+  "valid": 10,
+  "best_J": 4.688417250285815,
+  "pins": {
+   "g_bb_v": {
+    "box": [
+     0.0,
+     0.5
+    ],
+    "n_low": 4,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     1.0
+    ],
+    "top_median": 0.0282392415
+   },
+   "g_depth_h_ratio": {
+    "box": [
+     0.55,
+     1.0
+    ],
+    "n_low": 0,
+    "n_high": 6,
+    "kernel": [
+     0.5,
+     1.2
+    ],
+    "top_median": 0.99249314
+   },
+   "g_depth_mm": {
+    "box": [
+     200.0,
+     340.0
+    ],
+    "n_low": 6,
+    "n_high": 0,
+    "kernel": null,
+    "top_median": 204.0460144424
+   },
+   "g_inward_h_mm": {
+    "box": [
+     0.0,
+     40.0
+    ],
+    "n_low": 1,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     "15% height"
+    ],
+    "top_median": 5.5150372058
+   },
+   "g_rect_turn_deg": {
+    "box": [
+     45.0,
+     80.0
+    ],
+    "n_low": 1,
+    "n_high": 0,
+    "kernel": null,
+    "top_median": 49.3722245548
+   }
+  }
+ },
+ "rolled_bb_cohort_s2": {
+  "valid": 10,
+  "best_J": 4.528789059325888,
+  "pins": {
+   "g_axial_v_mm": {
+    "box": [
+     -20.0,
+     20.0
+    ],
+    "n_low": 0,
+    "n_high": 6,
+    "kernel": [
+     "-10% depth",
+     "10% depth"
+    ],
+    "top_median": 19.1891432245
+   },
+   "g_bb_v": {
+    "box": [
+     0.0,
+     0.5
+    ],
+    "n_low": 5,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     1.0
+    ],
+    "top_median": 0.0385062237
+   },
+   "g_depth_h_ratio": {
+    "box": [
+     0.55,
+     1.0
+    ],
+    "n_low": 0,
+    "n_high": 6,
+    "kernel": [
+     0.5,
+     1.2
+    ],
+    "top_median": 0.9937889783
+   },
+   "g_depth_mm": {
+    "box": [
+     200.0,
+     340.0
+    ],
+    "n_low": 9,
+    "n_high": 0,
+    "kernel": null,
+    "top_median": 202.97015482
+   },
+   "g_inward_h_mm": {
+    "box": [
+     0.0,
+     40.0
+    ],
+    "n_low": 2,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     "15% height"
+    ],
+    "top_median": 3.5135293619
+   },
+   "g_inward_v_mm": {
+    "box": [
+     0.0,
+     40.0
+    ],
+    "n_low": 2,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     "15% height"
+    ],
+    "top_median": 4.2770055242
+   },
+   "g_terminal_deg": {
+    "box": [
+     225.0,
+     280.0
+    ],
+    "n_low": 0,
+    "n_high": 3,
+    "kernel": [
+     ">180",
+     280.0
+    ],
+    "top_median": 277.1838937945
+   }
+  }
+ },
+ "rolled_beak_cohort_s1": {
+  "valid": 10,
+  "best_J": 4.516208572377459,
+  "pins": {
+   "g_axial_h_mm": {
+    "box": [
+     -20.0,
+     20.0
+    ],
+    "n_low": 1,
+    "n_high": 0,
+    "kernel": [
+     "-10% depth",
+     "10% depth"
+    ],
+    "top_median": -8.6128825188
+   },
+   "g_bb_v": {
+    "box": [
+     0.0,
+     0.5
+    ],
+    "n_low": 6,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     1.0
+    ],
+    "top_median": 0.0089073467
+   },
+   "g_depth_mm": {
+    "box": [
+     200.0,
+     340.0
+    ],
+    "n_low": 7,
+    "n_high": 0,
+    "kernel": null,
+    "top_median": 202.9156143909
+   },
+   "g_inward_h_mm": {
+    "box": [
+     0.0,
+     40.0
+    ],
+    "n_low": 2,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     "15% height"
+    ],
+    "top_median": 4.2739480065
+   },
+   "g_rect_exponent": {
+    "box": [
+     4.0,
+     12.0
+    ],
+    "n_low": 0,
+    "n_high": 1,
+    "kernel": null,
+    "top_median": 10.7642165266
+   }
+  }
+ },
+ "rolled_beak_cohort_s2": {
+  "valid": 10,
+  "best_J": 4.478765442175404,
+  "pins": {
+   "g_axial_h_mm": {
+    "box": [
+     -20.0,
+     20.0
+    ],
+    "n_low": 1,
+    "n_high": 0,
+    "kernel": [
+     "-10% depth",
+     "10% depth"
+    ],
+    "top_median": -12.978824491
+   },
+   "g_axial_v_mm": {
+    "box": [
+     -20.0,
+     20.0
+    ],
+    "n_low": 0,
+    "n_high": 3,
+    "kernel": [
+     "-10% depth",
+     "10% depth"
+    ],
+    "top_median": 16.7970319727
+   },
+   "g_bb_v": {
+    "box": [
+     0.0,
+     0.5
+    ],
+    "n_low": 4,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     1.0
+    ],
+    "top_median": 0.0291647565
+   },
+   "g_depth_mm": {
+    "box": [
+     200.0,
+     340.0
+    ],
+    "n_low": 5,
+    "n_high": 0,
+    "kernel": null,
+    "top_median": 206.056762184
+   },
+   "g_inward_h_mm": {
+    "box": [
+     0.0,
+     40.0
+    ],
+    "n_low": 3,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     "15% height"
+    ],
+    "top_median": 3.7771849279
+   },
+   "g_inward_v_mm": {
+    "box": [
+     0.0,
+     40.0
+    ],
+    "n_low": 7,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     "15% height"
+    ],
+    "top_median": 0.7016172146
+   },
+   "g_terminal_deg": {
+    "box": [
+     225.0,
+     280.0
+    ],
+    "n_low": 0,
+    "n_high": 4,
+    "kernel": [
+     ">180",
+     280.0
+    ],
+    "top_median": 277.9381737242
+   }
+  }
+ },
+ "lcl_bb_cohort": {
+  "valid": 10,
+  "best_J": 6.247232053298431,
+  "pins": {
+   "g_bb_h": {
+    "box": [
+     0.6,
+     1.0
+    ],
+    "n_low": 0,
+    "n_high": 5,
+    "kernel": [
+     0.0,
+     1.0
+    ],
+    "top_median": 0.9912438179
+   },
+   "g_bb_v": {
+    "box": [
+     0.0,
+     0.5
+    ],
+    "n_low": 5,
+    "n_high": 0,
+    "kernel": [
+     0.0,
+     1.0
+    ],
+    "top_median": 0.0178046028
+   }
+  }
+ }
+}
