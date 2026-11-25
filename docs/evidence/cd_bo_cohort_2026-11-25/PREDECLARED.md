@@ -45,3 +45,34 @@ i.e. the roll-on station — the lever batch 2 pointed to.
 - Rolled: at least one top-5 design passes all six rules on verify. Rows (`lcl`, `iwar`): 50/50 that any design
   reaches H ≥ 62° at 8 kHz without a 2–4 kHz waistband.
 - Rows campaigns will drift toward larger mouths (lower `fc`) — expected and recorded through `size_feasibility`.
+
+## Addendum, written 2026-11-25T17:55Z (12:55 EST) before any of these solves — beak mouths
+
+**Trigger.** Owner: the recent horns have flat mouths "like they're going to be mated to a cabinet", while they will
+hang freestanding (every solve here is a freestanding quarter model). Survey of every saved campaign with a
+beak-type knob (`scratch/beak_survey.py`): the beak constructions exist but were boxed in — the Klangfilm core beak
+narrowed from 0–60 / 0–45 / ±20 mm to 0–10 / 0–5 (later pinned 0.04) / ±5 mm; Lamé v1 negative rim sweep pinned at
+its −0.22 floor on v11; rolled `axial_*` is a late-body bump that returns to zero before the lip (≤ 10 % of depth),
+so the rolled lip itself only moves through `depth_h_ratio`.
+
+**Batch-1 observation that is also evidence:** `rolled_bb_cohort_s1` was stopped by the bound-pinned watchdog after
+30 valid rows (best screen J 4.688) with 4/6 of its top 6 at `g_depth_h_ratio` = 1.0 — the SEARCH ceiling inherited
+from the source campaign; the kernel allows 0.5–1.2 (> 1 = H lips ahead of V).
+
+**New campaigns (CMA, 100 valid, same open brief, `resample_strict`):**
+
+| Campaign | Change | Dims |
+|---|---|---:|
+| `rolled_beak_cohort_s1` / `_s2` | rolled + backbone with `depth_h_ratio` 0.55–1.2 (both saddle directions); new identity | 17 |
+| `lcl_beak_cohort` | Le Cléac'h H/V CD hybrid + **rim-beak overlay** (new kind `beak_v1`: H, V ±60 mm, 45° scoop ±30 mm, gate start 0.4–0.85; zero = the parent's verify mesh byte-for-byte) | 12 |
+| `iwar_beak_cohort` | Iwata AR CD hybrid + rim-beak overlay | 13 |
+| `klangfilm_core_beak_cohort` | Klangfilm-Lamé H/V core (best of the v11 `cd11c` run), its own beak reopened to the kernel range; this kernel only sets H back / V forward | 12 |
+
+Watchdog `pin_ignore` on beak amplitudes and on law-coupled knobs (rolled depth floor / axial relief): bound pinning
+is reported post hoc instead of stopping the cohort at ~30 rows.
+
+**Predictions.** (1) `rolled_beak` top designs leave 1.0: median `depth_h_ratio` of the top 10 > 1.0 (H ahead), and
+its best screen J ≤ 4.688 (`rolled_bb_cohort_s1`'s best). (2) For `lcl_beak` / `iwar_beak` the top-10 median of
+`rb_v_mm − rb_h_mm` is non-zero with |·| ≥ 10 mm (the optimizer uses the beak), sign not predicted. (3) The Klangfilm
+core's best J beats nothing in the rolled set (its v11 best was 7.05 on the 700 Hz brief). (4) Same caveat as above:
+every promotion is by the six CD rules on verify, never by J alone.

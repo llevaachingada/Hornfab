@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path.cwd()))
 from hornlab_search.config import brief_for_envelope_adapter, envelope_policy, load_config  # noqa: E402
-from hornlab_search.design.generators import cd_backbone_family as bf, cd_backbone_rows_family as rf  # noqa: E402
+from hornlab_search.design.generators import cd_backbone_family as bf, cd_backbone_rows_family as rf, rim_beak_family as kf  # noqa: E402
 from hornlab_search.design.space import DesignSpace  # noqa: E402
 
 for p in sorted(glob.glob('examples/typologies/cd_bo_cohort_2026-11-25/*.yaml')):
@@ -19,7 +19,7 @@ for p in sorted(glob.glob('examples/typologies/cd_bo_cohort_2026-11-25/*.yaml'))
         space = DesignSpace.from_config(cfg)
         pol = envelope_policy(cfg.brief)
         block = space.seed.params['grid']
-        mod = rf if rf.is_family_spec(block) else bf
+        mod = kf if kf.is_family_spec(block) else rf if rf.is_family_spec(block) else bf
         meta = mod.resolve_grid(block, brief_for_envelope_adapter(cfg.brief))['meta']
         active = sorted(k for k, b in space.bounds.items() if b.search)
         print(f'{name:22s} OK policy {pol.mode} cand {pol.candidate_limits_mm} active {len(active)} '

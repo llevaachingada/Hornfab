@@ -544,8 +544,8 @@ def _build_grid_mesh(design: Design, mesh: MeshSpec, cfg, out_dir: Path, *,
     out_dir.mkdir(parents=True, exist_ok=True)
     geometry = {"inner_points": inner, "meta": meta,
                 "wall_thickness_mm": float(block.get("wall_thickness_mm", 3.0))}
-    from ..design.generators import rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
-    for family in (rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
+    from ..design.generators import rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rim_beak_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body
+    for family in (rolled_family, rolled_cd_family, cd_backbone_family, cd_backbone_rows_family, rim_beak_family, rolled_terminal_family, klangfilm_lame_family, klangfilm_lame_hv_family, klangfilm_lame_hv_core_family, lecleach_swept_hv, sculpted_rosse_family, record_body):
         if family.is_family_spec(block):
             if mounting is not None:
                 raise GeometryInvalidError('versioned explicit body cannot be combined with enclosure')
