@@ -362,6 +362,13 @@ def _validate_envelope(env, where: str) -> None:
                 or not math.isfinite(val) or val < 1 or env.get("enforce", True)):
             raise ConfigError(f"{where}: envelope.max_utilization requires enforce: false "
                               "and must be a finite number >= 1")
+    if "soft_penalty" in env:
+        # Opt-in soft size cost on J (objective/size_penalty.py, owner 2026-11-25).
+        from .objective.size_penalty import validate_soft_penalty
+        try:
+            validate_soft_penalty(env["soft_penalty"], where, enforce=bool(env.get("enforce", True)))
+        except ValueError as exc:
+            raise ConfigError(str(exc)) from None
 
 
 def load_brief(path) -> dict:

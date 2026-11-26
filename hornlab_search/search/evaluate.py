@@ -1055,6 +1055,16 @@ def evaluate(design: Design, space, cfg, mode: str, run_dir, store, backend, *,
 
         st["size_feasibility"] = size_feasibility_record(
             mesh, policy, design_hash=dh, mesh_hash=mh, mounted=bool(mkey))
+        # Opt-in soft size cost (objective/size_penalty.py): added AFTER the acoustic objective on a
+        # solved row only; absent envelope.soft_penalty leaves J, terms and the row byte-identical.
+        from ..objective.size_penalty import size_penalty_terms, soft_penalty_block
+
+        soft = soft_penalty_block(getattr(cfg, "brief", None))
+        if soft is not None and not kind:
+            extra = size_penalty_terms(st["size_feasibility"], soft)
+            ev = dataclasses.replace(
+                ev, objective=float(ev.objective) + extra["size_penalty"],
+                terms={**ev.terms, **extra, "J_acoustic": float(ev.objective)})
     if str(getattr(cfg.search, "record_gate", "") or "") == "shadow":
         # WP 3.3 (opt-in): annotate the row with the PRE-MESH record's worst envelope margin and
         # whether the record's inside/outside prediction agrees with the deterministic refusal.

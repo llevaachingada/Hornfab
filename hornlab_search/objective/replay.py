@@ -801,6 +801,18 @@ def _replay_core(
             diagnostics={"score_error": f"{type(exc).__name__}: {exc}"},
         )
 
+    # ---- opt-in soft size cost (objective/size_penalty.py), exactly as search/evaluate.py adds it
+    soft = None
+    if brief is not None:
+        from .size_penalty import size_penalty_terms, soft_penalty_block
+        raw_b = brief.raw.get("brief") if isinstance(brief.raw.get("brief"), dict) else brief.raw
+        soft = soft_penalty_block(raw_b)
+    if soft is not None and j is not None:
+        size_record = meta.get("size_feasibility") or (meta.get("provenance") or {}).get("size_feasibility")
+        extra = size_penalty_terms(size_record, soft)
+        terms = {**dict(terms), **extra, "J_acoustic": float(j)}
+        j = float(j) + extra["size_penalty"]
+
     # ---- completeness diagnostics ---------------------------------------------------------
     ripple_used_resp = None
     flat_used_resp = None
@@ -1075,6 +1087,8 @@ def replay_run_dir(run_dir, design_hash: str | None = None, *, brief: Brief | st
         "objective_version": (1 if stored_version is None else stored_version),
         "target": (dataclasses.asdict(base_target_dict) if base_target_dict is not None else None),
     }
+    if status.get("size_feasibility"):
+        meta["size_feasibility"] = status["size_feasibility"]
     return _replay_core(
         meta, arrays, response=response, stored_metrics=stored_metrics,
         stored_metric_reasons=[], brief=brief, target=target, weights_override=weights,

@@ -51,11 +51,12 @@ bounds:
     lo: 0.3
     hi: 0.9
     search: true
-brief_file: ../../briefs/home_xo900_2026-11-20/room_landscape_80x50_900_hf1440_v11cd_open115_pm5const_2026-11-25.yaml
-description: lcl_beak on the +-5 deg constant-directivity brief (owner 2026-11-25
+brief_file: ../../briefs/home_xo900_2026-11-20/room_landscape_80x50_900_hf1440_v11cd_open115_pm5const_size5_2026-11-25.yaml
+description: 'lcl_beak on the +-5 deg constant-directivity brief (owner 2026-11-25
   17:43). Box, seed and knobs = lcl_beak_r1 (best known design of the family, exploration
   box); only the brief changed. 100 valid screen solves. Judged on verify by the six
-  CD rules, not J alone.
+  CD rules, not J alone. Brief: +-5 deg constant-directivity + soft size penalty (5
+  % over = +1 J).'
 family: FREEFORM
 feasibility:
   derivation:
