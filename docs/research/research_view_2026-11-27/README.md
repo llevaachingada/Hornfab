@@ -1,87 +1,62 @@
-# M1 research snapshot — handback (2026-11-27)
+# M1 research snapshot — handback (2026-11-27, after senior hardening)
 
 ADR: [ADR_M1_research_snapshot.md](ADR_M1_research_snapshot.md). Code: `hornlab_search/research/`
-(`provenance.py`, `sources.py`, `findings.py`, `build.py`, `template.html`). Tests:
-`tests/test_research_snapshot.py`. Nothing in production scoring, optimizers, caches, mesh defaults,
-`gui/server.py` or the old report/routes changed. No GPU, no solver, no BEM.
+(`provenance.py`, `sources.py`, `findings.py`, `guide.py`, `build.py`, `template.html`) and
+`hornlab_search/gui/data_research.py`. Tests: `tests/test_research_snapshot.py`,
+`tests/test_gui_research_snapshot.py`. No production scoring, optimizer, cache, mesh default or GPU change.
 
-```powershell
-.venv\Scripts\python.exe -m hornlab_search.research build --cutoff 2026-11-25T23:59:59Z
-```
+## How to run
 
-Output: `runs/analysis/research_<date>_<id8>/` (`snapshot.json`, `manifest.json`, `rows.ndjson`,
-`findings.ndjson`, `index.html`). The GUI's existing route serves it at
-`/analysis/research_2026-11-25_08a6d477/index.html`. The HTML embeds the exact `snapshot.json` bytes.
+- GUI: Overview → Briefing → **Generate research snapshot** (empty cutoff = now; or an ISO instant to
+  reproduce). CPU-only job, ~5–10 s; the card then shows the newest snapshot with an "Open research
+  report" link and the agent files.
+- CLI: `.venv\Scripts\python.exe -m hornlab_search.research build [--cutoff 2026-11-25T23:59:59Z]`.
+- Output: `runs/analysis/research_<date>_<id8>/` — `index.html` (people), `summary.json` +
+  `AGENT_GUIDE.md` + `findings.ndjson` + `rows.ndjson` (agents), `snapshot.json`, `manifest.json`.
 
-## Fresh snapshot (measured in this pass)
+## Fresh snapshot [measured]
 
-`snapshot 08a6d477803f510e`, cutoff `2026-11-25T23:59:59Z`, commit `bd5b769cffee`, 455 sources,
-50 exclusions (49 runs after cutoff, 1 row without timestamp: `dose:rolled:control_epw9`), 8 findings,
-150 missing/unknown cells. Committed copy: [snapshot_08a6d477/](snapshot_08a6d477/) (manifest, findings,
-build logs). Two consecutive builds gave byte-identical `snapshot.json` (sha256 checked).
+`bc737b910572690c`, cutoff 2026-11-25T23:59:59Z, commit `d2273848`: 460 sources, 49 exclusions,
+9 findings, 155 missing/unknown cells listed. Built through the GUI entry script and the CLI with
+byte-identical digests ([build.log](snapshot_bc737b91/build.log)). Replay at 2026-11-24 → `851c572d`,
+0 dose rows (all solved 11-25), 6 findings ([log](snapshot_bc737b91/build_replay_cutoff_2026-11-24.log)).
+Committed copy: [snapshot_bc737b91/](snapshot_bc737b91/). Screens: [desktop](m1_desktop_1440.png),
+[narrow](m1_narrow_500.png), [GUI card](gui_overview_research_card.png).
 
-## Source / data coverage
+## Verification [measured]
 
-| Area | Source | Coverage |
-|---|---|---|
-| Dose experiment | `cd_backbone_2026-11-25/results*.json` + 23 committed configs (git) | 24 rows (rolled 14, Lamé 7, second rolled body 3); 22 corroborated `match` against local `best.json` (Δ 0); 2 controls have no job record (`run_dir_missing`) |
-| Cohort inventory | `runs/*/run.json` + `search.ndjson` | 1043 run dirs scanned; 803 other objective versions, 8 without run.json; 152 v11 cohorts (strict key) |
-| Admission | `runs/v11_bo_day_planning/cohort_*` + `acquisition_confirmation_2026-11-23/confirmation.json` | 10 cohort dirs + Fold confirmation (linked by persisted `eval_run_id`) |
-| Claims | metric-BO handoff §3 table | 29 rows: 9 agree, 1 conflict, 19 not comparable (no admission artifact) |
-| Mesh fidelity | `MESH_POLICY_AB.csv`, `ACOUSTIC_CONVERGENCE.csv` | 5 acoustic cases, 1 mesh-only class, 1 inert (CAD) |
-| Canary | `runs/metric_bo_canary_2026-11-23/work_v4` + rehearsal `work` | 2 screen/verify pairs, 7 replicate pairs |
+- Every `{v, src}` cell resolves mechanically to its pinned source: **1210 ok, 0 bad** (898 committed via
+  git, 312 `runs/` from disk) — [resolve_all_cells.log](snapshot_bc737b91/resolve_all_cells.log).
+- Independent adversarial check (separate agent): 27/30 sampled cells exact, all 8 findings supported,
+  both cohort recounts exact, c500 conflict confirmed. Its 4 issues (derived time cited as raw, markdown
+  pointers not mechanical, "holdout pass" overstating PASS_FOR_EXPLORATORY_PILOT, implicit control
+  exclusion) are fixed and now covered by tests.
+- Cohort inventory reproduces `runs/v11_bo_day_planning/v11_cohort_inventory.py` on all 200 configs
+  (valid rows, runs, best J); the extra `lcl_beak_cohort` is the dead 11-26 job with no rows.
+- All 22 committed dose configs equal the configs the runs recorded (`config_equal: true`).
+- Attribution residual on all 24 dose rows with stored terms ≤ 1.78e-15.
+- Canary replicate (two packages): max |ΔJ| 2.71e-06.
+- GUI button clicked end to end on a test server: job `done`, exit 0, `gpu: false`, ~5 s.
 
-Unavailable telemetry (recorded, not inferred): GPU wall time/VRAM at rear factor 1.5; physical
-measurements (none; all simulated BEM); per-row GPU telemetry in the inventory (not aggregated).
+## Assumptions corrected in the hardening pass
 
-## Example agent finding resolved to source
-
-`matched_pair` (id `960c75bf36ecd0d9`): `rolled_bb_h065` J 4.6755 fails `min_re_z_ok`;
-`rolled_bb_h065_th025` J 4.6787 passes; only `g_bb_throat_frac` differs (0.15 → 0.25). Every cell resolves:
-`results.json#/rolled/runs/rolled_bb_h065/J`, `…/min_re_z_from_900` (0.8638 → 0.9928),
-`results.json#/rolled/checks/rolled_bb_h065/min_re_z_ok` = false,
-`rolled_bb_h065.yaml#/bounds/g_bb_throat_frac/lo`. ΔJ = calc `J(pass) - J(fail)` = 0.003167.
-
-The data also show what the mockup did not: the true lowest J in that identity is
-`rolled_bb_h065_ri022` (4.3488, roll-in 0.22), which also fails loading (`scalar_not_gate`).
-
-## Residual reconciliation (exact)
-
-Attribution = `gui/data_breakdown.score_breakdown` weights × stored terms; residual = stored total − fsum.
-All 24 dose rows: residual ∈ {0, ±8.88e-16, 1.78e-15} (worst `lame_bb_h100_m040_t25_r15`
-1.7763568394002505e-15). No unattributed term. Stored total equals stored J on every row.
-
-## Replay and negative controls
-
-- Replay at cutoff `2026-11-24T23:59:59Z` → snapshot `561b1d1a46120c3c`: 0 dose rows (all 11-25), so no
-  dose findings; the cohort counts equal the handoff table, and the c500 conflict persists.
-- Solve replicate: 7 designs solved in two independent canary packages, max |ΔJ| 2.71e-06.
-- Appending a row after the cutoff leaves the snapshot id unchanged; changing a row before it changes
-  the id (test A5/A6).
-
-## Reconciliation finding (data quality)
-
-Handoff §3 (line 136) says `r3_c500` "needs strict artifact + holdout/B4"; the artifact
-`cohort_c500_2026-11-24/holdout_comparison.json` (written 2026-11-24 19:21Z) says
-`PASS_FOR_EXPLORATORY_PILOT`. The handoff was committed 2026-11-25 23:08Z, so the table was stale when
-committed. CONTINUITY 11-25 already records c500 holdout PASS.
-
-## Tests (run in this pass)
-
-`tests/test_research_snapshot.py` 14 + neighbours (`test_gui_score_breakdown`, `test_gui_views_analysis*`):
-**45 tests, 0 failures, 0 errors, 0 skipped** (junitxml). The full suite was not run here (another
-session's full run was in progress).
+1. Refined-mesh (epw 9) verdicts: `analyze.py` compared them with the epw-6 control; now the mesh-delta
+   rule plus the six rules vs the epw-9 control (both rows still pass). The epw-9 control is now a row.
+2. Hard-coded markdown line numbers replaced by searched, mechanically resolvable anchors.
+3. `PASS_FOR_EXPLORATORY_PILOT` is `pilot_eligible`, not "holdout pass"; unknown PASS_* is `unknown`.
+4. The existing `optimizer_evidence.py` is now the cost/fidelity adapter for 13 admission-relevant
+   cohorts (36 run cards) — it surfaced `software_drift` in Fold, c500 and FAV (new finding).
+5. Cohort key gained a mesh+solve digest; config revisions shown as treatment variants.
+6. The 150-row floor and the rule thresholds are cited from their documents, not hard-coded.
 
 ## Blockers / limits
 
-- The "architecture package" and its tests named in the entrypoint were not in the hand-off folder.
-- Admission artifacts are placed against the cutoff by file mtime (they carry no timestamp).
-- Fold canary ↔ cohort link is a handoff claim (canary run.json has no `config_name`).
-- Inherited claim statuses are parsed from markdown by keyword; 19 rows have no comparable artifact.
-- Score attribution for size-penalty runs would show the penalty as residual until the
-  `hungry-sinoussi` breakdown fix is merged.
+- Architecture package and its tests were not provided. Admission artifacts are placed by mtime.
+- Fold canary ↔ cohort link is a handoff claim. 139 small cohorts have no optimizer-evidence card
+  (below floor, no admission artifact) — stated per cohort.
+- GPU timing at rear factor 1.5 and physical measurements remain unmeasured.
 
-## Proposed next milestone (M2, only now that M1 runs)
+## Next milestone (M2)
 
-Add curve-level drilldown from saved `response.npz` (H/V/Re(z) vs frequency per dose row), extend the
-inventory to v7/v10 identities with the same strict key, and a GUI nav link to the latest snapshot.
+Curve-level drilldown from `response.npz`, v7/v10 inventories under the same key, and per-version
+re-admission for the software-drift cohorts.

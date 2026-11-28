@@ -37,6 +37,8 @@ CLI_BOOT = "import sys; from hornlab_search.cli import main; sys.exit(main(sys.a
 HW_ENTRY = "tools/system/gui_system_job.py"
 #: Repo-relative entry script for the API snapshot job (Overview phase 4). Not a GPU kind.
 SNAPSHOT_ENTRY = "hornlab_search/gui/data_overview_snapshot.py"
+#: Repo-relative entry script for the M1 research snapshot job (read-only, CPU only). Not a GPU kind.
+RESEARCH_ENTRY = "hornlab_search/gui/data_research.py"
 
 
 def auto_backend() -> str | None:
@@ -378,6 +380,14 @@ class JobManager:
             if not 1 <= days <= 365:
                 raise JobError("days must be between 1 and 365")
             return OSN.snapshot_argv(days), False
+        if kind == "research-snapshot":
+            # M1 research snapshot: read-only over committed evidence + runs/, writes only
+            # runs/analysis/research_<date>_<id8>/. Deliberately NOT a GPU kind (no solver, no lock).
+            from . import data_research as RS
+            try:
+                return RS.research_argv(a), False
+            except RS.ResearchArgError as exc:
+                raise JobError(str(exc)) from None
         if kind == "hw-screen":
             # P5: a CPU-only deterministic woofer/cabinet/XO/placement screen. The system data
             # layer owns the whole validation (repo-contained spec, 16-hex saved asset, real driver
@@ -489,6 +499,8 @@ class JobManager:
             return HW_ENTRY
         if kind == "overview-snapshot":
             return SNAPSHOT_ENTRY
+        if kind == "research-snapshot":
+            return RESEARCH_ENTRY
         return self._bridge_entry(argv)
 
     def preview(self, kind: str, args: dict) -> dict:

@@ -1,0 +1,11 @@
+research snapshot: cutoff 2026-11-25T23:59:59Z (read-only; no solver, no GPU lock)
+snapshot bc737b910572690c cutoff 2026-11-25T23:59:59Z commit d2273848d5af
+out C:\Users\hunte\Hrns\hornlab-search\runs\analysis\research_2026-11-25_bc737b91
+sources 460 exclusions 49 findings 9 missing-cells 155
+  snapshot.json    sha256 48644dd935d9335c3d8dc2e4ce36995e992f8e37fb5b38b8dff2ccc812378926
+  manifest.json    sha256 d42800125d88a6412c76405de0b7fda5b11afe110e288382cab49c674493701f
+  rows.ndjson      sha256 ef17546e30ee229a58f5a9f30fb58ce0f032f76fe6c758b234f4e3ad3f3a4f86
+  findings.ndjson  sha256 73719d9d8f8e0d66d4410bdb8858dfc05bb3af8149124d629beab8db5a6d6bb9
+  AGENT_GUIDE.md   sha256 2d96284223bb20d5a3976c2a92e8834a4e7f747528f9abbe7c9d7ae9db4c3984
+  index.html       sha256 4ab016ab4f3de7527b03d15fc89f11377ecca96a52d96bfffbb58dea472d401f
+  summary.json     sha256 d2a3603baec579d8c4034febb70f96877460016070f3b3c0edefb7c4051bee0c

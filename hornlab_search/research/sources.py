@@ -125,13 +125,48 @@ def _run_dir_local(root: Path, recorded: str | None) -> Path | None:
     return p if p.is_dir() else None
 
 
+def _line_of(text: str, needle: str) -> int | None:
+    """1-based line of the first line containing ``needle`` (pointers are searched, never hard-coded)."""
+    for i, line in enumerate(text.splitlines(), start=1):
+        if needle in line:
+            return i
+    return None
+
+
+#: analyze.py's bin sets (PREDECLARED.md "Bin set" table), used only to re-evaluate the three
+#: control-relative rules against a fidelity-matched control.
+HF_BINS = (6085, 6325, 6977, 7113, 8000)
+
+
+def _matched_fidelity_rules(cand: dict, ctl: dict, src: str, cptr: str, kptr: str) -> dict:
+    """V-not-narrower, loading and J rules re-evaluated against a control at the same mesh fidelity
+    (analyze.check's formulas, PREDECLARED rules 3, 5, 6)."""
+    idx = {round(x): i for i, x in enumerate(cand.get("freqs") or [])}
+    try:
+        dv = min(cand["V"][idx[b]] - ctl["V"][idx[b]] for b in HF_BINS)
+    except (KeyError, IndexError, TypeError):
+        dv = None
+    ins = [f"{src}#{cptr}", f"{src}#{kptr}"]
+    return {
+        "V_HF_not_narrower": calc(None if dv is None else bool(dv >= 0.0), "min_HF(V_cand - V_ctl) >= 0", ins),
+        "min_re_z_ok": calc(bool(cand["min_re_z_from_900"] >= ctl["min_re_z_from_900"] - 0.1),
+                            "minRe(z)_cand >= minRe(z)_ctl - 0.1", ins),
+        "J_ok": calc(bool(cand["J"] <= ctl["J"]), "J_cand <= J_ctl", ins),
+    }
+
+
 def dose_experiment(reg: Registry, cutoff: datetime) -> dict:
     root = reg.root
-    pre = reg.git_text(f"{DOSE_DIR}/PREDECLARED.md") or ""
+    pre_src = f"{DOSE_DIR}/PREDECLARED.md"
+    pre = reg.git_text(pre_src) or ""
     m = re.search(r"Written (\d{4}-\d{2}-\d{2}T\d{2}:\d{2})Z", pre)
     predeclared_at = parse_utc(m.group(1) + ":00Z") if m else None
-    pre_cell = cell(iso(predeclared_at), f"{DOSE_DIR}/PREDECLARED.md", "line:3") if m \
+    pre_cell = cell(iso(predeclared_at), pre_src, f"line:{_line_of(pre, 'Written ')}/text:Written") if m \
         else missing("PREDECLARED.md has no 'Written' timestamp")
+    ln_epw9 = _line_of(pre, "epw-9 controls")
+    ctx = {"predeclared_at": predeclared_at, "pre_cell": pre_cell,
+           "epw9_control_cell": cell(9.0, pre_src, f"line:{ln_epw9}/text:epw-9 controls") if ln_epw9
+           else missing("epw-9 control not named in PREDECLARED.md")}
 
     rows, fams = [], []
     packets = [("results.json", ("rolled", "lame")), ("results_transfer.json", (None,))]
@@ -145,37 +180,39 @@ def dose_experiment(reg: Registry, cutoff: datetime) -> dict:
             block = data if fam is None else data.get(fam) or {}
             fam_name = fam or "rolled2"
             fams.append({"family": fam_name, "source": src, "status": "ok"})
-            runs, jobs, checks = (block.get(k) or {} for k in ("runs", "jobs", "checks"))
+            runs, checks = (block.get(k) or {} for k in ("runs", "checks"))
             base = "" if fam is None else json_pointer(fam)
+            gate = ((data.get("mesh_gate") or {}).get(fam) or {}) if fam else {}
             for job in list(dict.fromkeys(list(runs) + list(checks))):
-                rows.append(_dose_row(reg, root, cutoff, fam_name, job, block, src, base,
-                                      predeclared_at, pre_cell))
+                rows.append(_dose_row(reg, root, cutoff, fam_name, job, block, src, base, ctx, gate))
     kept = [r for r in rows if r is not None]
-    pre_src = f"{DOSE_DIR}/PREDECLARED.md"
-    h_floor = cell(62.0, pre_src, "line:89/rule-1") if "H ≥ 62°" in pre else missing("rule 1 text not found")
+    ln1, ln5 = _line_of(pre, "H ≥ 62° at all five"), _line_of(pre, "**Loading:**")
+    h_floor = cell(62.0, pre_src, f"line:{ln1}/text:H ≥ 62° at all five") if ln1 else missing("rule 1 text not found")
     gates = {}
     for r in kept:
-        if r["is_control"] and r["min_re_z"].get("v") is not None:
+        if r["job"] in ("control", f"{r['family']}_bb_control") and r["min_re_z"].get("v") is not None:
             gates[r["family"]] = {
                 "H_HF_floor_deg": h_floor,
-                "min_re_z": calc(r["min_re_z"]["v"] - 0.1, "control min Re(z) - 0.1 (rule 5, line 93)",
-                                 [r["min_re_z"], f"{pre_src}#line:93/rule-5"])}
-    return {"gates": gates,"title": "CD wall-angle backbone: fixed-candidate verifies (2026-11-25)",
-            "readme": f"{DOSE_DIR}/README.md", "predeclared": f"{DOSE_DIR}/PREDECLARED.md",
+                "min_re_z": calc(r["min_re_z"]["v"] - 0.1, "control min Re(z) - 0.1 (rule 5)",
+                                 [r["min_re_z"], f"{pre_src}#line:{ln5}/text:**Loading:**"])}
+    return {"gates": gates, "title": "CD wall-angle backbone: fixed-candidate verifies (2026-11-25)",
+            "readme": f"{DOSE_DIR}/README.md", "predeclared": pre_src,
             "predeclared_at": pre_cell, "rules": [{"key": k, "label": l} for k, l in RULES],
             "families": fams, "rows": kept,
             "scope": "Simulated matched verifies (BEAT CUDA, 29-frequency verify grid, 36 mm / 2 deg "
-                     "assumed source, freestanding quarter model). Not physical-driver measurements."}
+                     "assumed source, freestanding quarter model). Not physical-driver measurements. "
+                     "Pass rules are predeclared for this CD backbone experiment only."}
 
 
-def _dose_row(reg, root, cutoff, fam, job, block, src, base, predeclared_at, pre_cell):
+def _dose_row(reg, root, cutoff, fam, job, block, src, base, ctx, gate):
     runs, jobs, checks = (block.get(k) or {} for k in ("runs", "jobs", "checks"))
-    is_control = job == "control" or job.endswith("_bb_control")
+    is_control = job in ("control", "control_epw9") or job.endswith("_bb_control")
     jobrec = jobs.get(job) or {}
-    when = parse_utc(Path(re.split(r"[\\/]", jobrec.get("run", ""))[-1]).name) if jobrec.get("run") else None
-    when_cell = cell(iso(when), src, base + json_pointer("jobs", job, "run")) if when else None
+    when = parse_utc(re.split(r"[\\/]", jobrec.get("run", ""))[-1]) if jobrec.get("run") else None
+    when_cell = calc(iso(when), "UTC from the run-dir name prefix YYYYMMDDTHHMMSSZ",
+                     [f"{src}#{base}{json_pointer('jobs', job, 'run')}"]) if when else None
     if when is None and is_control:      # controls were solved before the predeclaration
-        when, when_cell = predeclared_at, dict(pre_cell, note="upper bound: solved before predeclaration")
+        when, when_cell = ctx["predeclared_at"], dict(ctx["pre_cell"], note="upper bound: solved before predeclaration")
     rid = f"dose:{fam}:{job}"
     if when is None:
         reg.exclude(rid, "no timestamp: cannot place against the cutoff")
@@ -202,7 +239,8 @@ def _dose_row(reg, root, cutoff, fam, job, block, src, base, predeclared_at, pre
         row["brief_hash"] = calc(brief_hash(cfg.get("brief")), "sha256[:12](brief - path)", [f"{cfg_src}#/brief"])
         row["objective_version"] = cell((cfg.get("objective") or {}).get("version"), cfg_src, "/objective/version")
     else:
-        row["knobs"], row["epw"] = {}, missing("no committed config for this run key")
+        row["knobs"] = {}
+        row["epw"] = ctx["epw9_control_cell"] if job == "control_epw9" else missing("no committed config for this run key")
         row["brief_hash"] = missing("no committed config")
         row["objective_version"] = missing("no committed config")
     if isinstance(run, dict):
@@ -218,7 +256,7 @@ def _dose_row(reg, root, cutoff, fam, job, block, src, base, predeclared_at, pre
         row["n_dof"] = cell(run.get("n_dof"), src, rptr + "/n_dof") if run.get("n_dof") is not None \
             else missing("n_dof not stored")
         row["attribution"] = _attribution(cfg, cfg_src, run.get("terms") or {}, src, rptr + "/terms") \
-            if cfg else {"status": "missing", "reason": "no committed config: weights unknown"}
+            if cfg else {"status": "missing", "reason": "no committed config: weights unknown (not inferred from a sibling)"}
     else:
         ck = checks.get(job) or {}
         row["J"] = dict(cell(ck.get("J"), src, base + json_pointer("checks", job, "J")),
@@ -230,39 +268,88 @@ def _dose_row(reg, root, cutoff, fam, job, block, src, base, predeclared_at, pre
         row["n_dof"] = missing("no run row")
         row["attribution"] = {"status": "missing", "reason": "stored terms absent (check row only)"}
     row["verdict"] = _verdict(checks.get(job), src, base + json_pointer("checks", job), is_control)
+    if job.endswith("_epw9") and not is_control:
+        row["verdict"] = _refined_mesh_verdict(row["verdict"], job, runs, gate, src, base)
     # cost: persisted job log fields only (no inference)
     if jobrec:
         jp = base + json_pointer("jobs", job)
         pk = re.search(r"peak (\d+) MiB", jobrec.get("note") or "")
         row["cost"] = {"wall_s": cell(jobrec.get("seconds"), src, jp + "/seconds"),
                        "vram_baseline_mb": cell(jobrec.get("vram_baseline_mb"), src, jp + "/vram_baseline_mb"),
-                       "peak_vram_mib": cell(int(pk.group(1)), src, jp + "/note") if pk
+                       "peak_vram_mib": calc(int(pk.group(1)), "regex 'peak <N> MiB' in the job note",
+                                             [f"{src}#{jp}/note"]) if pk
                        else missing("peak not in job note"),
                        "lane": "gpu (beat_cuda)"}
     else:
-        row["cost"] = {"status": "missing", "reason": "no job record (control solved earlier)"}
-    # corroboration against the local run dir (optional; absent in CI)
+        row["cost"] = {"status": "missing", "reason": "no job record in the evidence packet (control solved earlier)"}
+    row["corroboration"] = _corroborate(reg, root, jobrec, row, cfg)
+    return row
+
+
+def _refined_mesh_verdict(v6: dict, job: str, runs: dict, gate: dict, src: str, base: str) -> dict:
+    """PREDECLARED refined-mesh gate = delta rule (analyze.mesh_gate) AND the six rules at epw 9.
+    analyze.check scored epw-9 rows against the epw-6 control; the three control-relative rules are
+    re-evaluated here against the epw-9 control so no verdict mixes mesh fidelities."""
+    stem = job[: -len("_epw9")]
+    g = gate.get(stem) or {}
+    gptr = json_pointer("mesh_gate", base.strip("/"), stem, "passes_predeclared_mesh_rule")
+    delta_ok = g.get("passes_predeclared_mesh_rule")
+    ctl9, cand = runs.get("control_epw9"), runs.get(job)
+    rules = dict(v6.get("rules") or {})
+    out = {"basis": "refined-mesh gate: delta rule AND six rules vs the epw-9 control",
+           "epw6_control_checks": {"rules": rules, "v": v6.get("v"),
+                                   "note": "analyze.py compared this epw-9 row with the epw-6 control "
+                                           "(cross-fidelity); informational only"}}
+    if not isinstance(delta_ok, bool) or not isinstance(ctl9, dict) or not isinstance(cand, dict):
+        out.update(v="unknown", failed_rules=[], rules=rules,
+                   reason="mesh_gate row or epw-9 control missing")
+        return out
+    matched = _matched_fidelity_rules(cand, ctl9, src, base + json_pointer("runs", job),
+                                      base + json_pointer("runs", "control_epw9"))
+    rules.update(matched)
+    rules["mesh_delta_rule"] = cell(delta_ok, src, gptr)
+    failed = [k for k, c in rules.items() if c.get("v") is False]
+    unknown = [k for k, c in rules.items() if c.get("v") is None]
+    out.update(v="fail" if failed else "unknown" if unknown else "pass", failed_rules=failed, rules=rules,
+               calc="all six rules (epw-9 control) and the mesh delta rule true")
+    return out
+
+
+def _corroborate(reg, root, jobrec: dict, row: dict, cfg: dict | None) -> dict:
+    """Optional check against the local run dir: best.json J equals the packet J, and the committed
+    config equals the config the run recorded (absent in CI, where runs/ is not committed)."""
     local = _run_dir_local(root, jobrec.get("run"))
     if local is None:
-        row["corroboration"] = {"status": "run_dir_missing"}
-    else:
-        best = reg.disk_json(local / "best.json")
-        j_local = finite((best or {}).get("objective"))
-        j_res = finite(row["J"].get("v"))
-        if j_local is None or j_res is None:
-            row["corroboration"] = {"status": "unknown"}
-        else:
-            d = j_local - j_res
-            row["corroboration"] = {"status": "match" if abs(d) <= 1e-9 else "mismatch",
-                                    "best_json_J": cell(j_local, reg.rel(local / "best.json"), "/objective"),
-                                    "delta": calc(d, "best.json - results.json", [])}
-    return row
+        return {"status": "run_dir_missing"}
+    best = reg.disk_json(local / "best.json")
+    meta = reg.disk_json(local / "run.json") or {}
+    j_local, j_res = finite((best or {}).get("objective")), finite(row["J"].get("v"))
+    if j_local is None or j_res is None:
+        return {"status": "unknown"}
+    d = j_local - j_res
+    rcfg = meta.get("config")
+    cfg_equal = (rcfg == cfg) if isinstance(rcfg, dict) and cfg is not None else None
+    ok = abs(d) <= 1e-9 and cfg_equal is not False
+    return {"status": "match" if ok else "mismatch",
+            "best_json_J": cell(j_local, reg.rel(local / "best.json"), "/objective"),
+            "delta": calc(d, "best.json J - packet J", [reg.rel(local / "best.json") + "#/objective",
+                                                         row["J"].get("src") or ""]),
+            "config_equal": calc(cfg_equal, "run.json config == committed config",
+                                 [reg.rel(local / "run.json") + "#/config", row.get("config") or ""])}
 
 
 # ------------------------------------------------------------------ cohort inventory
 
 PLANNING = "runs/v11_bo_day_planning"
 PENALTY_J = 900.0
+#: Below this exact-replay fraction a cohort cannot form the strict admission artifact (snapshot policy).
+REPLAY_MIN = 0.95
+
+
+def fidelity_policy(cfg: dict) -> str:
+    """sha256[:8] of the run's mesh + solve blocks: cohorts never pool across mesh/solve settings."""
+    body = {"mesh": cfg.get("mesh"), "solve": cfg.get("solve")}
+    return hashlib.sha256(json.dumps(body, sort_keys=True, default=str).encode()).hexdigest()[:8]
 
 
 def _cfg_name(meta: dict) -> str:
@@ -301,7 +388,7 @@ def cohort_inventory(reg: Registry, cutoff: datetime, objective_version: int = 1
         reg.disk_bytes(rj)
         cfg = meta.get("config") or {}
         key = (_cfg_name(meta), objective_version, brief_hash(cfg.get("brief")) or "unknown",
-               str(meta.get("mode") or "?"), str(meta.get("backend") or "?"))
+               str(meta.get("mode") or "?"), str(meta.get("backend") or "?"), fidelity_policy(cfg))
         g = groups.setdefault(key, {"runs": [], "rows": 0, "valid": 0, "penalty": 0, "cached": 0,
                                     "failed": {}, "unique": set(), "dup_valid": 0, "best": None,
                                     "config_shas": set(), "first": None, "last": None})
@@ -346,12 +433,15 @@ def cohort_inventory(reg: Registry, cutoff: datetime, objective_version: int = 1
     for key in groups:
         by_name.setdefault(key[0], []).append(key)
     admissions = _admissions(reg, cutoff, run_to_key)
+    used: set = set()
     cohorts = []
     for key, g in groups.items():
-        name, ver, bh, mode, backend = key
-        cid = f"cohort:{name}|v{ver}|{bh}|{mode}|{backend}"
+        name, ver, bh, mode, backend, fid = key
+        cid = f"cohort:{name}|v{ver}|{bh}|{mode}|{backend}|{fid}"
         best = g["best"]
-        adm = admissions.get((name, bh)) or admissions.get((name, None))
+        adm = admissions.get((name, bh, mode))
+        if adm:
+            used.add((name, bh, mode))
         ins = [f"runs/{r}/search.ndjson" for r in sorted(g["runs"])]
         cohorts.append({
             "id": cid, "config_name": name, "objective_version": ver, "brief_hash": bh,
@@ -360,9 +450,12 @@ def cohort_inventory(reg: Registry, cutoff: datetime, objective_version: int = 1
             "n_runs": calc(len(g["runs"]), "count(run dirs)", [f"runs/{r}/run.json" for r in g["runs"]]),
             "runs": sorted(g["runs"]),
             "inputs": ins,
+            "fidelity_policy": fid,
             "config_shas": sorted(s for s in g["config_shas"] if s),
+            "treatment_variants": calc(len({s for s in g["config_shas"] if s}),
+                                       "count(distinct run.json config_sha)", [f"runs/{r}/run.json" for r in g["runs"]]),
             "rows": calc(g["rows"], "count(rows <= cutoff)", ins),
-            "valid": calc(g["valid"], f"count(ok and J < {PENALTY_J})", ins),
+            "valid": calc(g["valid"], f"count(ok and J < {PENALTY_J}; cached replays included)", ins),
             "unique_designs": calc(len(g["unique"]), "count(distinct design_hash | valid)", ins),
             "duplicate_valid": calc(g["dup_valid"], "valid - unique", ins),
             "penalty": calc(g["penalty"], f"count(ok and J >= {PENALTY_J})", ins),
@@ -376,8 +469,14 @@ def cohort_inventory(reg: Registry, cutoff: datetime, objective_version: int = 1
             "status": _cohort_status(adm),
         })
     cohorts.sort(key=lambda c: (-(c["unique_designs"]["v"]), c["config_name"], c["brief_hash"]))
-    return {"objective_version": objective_version, "grouping": ["config_name", "objective_version",
-            "brief_hash", "mode", "backend"], "scan": scan, "cohorts": cohorts,
+    orphans = [{"key": list(k), "source": a.get("source"), "reason": "no cohort with this config, brief and mode"}
+               for k, a in sorted(admissions.items(), key=lambda kv: str(kv[0])) if k not in used]
+    return {"objective_version": objective_version,
+            "grouping": ["config_name", "objective_version", "brief_hash", "mode", "backend", "fidelity_policy"],
+            "scan": scan, "cohorts": cohorts, "orphan_admissions": orphans,
+            "policy": {"penalty_J": PENALTY_J, "replay_min_fraction": REPLAY_MIN,
+                       "note": "snapshot policy values, not project rules: J >= penalty_J is a refusal penalty; "
+                               "a cohort below replay_min_fraction exact replay is reported as replay_mismatch"},
             "admission_sources": sorted({a["source"] for a in admissions.values() if a.get("source")})}
 
 
@@ -389,13 +488,15 @@ def _cohort_status(adm: dict | None) -> str:
     rep = adm.get("replay") or {}
     if (rep.get("exact_complete") or {}).get("v") is not None and (rep.get("available") or {}).get("v"):
         frac = rep["exact_complete"]["v"] / rep["available"]["v"]
-        if frac < 0.95:
+        if frac < REPLAY_MIN:
             return "replay_mismatch"
     hv = (adm.get("holdout") or {}).get("verdict", {}).get("v")
     if hv is None:
         return "needs_admission"
+    if str(hv) == "PASS_FOR_EXPLORATORY_PILOT":
+        return "pilot_eligible"
     if str(hv).startswith("PASS"):
-        return "holdout_pass"
+        return "unknown"                  # an unrecognised PASS_* verdict is never silently promoted
     if str(hv) == "HOLD":
         return "hold"
     return "unknown"
@@ -406,7 +507,7 @@ def _admissions(reg: Registry, cutoff: datetime, run_to_key: dict) -> dict:
     base = reg.root / PLANNING
     if not base.is_dir():
         return out
-    for d in sorted(base.glob("cohort_*")):
+    for d in sorted(p for p in base.glob("cohort_*") if p.is_dir()):
         off_p, hold_p, cat_p = d / "offline_scores.json", d / "holdout_comparison.json", d / "catalog.csv"
         newest = max((p.stat().st_mtime for p in (off_p, hold_p, cat_p) if p.is_file()), default=None)
         if newest is not None and datetime.fromtimestamp(newest).astimezone() > cutoff:
@@ -424,11 +525,12 @@ def _admissions(reg: Registry, cutoff: datetime, run_to_key: dict) -> dict:
                           "available": cell(sel.get("available"), osrc, "/selection/available"),
                           "counts": off.get("counts")},
                "no_backend_calls": off.get("no_backend_calls")}
-        bh = None
+        bh, cat_fid = None, None
         if cat_p.is_file():
             raw = reg.disk_bytes(cat_p) or b""
             first = next(csv.DictReader(io.StringIO(raw.decode("utf-8", errors="replace"))), None)
             bh = (first or {}).get("brief_hash") or None
+            cat_fid = (first or {}).get("fidelity") or None
             rec["brief_hash"] = cell(bh, reg.rel(cat_p), "row:1/brief_hash") if bh else missing("catalog has no brief_hash")
         if hold_p.is_file():
             h = reg.disk_json(hold_p) or {}
@@ -444,9 +546,12 @@ def _admissions(reg: Registry, cutoff: datetime, run_to_key: dict) -> dict:
             if bh and hb and hb != bh:
                 rec["identity_conflict"] = f"catalog brief {bh} != holdout brief {hb}"
             bh = bh or hb
+            fid_mode = str((h.get("identity") or {}).get("fidelity") or "screen")
         else:
             rec["holdout"] = {"verdict": missing("no holdout_comparison.json", reg.rel(d))}
-        out[(name, bh)] = rec
+            fid_mode = cat_fid or "screen"     # the catalog's fidelity column; screen when absent
+        rec["fidelity"] = fid_mode
+        out[(name, bh, fid_mode)] = rec
     # Fold: the acquisition confirmation is linked through its evaluation run id (persisted).
     conf_p = base / "acquisition_confirmation_2026-11-23" / "confirmation.json"
     if conf_p.is_file():
@@ -454,7 +559,7 @@ def _admissions(reg: Registry, cutoff: datetime, run_to_key: dict) -> dict:
         csrc = reg.rel(conf_p)
         key = run_to_key.get(c.get("eval_run_id") or "")
         if key:
-            out[(key[0], key[2])] = {
+            out[(key[0], key[2], key[3])] = {
                 "source": csrc, "kind": "acquisition_confirmation",
                 "linked_by": cell(c.get("eval_run_id"), csrc, "/eval_run_id"),
                 "verdict": cell((c.get("decision") or {}).get("verdict"), csrc, "/decision/verdict"),
@@ -477,7 +582,7 @@ def _claimed_status(text: str) -> str:
     if "holdout **hold" in t or "holdout **hold**" in t or "**hold**" in t:
         return "hold"
     if "pass" in t and "holdout" in t:
-        return "holdout_pass"
+        return "pilot_eligible"
     if "needs strict artifact" in t:
         return "needs_admission"
     if "live loop" in t:
@@ -492,6 +597,9 @@ def handoff_claims(reg: Registry) -> dict:
     if text is None:
         return {"source": HANDOFF, "status": "missing", "claims": []}
     claims, in_sec = [], False
+    mf = re.search(r"exceed the (\d+) floor", text)
+    ln = next((i for i, ln_ in enumerate(text.splitlines(), start=1) if mf and mf.group(0) in ln_), None)
+    floor = cell(int(mf.group(1)), HANDOFF, f"line:{ln}/text:{mf.group(0)}") if mf else missing("no row floor stated in the handoff")
     for i, line in enumerate(text.splitlines(), start=1):
         if line.startswith("## 3."):
             in_sec = True
@@ -501,13 +609,13 @@ def handoff_claims(reg: Registry) -> dict:
         m = _ROW.match(line) if in_sec else None
         if m:
             claims.append({"config_name": m.group(1), "line": i,
-                           "unique": cell(int(m.group(2)), HANDOFF, f"line:{i}/unique"),
-                           "runs": cell(int(m.group(3)), HANDOFF, f"line:{i}/runs"),
-                           "best_J": cell(float(m.group(4)), HANDOFF, f"line:{i}/best_J"),
+                           "unique": cell(int(m.group(2)), HANDOFF, f"line:{i}/col:unique"),
+                           "runs": cell(int(m.group(3)), HANDOFF, f"line:{i}/col:runs"),
+                           "best_J": cell(float(m.group(4)), HANDOFF, f"line:{i}/col:best J"),
                            "status_text": m.group(5),
                            "claimed_status": _claimed_status(m.group(5))})
     return {"source": HANDOFF, "status": "ok", "grade": "inherited claim (not re-measured)",
-            "snapshot_label": "2026-11-24", "claims": claims}
+            "snapshot_label": "2026-11-24", "claims": claims, "admission_floor": floor}
 
 
 def reconcile_claims(claims: dict, inventory: dict) -> list[dict]:
@@ -525,7 +633,7 @@ def reconcile_claims(claims: dict, inventory: dict) -> list[dict]:
         top = max(screen, key=lambda c: c["unique_designs"]["v"])
         artifact_status = top["status"]
         claimed = cl["claimed_status"]
-        comparable = claimed in ("holdout_pass", "hold", "replay_mismatch", "needs_admission")
+        comparable = claimed in ("pilot_eligible", "hold", "replay_mismatch", "needs_admission")
         status_ok = (claimed == artifact_status) if comparable else None
         out.append({"config_name": cl["config_name"], "claim_line": cl["line"], "cohort": top["id"],
                     "claimed_unique": cl["unique"], "unique_at_cutoff": top["unique_designs"],
@@ -647,3 +755,98 @@ def canary(reg: Registry, cutoff: datetime) -> dict:
             "n_pairs": len(ver), "replicates": reps,
             "replicate_max_abs_delta": calc(max((r["abs_delta"]["v"] for r in reps), default=None),
                                             "max |v4 - rehearsal|", [r["abs_delta"] for r in reps])}
+
+
+# ------------------------------------------------------------------ existing optimizer-evidence adapter
+
+OE_TOOLS = ("tools/analysis/optimizer_evidence.py", "tools/analysis/optimizer_switch.py",
+            "tools/analysis/continuation_advice.py", "tools/analysis/_common.py",
+            "tools/analysis/floor_registry.py")
+
+
+def _load_optimizer_evidence(root: Path):
+    import importlib
+    import sys
+    tool_dir = str(Path(root) / "tools" / "analysis")
+    if tool_dir not in sys.path:
+        sys.path.insert(0, tool_dir)
+    return importlib.import_module("optimizer_evidence")
+
+
+def optimizer_evidence(reg: Registry, inv: dict, floor_cell: dict | None) -> dict:
+    """Attach the existing ``tools/analysis/optimizer_evidence.py`` (schema optimizer-evidence-v1)
+    report to every admission-relevant cohort: outcome buckets, cost ledger (BEM seconds), failure
+    signal, pinned walls, continuation advice and cross-run compatibility. Read-only, advisory.
+
+    The tool reads whole run dirs, so a run with rows after the cutoff is NOT carded (recorded as
+    excluded) rather than letting future rows leak in."""
+    floor = (floor_cell or {}).get("v")
+    tool_digests = []
+    for t in OE_TOOLS:
+        reg.git_bytes(t)
+        tool_digests.append(t)
+    try:
+        OE = _load_optimizer_evidence(reg.root)
+    except Exception as exc:  # noqa: BLE001
+        return {"status": "failed", "reason": f"{type(exc).__name__}: {exc}", "tools": tool_digests}
+    n_cards = 0
+    for c in inv["cohorts"]:
+        relevant = c["admission"].get("kind") or (isinstance(floor, int) and c["unique_designs"]["v"] >= floor)
+        if not relevant:
+            c["optimizer_evidence"] = {"status": "not_computed",
+                                       "reason": "below the row floor and no admission artifact"}
+            continue
+        usable, skipped = [], []
+        for r in c["runs"]:
+            src = reg.sources.get(f"runs/{r}/search.ndjson") or {}
+            if src.get("lines_after_cutoff"):
+                skipped.append({"run": r, "reason": "run has rows after the cutoff"})
+            elif src.get("status") == "missing":
+                skipped.append({"run": r, "reason": "no search.ndjson"})
+            else:
+                usable.append(r)
+        if not usable:
+            c["optimizer_evidence"] = {"status": "missing", "reason": "no run usable at the cutoff", "skipped": skipped}
+            continue
+        try:
+            rep = OE.build_report(run_dirs=[reg.root / "runs" / r for r in usable])
+        except BaseException as exc:  # noqa: BLE001 - the tool exits via SystemExit on refusal
+            c["optimizer_evidence"] = {"status": "failed", "reason": f"{type(exc).__name__}: {exc}"}
+            continue
+        cards = []
+        for card in rep.get("run_cards") or []:
+            k, oc = card.get("key_numbers") or {}, card.get("outcome_counts") or {}
+            ref = f"tools/analysis/optimizer_evidence.py::run_cards[{card['run_id']}]"
+            cards.append({
+                "run": card["run_id"],
+                "attempts_new": calc(k.get("attempts_new"), "optimizer_switch.cost_ledger.attempts_new", [ref]),
+                "bem_seconds": calc(k.get("actual_bem_seconds"), "optimizer_switch.cost_ledger.actual_bem_seconds", [ref]),
+                "recorded_seconds": calc(k.get("recorded_total_seconds"), "cost_ledger.elapsed_seconds.recorded_total", [ref]),
+                "failure_fraction": calc(k.get("failure_fraction"), "optimizer_switch.failure_signal.fraction", [ref]),
+                "outcomes": {b: oc.get(b) for b in ("index_rows", "valid", "cached", "geometry_refusal",
+                                                    "envelope_refusal", "resource_refusal", "solver_failure",
+                                                    "pipeline_failure", "unknown")},
+                "pinned_walls": [w.get("key") for w in card.get("walls") or [] if w.get("wall_lo") or w.get("wall_hi")],
+                "continuation": {k2: (card.get("continuation") or {}).get(k2) for k2 in ("advice", "status", "floor_J")},
+                "stalled": (card.get("progress") or {}).get("stalled"),
+            })
+        n_cards += len(cards)
+        tot = lambda key: math.fsum(x[key]["v"] for x in cards if isinstance(x[key]["v"], (int, float)))  # noqa: E731
+        cr = rep.get("cross_run") or {}
+        c["optimizer_evidence"] = {
+            "status": "ok" if not skipped else "partial", "schema": rep.get("schema"),
+            "advisory_only": rep.get("advisory_only"), "dispatches_work": rep.get("dispatches_work"),
+            "runs": cards, "skipped": skipped,
+            "totals": {"bem_hours": calc(tot("bem_seconds") / 3600.0, "sum(bem_seconds)/3600", [x["bem_seconds"] for x in cards]),
+                       "recorded_hours": calc(tot("recorded_seconds") / 3600.0, "sum(recorded_seconds)/3600",
+                                              [x["recorded_seconds"] for x in cards]),
+                       "attempts": calc(int(tot("attempts_new")), "sum(attempts_new)", [x["attempts_new"] for x in cards])},
+            "cross_run": {"compatible_for_inference": cr.get("compatible_for_inference"),
+                          "compatible_for_descriptive": cr.get("compatible_for_descriptive"),
+                          "blocking": cr.get("blocking")},
+            "decision": rep.get("decision"),
+            "alternatives": [{"action": a.get("action"), "why": a.get("why"), "confidence": a.get("confidence"),
+                              "run_id": a.get("run_id")} for a in rep.get("alternatives") or []],
+        }
+    return {"status": "ok", "tools": tool_digests, "n_cards": n_cards, "schema": "optimizer-evidence-v1",
+            "note": "existing advisory tool; cards only for admission-relevant cohorts with no rows after the cutoff"}

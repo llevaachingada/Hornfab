@@ -212,10 +212,10 @@ def test_a8_claims_reconcile_and_conflicts_surface(tmp_path):
     _fake_runs(tmp_path)
     inv = S.cohort_inventory(Registry(tmp_path, "0" * 40), CUT)
     claims = {"claims": [{"config_name": "beta", "line": 7, "unique": {"v": 4, "src": "x#line:7"},
-                          "claimed_status": "holdout_pass"}]}
+                          "claimed_status": "pilot_eligible"}]}
     rec = S.reconcile_claims(claims, inv)
     assert rec[0]["result"] == "status_conflict" and rec[0]["artifact_status"] == "replay_mismatch"
-    assert "claim_conflict" in {f["kind"] for f in F.cohort_findings(inv, rec, floor=1)}
+    assert "claim_conflict" in {f["kind"] for f in F.cohort_findings(inv, rec, {"v": 1, "src": "x.md#line:1/text:x"})}
 
 
 # ------------------------------------------------------------------ A5/A6 frozen, deterministic
@@ -274,3 +274,180 @@ def test_a10_html_embeds_the_snapshot_bytes(tmp_path):
     tpl = B.TEMPLATE.read_text(encoding="utf-8")
     for literal in ("4.676", "4.679", "0.864", "0.993", "291", "Compact400"):   # mockup numbers
         assert literal not in tpl
+
+
+# ------------------------------------------------------------------ hardening (2026-11-27 senior pass)
+
+def _resolve(src: str, head: str):
+    """Mechanically resolve one ``src`` against the committed bytes (the agent-guide pointer grammar)."""
+    import csv
+    import io
+
+    import yaml
+    path, ptr = src.split("#", 1)
+    raw = subprocess.run(["git", "show", f"{head}:{path}"], cwd=REPO, capture_output=True, check=True).stdout
+    text = raw.decode("utf-8-sig")
+    if ptr.startswith("line:"):
+        head_, _, rest = ptr[5:].partition("/")
+        line = text.splitlines()[int(head_) - 1]
+        if rest.startswith("text:"):
+            assert rest[5:] in line, (src, line)
+            return rest[5:]
+        if rest.startswith("col:"):
+            hdr_line = next(l for l in text.splitlines()[: int(head_)][::-1] if l.startswith("| ") and "---" not in l
+                            and rest[4:] in [c.strip() for c in l.strip("|").split("|")])
+            cols = [c.strip() for c in hdr_line.strip("|").split("|")]
+            return [c.strip() for c in line.strip("|").split("|")][cols.index(rest[4:])].strip("*`")
+        return json.loads(line)[rest]
+    if ptr.startswith("row:"):
+        n, _, col = ptr[4:].partition("/")
+        return list(csv.DictReader(io.StringIO(text)))[int(n) - 1][col]
+    node = yaml.safe_load(text) if path.endswith((".yaml", ".yml")) else json.loads(text)
+    for part in ptr.strip("/").split("/"):
+        part = part.replace("~1", "/").replace("~0", "~")
+        node = node[int(part)] if isinstance(node, list) else node[part]
+    return node
+
+
+def _cells(obj):
+    if isinstance(obj, dict):
+        if isinstance(obj.get("src"), str) and "v" in obj and obj.get("status") is None:
+            yield obj
+        for v in obj.values():
+            yield from _cells(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            yield from _cells(v)
+
+
+def test_every_committed_src_resolves_mechanically(dose, head):
+    reg = Registry(REPO, head)
+    claims = S.handoff_claims(reg)
+    mesh = S.mesh_fidelity(reg)
+    cells = [c for c in _cells([dose, claims, mesh]) if not c["src"].startswith("runs/")]
+    assert len(cells) > 300
+    for c in cells:
+        got = _resolve(c["src"], head)
+        if "/text:" in c["src"]:
+            continue                                          # phrase anchor: presence checked in _resolve
+        if isinstance(c["v"], float) and isinstance(got, str):
+            assert float(got) == c["v"], c["src"]
+        elif isinstance(c["v"], int) and not isinstance(c["v"], bool) and isinstance(got, str):
+            assert int(got) == c["v"], c["src"]
+        else:
+            assert got == c["v"], c["src"]
+
+
+def test_run_time_is_a_calculation_not_a_raw_cell(dose):
+    r = _row(dose, "rolled_bb_h065")
+    assert "calc" in r["time"] and r["time"]["v"] == "2026-11-25T13:11:11Z"
+
+
+def test_refined_mesh_rows_use_the_matched_fidelity_control(dose):
+    r = _row(dose, "rolled_bb_h065_th025_epw9")
+    v = r["verdict"]
+    assert v["v"] == "pass" and "mesh_delta_rule" in v["rules"]
+    for k in ("V_HF_not_narrower", "min_re_z_ok", "J_ok"):
+        assert "control_epw9" in " ".join(v["rules"][k]["inputs"]), k          # epw-9 control, not epw-6
+    assert v["epw6_control_checks"]["note"].startswith("analyze.py compared")
+    ctl9 = next(x for x in dose["rows"] if x["job"] == "control_epw9")
+    assert ctl9["is_control"] and ctl9["epw"]["v"] == 9.0 and ctl9["attribution"]["status"] == "missing"
+
+
+def test_unknown_pass_verdict_is_not_promoted():
+    adm = {"replay": {"exact_complete": {"v": 10}, "available": {"v": 10}},
+           "holdout": {"verdict": {"v": "PASS_SOMETHING_NEW"}}}
+    assert S._cohort_status(adm) == "unknown"
+    adm["holdout"]["verdict"]["v"] = "PASS_FOR_EXPLORATORY_PILOT"
+    assert S._cohort_status(adm) == "pilot_eligible"
+
+
+def test_corroboration_checks_j_and_config(tmp_path):
+    run = tmp_path / "runs" / "20261125T131111Z-verify-1f727a"
+    run.mkdir(parents=True)
+    cfg = {"brief": {"name": "b"}, "mesh": {"epw": 6}}
+    (run / "best.json").write_text(json.dumps({"objective": 4.5}), encoding="utf-8")
+    (run / "run.json").write_text(json.dumps({"config": cfg}), encoding="utf-8")
+    reg = Registry(tmp_path, "0" * 40)
+    row = {"J": {"v": 4.5, "src": "x#/J"}, "config": "c.yaml"}
+    ok = S._corroborate(reg, tmp_path, {"run": r"C:\x\runs" + "\\" + run.name}, row, cfg)   # Windows path as recorded
+    assert ok["status"] == "match" and ok["config_equal"]["v"] is True
+    bad = S._corroborate(reg, tmp_path, {"run": run.name}, row, {**cfg, "mesh": {"epw": 9}})
+    assert bad["status"] == "mismatch" and bad["config_equal"]["v"] is False
+
+
+def test_fidelity_policy_splits_mesh_changes(tmp_path):
+    _fake_runs(tmp_path)
+    d = tmp_path / "runs" / "20261124T040000Z-screen-eeeeee"
+    _run(tmp_path, d.name, "beta", {"name": "b1"}, _rows(2))
+    meta = json.loads((d / "run.json").read_text(encoding="utf-8"))
+    meta["config"]["mesh"] = {"rear_res_factor": 1.5}
+    (d / "run.json").write_text(json.dumps(meta), encoding="utf-8")
+    inv = S.cohort_inventory(Registry(tmp_path, "0" * 40), CUT)
+    beta = [c for c in inv["cohorts"] if c["config_name"] == "beta"]
+    assert len(beta) == 2 and len({c["fidelity_policy"] for c in beta}) == 2
+
+
+def test_brief_hash_matches_the_canonical_rule():
+    from hornlab_search.design.generated import brief_hash as canonical
+    b = {"name": "x", "path": "ignored.yaml", "target": {"h": [1, 2]}}
+    assert S.brief_hash(b) == canonical(b)
+
+
+def test_findings_serve_three_audiences(dose, tmp_path):
+    _fake_runs(tmp_path)
+    finds = F.dose_findings(dose)
+    for f in finds:
+        assert f["plain"] and not any(t in f["plain"] for t in ("Re(z)", "J ", "epw", "_bb_"))
+        assert f["scope"] and f["strength"]
+        for s in f["next_steps"]:
+            assert isinstance(s["needs_gpu"], bool) and isinstance(s["needs_owner_approval"], bool)
+    snap = B.build_snapshot(tmp_path, "2026-11-25T23:59:59Z", "0" * 40)
+    out = tmp_path / "out"
+    B.write_snapshot(snap, out)
+    summ = json.loads((out / "summary.json").read_text(encoding="utf-8"))
+    assert summ["snapshot_id"] == snap["snapshot_id"] and summ["plain_summary"]
+    guide = (out / "AGENT_GUIDE.md").read_text(encoding="utf-8")
+    assert "Never compare or rank J" in guide and "## Suggested next steps" in guide
+    assert not list(out.glob("*.tmp"))
+    # GPU steps sort after CPU steps and always ask for the owner
+    steps = summ["next_steps"]
+    assert steps == sorted(steps, key=lambda s: (s["needs_gpu"], s["needs_owner_approval"], s["finding_kind"], s["what"]))
+    assert all(s["needs_owner_approval"] for s in steps if s["needs_gpu"])
+
+
+def test_optimizer_evidence_adapter_respects_cutoff_and_totals(tmp_path, monkeypatch):
+    _fake_runs(tmp_path)
+    # a beta row after the cutoff: that run must not be carded (the tool reads whole runs)
+    nd = tmp_path / "runs" / "20261124T020000Z-screen-cccccc" / "search.ndjson"
+    with nd.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps({"ok": True, "objective": 1.0, "design_hash": "z", "created_utc": "2026-11-26T01:00:00Z"}) + "\n")
+    reg = Registry(tmp_path, "0" * 40)
+    inv = S.cohort_inventory(reg, CUT)
+    seen = []
+
+    class FakeOE:
+        @staticmethod
+        def build_report(run_dirs):
+            seen.extend(Path(p).name for p in run_dirs)
+            return {"schema": "optimizer-evidence-v1", "advisory_only": True, "dispatches_work": False,
+                    "run_cards": [{"run_id": Path(p).name,
+                                   "key_numbers": {"attempts_new": 10, "actual_bem_seconds": 1800.0,
+                                                   "recorded_total_seconds": 2000.0, "failure_fraction": 0.1},
+                                   "outcome_counts": {"valid": 9}, "walls": [{"key": "g_a", "wall_lo": True}],
+                                   "continuation": {"advice": "x"}, "progress": {"stalled": False}} for p in run_dirs],
+                    "cross_run": {"compatible_for_inference": True, "blocking": []}, "decision": {}, "alternatives": []}
+
+    monkeypatch.setattr(S, "_load_optimizer_evidence", lambda root: FakeOE)
+    out = S.optimizer_evidence(reg, inv, {"v": 1})
+    assert out["status"] == "ok"
+    beta = next(c for c in inv["cohorts"] if c["config_name"] == "beta")
+    assert beta["optimizer_evidence"]["status"] == "missing"          # its only run continues past the cutoff
+    assert "20261124T020000Z-screen-cccccc" not in seen
+    alpha = next(c for c in inv["cohorts"] if c["config_name"] == "alpha" and c["unique_designs"]["v"] == 5)
+    o = alpha["optimizer_evidence"]
+    assert o["status"] == "ok" and o["totals"]["bem_hours"]["v"] == 0.5 and o["totals"]["attempts"]["v"] == 10
+    assert o["runs"][0]["pinned_walls"] == ["g_a"]
+    low = S.optimizer_evidence(Registry(tmp_path, "0" * 40), S.cohort_inventory(Registry(tmp_path, "0" * 40), CUT),
+                               {"v": 10_000})
+    assert low["status"] == "ok"

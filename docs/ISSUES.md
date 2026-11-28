@@ -1,5 +1,12 @@
 ﻿# ISSUES
 
+## 2026-11-27 (late) - M1 research snapshot hardening
+
+- DONE: GUI button + API, fidelity-matched refined-mesh verdicts, optimizer-evidence adapter, audience layers;
+  41 research/GUI tests.
+- OPEN: `software_drift` in r3_v11_fold, r3_c500, r3_fav - confirm admission dependency groups before training.
+- OPEN: handoff §3 `r3_c500` status still stale (artifact: PASS_FOR_EXPLORATORY_PILOT).
+
 ## 2026-11-27 - M1 research snapshot
 
 - DONE: read-only research snapshot (`hornlab_search/research/`, snapshot `08a6d477`), ADR, 14 acceptance tests.

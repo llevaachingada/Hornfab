@@ -60,6 +60,13 @@ details summary{cursor:pointer;color:var(--blue)}
 .kv small{display:block}
 .src{font:11px/1.4 ui-monospace,Consolas,monospace;color:var(--muted);word-break:break-all}
 .footer{margin-top:20px;color:var(--muted);font-size:12px}
+.plain{font-size:14px}.tech{color:var(--muted);font-size:13px}
+.plainlist li{margin:4px 0;font-size:15px}
+.steps{margin:4px 0 8px;padding-left:18px;font-size:13px}
+.badge{display:inline-block;font-size:11px;padding:0 5px;border-radius:4px;border:1px solid var(--line);margin-left:4px}
+.badge.gpu{color:var(--amber);border-color:var(--amber)}.badge.own{color:var(--violet);border-color:var(--violet)}.badge.cpu{color:var(--green)}
+.gloss{display:grid;grid-template-columns:180px 1fr;gap:6px 14px;margin:0}.gloss dt{font-weight:600}.gloss dd{margin:0;color:var(--muted)}
+@media(max-width:850px){.gloss{grid-template-columns:1fr}.gloss dd{margin-bottom:6px}}
 @media(max-width:850px){main{padding:18px 14px}.top,.grid2,.charts{grid-template-columns:1fr}h1{font-size:24px}.card{padding:13px}}
 </style>
 </head>
@@ -84,7 +91,7 @@ function V(c, d = 3, unit = "") {
 }
 const cls = v => ({pass:"pass", fail:"fail", control:"control", missing:"warn", unknown:"warn"}[v] || "");
 const STATUS = {
-  holdout_pass: ["pass", "holdout pass", "eligible for a held canary; no auto-dispatch"],
+  pilot_eligible: ["pass", "holdout pass · pilot only", "PASS_FOR_EXPLORATORY_PILOT: a held canary may be considered; not full admission"],
   hold: ["fail", "hold", "holdout lost top-decile recall / best-at-k; do not promote"],
   replay_mismatch: ["fail", "replay mismatch", "repair the replay contract before any admission"],
   needs_admission: ["warn", "needs admission", "offline replay exists; strict artifact + frozen holdout missing"],
@@ -103,20 +110,46 @@ function header() {
   <p class="note">Sources read at commit <code>${esc(S.source_commit.slice(0, 12))}</code> (committed files via git) and from the local run archive (pinned by sha256). ${m.n_sources} sources · ${m.exclusions.length} items excluded by the cutoff or missing a timestamp · generator <code>${esc(S.generator)}</code>. Hover any number for its exact value and source. <a href="#manifest">Manifest ↓</a> · <a href="#missing">Missing evidence ↓</a></p></header>`;
 }
 
+function stepsHtml(steps) {
+  if (!steps || !steps.length) return "";
+  return `<ul class="steps">${steps.map(s => `<li>${esc(s.what)} ${s.needs_gpu ? '<span class="badge gpu">needs GPU</span>' : '<span class="badge cpu">no GPU</span>'}${s.needs_owner_approval ? ' <span class="badge own">owner approval</span>' : ""}</li>`).join("")}</ul>`;
+}
+
+function plainCard() {
+  return `<section class="card detail" id="plain"><div class="eyebrow">In plain words</div><h2>What this snapshot says</h2>
+  <ul class="plainlist">${S.plain_summary.map(t => `<li>${esc(t)}</li>`).join("")}</ul>
+  <p class="note">Reading paths: <a href="#plain">plain summary</a> · <a href="#findings">engineering findings</a> · <a href="#dose">experiment detail</a> · <a href="#agents">for AI agents</a> · <a href="#glossary">glossary</a>. Hover any number for its exact value and source.</p></section>`;
+}
+
+function agentsCard() {
+  const files = ["summary.json", "AGENT_GUIDE.md", "snapshot.json", "manifest.json"];
+  return `<section class="card detail" id="agents"><div class="eyebrow">For AI agents and automation</div><h2>Machine-readable outputs and rules</h2>
+  <p class="muted">Same bytes as this page. Read <code>summary.json</code> first, then <code>findings.ndjson</code> / <code>rows.ndjson</code> beside it on disk (<code>runs/analysis/&lt;this folder&gt;/</code>).</p>
+  <p>${files.map(f => `<a href="${f}">${f}</a>`).join(" · ")}</p>
+  <h3>Invariants a plan must respect</h3><ol>${S.agent_invariants.map(t => `<li>${esc(t)}</li>`).join("")}</ol></section>`;
+}
+
+function glossaryCard() {
+  return `<section class="card detail" id="glossary"><div class="eyebrow">Glossary</div><h2>Terms used on this page</h2>
+  <dl class="gloss">${Object.entries(S.glossary).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl></section>`;
+}
+
 function findingsCard() {
   const dec = S.findings.filter(f => f.severity === "decision");
   const anchor = {matched_pair: "#dose", scalar_not_gate: "#dose", count_not_admission: "#bo", mesh_scope: "#mesh"};
   const items = dec.map((f, i) => `<div class="finding"><span class="num">${String(i + 1).padStart(2, "0")}</span><div>
-    <h3>${esc(f.title)}</h3><p>${esc(f.observation)}</p>
-    <details><summary>Hypothesis, action, evidence</summary><div class="grades">
+    <h3>${esc(f.title)}</h3><p class="plain">${esc(f.plain)}</p><p class="tech">${esc(f.observation)}</p>
+    ${stepsHtml(f.next_steps)}
+    <details><summary>Hypothesis, action, scope, evidence</summary><div class="grades">
       <b>Observation</b><span>${esc(f.observation)}</span><b>Hypothesis</b><span>${esc(f.hypothesis)}</span>
       <b>Action</b><span>${esc(f.action)} <small>(${esc(f.action_policy)})</small></span>
+      <b>Scope</b><span>${esc(f.scope)}</span><b>Strength</b><span>${esc(f.strength)}</span>
       <b>Evidence</b><span class="src">${f.evidence.map(esc).join("<br>")}</span>
       <b>Finding id</b><span class="src">${esc(f.id)}</span></div></details>
     ${anchor[f.kind] ? `<a href="${anchor[f.kind]}">Inspect linked evidence ↓</a>` : ""}</div></div>`).join("");
   const others = S.findings.filter(f => f.severity !== "decision").map(f =>
-    `<li><span class="${f.severity === "data_quality" ? "warn" : f.severity === "control" ? "ok" : "info"}">${esc(f.severity.replace("_", " "))}</span> · <strong>${esc(f.title)}</strong> — ${esc(f.observation)}</li>`).join("");
-  return `<article class="card"><div class="eyebrow">Priority findings (derived from rows, not hand-written)</div><h2>What should happen next?</h2>${items}
+    `<li><span class="${f.severity === "data_quality" ? "warn" : f.severity === "control" ? "ok" : "info"}">${esc(f.severity.replace("_", " "))}</span> · <strong>${esc(f.title)}</strong> — ${esc(f.plain)} <span class="tech">${esc(f.observation)}</span>${stepsHtml(f.next_steps)}</li>`).join("");
+  return `<article class="card" id="findings"><div class="eyebrow">Priority findings (derived from rows, not hand-written)</div><h2>What should happen next?</h2>${items}
     <div class="drill"><div class="eyebrow">Controls, data quality and reconciliation</div><ul>${others}</ul></div></article>`;
 }
 
@@ -208,7 +241,11 @@ function doseDrill(r) {
     <p class="note">Weights via <code>${esc(a.resolver)}</code> (objective v${a.objective_version}); contributions = weight × stored term; no re-score.</p>`;
   }
   const cost = r.cost && r.cost.wall_s ? `wall ${V(r.cost.wall_s, 1, " s")} · VRAM baseline ${V(r.cost.vram_baseline_mb, 0, " MB")} · peak ${V(r.cost.peak_vram_mib, 0, " MiB")} · ${esc(r.cost.lane)}` : `<span class="warn">${esc((r.cost || {}).reason || "cost missing")}</span>`;
-  const rules = S.dose.rules.map(x => `<tr><td>${esc(x.label)}</td><td>${r.verdict.rules[x.key] ? V(r.verdict.rules[x.key]) : "—"}</td></tr>`).join("");
+  const labels = Object.fromEntries(S.dose.rules.map(x => [x.key, x.label]));
+  labels.mesh_delta_rule = "refined-mesh deltas keep sign and size (mesh gate)";
+  const order = Object.keys(labels);
+  const rules = Object.entries(r.verdict.rules || {}).sort((a, b) => order.indexOf(a[0]) - order.indexOf(b[0])).map(([k, c]) => `<tr><td>${esc(labels[k] || k)}</td><td>${V(c)}</td></tr>`).join("")
+    + (r.verdict.basis ? `<tr><td colspan="2" class="wrap muted">${esc(r.verdict.basis)}${r.verdict.epw6_control_checks ? `. ${esc(r.verdict.epw6_control_checks.note)} (that check said: ${esc(r.verdict.epw6_control_checks.v)})` : ""}</td></tr>` : "");
   $("#dosedrill").innerHTML = `<div class="eyebrow">Drilldown · ${esc(r.id)}</div>
   <div class="grid2" style="margin-top:6px"><div><h3>Score attribution</h3><div class="tablewrap">${attr}</div></div>
   <div><h3>Predeclared rules</h3><table><tbody>${rules}</tbody></table>
@@ -249,6 +286,15 @@ function drawBo() {
   });
   boDrill(S.inventory.cohorts.find(c => c.id === boSel));
 }
+function oeHtml(o) {
+  if (!o || !o.runs) return `<p class="warn">${esc((o && o.status) || "missing")}: ${esc((o && o.reason) || "")}</p>`;
+  const t = o.totals;
+  const rows = o.runs.map(r => `<tr><td class="src">${esc(r.run)}</td><td>${V(r.attempts_new, 0)}</td><td>${V(r.bem_seconds, 0, " s")}</td><td>${V(r.failure_fraction, 3)}</td><td>${esc(r.pinned_walls.join(", ") || "—")}</td><td class="wrap">${esc(r.continuation.advice || "—")}</td></tr>`).join("");
+  return `<p>${V(t.attempts, 0)} attempts · ${V(t.bem_hours, 2, " BEM h")} · ${V(t.recorded_hours, 2, " h recorded")} · runs compatible for inference: ${esc(String(o.cross_run.compatible_for_inference))}${o.cross_run.blocking && o.cross_run.blocking.length ? ` <small class="warn">(blocking: ${esc(o.cross_run.blocking.join(", "))})</small>` : ""} <small class="muted">— existing <code>optimizer_evidence.py</code> (${esc(o.schema)}), advisory only${o.status === "partial" ? `; ${o.skipped.length} run(s) skipped: rows after the cutoff` : ""}</small></p>
+  <div class="tablewrap"><table><thead><tr><th>Run</th><th>Attempts</th><th>BEM time</th><th>Failure fraction</th><th>Pinned walls</th><th>Continuation advice</th></tr></thead><tbody>${rows}</tbody></table></div>
+  ${o.alternatives && o.alternatives.length ? `<p class="note">Advisory alternatives: ${o.alternatives.map(a => `${esc(a.action)} (${esc(a.run_id || "")}, ${esc(a.confidence || "")})`).join("; ")}</p>` : ""}`;
+}
+
 function boDrill(c) {
   if (!c) { $("#bodrill").innerHTML = ""; return; }
   const a = c.admission || {}, rc = S.reconciliation.find(r => r.cohort === c.id);
@@ -265,7 +311,7 @@ function boDrill(c) {
   <div class="kv"><div><small>runs</small>${V(c.n_runs, 0)}</div><div><small>rows ≤ cutoff</small>${V(c.rows, 0)}</div><div><small>valid</small>${V(c.valid, 0)}</div>
   <div><small>unique designs</small>${V(c.unique_designs, 0)}</div><div><small>duplicate valid</small>${V(c.duplicate_valid, 0)}</div><div><small>cached</small>${V(c.cached, 0)}</div>
   <div><small>penalty (J ≥ 900)</small>${V(c.penalty, 0)}</div>${fails}<div><small>best J (this identity only)</small>${V(c.best_J, 4)}</div></div>
-  <h3>Admission evidence</h3>${adm}<h3>Inherited claim reconciliation</h3>${rec}
+  <h3>Admission evidence</h3>${adm}<h3>Cost and optimizer evidence</h3>${oeHtml(c.optimizer_evidence)}<h3>Inherited claim reconciliation</h3>${rec}
   <details><summary>${c.runs.length} run dirs · first row ${esc(c.first_row)} · last row ${esc(c.last_row)}</summary><p class="src">${c.runs.map(esc).join(" · ")}</p></details>`;
 }
 
@@ -313,10 +359,10 @@ function manifestCard() {
 }
 
 function render() {
-  $("#app").innerHTML = header() +
+  $("#app").innerHTML = header() + plainCard() +
     `<section class="top">${findingsCard()}${decisionCard()}</section>` + doseCard() +
     `<div class="grid2">${boCard()}<section class="card" id="mesh">${meshCard()}<hr style="border:0;border-top:1px solid var(--line);margin:18px 0">${canaryCard()}</section></div>` +
-    missingCard() + manifestCard() +
+    missingCard() + agentsCard() + glossaryCard() + manifestCard() +
     `<div class="footer">Generated from <code>snapshot.json</code> by <code>${esc(S.generator)}</code>. No geometry render or raw acoustic curve is drawn: values are persisted rows or labelled deterministic calculations. Simulated BEM, not physical measurements. No GPU authorization; findings are suggestions, never dispatched.</div>`;
   $("#doseFam").onchange = e => { doseFam = e.target.value; doseSel = null; drawDose(); };
   $("#doseSel").onchange = e => { doseSel = e.target.value; drawDose(); };

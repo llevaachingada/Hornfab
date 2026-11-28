@@ -2,11 +2,6 @@
  "cutoff_utc": "2026-11-25T23:59:59Z",
  "exclusions": [
   {
-   "reason": "no timestamp: cannot place against the cutoff",
-   "time": null,
-   "what": "dose:rolled:control_epw9"
-  },
-  {
    "reason": "after cutoff",
    "time": "2026-11-26T00:48:40Z",
    "what": "run:20261126T004808Z-screen-d3037f"
@@ -252,226 +247,226 @@
    "what": "run:20261126T193329Z-screen-cf966d"
   }
  ],
- "generator": "research-snapshot-m1/2",
- "n_sources": 455,
+ "generator": "research-snapshot-m1/3",
+ "n_sources": 460,
  "reads": "committed files via `git show <source_commit>:<path>`; runs/ from disk, append-only logs pinned on the lines at or before the cutoff",
  "schema": "hornfab-research-snapshot-m1",
- "snapshot_id": "08a6d477803f510e",
- "source_commit": "bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+ "snapshot_id": "bc737b910572690c",
+ "source_commit": "d2273848d5af3898727c70354e0360cce0483ebb",
  "sources": [
   {
    "bytes": 13596,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "docs/evidence/cd_backbone_2026-11-25/PREDECLARED.md",
    "sha256": "555876e4a76a0f73c097bb9747cd78cc679969676c9afd8b34fc0e99bf91aacd",
    "worktree": "identical"
   },
   {
    "bytes": 180195,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "docs/evidence/cd_backbone_2026-11-25/results.json",
    "sha256": "3d21e02919c0d45ac8ffedb859e97d143e1686a3724c1635f3ae7f58b4cec7e3",
    "worktree": "eol_only"
   },
   {
    "bytes": 21895,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "docs/evidence/cd_backbone_2026-11-25/results_transfer.json",
    "sha256": "d024159faae34dca30508ea4ceb69fd87cc215137f2f3025725fe210bb2f06d0",
    "worktree": "eol_only"
   },
   {
    "bytes": 5804,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "docs/evidence/variable_mesh_2026-11-23/ACOUSTIC_CONVERGENCE.csv",
    "sha256": "3b0aac7533a1382c72f16bb6faf158de3ec85210f2b9ae1beb35973dc925edaf",
    "worktree": "eol_only"
   },
   {
    "bytes": 10644,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "docs/evidence/variable_mesh_2026-11-23/ADOPTION_DECISION.md",
    "sha256": "9a7da0f359984cca93dcef9187c60c31e96ae59bf97487700bb4b05b789cef56",
    "worktree": "identical"
   },
   {
    "bytes": 8918,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "docs/evidence/variable_mesh_2026-11-23/MESH_POLICY_AB.csv",
    "sha256": "ca90514202b654c3203b36e85d68ba9199119d1aa8a81283f36e56c152fd1da3",
    "worktree": "eol_only"
   },
   {
    "bytes": 18572,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "docs/research/metric_bo_2026-11-22/12_HANDOFF_2026-11-24.md",
    "sha256": "25f1478546566f17e54a9dc0dbb2ea2b8572d7377728ab54b1e7d866f30b044f",
    "worktree": "eol_only"
   },
   {
    "bytes": 7885,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/lame_bb_control_m040.yaml",
    "sha256": "ca4df928e658f671d733e4c15f58e9db5ffb8e960d19751cfcbe2f4a057c3eda",
    "worktree": "identical"
   },
   {
    "bytes": 7857,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/lame_bb_h050_m040.yaml",
    "sha256": "cf160446b6f9ac34a2212535502a588217a0958bfe60e3bd100913bfe77bdb31",
    "worktree": "identical"
   },
   {
    "bytes": 7754,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/lame_bb_h075_m040_t25_r20.yaml",
    "sha256": "96d1080962579aa36aa171724bb7b43669a8176be34882b4414357511ac38750",
    "worktree": "identical"
   },
   {
    "bytes": 7857,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/lame_bb_h100_m040.yaml",
    "sha256": "1002632d662004208ca2454c9d6b8c4f3fa91716483e390d0689c3b3f8679675",
    "worktree": "identical"
   },
   {
    "bytes": 7754,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/lame_bb_h100_m040_t25_r15.yaml",
    "sha256": "72b89d2215851e789cebac1d401fd7e4c12cba690a84bc8311e98d388476e4ff",
    "worktree": "identical"
   },
   {
    "bytes": 7750,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/lame_bb_h100_m040_t25_r20.yaml",
    "sha256": "a639ab81eec0eda571f4a82744bf0133e98e2d4397bd59836cb7e23c799068d7",
    "worktree": "identical"
   },
   {
    "bytes": 7750,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/lame_bb_h100_m040_t30_r15.yaml",
    "sha256": "b2d1a71dbeb6f2207c1a813e7ea1a3a28de915aaa42b744158491691a92532cd",
    "worktree": "identical"
   },
   {
    "bytes": 8462,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled2_bb_control.yaml",
    "sha256": "34c95f839b44f56cd8fe74ad2440dd87c621692810b8962988b804c14671857f",
    "worktree": "identical"
   },
   {
    "bytes": 8505,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled2_bb_h050_th025.yaml",
    "sha256": "f6503c2ec9a5a32a865229ebaebe0367a583263b8a69b4e8ea01b4b86275edf5",
    "worktree": "identical"
   },
   {
    "bytes": 8509,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled2_bb_h065_th025.yaml",
    "sha256": "42a7319554bba8e789901e92d72b33c1c9e3de35fe3db611a36d948e9388ed2e",
    "worktree": "identical"
   },
   {
    "bytes": 8612,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_control.yaml",
    "sha256": "9dd5a54c3a53c8b39c1ec5be03727484773f6ce527bb9eba1f987f484d1df46b",
    "worktree": "identical"
   },
   {
    "bytes": 8560,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h035.yaml",
    "sha256": "6b0a06b698ce1770900a4f249ec4583c9ed75614aea69dcfb6b87c47e0ff5882",
    "worktree": "identical"
   },
   {
    "bytes": 8560,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h045.yaml",
    "sha256": "5d802f81500c560bb31ca0e7554a78e2a9d60dffad4085da03adff39b7d65bc0",
    "worktree": "identical"
   },
   {
    "bytes": 8565,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h050.yaml",
    "sha256": "84bef8f241d5f9d0694cfd42753ed114f19df037ee07049a8a342548168b284e",
    "worktree": "identical"
   },
   {
    "bytes": 8418,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h050_epw9.yaml",
    "sha256": "9d2d004a6fd66153d8bbb0b430a2eb15460f1c74fae2f8ede93d0d6f7efa8ec3",
    "worktree": "identical"
   },
   {
    "bytes": 8447,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h050_th025.yaml",
    "sha256": "101ed4039c7c4494dec20f467453db5341bb6d442a357712d78b4f65aa99e787",
    "worktree": "identical"
   },
   {
    "bytes": 8560,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h065.yaml",
    "sha256": "e5df9c874ce2a2198570648f9fee3668b53c12a921b406dec9da0df7e8cb8dcd",
    "worktree": "identical"
   },
   {
    "bytes": 8454,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h065_ri022.yaml",
    "sha256": "e1ff7eeb4de7a15b0e27c4a23c6b65509e5820d6585150d3fe75cbbd6786894c",
    "worktree": "identical"
   },
   {
    "bytes": 8454,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h065_ri038.yaml",
    "sha256": "67d57f9a6ed0652839ba3319dcef4de63947606951aa5ad2d15dd77692901d33",
    "worktree": "identical"
   },
   {
    "bytes": 8451,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h065_th025.yaml",
    "sha256": "0fd44f95e270905e27208b5307dc491dcad076228a52e85c2c44543b59c8448e",
    "worktree": "identical"
   },
   {
    "bytes": 8338,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h065_th025_epw9.yaml",
    "sha256": "553474f5a90de23c62414d24afbb5d1d6cc10f9249990fe8ab21a087fa97503c",
    "worktree": "identical"
   },
   {
    "bytes": 8447,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h065_th030.yaml",
    "sha256": "87f5a9dc90ba4582dc156536800ffa5dfe78be910039fccd54d10606d9ee9ffd",
    "worktree": "identical"
   },
   {
    "bytes": 8443,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h080_th030.yaml",
    "sha256": "2e26232809faeab73a5bc0f1bf9911784fa2e4c22b1ed744b603d0dd35e468bd",
    "worktree": "identical"
   },
   {
    "bytes": 8565,
-   "origin": "git:bd5b769cffee4b6e709839220ae551c8a6abb7a8",
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
    "path": "examples/typologies/cd_backbone_2026-11-25/rolled_bb_h100.yaml",
    "sha256": "d2782c2dd3a3322c1122055456d2717c83f218b445d8f26b383927f4a5a73745",
    "worktree": "identical"
@@ -3580,6 +3575,41 @@
    "origin": "disk",
    "path": "runs/v11_bo_day_planning/cohort_twinray_2026-11-24/offline_scores.json",
    "sha256": "e42f7e835bf468cbb49ef801e1f2cfb31aa50e070e448c520096e202b894d0ea"
+  },
+  {
+   "bytes": 44908,
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
+   "path": "tools/analysis/_common.py",
+   "sha256": "efb7cdd586561e955fb030bd534adad59ba564f61bf12345af005cd27dfd8a96",
+   "worktree": "identical"
+  },
+  {
+   "bytes": 6290,
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
+   "path": "tools/analysis/continuation_advice.py",
+   "sha256": "13305a13bf49a8dc7eca8ca09548caf64c0ef39abac60f0293026a7c794aa98f",
+   "worktree": "eol_only"
+  },
+  {
+   "bytes": 33198,
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
+   "path": "tools/analysis/floor_registry.py",
+   "sha256": "fb162f42703df3618bd1efd9e3a9d2edfa1f748a451e0672fece2545fdb00f51",
+   "worktree": "identical"
+  },
+  {
+   "bytes": 45389,
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
+   "path": "tools/analysis/optimizer_evidence.py",
+   "sha256": "8b4690f76ee2d48c7d53afc561539b7ecc85de34765f20e79afaf8acb2fe61cd",
+   "worktree": "identical"
+  },
+  {
+   "bytes": 21469,
+   "origin": "git:d2273848d5af3898727c70354e0360cce0483ebb",
+   "path": "tools/analysis/optimizer_switch.py",
+   "sha256": "e5fcf0cd29768338ebbd0db1af9378fabc3eefa0a0e1f466d314bed43a6ee65d",
+   "worktree": "identical"
   }
  ],
  "worktree_differs": [],
@@ -3588,6 +3618,7 @@
   "docs/evidence/cd_backbone_2026-11-25/results_transfer.json",
   "docs/evidence/variable_mesh_2026-11-23/ACOUSTIC_CONVERGENCE.csv",
   "docs/evidence/variable_mesh_2026-11-23/MESH_POLICY_AB.csv",
-  "docs/research/metric_bo_2026-11-22/12_HANDOFF_2026-11-24.md"
+  "docs/research/metric_bo_2026-11-22/12_HANDOFF_2026-11-24.md",
+  "tools/analysis/continuation_advice.py"
  ]
 }

@@ -162,6 +162,7 @@ The tables below are the complete live inventory. Descriptions are the tools' ow
 
 | Command | What it does | GPU | Source |
 |---|---|---|---|
+| `.venv\Scripts\python.exe -m hornlab_search.research build [--cutoff ...]` | Frozen, sourced research snapshot (findings, cohort inventory, attribution); also the GUI Overview "Generate research snapshot" button | n | [`hornlab_search/research/build.py`](../hornlab_search/research/build.py) |
 | `.venv\Scripts\python.exe tools\analysis\cohorts.py` | Operation-specific comparability and the ATH census | n | [`tools/analysis/cohorts.py`](../tools/analysis/cohorts.py) |
 | `.venv\Scripts\python.exe tools/analysis/continuation_advice.py [--run ...]` | Continuation rule (Fable plan §10.1 D8, WP 7.2 advisory) — CPU, read-only, no action taken. | n | [`tools/analysis/continuation_advice.py`](../tools/analysis/continuation_advice.py) |
 | `.venv\Scripts\python.exe tools/analysis/convergence.py --run <dir> [--run <dir> ...] --out <dir>` | Best-so-far J vs valid-evaluation index for search runs. | n | [`tools/analysis/convergence.py`](../tools/analysis/convergence.py) |

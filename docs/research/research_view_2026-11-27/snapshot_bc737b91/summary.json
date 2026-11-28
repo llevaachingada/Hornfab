@@ -1,0 +1,230 @@
+{
+ "cohort_status": {
+  "confirmation_pass_for_exploratory_pilot": 1,
+  "hold": 2,
+  "needs_admission": 2,
+  "not_evaluated": 141,
+  "pilot_eligible": 5,
+  "replay_mismatch": 1
+ },
+ "counts": {
+  "cohorts": 152,
+  "dose_rows": 25,
+  "exclusions": 49,
+  "findings": 9,
+  "missing_cells": 155,
+  "sources": 460
+ },
+ "cutoff_utc": "2026-11-25T23:59:59Z",
+ "generator": "research-snapshot-m1/3",
+ "headlines": [
+  {
+   "id": "960c75bf36ecd0d9",
+   "kind": "matched_pair",
+   "plain": "Two nearly identical horn designs score almost the same, but only one meets the agreed acceptance rules: a small change near the throat fixes how well the horn loads the driver. The single score number hides this, so the rules, not the score, decide.",
+   "severity": "decision",
+   "title": "One knob, two verdicts: rolled_bb_h065 fails, rolled_bb_h065_th025 passes at +0.0032 J"
+  },
+  {
+   "id": "1dac280e5348308d",
+   "kind": "count_not_admission",
+   "plain": "Some design groups have plenty of results but still are not trustworthy enough to train the optimizer on. More of the same results would not fix that.",
+   "severity": "decision",
+   "title": "Sample count is not admission"
+  },
+  {
+   "id": "952b10fbefb9bd1c",
+   "kind": "mesh_scope",
+   "plain": "A coarser mesh on the back of the horn cuts the simulation size by about 22% on the tested shape types while beamwidths move by at most 0.16°; it does nothing for CAD-built horns.",
+   "severity": "decision",
+   "title": "Rear coarsening pays off on the tested formula classes, not on CAD"
+  },
+  {
+   "id": "3c624f7396c2208b",
+   "kind": "scalar_not_gate",
+   "plain": "The design with the best single score in this group fails an acceptance rule. Ranking by score alone would have picked the wrong design.",
+   "severity": "decision",
+   "title": "Lowest J in rolled fails a predeclared rule; the nearest passing candidate is 0.3299 J higher"
+  },
+  {
+   "id": "b5eb8f2ec8008924",
+   "kind": "claim_conflict",
+   "plain": "A planning document is out of date: it says a check is still to do, but the records show it was run and passed for a limited trial.",
+   "severity": "data_quality",
+   "title": "Handoff status disagrees with the admission artifact"
+  },
+  {
+   "id": "b09e20a1decb46f7",
+   "kind": "software_drift",
+   "plain": "Some groups of results were produced with different versions of the simulation software, so they should be checked before being treated as one consistent set.",
+   "severity": "data_quality",
+   "title": "Cohorts whose runs span different software pins"
+  },
+  {
+   "id": "a0ca5d4f9b1eb61f",
+   "kind": "solve_replicate",
+   "plain": "Solving the same design twice gives the same answer to about one part in a million, so the differences reported here are real.",
+   "severity": "control",
+   "title": "Negative control: repeated solves of the same designs agree"
+  },
+  {
+   "id": "e4e613ccd1a044c4",
+   "kind": "attribution_reconciles",
+   "plain": "The score breakdown adds up exactly to the recorded score, so the per-part bars can be trusted.",
+   "severity": "info",
+   "title": "Score attribution reconciles to the stored J"
+  },
+  {
+   "id": "91e174c0855c0e0a",
+   "kind": "canary_rank",
+   "plain": "In the one small trial, the quick check and the careful check agreed on which design was better. Two designs are too few to rely on.",
+   "severity": "info",
+   "title": "Canary: screen order survives verify (n = 2)"
+  }
+ ],
+ "next_steps": [
+  {
+   "blocked_by": [],
+   "finding_id": "b5eb8f2ec8008924",
+   "finding_kind": "claim_conflict",
+   "kind": "fix_doc",
+   "needs_gpu": false,
+   "needs_owner_approval": false,
+   "tool": null,
+   "what": "Correct the handoff table row for r3_c500."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "1dac280e5348308d",
+   "finding_kind": "count_not_admission",
+   "kind": "keep_held",
+   "needs_gpu": false,
+   "needs_owner_approval": false,
+   "tool": null,
+   "what": "Keep c400_v11_open out of metric-BO admission."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "1dac280e5348308d",
+   "finding_kind": "count_not_admission",
+   "kind": "keep_held",
+   "needs_gpu": false,
+   "needs_owner_approval": false,
+   "tool": null,
+   "what": "Keep photo_osse_morph_xo900_v11 out of metric-BO admission."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "1dac280e5348308d",
+   "finding_kind": "count_not_admission",
+   "kind": "repair_replay",
+   "needs_gpu": false,
+   "needs_owner_approval": false,
+   "tool": "tools/analysis/rescore_identity.py",
+   "what": "Recover the original box/config for home_ext_throat_v11_open so its rows re-encode exactly (3 config revisions in this cohort)."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "960c75bf36ecd0d9",
+   "finding_kind": "matched_pair",
+   "kind": "report_change",
+   "needs_gpu": false,
+   "needs_owner_approval": false,
+   "tool": null,
+   "what": "Show the predeclared verdict beside J wherever candidates are ranked."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "952b10fbefb9bd1c",
+   "finding_kind": "mesh_scope",
+   "kind": "keep_policy",
+   "needs_gpu": false,
+   "needs_owner_approval": false,
+   "tool": null,
+   "what": "Keep rear_res_factor 1.5 explicit in new formula-class configs."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "3c624f7396c2208b",
+   "finding_kind": "scalar_not_gate",
+   "kind": "selection_rule",
+   "needs_gpu": false,
+   "needs_owner_approval": false,
+   "tool": null,
+   "what": "Filter candidates by the predeclared rules before ranking by J."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "b09e20a1decb46f7",
+   "finding_kind": "software_drift",
+   "kind": "check_dependency_group",
+   "needs_gpu": false,
+   "needs_owner_approval": false,
+   "tool": "tools/analysis/optimizer_evidence.py",
+   "what": "Compare r3_c500's admission dependency group with its run lib_shas."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "b09e20a1decb46f7",
+   "finding_kind": "software_drift",
+   "kind": "check_dependency_group",
+   "needs_gpu": false,
+   "needs_owner_approval": false,
+   "tool": "tools/analysis/optimizer_evidence.py",
+   "what": "Compare r3_fav's admission dependency group with its run lib_shas."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "b09e20a1decb46f7",
+   "finding_kind": "software_drift",
+   "kind": "check_dependency_group",
+   "needs_gpu": false,
+   "needs_owner_approval": false,
+   "tool": "tools/analysis/optimizer_evidence.py",
+   "what": "Compare r3_v11_fold's admission dependency group with its run lib_shas."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "960c75bf36ecd0d9",
+   "finding_kind": "matched_pair",
+   "kind": "adopt_reference",
+   "needs_gpu": false,
+   "needs_owner_approval": true,
+   "tool": null,
+   "what": "Use rolled_bb_h065_th025 as the reference candidate for this body."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "91e174c0855c0e0a",
+   "finding_kind": "canary_rank",
+   "kind": "verify_more",
+   "needs_gpu": true,
+   "needs_owner_approval": true,
+   "tool": null,
+   "what": "Verify more screen leaders before using screen gaps as evidence."
+  },
+  {
+   "blocked_by": [],
+   "finding_id": "952b10fbefb9bd1c",
+   "finding_kind": "mesh_scope",
+   "kind": "measure_gpu",
+   "needs_gpu": true,
+   "needs_owner_approval": true,
+   "tool": null,
+   "what": "Time one factor-1.5 vs 1.0 solve pair on the GPU lane."
+  }
+ ],
+ "plain_summary": [
+  "This page freezes what the project's records showed at 2026-11-25T23:59:59Z and explains what they mean. It looked at 152 groups of optimizer results (11 of them checked for use in training) and 25 carefully simulated horn designs.",
+  "Two nearly identical horn designs score almost the same, but only one meets the agreed acceptance rules: a small change near the throat fixes how well the horn loads the driver. The single score number hides this, so the rules, not the score, decide.",
+  "Some design groups have plenty of results but still are not trustworthy enough to train the optimizer on. More of the same results would not fix that.",
+  "A coarser mesh on the back of the horn cuts the simulation size by about 22% on the tested shape types while beamwidths move by at most 0.16°; it does nothing for CAD-built horns.",
+  "The design with the best single score in this group fails an acceptance rule. Ranking by score alone would have picked the wrong design.",
+  "A planning document is out of date: it says a check is still to do, but the records show it was run and passed for a limited trial.",
+  "Some groups of results were produced with different versions of the simulation software, so they should be checked before being treated as one consistent set.",
+  "All numbers come from computer simulations, not from measuring real hardware. Nothing on this page starts any work by itself."
+ ],
+ "schema": "hornfab-research-summary-m1",
+ "snapshot_id": "bc737b910572690c",
+ "source_commit": "d2273848d5af3898727c70354e0360cce0483ebb"
+}

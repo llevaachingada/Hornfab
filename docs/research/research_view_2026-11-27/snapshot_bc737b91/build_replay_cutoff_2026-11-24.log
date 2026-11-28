@@ -1,0 +1,10 @@
+snapshot 851c572d96021098 cutoff 2026-11-24T23:59:59Z commit d2273848d5af
+out C:\Users\hunte\Hrns\hornlab-search\runs\analysis\research_2026-11-24_851c572d
+sources 304 exclusions 129 findings 6 missing-cells 92
+  snapshot.json    sha256 c575f54ee1f9be653fc169ce77f735030b9f3f0f3ee915005049ec8426e17d27
+  manifest.json    sha256 f0834225c936f89e892238a18358ddc08032f35fb07cb50006782f3de7673728
+  rows.ndjson      sha256 7b4e5e43a85d58b6181d92a090a71130b8099f470f24345884e9d4aceaa92b2e
+  findings.ndjson  sha256 9cacfb3e1abc3391e6f3445513fa846e909ab0ea75d6022bfd30f7926c3c115c
+  AGENT_GUIDE.md   sha256 bd8028c2ca07af6ad1e94294cdf7dffd475e79309df7547473fc816bf4d34263
+  index.html       sha256 850d4575912afaf4ac3d475af15f9c57ed71bf8a50be8874eae46d6dab3f2f09
+  summary.json     sha256 ff2d9bb856e32c2ccd51614f3bbedbb3c107abdd946f137410580a1545251be3

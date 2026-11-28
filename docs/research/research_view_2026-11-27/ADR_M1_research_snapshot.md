@@ -1,65 +1,58 @@
 # ADR — M1 research snapshot (read-only engineering research view)
 
-Status: accepted for M1, 2026-11-27. Scope: the brief in `00_OPUS_ENTRYPOINT.md` (owner download,
-not committed) plus the design mockup `research_dashboard.html` (reference SHA `898773d6`).
-The "architecture package" and its tests named in the entrypoint were **not** in the hand-off folder;
-only the entrypoint and mockup were. Acceptance tests below are therefore authored here.
+Status: accepted, 2026-11-27; senior hardening pass same day. Scope: `00_OPUS_ENTRYPOINT.md` (owner
+download, not committed) plus the mockup `research_dashboard.html` (reference SHA `898773d6`). The
+"architecture package" and its tests named in the entrypoint were not in the hand-off folder, so the
+acceptance tests are authored here.
 
 ## Reference vs local state (recorded, not assumed)
 
-- Mockup reference `898773d6` (2026-11-25T18:08-05:00) is an ancestor of local HEAD `bd5b769c`
-  (branch `hornfab-all-2026-11-18`, 4 ahead of origin). Between them: 177 files, +15 740/−4 166.
-  The three cited evidence packets are byte-unchanged except 10 restored metric-BO research docs;
-  `objective/size_penalty.py` + `objective/replay.py` were added (soft size penalty, opt-in).
-  The score-breakdown size-penalty fix lives only on `claude/hungry-sinoussi-4bc609` (not merged),
-  so any size-penalty run would show its penalty as an explicit `unattributed` residual here.
-- Worktrees present (not touched): `hornfab-metric-bo-wt`, `.claude/worktrees/hungry-sinoussi-4bc609`,
-  `hornlab-woofer-system-wt` (locked). GPU lock `runs/.gpu.lock` is stale (pid 19072, 2026-11-26);
-  M1 needs no GPU and does not touch it.
+- `898773d6` is an ancestor of the build commit. The three cited evidence packets are byte-unchanged
+  since then; `objective/size_penalty.py` was added later (opt-in). The breakdown size-penalty fix lives
+  only on `claude/hungry-sinoussi-4bc609`, so a size-penalty run would show the penalty as an explicit
+  residual here.
+- Worktrees present, untouched. GPU lock `runs/.gpu.lock` is stale (2026-11-26); no GPU is used.
 
 ## Decisions
 
-1. **Score attribution: reuse, do not copy.** Contributions come from
-   `gui/data_breakdown.score_breakdown` (which calls the objective package's own weight resolvers).
-   The snapshot stores per-term weight × stored raw term, the stored total, and the exact residual
-   `total − Σ contributions` (printed with `repr` precision). No new scoring version.
-2. **Strict grouping.** A cohort key is `(config_name, objective_version, brief_hash, mode, backend)`;
-   a config name spanning more than one key is split and flagged `mixed_identity`, never pooled.
-   J is never compared across keys; the Overview shows J only inside one key, and the
-   screen/verify canary shows ranks, labelled as two score identities.
-3. **Manifest cutoff.** `cutoff_utc` is an input. Run dirs whose `run.json.started_utc` is after it,
-   and rows whose `created_utc` is after it, are excluded and **counted** in the manifest.
-   Committed sources are read from a pinned git commit (`git show <sha>:<path>`); untracked
-   `runs/` sources are read from disk and pinned by sha256. The snapshot id is the sha256 of the
-   canonical manifest (sources + cutoff + generator version), so a changed input is a new snapshot.
-4. **Artifact adapters (read-only, no solver imports).** `hornlab_search/research/sources.py`:
-   dose experiment (`results.json` + the run dirs' `best.json`/`run.json`), cohort inventory
-   (`runs/*/run.json` + `search.ndjson`, joined to the existing admission artifacts
-   `runs/v11_bo_day_planning/cohort_*/{offline_scores,holdout_comparison}.json`), mesh fidelity
-   (`MESH_POLICY_AB.csv`, `ACOUSTIC_CONVERGENCE.csv`), canary (`work_v4` study rows, with the
-   rehearsal package as a replicate). Inherited handoff claims (the §3 table) are parsed as
-   *claims* and reconciled against artifacts, never used as values.
-5. **Status vocabulary.** Row/cohort states are distinct: `ok`, `failed:<kind>`, `penalty`,
-   `missing` (artifact absent), `unsupported` (inert by construction, e.g. CAD rear coarsening),
-   `unknown` (field absent in a present artifact). Missing evidence is listed, not hidden.
-6. **Evidence grades.** Each finding carries `observation` (what rows show), `hypothesis` (what it
-   may mean), `action` (what to do, never auto-dispatched), and `evidence` = row ids that resolve
-   to `{source, sha256, pointer}`.
-7. **Outputs from one artifact.** `snapshot.json` is the artifact; `rows.ndjson`,
-   `findings.ndjson`, `manifest.json` and `index.html` are rendered from it (the HTML embeds the
-   same JSON bytes and recomputes nothing).
-8. **Front-end route: none added.** Output goes to `runs/analysis/research_<date>_<id8>/`, which
-   the GUI already serves at `/analysis/<set>/index.html` (existing guarded route). `gui/server.py`,
-   the old run report and all routes are unchanged; a live GUI needs no restart.
+1. **Score attribution: reuse, do not copy.** `gui/data_breakdown.score_breakdown` (the objective
+   package's own weight resolvers) × stored terms; exact residual = stored total − fsum.
+2. **Strict grouping.** Cohort key = `(config_name, objective_version, brief_hash, mode, backend,
+   fidelity_policy)`; `fidelity_policy` = sha256[:8] of the run's mesh + solve blocks. Config-SHA
+   revisions inside a cohort are reported as `treatment_variants`, not split (they do not change J
+   comparability). J is never compared across keys.
+3. **Manifest cutoff.** `cutoff_utc` input (`now` by default). Runs/rows after it are excluded and
+   counted; committed sources are read at a pinned commit; `runs/` logs are pinned on the lines used,
+   so appends after the cutoff do not change the snapshot id. Admission artifacts are placed by mtime.
+4. **Adapters (read-only).** Dose experiment (committed `results*.json` + committed configs; local run
+   dirs corroborate J and config equality), cohort inventory (reproduces
+   `v11_cohort_inventory.py` on all 200 configs), admission artifacts, handoff claims (reconciled, never
+   used as values), variable-mesh CSVs, canary + replicate, and the **existing**
+   `tools/analysis/optimizer_evidence.py` (optimizer-evidence-v1) for cost ledger, outcome buckets,
+   failure signal, walls and cross-run compatibility — carded only when a run has no rows after the
+   cutoff.
+5. **Refined-mesh verdicts are fidelity-matched.** `analyze.py` scored epw-9 rows against the epw-6
+   control; PREDECLARED's refined-mesh gate requires the mesh-delta rule AND the six rules at epw 9.
+   The three control-relative rules are re-evaluated against the epw-9 control (labelled calc).
+6. **Status vocabulary.** `ok`, `failed:<kind>`, `penalty`, `missing`, `unsupported`, `unknown`,
+   `run_dir_missing`; cohort statuses `pilot_eligible` (PASS_FOR_EXPLORATORY_PILOT only — not full
+   admission), `hold`, `replay_mismatch`, `needs_admission`, `not_evaluated`; an unrecognised PASS_* is
+   `unknown`, never promoted.
+7. **Three audiences, one artifact.** `snapshot.json` is the artifact. Findings carry observation /
+   hypothesis / action (engineers), `plain` (non-technical readers) and structured `next_steps` with
+   `needs_gpu` / `needs_owner_approval` (planning agents). `summary.json` (written last),
+   `AGENT_GUIDE.md`, `rows.ndjson`, `findings.ndjson`, `manifest.json` and `index.html` are rendered from
+   it. Nothing is dispatched.
+8. **Front end.** Output in `runs/analysis/research_<date>_<id8>/`, served by the existing `/analysis/`
+   route. GUI: Overview → Briefing → "Generate research snapshot" runs the CPU-only `research-snapshot`
+   job kind (`gui/data_research.py`, not in `GPU_KINDS`); `GET /api/research/snapshots` lists complete
+   snapshots. Additive changes to `gui/jobs.py`, `gui/server.py`, `gui/static/overview.js`; old report
+   and routes unchanged.
 
-## Acceptance tests (`tests/test_research_snapshot.py`, offline, fixtures = the real 11-25 rows)
+## Acceptance tests
 
-A1 every numeric leaf in the snapshot sits in a cell with a resolvable `src`; A2 attribution
-residual of every dose row equals stored total − Σ contributions exactly, and |residual| < 1e-9
-for the v11 rows; A3 the lowest-J fixed-throat dose (`h065`, 4.6755) is a predeclared FAIL and the
-throat-0.25 run PASSES (finding derived, not hard-coded); A4 a cutoff before 2026-11-25T15:39Z drops
-the batch-4 runs and records the exclusion; A5 the same inputs give a byte-identical snapshot;
-A6 a changed input changes the snapshot id; A7 a config name with two brief hashes splits into two
-cohorts; A8 missing holdout → `missing`, replay 1/180 → `replay_mismatch`; A9 rehearsal vs v4
-canary replicate agree to < 1e-5 (negative control for solve noise); A10 HTML contains the
-embedded snapshot bytes and no number absent from the JSON.
+`tests/test_research_snapshot.py` (A1–A10 plus hardening: every committed `src` resolves mechanically;
+derived values are calcs; fidelity-matched refined-mesh verdicts; corroboration of J and config;
+fidelity-policy split; canonical brief-hash rule; audience fields; optimizer-evidence cutoff guard) and
+`tests/test_gui_research_snapshot.py` (CPU kind, cutoff validation/refusal, listing only complete
+snapshots, API route, preview command, button wiring).

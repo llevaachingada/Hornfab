@@ -296,6 +296,9 @@ class App:
                 raise ValueError("days must be between 1 and 365")
             return OV.overview(self.root, self.runs, days=days,
                                show_legacy=bool(_q_bool(q, "legacy", False)))
+        if head == "research" and len(parts) == 2 and parts[1] == "snapshots":
+            from . import data_research as RS
+            return {"snapshots": RS.snapshots(self.runs)}
         if head == "overview" and len(parts) == 2 and parts[1] == "snapshots":
             from . import data_overview_snapshot as OSN
             return {"snapshots": OSN.snapshots(self.root, self.runs)}
@@ -765,7 +768,7 @@ class App:
             if head == "preview":                       # the exact command a launch would run (same validation)
                 kind = str(body.get("kind", ""))
                 args = body.get("args") or {}
-                if kind.startswith("hw-") or kind == "overview-snapshot":
+                if kind.startswith("hw-") or kind in ("overview-snapshot", "research-snapshot"):
                     # These jobs run through a repo entry script, not the stock CLI; the preview
                     # must print the command that will really run (never a lie).
                     prev = self.jobs.preview(kind, args)

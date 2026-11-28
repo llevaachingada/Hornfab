@@ -8,6 +8,21 @@ Entries dated before 2026-11-01 are archived verbatim; every November entry stay
 - 2026-10-23 to 2026-10-31 (158 blocks): [docs/history/CONTINUITY_2026-10-23_2026-10-31.md](history/CONTINUITY_2026-10-23_2026-10-31.md) (rotated 2026-11-25).
 - Machine-readable index: [docs/history/manifest.json](history/manifest.json).
 
+## 2026-11-27 (late) - M1 research snapshot: senior hardening, GUI button, three audiences
+
+- **Owner ask:** harden M1 (verify every assumption), add a one-click GUI control, serve agents plus
+  technical and non-technical readers.
+- **GUI:** Overview > Briefing > "Generate research snapshot" runs the CPU-only `research-snapshot` job
+  (`gui/data_research.py`; not a GPU kind); `GET /api/research/snapshots`. Clicked end to end: exit 0, ~5 s.
+- **Corrected:** epw-9 verdicts now fidelity-matched (analyze.py had used the epw-6 control); mechanical
+  markdown anchors; PASS_FOR_EXPLORATORY_PILOT shown as `pilot_eligible`; derived values are calcs; cohort
+  key adds a mesh+solve digest; existing `tools/analysis/optimizer_evidence.py` wired in as the cost/fidelity
+  adapter (new `software_drift` finding: Fold, c500, FAV).
+- **Audiences:** plain-language summary + glossary, engineering drilldowns, `summary.json` /
+  `AGENT_GUIDE.md` with next steps labelled needs_gpu / needs_owner_approval.
+- **Snapshot `bc737b91`** (cutoff 2026-11-25): 9 findings; 1210/1210 cells resolve; inventory reproduces
+  the old inventory script on 200 configs; byte-identical rebuild. Handback: `docs/research/research_view_2026-11-27/`.
+
 ## 2026-11-27 - M1 research snapshot: read-only research view over the 11-21..25 evidence
 
 - **Owner ask:** implement the research-dashboard mockup + Opus entrypoint (M1) as a real, sourced artifact.

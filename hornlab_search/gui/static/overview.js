@@ -220,7 +220,70 @@ function lanesHtml(lanes) {
     }).join("")}</tbody></table></div>`;
 }
 
-function briefingTab(d, lastVisit, snaps = []) {
+// Research snapshot (M1): a read-only, sourced research view built by a CPU-only job.
+function researchCardHtml(rs = []) {
+  const latest = rs[0];
+  const sev = h => h.severity === "decision" ? "good" : "warn";
+  const latestHtml = latest ? `
+    <p style="margin:6px 0"><a class="btn btn-sm" href="${esc(latest.href)}" target="_blank" rel="noopener">Open research report ↗</a>
+      <span class="muted" style="font-size:.78rem">cutoff ${esc(latest.cutoff_utc)} · snapshot <span class="mono">${esc(latest.snapshot_id)}</span> · ${int(latest.counts.findings)} findings · ${int(latest.counts.cohorts)} cohorts · ${int(latest.counts.sources)} sources</span></p>
+    <ul class="ov-chg">${(latest.headlines || []).map(h => `<li>${pill(h.severity === "decision" ? "decision" : "data quality", sev(h))} <b>${esc(h.title)}</b><br><span class="muted">${esc(h.plain)}</span></li>`).join("")}</ul>
+    <p class="muted" style="font-size:.76rem">For agents: <a href="${esc(latest.files["summary.json"])}" target="_blank" rel="noopener">summary.json</a> · <a href="${esc(latest.files["AGENT_GUIDE.md"])}" target="_blank" rel="noopener">AGENT_GUIDE.md</a> · <a href="${esc(latest.files["snapshot.json"])}" target="_blank" rel="noopener">snapshot.json</a> · on disk: <span class="mono">runs/${esc(latest.path)}/</span> (also rows.ndjson, findings.ndjson). ${int(latest.n_next_steps)} suggested next steps, each labelled for GPU use and owner approval; none run automatically.</p>
+    ${rs.length > 1 ? `<details><summary class="muted" style="font-size:.78rem">${rs.length - 1} earlier research snapshot${rs.length === 2 ? "" : "s"}</summary><ul class="ov-chg">${rs.slice(1, 8).map(x => `<li><a href="${esc(x.href)}" target="_blank" rel="noopener">${esc(x.id)}</a> <span class="muted">cutoff ${esc(x.cutoff_utc)} · ${int(x.counts.findings)} findings</span></li>`).join("")}</ul></details>` : ""}`
+    : `<p class="muted">No research snapshot yet. "Generate research snapshot" builds one in about 10–20 s (CPU only, read-only).</p>`;
+  return `<section class="card" id="ov-research"><div class="eyebrow">Research snapshot · decisions with sources</div>
+    <p class="muted" style="font-size:.8rem;margin:4px 0">Freezes the committed evidence and the run archive at a cutoff, then explains it three ways: plain-language summary, engineering drilldowns where every number links to its source, and machine-readable files for planning agents. Never compares J across score identities; starts no work.</p>
+    <div class="pill-row" style="margin:6px 0"><button class="btn btn-sm" id="ov-research-go">Generate research snapshot</button>
+      <label class="ov-ctl" style="font-size:.78rem">cutoff <input id="ov-research-cutoff" type="text" placeholder="now" size="22" aria-label="Research snapshot cutoff (now or an ISO-8601 UTC time)"></label>
+      <span class="muted" style="font-size:.76rem" id="ov-research-msg" role="status" aria-live="polite">CPU-only; never takes the GPU lock. Leave cutoff empty for now, or e.g. 2026-11-25T23:59:59Z to reproduce.</span></div>
+    ${latestHtml}</section>`;
+}
+
+function wireResearch(root, onDone) {
+  const btn = root.querySelector("#ov-research-go");
+  if (!btn) return;
+  const done = sessionStorage.getItem("ov-research-done");
+  if (done) {                                       // survive the re-render that shows the new snapshot
+    sessionStorage.removeItem("ov-research-done");
+    const m = root.querySelector("#ov-research-msg");
+    if (m) m.textContent = done;
+  }
+  btn.addEventListener("click", async () => {
+    const msg = root.querySelector("#ov-research-msg");
+    const cutoff = (root.querySelector("#ov-research-cutoff") || {}).value || "";
+    const say = t => { if (msg) msg.textContent = t; };
+    btn.disabled = true;
+    say("Starting research snapshot job…");
+    try {
+      const r = await fetch("/api/jobs", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind: "research-snapshot", args: cutoff.trim() ? { cutoff: cutoff.trim() } : {} }) });
+      const out = await r.json().catch(() => ({}));
+      if (!r.ok || out.error) { say(`Refused: ${out.error || r.status}`); btn.disabled = false; return; }
+      say(`Research snapshot job ${out.id} ${out.status}…`);
+      const t0 = Date.now();
+      while (Date.now() - t0 < 180000) {
+        await new Promise(res => setTimeout(res, 1500));
+        const j = await fetch(`/api/job/${encodeURIComponent(out.id)}`).then(x => x.json()).catch(() => null);
+        if (!j || j.error) continue;
+        if (j.status === "done") {
+          sessionStorage.setItem("ov-research-done", `Research snapshot ready (job ${out.id}, ${Math.round((Date.now() - t0) / 1000)} s). Newest shown below.`);
+          onDone(); return;
+        }
+        if (j.status === "failed") {
+          const tail = String(j.log_tail || "").trim().split("\n").slice(-2).join(" ");
+          say(`Failed (exit ${j.returncode}): ${tail || "see the Jobs page"}`); btn.disabled = false; return;
+        }
+        say(`Research snapshot job ${out.id} ${j.status}… ${Math.round((Date.now() - t0) / 1000)} s`);
+      }
+      say(`Still running after 3 min; check the Jobs page for job ${out.id}.`);
+    } catch (e) {
+      say(`Refused: ${e.message}`);
+    }
+    btn.disabled = false;
+  });
+}
+
+function briefingTab(d, lastVisit, snaps = [], rsnaps = []) {
   const k = d.kpis || {}, rd = d.readiness || {};
   const cur = (d.identities || []).filter(i => i.status === "current");
   const leaderRows = cur.map(i => {
@@ -258,6 +321,7 @@ function briefingTab(d, lastVisit, snaps = []) {
       <tbody>${leaderRows || `<tr><td class="muted" colspan="6">No current identity has runs in this window.</td></tr>`}</tbody></table></div></section>
     <section class="card"><div class="eyebrow">What changed ${lastVisit ? `since your last visit (${ago(new Date(since).toISOString())})` : "in the last 24 h"}</div>
       ${chg ? `<ul class="ov-chg">${chg}</ul>${changed.length > 12 ? `<p class="muted">${changed.length - 12} more lines updated — see Leaders.</p>` : ""}` : `<p class="muted">Nothing new.</p>`}</section>
+    ${researchCardHtml(rsnaps)}
     <section class="card"><div class="eyebrow">Frozen snapshots</div>
       ${snapshotListHtml(snaps) || `<p class="muted">No snapshot yet. "Generate snapshot" writes one under <span class="mono">runs/analysis/overview_&lt;date&gt;/</span> (CPU only).</p>`}</section>`;
 }
@@ -272,7 +336,7 @@ export async function viewOverview(root, query = "") {
   root.innerHTML = `<div class="stack" style="gap:18px;opacity:.6" aria-hidden="true">
     <div class="skeleton-block" style="height:2.2rem;width:min(260px,60%)"></div>
     <div class="skeleton-block" style="height:180px"></div></div><p class="sr-only" role="status">Loading overview…</p>`;
-  let d, fd = null, reg = null, health = [], snaps = [], pd = null;
+  let d, fd = null, reg = null, health = [], snaps = [], pd = null, rsnaps = [];
   const qs = `days=${encodeURIComponent(s.days)}${s.legacy ? "&legacy=1" : ""}`;
   const getJson = async url => {
     const r = await fetch(url);
@@ -292,7 +356,10 @@ export async function viewOverview(root, query = "") {
       pd = await getJson(`/api/overview/params?${qs}`);
     }
     if (s.tab === "briefing") {
-      snaps = await getJson("/api/overview/snapshots").then(x => x.snapshots || []).catch(() => []);
+      [snaps, rsnaps] = await Promise.all([
+        getJson("/api/overview/snapshots").then(x => x.snapshots || []).catch(() => []),
+        getJson("/api/research/snapshots").then(x => x.snapshots || []).catch(() => []),
+      ]);
     }
   } catch (e) {
     root.removeAttribute("aria-busy");
@@ -308,7 +375,7 @@ export async function viewOverview(root, query = "") {
       : s.tab === "next" ? findingsTabHtml(fd, s)
         : s.tab === "decisions" ? registryTabHtml(reg, health)
           : s.tab === "params" ? paramsTabHtml(pd)
-            : briefingTab(d, lastVisit, snaps);
+            : briefingTab(d, lastVisit, snaps, rsnaps);
   root.innerHTML = `<div class="stack" style="gap:18px">
     <div><div class="eyebrow">Overview · live from runs/</div><h2>Project overview</h2>
       <p class="hw-story">Where the search stands: leaders per score identity, families against each score, and what changed. Rolled up by line of work, not run folder.</p>
@@ -330,6 +397,7 @@ export async function viewOverview(root, query = "") {
   }
   if (s.tab === "decisions") wireRegistry(root);
   if (s.tab === "params") wireParams(root);
+  if (s.tab === "briefing") wireResearch(root, () => viewOverview(root, query));
   const snapBtn = root.querySelector("#ov-snap");
   if (snapBtn) snapBtn.addEventListener("click", async () => {
     const msg = root.querySelector("#ov-snap-msg");
