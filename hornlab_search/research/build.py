@@ -32,6 +32,7 @@ from typing import Any
 
 from . import findings as F
 from . import guide as G
+from . import index as I
 from . import sources as S
 from .provenance import GENERATOR, Registry, iso, parse_utc
 
@@ -124,6 +125,8 @@ def build_snapshot(root: Path, cutoff: str | None = DEFAULT_CUTOFF, commit: str 
         "sources_missing": [s["path"] for s in sources if s.get("status") in ("missing", "unreadable")],
     }
     snap["plain_summary"] = G.plain_summary(snap)
+    snap["index"] = I.build_index(snap)
+    snap["facets"] = I.facets(snap["index"])
     return snap
 
 

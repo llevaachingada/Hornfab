@@ -1,5 +1,10 @@
 ﻿# ISSUES
 
+## 2026-11-27 (night) - Research report sorting
+
+- DONE: ranked, sortable research tables; evidence index with facets and back-links.
+- OPEN: Overview Typologies tab does not fit smaller screens (owner report); research query/diff CLI.
+
 ## 2026-11-27 (late) - M1 research snapshot hardening
 
 - DONE: GUI button + API, fidelity-matched refined-mesh verdicts, optimizer-evidence adapter, audience layers;

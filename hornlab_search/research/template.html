@@ -36,7 +36,9 @@ a{color:var(--blue)}
 .selected{stroke:#fff;stroke-width:2.5}
 .tablewrap{overflow:auto;max-width:100%}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-td,th{text-align:left;padding:7px 7px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
+td,th{text-align:left;padding:6px 7px;border-bottom:1px solid var(--line);vertical-align:top;overflow-wrap:anywhere}
+th{white-space:nowrap}th.sortable{cursor:pointer;user-select:none}th.sortable:hover{color:var(--ink)}
+table td small{display:inline-block}
 th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 td.wrap{white-space:normal;min-width:180px}
 tr.click{cursor:pointer}tr.click:hover{background:#1d2732}
@@ -89,6 +91,33 @@ function V(c, d = 3, unit = "") {
   if (typeof t === "number") t = d < 0 ? (t === 0 ? "0" : t.toExponential(2)) : Number.isInteger(t) ? String(t) : t.toFixed(d);
   return `<span class="v" title="${esc("exact " + JSON.stringify(c.v) + " · " + srcOf(c))}">${esc(t)}${unit}</span>`;
 }
+// Ranks come from the backend index (rank never crosses a score identity); tables sort by rank by default.
+const IDX = Object.fromEntries((S.index || []).map(e => [e.id, e]));
+const SORT = { dose: { key: "rank", dir: 1 }, bo: { key: "rank", dir: 1 } };
+const REDRAW = {};
+function th(t, key, label) {
+  const st = SORT[t], on = st.key === key;
+  return `<th class="sortable" data-t="${t}" data-k="${key}" tabindex="0" aria-sort="${on ? (st.dir > 0 ? "ascending" : "descending") : "none"}">${esc(label)}${on ? (st.dir > 0 ? " ▲" : " ▼") : ""}</th>`;
+}
+function sortRows(rows, t, getters) {
+  const st = SORT[t], g = getters[st.key] || getters.rank;
+  return rows.slice().sort((a, b) => {
+    const x = g(a), y = g(b);
+    if (x == null && y == null) return 0;
+    if (x == null) return 1;
+    if (y == null) return -1;
+    return (x < y ? -1 : x > y ? 1 : 0) * st.dir;
+  });
+}
+function onSort(e) {
+  const h = e.target.closest && e.target.closest("th[data-k]");
+  if (!h || (e.type === "keydown" && e.key !== "Enter")) return;
+  const st = SORT[h.dataset.t];
+  if (st.key === h.dataset.k) st.dir *= -1; else { st.key = h.dataset.k; st.dir = 1; }
+  (REDRAW[h.dataset.t] || (() => {}))();
+}
+document.addEventListener("click", onSort);
+document.addEventListener("keydown", onSort);
 const cls = v => ({pass:"pass", fail:"fail", control:"control", missing:"warn", unknown:"warn"}[v] || "");
 const STATUS = {
   pilot_eligible: ["pass", "holdout pass · pilot only", "PASS_FOR_EXPLORATORY_PILOT: a held canary may be considered; not full admission"],
@@ -178,7 +207,8 @@ function doseCard() {
   <p class="muted">${esc(S.dose.scope)} Predeclared ${V(S.dose.predeclared_at)} — <span class="src">${esc(S.dose.predeclared)}</span></p>
   <div class="charts" id="charts"></div>
   <p class="note">Green = predeclared pass; red = fail; gray = control; diamond = throat/roll-in variant; refined-mesh (epw 9) rows are a different numerical fidelity and are not plotted. The line joins the base-recipe doses only (throat and roll-in at the control's values, epw 6). The H floor applies to five 6–8 kHz bins; the chart shows 8 kHz only.</p>
-  <div class="tablewrap"><table><thead><tr><th>Candidate</th><th>bb_h</th><th>Throat</th><th>Roll-in</th><th>epw</th><th>J</th><th>H 8k (°)</th><th>Min Re(z)</th><th>Predeclared result</th><th>Run dir check</th></tr></thead><tbody id="dosetbl"></tbody></table></div>
+  <p class="note">Default order = rank inside each score identity: predeclared pass first, then J ascending (controls first, unranked). Click any column header to sort; click again to reverse.</p>
+  <div class="tablewrap"><table><thead id="dosehead"></thead><tbody id="dosetbl"></tbody></table></div>
   <div class="drill" id="dosedrill"></div></section>`;
 }
 function drawDose() {
@@ -215,7 +245,15 @@ function drawDose() {
     el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); doseSel = el.dataset.id; drawDose(); } };
   });
   const k = (r, n) => r.knobs[n] ? V(r.knobs[n], 2) : `<span class="muted">—</span>`;
-  $("#dosetbl").innerHTML = rows.map(r => `<tr class="click ${r.id === doseSel ? "sel" : ""}" tabindex="0" data-row="${esc(r.id)}">
+  const kv = (r, n) => r.knobs[n] ? r.knobs[n].v : null;
+  const rk = r => (IDX[r.id] || {}).rank;
+  $("#dosehead").innerHTML = `<tr>${th("dose", "rank", "Rank")}${th("dose", "job", "Candidate")}${th("dose", "bb_h", "bb_h")}${th("dose", "throat", "Throat")}${th("dose", "rollin", "Roll-in")}${th("dose", "epw", "epw")}${th("dose", "J", "J")}${th("dose", "H8k", "H 8k (°)")}${th("dose", "rez", "Min Re(z)")}${th("dose", "verdict", "Predeclared result")}<th>Run dir check</th></tr>`;
+  const sorted = sortRows(rows, "dose", {
+    rank: r => `${String(r.epw.v).padStart(4, "0")}|${r.is_control ? "0" : "1"}|${String(rk(r) ?? 999).padStart(4, "0")}`,
+    job: r => r.job, bb_h: r => kv(r, "g_bb_h"), throat: r => kv(r, "g_bb_throat_frac"), rollin: r => kv(r, "g_bb_rollin_frac"),
+    epw: r => r.epw.v, J: r => r.J.v, H8k: r => r.H8k.v, rez: r => r.min_re_z.v, verdict: r => r.verdict.v });
+  $("#dosetbl").innerHTML = sorted.map(r => `<tr class="click ${r.id === doseSel ? "sel" : ""}" tabindex="0" data-row="${esc(r.id)}">
+    <td title="${esc((IDX[r.id] || {}).rank_basis || "control: not ranked")}">${r.is_control ? '<span class="muted">ctl</span>' : rk(r) != null ? `<strong>#${rk(r)}</strong>` : "—"}</td>
     <td><button data-row="${esc(r.id)}">${esc(r.job)}</button></td><td>${k(r, "g_bb_h")}</td><td>${k(r, "g_bb_throat_frac")}</td><td>${k(r, "g_bb_rollin_frac")}</td>
     <td>${V(r.epw, 0)}</td><td>${V(r.J, 3)}</td><td>${V(r.H8k, 1)}</td><td>${V(r.min_re_z, 3)}</td>
     <td class="${cls(r.verdict.v)}">${esc(r.verdict.v)} ${esc(r.verdict.failed_rules.join(", "))}</td>
@@ -263,7 +301,8 @@ function boCard() {
   return `<section class="card" id="bo"><div class="row"><div><div class="eyebrow">BO admission · cohort inventory</div><h2>Evidence readiness</h2></div>
   <label>Filter <select id="boStatus"><option value="all">All statuses</option>${sts.map(s => `<option value="${esc(s)}">${esc(statusOf(s)[1])}</option>`).join("")}</select></label></div>
   <p class="muted">Objective v${S.inventory.objective_version} runs at the cutoff, grouped strictly by ${esc(S.inventory.grouping.join(" × "))}. Count is not a score or an admission criterion; J is never compared across rows.</p>
-  <div class="tablewrap"><table><thead><tr><th>Cohort</th><th>Unique</th><th>Failed / penalty</th><th>Status / action</th></tr></thead><tbody id="botbl"></tbody></table></div>
+  <p class="note">Default order = admission readiness (pilot-eligible first), then unique designs. Click a header to sort.</p>
+  <div class="tablewrap"><table><thead id="bohead"></thead><tbody id="botbl"></tbody></table></div>
   <p class="note"><button id="boMore"></button> Scanned ${S.inventory.scan.run_dirs} run dirs: ${S.inventory.scan.other_version} other objective versions, ${S.inventory.scan.no_run_json} without run.json, ${S.inventory.scan.unreadable_run_json} unreadable, ${S.inventory.scan.runs_after_cutoff} runs and ${S.inventory.scan.rows_after_cutoff} rows after the cutoff, ${S.inventory.scan.rows_time_unknown} rows without a timestamp.</p>
   <div class="drill" id="bodrill"></div></section>`;
 }
@@ -272,10 +311,15 @@ function drawBo() {
   const total = cs.length;
   if (!boShowAll && boStatus === "all") cs = cs.filter(c => c.unique_designs.v >= 150 || c.status !== "not_evaluated");
   const mx = Math.max(...S.inventory.cohorts.map(c => c.unique_designs.v), 1);
+  const bem = c => (((c.optimizer_evidence || {}).totals || {}).bem_hours || {}).v ?? null;
+  $("#bohead").innerHTML = `<tr>${th("bo", "rank", "Rank")}${th("bo", "name", "Cohort")}${th("bo", "unique", "Unique")}${th("bo", "failed", "Failed / penalty")}${th("bo", "bem", "BEM h")}${th("bo", "rank", "Status / action")}</tr>`;
+  cs = sortRows(cs, "bo", { rank: c => (IDX[c.id] || {}).rank, name: c => c.config_name, unique: c => c.unique_designs.v,
+    failed: c => c.failed_total.v, bem });
   $("#botbl").innerHTML = cs.map(c => { const s = statusOf(c.status);
-    return `<tr class="click ${c.id === boSel ? "sel" : ""}" tabindex="0" data-c="${esc(c.id)}"><td>${esc(c.config_name)}<br><small>${esc(c.mode)} · brief ${esc(c.brief_hash)}${c.mixed_identity ? ' · <span class="warn">mixed identity</span>' : ""}</small></td>
+    return `<tr class="click ${c.id === boSel ? "sel" : ""}" tabindex="0" data-c="${esc(c.id)}"><td title="${esc((IDX[c.id] || {}).rank_basis || "")}"><strong>#${esc((IDX[c.id] || {}).rank ?? "—")}</strong></td><td>${esc(c.config_name)}<br><small>${esc(c.mode)} · brief ${esc(c.brief_hash)}${c.mixed_identity ? ' · <span class="warn">mixed identity</span>' : ""}</small></td>
     <td><span class="bar" style="width:${(60 * c.unique_designs.v / mx).toFixed(1)}px"></span> ${V(c.unique_designs, 0)}</td>
     <td>${V(c.failed_total, 0)} / ${V(c.penalty, 0)}</td>
+    <td>${bem(c) == null ? '<span class="muted">—</span>' : V(c.optimizer_evidence.totals.bem_hours, 2)}</td>
     <td><strong class="${s[0]}">${esc(s[1])}</strong><br><small>${esc(s[2])}</small></td></tr>`; }).join("");
   const btn = $("#boMore");
   btn.textContent = boShowAll ? "Show admission-relevant only" : `Show all ${total} cohorts`;
@@ -318,7 +362,7 @@ function boDrill(c) {
 // ------------------------------------------------------------------ mesh + canary
 function meshCard() {
   const m = S.mesh;
-  const rows = (m.rows || []).map(r => `<tr><td>${esc(r.label)}<br><small>${V(r.f_hi_hz, 0, " Hz")} · ${V(r.dof_before, 0)} → ${V(r.dof_after, 0)}</small></td>
+  const rows = (m.rows || []).slice().sort((a, b) => ((IDX[a.id] || {}).rank ?? 99) - ((IDX[b.id] || {}).rank ?? 99)).map(r => `<tr><td>${esc(r.label)}<br><small>${V(r.f_hi_hz, 0, " Hz")} · ${V(r.dof_before, 0)} → ${V(r.dof_after, 0)}</small></td>
     <td><span class="bar" style="width:${Math.max(0, 2 * r.dof_reduction_pct.v).toFixed(1)}px"></span> ${V(r.dof_reduction_pct, 1, "%")}</td>
     <td>${r.evidence === "acoustic" ? V(r.max_bw_delta_deg, 3) : `<span class="${r.evidence === "unsupported" ? "control" : "warn"}">${esc(r.evidence === "unsupported" ? "inert · not solved" : "mesh only")}</span>`}</td></tr>`).join("");
   return `<div class="eyebrow">Numerical fidelity</div><h2>Rear coarsening: scope matters</h2>
@@ -371,6 +415,8 @@ function render() {
   if (mp) doseSel = mp.evidence[1];
   drawDose(); drawBo();
 }
+REDRAW.dose = () => drawDose();
+REDRAW.bo = () => drawBo();
 render();
 </script>
 </body>

@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable
 
 #: Bumped whenever a calculation or the snapshot shape changes (part of the snapshot id).
-GENERATOR = "research-snapshot-m1/3"
+GENERATOR = "research-snapshot-m1/4"
 
 
 def sha256(data: bytes) -> str:

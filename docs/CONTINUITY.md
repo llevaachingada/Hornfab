@@ -8,6 +8,14 @@ Entries dated before 2026-11-01 are archived verbatim; every November entry stay
 - 2026-10-23 to 2026-10-31 (158 blocks): [docs/history/CONTINUITY_2026-10-23_2026-10-31.md](history/CONTINUITY_2026-10-23_2026-10-31.md) (rotated 2026-11-25).
 - Machine-readable index: [docs/history/manifest.json](history/manifest.json).
 
+## 2026-11-27 (night) - Research report: ranked, sortable tables
+
+- New `hornlab_search/research/index.py`: one typed evidence index (ranks, facets, finding back-links) in
+  `snapshot.json`. Ranks never cross a score identity: dose = predeclared pass first then J; cohorts =
+  admission readiness then unique designs; mesh = acoustic evidence then DOF cut.
+- Report tables default to rank order with a Rank column; every header click-sorts (keyboard too); cells
+  wrap instead of overflowing. Verified at 1280 px. Query/diff CLI deferred.
+
 ## 2026-11-27 (late) - M1 research snapshot: senior hardening, GUI button, three audiences
 
 - **Owner ask:** harden M1 (verify every assumption), add a one-click GUI control, serve agents plus
