@@ -6218,7 +6218,8 @@ const BREAKDOWN_LABELS = {
   cd_lw: "CD listening window", cd_di_std: "CD DI std", cd_nacc: "CD NACC",
   offaxis_smooth: "CD off-axis", hf_floor: "HF floor", constancy: "Constancy",
   distd: "DI std", diag: "H/V diagonal", load_near: "Near-band loading", z_smooth: "Z smoothness",
-  cov_pat: "Coverage pattern", di_rise: "DI rise", unattributed: "Penalty / other",
+  cov_pat: "Coverage pattern", di_rise: "DI rise", size_penalty: "Size penalty (brief)",
+  unattributed: "Penalty / other",
 };
 
 /** Pure: the run page's score-breakdown rows. Uses the server's per-version breakdown

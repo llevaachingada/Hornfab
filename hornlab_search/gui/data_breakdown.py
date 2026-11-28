@@ -118,6 +118,23 @@ def _side(terms: dict | None, keys: tuple[str, ...], w: dict) -> dict | None:
             "unattributed": gap if gap is not None and abs(gap) > _SUM_TOL else 0.0}
 
 
+#: Brief ``envelope.soft_penalty`` term stored on solved rows (weight 1: it is already in J units).
+SIZE_PENALTY_KEY = "size_penalty"
+
+
+def _with_size_total(terms: dict | None) -> dict | None:
+    """A copy whose ``total`` is the row's J: acoustic total (``J_acoustic`` else ``total``) + size."""
+    if not isinstance(terms, dict):
+        return terms
+    sp = _num(terms.get(SIZE_PENALTY_KEY))
+    acoustic = _num(terms.get("J_acoustic"))
+    if acoustic is None:
+        acoustic = _num(terms.get("total"))
+    if sp is None or acoustic is None:
+        return terms
+    return {**terms, "total": acoustic + sp}
+
+
 def score_breakdown(cfg: dict, version: int, terms_seed: dict | None,
                     terms_best: dict | None) -> dict:
     """The run page breakdown: one row per weighted term of ``version`` (see module doc).
@@ -136,6 +153,14 @@ def score_breakdown(cfg: dict, version: int, terms_seed: dict | None,
     except Exception as exc:  # noqa: BLE001 - the run page must render without the breakdown
         return {"available": False, "version": version,
                 "reason": f"{type(exc).__name__}: {exc}"}
+    # Opt-in soft size cost (objective/size_penalty.py, 2026-11-25): added to J AFTER the objective,
+    # so the row stores ``size_penalty`` + ``J_acoustic`` while ``terms.total`` stays acoustic. Show
+    # it as its own weight-1 row and reconcile against the row's real J (acoustic + size).
+    if any(isinstance(t, dict) and _num(t.get(SIZE_PENALTY_KEY)) is not None
+           for t in (terms_seed, terms_best)):
+        keys = tuple(keys) + (SIZE_PENALTY_KEY,)
+        w = {**w, SIZE_PENALTY_KEY: 1.0}
+        terms_seed, terms_best = _with_size_total(terms_seed), _with_size_total(terms_best)
     seed = _side(terms_seed, keys, w)
     best = _side(terms_best, keys, w)
     rows = []

@@ -194,3 +194,21 @@ def test_breakdown_rows_js(v11_run, tmp_path):
                         json.dumps({"score_breakdown": d["score_breakdown"]})],
                        capture_output=True, text=True, encoding="utf-8", cwd=str(tmp_path))
     assert "BREAKDOWN JS OK" in r.stdout, f"stdout: {r.stdout}\nstderr: {r.stderr}"
+
+
+def test_size_penalty_is_its_own_row_and_sums_to_the_row_j():
+    """Brief envelope.soft_penalty (2026-11-25) adds to J after the objective; terms.total stays
+    acoustic, so the breakdown must show size_penalty and reconcile to J_acoustic + size_penalty."""
+    w = dict(V11_WEIGHTS, cd_lw=1.5, cd_di_std=0.75, cd_nacc=0.75, offaxis_smooth=1.0)
+    best = dict(BEST_TERMS, size_penalty=0.36, size_utilization=1.03, J_acoustic=BEST_J)
+    seed = dict(BEST_TERMS)          # an unpenalised start row (inside the box)
+    cfg = {"weights": V11_WEIGHTS, "objective": V11_OBJECTIVE}
+    bd = score_breakdown(cfg, 11, seed, best)
+    assert bd["keys"][-1] == "size_penalty" and bd["weights"]["size_penalty"] == 1.0
+    row = next(r for r in bd["rows"] if r["key"] == "size_penalty")
+    assert row["best"] == pytest.approx(0.36) and row["seed"] is None
+    assert sum(r["best"] for r in bd["rows"] if r["best"] is not None) == pytest.approx(BEST_J + 0.36)
+    assert bd["best"]["total"] == pytest.approx(BEST_J + 0.36) and bd["best"]["unattributed"] == 0.0
+    assert bd["seed"]["unattributed"] == 0.0
+    assert all(r["key"] != "unattributed" for r in bd["rows"])
+    del w

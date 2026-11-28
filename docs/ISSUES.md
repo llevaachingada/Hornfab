@@ -30,6 +30,7 @@
 - OPEN: M2 candidates - curve drilldown from `response.npz`, v7/v10 inventory, GUI nav link to latest snapshot.
 
 ## 2026-11-27 - Consolidation sync
+- DONE: GUI score breakdown shows the brief size penalty as its own row (was missing; sums now match J).
 
 - DONE: 11-25 throat-sculpt pilot + repo-findability reorg committed; 10 metric-BO research docs restored from
   `feat/metric-aware-bo`; hornfab-all pushed, main fast-forwarded and pushed.
