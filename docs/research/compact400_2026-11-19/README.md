@@ -48,13 +48,13 @@ It is built exactly like `compact_xo900`: the objective v10 scalar is unchanged 
 | mesh part (B1, fixed, `floor_record.json`) | 0.00768 J |
 | **combined floor** | **0.1293 J** |
 
-- **Command:** `rescore_identity.py floor --brief <brief> --runs-root runs --top 28 --out runs/analysis/compact400_floor_2026-11-19`. Exit 0. Output: [`evidence/floor/`](evidence/floor/).
+- **Command:** `rescore_identity.py floor --brief <brief> --runs-root runs --top 28 --out runs/analysis/compact400_floor_2026-11-19`. Exit 0. Output: [`evidence/floor/`](evidence/floor).
 - **Caveat:** the pairs come from the whole fleet, which is mostly 600 mm-class home horns. This is the score-consistency floor of this target set, not a repeatability floor measured on 400 mm horns.
 - **Rule:** re-measure it once the compact400 lanes have their own screen→verify pairs. Until then, treat gains below about 0.13 J as ties.
 
 ## 4. The bar the new lanes must beat (CPU rescore, no solve)
 
-`rescore_identity.py rescore` was run on 15 stored runs that contain HF1440 designs inside the cube. Output: [`evidence/rescore/`](evidence/rescore/).
+`rescore_identity.py rescore` was run on 15 stored runs that contain HF1440 designs inside the cube. Output: [`evidence/rescore/`](evidence/rescore).
 - 1,281 designs were exact-complete; 978 of those fit the cube.
 - 470 were not replayable (466 `record_not_ok`, 4 `target_regeneration_unsupported`).
 

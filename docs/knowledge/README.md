@@ -36,7 +36,7 @@ Hybrid and new-law **construction contracts** (draft, 2026-11-18): [contracts/](
 ## Authority and history
 
 - [Research basis](../plan/12_RESEARCH_BASIS.md): existing plan basis, preserved in place.
-- [Detailed typology research](../research/typologies/),
+- [Detailed typology research](../research/typologies),
   [senior-pass guide](../research/senior_pass_2026-10-24/README.md), and
   [full docs index](../INDEX.md): historical dossiers, corrections, proposals and evidence.
   Read status/correction headers; historical guidance is not blanket current policy.

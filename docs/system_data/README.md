@@ -20,7 +20,7 @@ hand-written artifact here.
 > **Pure-horn GPU design export is elsewhere.** This bundle covers the *system* study (horn channel
 > + vented woofer box, Boundary Lab coupling, screen shortlists). The per-typology top-N GPU-solved
 > horn designs with acoustic arrays are exported by [`tools/data/top_designs.py`](../../tools/data/top_designs.py)
-> into [`docs/top_designs/`](../top_designs/). The two are deliberately separate: system cases have
+> into [`docs/top_designs/`](../top_designs). The two are deliberately separate: system cases have
 > no objective `J` to rank, and their fidelity labels are declared, not scored.
 
 ## Files

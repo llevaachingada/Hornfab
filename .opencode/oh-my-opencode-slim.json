@@ -73,7 +73,10 @@
         "hornlab-shape-check",
         "hornlab-search-economy",
         "hornlab-render",
-        "hornlab-typology-research"
+        "hornlab-typology-research",
+        "hornlab-brief-scoring",
+        "hornlab-generator-family",
+        "hornlab-find"
       ]
     },
     "designer": {
@@ -82,7 +85,9 @@
         "hornlab-evidence",
         "hornlab-acoustic-grounding",
         "hornlab-shape-check",
-        "hornlab-typology-research"
+        "hornlab-typology-research",
+        "hornlab-brief-scoring",
+        "hornlab-find"
       ]
     }
   },

@@ -1,7 +1,7 @@
 # System backend closeout — B18–B30 / F19 (2026-11-21)
 
 **Scope.** A current-HEAD audit of the backend/GUI issues in
-[`HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md`](../../HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md)
+[`HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md`](../../handoffs/HORN_WOOFER_SYSTEM_HANDBOOK_2026-11-19.md)
 §8.1, followed by the fixes that need no owner decision and no acoustic redesign. No GPU, no
 solver, no new case except the separate R5a balloon control.
 

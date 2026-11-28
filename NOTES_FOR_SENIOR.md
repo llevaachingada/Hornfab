@@ -1355,3 +1355,16 @@ fail in the working copy: the refusal path now returns `invalid_envelope: genera
 `tests/test_mesh_build_grid_rows.py`, `tests/test_design_generated_recipe.py` and both dispatch tests also pass).
 Suggested fix (registry lane): either keep `invalid_geometry` as the outer prefix for generator-refused envelope
 violations, or update the two assertions in the same commit as the prefix change. Not touched here (not my files).
+
+
+## 2026-11-25  Sculpted-throat lane: new kind throat_sculpt_v1 is NOT registered in the dispatch tuples (digest hazard)
+`hornlab_search/design/generators/throat_sculpt_family.py` (+ kernel `_throat_sculpt_v1.py`) is complete and tested
+(`tests/test_throat_sculpt_geometry.py`), but adding it to the `for family in (...)` tuples in `grid.py` (4 blocks),
+`mesh/build.py` and `design/generated.py` would change `grid.py`, which is in `rows_bb_v1`'s `_sources()`: the digest
+`3ce85c423949...` currently matches ~300 designs saved today by `cd_bo_cohort_2026-11-25`, and that night's queued
+`explore_verify_tops` re-verifies them. So the registration was left out on purpose.
+Exact change needed (byte-wise, keep CRLF in grid.py/generated.py): replace `rim_beak_family, ` with
+`rim_beak_family, throat_sculpt_family, ` in those three files (14 occurrences); diff staged at
+`docs/research/typologies/sculpted_throat_2026-11-25/dispatch_registration.patch`. Apply it after the night no longer
+needs the current rows_bb_v1 digest, and record the digest bump in that commit. Until then the lane runs through
+`tools/geometry/throat_sculpt_pilot.py` (resolve -> build_grid_mesh -> solve -> v11 score), which needs no dispatch.

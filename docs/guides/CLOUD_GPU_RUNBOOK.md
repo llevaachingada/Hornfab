@@ -1,8 +1,8 @@
 # Cloud GPU runbook (RunPod-first)
 
 2026-11-02. Operator steps to run **hornlab-search** CUDA jobs on a rented GPU.
-Research basis: [`CLOUD_GPU_REPORT.md`](CLOUD_GPU_REPORT.md) (CP-9). Hardware sizing
-caveats: [`evidence/HARDWARE_2026-11-01.md`](evidence/HARDWARE_2026-11-01.md).
+Research basis: [`CLOUD_GPU_REPORT.md`](../archive/2026-10/CLOUD_GPU_REPORT.md) (CP-9). Hardware sizing
+caveats: [`evidence/HARDWARE_2026-11-01.md`](../evidence/HARDWARE_2026-11-01.md).
 
 **Defaults:** RunPod **SECURE** pod, **RTX 4090 24 GB**, Linux + CUDA. First
 workload = Solana / SAWMOD **screen `run`** (not CMA search until CP-9a passes).

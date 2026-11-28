@@ -1,5 +1,22 @@
 ﻿# ISSUES
 
+## 2026-11-27 - Consolidation sync
+
+- DONE: 11-25 throat-sculpt pilot + repo-findability reorg committed; 10 metric-BO research docs restored from
+  `feat/metric-aware-bo`; hornfab-all pushed, main fast-forwarded and pushed.
+- OPEN: `cd_bo_cohort_2026-11-25` night died 2026-11-26 (`rolled_r8` exit 1; `lcl_beak_cohort` never finished);
+  stale GPU lock. Re-queue the remaining jobs after `gpu-clean`.
+- OPEN: PR #77 (System v1 Pass A) and PR #75 (Fable v2) need review. Throat-sculpt not in the generator registry.
+
+## Archive
+
+- No dated ISSUES section was rotated on 2026-11-25: all 169 `## YYYY-MM-DD`
+  sections are November (2026-11-16 to 2026-11-25) and stay live.
+- Pre-November notes are undated freeform text inside the live 2026-11-16
+  section (which contains OPEN items) and are retained there.
+- Closed GitHub issue rows #1-#11: [docs/history/ISSUES_closed.md](history/ISSUES_closed.md) (rotated 2026-10-30).
+- Machine-readable index: [docs/history/manifest.json](history/manifest.json).
+
 ## 2026-11-25 - Metric-aware BO release and admission queue
 
 - DONE: integrated metric-aware worker/refit/package/CLI; clean Home v11 Fold canary (8+2 calls,
@@ -1607,7 +1624,7 @@
 
 ## 2026-11-16 - Agent-orchestration review filed; no issue closed (docs-only)
 
-- DONE: [`AGENT_ORCHESTRATION_REVIEW_2026-11-16.md`](AGENT_ORCHESTRATION_REVIEW_2026-11-16.md)
+- DONE: [`AGENT_ORCHESTRATION_REVIEW_2026-11-16.md`](archive/2026-11/AGENT_ORCHESTRATION_REVIEW_2026-11-16.md)
   records the measured cause of slow agent sessions - prompt size from container-directory launches
   and unbudgeted multi-hundred-KB document reads, not agent count - with the evidence queries, the
   P0-P3 plan, and the risk/validation note for each item.

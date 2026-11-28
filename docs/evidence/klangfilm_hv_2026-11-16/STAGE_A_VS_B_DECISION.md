@@ -37,7 +37,7 @@ through `brief_from_config`.
 ## 2. Physical results
 
 Full tables, per-frequency arrays and plots: [`AB_REPORT.md`](AB_REPORT.md),
-[`ab_report.json`](ab_report.json), [`ab_plots/`](ab_plots/).
+[`ab_report.json`](ab_report.json), [`ab_plots/`](ab_plots).
 
 ### 2.1 Axis authority (mean −6 dB beamwidth change vs A0)
 

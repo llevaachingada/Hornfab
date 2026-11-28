@@ -12,7 +12,7 @@ Two Sonnet agents did the literature surveys (appendices); the code audit, measu
 | [04_IMPLEMENTATION_PLAN.md](04_IMPLEMENTATION_PLAN.md) | work packages for an implementing agent: steps, tests, acceptance, guardrails |
 | [appendix_A_typology_survey_raw.md](appendix_A_typology_survey_raw.md) | literature survey: typologies (sources), with corrections header |
 | [appendix_B_methods_survey_raw.md](appendix_B_methods_survey_raw.md) | literature survey: BEM/GPU, drivers, optimizers, metrics (sources), with corrections header |
-| [evidence/](evidence/) | the scripts behind every [measured] number (no solver needed) |
+| [evidence/](evidence) | the scripts behind every [measured] number (no solver needed) |
 
 ## Top findings
 

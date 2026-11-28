@@ -1,3 +1,5 @@
+> Superseded for scoring semantics by [SCORING_REFERENCE](../knowledge/SCORING_REFERENCE.md) on 2026-11-25; retained for brief-selection history.
+
 # Brief and scoring guide — the S1a driver pass (2026-10-25)
 
 Owner-directed finalization (Oracle decision pass; every number below was measured on the live

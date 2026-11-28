@@ -25,10 +25,8 @@ all three from the config and the prior runs; run it before writing the night fi
     --ab <control> --from-runs runs\<prior-run>
 ```
 
-Exit 1 on a hard fault (a searched seed value outside its bound, mesh-consistency error, config
-error); `--strict` promotes warnings. Everything else is a report. The numbers come from the
-config and the history, never from a fixed table, so there is nothing to update when a brief
-changes.
+Exit 1 on a hard fault (seed outside its bound, mesh-consistency error, config error); `--strict` promotes warnings.
+Everything else is a report computed from the config and history, never a fixed table.
 
 ## What the checks mean
 
@@ -36,33 +34,25 @@ changes.
    `DesignSpace.normalize()` without failing the run, while eval 0 still scores the unclipped seed
    — the run starts somewhere the optimiser never revisits. Missing keys are filled with the bound
    midpoint (also silent). Move the seed inside, or widen the bound deliberately.
-2. **Headroom.** If the seed equals the prior run's best — same design hash, or the same values on
-   every knob the prior run searched with only new neutral DOF added — the run starts at the
-   converged optimum. A new config that only adds the law amplitudes at 0 is a nested incumbent:
-   its hash changes, its geometry and J do not. That is a re-test, not a search; give it a reason
-   (a new DOF, a new brief) and a step small enough to refine. Otherwise it spends evals
-   relearning that the optimum is the optimum.
+2. **Headroom.** If the seed equals the prior run's best — same design hash, or same values on every knob with
+   only new neutral DOF added — the run starts at the converged optimum. A config that only adds law amplitudes
+   at 0 is a nested incumbent: its hash changes, its geometry and J do not. That is a re-test, not a search; give
+   it a reason (a new DOF, a new brief) and a step small enough to refine. Otherwise it relearns the optimum.
 3. **Resolution.** `sigma0` is in per-dimension box units. The tool reports the prior run's top-k
    spread, the recommended sigma, and the expected number of valid samples that land inside that
    spread (`chi-square_d`). Native families go through the production
-   `search.warm_start.sigma_from_spread` path; generated families use an equivalent local fallback
+   `search.warm_start.sigma_from_spread` path (`hornlab_search/search/warmstart.py`); generated families use an equivalent local fallback
    because `warmstart` cannot read their `params.<generator>.knobs` rows today. If the expectation
    is below the policy floor, the budget cannot find the region. Fix the step, the budget, or the
    box — in that order. A measured spread far below `sigma0` with best-at-eval-0 is the signature
    of this failure.
 
-   **Measured backing (2026-11-17, `docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md`).** sigma0 and
-   bound width are ONE decision, not two. Controlled A/B on the same 12-key config: sigma0 0.25 on
-   global generator bounds → 24/45 refusals, zero improvement, flat from eval 1; sigma0 0.10 on
-   seed-centered ±30 % bounds → best J −56 % by eval 102, 9 refusals. Retrospective over ~80 recent
-   runs: refusal storms track sigma0 × free-keys × bound width (sigma0 0.22–0.25 on wide boxes:
-   25–48 % median refusal with flat tails), while sigma0 0.20 on modest boxes is quiet (1.2 %
-   refusal) and refinement at 0.12 near a live basin gains 8 %. Starting points when the preflight
-   sweep is unavailable — greenfield on global bounds with <6 keys: 0.15–0.20; seed-centered
-   ±20–30 % bounds: 0.08–0.15; refinement at a converged incumbent: 0.05–0.12 and say so in the
-   night plan. Never ship sigma0 ≥ 0.25 with >8 free keys or global bounds. A flat trace with
-   ≥30 % refusals is the storm signature: stop the arm, sweep sigma0 with the preflight, relaunch —
-   do not let budget burn out in refusals.
+   **Measured backing (2026-11-17, `docs/evidence/SIGMA0_ANALYSIS_2026-11-17.md`).** sigma0 and bound width
+   are ONE decision. Controlled A/B (12 keys): sigma0 0.25 on global bounds → 24/45 refusals, zero gain;
+   sigma0 0.10 on seed-centred ±30 % bounds → best J −56 % by eval 102, 9 refusals. Retrospective (~80 runs):
+   refusal storms track sigma0 × free-keys × box width. Starting points until the preflight sweep runs:
+   greenfield/global/<6 keys 0.15–0.20; ±20–30 % seed-centred 0.08–0.15; refinement 0.05–0.12. Never ship
+   sigma0 ≥ 0.25 on >8 free keys or global bounds; a flat trace with ≥30 % refusals is the storm signature.
 4. **Economy.** With `--samples N` the tool samples the box **uniformly** through the real
    generator/mesher and reports the valid fraction and refusal kinds *before* the queue. CMA
    concentrates near the seed, so read the uniform number as a bound — it over-represents the far
@@ -82,6 +72,27 @@ changes.
    negative when the treatment dimension was active, the added region was actually sampled, and
    the control had headroom; otherwise it is an untested hypothesis.
 
+## BO identity and starts (metric-BO)
+
+- **Identity = brief + bounds** (+ objective/scorer version). `ActiveProjection.identity(space)` encodes one
+  `DesignSpace`; the box identity is `bo.metric_identity.bounds_identity` — a sha256 of per-key physical bounds
+  and transforms (`hornlab_search/bo/metric_identity.py:159-161`) — and the score identity is objective version
+  + brief hash (`:200-236`). A different brief or a changed bound is a **different identity**: rows do not pool
+  and J is not comparable.
+- **One box per family so runs pool.** Repeat runs of a family must reuse byte-identical searched bounds; the
+  two rolled campaigns share one identity and pool to 200 rows (`docs/evidence/cd_bo_cohort_2026-11-25/PREDECLARED.md:18-22`);
+  `check_explore.py:24-30` prints distinct boxes per family.
+- **>=100 usable rows per identity; aim for >=5 groups (independent runs).** `tools/bo_compare/prepare_study.py`
+  refuses below `--min-rows` (default 100: `:76`, `:165-167`). The A/B verdict rule becomes a real verdict only at
+  >=5 runs, else "indicative" (`tools/analysis/_common.py:1053-1061`), so spread rows over >=5 runs, not one long one.
+- **Snap exploration starts; the seed hash must round-trip.** Sobol/scrambled starts are full float precision, but
+  the space rounds knobs on denormalize, so an unsnapped start is "not representable" and `ActiveProjection`
+  raises `HashMismatchError`. Snap each start `denormalize(normalize_design(seed, verify_round_trip=False))` and keep
+  it only if `snapped.hash() == space.seed.hash()` (`docs/evidence/cd_bo_cohort_2026-11-25/snap_starts.py:20-28`;
+  `check_explore.py:21-25` asserts it, and `bo/encoding.py:264-274` is the same check inside `normalize_design`).
+- **Explore first.** A CMA exploration cohort makes the valid rows BO needs; open no BO arm until the cohort clears
+  the row/group floor. Never widen a queued config's bounds to "add data" — that is a new identity and splits the pool.
+
 ## Rules for a queue (write these into the plan before the run)
 
 - Record the predicted best-at and first-improvement eval before launching; compare at readout.
@@ -89,34 +100,21 @@ changes.
   version and brief.
 - State the expected refusal fraction and how it was measured (box sample or prior run).
 - Put the owner's priority first; a cutoff must never leave a treatment without its control.
-- Add `search.warm_start` whenever the seed came from a prior run of the same family:
-  `{from_runs: [...], top_k: 10, sigma_from_spread: true}`. It sets the mean to the prior best and
-  the step to the measured spread (clamped to `[0.05, sigma0]`); it never changes the solve hash.
+- Add `search.warm_start` when the seed came from a prior run of the same family:
+  `{from_runs: [...], top_k: 10, sigma_from_spread: true}` — mean = prior best, step = measured spread (clamped
+  to `[0.05, sigma0]`); it never changes the solve hash.
 - Do not edit a config a queued/running night uses; copy it (the night-queue skill's rule 6).
 
 ## Readout (after the run)
 
-`tools/night_status.py --since-hours 24`, then `tools/analysis/convergence.py`,
-`walls.py` and `seed_variance.py` on the run dirs. Report: best-at eval, first-improvement eval,
-valid fraction by block, pinned dims, and whether the predicted headroom was real. A run whose
-best is n=0 needs one of the six checks above named as the cause; "CMA failed" is not a diagnosis.
+`tools/night_status.py --since-hours 24`, then `tools/analysis/convergence.py`, `walls.py` and
+`seed_variance.py` on the run dirs. Report: best-at eval, first-improvement eval, valid fraction by block, pinned
+dims, and whether predicted headroom was real. A best of n=0 needs one of the six checks named as the cause.
 
 ## Evidence behind this skill (2026-11-14, `sab_home_gpu_2026-11-14` + `sab_lecleach_cpu_2026-11-14`)
 
-- [measured] H1 seeds 1234 and 5678 both scored 3.2325 at n=0 and never beat it (78 and 65 valid of
-  100). That 3.2325 was itself found at n=191/254 in `51328c` and n=196/200 in `18985d`; H1 then
-  got half the evals that took.
-- [measured] sigma0=0.15 in 9-D: the nearest valid sample to the seed was 0.31 normalized (J 3.59),
-  median distance ~1.0, median J ~6.2; sigma shrank only to 0.107 after 9 generations. No sample
-  entered the basin.
-- [measured] 22–36% of evals were refused `invalid_geometry` ("outside the brief envelope (width
-  816 > 600.0 mm)") despite `infeasible_penalty: graded`; every refusal carried the flat 1000.
-- [measured] The one arm with real headroom, C1 narrow, improved 2.1283 -> 1.9699 with the first
-  gain at n=117 of 200 — at the end of its budget.
-- [measured] L1 A/B: all arms improved from 1.6019 (~0.83–0.90) but no treatment beat control.
-  Every winner pinned `g_stop_deg` at 120 (its lower bound) and `g_T` near 0.60, while the
-  treatment moved `g_fc_hz`'s lower bound. `sab__lecleach_fc540_T_narrow.yaml` also has a seed outside its
-  own box (`g_T 0.8` vs `0.687–0.777`), which `normalize()` clips.
-
-The reusable lesson is not "use sigma=0.05" or "budget=200". It is: measure the spread, check the
-seed, sample the box, then choose the step and the budget.
+- [measured] H1 seeds both scored 3.2325 at n=0 and never beat it (a value finding took 191–254 evals elsewhere).
+- [measured] sigma0=0.15 in 9-D: nearest valid sample 0.31 normalized; sigma shrank only to 0.107 after 9 generations — no basin entry.
+- [measured] 22–36 % refused `invalid_geometry` despite graded penalty; the only arm with real headroom improved at n=117 of 200.
+- [measured] L1 A/B: no treatment beat control; every winner pinned `g_stop_deg` at 120 while the treatment moved `g_fc_hz`.
+- Lesson: measure the spread, check the seed, sample the box, then choose step and budget — not a fixed sigma or budget.

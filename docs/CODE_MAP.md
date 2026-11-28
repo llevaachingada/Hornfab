@@ -109,7 +109,7 @@ self-redrawing `chart()` (`square` option); `app.js::brk()` wraps ids; tokens `-
 Study execution (scalar, turbo, pareto): `studies/production.py` bridges immutable packages to the
 existing evaluator in an owned serial worker; `tools/analysis/study_cohort.py`
 prepares task-specific canonical v4/v7 evidence without solving. See the
-[runbook](BAYESIAN_STUDIES_RUNBOOK.md). `bo/data.py` accepts history rows with `morph_target` 0 (no morph) or 1 (rectangle), where the dropped
+[runbook](guides/BAYESIAN_STUDIES_RUNBOOK.md). `bo/data.py` accepts history rows with `morph_target` 0 (no morph) or 1 (rectangle), where the dropped
 `morph_exponent` is inert. `bo/data.py::canonical_design` reuses the
 production links and throat-coupling transformation for all Bayesian geometry.
 
@@ -293,6 +293,45 @@ bempp_cpu) â†’ `metrics` (beamwidth, ripple, DI, impedance) â†’ `objec
 | `tools/widen_campaign_boxes.py` | Campaign search-box widening (2026-10-26 owner ruling: the box is never the binding constraint). Widens every SEARCHED knob of the 23 `examples/typologies/campaign_2026-10-26/` cells (skips `crease__`/`gcurve__`/`control__`) to the physical range, intersects `families.FAMILY_KEYS` hard limits, keeps the seed inside, NEVER narrows an existing edge, leaves pinned keys pinned, and sets `search.infeasible_penalty: graded`; `--dry-run` prints the per-knob beforeâ†’after table, `--write` applies. Comment-preserving line patch (PyYAML read/verify only), seeds byte-identical; result in `docs/evidence/CAMPAIGN_DRYRUN_2026-10-26.md` Â§8. |
 | `hornlab_search/mesh/step_build.py` (2026-10-28) | Now a small CAD-tool registry (`CAD_TOOLS`): `multicell` and `plughorn`; the plughorn recipe is validated by the tool's own keys. `design/generated.py::plughorn_params` maps a `generator: {name: plughorn}` config's knobs to the recipe (envelope-checked); the GUI sandbox previews it (`gui/data.py::_plughorn_preview`). |
 | `tools/cad/multicell.py` | WP14 multicell CAD authoring (build123d 0.13.0, optional `cad` extra): classic WE/Altec frusta-of-pyramids cells (`x = zÂ·tan Î±_i`, `y = zÂ·tan Î²_j`), thickened septa (â‰¥ 1.5 mm) from `z_s`, exponential throat manifold; CLI + importable API; exports the labelled STEP via OCC `STYLED_ITEM` styles (`driver`/`wall` exact contract) + round-trip inventory proof; used by `mesh/step_build.py`. |
+| `tools/agent/ping_agents.py` | Prove skill discovery, skill grants and skill loading actually work. |
+| `tools/analysis/klangfilm_hv_ab_report.py` | Stage A H/V A/B acoustic report: physical metrics, not just scores (one-off). |
+| `tools/analysis/mesh_acoustic_ab.py` | Frozen-grid acoustic A/B across saved-mesh policy arms (CPU backend by default). |
+| `tools/analysis/mesh_policy_ab.py` | Build mesh-only policy arms for one saved design, then audit each mesh (CPU only). |
+| `tools/analysis/mesh_region_audit.py` | Region-level mesh-resolution audit over a design dir or `mesh.msh` (read-only). |
+| `tools/bassbox.py` | Lumped sealed/vented bass-box model with DSP and limit-based maximum SPL (M10). |
+| `tools/cad/meh.py` | Multiple-entry horn (MEH) L1 CAD: horn + box + flush mid-port patches to labelled STEP. |
+| `tools/data/dedupe_runs.py` | Replace byte-duplicate heavy run files with hardlinks to their cache entry. |
+| `tools/data/doctor.py` | Read-only integrity report for the local data stores. |
+| `tools/data/ingest_foreign.py` | Ingest foreign rows from another lab: validate, tag, write a CP-7b parity report. |
+| `tools/data/keepers.py` | Derived, regenerable "keepers" index over the append-only dataset store. |
+| `tools/export_config.py` | Export the exact hornlab_mesher config for a run's top designs (no solves, no meshes). |
+| `tools/geometry/audit_rolled_family.py` | Audit a master-family search box through the real CPU mesher, without BEM. |
+| `tools/geometry/hf1440_seed_gallery.py` | HornFab HF1440 dual-family geometry gallery (intended for the Hornfab repo; one-off). |
+| `tools/geometry/k_visual_seed_diagnostic_20261116.py` | Geometry-only diagnostic for the owner-supplied K seed pack; no meshing or solving (one-off). |
+| `tools/geometry/klangfilm_hv_ab.py` | Stage A single-axis acoustic A/B: identity gate and sequential runner (no optimizer). |
+| `tools/geometry/klangfilm_hv_contact_sheet.py` | Klangfilm-Lame H/V Phase A contact sheet (matplotlib Agg only; CPU; no meshing/BEM). |
+| `tools/geometry/klangfilm_hv_preflight.py` | Klangfilm-Lame H/V Phase A geometry preflight (CPU only; no meshing, no BEM, no GPU). |
+| `tools/geometry/klangfilm_hv_search_box.py` | Lawfulness probe for the Klangfilm-Lame H/V Phase A search box (CPU only, no solves). |
+| `tools/geometry/plot_rolled_family.py` | Plot physical axis cuts and projected relief rings of the canonical family (one-off). |
+| `tools/gui/browser_check.py` | Browser check for the hornlab-search GUI (GUI completion handoff section 8.6). |
+| `tools/make_shape_variants.py` | Generate Morph / guiding-curve SEARCH variants of every typology that can take them. |
+| `tools/make_v4_campaign.py` | Generate the objective-v4 copy of the 2026-10-26 campaign (briefs + typology configs; one-off). |
+| `tools/meh/run_screen.ps1` | Run one MEH brief as a GPU screen job then verify its top candidates. |
+| `tools/night_queue/fidelity_pairs.py` | Fixed-design fidelity checks for the acoustic-truth ladder (GPU). |
+| `tools/night_queue/refresh_loop.ps1` | Keep repairing a live night's failed/stopped jobs until the cutoff (one-off). |
+| `tools/night_queue/refresh_watchdog.py` | Night refresher: inspect failed/watchdog-stopped jobs and repair them. |
+| `tools/night_queue/walls_continuations.py` | Generate walls-relieved successor configs + queue jobs for recent runs that hit bound walls. |
+| `tools/observe_run.py` | Read-only observer for an overnight campaign night. |
+| `tools/rescore/driver_check.py` | Driver-file readiness audit (report-only; no driver-model code change). |
+| `tools/rescore/rescore_v6_v7.py` | Offline objective v6 vs v7 re-score over the stored dataset (no GPU, no solver). |
+| `tools/system/assembly_render.py` | Render what Boundary Lab actually compiled for one staged horn+cabinet case. |
+| `tools/system/audit_saved_horns.py` | Read-only saved-horn audit CLI (`hornlab_search.system` Tier 0). |
+| `tools/system/bl_smoke.py` | Boundary Lab machine smoke: read-only probe (default) or a real vented generation. |
+| `tools/system/mesh_sensitivity.py` | Mesh-sensitivity comparison for one assembled horn+cabinet case at several mesh levels. |
+| `tools/system/placement_compare.py` | Compare the per-excitation Boundary Lab results of the three staged placements. |
+| `tools/visualizations/prepare_capture.py` | Package saved solved meshes in HornLab's browser playback format. |
+| `tools/visualizations/prepare_improvements.py` | Package saved solved meshes in HornLab's browser playback format (same docstring as prepare_capture.py; possible duplicate). |
+| `tools/visualizations/verify_flash.py` | Verify that only improvement frames flash lime in a HornLab evolution reel. |
 | `tests/` | Offline suite; `requires_*` / `gpu` / `slow` markers in `tests/conftest.py`. |
 | `.opencode/skills/` | Agent skills (opencode project scope, auto-discovered): `hornlab-gpu-job` (per-GPU-job hygiene/capture recipe; exit-3 + tripwire semantics) + `hornlab-evidence` (evidence-doc assembly + pre-publish byte-check) + `hornlab-typology-research` (horn-design grounding: typology dossiers + R9/rename-gate discipline before typology/shape work). |
 | `.claude/skills/` | Claude Code project skills (Claude loads only this folder): mirrors of the three `.opencode` skills plus `hornlab-night-queue` (detached multi-night queue, live-night rules, status, recovery), `hornlab-shape-check` (new shape -> meshes before GPU: dof cap, envelope, round coupling, quadrant/span) and `hornlab-render` (views + stack/card/sheet layouts). Edit the `.opencode` originals and re-copy. |
@@ -315,6 +354,12 @@ bempp_cpu) â†’ `metrics` (beamwidth, ripple, DI, impedance) â†’ `objec
 | `tools/bench/cpu_gpu_concurrent.py` | WP3 pilot: CPU lane + CUDA lane, separate processes/worker dirs, own-tree cleanup, aggregate candidates/h + parity. Bench only. |
 | `tools/bench/mesh_policy_study.py` | WP4: baseline vs `curvature_npts` meshes (N/E, edge stats, build seconds; optional `--solve`). |
 | `tools/bench/compare_search_runs.py` | Compare two run dirs' `search.ndjson` (same designs/order/objectives) + candidates/hour. |
+| `tools/bench/cpu_vs_cuda_meh.py` | Legacy CPU-vs-CUDA MEH benchmark; non-production historical path, superseded (see `docs/throughput/RUNBOOK.md`). |
+| `tools/bench/cuda_cpu_40designs.py` | Legacy 40-design CUDA-vs-CPU benchmark; non-production historical path, superseded. |
+| `tools/bench/cuda_threads.py` | Legacy CUDA thread-scaling benchmark; non-production historical path, superseded. |
+| `tools/bench/full_range_cuda_cpu.py` | Legacy full-range CUDA-vs-CPU benchmark; non-production historical path, superseded. |
+| `tools/bench/run_with_memwatch.py` | Records a job's peak dedicated + shared ("Windows WDDM spill") VRAM; no solve of its own. |
+| `tools/bench/screen_grid_ab.py` | SCREEN-grid A/B: frequency resolution and 12 kHz cost for hornlab-search (GPU). |
 | `docs/throughput/` | `RUNBOOK.md` (owner steps + gates), `WP1_FUSED_IDENTITY_CACHE_PATCH.md` (fork proposal). |
 | `tools/data/renumber_objective_v5_to_v7.py` | 2026-11-12 one-off relabel of the hardened branch's objective "5" to v7 in dataset shards and run dirs (dry run by default, backup, os.replace). |
 | `hornlab_search/metrics/acoustic_v2.py` | Rev2 additive metrics: main-lobe first crossings, sphere DI quadrature, 3D lobes/islands, loading and pattern-control onset, Keele estimate, analyze_response. Not used by any objective. |
@@ -342,6 +387,8 @@ bempp_cpu) â†’ `metrics` (beamwidth, ripple, DI, impedance) â†’ `objec
 | `hornlab_search/design/generators/_rolled_rect_terminal_v1.py` + `rolled_terminal_family.py` (2026-11-20) | Versioned `rolled_family_rect_term_v1` H-terminal roll-onset/C-return law: H-meridian Hermite P0-P3 + 40 deg C2 azimuthal blend, V/throat zero-control; width-500 neutral J 9.0033; C look-only (J 9.60/9.58, ripple 0.159/0.158; max-width z 174.8 vs parent 159.0); tests `tests/test_rolled_terminal_geometry.py`; handoff `docs/HANDOFF_ROLLED_TERMINAL_2026-11-20.md`. |
 | `hornlab_search/design/generators/_cd_backbone_v1.py` + `cd_backbone_family.py` (2026-11-25) | Versioned `cd-backbone-v1` wall-angle backbone under the retained return (LABELED HYPOTHESIS): the parent surface is resolved unchanged, then each row's pre-roll arc is blended at equal arc fraction toward a solved CD schedule (row throat angle -> theta_c -> the row's own tangent at the forward station) with `lam(psi) = bb_h cos^2 psi + bb_v sin^2 psi`; knobs `g_bb_h`/`g_bb_v` (0-1), `g_bb_throat_frac` (0.05-0.30), `g_bb_rollin_frac` (0.15-0.45), sum <= 0.8; kinds `rolled_family_rect_bb_v1` / `klangfilm_lame_hv_bb_v1`; digest includes the parent's; neutral strength returns the parent object bit-for-bit. Configs `examples/typologies/cd_backbone_2026-11-25/`; tests `tests/test_cd_backbone_geometry.py`; evidence `docs/evidence/cd_backbone_2026-11-25/README.md` (rolled bb_h 0.5 passes: H 65.7 deg at 8 kHz, J 8.121 → 5.407). |
 | `tools/geometry/apply_cd_backbone.py` (2026-11-25) | Wraps a saved `rolled_family_rect_v1` / `rolled_family_rect_cd_v1` / `klangfilm_lame_hv_cd` design in the `cd-backbone-v1` kinds as fixed-candidate YAMLs (neutral control + recipes, default `bb_h` 0.65 / throat 0.25 / roll-in 0.30) from the run's exact effective config, and checks the neutral control builds the saved mesh byte-for-byte. Evidence `docs/evidence/cd_backbone_2026-11-25/README.md`. |
+| `hornlab_search/design/generators/_throat_sculpt_v1.py` + `throat_sculpt_family.py` (2026-11-25) | Versioned `throat-sculpt-v1` overlay on an `osse_rollback` rows parent (LABELED HYPOTHESIS): forward-core-only (A) mouth-preserving angular slot delay `D = Dh|cos|^2p + Dv|sin|^2p + Dd|sin2psi|^2p` through a C2 monotone delayed coordinate, (C) signed radial sculpt `r += r0 w(z)(c2 cos2psi + c4 cos4psi + c6 cos6psi)` with a C2 compact bump (may cross below r0 = true pinch), optional per-z area preservation, throat-clustered re-stationing (`rows.core_step_mm`). Knobs `g_ts_*`; own digest; neutral = parent bit-for-bit. NOT yet in the grid/build/generated dispatch tuples (staged patch `docs/research/typologies/sculpted_throat_2026-11-25/dispatch_registration.patch`; applying it moves the `rows_bb_v1` digest). Tests `tests/test_throat_sculpt_geometry.py`. |
+| `tools/geometry/throat_sections.py`, `rosse_reference_fit.py`, `throat_sculpt_pilot.py`, `throat_sculpt_atlas.py`, `throat_sculpt_render.py` (2026-11-25) | Sculpted-throat lane tools: plane sections of STL/STEP (OCP) or a grid with first-wall-hit radii, area, convexity, curvature, Fourier, axial occlusion; mesher-R-OSSE vs CAD residuals; case bank (CPU mesh + emitted-wall waist check) and matched v11 solve (`--backend beat_cpu` CPU lane, `--fmax` diagnostic); section atlas and 3D throat views. Evidence `docs/evidence/throat_sculpting_2026-11-25/`. |
 | `hornlab_search/design/generators/cd_backbone_rows_family.py` (2026-11-25) | Kind `rows_bb_v1`: the same `cd-backbone-v1` kernel over a generic WP9b rows parent carried under `rows.parent_rows` (`lecleach`, `lecleach_ar`, `iwata_ar`, `salmon_elliptical`, `lecleach_mod`, `toroidal_rollback`; quarter span only), built by `grid.rows_grid_points`. LABELED CD HYBRID of a non-CD parent (new identity). Neutral returns the parent's `(inner, meta)` without `outer_points` so the verify mesh is byte-identical to the bare parent. Digest covers this module, the kernel, `cd_backbone_family.py`, `grid.py`, `profiles.py`, `throat_hv.py`. Own module so the existing backbone kinds' digests are unchanged. `tools/geometry/apply_cd_backbone.py` maps the rows types to it; `--base-config` re-scores a parent on another brief and checks parity against the bare parent. Evidence `docs/evidence/cd_variants_2026-11-25/README.md`. |
 | `hornlab_search/geometry/sensitivity.py` (2026-11-17) | Stage 5 geometric identifiability from the canonical record: surface/descriptor Jacobians in the optimizer's unit coordinates, knob labels (active/weak/conditional/inactive), coupling and effective dimension, greedy chain-free geometric link proposals, feasible steps, Sobol box feasibility by slice, the linear envelope-margin constraint (WP 5.4) and the predicted bad-candidate rate per sigma0. CPU, read-only. |
 | `tools/analysis/space_card.py` (2026-11-17) | Per-lane space card (JSON + MD) from `geometry.sensitivity`, optional run evidence from `walls`/`links`, recommendations (fix / fix_or_widen / link / rebound / sigma0 / constraint) never applied; `shared_map.md` across lanes. |

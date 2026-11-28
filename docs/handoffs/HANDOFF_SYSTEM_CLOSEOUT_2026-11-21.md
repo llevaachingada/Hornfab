@@ -27,8 +27,8 @@ No GPU was used by this pass.
 | **`system_data` CSV bundle** | **Expanded** | `docs/system_data/` now carries the full 70,457-row result CSV, the 767-row metrics CSV and the 36-row screen CSV |
 
 All closeout evidence is indexed from
-[`docs/evidence/system_evidence_2026-11-19/README.md`](evidence/system_evidence_2026-11-19/README.md)
-and [`docs/system_data/README.md`](system_data/README.md).
+[`docs/evidence/system_evidence_2026-11-19/README.md`](../evidence/system_evidence_2026-11-19/README.md)
+and [`docs/system_data/README.md`](../system_data/README.md).
 
 ---
 

@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "generated": "2026-11-25",
+  "policy": "entries dated before 2026-11-01 archived verbatim; newest month live",
+  "archives": [
+    {
+      "file": "docs/history/CONTINUITY_2026-10-12_2026-10-22.md",
+      "source": "docs/CONTINUITY.md",
+      "date_first": "2026-10-12",
+      "date_last": "2026-10-22",
+      "entries": 44,
+      "sha256": "5e29a05d2e9b35b420da8c33297d23b42aa5602d43ef3c16b504ac828b36c374",
+      "note": "pre-existing rotation (2026-10-30); unchanged by W7"
+    },
+    {
+      "file": "docs/history/CONTINUITY_2026-10-23_2026-10-31.md",
+      "source": "docs/CONTINUITY.md",
+      "date_first": "2026-10-23",
+      "date_last": "2026-10-31",
+      "entries": 158,
+      "distinct_entries": 140,
+      "sha256": "cb7ab0fbd2abd48d7e8a6c275e196b50ada631b44abb2c7910d821ceb95cb7d8",
+      "note": "rotated 2026-11-25"
+    },
+    {
+      "file": "docs/history/ISSUES_closed.md",
+      "source": "docs/ISSUES.md",
+      "date_first": null,
+      "date_last": null,
+      "entries": 11,
+      "sha256": "6ceef19ef31cb3b8423a165f26ea3acc2b17d7f664524086bc5d12de9a955b0a",
+      "note": "pre-existing rotation (2026-10-30): closed GitHub issue rows #1-#11; undated"
+    }
+  ],
+  "live": {
+    "docs/CONTINUITY.md": {
+      "date_first": "2026-11-01",
+      "date_last": "2026-11-25",
+      "entries": 372,
+      "bytes": 664330,
+      "sha256": "5c4f481ceeaa6da6b7aa5c2a1aabb88b9c5807cf7e2e3ab200b579da22814dd9",
+      "distinct_entries": 356
+    },
+    "docs/ISSUES.md": {
+      "date_first": "2026-11-16",
+      "date_last": "2026-11-25",
+      "entries": 169,
+      "bytes": 532646,
+      "sha256": "bc627b87006cd742ad3fe686e517cf2735b6c03368374f739d901553ae917087"
+    }
+  },
+  "notes": [
+    "44 live CONTINUITY blocks dated 2026-10-12..2026-10-22 were already in CONTINUITY_2026-10-12_2026-10-22.md; they were removed from the live file and not re-archived. The live copies carried pre-existing mojibake from a log union; content is identical to the archive after repairing that encoding.",
+    "18 blocks in the 2026-10-29..2026-10-31 range appear twice in the source (pre-existing log union); both copies are preserved verbatim per the no-deletion rule. distinct_entries records the unique count.",
+    "Existing CONTINUITY_2026-10-12_2026-10-22.md is LF/no-BOM; the new archive is CRLF/no-BOM, copied byte-for-byte from the CRLF live log."
+  ]
+}

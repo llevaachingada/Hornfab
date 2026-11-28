@@ -97,7 +97,7 @@ and decide on the first gate-passing candidate; do not start a second GPU job wh
 
 ## P0b (added 2026-10-29, owner-directed: BLOCKS every cone_plughorn directivity claim). Cone source model — the rigid piston is the assumption
 
-Plan: [`CONE_SOURCE_MODEL_PLAN_2026-10-29.md`](CONE_SOURCE_MODEL_PLAN_2026-10-29.md). Measured state: the
+Plan: [`CONE_SOURCE_MODEL_PLAN_2026-10-29.md`](archive/2026-10/CONE_SOURCE_MODEL_PLAN_2026-10-29.md). Measured state: the
 `cone_plughorn` typology drives the cone face as a **rigid axial piston** at every frequency, but a 10-inch
 paper cone is pistonic only to roughly **0.7–1.5 kHz**; the band runs to 4 kHz. Above break-up a real cone has
 sign changes in `v(r)`, which must produce lobes and nulls that a uniform piston cannot produce (Hankel

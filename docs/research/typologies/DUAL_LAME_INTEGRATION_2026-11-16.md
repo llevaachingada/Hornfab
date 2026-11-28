@@ -60,7 +60,7 @@ shell adapter checks in [screen](dual_lame_2026-11-16/screen/geometry_metrics.cs
 pass 27 cases and reject L12 for width. They do not certify global geometry.
 
 Both families now have separate, digest-bound GRID routes, fixed geometry-only
-examples, and preview-only GUI entries. The [contact sheets](dual_lame_2026-11-16/render/)
+examples, and preview-only GUI entries. The [contact sheets](dual_lame_2026-11-16/render)
 show all 28 original inner surfaces at a fixed scale, without shell. The
 [mesh audit](dual_lame_2026-11-16/mesh_audit/README.md) preserves the two
 first-seed meshes and source-tag evidence. The [K meshes](dual_lame_2026-11-16/all_seed_mesh/README.md)

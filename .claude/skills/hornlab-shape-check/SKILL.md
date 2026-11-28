@@ -5,6 +5,17 @@ description: Design or edit a horn geometry variant in hornlab-search (new confi
 
 # hornlab shape check
 
+## Read the family's laws before choosing bounds
+
+Before writing any `bounds:`, open `docs/knowledge/FAMILY_LAWS.md` and the family card under
+`docs/knowledge/typologies/`, and read **all** of that family's joint validity laws — not only the one a
+refusal happened to name. A bound legal in isolation can be illegal against the seed's other values, and
+each violation surfaces as a separate refused eval. Examples in code: rolled axial relief ≤ 10 % of depth
+and inward relief ≤ 15 % of height, disjoint non-dormant relief window, `width_lo > height_hi`
+(`hornlab_search/design/generators/rolled_family.py:134-143`); Klangfilm `hv_core` and OSSE `aspect_ratio` /
+R-OSSE `exponent` are throat-coupled or inert per mode. Check every bound endpoint against the seed's other
+values before the first mesh.
+
 ## The check (always, before queueing)
 
 ```
@@ -48,7 +59,8 @@ contract in `docs/knowledge/` and let geometry, product envelope and BEM results
   1.4" exit at 45 deg cannot load at 400-600 Hz; extra depth helps via OS `k` (slower throat), not narrower walls.
 - **Generator changes are additive**: new knobs default to today's geometry and are listed in the kind's
   defaults so design hashes do not move; run `tests/test_design_generators_grid*.py tests/test_mesh_build_grid*.py
-  tests/test_param_catalog.py` (CPU) after any edit to `design/generators/grid.py`.
+  tests/test_param_catalog.py` (CPU) after any edit to `design/generators/grid.py`. For a new behaviour or a new
+  module (not a knob), follow `hornlab-generator-family` — editing a hashed file orphans saved recipes.
 - Brief changes for one experiment: copy the brief (`<name>_deep_v4.yaml`), never edit one a night uses.
 - New typology / shape law: CLAUDE.md "Research grounding" applies (hornlab-typology-research); label
   experiments "LABELED HYPOTHESIS-SHAPE EXPERIMENT", no published names.
