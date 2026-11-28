@@ -66,6 +66,13 @@ Entries dated before 2026-11-01 are archived verbatim; every November entry stay
 - **Fix (GUI breakdown):** size-penalised runs (brief `envelope.soft_penalty`, 2026-11-25) keep the
   acoustic J in `terms.total`; the chart now adds a `size_penalty` row and reconciles to the row's J
   (checked on `20261126T004808Z-screen-d3037f`: sum 4.656389 = J). New test; breakdown+favorites 15 pass.
+- **Offline suite (2026-11-27, `.venv`, `-m "not slow and not gpu"`):** 6167 tests, 69 failed, 4 errors, 36
+  skipped. ~57 are environment, not code: the metric-BO tests need `botorch`/`gpytorch`, which live only in
+  the sanctioned `Hrns/oc-wt/bo-study/bayes-venv`. Re-run with that interpreter: 16 still fail - the 7 known
+  since 2026-11-21 (v8 x2, score_identities, preflight history, b8 Popen, v11 dataset census, scout40) plus
+  cache_producer_audit, design_generated failure-marker x2, studies_cli_metric_canary x4 (all also fail at
+  `9ce1550e`, before this consolidation) and gui_bridge_preview x2 (rolled_es_spiral_v7, crowe_panel_home_v7;
+  passed at `9ce1550e`, re-run timed out - likely load, unconfirmed). Tracked in ISSUES 2026-11-27.
 
 - **Owner ask:** commit everything left uncommitted, sync local main/hornfab-all/GitHub, toward one checkout.
 - **Committed:** `2ad05ba0` throat-sculpt typology pilot (generator `throat_sculpt_family.py`, 6 geometry tools,

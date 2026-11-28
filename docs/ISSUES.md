@@ -31,6 +31,17 @@
 
 ## 2026-11-27 - Consolidation sync
 - DONE: GUI score breakdown shows the brief size penalty as its own row (was missing; sums now match J).
+- OPEN (test env): ~57 metric-BO failures in the plain `.venv` run are a missing `bayes` extra (`gpytorch`,
+  `botorch`); either install `.[bayes]` into `.venv` or make those tests skip cleanly without it.
+- OPEN (test debt, pre-existing): v8 x2, score_identities, preflight history, b8 study_jobs Popen, v11 dataset
+  census, scout40 count; NEW since 11-21 and present before 2026-11-27: test_cache_producer_audit (`_compute`
+  call site), test_design_generated failure-marker x2, test_studies_cli_metric_canary x4 (also in bayes-venv).
+- OPEN (unconfirmed): test_gui_bridge_preview rolled_es_spiral_v7 / crowe_panel_home_v7 failed in the full run,
+  passed at 9ce1550e; re-check on an idle machine.
+- OPEN: PR #75 partly landed (627b880c); still missing tools/analysis/meridian_sanity.py + test, 2 fable_v2
+  configs, renders - cherry-pick then close. PR #77 conflicts in system/dsp.py, boundarylab/stage.py, tests.
+- OPEN (search): 15 cd_bo_cohort jobs stopped by the bound-pinned watchdog (exit 75): widen those boxes;
+  favl_c500_open115_150 best J 1.388 needs verify-grid + size check + strict metric artifact.
 
 - DONE: 11-25 throat-sculpt pilot + repo-findability reorg committed; 10 metric-BO research docs restored from
   `feat/metric-aware-bo`; hornfab-all pushed, main fast-forwarded and pushed.
