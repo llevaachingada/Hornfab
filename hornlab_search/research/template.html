@@ -62,6 +62,11 @@ details summary{cursor:pointer;color:var(--blue)}
 .kv small{display:block}
 .src{font:11px/1.4 ui-monospace,Consolas,monospace;color:var(--muted);word-break:break-all}
 .footer{margin-top:20px;color:var(--muted);font-size:12px}
+.viewbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0}
+.viewbar button[aria-pressed="true"]{border-color:var(--blue);color:var(--blue);font-weight:600}
+body.simple .tech,body.simple .src,body.simple .adv,body.simple .adv-hint-x{display:none!important}
+body.simple .finding details{display:none}
+th.has-tip{text-decoration:underline dotted #5b6b7b;text-underline-offset:3px}
 .plain{font-size:14px}.tech{color:var(--muted);font-size:13px}
 .plainlist li{margin:4px 0;font-size:15px}
 .steps{margin:4px 0 8px;padding-left:18px;font-size:13px}
@@ -94,10 +99,20 @@ function V(c, d = 3, unit = "") {
 // Ranks come from the backend index (rank never crosses a score identity); tables sort by rank by default.
 const IDX = Object.fromEntries((S.index || []).map(e => [e.id, e]));
 const SORT = { dose: { key: "rank", dir: 1 }, bo: { key: "rank", dir: 1 } };
+const G = S.glossary || {};
+const TIPS = { J: G["J"], rez: G["min Re(z)"], epw: G["epw / mesh"], H8k: G["beamwidth (H/V)"],
+  verdict: G["predeclared rule"], rank: "Order within one score: designs that pass the agreed rules first, then lower score. Never compared across scores.",
+  unique: "Distinct designs with a valid result in this group.", failed: "Attempts that never produced a result (e.g. invalid geometry).",
+  bem: "Simulation time spent on this group, in hours.", bb_h: "How strongly the horizontal wall-angle backbone is applied (0 = off).",
+  throat: "Length of the throat transition (share of the horn length).", rollin: "Where the outward roll starts (share of the horn length)." };
+let MODE = localStorage.getItem("research-view") || "simple";
+const RULELBL = Object.assign(Object.fromEntries(((S.dose || {}).rules || []).map(x => [x.key, x.label])),
+  { mesh_delta_rule: "refined-mesh deltas keep sign and size" });
 const REDRAW = {};
 function th(t, key, label) {
   const st = SORT[t], on = st.key === key;
-  return `<th class="sortable" data-t="${t}" data-k="${key}" tabindex="0" aria-sort="${on ? (st.dir > 0 ? "ascending" : "descending") : "none"}">${esc(label)}${on ? (st.dir > 0 ? " ▲" : " ▼") : ""}</th>`;
+  const tip = TIPS[key] || "";
+  return `<th class="sortable${tip ? " has-tip" : ""}" data-t="${t}" data-k="${key}" tabindex="0" title="${esc(tip ? tip + " (click to sort)" : "Click to sort")}" aria-sort="${on ? (st.dir > 0 ? "ascending" : "descending") : "none"}">${esc(label)}${on ? (st.dir > 0 ? " ▲" : " ▼") : ""}</th>`;
 }
 function sortRows(rows, t, getters) {
   const st = SORT[t], g = getters[st.key] || getters.rank;
@@ -133,6 +148,10 @@ const statusOf = s => STATUS[s] || ["warn", s, ""];
 function header() {
   const m = S.manifest;
   return `<header><div class="eyebrow">HornFab / Research intelligence · M1 snapshot</div>
+  <div class="viewbar" role="group" aria-label="Level of detail"><span class="muted">View:</span>
+    <button type="button" data-mode="simple" aria-pressed="${MODE === "simple"}">Simple</button>
+    <button type="button" data-mode="detailed" aria-pressed="${MODE === "detailed"}">Detailed</button>
+    <span class="muted adv-hint">Simple hides IDs, hashes, sources and raw technical text. Every number still shows its source on hover.</span></div>
   <div class="row"><h1>Research decisions, not just rankings</h1>
   <span class="pill" title="snapshot id = sha256(manifest)[:16]">snapshot <code>${esc(S.snapshot_id)}</code> · cutoff ${esc(S.cutoff_utc)}</span></div>
   <p class="muted">${esc(S.scope)}</p>
@@ -152,7 +171,7 @@ function plainCard() {
 
 function agentsCard() {
   const files = ["summary.json", "AGENT_GUIDE.md", "snapshot.json", "manifest.json"];
-  return `<section class="card detail" id="agents"><div class="eyebrow">For AI agents and automation</div><h2>Machine-readable outputs and rules</h2>
+  return `<section class="card detail adv" id="agents"><div class="eyebrow">For AI agents and automation</div><h2>Machine-readable outputs and rules</h2>
   <p class="muted">Same bytes as this page. Read <code>summary.json</code> first, then <code>findings.ndjson</code> / <code>rows.ndjson</code> beside it on disk (<code>runs/analysis/&lt;this folder&gt;/</code>).</p>
   <p>${files.map(f => `<a href="${f}">${f}</a>`).join(" · ")}</p>
   <h3>Invariants a plan must respect</h3><ol>${S.agent_invariants.map(t => `<li>${esc(t)}</li>`).join("")}</ol></section>`;
@@ -256,7 +275,7 @@ function drawDose() {
     <td title="${esc((IDX[r.id] || {}).rank_basis || "control: not ranked")}">${r.is_control ? '<span class="muted">ctl</span>' : rk(r) != null ? `<strong>#${rk(r)}</strong>` : "—"}</td>
     <td><button data-row="${esc(r.id)}">${esc(r.job)}</button></td><td>${k(r, "g_bb_h")}</td><td>${k(r, "g_bb_throat_frac")}</td><td>${k(r, "g_bb_rollin_frac")}</td>
     <td>${V(r.epw, 0)}</td><td>${V(r.J, 3)}</td><td>${V(r.H8k, 1)}</td><td>${V(r.min_re_z, 3)}</td>
-    <td class="${cls(r.verdict.v)}">${esc(r.verdict.v)} ${esc(r.verdict.failed_rules.join(", "))}</td>
+    <td class="${cls(r.verdict.v)}">${esc(r.verdict.v)}${r.verdict.failed_rules.length ? `: <span class="plainrule">${esc(r.verdict.failed_rules.map(k => RULELBL[k] || k).join("; "))}</span>` : ""}</td>
     <td>${esc(r.corroboration.status)}</td></tr>`).join("");
   document.querySelectorAll("#dosetbl [data-row]").forEach(el => {
     const go = () => { doseSel = el.dataset.row; drawDose(); };
@@ -303,7 +322,7 @@ function boCard() {
   <p class="muted">Objective v${S.inventory.objective_version} runs at the cutoff, grouped strictly by ${esc(S.inventory.grouping.join(" × "))}. Count is not a score or an admission criterion; J is never compared across rows.</p>
   <p class="note">Default order = admission readiness (pilot-eligible first), then unique designs. Click a header to sort.</p>
   <div class="tablewrap"><table><thead id="bohead"></thead><tbody id="botbl"></tbody></table></div>
-  <p class="note"><button id="boMore"></button> Scanned ${S.inventory.scan.run_dirs} run dirs: ${S.inventory.scan.other_version} other objective versions, ${S.inventory.scan.no_run_json} without run.json, ${S.inventory.scan.unreadable_run_json} unreadable, ${S.inventory.scan.runs_after_cutoff} runs and ${S.inventory.scan.rows_after_cutoff} rows after the cutoff, ${S.inventory.scan.rows_time_unknown} rows without a timestamp.</p>
+  <p class="note"><button id="boMore"></button> <span class="adv">Scanned ${S.inventory.scan.run_dirs} run dirs: ${S.inventory.scan.other_version} other objective versions, ${S.inventory.scan.no_run_json} without run.json, ${S.inventory.scan.unreadable_run_json} unreadable, ${S.inventory.scan.runs_after_cutoff} runs and ${S.inventory.scan.rows_after_cutoff} rows after the cutoff, ${S.inventory.scan.rows_time_unknown} rows without a timestamp.</span></p>
   <div class="drill" id="bodrill"></div></section>`;
 }
 function drawBo() {
@@ -316,7 +335,7 @@ function drawBo() {
   cs = sortRows(cs, "bo", { rank: c => (IDX[c.id] || {}).rank, name: c => c.config_name, unique: c => c.unique_designs.v,
     failed: c => c.failed_total.v, bem });
   $("#botbl").innerHTML = cs.map(c => { const s = statusOf(c.status);
-    return `<tr class="click ${c.id === boSel ? "sel" : ""}" tabindex="0" data-c="${esc(c.id)}"><td title="${esc((IDX[c.id] || {}).rank_basis || "")}"><strong>#${esc((IDX[c.id] || {}).rank ?? "—")}</strong></td><td>${esc(c.config_name)}<br><small>${esc(c.mode)} · brief ${esc(c.brief_hash)}${c.mixed_identity ? ' · <span class="warn">mixed identity</span>' : ""}</small></td>
+    return `<tr class="click ${c.id === boSel ? "sel" : ""}" tabindex="0" data-c="${esc(c.id)}"><td title="${esc((IDX[c.id] || {}).rank_basis || "")}"><strong>#${esc((IDX[c.id] || {}).rank ?? "—")}</strong></td><td>${esc(c.config_name)}<br><small class="tech">${esc(c.mode)} · brief ${esc(c.brief_hash)}${c.mixed_identity ? ' · <span class="warn">mixed identity</span>' : ""}</small></td>
     <td><span class="bar" style="width:${(60 * c.unique_designs.v / mx).toFixed(1)}px"></span> ${V(c.unique_designs, 0)}</td>
     <td>${V(c.failed_total, 0)} / ${V(c.penalty, 0)}</td>
     <td>${bem(c) == null ? '<span class="muted">—</span>' : V(c.optimizer_evidence.totals.bem_hours, 2)}</td>
@@ -396,7 +415,7 @@ function missingCard() {
 function manifestCard() {
   const m = S.manifest;
   const rows = m.sources.map(s => `<tr><td class="src">${esc(s.path)}</td><td>${esc(s.origin)}${s.worktree && s.worktree !== "identical" ? ` <small class="${s.worktree === "differs" ? "bad" : "muted"}">(worktree ${esc(s.worktree)})</small>` : ""}${s.status ? ` <span class="warn">${esc(s.status)}</span>` : ""}</td><td class="src">${esc((s.sha256 || s.sha256_included || "").slice(0, 16))}</td><td>${s.lines_included != null ? `${s.lines_included}/${s.lines_total} lines` : (s.bytes != null ? s.bytes + " B" : "")}</td></tr>`).join("");
-  return `<section class="card detail" id="manifest"><div class="eyebrow">Frozen manifest</div><h2>Snapshot ${esc(m.snapshot_id)}</h2>
+  return `<section class="card detail adv" id="manifest"><div class="eyebrow">Frozen manifest</div><h2>Snapshot ${esc(m.snapshot_id)}</h2>
   <p class="muted">${esc(m.reads)}. Cutoff ${esc(m.cutoff_utc)} · commit <code>${esc(m.source_commit)}</code> · ${m.n_sources} sources · worktree differs from commit: ${m.worktree_differs.length ? esc(m.worktree_differs.join(", ")) : "none"} (line-ending-only: ${m.worktree_eol_only.length}).</p>
   <details><summary>All ${m.n_sources} sources with digests</summary><div class="tablewrap"><table><thead><tr><th>Path</th><th>Origin</th><th>sha256[:16]</th><th>Size / lines used</th></tr></thead><tbody>${rows}</tbody></table></div></details>
   <p class="note">Agent outputs beside this page: <code>snapshot.json</code> (this exact artifact), <code>rows.ndjson</code>, <code>findings.ndjson</code>, <code>manifest.json</code>.</p></section>`;
@@ -415,9 +434,19 @@ function render() {
   if (mp) doseSel = mp.evidence[1];
   drawDose(); drawBo();
 }
+function applyMode() {
+  document.body.classList.toggle("simple", MODE === "simple");
+  document.querySelectorAll(".viewbar [data-mode]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === MODE)));
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest && e.target.closest(".viewbar [data-mode]");
+  if (!b) return;
+  MODE = b.dataset.mode; localStorage.setItem("research-view", MODE); applyMode();
+});
 REDRAW.dose = () => drawDose();
 REDRAW.bo = () => drawBo();
 render();
+applyMode();
 </script>
 </body>
 </html>

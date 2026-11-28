@@ -1,5 +1,10 @@
 ﻿# ISSUES
 
+## 2026-11-27 (night, 2) - GUI readability
+
+- DONE: Typologies tab compact list (owner fit report closed); report Simple/Detailed view and glossary tips.
+- OPEN: research query/diff CLI; Leaders tab and other wide tables not reviewed for small screens.
+
 ## 2026-11-27 (night) - Research report sorting
 
 - DONE: ranked, sortable research tables; evidence index with facets and back-links.

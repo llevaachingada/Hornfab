@@ -68,6 +68,13 @@ const STYLE = `
 .ov-mx .cell b{font-size:.9rem} .ov-mx .cell small{font-size:.7rem}
 .ov-mx .lead b{color:var(--good)} .ov-mx .tie b{color:var(--accent)}
 .ov-chg li{margin:3px 0}
+.ov-fam{display:grid;grid-template-columns:minmax(180px,260px) 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--rule)}
+.ov-fam:first-of-type{border-top:0}
+@media (max-width:760px){.ov-fam{grid-template-columns:1fr}}
+.ov-chips{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+.ov-chip{display:inline-flex;gap:5px;align-items:baseline;padding:3px 8px;border:1px solid var(--rule);border-radius:999px;font-size:.78rem;text-decoration:none;color:inherit}
+.ov-chip:hover{border-color:var(--accent)}
+.ov-chip.lead{border-color:var(--good)} .ov-chip.lead b{color:var(--good)} .ov-chip.tie b{color:var(--accent)}
 details.ov-line summary{cursor:pointer}
 `;
 
@@ -110,7 +117,7 @@ function parseQuery(q) {
            kind: p.get("kind") || "", card: p.get("card") || "",
            status: ["open", "resolved", "all", "dismissed"].includes(p.get("status")) ? p.get("status") : "open",
            sort: ["priority", "newest", "identity"].includes(p.get("sort")) ? p.get("sort") : "priority",
-           q: p.get("q") || "" };
+           q: p.get("q") || "", view: p.get("view") === "matrix" ? "matrix" : "" };
 }
 function hashFor(s) {
   const p = new URLSearchParams({ tab: s.tab, days: String(s.days) });
@@ -121,6 +128,7 @@ function hashFor(s) {
   if (s.status && s.status !== "open") p.set("status", s.status);
   if (s.sort && s.sort !== "priority") p.set("sort", s.sort);
   if (s.q) p.set("q", s.q);
+  if (s.view) p.set("view", s.view);
   return "#/overview?" + p.toString();
 }
 
@@ -187,8 +195,37 @@ function leadersTab(d, s) {
 
 // ── Typologies ─────────────────────────────────────────────────────────────
 
-function typologiesTab(d) {
+// Default: one row per family with its standings as wrapping chips (fits any width). The original
+// family x identity matrix is one click away (?view=matrix); it scrolls sideways by design.
+function typologiesTab(d, view = "") {
   const ids = (d.identities || []).filter(i => i.status !== "legacy");
+  if (view !== "matrix") return typologiesList(d, ids);
+  return typologiesMatrix(d, ids);
+}
+
+function typologiesList(d, ids) {
+  const fams = (d.typology || []).map(c => {
+    const cells = ids.map(i => ({ i, cell: c.cells[i.id] })).filter(x => x.cell)
+      .sort((a, b) => a.cell.rank - b.cell.rank || a.cell.of - b.cell.of);
+    const best = cells[0] ? cells[0].cell.rank : 99;
+    return { c, cells, best, leads: cells.filter(x => x.cell.rank === 1).length };
+  }).sort((a, b) => b.leads - a.leads || a.best - b.best || String(a.c.label).localeCompare(String(b.c.label)));
+  const chip = ({ i, cell }) => {
+    const tone = cell.rank === 1 ? "lead" : cell.tie ? "tie" : "";
+    const tip = `${i.label}: rank ${cell.rank} of ${cell.of}, best J ${num(cell.best_j)} (${cell.construction})${cell.state ? `, ${cell.state}` : ""}. J is comparable only inside this score.`;
+    return `<a class="ov-chip ${tone}" href="${hashFor({ tab: "leaders", days: d.days, legacy: d.show_legacy, ident: i.id })}" title="${esc(tip)}"><b>#${cell.rank}<small class="muted">/${cell.of}</small></b> ${esc(i.label)}${cell.state ? ` ${pill(esc(cell.state), STATE_PILL[cell.state] || "", STATE_TIP[cell.state] || "")}` : ""}</a>`;
+  };
+  const rows = fams.map(({ c, cells, leads }) => `<div class="ov-fam">
+      <div class="ov-fam-h"><b>${esc(c.label)}</b> <span class="muted">· ${int(c.evals)} evals${leads ? ` · <span style="color:var(--good)">leads ${leads} score${leads === 1 ? "" : "s"}</span>` : ""}</span>
+        <br><small class="muted">${c.constructions.map(esc).join(", ")}</small></div>
+      <div class="ov-chips">${cells.length ? cells.map(chip).join("") : `<span class="muted">no runs in this window</span>`}</div></div>`).join("");
+  return `<section class="card"><div class="eyebrow">Typologies · where each family stands</div>
+    <p class="muted" style="font-size:.8rem">One row per design family, best first. Each chip is the family's rank inside one score (green = leads that score). Ranks compare designs within one score only, never across scores. Hover a chip for details; click it for that score's leaderboard.
+      <a href="${hashFor({ tab: "typologies", days: d.days, legacy: d.show_legacy, view: "matrix" })}">Show full matrix →</a></p>
+    ${rows || `<p class="muted">No runs in this window.</p>`}</section>`;
+}
+
+function typologiesMatrix(d, ids) {
   const rows = (d.typology || []).map(c => `<tr>
     <td class="l"><b>${esc(c.label)}</b><br><small class="muted">${c.constructions.map(esc).join(", ")}</small>${c.doc ? `<br><small class="muted mono" title="knowledge-hub family card">${brk(c.doc)}</small>` : ""}</td>
     <td class="r">${int(c.evals)}</td>
@@ -199,6 +236,7 @@ function typologiesTab(d) {
       return `<td><a class="cell ${cls}" href="${hashFor({ tab: "leaders", days: d.days, legacy: d.show_legacy, ident: i.id })}"><b>#${cell.rank}<small class="muted"> / ${cell.of}</small></b><small class="mono">${num(cell.best_j)}</small><small class="muted">${esc(cell.construction)}</small>${cell.state ? `<small>${pill(esc(cell.state), STATE_PILL[cell.state] || "", STATE_TIP[cell.state] || "")}</small>` : ""}</a></td>`;
     }).join("")}</tr>`).join("");
   return `<section class="card"><div class="eyebrow">Typologies × score identities</div>
+    <p style="font-size:.8rem"><a href="${hashFor({ tab: "typologies", days: d.days, legacy: d.show_legacy })}">← Back to the compact list</a> · this matrix scrolls sideways.</p>
     <p class="muted" style="font-size:.8rem">Best rank of each knowledge-hub family inside each score identity (green = leads, accent = inside the leader's floor). Ranks compare lines within one column only — never across columns. Family targets differ: read the family card before applying one family's heuristics to another.</p>
     <div class="tbl-wrap"><table class="ov-tbl ov-mx"><thead><tr><th class="l">Family card</th><th class="r">evals</th>${ids.map(i => `<th title="${esc(i.brief)}">${esc(i.label)}</th>`).join("")}</tr></thead>
     <tbody>${rows || `<tr><td class="muted">No runs in this window.</td></tr>`}</tbody></table></div></section>`;
@@ -371,7 +409,7 @@ export async function viewOverview(root, query = "") {
   const tabBtn = (t, label) => `<a class="btn btn-sm" href="${hashFor({ ...s, tab: t })}"${s.tab === t ? ` aria-current="page" style="border-color:var(--accent);color:var(--accent)"` : ""}>${label}</a>`;
   const dayOpts = [1, 3, 7, 14, 30, 90].map(n => `<option value="${n}"${n === s.days ? " selected" : ""}>last ${n} day${n === 1 ? "" : "s"}</option>`).join("");
   const body = s.tab === "leaders" ? leadersTab(d, s)
-    : s.tab === "typologies" ? typologiesTab(d)
+    : s.tab === "typologies" ? typologiesTab(d, s.view)
       : s.tab === "next" ? findingsTabHtml(fd, s)
         : s.tab === "decisions" ? registryTabHtml(reg, health)
           : s.tab === "params" ? paramsTabHtml(pd)

@@ -8,6 +8,14 @@ Entries dated before 2026-11-01 are archived verbatim; every November entry stay
 - 2026-10-23 to 2026-10-31 (158 blocks): [docs/history/CONTINUITY_2026-10-23_2026-10-31.md](history/CONTINUITY_2026-10-23_2026-10-31.md) (rotated 2026-11-25).
 - Machine-readable index: [docs/history/manifest.json](history/manifest.json).
 
+## 2026-11-27 (night, 2) - Friendlier GUI for non-technical readers
+
+- Overview Typologies tab: default is now a compact list (one row per family, best first, rank chips that
+  wrap); the original matrix stays at `?view=matrix`. Fits 1280 px with no sideways scroll.
+- Research report: Simple / Detailed switch (Simple default, remembered per browser) hides IDs, hashes,
+  sources, agent and manifest panels; failed rules read as sentences; column headers carry glossary tips.
+- Tests: research + GUI research + Overview suites (124) pass.
+
 ## 2026-11-27 (night) - Research report: ranked, sortable tables
 
 - New `hornlab_search/research/index.py`: one typed evidence index (ranks, facets, finding back-links) in
