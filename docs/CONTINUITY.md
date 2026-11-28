@@ -8,6 +8,23 @@ Entries dated before 2026-11-01 are archived verbatim; every November entry stay
 - 2026-10-23 to 2026-10-31 (158 blocks): [docs/history/CONTINUITY_2026-10-23_2026-10-31.md](history/CONTINUITY_2026-10-23_2026-10-31.md) (rotated 2026-11-25).
 - Machine-readable index: [docs/history/manifest.json](history/manifest.json).
 
+## 2026-11-27 - M1 research snapshot: read-only research view over the 11-21..25 evidence
+
+- **Owner ask:** implement the research-dashboard mockup + Opus entrypoint (M1) as a real, sourced artifact.
+- **Built:** `hornlab_search/research/` (provenance, adapters, findings, builder, HTML template) and
+  `python -m hornlab_search.research build`. Every number is a `{v, src}` cell or a versioned calc; committed
+  inputs read via git at a pinned commit, `runs/` inputs pinned by sha256 of the lines at/before the cutoff.
+  Output to `runs/analysis/research_<date>_<id8>/` (existing GUI `/analysis/` route; `gui/server.py` untouched).
+- **Snapshot `08a6d477803f510e`** (cutoff 2026-11-25T23:59:59Z, commit `bd5b769c`): 455 sources, 50 exclusions,
+  8 findings; byte-identical on rebuild. 24 dose rows, attribution residual <= 1.78e-15 on all; 152 strict v11
+  cohorts; matched pair h065 (J 4.6755, fails loading) vs h065_th025 (4.6787, passes) derived from data; the
+  lowest J in that identity is actually ri022 (4.3488, also fails loading).
+- **Data-quality finding:** handoff §3 line 136 says `r3_c500` needs admission; its holdout artifact (11-24 19:21Z)
+  says PASS_FOR_EXPLORATORY_PILOT. Replay at cutoff 11-24 keeps the conflict and drops all dose rows (expected).
+- **Tests:** `tests/test_research_snapshot.py` + breakdown/analysis-view neighbours: 45 passed, 0 failed/skipped.
+  Full suite not run (another session was running it). No GPU used; stale GPU lock untouched.
+- Handback/ADR/screens: `docs/research/research_view_2026-11-27/`.
+
 ## 2026-11-27 - Consolidation: uncommitted 11-25 work committed, metric-BO docs restored, branches synced
 
 - **Owner ask:** commit everything left uncommitted, sync local main/hornfab-all/GitHub, toward one checkout.

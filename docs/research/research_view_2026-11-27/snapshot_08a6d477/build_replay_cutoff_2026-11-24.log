@@ -1,0 +1,8 @@
+snapshot 561b1d1a46120c3c cutoff 2026-11-24T23:59:59Z commit bd5b769cffee
+out C:\Users\hunte\Hrns\hornlab-search\runs\analysis\research_2026-11-24_561b1d1a
+sources 299 exclusions 129 findings 5 missing-cells 92
+  snapshot.json    sha256 534963425f09c05999135dd337ba3def927ef52313e2f91b70b8ae69c8836b5e
+  manifest.json    sha256 a442af3cd6e55a2d3a0231e7fd52b13f96b478fba78da6ed89c0165515182dd7
+  rows.ndjson      sha256 a1459e1869ab390739abefefb3955ab2f40cfe9bf876293453e357afa5195023
+  findings.ndjson  sha256 0e2a29990d0ba6322b612f01749a99218256bed1edf1c056b997cb46602792cc
+  index.html       sha256 a8bbebd81c0f7be11818dbe5e59e8fb6dd9c8fab4a14d26ca96163c2b40c0508

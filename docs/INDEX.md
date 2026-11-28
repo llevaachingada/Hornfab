@@ -116,6 +116,7 @@ Status tags: **CURRENT** = use this; **REFERENCE** = useful background; **SUPERS
 - [Solver, compute and test suite](research/README.md#solver-compute-and-test-suite) — Solver, compute and test suite. **CURRENT**
 - [Acoustic physics, room and system](research/README.md#acoustic-physics-room-and-system) — Acoustic physics, room and system. **CURRENT**
 - [Integration and research indexes](research/README.md#integration-and-research-indexes) — Integration and research indexes. **CURRENT**
+- [research_view_2026-11-27/README.md](research/research_view_2026-11-27/README.md) — M1 read-only research snapshot (frozen manifest, cohort inventory, score attribution, findings); ADR + handback. **CURRENT**
 
 ## Guides
 

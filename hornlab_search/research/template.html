@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HornFab research snapshot</title>
+<style>
+:root{color-scheme:dark;--bg:#10151b;--card:#171e26;--line:#33404d;--muted:#a9b7c5;--ink:#ecf2f8;--blue:#80b6ef;--green:#79c9a5;--amber:#efb96d;--red:#f39b91;--violet:#b9a6f0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1420px;margin:auto;padding:24px 34px 48px}
+header{border-bottom:1px solid var(--line);padding-bottom:18px}
+h1{font-size:30px;line-height:1.16;margin:9px 0}
+h2{font-size:19px;margin:0 0 8px}
+h3{font-size:15px;margin:0 0 4px}
+p{margin:4px 0 12px}
+code{font-size:12px}
+.eyebrow{font:600 11px/1.4 system-ui;letter-spacing:.15em;color:var(--blue);text-transform:uppercase}
+.muted,small{color:var(--muted)}
+a{color:var(--blue)}
+.top{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:16px}
+.grid2{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:16px}
+.card{background:var(--card);border:1px solid var(--line);padding:18px;border-radius:10px;min-width:0}
+.detail{margin-top:16px}
+.finding{display:grid;grid-template-columns:32px 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.finding:first-of-type{border:0}
+.num{font-size:21px;color:var(--blue);font-weight:700}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.pass,.ok{color:var(--green)}.fail,.bad{color:var(--red)}.control{color:var(--muted)}.warn{color:var(--amber)}.info{color:var(--violet)}
+.charts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.chart{border:1px solid var(--line);border-radius:7px;padding:10px;min-width:0}
+.chart svg{width:100%;height:auto;display:block}
+.chart h3{font-size:13px}
+.chart text{fill:var(--muted);font-size:11px}
+.chart .tick{stroke:var(--line)}
+.selected{stroke:#fff;stroke-width:2.5}
+.tablewrap{overflow:auto;max-width:100%}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+td,th{text-align:left;padding:7px 7px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+td.wrap{white-space:normal;min-width:180px}
+tr.click{cursor:pointer}tr.click:hover{background:#1d2732}
+tr.sel{background:#23364a}
+button,select{color:var(--ink);background:#25313e;border:1px solid #526373;border-radius:5px;padding:6px 9px;font:inherit}
+button{cursor:pointer}
+button:focus,select:focus,a:focus,tr:focus{outline:2px solid var(--blue);outline-offset:2px}
+.bar{height:8px;min-width:2px;background:var(--blue);display:inline-block;border-radius:2px;vertical-align:middle}
+.bar.neg{background:var(--red)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.big{font-size:26px;font-weight:700}
+.pill{padding:2px 6px;border:1px solid var(--line);border-radius:4px;font-size:12px}
+.v[title]{border-bottom:1px dotted #5b6b7b;cursor:help}
+.drill{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.drill:empty{display:none}
+.grades{display:grid;grid-template-columns:110px 1fr;gap:2px 10px;font-size:13px;margin:6px 0}
+.grades b{color:var(--muted);font-weight:600}
+details summary{cursor:pointer;color:var(--blue)}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:8px 0}
+.kv div{border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.kv small{display:block}
+.src{font:11px/1.4 ui-monospace,Consolas,monospace;color:var(--muted);word-break:break-all}
+.footer{margin-top:20px;color:var(--muted);font-size:12px}
+@media(max-width:850px){main{padding:18px 14px}.top,.grid2,.charts{grid-template-columns:1fr}h1{font-size:24px}.card{padding:13px}}
+</style>
+</head>
+<body>
+<main id="app"><p class="muted">Loading snapshot…</p></main>
+<script id="snapshot" type="application/json">/*__SNAPSHOT_JSON__*/null</script>
+<script>
+"use strict";
+const S = JSON.parse(document.getElementById("snapshot").textContent);
+const $ = (q, el = document) => el.querySelector(q);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const srcOf = c => !c ? "" : c.src ? c.src : c.calc ? `calc: ${c.calc} [${c.calc_version}] ← ${(c.inputs || []).slice(0, 6).join(" · ")}${(c.inputs || []).length > 6 ? " …" : ""}` : (c.reason || "");
+// Render a cell. Numbers are formatted for display only; the title carries the exact value and source.
+function V(c, d = 3, unit = "") {
+  if (!c || c.v === null || c.v === undefined) {
+    const st = c && c.status ? c.status : "missing";
+    return `<span class="v warn" title="${esc(st + (c && c.reason ? ": " + c.reason : "") + (c && c.src ? " · " + c.src : ""))}">${esc(st)}</span>`;
+  }
+  let t = c.v;
+  if (typeof t === "number") t = d < 0 ? (t === 0 ? "0" : t.toExponential(2)) : Number.isInteger(t) ? String(t) : t.toFixed(d);
+  return `<span class="v" title="${esc("exact " + JSON.stringify(c.v) + " · " + srcOf(c))}">${esc(t)}${unit}</span>`;
+}
+const cls = v => ({pass:"pass", fail:"fail", control:"control", missing:"warn", unknown:"warn"}[v] || "");
+const STATUS = {
+  holdout_pass: ["pass", "holdout pass", "eligible for a held canary; no auto-dispatch"],
+  hold: ["fail", "hold", "holdout lost top-decile recall / best-at-k; do not promote"],
+  replay_mismatch: ["fail", "replay mismatch", "repair the replay contract before any admission"],
+  needs_admission: ["warn", "needs admission", "offline replay exists; strict artifact + frozen holdout missing"],
+  not_evaluated: ["control", "not evaluated", "no admission artifact"],
+  confirmation_pass_for_exploratory_pilot: ["pass", "confirmation pass", "acquisition confirmation (1 seed of 3) passed"],
+  unknown: ["warn", "unknown", "artifact present, verdict unrecognised"]
+};
+const statusOf = s => STATUS[s] || ["warn", s, ""];
+
+function header() {
+  const m = S.manifest;
+  return `<header><div class="eyebrow">HornFab / Research intelligence · M1 snapshot</div>
+  <div class="row"><h1>Research decisions, not just rankings</h1>
+  <span class="pill" title="snapshot id = sha256(manifest)[:16]">snapshot <code>${esc(S.snapshot_id)}</code> · cutoff ${esc(S.cutoff_utc)}</span></div>
+  <p class="muted">${esc(S.scope)}</p>
+  <p class="note">Sources read at commit <code>${esc(S.source_commit.slice(0, 12))}</code> (committed files via git) and from the local run archive (pinned by sha256). ${m.n_sources} sources · ${m.exclusions.length} items excluded by the cutoff or missing a timestamp · generator <code>${esc(S.generator)}</code>. Hover any number for its exact value and source. <a href="#manifest">Manifest ↓</a> · <a href="#missing">Missing evidence ↓</a></p></header>`;
+}
+
+function findingsCard() {
+  const dec = S.findings.filter(f => f.severity === "decision");
+  const anchor = {matched_pair: "#dose", scalar_not_gate: "#dose", count_not_admission: "#bo", mesh_scope: "#mesh"};
+  const items = dec.map((f, i) => `<div class="finding"><span class="num">${String(i + 1).padStart(2, "0")}</span><div>
+    <h3>${esc(f.title)}</h3><p>${esc(f.observation)}</p>
+    <details><summary>Hypothesis, action, evidence</summary><div class="grades">
+      <b>Observation</b><span>${esc(f.observation)}</span><b>Hypothesis</b><span>${esc(f.hypothesis)}</span>
+      <b>Action</b><span>${esc(f.action)} <small>(${esc(f.action_policy)})</small></span>
+      <b>Evidence</b><span class="src">${f.evidence.map(esc).join("<br>")}</span>
+      <b>Finding id</b><span class="src">${esc(f.id)}</span></div></details>
+    ${anchor[f.kind] ? `<a href="${anchor[f.kind]}">Inspect linked evidence ↓</a>` : ""}</div></div>`).join("");
+  const others = S.findings.filter(f => f.severity !== "decision").map(f =>
+    `<li><span class="${f.severity === "data_quality" ? "warn" : f.severity === "control" ? "ok" : "info"}">${esc(f.severity.replace("_", " "))}</span> · <strong>${esc(f.title)}</strong> — ${esc(f.observation)}</li>`).join("");
+  return `<article class="card"><div class="eyebrow">Priority findings (derived from rows, not hand-written)</div><h2>What should happen next?</h2>${items}
+    <div class="drill"><div class="eyebrow">Controls, data quality and reconciliation</div><ul>${others}</ul></div></article>`;
+}
+
+function decisionCard() {
+  const f = S.findings.find(x => x.kind === "matched_pair");
+  if (!f) return `<article class="card"><div class="eyebrow">Decision evidence</div><p class="warn">No matched fail/pass pair in this snapshot.</p></article>`;
+  const c = f.cells;
+  return `<article class="card"><div class="eyebrow">Decision evidence</div><h2>One knob, two verdicts</h2>
+  <p class="muted">Same family, brief, objective version and mesh; only the throat transition differs (${V(c.fail_knob, 2)} → ${V(c.pass_knob, 2)}).</p>
+  <div class="row"><div><div class="big">${V(c.fail_J, 3)}</div><span class="fail">Lower J · fail</span></div>
+  <div><div class="big">${V(c.pass_J, 3)}</div><span class="pass">Corrected · pass</span></div></div>
+  <p style="margin-top:16px">A ${V(c.delta_J, 4)} score difference hides a loading correction: min normalized Re(z) <strong>${V(c.fail_min_re_z, 3)} → ${V(c.pass_min_re_z, 3)}</strong>. The scalar objective is not an acceptance gate.</p>
+  <p class="note">Failed rule cell: ${V(c.failed_rule)}. Evidence rows: <span class="src">${f.evidence.map(esc).join(" · ")}</span></p>
+  <a href="#dose">Inspect the matched dose experiment ↓</a></article>`;
+}
+
+// ------------------------------------------------------------------ dose experiment
+let doseFam = "rolled", doseSel = null;
+function doseRows() { return S.dose.rows.filter(r => r.family === doseFam); }
+function doseCard() {
+  const fams = [...new Set(S.dose.rows.map(r => r.family))];
+  return `<section class="card detail" id="dose"><div class="row"><div><div class="eyebrow">Linked physical experiment</div>
+  <h2>${esc(S.dose.title)}</h2></div>
+  <div><label>Body <select id="doseFam">${fams.map(f => `<option ${f === doseFam ? "selected" : ""}>${esc(f)}</option>`).join("")}</select></label>
+  <label>Highlight <select id="doseSel"></select></label></div></div>
+  <p class="muted">${esc(S.dose.scope)} Predeclared ${V(S.dose.predeclared_at)} — <span class="src">${esc(S.dose.predeclared)}</span></p>
+  <div class="charts" id="charts"></div>
+  <p class="note">Green = predeclared pass; red = fail; gray = control; diamond = throat/roll-in variant; refined-mesh (epw 9) rows are a different numerical fidelity and are not plotted. The line joins the base-recipe doses only (throat and roll-in at the control's values, epw 6). The H floor applies to five 6–8 kHz bins; the chart shows 8 kHz only.</p>
+  <div class="tablewrap"><table><thead><tr><th>Candidate</th><th>bb_h</th><th>Throat</th><th>Roll-in</th><th>epw</th><th>J</th><th>H 8k (°)</th><th>Min Re(z)</th><th>Predeclared result</th><th>Run dir check</th></tr></thead><tbody id="dosetbl"></tbody></table></div>
+  <div class="drill" id="dosedrill"></div></section>`;
+}
+function drawDose() {
+  const rows = doseRows();
+  if (!rows.some(r => r.id === doseSel)) doseSel = (rows.find(r => r.verdict.v === "pass") || rows[0] || {}).id;
+  $("#doseSel").innerHTML = rows.map(r => `<option value="${esc(r.id)}" ${r.id === doseSel ? "selected" : ""}>${esc(r.job)}</option>`).join("");
+  const ctrl = rows.find(r => r.is_control) || {knobs: {}};
+  const base = r => (r.knobs.g_bb_throat_frac || {}).v === (ctrl.knobs.g_bb_throat_frac || {}).v && (r.knobs.g_bb_rollin_frac || {}).v === (ctrl.knobs.g_bb_rollin_frac || {}).v;
+  const plotted = rows.filter(r => (r.epw.v === 6 || r.epw.v === 6.0) && r.knobs.g_bb_h);
+  const g = S.dose.gates[doseFam] || {};
+  const cfgs = [
+    {key: "H8k", label: "Horizontal beamwidth at 8 kHz (°)", gate: g.H_HF_floor_deg},
+    {key: "min_re_z", label: "Minimum normalized Re(z) from 900 Hz", gate: g.min_re_z},
+    {key: "J", label: "Scalar objective J (lower better; not a gate)"}];
+  const col = {pass: "#79c9a5", fail: "#f39b91", control: "#a9b7c5", missing: "#efb96d", unknown: "#efb96d"};
+  $("#charts").innerHTML = cfgs.map(c => {
+    const vals = plotted.map(r => r[c.key] && r[c.key].v).filter(v => typeof v === "number").concat(c.gate && c.gate.v != null ? [c.gate.v] : []);
+    if (!vals.length) return `<div class="chart"><h3>${esc(c.label)}</h3><p class="warn">no values</p></div>`;
+    let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * 0.08 || 1; lo -= pad; hi += pad;
+    const X = r => 40 + 250 * r.knobs.g_bb_h.v, Y = v => 156 - 128 * (v - lo) / (hi - lo);
+    const ticks = [0, 1, 2, 3, 4].map(i => lo + (hi - lo) * i / 4);
+    const grid = ticks.map(t => `<line class="tick" x1="40" y1="${Y(t)}" x2="290" y2="${Y(t)}"/><text x="34" y="${Y(t) + 4}" text-anchor="end">${Math.abs(t) >= 10 ? t.toFixed(0) : t.toFixed(2)}</text>`).join("");
+    const gate = c.gate && c.gate.v != null ? `<line x1="40" x2="290" y1="${Y(c.gate.v)}" y2="${Y(c.gate.v)}" stroke="#efb96d" stroke-dasharray="5 3"><title>${esc(srcOf(c.gate))}</title></line><text x="288" y="${Y(c.gate.v) - 5}" text-anchor="end" style="fill:#efb96d">rule ${c.gate.v.toFixed(c.gate.v > 10 ? 0 : 3)}</text>` : "";
+    const line = plotted.filter(base).filter(r => r[c.key] && typeof r[c.key].v === "number").sort((a, b) => a.knobs.g_bb_h.v - b.knobs.g_bb_h.v).map(r => `${X(r)},${Y(r[c.key].v)}`).join(" ");
+    const marks = plotted.filter(r => r[c.key] && typeof r[c.key].v === "number").map(r => {
+      const x = X(r), y = Y(r[c.key].v), fill = col[r.verdict.v] || "#efb96d", sel = r.id === doseSel ? "selected" : "";
+      const shape = base(r) ? `<circle cx="${x}" cy="${y}" r="5" fill="${fill}" class="${sel}"/>` : `<path d="M${x} ${y - 6}L${x + 6} ${y}L${x} ${y + 6}L${x - 6} ${y}Z" fill="${fill}" class="${sel}"/>`;
+      return `<g tabindex="0" role="button" data-id="${esc(r.id)}" aria-label="${esc(r.job)}: ${r[c.key].v}"><title>${esc(r.job)}: ${r[c.key].v} · ${esc(srcOf(r[c.key]))}</title>${shape}</g>`;
+    }).join("");
+    return `<div class="chart"><h3>${esc(c.label)}</h3><svg viewBox="0 0 310 193" role="img" aria-label="${esc(c.label)}">${grid}${gate}<polyline points="${line}" fill="none" stroke="#80b6ef" stroke-width="1.8"/>${marks}<line x1="40" x2="290" y1="156" y2="156" stroke="#526373"/>${[0, .25, .5, .75, 1].map(t => `<text x="${40 + t * 250}" y="172" text-anchor="middle">${t}</text>`).join("")}<text x="165" y="188" text-anchor="middle">Horizontal backbone blend g_bb_h</text></svg></div>`;
+  }).join("");
+  document.querySelectorAll("#charts [data-id]").forEach(el => {
+    el.onclick = () => { doseSel = el.dataset.id; drawDose(); };
+    el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); doseSel = el.dataset.id; drawDose(); } };
+  });
+  const k = (r, n) => r.knobs[n] ? V(r.knobs[n], 2) : `<span class="muted">—</span>`;
+  $("#dosetbl").innerHTML = rows.map(r => `<tr class="click ${r.id === doseSel ? "sel" : ""}" tabindex="0" data-row="${esc(r.id)}">
+    <td><button data-row="${esc(r.id)}">${esc(r.job)}</button></td><td>${k(r, "g_bb_h")}</td><td>${k(r, "g_bb_throat_frac")}</td><td>${k(r, "g_bb_rollin_frac")}</td>
+    <td>${V(r.epw, 0)}</td><td>${V(r.J, 3)}</td><td>${V(r.H8k, 1)}</td><td>${V(r.min_re_z, 3)}</td>
+    <td class="${cls(r.verdict.v)}">${esc(r.verdict.v)} ${esc(r.verdict.failed_rules.join(", "))}</td>
+    <td>${esc(r.corroboration.status)}</td></tr>`).join("");
+  document.querySelectorAll("#dosetbl [data-row]").forEach(el => {
+    const go = () => { doseSel = el.dataset.row; drawDose(); };
+    el.onclick = go; el.onkeydown = e => { if (e.key === "Enter") go(); };
+  });
+  doseDrill(rows.find(r => r.id === doseSel));
+}
+function doseDrill(r) {
+  if (!r) { $("#dosedrill").innerHTML = ""; return; }
+  const a = r.attribution;
+  let attr = `<p class="warn">Attribution ${esc(a.status)}: ${esc(a.reason || "")}</p>`;
+  if (a.status === "ok") {
+    const mx = Math.max(...a.components.map(c => Math.abs(c.contribution.v || 0)), 1e-12);
+    attr = `<table><thead><tr><th>Term</th><th>Weight</th><th>Stored raw term</th><th>Contribution</th><th></th></tr></thead><tbody>
+    ${a.components.map(c => `<tr><td>${esc(c.key)}</td><td>${V(c.weight, 3)}</td><td>${V(c.raw, 4)}</td><td>${V(c.contribution, 4)}</td>
+      <td><span class="bar ${c.contribution.v < 0 ? "neg" : ""}" style="width:${(120 * Math.abs(c.contribution.v || 0) / mx).toFixed(1)}px"></span></td></tr>`).join("")}
+    <tr><td><strong>Σ contributions</strong></td><td></td><td></td><td>${V(a.sum, 6)}</td><td></td></tr>
+    <tr><td><strong>Stored total J</strong></td><td></td><td></td><td>${V(a.stored_total, 6)}</td><td></td></tr>
+    <tr><td><strong>Residual</strong></td><td></td><td></td><td>${V(a.residual, -1)}</td><td class="muted">exact: ${esc(String(a.residual.v))}</td></tr></tbody></table>
+    <p class="note">Weights via <code>${esc(a.resolver)}</code> (objective v${a.objective_version}); contributions = weight × stored term; no re-score.</p>`;
+  }
+  const cost = r.cost && r.cost.wall_s ? `wall ${V(r.cost.wall_s, 1, " s")} · VRAM baseline ${V(r.cost.vram_baseline_mb, 0, " MB")} · peak ${V(r.cost.peak_vram_mib, 0, " MiB")} · ${esc(r.cost.lane)}` : `<span class="warn">${esc((r.cost || {}).reason || "cost missing")}</span>`;
+  const rules = S.dose.rules.map(x => `<tr><td>${esc(x.label)}</td><td>${r.verdict.rules[x.key] ? V(r.verdict.rules[x.key]) : "—"}</td></tr>`).join("");
+  $("#dosedrill").innerHTML = `<div class="eyebrow">Drilldown · ${esc(r.id)}</div>
+  <div class="grid2" style="margin-top:6px"><div><h3>Score attribution</h3><div class="tablewrap">${attr}</div></div>
+  <div><h3>Predeclared rules</h3><table><tbody>${rules}</tbody></table>
+  <h3 style="margin-top:12px">Identity and fidelity</h3><div class="kv">
+    <div><small>brief hash</small>${V(r.brief_hash)}</div><div><small>objective</small>${V(r.objective_version)}</div>
+    <div><small>mesh epw</small>${V(r.epw, 0)}</div><div><small>solved DOF</small>${V(r.n_dof, 0)}</div>
+    <div><small>solve time (UTC)</small>${V(r.time)}</div><div><small>run-dir corroboration</small>${esc(r.corroboration.status)}${r.corroboration.delta ? " Δ " + V(r.corroboration.delta, -1) : ""}</div></div>
+  <h3>Cost</h3><p>${cost}</p><p class="src">config: ${esc(r.config || "none")}</p></div></div>`;
+}
+
+// ------------------------------------------------------------------ cohorts
+let boStatus = "all", boSel = null, boShowAll = false;
+function boCard() {
+  const sts = [...new Set(S.inventory.cohorts.map(c => c.status))];
+  return `<section class="card" id="bo"><div class="row"><div><div class="eyebrow">BO admission · cohort inventory</div><h2>Evidence readiness</h2></div>
+  <label>Filter <select id="boStatus"><option value="all">All statuses</option>${sts.map(s => `<option value="${esc(s)}">${esc(statusOf(s)[1])}</option>`).join("")}</select></label></div>
+  <p class="muted">Objective v${S.inventory.objective_version} runs at the cutoff, grouped strictly by ${esc(S.inventory.grouping.join(" × "))}. Count is not a score or an admission criterion; J is never compared across rows.</p>
+  <div class="tablewrap"><table><thead><tr><th>Cohort</th><th>Unique</th><th>Failed / penalty</th><th>Status / action</th></tr></thead><tbody id="botbl"></tbody></table></div>
+  <p class="note"><button id="boMore"></button> Scanned ${S.inventory.scan.run_dirs} run dirs: ${S.inventory.scan.other_version} other objective versions, ${S.inventory.scan.no_run_json} without run.json, ${S.inventory.scan.unreadable_run_json} unreadable, ${S.inventory.scan.runs_after_cutoff} runs and ${S.inventory.scan.rows_after_cutoff} rows after the cutoff, ${S.inventory.scan.rows_time_unknown} rows without a timestamp.</p>
+  <div class="drill" id="bodrill"></div></section>`;
+}
+function drawBo() {
+  let cs = S.inventory.cohorts.filter(c => boStatus === "all" || c.status === boStatus);
+  const total = cs.length;
+  if (!boShowAll && boStatus === "all") cs = cs.filter(c => c.unique_designs.v >= 150 || c.status !== "not_evaluated");
+  const mx = Math.max(...S.inventory.cohorts.map(c => c.unique_designs.v), 1);
+  $("#botbl").innerHTML = cs.map(c => { const s = statusOf(c.status);
+    return `<tr class="click ${c.id === boSel ? "sel" : ""}" tabindex="0" data-c="${esc(c.id)}"><td>${esc(c.config_name)}<br><small>${esc(c.mode)} · brief ${esc(c.brief_hash)}${c.mixed_identity ? ' · <span class="warn">mixed identity</span>' : ""}</small></td>
+    <td><span class="bar" style="width:${(60 * c.unique_designs.v / mx).toFixed(1)}px"></span> ${V(c.unique_designs, 0)}</td>
+    <td>${V(c.failed_total, 0)} / ${V(c.penalty, 0)}</td>
+    <td><strong class="${s[0]}">${esc(s[1])}</strong><br><small>${esc(s[2])}</small></td></tr>`; }).join("");
+  const btn = $("#boMore");
+  btn.textContent = boShowAll ? "Show admission-relevant only" : `Show all ${total} cohorts`;
+  btn.onclick = () => { boShowAll = !boShowAll; drawBo(); };
+  document.querySelectorAll("#botbl [data-c]").forEach(el => {
+    const go = () => { boSel = el.dataset.c; drawBo(); };
+    el.onclick = go; el.onkeydown = e => { if (e.key === "Enter") go(); };
+  });
+  boDrill(S.inventory.cohorts.find(c => c.id === boSel));
+}
+function boDrill(c) {
+  if (!c) { $("#bodrill").innerHTML = ""; return; }
+  const a = c.admission || {}, rc = S.reconciliation.find(r => r.cohort === c.id);
+  const fails = Object.entries(c.failed).map(([k, v]) => `<div><small>failed · ${esc(k)}</small>${V(v, 0)}</div>`).join("");
+  let adm = `<p class="warn">Admission: ${esc(a.status || "missing")} ${esc(a.reason || "")}</p>`;
+  if (a.kind === "cohort_admission") {
+    const ch = (a.holdout && a.holdout.checks) ? Object.entries(a.holdout.checks).map(([k, v]) => `<tr><td>${esc(k)}</td><td class="${v.v ? "ok" : "bad"}">${V(v)}</td></tr>`).join("") : "";
+    adm = `<p>Replay ${V(a.replay.exact_complete, 0)} / ${V(a.replay.available, 0)} exact-complete · holdout verdict ${V(a.holdout.verdict)}</p>${ch ? `<table><tbody>${ch}</tbody></table>` : ""}${a.identity_conflict ? `<p class="bad">${esc(a.identity_conflict)}</p>` : ""}<p class="src">${esc(a.dir)}</p>`;
+  } else if (a.kind === "acquisition_confirmation") {
+    adm = `<p>Acquisition confirmation verdict ${V(a.verdict)}, linked by eval run ${V(a.linked_by)}. ${esc(a.note)}</p><table><tbody>${Object.entries(a.checks).map(([k, v]) => `<tr><td>${esc(k)}</td><td class="${v.v ? "ok" : "bad"}">${V(v)}</td></tr>`).join("")}</tbody></table>`;
+  }
+  const rec = rc ? `<p>Handoff claim (line ${rc.claim_line}): unique ${V(rc.claimed_unique, 0)}, status <em>${esc(rc.claimed_status)}</em> · at cutoff ${V(rc.unique_at_cutoff, 0)} (Δ ${V(rc.unique_delta, 0)}), artifact status <em>${esc(rc.artifact_status)}</em> → <strong class="${rc.result === "status_conflict" ? "bad" : rc.result === "agrees" ? "ok" : "muted"}">${esc(rc.result)}</strong></p>` : `<p class="muted">No handoff claim for this cohort.</p>`;
+  $("#bodrill").innerHTML = `<div class="eyebrow">Drilldown · ${esc(c.id)}</div>
+  <div class="kv"><div><small>runs</small>${V(c.n_runs, 0)}</div><div><small>rows ≤ cutoff</small>${V(c.rows, 0)}</div><div><small>valid</small>${V(c.valid, 0)}</div>
+  <div><small>unique designs</small>${V(c.unique_designs, 0)}</div><div><small>duplicate valid</small>${V(c.duplicate_valid, 0)}</div><div><small>cached</small>${V(c.cached, 0)}</div>
+  <div><small>penalty (J ≥ 900)</small>${V(c.penalty, 0)}</div>${fails}<div><small>best J (this identity only)</small>${V(c.best_J, 4)}</div></div>
+  <h3>Admission evidence</h3>${adm}<h3>Inherited claim reconciliation</h3>${rec}
+  <details><summary>${c.runs.length} run dirs · first row ${esc(c.first_row)} · last row ${esc(c.last_row)}</summary><p class="src">${c.runs.map(esc).join(" · ")}</p></details>`;
+}
+
+// ------------------------------------------------------------------ mesh + canary
+function meshCard() {
+  const m = S.mesh;
+  const rows = (m.rows || []).map(r => `<tr><td>${esc(r.label)}<br><small>${V(r.f_hi_hz, 0, " Hz")} · ${V(r.dof_before, 0)} → ${V(r.dof_after, 0)}</small></td>
+    <td><span class="bar" style="width:${Math.max(0, 2 * r.dof_reduction_pct.v).toFixed(1)}px"></span> ${V(r.dof_reduction_pct, 1, "%")}</td>
+    <td>${r.evidence === "acoustic" ? V(r.max_bw_delta_deg, 3) : `<span class="${r.evidence === "unsupported" ? "control" : "warn"}">${esc(r.evidence === "unsupported" ? "inert · not solved" : "mesh only")}</span>`}</td></tr>`).join("");
+  return `<div class="eyebrow">Numerical fidelity</div><h2>Rear coarsening: scope matters</h2>
+  <p class="muted">${esc(m.factor)}. Solved DOF and recorded acoustic deviation against a finer reference; mesh-only classes show vertex counts.</p>
+  <div class="tablewrap"><table><thead><tr><th>Class</th><th>DOF reduction</th><th>Max H/V Δ (°)</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p class="note">Unmeasured: ${esc((m.unmeasured || []).join("; "))}. <span class="src">${esc(m.decision)}</span></p>`;
+}
+function canaryCard() {
+  const c = S.canary;
+  if (c.status !== "ok") return `<div class="eyebrow">Canary</div><p class="warn">${esc(c.reason || "missing")}</p>`;
+  const rows = c.verify_pairs.map(p => `<tr><td><code>${esc(p.design)}</code></td><td>${V(p.screen_J, 3)}</td><td>${V(p.verify_J, 3)}</td></tr>`).join("");
+  const reps = c.replicates.map(r => `<tr><td>${esc(r.mode)}</td><td><code>${esc(r.design)}</code></td><td>${V(r.abs_delta, -1)}</td></tr>`).join("");
+  return `<div class="eyebrow">Canary / matched verification</div><h2>Rank ${c.rank_preserved.v ? "survives" : "changes"}, gap changes</h2>
+  <p class="muted">${esc(c.identities.note)}. Screen brief ${esc(c.identities.screen_brief)}, verify brief ${esc(c.identities.verify_brief)}.</p>
+  <div class="tablewrap"><table><thead><tr><th>Design</th><th>Screen J</th><th>Verify J</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <p class="muted">${c.n_pairs} designs only: no general rank calibration.</p>
+  <details><summary>Negative control: ${c.replicates.length} repeated solves, max |ΔJ| ${V(c.replicate_max_abs_delta, -1)}</summary>
+  <table><thead><tr><th>Fidelity</th><th>Design</th><th>|v4 − rehearsal|</th></tr></thead><tbody>${reps}</tbody></table></details>`;
+}
+
+function missingCard() {
+  const me = S.missing_evidence, by = {};
+  me.cells.forEach(c => { const k = `${c.status}: ${c.reason || "(no reason)"}`; by[k] = (by[k] || 0) + 1; });
+  const ex = {}; S.manifest.exclusions.forEach(e => { ex[e.reason] = (ex[e.reason] || 0) + 1; });
+  return `<section class="card detail" id="missing"><div class="eyebrow">Explicitly missing evidence</div><h2>What this snapshot cannot tell you</h2>
+  <div class="grid2" style="margin-top:4px"><div><h3>Not measured</h3><ul>${me.unmeasured.map(u => `<li>${esc(u)}</li>`).join("")}</ul>
+  <h3>Excluded inputs</h3><ul>${Object.entries(ex).map(([k, v]) => `<li>${v} × ${esc(k)}</li>`).join("")}</ul>
+  ${me.sources_missing.length ? `<h3>Sources missing</h3><p class="src">${me.sources_missing.map(esc).join("<br>")}</p>` : ""}</div>
+  <div><h3>Missing / unknown cells (${me.cells.length})</h3><table><tbody>${Object.entries(by).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<tr><td class="wrap">${esc(k)}</td><td>${v}</td></tr>`).join("")}</tbody></table></div></div></section>`;
+}
+function manifestCard() {
+  const m = S.manifest;
+  const rows = m.sources.map(s => `<tr><td class="src">${esc(s.path)}</td><td>${esc(s.origin)}${s.worktree && s.worktree !== "identical" ? ` <small class="${s.worktree === "differs" ? "bad" : "muted"}">(worktree ${esc(s.worktree)})</small>` : ""}${s.status ? ` <span class="warn">${esc(s.status)}</span>` : ""}</td><td class="src">${esc((s.sha256 || s.sha256_included || "").slice(0, 16))}</td><td>${s.lines_included != null ? `${s.lines_included}/${s.lines_total} lines` : (s.bytes != null ? s.bytes + " B" : "")}</td></tr>`).join("");
+  return `<section class="card detail" id="manifest"><div class="eyebrow">Frozen manifest</div><h2>Snapshot ${esc(m.snapshot_id)}</h2>
+  <p class="muted">${esc(m.reads)}. Cutoff ${esc(m.cutoff_utc)} · commit <code>${esc(m.source_commit)}</code> · ${m.n_sources} sources · worktree differs from commit: ${m.worktree_differs.length ? esc(m.worktree_differs.join(", ")) : "none"} (line-ending-only: ${m.worktree_eol_only.length}).</p>
+  <details><summary>All ${m.n_sources} sources with digests</summary><div class="tablewrap"><table><thead><tr><th>Path</th><th>Origin</th><th>sha256[:16]</th><th>Size / lines used</th></tr></thead><tbody>${rows}</tbody></table></div></details>
+  <p class="note">Agent outputs beside this page: <code>snapshot.json</code> (this exact artifact), <code>rows.ndjson</code>, <code>findings.ndjson</code>, <code>manifest.json</code>.</p></section>`;
+}
+
+function render() {
+  $("#app").innerHTML = header() +
+    `<section class="top">${findingsCard()}${decisionCard()}</section>` + doseCard() +
+    `<div class="grid2">${boCard()}<section class="card" id="mesh">${meshCard()}<hr style="border:0;border-top:1px solid var(--line);margin:18px 0">${canaryCard()}</section></div>` +
+    missingCard() + manifestCard() +
+    `<div class="footer">Generated from <code>snapshot.json</code> by <code>${esc(S.generator)}</code>. No geometry render or raw acoustic curve is drawn: values are persisted rows or labelled deterministic calculations. Simulated BEM, not physical measurements. No GPU authorization; findings are suggestions, never dispatched.</div>`;
+  $("#doseFam").onchange = e => { doseFam = e.target.value; doseSel = null; drawDose(); };
+  $("#doseSel").onchange = e => { doseSel = e.target.value; drawDose(); };
+  $("#boStatus").onchange = e => { boStatus = e.target.value; drawBo(); };
+  const mp = S.findings.find(x => x.kind === "matched_pair");
+  if (mp) doseSel = mp.evidence[1];
+  drawDose(); drawBo();
+}
+render();
+</script>
+</body>
+</html>

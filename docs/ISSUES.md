@@ -1,5 +1,12 @@
 ﻿# ISSUES
 
+## 2026-11-27 - M1 research snapshot
+
+- DONE: read-only research snapshot (`hornlab_search/research/`, snapshot `08a6d477`), ADR, 14 acceptance tests.
+- OPEN: correct `docs/research/metric_bo_2026-11-22/12_HANDOFF_2026-11-24.md` §3 `r3_c500` status (artifact says
+  holdout PASS_FOR_EXPLORATORY_PILOT).
+- OPEN: M2 candidates - curve drilldown from `response.npz`, v7/v10 inventory, GUI nav link to latest snapshot.
+
 ## 2026-11-27 - Consolidation sync
 
 - DONE: 11-25 throat-sculpt pilot + repo-findability reorg committed; 10 metric-BO research docs restored from
