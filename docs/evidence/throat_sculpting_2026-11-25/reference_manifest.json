@@ -1,0 +1,32 @@
+{
+ "downloaded_utc": "2026-11-26T00:31Z",
+ "local_store": "reference/ath_st260_bld/ (git-ignored)",
+ "license_note": "author: free for non-commercial use; do not redistribute",
+ "archives": {
+  "ST260-BLD-mres.zip": {
+   "url": "https://at-horns.eu/ext/ST260-BLD-mres.zip",
+   "bytes": 1460056,
+   "sha256": "7f39635d95a772b66ec236e1d0d369d23f4584308959895c560ff90b10a037d5"
+  },
+  "ST260-BLD-v1-STEP.zip": {
+   "url": "https://at-horns.eu/ext/ST260-BLD-v1-STEP.zip",
+   "bytes": 1366409,
+   "sha256": "d8e0f8f121cda7b2960c45f69fe92d2b043735b5cea48431b2f3459b89665f90"
+  }
+ },
+ "members": {
+  "ST260-BLD-mres.stl": {
+   "bytes": 3178184,
+   "sha256": "55515ded5f2ea9bd5a0f2db831fb9bbc7c54e8549019ec4c03cc8c8a5ad5a218"
+  },
+  "ST260-BLD-v1.step": {
+   "bytes": 5004565,
+   "sha256": "fe6d63c2f80cfe9427d81cd9f56f4020e64be34ac3ac1fc9e87479092f4b79bb"
+  }
+ },
+ "frame": "mm; flange bore circle r 12.70 at z=0; +z into the horn; no re-alignment applied",
+ "tools": [
+  "tools/geometry/throat_sections.py",
+  "tools/geometry/rosse_reference_fit.py"
+ ]
+}

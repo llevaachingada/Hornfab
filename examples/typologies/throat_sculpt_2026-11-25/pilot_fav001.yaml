@@ -1,0 +1,28 @@
+# Throat-sculpt matched pilot on FAV-001 (osse_rollback, design 4140768780f0, verify J 4.9939 on the
+# 700 Hz v11 CD brief). The parent config's brief + seed + mesh/solve identity IS the matched control.
+# Used by tools/geometry/throat_sculpt_pilot.py (bank / solve). LABELED HYPOTHESIS geometry; see
+# docs/research/typologies/sculpted_throat_2026-11-25/.
+# Planes: "h" = psi 0 (horizontal, the 80 deg coverage plane), "v" = psi 90 deg.
+# target_waist root-finds ts_c2 so the minimum radius on that plane = ratio * r0 (r0 = 18 mm).
+parent_config: examples/typologies/fav8_2026-11-20/fav8__k1_cd_polish.yaml
+spec: {n_phi: 25, n_s: 64, wall_thickness_mm: 3.0, core_step_mm: 3.0}
+cases:
+  - {id: B0_parent, parent: true, purpose: "FAV-001 as published (n_s 40 uniform stations); replays the verify identity"}
+  - {id: B0s_station, ts: {ts_c2: 1.0e-9}, purpose: "station control: same surface, sculpt stations (n_s 64, 3 mm core)"}
+  - {id: S_h10, ts: {ts_slot_h_mm: 10.0}, purpose: "slot: H flare onset delayed 10 mm (no contraction)"}
+  - {id: S_h20, ts: {ts_slot_h_mm: 20.0}, purpose: "slot: H delay 20 mm"}
+  - {id: S_h35, ts: {ts_slot_h_mm: 35.0}, purpose: "slot: H delay 35 mm"}
+  - {id: S_v20, ts: {ts_slot_v_mm: 20.0}, purpose: "slot rotated control: V delay 20 mm"}
+  - {id: S_four30, ts: {ts_slot_h_mm: 30.0, ts_slot_v_mm: 30.0, ts_slot_pow: 4.0}, purpose: "fourfold slot (M2-inspired: axes 30 mm, diagonals ~4 mm)"}
+  - {id: P10_h, target_waist: {plane: h, ratio: 0.90}, ts: {ts_rise_mm: 12.0, ts_fall_mm: 30.0}, purpose: "true H pinch to 0.90 r0, peak 12 mm, free area"}
+  - {id: P20_h, target_waist: {plane: h, ratio: 0.80}, ts: {ts_rise_mm: 12.0, ts_fall_mm: 30.0}, purpose: "true H pinch 0.80, free area"}
+  - {id: P30_h, target_waist: {plane: h, ratio: 0.70}, ts: {ts_rise_mm: 12.0, ts_fall_mm: 30.0}, purpose: "true H pinch 0.70, free area"}
+  - {id: PA20_h, target_waist: {plane: h, ratio: 0.80}, ts: {ts_rise_mm: 12.0, ts_fall_mm: 30.0, ts_area: 1.0}, purpose: "H pinch 0.80, area preserved (directional constriction)"}
+  - {id: PA30_h, target_waist: {plane: h, ratio: 0.70}, ts: {ts_rise_mm: 12.0, ts_fall_mm: 30.0, ts_area: 1.0}, purpose: "H pinch 0.70, area preserved"}
+  - {id: P20_v, target_waist: {plane: v, ratio: 0.80}, ts: {ts_rise_mm: 12.0, ts_fall_mm: 30.0}, purpose: "rotated control: V pinch 0.80 (BLD orientation)"}
+  - {id: P20_h_late, target_waist: {plane: h, ratio: 0.80}, ts: {ts_rise_mm: 25.0, ts_fall_mm: 40.0}, purpose: "H pinch 0.80 peaking at 25 mm"}
+  - {id: PA30_h_c4p, target_waist: {plane: h, ratio: 0.70}, ts: {ts_c4: 0.10, ts_rise_mm: 12.0, ts_fall_mm: 30.0, ts_area: 1.0}, purpose: "PA30 + c4 +0.10 (cardinals out, diagonals in)"}
+  - {id: PA30_h_c4m, target_waist: {plane: h, ratio: 0.70}, ts: {ts_c4: -0.10, ts_rise_mm: 12.0, ts_fall_mm: 30.0, ts_area: 1.0}, purpose: "PA30 + c4 -0.10 (diagonals out)"}
+  - {id: C_slot_pinch, target_waist: {plane: h, ratio: 0.80}, ts: {ts_slot_h_mm: 20.0, ts_rise_mm: 12.0, ts_fall_mm: 30.0}, purpose: "slot H 20 + H pinch 0.80"}
+  - {id: X_bldlike_h, target_waist: {plane: h, ratio: 0.55}, ts: {ts_rise_mm: 20.0, ts_fall_mm: 50.0, ts_area: 1.0}, purpose: "aggressive BLD-like H constriction 0.55 r0, area preserved"}
+  - {id: X_bldfit_h, ts: {ts_c2: -0.62, ts_c4: -0.20, ts_c6: 0.03, ts_rise_mm: 25.0, ts_fall_mm: 35.0}, purpose: "BLD section harmonics (CAD Fourier fit at z 25 mm, rotated to H) on a compact window, free area"}

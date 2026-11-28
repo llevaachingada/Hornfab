@@ -1,0 +1,29 @@
+{
+  "source_file": "ST260-BLD-mres.stl",
+  "kind": "stl",
+  "sha256": "55515ded5f2ea9bd5a0f2db831fb9bbc7c54e8549019ec4c03cc8c8a5ad5a218",
+  "n_triangles": 63562,
+  "r0_mm": 12.7,
+  "bbox_mm": [
+    [
+      -130.0,
+      -130.0,
+      0.0
+    ],
+    [
+      130.0,
+      130.0,
+      108.34024810791016
+    ]
+  ],
+  "deflection_mm": null,
+  "method": "plane sections; first wall hit along rays from the axis (forward passage only)",
+  "occlusion_fraction": 0.20998302469135802,
+  "global_r_min_mm": 4.800559102398557,
+  "global_r_min_z_mm": 25.5,
+  "global_r_min_phi_deg": 90.0,
+  "global_pinch_ratio": 0.3779967797164218,
+  "min_convexity": 0.8761533911077652,
+  "any_nonconvex": true,
+  "max_ray_hits": 12
+}

@@ -1,0 +1,20 @@
+case,status,analytic_pinch_ratio,mesh_pinch_ratio,r_min_z_mm,r_min_phi_deg,waist_h_mm,waist_v_mm,area_ratio_at_waist,analytic_min_convexity,analytic_occlusion,mesh_occlusion,n_triangles,design_hash,purpose
+B0_parent,meshed,1,0.9974,0,0,18,18,0.9999,1,0,0,8702,4140768780f0,FAV-001 as published (n_s 40 uniform stations); replays the verify identity
+B0s_station,meshed,1,0.9974,0,0,18,18,0.9999,1,0,0,8770,adfdb170725a,"station control: same surface, sculpt stations (n_s 64, 3 mm core)"
+S_h10,meshed,1,0.9967,0,0,18,18,0.9999,1,0,0,8704,a3f942f47067,slot: H flare onset delayed 10 mm (no contraction)
+S_h20,meshed,1,0.9968,0,0,18,18,0.9999,0.9991,0,0,8698,c65203fc4fe8,slot: H delay 20 mm
+S_h35,meshed,1,0.9969,0,0,18,18,0.9999,0.9718,0,0,8674,7aff7733dc43,slot: H delay 35 mm
+S_v20,mesh_failed,1,,0,0,18,18,0.9999,0.9591,0,,,a8d47d5932c5,slot rotated control: V delay 20 mm
+S_four30,meshed,1,0.9968,0,0,18,18,0.9999,0.9341,0,0,8663,403729374681,"fourfold slot (M2-inspired: axes 30 mm, diagonals ~4 mm)"
+P10_h,meshed,0.9022,0.9029,9,0,16.24,18,1.141,1,0.04699,0.04769,8693,95f1e10e0633,"true H pinch to 0.90 r0, peak 12 mm, free area"
+P20_h,meshed,0.8001,0.7967,11,0,14.4,18,1.218,0.9964,0.0987,0.1,8722,b3875dc26765,"true H pinch 0.80, free area"
+P30_h,meshed,0.6994,0.7112,10,0,12.59,18,1.221,0.9802,0.1484,0.147,8751,ed3ab39c2d56,"true H pinch 0.70, free area"
+PA20_h,meshed,0.8001,0.7969,11,0,14.4,18,1.178,0.9976,0.1021,0.1029,8754,b8060f7727e4,"H pinch 0.80, area preserved (directional constriction)"
+PA30_h,meshed,0.6995,0.7117,10,0,12.59,18,1.151,0.984,0.1543,0.1526,8737,fdcd3b8917ef,"H pinch 0.70, area preserved"
+P20_v,meshed,0.8008,0.8018,11,90,18,14.41,1.219,0.996,0.09732,0.09783,8763,188f049ad156,rotated control: V pinch 0.80 (BLD orientation)
+P20_h_late,meshed,0.8014,0.8019,18,0,14.43,18,1.521,0.9797,0.08222,0.08268,8745,d3e527a4ae39,H pinch 0.80 peaking at 25 mm
+PA30_h_c4p,meshed,0.6997,0.7055,10,0,12.59,18,1.149,0.996,0.2106,0.2068,8773,3a3ca3a2b4c2,"PA30 + c4 +0.10 (cardinals out, diagonals in)"
+PA30_h_c4m,meshed,0.6994,0.7116,10,0,12.59,18,1.151,0.9587,0.1172,0.1161,8754,765ba2bd1866,PA30 + c4 -0.10 (diagonals out)
+C_slot_pinch,meshed,0.8015,0.8045,12,0,14.43,18,1.073,0.9991,0.1096,0.111,8679,89c19765af2b,slot H 20 + H pinch 0.80
+X_bldlike_h,meshed,0.5502,0.5496,16,0,9.904,18,1.355,0.936,0.2145,0.2134,8795,b256d39b52a4,"aggressive BLD-like H constriction 0.55 r0, area preserved"
+X_bldfit_h,meshed,0.5631,0.5568,19,0,10.14,18,1.63,0.891,0.1513,0.1519,9004,78c18a431438,"BLD section harmonics (CAD Fourier fit at z 25 mm, rotated to H) on a compact window, free area"
