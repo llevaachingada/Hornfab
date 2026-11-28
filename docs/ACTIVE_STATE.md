@@ -29,6 +29,9 @@ git log --oneline -5; git status --porcelain
 - **Metric-aware BO:** the Home v11 Fold loop is proven end-to-end; the adaptive 20-screen tranche
   and four native/900 Hz canaries are staged and HELD pending owner GPU authorization. Admission
   table: `docs/research/metric_bo_2026-11-22/12_HANDOFF_2026-11-24.md`.
+- **Research snapshot (2026-11-27):** read-only, sourced research view — GUI Overview > Briefing >
+  "Generate research snapshot" or `python -m hornlab_search.research build`; handback
+  `docs/research/research_view_2026-11-27/README.md`.
 - **Recent evidence:** CD wall-angle backbone best rolled bb_h 0.50, J 8.121 → 5.407
   ([readout](evidence/cd_backbone_2026-11-25/README.md)); directivity attribution readout
   ([2026-11-24](evidence/directivity_attribution_2026-11-24/README.md)).

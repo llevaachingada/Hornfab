@@ -1,5 +1,10 @@
 ﻿# ISSUES
 
+## 2026-11-27 (night, 3) - Log sweep
+
+- DONE: CODE_MAP/ACTIVE_STATE/NOTES_FOR_SENIOR synced for the research view.
+- OPEN: cd_backbone analyze.py checks epw-9 rows against the epw-6 control (see NOTES_FOR_SENIOR 2026-11-27).
+
 ## 2026-11-27 (night, 2) - GUI readability
 
 - DONE: Typologies tab compact list (owner fit report closed); report Simple/Detailed view and glossary tips.

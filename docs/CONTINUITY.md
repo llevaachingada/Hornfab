@@ -8,6 +8,12 @@ Entries dated before 2026-11-01 are archived verbatim; every November entry stay
 - 2026-10-23 to 2026-10-31 (158 blocks): [docs/history/CONTINUITY_2026-10-23_2026-10-31.md](history/CONTINUITY_2026-10-23_2026-10-31.md) (rotated 2026-11-25).
 - Machine-readable index: [docs/history/manifest.json](history/manifest.json).
 
+## 2026-11-27 (night, 3) - Research-view log sweep
+
+- Logging surfaces synced: CODE_MAP (index.py, Typologies list, view switch), ACTIVE_STATE pointer to the research
+  snapshot, INDEX/TOOLS already list it, NOTES_FOR_SENIOR entry on the analyze.py epw-9 cross-fidelity check.
+- Commits this session: d2273848, 06c639a0, b6f7a813, 0052771e (all pushed) + this sweep.
+
 ## 2026-11-27 (night, 2) - Friendlier GUI for non-technical readers
 
 - Overview Typologies tab: default is now a compact list (one row per family, best first, rank chips that

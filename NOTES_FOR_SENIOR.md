@@ -1368,3 +1368,11 @@ Exact change needed (byte-wise, keep CRLF in grid.py/generated.py): replace `rim
 `docs/research/typologies/sculpted_throat_2026-11-25/dispatch_registration.patch`. Apply it after the night no longer
 needs the current rows_bb_v1 digest, and record the digest bump in that commit. Until then the lane runs through
 `tools/geometry/throat_sculpt_pilot.py` (resolve -> build_grid_mesh -> solve -> v11 score), which needs no dispatch.
+
+## 2026-11-27 - research view: cd_backbone analyze.py cross-fidelity check (read-only finding)
+
+`docs/evidence/cd_backbone_2026-11-25/analyze.py` main() computes `checks` for the `*_epw9` rows against the
+epw-6 control (`check(k, v, a)` with `a = runs['control']`). PREDECLARED's refined-mesh gate needs the six rules
+at epw 9, so V-not-narrower, loading and J should use `control_epw9`. Re-evaluated in
+`hornlab_search/research/sources.py::_refined_mesh_verdict`: both epw-9 rows still pass. Not edited (evidence
+owner's file); suggested change: pass `runs['control_epw9']` as the control for `*_epw9` keys.
